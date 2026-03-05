@@ -1,12 +1,43 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import AnnouncementBar from "@/components/sections/AnnouncementBar";
+import Navbar from "@/components/sections/Navbar";
+import ScrollProgress from "@/components/custom/ScrollProgress";
+import CustomCursor from "@/components/custom/CustomCursor";
+import Hero from "@/components/sections/Hero";
+import LogoBar from "@/components/sections/LogoBar";
+import PainSection from "@/components/sections/PainSection";
+import SolutionSection from "@/components/sections/SolutionSection";
+import UseCasesGrid from "@/components/sections/UseCasesGrid";
+import ROISection from "@/components/sections/ROISection";
+import HowItWorks from "@/components/sections/HowItWorks";
+import Results from "@/components/sections/Results";
+import WhyUs from "@/components/sections/WhyUs";
+import Pricing from "@/components/sections/Pricing";
+import Guarantee from "@/components/sections/Guarantee";
+import FinalCTA from "@/components/sections/FinalCTA";
+import Footer from "@/components/sections/Footer";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <CustomCursor />
+      <AnnouncementBar />
+      <Navbar />
+      <ScrollProgress />
+      <main>
+        <Hero />
+        <LogoBar />
+        <PainSection />
+        <SolutionSection />
+        <UseCasesGrid />
+        <ROISection />
+        <HowItWorks />
+        <Results />
+        <WhyUs />
+        <Pricing />
+        <Guarantee />
+        <FinalCTA />
+      </main>
+      <Footer />
     </div>
   );
 };
