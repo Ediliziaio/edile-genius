@@ -68,6 +68,16 @@ export default {
           100: "hsl(var(--neutral-100))",
           50: "hsl(var(--neutral-50))",
         },
+        settore: {
+          infissi: "#3B82F6",
+          "infissi-bg": "#EFF6FF",
+          fotovoltaico: "#F59E0B",
+          "fotovoltaico-bg": "#FFFBEB",
+          ristr: "#8B5CF6",
+          "ristr-bg": "#F5F3FF",
+          edilizia: "#3ECF6E",
+          "edilizia-bg": "#E8FAF0",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
