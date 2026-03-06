@@ -95,7 +95,12 @@ export default function AppDashboard() {
           <h1 className="text-2xl font-bold text-ink-900">
             Buongiorno{profile?.full_name ? `, ${profile.full_name}` : ""}! 👋
           </h1>
-          <p className="mt-1 text-sm text-ink-500">Ecco un riepilogo della tua attività.</p>
+          <p className="mt-1 text-sm text-ink-500">
+            {company?.name && <span className="font-medium text-ink-700">{company.name}</span>}
+            {company?.plan && <span> · Piano <span className="capitalize">{company.plan}</span></span>}
+            {trialActive && trialEndsAt && <span> · Trial fino al {format(trialEndsAt, "d MMM yyyy", { locale: it })}</span>}
+            {!company?.name && "Ecco un riepilogo della tua attività."}
+          </p>
         </div>
       </div>
 

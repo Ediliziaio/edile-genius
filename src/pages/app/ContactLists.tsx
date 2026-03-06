@@ -1,13 +1,13 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Users, Loader2, Trash2 } from "lucide-react";
+import { Plus, Search, Users, Loader2, Trash2, Eye, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 const COLOR_OPTIONS = [
@@ -21,10 +21,13 @@ const COLOR_OPTIONS = [
   { value: "#64748b", label: "Grigio" },
 ];
 
+const ICON_OPTIONS = ["📋", "📞", "🏠", "☀", "🪟", "🏢", "🎯", "⭐", "🔥", "💼", "🔑", "📊"];
+
 interface ListForm {
   name: string;
   description: string;
   color: string;
+  icon: string;
 }
 
 export default function ContactListsPage() {
@@ -35,7 +38,7 @@ export default function ContactListsPage() {
 
   const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);
-  const [form, setForm] = useState<ListForm>({ name: "", description: "", color: "#6366f1" });
+  const [form, setForm] = useState<ListForm>({ name: "", description: "", color: "#6366f1", icon: "📋" });
   const [submitting, setSubmitting] = useState(false);
 
   const { data: lists = [], isLoading } = useQuery({
@@ -58,10 +61,7 @@ export default function ContactListsPage() {
   });
 
   const handleCreate = async () => {
-    if (!form.name.trim()) {
-      toast({ title: "Nome obbligatorio", variant: "destructive" });
-      return;
-    }
+    if (!form.name.trim()) { toast({ title: "Nome obbligatorio", variant: "destructive" }); return; }
     setSubmitting(true);
     try {
       const { error } = await supabase.from("contact_lists").insert({
@@ -69,17 +69,16 @@ export default function ContactListsPage() {
         name: form.name.trim(),
         description: form.description.trim() || null,
         color: form.color,
+        icon: form.icon,
       });
       if (error) throw error;
       toast({ title: "Lista creata" });
       setShowCreate(false);
-      setForm({ name: "", description: "", color: "#6366f1" });
+      setForm({ name: "", description: "", color: "#6366f1", icon: "📋" });
       queryClient.invalidateQueries({ queryKey: ["contact-lists", companyId] });
     } catch (err: any) {
       toast({ title: "Errore", description: err.message, variant: "destructive" });
-    } finally {
-      setSubmitting(false);
-    }
+    } finally { setSubmitting(false); }
   };
 
   const handleDelete = async (id: string) => {
@@ -124,8 +123,8 @@ export default function ContactListsPage() {
             <div key={list.id} className="rounded-card border border-ink-200 bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 rounded-btn flex items-center justify-center" style={{ backgroundColor: `${list.color || '#6366f1'}20` }}>
-                    <Users className="w-4 h-4" style={{ color: list.color || '#6366f1' }} />
+                  <div className="w-9 h-9 rounded-btn flex items-center justify-center text-lg" style={{ backgroundColor: `${list.color || '#6366f1'}20` }}>
+                    {list.icon || "📋"}
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm text-ink-900">{list.name}</h3>
@@ -137,8 +136,16 @@ export default function ContactListsPage() {
                 </button>
               </div>
               {list.description && (
-                <p className="text-xs text-ink-500 line-clamp-2">{list.description}</p>
+                <p className="text-xs text-ink-500 line-clamp-2 mb-3">{list.description}</p>
               )}
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" asChild className="border-ink-200 text-ink-700 flex-1">
+                  <Link to={`/app/lists/${list.id}`}><Eye className="w-3.5 h-3.5 mr-1.5" /> Vedi Contatti</Link>
+                </Button>
+                <Button variant="outline" size="sm" asChild className="border-ink-200 text-ink-700 flex-1">
+                  <Link to={`/app/campaigns/new?list=${list.id}`}><Megaphone className="w-3.5 h-3.5 mr-1.5" /> Crea Campagna →</Link>
+                </Button>
+              </div>
             </div>
           ))}
         </div>
@@ -157,6 +164,17 @@ export default function ContactListsPage() {
             <div className="space-y-1">
               <Label className="text-ink-600">Descrizione</Label>
               <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-ink-50 border-ink-200 text-ink-900" placeholder="Descrizione opzionale..." />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-ink-600">Icona</Label>
+              <div className="flex flex-wrap gap-2">
+                {ICON_OPTIONS.map((icon) => (
+                  <button key={icon} onClick={() => setForm({ ...form, icon })}
+                    className={`w-9 h-9 rounded-btn text-lg flex items-center justify-center border-2 transition-all ${form.icon === icon ? "border-ink-900 bg-ink-50 scale-110" : "border-transparent hover:bg-ink-50"}`}>
+                    {icon}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="space-y-1">
               <Label className="text-ink-600">Colore</Label>

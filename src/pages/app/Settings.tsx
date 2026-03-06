@@ -224,6 +224,7 @@ export default function Settings() {
           <TabsTrigger value="api">API & Integrazioni</TabsTrigger>
           <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
           <TabsTrigger value="notif">Notifiche</TabsTrigger>
+          <TabsTrigger value="billing">Piano & Fatturazione</TabsTrigger>
         </TabsList>
 
         {/* Profile Tab */}
@@ -420,6 +421,17 @@ export default function Settings() {
               {savingNotif ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
               Salva preferenze
             </Button>
+          </div>
+        </TabsContent>
+
+        {/* Billing Tab */}
+        <TabsContent value="billing">
+          <div className="rounded-card border border-ink-200 bg-white p-6 space-y-4 max-w-lg shadow-card">
+            <h3 className="text-lg font-semibold text-ink-900">Piano & Fatturazione</h3>
+            <p className="text-sm text-ink-500">La gestione del piano e della fatturazione sarà disponibile a breve.</p>
+            <div className="rounded-lg bg-ink-50 p-4 text-center">
+              <p className="text-ink-400 text-sm">🚧 In costruzione</p>
+            </div>
           </div>
         </TabsContent>
       </Tabs>
