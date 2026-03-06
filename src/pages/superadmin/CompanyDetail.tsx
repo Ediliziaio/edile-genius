@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import StatsCard from "@/components/superadmin/StatsCard";
-import { ArrowLeft, Bot, Phone, MessageSquare, Eye, EyeOff, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Bot, Phone, MessageSquare, Eye, EyeOff, Save, Loader2, UserCheck } from "lucide-react";
+import { useImpersonation } from "@/context/ImpersonationContext";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Company = Tables<"companies">;
@@ -27,6 +28,7 @@ export default function CompanyDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { startImpersonation } = useImpersonation();
 
   const [company, setCompany] = useState<Company | null>(null);
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -82,6 +84,9 @@ export default function CompanyDetail() {
         </div>
         <Badge className={statusColors[company.status || "active"]}>{company.status || "active"}</Badge>
         <Badge variant="outline" className="border-ink-200 text-ink-500">{planLabels[company.plan || "starter"] || company.plan}</Badge>
+        <Button variant="outline" size="sm" className="border-accent-blue text-accent-blue hover:bg-status-info-light" onClick={() => { startImpersonation(company.id, company.name); navigate("/app"); }}>
+          <UserCheck className="w-4 h-4 mr-1" /> Impersona
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

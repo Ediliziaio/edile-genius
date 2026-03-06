@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { name, slug, sector, plan, admin_email, admin_password, el_api_key } = body;
+    const { name, slug, sector, plan, admin_email, admin_password, el_api_key, phone, vat_number, address, city, website, trial_ends_at } = body;
 
     if (!name || !slug || !admin_email || !admin_password) {
       return new Response(
@@ -84,6 +84,12 @@ Deno.serve(async (req) => {
         el_api_key: el_api_key || null,
         created_by: callerId,
         status: "active",
+        phone: phone || null,
+        vat_number: vat_number || null,
+        address: address || null,
+        city: city || null,
+        website: website || null,
+        trial_ends_at: trial_ends_at || null,
       })
       .select()
       .single();
