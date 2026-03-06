@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { useCompanyId } from "@/hooks/useCompanyId";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -48,6 +49,7 @@ const EVENT_TYPES = [
 
 export default function Settings() {
   const { profile, user } = useAuth();
+  const companyId = useCompanyId();
   const { toast } = useToast();
 
   const [loading, setLoading] = useState(true);
@@ -77,10 +79,10 @@ export default function Settings() {
     if (!profile) return;
     setFullName(profile.full_name || "");
     setAvatarUrl(profile.avatar_url || "");
-    if (profile.company_id) {
+    if (companyId) {
       Promise.all([
-        supabase.from("companies").select("el_api_key, settings").eq("id", profile.company_id).single(),
-        loadWebhooks(profile.company_id),
+        supabase.from("companies").select("el_api_key, settings").eq("id", companyId).single(),
+        loadWebhooks(companyId),
       ]).then(([compRes]) => {
         if (compRes.data) {
           setApiKey(compRes.data.el_api_key || "");
@@ -90,7 +92,7 @@ export default function Settings() {
         setLoading(false);
       });
     } else { setLoading(false); }
-  }, [profile]);
+  }, [profile, companyId]);
 
   const loadWebhooks = async (companyId: string) => {
     setLoadingWebhooks(true);
@@ -112,18 +114,18 @@ export default function Settings() {
   };
 
   const saveApiKey = async () => {
-    if (!profile?.company_id) return;
+    if (!companyId) return;
     setSavingApi(true);
-    const { error } = await supabase.from("companies").update({ el_api_key: apiKey || null }).eq("id", profile.company_id);
+    const { error } = await supabase.from("companies").update({ el_api_key: apiKey || null }).eq("id", companyId);
     setSavingApi(false);
     toast(error ? { title: "Errore", description: error.message, variant: "destructive" } : { title: "API Key aggiornata" });
   };
 
   const testConnection = async () => {
-    if (!profile?.company_id) return;
+    if (!companyId) return;
     setTesting(true);
     try {
-      const { data, error } = await supabase.functions.invoke("get-elevenlabs-voices", { body: { company_id: profile.company_id } });
+      const { data, error } = await supabase.functions.invoke("get-elevenlabs-voices", { body: { company_id: companyId } });
       if (error) throw error;
       toast({ title: "Connessione riuscita", description: `${data?.voices?.length || 0} voci trovate.` });
     } catch (err: any) {
@@ -133,19 +135,19 @@ export default function Settings() {
   };
 
   const saveNotif = async () => {
-    if (!profile?.company_id) return;
+    if (!companyId) return;
     setSavingNotif(true);
-    const { error } = await supabase.from("companies").update({ settings: notif as unknown as Json }).eq("id", profile.company_id);
+    const { error } = await supabase.from("companies").update({ settings: notif as unknown as Json }).eq("id", companyId);
     setSavingNotif(false);
     toast(error ? { title: "Errore", description: error.message, variant: "destructive" } : { title: "Preferenze salvate" });
   };
 
   // Webhook CRUD
   const createWebhook = async () => {
-    if (!profile?.company_id || !whForm.url || whForm.events.length === 0) return;
+    if (!companyId || !whForm.url || whForm.events.length === 0) return;
     setSavingWh(true);
     const { error } = await supabase.from("webhooks").insert({
-      company_id: profile.company_id,
+      company_id: companyId,
       url: whForm.url,
       secret: whForm.secret || null,
       events: whForm.events,
@@ -158,28 +160,28 @@ export default function Settings() {
       toast({ title: "Webhook creato" });
       setShowCreateWh(false);
       setWhForm({ url: "", secret: "", events: [] });
-      loadWebhooks(profile.company_id);
+      if (companyId) loadWebhooks(companyId);
     }
   };
 
   const toggleWebhook = async (id: string, active: boolean) => {
     await supabase.from("webhooks").update({ is_active: active }).eq("id", id);
-    if (profile?.company_id) loadWebhooks(profile.company_id);
+    if (companyId) loadWebhooks(companyId);
   };
 
   const deleteWebhook = async (id: string) => {
     await supabase.from("webhooks").delete().eq("id", id);
-    if (profile?.company_id) loadWebhooks(profile.company_id);
+    if (companyId) loadWebhooks(companyId);
     toast({ title: "Webhook eliminato" });
   };
 
   const testWebhook = async (wh: Webhook) => {
-    if (!profile?.company_id) return;
+    if (!companyId) return;
     setTestingWh(wh.id);
     try {
       const { error } = await supabase.functions.invoke("dispatch-webhook", {
         body: {
-          company_id: profile.company_id,
+          company_id: companyId,
           event_type: "test.ping",
           payload: { message: "Test webhook from settings", timestamp: new Date().toISOString() },
         },

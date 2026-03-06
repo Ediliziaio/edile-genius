@@ -26,7 +26,7 @@ export default function AuthGuard({ requiredRole }: AuthGuardProps) {
   }
 
   if (requiredRole === "company" && !isCompanyUser && !isSuperAdmin) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/superadmin" replace />;
   }
 
   return <Outlet />;

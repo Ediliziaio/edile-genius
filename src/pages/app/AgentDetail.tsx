@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/context/AuthContext";
+import { useCompanyId } from "@/hooks/useCompanyId";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { ArrowLeft, Save, Loader2, Power, Phone, Clock, Plug, BarChart3, BookOpen } from "lucide-react";
@@ -22,10 +22,9 @@ import type { Tables } from "@/integrations/supabase/types";
 export default function AgentDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { profile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const companyId = profile?.company_id || "";
+  const companyId = useCompanyId() || "";
 
   const [saving, setSaving] = useState(false);
   const [configData, setConfigData] = useState<AgentConfigData | null>(null);

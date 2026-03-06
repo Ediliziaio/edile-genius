@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/context/AuthContext";
+import { useCompanyId } from "@/hooks/useCompanyId";
 import { MessageSquare, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,8 +13,7 @@ import { it } from "date-fns/locale";
 import type { Tables } from "@/integrations/supabase/types";
 
 export default function ConversationsPage() {
-  const { profile } = useAuth();
-  const companyId = profile?.company_id;
+  const companyId = useCompanyId();
   const [search, setSearch] = useState("");
   const [agentFilter, setAgentFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");

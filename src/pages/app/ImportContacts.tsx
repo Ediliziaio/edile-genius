@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useCompanyId } from "@/hooks/useCompanyId";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -107,10 +107,9 @@ function autoMapHeaders(headers: string[]): Record<number, string> {
 const BATCH_SIZE = 50;
 
 export default function ImportContactsPage() {
-  const { profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const companyId = profile?.company_id;
+  const companyId = useCompanyId();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState(0);

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import { useCompanyId } from "@/hooks/useCompanyId";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -34,11 +34,10 @@ interface CampaignForm {
 }
 
 export default function CampaignsPage() {
-  const { profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const companyId = profile?.company_id;
+  const companyId = useCompanyId();
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
