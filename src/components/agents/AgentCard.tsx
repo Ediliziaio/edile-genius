@@ -1,5 +1,6 @@
 import { Phone, MoreVertical, Activity } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
 
 interface AgentCardProps {
@@ -11,9 +12,10 @@ export default function AgentCard({ agent, onClick }: AgentCardProps) {
   const isActive = agent.status === "active";
 
   return (
-    <div
+    <Link
+      to={`/app/agents/${agent.id}`}
       onClick={onClick}
-      className="rounded-xl p-5 border cursor-pointer transition-all hover:scale-[1.01]"
+      className="block rounded-xl p-5 border cursor-pointer transition-all hover:scale-[1.01]"
       style={{
         backgroundColor: "hsl(var(--app-bg-secondary))",
         borderColor: "hsl(var(--app-border-subtle))",
@@ -60,6 +62,6 @@ export default function AgentCard({ agent, onClick }: AgentCardProps) {
           <Activity className="w-3 h-3" /> {agent.calls_this_month ?? 0}/mese
         </span>
       </div>
-    </div>
+    </Link>
   );
 }
