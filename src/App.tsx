@@ -28,6 +28,12 @@ import CampaignsPage from "./pages/app/Campaigns";
 import ImportContactsPage from "./pages/app/ImportContacts";
 import CreateCampaignPage from "./pages/app/CreateCampaign";
 import CampaignDetailPage from "./pages/app/CampaignDetail";
+import ContactListDetailPage from "./pages/app/ContactListDetail";
+import TeamPage from "./pages/superadmin/Team";
+import SASettingsPage from "./pages/superadmin/SASettings";
+import GlobalAnalyticsPage from "./pages/superadmin/GlobalAnalytics";
+import ApiKeysPage from "./pages/superadmin/ApiKeys";
+import SystemLogsPage from "./pages/superadmin/SystemLogs";
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -50,6 +56,11 @@ const App = () => (
                 <Route path="/superadmin/companies" element={<Companies />} />
                 <Route path="/superadmin/companies/new" element={<CreateCompany />} />
                 <Route path="/superadmin/companies/:id" element={<CompanyDetail />} />
+                <Route path="/superadmin/team" element={<TeamPage />} />
+                <Route path="/superadmin/settings" element={<SASettingsPage />} />
+                <Route path="/superadmin/analytics" element={<GlobalAnalyticsPage />} />
+                <Route path="/superadmin/api-keys" element={<ApiKeysPage />} />
+                <Route path="/superadmin/logs" element={<SystemLogsPage />} />
               </Route>
             </Route>
 
@@ -64,6 +75,7 @@ const App = () => (
                 <Route path="/app/contacts" element={<ContactsPage />} />
                 <Route path="/app/contacts/import" element={<ImportContactsPage />} />
                 <Route path="/app/lists" element={<ContactListsPage />} />
+                <Route path="/app/lists/:id" element={<ContactListDetailPage />} />
                 <Route path="/app/campaigns" element={<CampaignsPage />} />
                 <Route path="/app/campaigns/new" element={<CreateCampaignPage />} />
                 <Route path="/app/campaigns/:id" element={<CampaignDetailPage />} />
