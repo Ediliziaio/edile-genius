@@ -1,113 +1,90 @@
 
 
-# Analisi Completa: Stato Attuale vs Documento
+# Gap Analysis & Implementation Plan
 
-## Completato (Fasi A-D1-fix)
+After comparing the PDF specification against the current codebase, here are the missing features organized by priority.
 
-| Fase | Stato |
-|------|-------|
-| A - Design System light theme | DONE |
-| B - Schema DB rename columns | DONE |
-| C - Pagine base Contacts/Lists/Campaigns | DONE |
-| D1 - Colonne mancanti + funzioni DB | DONE |
-| D1-fix - Trigger effettivi + default status | DONE |
+## Already Implemented (Confirmed)
+- Login page, Shell layout, Sidebar navigation
+- Dashboard (company + superadmin) with quick actions, stats, trial info, contacts by status, upcoming calls
+- Agent CRUD: list, create wizard (4 steps), detail page with tabs (Config, Voice Test, Conversations, Analytics, Integration, Knowledge Base)
+- Contacts: table view, filters (status/priority/sector), search, pagination, bulk actions (delete/status/assign agent/add to list), side panel detail (Info/Calls/Notes/Activity), CSV export
+- Contact Lists: CRUD with color picker
+- Import Contacts: 3-step wizard with CSV upload, column mapping, batch insert
+- Campaigns: list, 4-step creation wizard, detail page with live stats and controls
+- Conversations: table with filters, transcript viewer
+- Settings: Profile, API Key, Webhooks, Notifications tabs
+- Impersonation system
+- Webhook system (DB + Edge Function + UI)
 
-## Stato Dettagliato delle Mancanze
+## Missing Features to Implement
 
-### Routing — Mancante
-| Route | Stato |
-|-------|-------|
-| `/app/contacts/import` | NON ESISTE |
-| `/app/contacts/:id` | NON ESISTE |
-| `/app/lists/:id` | NON ESISTE |
-| `/app/campaigns/new` | NON ESISTE (usa dialog) |
-| `/app/campaigns/:id` | NON ESISTE |
-| `/superadmin/team` | NON ESISTE (link in sidebar) |
+### 1. Contacts Page Enhancements
+- **View toggle** (Table / Kanban / Cards) as specified in the document
+- **Kanban view**: 5 columns by status, drag-and-drop to change status, contact cards with name/phone/sector/priority badges
+- **Card view**: 3-column grid with richer contact cards
+- **Per-row action menu** (dropdown with: Modifica, Aggiungi a Lista, Pianifica Chiamata, Vedi Chiamate, Segna Non Chiamare, Elimina)
+- **"Pianifica Chiamata"** bulk action (set `next_call_at`)
+- **Priority "urgent" level** with colored indicators (🔴 Urgente, 🟠 Alta, ⚪ Normale/Media, 🔵 Bassa)
+- **Source badge** display in table rows
+- **Subtitle stats**: "N contatti · N da chiamare · N qualificati"
 
-### Rubrica Contatti — Mancante
-- Side panel dettaglio contatto (slide da destra) con tab Info/Chiamate/Note/Attività
-- Vista Kanban drag & drop tra status
-- Vista Schede (card grid)
-- Checkbox multi-select con azioni bulk (Assegna Agente, Cambia Status, Aggiungi a Lista, Elimina)
-- Filtri per settore e priorità (solo status implementato)
-- Modifica/cancellazione contatti
-- Click-to-call
-- Paginazione: IMPLEMENTATA
-- Export CSV: IMPLEMENTATO
-- Form creazione con campi doc: IMPLEMENTATO
+### 2. Contact Lists Enhancements
+- **Icon/emoji picker** in create dialog (📋📞🏠☀🪟🏢🎯⭐🔥💼🔑📊)
+- **"Vedi Contatti"** and **"Crea Campagna →"** action buttons on each list card
+- **List detail page** (`/app/lists/:id`) showing list members with ability to add/remove contacts
 
-### Import Contatti — Interamente Mancante
-- Upload CSV/Excel con drag & drop
-- Mappatura colonne automatica + preview
-- Gestione duplicati
-- Progress bar inserimento batch
+### 3. Missing SuperAdmin Pages (stub/placeholder)
+- `/superadmin/team` — Team management page
+- `/superadmin/settings` — SuperAdmin settings
+- `/superadmin/analytics` — Global analytics
+- `/superadmin/api-keys` — API keys management
+- `/superadmin/logs` — System logs
 
-### Liste & Gruppi — Parziale
-- Colore: IMPLEMENTATO
-- Icona per lista: NON implementato (campo `icon` esiste in DB ma UI non lo usa)
-- Azioni "Vedi Contatti" e "Crea Campagna": MANCANTI
-- Dettaglio lista `/app/lists/:id`: MANCANTE
-
-### Campagne — Parziale
-- Lista + filtri + creazione base: IMPLEMENTATI
-- Wizard 4 step: MANCANTE (usa dialog semplice)
-- Dettaglio campagna con stats live: MANCANTE
-- Start/pause/resume logic: MANCANTE
-- Configurazione finestra oraria/retry/giorni: MANCANTE
-
-### Dashboard Azienda — Parziale
-- Stats base + agenti recenti + conversazioni: IMPLEMENTATI
-- Quick actions (Importa Contatti, Nuova Campagna, Analytics): MANCANTI
-- Widget "Contatti per Status": MANCANTE
-- Widget "Prossime Chiamate": MANCANTE
-- Info trial restante: MANCANTE
-
-### Dashboard SuperAdmin — Parziale
-- Stats KPI 4 card: IMPLEMENTATE
-- Barra utilizzo mese (progress bar chiamate): MANCANTE
-- Filtri settore/status sulla tabella aziende: MANCANTI (la pagina Companies li ha, Dashboard no)
-
-### Wizard Nuova Azienda — Parziale
-- 3 step con riepilogo: IMPLEMENTATO
-- Checklist "cosa succede dopo" nello step 3: MANCANTE
-- Campi aggiuntivi (telefono, sito web, città, P.IVA, note interne): MANCANTI
-- Test connessione ElevenLabs nello step 2: MANCANTE
-
-### Dettaglio Agente — Parziale
-- Tab Panoramica/Configurazione/Test/Conversazioni: IMPLEMENTATI
-- Tab Integrazione (embed widget, ID agente, richiesta telefonica): MANCANTE
-- Tab Analytics (grafici recharts): MANCANTE
-- Sezione Base di Conoscenza (upload PDF/TXT): MANCANTE
-
-### Impersonazione SuperAdmin — Interamente Mancante
-- `sessionStorage.impersonating` per "entrare" come azienda
-
-### Design/UI — Gap Minori
-- Token `violet` nei colori Tailwind: MANCANTE (usato solo inline `violet-100/700`)
+### 4. Minor UI Fixes
+- Dashboard subtitle: show company name + plan + trial days remaining
+- Settings: add "Piano & Fatturazione" placeholder tab
 
 ---
 
-## Piano Fasi Rimanenti (aggiornato)
+## Implementation Details
 
-### Fase D2 — Contacts Avanzati
-- Side panel dettaglio contatto con tab
-- Filtri settore/priorità
-- Modifica/cancellazione contatti
-- Checkbox multi-select + azioni bulk
+### Task 1: Contacts View Toggle + Kanban + Cards
+**Files**: `src/pages/app/Contacts.tsx`
 
-### Fase D3 — Import Contatti
-- `/app/contacts/import` wizard 3 step
-- Upload/parsing CSV, mappatura colonne, inserimento batch
+- Add `viewMode` state: `"table" | "kanban" | "cards"`
+- Add 3 toggle buttons in the filter bar area
+- **Kanban**: Render columns for each status, each column scrollable, cards showing name/phone/badges. On card drop (simple onClick status change for now since drag-and-drop libraries aren't installed), update contact status
+- **Cards**: 3-column grid with richer card layout showing all contact info
+- Add per-row dropdown menu with actions (Modifica opens detail panel, Pianifica Chiamata sets `next_call_at`, Segna Non Chiamare updates status)
+- Add "Pianifica Chiamata" bulk action with datetime picker
+- Update priority to include "urgent" with visual indicators
+- Add source badge chips in table
 
-### Fase D4 — Campagne Avanzate
-- Wizard 4 step `/app/campaigns/new`
-- Dettaglio campagna `/app/campaigns/:id`
-- Start/pause/resume
+### Task 2: Contact Lists Enhancements
+**Files**: `src/pages/app/ContactLists.tsx`, new `src/pages/app/ContactListDetail.tsx`
 
-### Fase D5 — Dashboard Enhancement + Impersonazione
-- Widget mancanti su entrambe le dashboard
-- Campi extra wizard nuova azienda
-- Impersonazione superadmin
+- Add emoji icon picker to create dialog
+- Add "Vedi Contatti" and "Crea Campagna" buttons to list cards
+- Create list detail page showing members with remove capability
+- Register route `/app/lists/:id` in `App.tsx`
 
-### Fase D6 — Agent Detail Enhancement
-- Tab Integrazione + Analytics + Base di Conoscenza
+### Task 3: SuperAdmin Stub Pages
+**Files**: New pages in `src/pages/superadmin/`
+
+- Create `Team.tsx`, `SASettings.tsx`, `GlobalAnalytics.tsx`, `ApiKeys.tsx`, `SystemLogs.tsx` as placeholder pages
+- Register all routes in `App.tsx`
+
+### Task 4: Dashboard + Settings Minor Enhancements
+**Files**: `src/pages/app/Dashboard.tsx`, `src/pages/app/Settings.tsx`
+
+- Dashboard: Add company name and trial days to subtitle
+- Settings: Add "Piano & Fatturazione" placeholder tab
+
+---
+
+## Estimated Scope
+- ~4 files modified, ~6 new files created
+- No database migrations needed (all columns already exist)
+- No new Edge Functions needed
+
