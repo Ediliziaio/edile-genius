@@ -59,6 +59,38 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
+  /* Dark app theme (platform pages only) */
+  .dark-app {
+    --app-bg-primary: 0 0% 4%;
+    --app-bg-secondary: 0 0% 7%;
+    --app-bg-tertiary: 0 0% 10%;
+    --app-bg-elevated: 0 0% 13%;
+    --app-bg-input: 0 0% 9%;
+
+    --app-border-subtle: 0 0% 100% / 0.06;
+    --app-border-default: 0 0% 100% / 0.10;
+    --app-border-strong: 0 0% 100% / 0.18;
+    --app-border-focus: 0 0% 100% / 0.35;
+    --app-border-error: 0 84% 60%;
+
+    --app-brand: 25 95% 53%;
+    --app-brand-dim: 25 95% 53% / 0.15;
+    --app-brand-glow: 25 95% 53% / 0.08;
+
+    --app-verde: 145 60% 52%;
+    --app-verde-dim: 145 60% 52% / 0.12;
+
+    --app-text-primary: 0 0% 100%;
+    --app-text-secondary: 0 0% 100% / 0.60;
+    --app-text-tertiary: 0 0% 100% / 0.35;
+    --app-text-disabled: 0 0% 100% / 0.20;
+
+    --app-success: 142 71% 45%;
+    --app-warning: 38 92% 50%;
+    --app-error: 0 84% 60%;
+    --app-info: 217 91% 60%;
+  }
 }
 
 @layer base {

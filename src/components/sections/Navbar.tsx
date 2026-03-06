@@ -73,9 +73,9 @@ const Navbar = () => {
 
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-4">
-          <a href="#" className="text-sm font-medium text-neutral-500 hover:text-primary transition-colors">
+          <Link to="/login" className="text-sm font-medium text-neutral-500 hover:text-primary transition-colors">
             Accedi
-          </a>
+          </Link>
           <Link
             to={isHome ? "#cta-finale" : "/soluzioni#cta-soluzioni"}
             onClick={(e) => {

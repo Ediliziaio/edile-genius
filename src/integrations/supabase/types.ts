@@ -14,16 +14,264 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agents: {
+        Row: {
+          avg_duration_sec: number | null
+          calls_this_month: number | null
+          calls_total: number | null
+          company_id: string
+          config: Json | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          elevenlabs_agent_id: string | null
+          elevenlabs_voice_id: string | null
+          first_message: string | null
+          id: string
+          language: string | null
+          last_call_at: string | null
+          name: string
+          sector: string | null
+          status: string | null
+          system_prompt: string | null
+          type: string | null
+          use_case: string | null
+        }
+        Insert: {
+          avg_duration_sec?: number | null
+          calls_this_month?: number | null
+          calls_total?: number | null
+          company_id: string
+          config?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          elevenlabs_agent_id?: string | null
+          elevenlabs_voice_id?: string | null
+          first_message?: string | null
+          id?: string
+          language?: string | null
+          last_call_at?: string | null
+          name: string
+          sector?: string | null
+          status?: string | null
+          system_prompt?: string | null
+          type?: string | null
+          use_case?: string | null
+        }
+        Update: {
+          avg_duration_sec?: number | null
+          calls_this_month?: number | null
+          calls_total?: number | null
+          company_id?: string
+          config?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          elevenlabs_agent_id?: string | null
+          elevenlabs_voice_id?: string | null
+          first_message?: string | null
+          id?: string
+          language?: string | null
+          last_call_at?: string | null
+          name?: string
+          sector?: string | null
+          status?: string | null
+          system_prompt?: string | null
+          type?: string | null
+          use_case?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companies: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          elevenlabs_api_key: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          plan: string | null
+          sector: string | null
+          settings: Json | null
+          slug: string
+          status: string | null
+          trial_ends_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          elevenlabs_api_key?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          plan?: string | null
+          sector?: string | null
+          settings?: Json | null
+          slug: string
+          status?: string | null
+          trial_ends_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          elevenlabs_api_key?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          plan?: string | null
+          sector?: string | null
+          settings?: Json | null
+          slug?: string
+          status?: string | null
+          trial_ends_at?: string | null
+        }
+        Relationships: []
+      }
+      conversations: {
+        Row: {
+          agent_id: string
+          caller_number: string | null
+          company_id: string
+          duration_sec: number | null
+          elevenlabs_conv_id: string | null
+          ended_at: string | null
+          id: string
+          metadata: Json | null
+          outcome: string | null
+          started_at: string | null
+          status: string | null
+          transcript: Json | null
+        }
+        Insert: {
+          agent_id: string
+          caller_number?: string | null
+          company_id: string
+          duration_sec?: number | null
+          elevenlabs_conv_id?: string | null
+          ended_at?: string | null
+          id?: string
+          metadata?: Json | null
+          outcome?: string | null
+          started_at?: string | null
+          status?: string | null
+          transcript?: Json | null
+        }
+        Update: {
+          agent_id?: string
+          caller_number?: string | null
+          company_id?: string
+          duration_sec?: number | null
+          elevenlabs_conv_id?: string | null
+          ended_at?: string | null
+          id?: string
+          metadata?: Json | null
+          outcome?: string | null
+          started_at?: string | null
+          status?: string | null
+          transcript?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          company_id: string | null
+          created_at: string | null
+          email: string
+          full_name: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          email: string
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_company_id: { Args: { _user_id: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role:
+        | "superadmin"
+        | "superadmin_user"
+        | "company_admin"
+        | "company_user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +398,13 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: [
+        "superadmin",
+        "superadmin_user",
+        "company_admin",
+        "company_user",
+      ],
+    },
   },
 } as const
