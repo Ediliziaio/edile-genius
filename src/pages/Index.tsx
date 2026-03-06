@@ -8,6 +8,7 @@ import PainSection from "@/components/sections/PainSection";
 import SolutionSection from "@/components/sections/SolutionSection";
 import UseCasesGrid from "@/components/sections/UseCasesGrid";
 import ROISection from "@/components/sections/ROISection";
+import CostCalculator from "@/components/sections/CostCalculator";
 import HowItWorks from "@/components/sections/HowItWorks";
 import Results from "@/components/sections/Results";
 import WhyUs from "@/components/sections/WhyUs";
@@ -30,6 +31,7 @@ const Index = () => {
         <SolutionSection />
         <UseCasesGrid />
         <ROISection />
+        <CostCalculator />
         <HowItWorks />
         <Results />
         <WhyUs />
