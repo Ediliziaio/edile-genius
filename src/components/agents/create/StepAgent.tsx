@@ -24,18 +24,21 @@ interface StepAgentProps {
   selectUseCase: (id: UseCaseId) => void;
 }
 
-function Tip({ text }: { text: string }) {
-  return (
-    <TooltipProvider delayDuration={200}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <HelpCircle className="w-3.5 h-3.5 text-ink-300 inline-block ml-1 cursor-help" />
-        </TooltipTrigger>
-        <TooltipContent className="max-w-[240px] text-xs">{text}</TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-}
+import React from "react";
+
+const Tip = React.forwardRef<HTMLSpanElement, { text: string }>(({ text }, ref) => (
+  <TooltipProvider delayDuration={200}>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span ref={ref} className="inline-flex items-center ml-1 cursor-help">
+          <HelpCircle className="w-3.5 h-3.5 text-ink-300" />
+        </span>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-[240px] text-xs">{text}</TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
+));
+Tip.displayName = "Tip";
 
 export default function StepAgent({ form, update, selectUseCase }: StepAgentProps) {
   return (
