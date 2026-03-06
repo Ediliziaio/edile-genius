@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Get current agent to check for el_agent_id
+    // Get current agent
     const { data: currentAgent } = await serviceClient
       .from("agents")
       .select("el_agent_id, company_id")
@@ -76,30 +76,39 @@ Deno.serve(async (req) => {
 
       const apiKey = company?.el_api_key || Deno.env.get("ELEVENLABS_API_KEY");
       if (apiKey) {
+        const cfg = (updates.config && typeof updates.config === "object") ? updates.config : {};
+        const agentCfg = (agent.config && typeof agent.config === "object") ? agent.config as Record<string, unknown> : {};
+
         const elBody: Record<string, unknown> = {
           conversation_config: {
             agent: {
               prompt: {
-                prompt: updates.system_prompt || agent.system_prompt,
+                prompt: updates.system_prompt || agent.system_prompt || "",
+                ...(cfg.llm_model ? { llm: cfg.llm_model } : agentCfg.llm_model ? { llm: agentCfg.llm_model } : {}),
+                ...(cfg.temperature !== undefined ? { temperature: cfg.temperature } : {}),
               },
-              first_message: updates.first_message || agent.first_message,
-              language: updates.language || agent.language,
+              first_message: updates.first_message || agent.first_message || "",
+              language: updates.language || agent.language || "it",
+              ...(cfg.max_duration_sec ? { max_duration_seconds: cfg.max_duration_sec } : {}),
+            },
+            tts: {
+              voice_id: updates.el_voice_id || agent.el_voice_id,
+              voice_settings: {
+                stability: cfg.voice_stability ?? agentCfg.voice_stability ?? 0.5,
+                similarity_boost: cfg.voice_similarity ?? agentCfg.voice_similarity ?? 0.75,
+                speed: cfg.voice_speed ?? agentCfg.voice_speed ?? 1.0,
+              },
             },
           },
         };
 
-        if (updates.el_voice_id) {
-          elBody.conversation_config = {
-            ...(elBody.conversation_config as Record<string, unknown>),
-            tts: { voice_id: updates.el_voice_id },
-          };
-        }
-
-        if (updates.config?.temperature !== undefined) {
-          const agentConfig = (elBody.conversation_config as Record<string, unknown>).agent as Record<string, unknown>;
-          agentConfig.prompt = {
-            ...(agentConfig.prompt as Record<string, unknown>),
-            temperature: updates.config.temperature,
+        // Turn settings
+        const turnTimeout = cfg.turn_timeout_sec ?? agentCfg.turn_timeout_sec;
+        const turnEagerness = cfg.turn_eagerness ?? agentCfg.turn_eagerness;
+        if (turnTimeout || turnEagerness) {
+          (elBody.conversation_config as Record<string, unknown>).turn = {
+            ...(turnTimeout ? { timeout: turnTimeout } : {}),
+            ...(turnEagerness ? { mode: turnEagerness } : {}),
           };
         }
 

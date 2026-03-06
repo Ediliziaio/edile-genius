@@ -42,7 +42,24 @@ export default function AgentDetail() {
 
   if (agent && !configData) {
     const cfg = (agent.config && typeof agent.config === "object" && !Array.isArray(agent.config)) ? agent.config as Record<string, unknown> : {};
-    setConfigData({ name: agent.name, description: agent.description || "", sector: agent.sector || "", language: agent.language || "it", voice_id: (agent as any).el_voice_id || "", system_prompt: agent.system_prompt || "", first_message: agent.first_message || "", temperature: typeof cfg.temperature === "number" ? cfg.temperature : 0.7 });
+    setConfigData({
+      name: agent.name, description: agent.description || "", sector: agent.sector || "",
+      language: agent.language || "it", voice_id: (agent as any).el_voice_id || "",
+      system_prompt: agent.system_prompt || "", first_message: agent.first_message || "",
+      temperature: typeof cfg.temperature === "number" ? cfg.temperature : 0.7,
+      llm_model: (cfg.llm_model as string) || "gpt-4o-mini",
+      turn_timeout_sec: (cfg.turn_timeout_sec as number) ?? 10,
+      turn_eagerness: (cfg.turn_eagerness as string) || "normal",
+      max_duration_sec: (cfg.max_duration_sec as number) ?? 600,
+      interruptions_enabled: (cfg.interruptions_enabled as boolean) ?? true,
+      end_call_enabled: (cfg.end_call_enabled as boolean) ?? false,
+      end_call_prompt: (cfg.end_call_prompt as string) || "",
+      language_detection_enabled: (cfg.language_detection_enabled as boolean) ?? false,
+      voice_stability: (cfg.voice_stability as number) ?? 0.5,
+      voice_similarity: (cfg.voice_similarity as number) ?? 0.75,
+      voice_speed: (cfg.voice_speed as number) ?? 1.0,
+      evaluation_criteria: (cfg.evaluation_criteria as string) || "",
+    });
   }
 
   const updateConfig = <K extends keyof AgentConfigData>(key: K, value: AgentConfigData[K]) => setConfigData(prev => prev ? { ...prev, [key]: value } : prev);
@@ -51,7 +68,16 @@ export default function AgentDetail() {
     if (!configData || !id) return;
     setSaving(true);
     try {
-      const { error } = await supabase.functions.invoke("update-agent", { body: { id, name: configData.name, description: configData.description, sector: configData.sector, language: configData.language, el_voice_id: configData.voice_id, system_prompt: configData.system_prompt, first_message: configData.first_message, config: { temperature: configData.temperature } } });
+      const config = {
+        temperature: configData.temperature, llm_model: configData.llm_model,
+        turn_timeout_sec: configData.turn_timeout_sec, turn_eagerness: configData.turn_eagerness,
+        max_duration_sec: configData.max_duration_sec, interruptions_enabled: configData.interruptions_enabled,
+        end_call_enabled: configData.end_call_enabled, end_call_prompt: configData.end_call_prompt,
+        language_detection_enabled: configData.language_detection_enabled,
+        voice_stability: configData.voice_stability, voice_similarity: configData.voice_similarity,
+        voice_speed: configData.voice_speed, evaluation_criteria: configData.evaluation_criteria,
+      };
+      const { error } = await supabase.functions.invoke("update-agent", { body: { id, name: configData.name, description: configData.description, sector: configData.sector, language: configData.language, el_voice_id: configData.voice_id, system_prompt: configData.system_prompt, first_message: configData.first_message, config } });
       if (error) throw error;
       toast({ title: "Salvato", description: "Configurazione aggiornata." });
       queryClient.invalidateQueries({ queryKey: ["agent", id] });
