@@ -1,38 +1,57 @@
 
 
-# Analisi: Il Wizard di Creazione Agente e gia Implementato
+# Analisi Completa: Wizard Attuale vs ElevenLabs
 
-Ho verificato tutto il codice del wizard e risulta gia completo con tutte le funzionalita richieste, implementate nel messaggio precedente. Ecco lo stato attuale:
+Il wizard a 5 step è già ben strutturato con sidebar, animazioni Framer Motion, voice picker con filtri, conversation flow avanzato, e test pre-creazione (TTS + Draft). Dopo analisi dettagliata del codice e della documentazione ElevenLabs, ecco cosa manca ancora per la parità completa:
 
-## Cosa c'e gia (5 Step completi)
+## Gap Identificati
 
-**Step 1 - Agente**: Nome, descrizione, caso d'uso con template, lingua, modello LLM (GPT-4o, Claude, Gemini), system prompt, primo messaggio, temperatura
+1. **Nessuna validazione tra step** — L'utente può avanzare senza compilare campi obbligatori (nome, prompt, voce)
+2. **Nessun feedback di completamento step** — La sidebar mostra "completato" solo perché si è passati allo step successivo, non perché i campi sono compilati
+3. **Mancano le Custom Tools (API/Client tools)** — ElevenLabs permette di configurare tool che l'agente può chiamare (es. API esterne, webhook)
+4. **Manca la sezione Guardrails/Safety** — Limiti di contenuto, PII redaction
+5. **Manca il supporto lingue aggiuntive** — Solo lingua principale, nessuna selezione multi-lingua
+6. **Il webhook_url non viene salvato** — Il campo esiste nel form ma non viene passato a `buildConfig()` né alla edge function
+7. **I file KB non vengono effettivamente caricati** — Il sistema raccoglie i file pending ma non li uploada al bucket `knowledge-base` durante la creazione
+8. **Manca progress bar / indicatore completamento globale** — ElevenLabs mostra una percentuale di completamento
+9. **Il TTS preview non usa le voice_settings personalizzate** — Chiama il TTS senza passare stability/similarity/speed
 
-**Step 2 - Voce**: VoicePickerEnhanced con ricerca, filtri per categoria (Professional, Casual, Male, Female, etc.), preview audio con play/pause, slider per Stabilita/Somiglianza/Velocita
+## Piano di Implementazione
 
-**Step 3 - Conversazione**: Turn timeout (1-30s), reattivita turno (eager/normal/patient), durata massima (1-30 min), interruzioni on/off, soft timeout con messaggio filler, End Call automatico con prompt, Language Detection
+### 1. Validazione Step e Completamento Intelligente
+- Aggiungere logica di validazione per step (step 0: name + system_prompt, step 1: voice_id, etc.)
+- La sidebar mostra check solo se i campi obbligatori dello step sono compilati
+- Bottone "Avanti" disabilitato se lo step corrente non è valido
+- Progress bar sotto l'header con % completamento globale
 
-**Step 4 - Avanzate**: Knowledge Base (placeholder upload), criteri di valutazione, settore, data retention toggle
+### 2. Upload effettivo Knowledge Base
+- Modificare `handleSubmit` in `CreateAgent.tsx` per uploadare i file pending al bucket `knowledge-base` dopo la creazione dell'agente
+- Salvare i riferimenti file nel campo `config.kb_files` dell'agente
 
-**Step 5 - Revisione**: Riepilogo completo, modalita pubblicazione (Bozza/Attivo)
+### 3. Webhook e Voice Settings nel flusso di creazione
+- Aggiungere `webhook_url` a `buildConfig()` e alla edge function `create-elevenlabs-agent`
+- Passare `voice_settings` (stability, similarity, speed) nella chiamata TTS preview
 
-**Infrastruttura**: Sidebar di navigazione con step, animazioni Framer Motion, edge functions `create-elevenlabs-agent` e `update-agent` sincronizzate con l'API ElevenLabs
+### 4. Supporto Multi-Lingua
+- Aggiungere campo `additional_languages` al form (multi-select)
+- Passare alla edge function per la configurazione ElevenLabs
 
-## Cosa manca per avvicinarsi ancora di piu a ElevenLabs
+### 5. Sezione Custom Tools (Step 4 - Avanzate)
+- Aggiungere un builder semplice per tool personalizzati: nome, descrizione, URL endpoint, metodo HTTP
+- Salvare nel config come array di tool definitions
 
-Dopo analisi dell'interfaccia ElevenLabs, posso migliorare questi aspetti:
-
-1. **Test vocale inline nello Step 5** - Aggiungere il VoiceTestPanel nella pagina di revisione per testare l'agente prima di crearlo
-2. **Widget di anteprima conversazione** - Preview live del primo messaggio come chat bubble
-3. **Fix warning console** - Il componente `Tip` non usa `forwardRef`, causando un warning React
-4. **Webhook configuration inline** - Aggiungere configurazione webhook nello step Advanced
-5. **Knowledge Base upload funzionante** - Attualmente e solo un placeholder, collegare l'upload reale al bucket `knowledge-base`
+### 6. Guardrails / Safety (Step 4 - Avanzate)
+- Toggle per PII redaction (numeri di telefono, email, carte di credito)
+- Limiti di contenuto (blocco argomenti sensibili)
 
 ### File da modificare
-- `StepReview.tsx` - Aggiungere VoiceTestPanel inline
-- `StepAgent.tsx` - Fix forwardRef warning su Tip
-- `StepAdvanced.tsx` - Knowledge base upload funzionante + webhook config
-- `VoicePickerEnhanced.tsx` - Aggiungere anteprima waveform durante il playback
+- `CreateAgent.tsx` — Validazione step, upload KB, webhook nel config, progress bar
+- `AgentStepSidebar.tsx` — Validazione visiva intelligente, progress indicator
+- `StepAdvanced.tsx` — Sezione Custom Tools + Guardrails
+- `StepReview.tsx` — Mostrare webhook, tools, KB files nel riepilogo, fix TTS con voice settings
+- `StepAgent.tsx` — Multi-lingua selector
+- `supabase/functions/create-elevenlabs-agent/index.ts` — Ricevere webhook_url, additional_languages, tools
+- `supabase/functions/elevenlabs-tts/index.ts` — Accettare voice_settings opzionali
 
-Nessuna migrazione DB necessaria (il bucket `knowledge-base` esiste gia).
+### Stima: ~7 file modificati, 0 nuovi componenti, 0 migrazioni DB
 
