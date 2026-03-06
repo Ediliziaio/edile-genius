@@ -1,54 +1,60 @@
 
 
-# Sezione 7B — Calcolatrice Costi Interattiva
+# Pagina Soluzioni — `/soluzioni`
 
-## Cosa costruire
+New page with 20 AI solutions for the construction sector, filterable by category, with detail modals.
 
-Una nuova sezione interattiva con calcolatrice di confronto costi "Dipendente Umano vs Agente AI", posizionata tra ROISection e HowItWorks.
+## Files to Create
 
-## File da creare/modificare
+### 1. `src/data/solutions.ts`
+Static data array of 20 solutions with fields: `id`, `settore`, `icon`, `title`, `description`, `bullets`, `roiChip`, `tipoAI`, plus extended modal content (`fullDescription`, `howItWorks` steps, `roiMetrics`, `idealFor`, `integrations`). Also export `settoreConfig` mapping each sector to its colors.
 
-### 1. Creare `src/components/sections/CostCalculator.tsx`
+### 2. `src/components/solutions/SolutionCard.tsx`
+Card component rendering header (colored bg, sector badge, number badge, icon, title), body (description with line-clamp-3, divider, 3 bullets, ROI chip), footer (AI type tag, "Scopri di più" link). Colors driven by `settoreConfig[settore]`.
 
-Componente principale con 5 parti:
+### 3. `src/components/solutions/FilterBar.tsx`
+Sticky filter bar (top: 68px under navbar). 5 pill buttons (Tutte + 4 sectors with emojis). Active state uses sector color. Counter "Mostrando X di 20". Horizontal scroll on mobile.
 
-**Parte 1 — Header + 4 Slider di input** in griglia 2×2:
-- Stipendio lordo (1400-3500, step 50, default 1800)
-- N° attività/giorno (10-80, step 5, default 25)
-- Ore perse/giorno (1-8, step 0.5, default 4)
-- Anni anzianità (0-10, step 1, default 3)
+### 4. `src/components/solutions/SolutionModal.tsx`
+Framer Motion modal with backdrop blur. Shows expanded solution: full description, "Come Funziona" 3 steps, ROI metrics, ideal customer profile, integrations list, CTA button. Close on backdrop/X/Escape. Body scroll lock.
 
-Usa il componente `Slider` di Radix già presente, con styling personalizzato (track h-1, thumb verde 20px con shadow). Ogni slider in una card bg neutral-50, border neutral-200, radius 16px.
+### 5. `src/components/solutions/SolutionsHero.tsx`
+Dark hero (bg neutral-900) with grid pattern, badge, staggered H1, subtitle, 4 stat pills with counter animation, scroll indicator chevron.
 
-**Parte 2 — Confronto 2 colonne + VS centrale:**
-- Card sinistra (Dipendente Umano): header rosso chiaro, 8 righe breakdown con formule reactive, box costi nascosti in fondo
-- Divisore VS centrale (solo desktop): linea tratteggiata + cerchio "VS"
-- Card destra (Agente AI): header verde chiaro, 8 righe breakdown reactive, box vantaggi in fondo
+### 6. `src/components/solutions/AIComparison.tsx`
+Dark section comparing Agente Vocale vs Agente AI Operativo — two cards side by side with a small green "combined" card between them on desktop.
 
-Formule calcolate con `useMemo` basate sui valori slider:
-- Human: stipLordo×13 + INPS 30.35% + TFR 7.41% + IRAP 3.9% + formazione + pasto + tools + admin
-- AI: canone scalato per volume (590/890/1190/1490) + setup ammortizzato 125/mese × 12
+### 7. `src/components/solutions/ImplementationSteps.tsx`
+4 implementation steps in alternating left/right Z-layout on desktop, vertical on mobile. Numbered backgrounds, green left border.
 
-**Parte 3 — Saving Box** scuro (bg neutral-900):
-3 colonne con risparmio annuo, % riduzione, ore liberate — tutti valori reactive.
+### 8. `src/components/solutions/SolutionsFAQ.tsx`
+8 FAQ items as Framer Motion accordion. White cards, chevron rotation, green left border when open.
 
-**Parte 4 — Tabella Errori Umani:**
-8 righe × 4 colonne (Tipo errore, Con Dipendente, Con AI, Impatto badge). Tabella con radius 20px, overflow hidden, shadow. Scroll orizzontale su mobile.
+### 9. `src/components/solutions/SolutionsCTA.tsx`
+Dark CTA section with form (identical pattern to FinalCTA), curtain reveal animation, scarcity badge, form with 4 inputs + dropdown.
 
-**Parte 5 — Nota metodologica:**
-Card verde chiaro con disclaimer sui dati INPS/CCNL.
+### 10. `src/pages/Solutions.tsx`
+Main page component. Manages `filterActive` state (initialized from URL hash) and `modalOpen` state. Composes: Navbar (with active "Soluzioni" link) → SolutionsHero → FilterBar → AnimatePresence grid of SolutionCards → AIComparison → ImplementationSteps → SolutionsFAQ → SolutionsCTA → Footer.
 
-### 2. Modificare `src/pages/Index.tsx`
+## Files to Modify
 
-Importare `CostCalculator` e inserirlo tra `<ROISection />` e `<HowItWorks />`.
+### 11. `src/App.tsx`
+Add route: `<Route path="/soluzioni" element={<Solutions />} />`.
 
-## Dettagli tecnici
+### 12. `src/components/sections/Navbar.tsx`
+- Update to use `react-router-dom` `Link` and `useLocation`
+- Add "Soluzioni" to nav links pointing to `/soluzioni`
+- Highlight active link when on `/soluzioni` (green text + fixed underline)
+- Logo links to `/` via `Link`
 
-- Usa `useState` per i 4 slider, `useMemo` per i calcoli derivati
-- Formattazione euro con `toLocaleString('it-IT')`
-- Framer Motion `useInView` per animazioni di entrata sezione
-- Componente `AnimatedBadge` esistente per il badge header
-- Slider Radix UI esistente con styling override (track sottile, thumb verde)
-- Responsive: griglie collassano a 1 colonna, VS nascosto su mobile, tabella con overflow-x scroll
-- `aria-label` e `aria-live="polite"` sui valori calcolati
+### 13. `tailwind.config.ts`
+Add sector colors under `colors.settore`: `infissi`, `infissi-bg`, `fotovoltaico`, `fotovoltaico-bg`, `ristr`, `ristr-bg`, `edilizia`, `edilizia-bg`.
+
+## Key Technical Details
+
+- **Filtering**: `useState` in Solutions page, filter array by `settore`. `AnimatePresence` + `layout` prop on motion.div wrappers for smooth grid reflow.
+- **Modal**: `AnimatePresence`, body overflow lock via `useEffect`, focus trap, Escape key listener.
+- **URL hash**: Read `window.location.hash` on mount to set initial filter (e.g., `#fotovoltaico` → filter fotovoltaico).
+- **Navbar**: Must work on both `/` (anchor links) and `/soluzioni` (router links). Use conditional logic based on `useLocation().pathname`.
+- **Reuse**: Same Navbar/Footer components, same AnimatedBadge, CounterStat, ScrollProgress, CustomCursor.
 
