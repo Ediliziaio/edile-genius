@@ -38,11 +38,10 @@ export default function AgentsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold" style={{ color: "hsl(var(--app-text-primary))" }}>Agenti</h1>
+        <h1 className="text-2xl font-bold text-ink-900">Agenti</h1>
         <Link
           to="/app/agents/new"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium"
-          style={{ backgroundColor: "hsl(var(--app-brand))", color: "#fff" }}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-btn text-sm font-medium bg-brand text-white hover:bg-brand-hover transition-colors"
         >
           <Plus className="w-4 h-4" /> Nuovo Agente
         </Link>
@@ -51,13 +50,12 @@ export default function AgentsPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "hsl(var(--app-text-tertiary))" }} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-400" />
           <Input
             placeholder="Cerca agente..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 border-0 text-sm"
-            style={{ backgroundColor: "hsl(var(--app-bg-input))", color: "hsl(var(--app-text-primary))" }}
+            className="pl-9 border border-ink-200 bg-white text-ink-900 placeholder:text-ink-300 text-sm"
           />
         </div>
         <div className="flex gap-2">
@@ -65,11 +63,11 @@ export default function AgentsPage() {
             <button
               key={s.value}
               onClick={() => setStatusFilter(s.value)}
-              className="px-3 py-2 rounded-lg text-xs font-medium transition-colors"
-              style={{
-                backgroundColor: statusFilter === s.value ? "hsl(var(--app-brand-dim))" : "hsl(var(--app-bg-tertiary))",
-                color: statusFilter === s.value ? "hsl(var(--app-brand))" : "hsl(var(--app-text-secondary))",
-              }}
+              className={`px-3 py-2 rounded-btn text-xs font-medium transition-colors ${
+                statusFilter === s.value
+                  ? "bg-brand-light text-brand-text"
+                  : "bg-ink-100 text-ink-500 hover:bg-ink-200"
+              }`}
             >
               {s.label}
             </button>
@@ -79,21 +77,20 @@ export default function AgentsPage() {
 
       {/* Grid */}
       {isLoading ? (
-        <div className="text-center py-12" style={{ color: "hsl(var(--app-text-tertiary))" }}>Caricamento...</div>
+        <div className="text-center py-12 text-ink-400">Caricamento...</div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-xl p-12 text-center border" style={{ backgroundColor: "hsl(var(--app-bg-secondary))", borderColor: "hsl(var(--app-border-subtle))" }}>
-          <Bot className="w-12 h-12 mx-auto mb-4" style={{ color: "hsl(var(--app-text-tertiary))" }} />
-          <p className="text-base font-medium mb-2" style={{ color: "hsl(var(--app-text-primary))" }}>
+        <div className="rounded-card p-12 text-center border border-ink-200 bg-white shadow-card">
+          <Bot className="w-12 h-12 mx-auto mb-4 text-ink-300" />
+          <p className="text-base font-medium mb-2 text-ink-900">
             {agents?.length === 0 ? "Nessun agente creato" : "Nessun risultato"}
           </p>
-          <p className="text-sm mb-4" style={{ color: "hsl(var(--app-text-secondary))" }}>
+          <p className="text-sm mb-4 text-ink-500">
             {agents?.length === 0 ? "Crea il tuo primo agente vocale AI per iniziare." : "Prova a cambiare i filtri."}
           </p>
           {agents?.length === 0 && (
             <Link
               to="/app/agents/new"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium"
-              style={{ backgroundColor: "hsl(var(--app-brand))", color: "#fff" }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-btn text-sm font-medium bg-brand text-white hover:bg-brand-hover"
             >
               <Plus className="w-4 h-4" /> Crea Agente
             </Link>

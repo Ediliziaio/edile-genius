@@ -15,19 +15,15 @@ export default function UseCaseSelector({ selected, onSelect }: UseCaseSelectorP
             key={uc.id}
             type="button"
             onClick={() => onSelect(uc.id)}
-            className="text-left rounded-xl p-4 transition-all border"
-            style={{
-              backgroundColor: isSelected ? "hsl(var(--app-brand-dim))" : "hsl(var(--app-bg-tertiary))",
-              borderColor: isSelected ? "hsl(var(--app-brand))" : "transparent",
-            }}
+            className={`text-left rounded-card p-4 transition-all border ${
+              isSelected
+                ? "border-brand bg-brand-light"
+                : "border-ink-200 bg-ink-50 hover:border-ink-400"
+            }`}
           >
             <span className="text-2xl">{uc.icon}</span>
-            <p className="mt-2 text-sm font-medium" style={{ color: "hsl(var(--app-text-primary))" }}>
-              {uc.label}
-            </p>
-            <p className="text-xs mt-1" style={{ color: "hsl(var(--app-text-secondary))" }}>
-              {uc.description}
-            </p>
+            <p className="mt-2 text-sm font-medium text-ink-900">{uc.label}</p>
+            <p className="text-xs mt-1 text-ink-500">{uc.description}</p>
           </button>
         );
       })}
