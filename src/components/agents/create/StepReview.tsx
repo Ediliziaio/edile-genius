@@ -1,5 +1,5 @@
 import { LANGUAGES } from "@/components/agents/PromptTemplates";
-import { Badge } from "@/components/ui/badge";
+import { MessageSquare } from "lucide-react";
 
 interface StepReviewProps {
   form: any;
@@ -59,6 +59,20 @@ export default function StepReview({ form, update }: StepReviewProps) {
         <h2 className="text-lg font-semibold text-ink-900">Revisione & Pubblica</h2>
         <p className="text-sm text-ink-400 mt-1">Controlla le impostazioni prima di creare l'agente.</p>
       </div>
+
+      {/* First Message Preview */}
+      {form.first_message && (
+        <div className="rounded-card border border-ink-200 bg-ink-50 p-4">
+          <p className="text-[10px] font-semibold text-ink-400 uppercase tracking-wide mb-3 flex items-center gap-1.5">
+            <MessageSquare className="w-3 h-3" /> Anteprima Primo Messaggio
+          </p>
+          <div className="flex justify-start">
+            <div className="bg-white border border-ink-200 rounded-btn rounded-bl-none px-4 py-2.5 max-w-[85%] text-sm text-ink-800 shadow-sm">
+              {form.first_message}
+            </div>
+          </div>
+        </div>
+      )}
 
       {sections.map(section => (
         <div key={section.title} className="rounded-card border border-ink-200 bg-white overflow-hidden">
