@@ -21,6 +21,9 @@ import ConversationsPage from "./pages/app/Conversations";
 import AnalyticsPage from "./pages/app/Analytics";
 import CompanyDetail from "./pages/superadmin/CompanyDetail";
 import SettingsPage from "./pages/app/Settings";
+import ContactsPage from "./pages/app/Contacts";
+import ContactListsPage from "./pages/app/ContactLists";
+import CampaignsPage from "./pages/app/Campaigns";
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -53,6 +56,9 @@ const App = () => (
                 <Route path="/app/agents/new" element={<CreateAgent />} />
                 <Route path="/app/agents/:id" element={<AgentDetail />} />
                 <Route path="/app/conversations" element={<ConversationsPage />} />
+                <Route path="/app/contacts" element={<ContactsPage />} />
+                <Route path="/app/lists" element={<ContactListsPage />} />
+                <Route path="/app/campaigns" element={<CampaignsPage />} />
                 <Route path="/app/analytics" element={<AnalyticsPage />} />
                 <Route path="/app/settings" element={<SettingsPage />} />
               </Route>
