@@ -11,6 +11,8 @@ import Login from "./pages/Login";
 import AuthGuard from "./components/auth/AuthGuard";
 import Shell from "./components/layout/Shell";
 import SuperAdminDashboard from "./pages/superadmin/Dashboard";
+import Companies from "./pages/superadmin/Companies";
+import CreateCompany from "./pages/superadmin/CreateCompany";
 import AppDashboard from "./pages/app/Dashboard";
 
 const queryClient = new QueryClient();
@@ -31,6 +33,8 @@ const App = () => (
             <Route element={<AuthGuard requiredRole="superadmin" />}>
               <Route element={<Shell />}>
                 <Route path="/superadmin" element={<SuperAdminDashboard />} />
+                <Route path="/superadmin/companies" element={<Companies />} />
+                <Route path="/superadmin/companies/new" element={<CreateCompany />} />
               </Route>
             </Route>
 
