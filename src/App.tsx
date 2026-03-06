@@ -16,6 +16,9 @@ import CreateCompany from "./pages/superadmin/CreateCompany";
 import AppDashboard from "./pages/app/Dashboard";
 import AgentsPage from "./pages/app/Agents";
 import CreateAgent from "./pages/app/CreateAgent";
+import AgentDetail from "./pages/app/AgentDetail";
+import ConversationsPage from "./pages/app/Conversations";
+import AnalyticsPage from "./pages/app/Analytics";
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -45,6 +48,9 @@ const App = () => (
                 <Route path="/app" element={<AppDashboard />} />
                 <Route path="/app/agents" element={<AgentsPage />} />
                 <Route path="/app/agents/new" element={<CreateAgent />} />
+                <Route path="/app/agents/:id" element={<AgentDetail />} />
+                <Route path="/app/conversations" element={<ConversationsPage />} />
+                <Route path="/app/analytics" element={<AnalyticsPage />} />
               </Route>
             </Route>
 
