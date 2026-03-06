@@ -1,20 +1,24 @@
 import { useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Menu, X } from "lucide-react";
-
-const navLinks = [
-  { label: "Agenti Vocali", href: "#soluzione" },
-  { label: "Agenti AI", href: "#use-cases" },
-  { label: "Come Funziona", href: "#come-funziona" },
-  { label: "Risultati", href: "#risultati" },
-  { label: "Pricing", href: "#pricing" },
-];
+import { Link, useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const { scrollY } = useScroll();
   const navBg = useTransform(scrollY, [0, 60], ["rgba(255,255,255,0)", "rgba(255,255,255,0.97)"]);
   const navShadow = useTransform(scrollY, [0, 60], ["none", "0 1px 0 hsl(214 32% 91%)"]);
+  const location = useLocation();
+  const isHome = location.pathname === "/";
+  const isSoluzioni = location.pathname === "/soluzioni";
+
+  const homeLinks = [
+    { label: "Agenti Vocali", href: "#soluzione" },
+    { label: "Agenti AI", href: "#use-cases" },
+    { label: "Come Funziona", href: "#come-funziona" },
+    { label: "Risultati", href: "#risultati" },
+    { label: "Pricing", href: "#pricing" },
+  ];
 
   return (
     <motion.nav
@@ -26,27 +30,45 @@ const Navbar = () => {
     >
       <div className="max-w-6xl mx-auto px-6 h-[68px] flex items-center justify-between">
         {/* Logo */}
-        <a href="#" className="flex flex-col">
+        <Link to="/" className="flex flex-col">
           <span className="font-display text-[22px] font-extrabold text-neutral-900">
             edilizia<span className="text-primary">.io</span>
           </span>
           <span className="font-mono text-[10px] uppercase tracking-wider bg-primary-light text-primary-dark px-2 py-0.5 rounded-full -mt-0.5 w-fit">
             AI per l'Edilizia
           </span>
-        </a>
+        </Link>
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="relative text-sm font-medium text-neutral-500 hover:text-neutral-900 transition-colors group"
-            >
-              {link.label}
-              <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
-            </a>
+          {homeLinks.map((link) => (
+            isHome ? (
+              <a
+                key={link.href}
+                href={link.href}
+                className="relative text-sm font-medium text-neutral-500 hover:text-neutral-900 transition-colors group"
+              >
+                {link.label}
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
+              </a>
+            ) : (
+              <Link
+                key={link.href}
+                to={`/${link.href}`}
+                className="relative text-sm font-medium text-neutral-500 hover:text-neutral-900 transition-colors group"
+              >
+                {link.label}
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
+              </Link>
+            )
           ))}
+          <Link
+            to="/soluzioni"
+            className={`relative text-sm font-medium transition-colors group ${isSoluzioni ? 'text-primary' : 'text-neutral-500 hover:text-neutral-900'}`}
+          >
+            Soluzioni
+            <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary origin-left transition-transform duration-300 ${isSoluzioni ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
+          </Link>
         </div>
 
         {/* Desktop CTA */}
@@ -54,12 +76,18 @@ const Navbar = () => {
           <a href="#" className="text-sm font-medium text-neutral-500 hover:text-primary transition-colors">
             Accedi
           </a>
-          <a
-            href="#cta-finale"
+          <Link
+            to={isHome ? "#cta-finale" : "/soluzioni#cta-soluzioni"}
+            onClick={(e) => {
+              if (isHome) {
+                e.preventDefault();
+                document.getElementById("cta-finale")?.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
             className="bg-primary text-primary-foreground px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-primary-dark hover:scale-[1.02] shadow-button-green transition-all"
           >
             Prenota Demo
-          </a>
+          </Link>
         </div>
 
         {/* Mobile Toggle */}
@@ -75,23 +103,41 @@ const Navbar = () => {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
         >
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={() => setOpen(false)}
-              className="block text-base font-medium text-neutral-700 hover:text-primary"
-            >
-              {link.label}
-            </a>
+          {homeLinks.map((link) => (
+            isHome ? (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={() => setOpen(false)}
+                className="block text-base font-medium text-neutral-700 hover:text-primary"
+              >
+                {link.label}
+              </a>
+            ) : (
+              <Link
+                key={link.href}
+                to={`/${link.href}`}
+                onClick={() => setOpen(false)}
+                className="block text-base font-medium text-neutral-700 hover:text-primary"
+              >
+                {link.label}
+              </Link>
+            )
           ))}
-          <a
-            href="#cta-finale"
+          <Link
+            to="/soluzioni"
+            onClick={() => setOpen(false)}
+            className={`block text-base font-medium ${isSoluzioni ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}
+          >
+            Soluzioni
+          </Link>
+          <Link
+            to={isSoluzioni ? "#cta-soluzioni" : "/"}
             onClick={() => setOpen(false)}
             className="block bg-primary text-primary-foreground text-center px-5 py-3 rounded-xl font-bold"
           >
             Prenota Demo
-          </a>
+          </Link>
         </motion.div>
       )}
     </motion.nav>
