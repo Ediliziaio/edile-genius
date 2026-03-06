@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           avg_duration_sec: number | null
           calls_month: number | null
+          calls_qualified: number | null
           calls_total: number | null
           company_id: string
           config: Json | null
@@ -28,18 +29,25 @@ export type Database = {
           el_voice_id: string | null
           first_message: string | null
           id: string
+          interrupt_enabled: boolean | null
           language: string | null
           last_call_at: string | null
+          max_duration_sec: number | null
           name: string
           sector: string | null
+          silence_sec: number | null
           status: string | null
           system_prompt: string | null
+          temperature: number | null
           type: string | null
+          updated_at: string | null
           use_case: string | null
+          voice_name: string | null
         }
         Insert: {
           avg_duration_sec?: number | null
           calls_month?: number | null
+          calls_qualified?: number | null
           calls_total?: number | null
           company_id: string
           config?: Json | null
@@ -50,18 +58,25 @@ export type Database = {
           el_voice_id?: string | null
           first_message?: string | null
           id?: string
+          interrupt_enabled?: boolean | null
           language?: string | null
           last_call_at?: string | null
+          max_duration_sec?: number | null
           name: string
           sector?: string | null
+          silence_sec?: number | null
           status?: string | null
           system_prompt?: string | null
+          temperature?: number | null
           type?: string | null
+          updated_at?: string | null
           use_case?: string | null
+          voice_name?: string | null
         }
         Update: {
           avg_duration_sec?: number | null
           calls_month?: number | null
+          calls_qualified?: number | null
           calls_total?: number | null
           company_id?: string
           config?: Json | null
@@ -72,14 +87,20 @@ export type Database = {
           el_voice_id?: string | null
           first_message?: string | null
           id?: string
+          interrupt_enabled?: boolean | null
           language?: string | null
           last_call_at?: string | null
+          max_duration_sec?: number | null
           name?: string
           sector?: string | null
+          silence_sec?: number | null
           status?: string | null
           system_prompt?: string | null
+          temperature?: number | null
           type?: string | null
+          updated_at?: string | null
           use_case?: string | null
+          voice_name?: string | null
         }
         Relationships: [
           {
@@ -94,45 +115,99 @@ export type Database = {
       campaigns: {
         Row: {
           agent_id: string | null
+          appointments_set: number | null
+          avg_duration: number | null
+          call_days: string[] | null
+          call_hour_limit: number | null
+          call_window_end: string | null
+          call_window_start: string | null
           company_id: string
           completed_at: string | null
           config: Json | null
           contact_list_id: string | null
+          contacts_called: number | null
+          contacts_qualified: number | null
+          contacts_reached: number | null
+          contacts_total: number | null
           created_at: string | null
+          created_by: string | null
+          custom_first_msg: string | null
+          description: string | null
           id: string
           name: string
+          retry_attempts: number | null
+          retry_delay_min: number | null
           scheduled_at: string | null
+          scheduled_end: string | null
+          scheduled_start: string | null
           started_at: string | null
           status: string
           type: string
+          updated_at: string | null
         }
         Insert: {
           agent_id?: string | null
+          appointments_set?: number | null
+          avg_duration?: number | null
+          call_days?: string[] | null
+          call_hour_limit?: number | null
+          call_window_end?: string | null
+          call_window_start?: string | null
           company_id: string
           completed_at?: string | null
           config?: Json | null
           contact_list_id?: string | null
+          contacts_called?: number | null
+          contacts_qualified?: number | null
+          contacts_reached?: number | null
+          contacts_total?: number | null
           created_at?: string | null
+          created_by?: string | null
+          custom_first_msg?: string | null
+          description?: string | null
           id?: string
           name: string
+          retry_attempts?: number | null
+          retry_delay_min?: number | null
           scheduled_at?: string | null
+          scheduled_end?: string | null
+          scheduled_start?: string | null
           started_at?: string | null
           status?: string
           type?: string
+          updated_at?: string | null
         }
         Update: {
           agent_id?: string | null
+          appointments_set?: number | null
+          avg_duration?: number | null
+          call_days?: string[] | null
+          call_hour_limit?: number | null
+          call_window_end?: string | null
+          call_window_start?: string | null
           company_id?: string
           completed_at?: string | null
           config?: Json | null
           contact_list_id?: string | null
+          contacts_called?: number | null
+          contacts_qualified?: number | null
+          contacts_reached?: number | null
+          contacts_total?: number | null
           created_at?: string | null
+          created_by?: string | null
+          custom_first_msg?: string | null
+          description?: string | null
           id?: string
           name?: string
+          retry_attempts?: number | null
+          retry_delay_min?: number | null
           scheduled_at?: string | null
+          scheduled_end?: string | null
+          scheduled_start?: string | null
           started_at?: string | null
           status?: string
           type?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -160,61 +235,91 @@ export type Database = {
       }
       companies: {
         Row: {
+          address: string | null
+          calls_used_month: number
+          city: string | null
           created_at: string | null
           created_by: string | null
           el_api_key: string | null
           id: string
           logo_url: string | null
+          monthly_calls_limit: number
           name: string
+          notes_internal: string | null
+          phone: string | null
           plan: string | null
           sector: string | null
           settings: Json | null
           slug: string
           status: string | null
           trial_ends_at: string | null
+          updated_at: string | null
+          vat_number: string | null
+          website: string | null
         }
         Insert: {
+          address?: string | null
+          calls_used_month?: number
+          city?: string | null
           created_at?: string | null
           created_by?: string | null
           el_api_key?: string | null
           id?: string
           logo_url?: string | null
+          monthly_calls_limit?: number
           name: string
+          notes_internal?: string | null
+          phone?: string | null
           plan?: string | null
           sector?: string | null
           settings?: Json | null
           slug: string
           status?: string | null
           trial_ends_at?: string | null
+          updated_at?: string | null
+          vat_number?: string | null
+          website?: string | null
         }
         Update: {
+          address?: string | null
+          calls_used_month?: number
+          city?: string | null
           created_at?: string | null
           created_by?: string | null
           el_api_key?: string | null
           id?: string
           logo_url?: string | null
+          monthly_calls_limit?: number
           name?: string
+          notes_internal?: string | null
+          phone?: string | null
           plan?: string | null
           sector?: string | null
           settings?: Json | null
           slug?: string
           status?: string | null
           trial_ends_at?: string | null
+          updated_at?: string | null
+          vat_number?: string | null
+          website?: string | null
         }
         Relationships: []
       }
       contact_list_members: {
         Row: {
+          added_at: string | null
           contact_id: string
           id: string
           list_id: string
         }
         Insert: {
+          added_at?: string | null
           contact_id: string
           id?: string
           list_id: string
         }
         Update: {
+          added_at?: string | null
           contact_id?: string
           id?: string
           list_id?: string
@@ -238,25 +343,40 @@ export type Database = {
       }
       contact_lists: {
         Row: {
+          color: string | null
           company_id: string
+          contact_count: number | null
           created_at: string | null
+          created_by: string | null
           description: string | null
+          icon: string | null
           id: string
           name: string
+          status: string | null
         }
         Insert: {
+          color?: string | null
           company_id: string
+          contact_count?: number | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
+          icon?: string | null
           id?: string
           name: string
+          status?: string | null
         }
         Update: {
+          color?: string | null
           company_id?: string
+          contact_count?: number | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
+          icon?: string | null
           id?: string
           name?: string
+          status?: string | null
         }
         Relationships: [
           {
@@ -270,45 +390,97 @@ export type Database = {
       }
       contacts: {
         Row: {
+          address: string | null
+          assigned_agent: string | null
+          assigned_user: string | null
+          call_attempts: number | null
+          cap: string | null
+          city: string | null
           company_id: string
+          company_name: string | null
           created_at: string | null
+          created_by: string | null
           email: string | null
           full_name: string
           id: string
+          last_contact_at: string | null
+          metadata: Json | null
+          next_call_at: string | null
           notes: string | null
           phone: string | null
+          phone_alt: string | null
+          priority: string | null
+          province: string | null
+          sector: string | null
           source: string | null
           status: string
           tags: Json | null
           updated_at: string | null
         }
         Insert: {
+          address?: string | null
+          assigned_agent?: string | null
+          assigned_user?: string | null
+          call_attempts?: number | null
+          cap?: string | null
+          city?: string | null
           company_id: string
+          company_name?: string | null
           created_at?: string | null
+          created_by?: string | null
           email?: string | null
           full_name: string
           id?: string
+          last_contact_at?: string | null
+          metadata?: Json | null
+          next_call_at?: string | null
           notes?: string | null
           phone?: string | null
+          phone_alt?: string | null
+          priority?: string | null
+          province?: string | null
+          sector?: string | null
           source?: string | null
           status?: string
           tags?: Json | null
           updated_at?: string | null
         }
         Update: {
+          address?: string | null
+          assigned_agent?: string | null
+          assigned_user?: string | null
+          call_attempts?: number | null
+          cap?: string | null
+          city?: string | null
           company_id?: string
+          company_name?: string | null
           created_at?: string | null
+          created_by?: string | null
           email?: string | null
           full_name?: string
           id?: string
+          last_contact_at?: string | null
+          metadata?: Json | null
+          next_call_at?: string | null
           notes?: string | null
           phone?: string | null
+          phone_alt?: string | null
+          priority?: string | null
+          province?: string | null
+          sector?: string | null
           source?: string | null
           status?: string
           tags?: Json | null
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "contacts_assigned_agent_fkey"
+            columns: ["assigned_agent"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "contacts_company_id_fkey"
             columns: ["company_id"]
@@ -322,43 +494,61 @@ export type Database = {
         Row: {
           agent_id: string
           caller_number: string | null
+          campaign_id: string | null
           company_id: string
+          contact_id: string | null
+          direction: string | null
           duration_sec: number | null
           el_conv_id: string | null
           ended_at: string | null
           id: string
           metadata: Json | null
           outcome: string | null
+          phone_number: string | null
+          sentiment: string | null
           started_at: string | null
           status: string | null
+          summary: string | null
           transcript: Json | null
         }
         Insert: {
           agent_id: string
           caller_number?: string | null
+          campaign_id?: string | null
           company_id: string
+          contact_id?: string | null
+          direction?: string | null
           duration_sec?: number | null
           el_conv_id?: string | null
           ended_at?: string | null
           id?: string
           metadata?: Json | null
           outcome?: string | null
+          phone_number?: string | null
+          sentiment?: string | null
           started_at?: string | null
           status?: string | null
+          summary?: string | null
           transcript?: Json | null
         }
         Update: {
           agent_id?: string
           caller_number?: string | null
+          campaign_id?: string | null
           company_id?: string
+          contact_id?: string | null
+          direction?: string | null
           duration_sec?: number | null
           el_conv_id?: string | null
           ended_at?: string | null
           id?: string
           metadata?: Json | null
           outcome?: string | null
+          phone_number?: string | null
+          sentiment?: string | null
           started_at?: string | null
           status?: string | null
+          summary?: string | null
           transcript?: Json | null
         }
         Relationships: [
@@ -370,10 +560,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "conversations_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "conversations_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
             referencedColumns: ["id"]
           },
         ]
@@ -438,6 +642,8 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          job_title: string | null
+          phone: string | null
           updated_at: string | null
         }
         Insert: {
@@ -447,6 +653,8 @@ export type Database = {
           email: string
           full_name?: string | null
           id: string
+          job_title?: string | null
+          phone?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -456,6 +664,8 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+          job_title?: string | null
+          phone?: string | null
           updated_at?: string | null
         }
         Relationships: [
