@@ -18,14 +18,14 @@ export default function SuperAdminDashboard() {
       try {
         const [companiesRes, agentsRes] = await Promise.all([
           supabase.from("companies").select("id, plan, status"),
-          supabase.from("agents").select("id, status, calls_this_month"),
+          supabase.from("agents").select("id, status, calls_month"),
         ]);
         const companies = companiesRes.data || [];
         const agents = agentsRes.data || [];
         setStats({
           companies: companies.length,
           activeAgents: agents.filter((a) => a.status === "active").length,
-          callsThisMonth: agents.reduce((sum, a) => sum + (a.calls_this_month || 0), 0),
+          callsThisMonth: agents.reduce((sum, a) => sum + ((a as any).calls_month || 0), 0),
           estimatedMRR: companies.filter((c) => c.status === "active").reduce((sum, c) => sum + (planPricing[c.plan || "starter"] || 0), 0),
         });
       } catch (err) { console.error("Error fetching stats:", err); }

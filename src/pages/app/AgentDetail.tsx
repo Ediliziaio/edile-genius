@@ -40,7 +40,7 @@ export default function AgentDetail() {
 
   if (agent && !configData) {
     const cfg = (agent.config && typeof agent.config === "object" && !Array.isArray(agent.config)) ? agent.config as Record<string, unknown> : {};
-    setConfigData({ name: agent.name, description: agent.description || "", sector: agent.sector || "", language: agent.language || "it", voice_id: agent.elevenlabs_voice_id || "", system_prompt: agent.system_prompt || "", first_message: agent.first_message || "", temperature: typeof cfg.temperature === "number" ? cfg.temperature : 0.7 });
+    setConfigData({ name: agent.name, description: agent.description || "", sector: agent.sector || "", language: agent.language || "it", voice_id: (agent as any).el_voice_id || "", system_prompt: agent.system_prompt || "", first_message: agent.first_message || "", temperature: typeof cfg.temperature === "number" ? cfg.temperature : 0.7 });
   }
 
   const updateConfig = <K extends keyof AgentConfigData>(key: K, value: AgentConfigData[K]) => setConfigData(prev => prev ? { ...prev, [key]: value } : prev);
@@ -49,7 +49,7 @@ export default function AgentDetail() {
     if (!configData || !id) return;
     setSaving(true);
     try {
-      const { error } = await supabase.functions.invoke("update-agent", { body: { id, name: configData.name, description: configData.description, sector: configData.sector, language: configData.language, elevenlabs_voice_id: configData.voice_id, system_prompt: configData.system_prompt, first_message: configData.first_message, config: { temperature: configData.temperature } } });
+      const { error } = await supabase.functions.invoke("update-agent", { body: { id, name: configData.name, description: configData.description, sector: configData.sector, language: configData.language, el_voice_id: configData.voice_id, system_prompt: configData.system_prompt, first_message: configData.first_message, config: { temperature: configData.temperature } } });
       if (error) throw error;
       toast({ title: "Salvato", description: "Configurazione aggiornata." });
       queryClient.invalidateQueries({ queryKey: ["agent", id] });
@@ -103,7 +103,7 @@ export default function AgentDetail() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             {[
               { label: "Chiamate totali", value: agent.calls_total ?? 0, icon: Phone },
-              { label: "Questo mese", value: agent.calls_this_month ?? 0, icon: Phone },
+              { label: "Questo mese", value: (agent as any).calls_month ?? 0, icon: Phone },
               { label: "Durata media", value: `${agent.avg_duration_sec ?? 0}s`, icon: Clock },
             ].map(stat => (
               <div key={stat.label} className="rounded-card p-4 bg-white border border-ink-200 shadow-card">
@@ -118,7 +118,7 @@ export default function AgentDetail() {
 
           <div className="rounded-card p-5 space-y-3 bg-white border border-ink-200 shadow-card">
             <h3 className="text-sm font-semibold text-ink-900">Dettagli</h3>
-            {[["Use Case", agent.use_case], ["Settore", agent.sector], ["Lingua", agent.language], ["Tipo", agent.type], ["ElevenLabs ID", agent.elevenlabs_agent_id]].map(([label, val]) => (
+            {[["Use Case", agent.use_case], ["Settore", agent.sector], ["Lingua", agent.language], ["Tipo", agent.type], ["ElevenLabs ID", (agent as any).el_agent_id]].map(([label, val]) => (
               <div key={label as string} className="flex justify-between text-sm">
                 <span className="text-ink-400">{label}</span>
                 <span className="text-ink-900">{val || "—"}</span>
@@ -142,7 +142,7 @@ export default function AgentDetail() {
         </TabsContent>
 
         <TabsContent value="test">
-          <VoiceTestPanel elevenlabsAgentId={agent.elevenlabs_agent_id} companyId={companyId} />
+          <VoiceTestPanel elevenlabsAgentId={(agent as any).el_agent_id} companyId={companyId} />
         </TabsContent>
 
         <TabsContent value="conversations">

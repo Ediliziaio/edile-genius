@@ -17,15 +17,15 @@ export type Database = {
       agents: {
         Row: {
           avg_duration_sec: number | null
-          calls_this_month: number | null
+          calls_month: number | null
           calls_total: number | null
           company_id: string
           config: Json | null
           created_at: string | null
           created_by: string | null
           description: string | null
-          elevenlabs_agent_id: string | null
-          elevenlabs_voice_id: string | null
+          el_agent_id: string | null
+          el_voice_id: string | null
           first_message: string | null
           id: string
           language: string | null
@@ -39,15 +39,15 @@ export type Database = {
         }
         Insert: {
           avg_duration_sec?: number | null
-          calls_this_month?: number | null
+          calls_month?: number | null
           calls_total?: number | null
           company_id: string
           config?: Json | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
-          elevenlabs_agent_id?: string | null
-          elevenlabs_voice_id?: string | null
+          el_agent_id?: string | null
+          el_voice_id?: string | null
           first_message?: string | null
           id?: string
           language?: string | null
@@ -61,15 +61,15 @@ export type Database = {
         }
         Update: {
           avg_duration_sec?: number | null
-          calls_this_month?: number | null
+          calls_month?: number | null
           calls_total?: number | null
           company_id?: string
           config?: Json | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
-          elevenlabs_agent_id?: string | null
-          elevenlabs_voice_id?: string | null
+          el_agent_id?: string | null
+          el_voice_id?: string | null
           first_message?: string | null
           id?: string
           language?: string | null
@@ -91,11 +91,78 @@ export type Database = {
           },
         ]
       }
+      campaigns: {
+        Row: {
+          agent_id: string | null
+          company_id: string
+          completed_at: string | null
+          config: Json | null
+          contact_list_id: string | null
+          created_at: string | null
+          id: string
+          name: string
+          scheduled_at: string | null
+          started_at: string | null
+          status: string
+          type: string
+        }
+        Insert: {
+          agent_id?: string | null
+          company_id: string
+          completed_at?: string | null
+          config?: Json | null
+          contact_list_id?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+          scheduled_at?: string | null
+          started_at?: string | null
+          status?: string
+          type?: string
+        }
+        Update: {
+          agent_id?: string | null
+          company_id?: string
+          completed_at?: string | null
+          config?: Json | null
+          contact_list_id?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          scheduled_at?: string | null
+          started_at?: string | null
+          status?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaigns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaigns_contact_list_id_fkey"
+            columns: ["contact_list_id"]
+            isOneToOne: false
+            referencedRelation: "contact_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           created_at: string | null
           created_by: string | null
-          elevenlabs_api_key: string | null
+          el_api_key: string | null
           id: string
           logo_url: string | null
           name: string
@@ -109,7 +176,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           created_by?: string | null
-          elevenlabs_api_key?: string | null
+          el_api_key?: string | null
           id?: string
           logo_url?: string | null
           name: string
@@ -123,7 +190,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           created_by?: string | null
-          elevenlabs_api_key?: string | null
+          el_api_key?: string | null
           id?: string
           logo_url?: string | null
           name?: string
@@ -136,13 +203,128 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_list_members: {
+        Row: {
+          contact_id: string
+          id: string
+          list_id: string
+        }
+        Insert: {
+          contact_id: string
+          id?: string
+          list_id: string
+        }
+        Update: {
+          contact_id?: string
+          id?: string
+          list_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_list_members_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_list_members_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "contact_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contact_lists: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_lists_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contacts: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          email: string | null
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string | null
+          source: string | null
+          status: string
+          tags: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          source?: string | null
+          status?: string
+          tags?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          source?: string | null
+          status?: string
+          tags?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           agent_id: string
           caller_number: string | null
           company_id: string
           duration_sec: number | null
-          elevenlabs_conv_id: string | null
+          el_conv_id: string | null
           ended_at: string | null
           id: string
           metadata: Json | null
@@ -156,7 +338,7 @@ export type Database = {
           caller_number?: string | null
           company_id: string
           duration_sec?: number | null
-          elevenlabs_conv_id?: string | null
+          el_conv_id?: string | null
           ended_at?: string | null
           id?: string
           metadata?: Json | null
@@ -170,7 +352,7 @@ export type Database = {
           caller_number?: string | null
           company_id?: string
           duration_sec?: number | null
-          elevenlabs_conv_id?: string | null
+          el_conv_id?: string | null
           ended_at?: string | null
           id?: string
           metadata?: Json | null
@@ -192,6 +374,58 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes: {
+        Row: {
+          author_id: string
+          company_id: string
+          contact_id: string | null
+          content: string
+          conversation_id: string | null
+          created_at: string | null
+          id: string
+        }
+        Insert: {
+          author_id: string
+          company_id: string
+          contact_id?: string | null
+          content: string
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string
+        }
+        Update: {
+          author_id?: string
+          company_id?: string
+          contact_id?: string | null
+          content?: string
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
             referencedColumns: ["id"]
           },
         ]
@@ -265,6 +499,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      my_company: { Args: never; Returns: string }
+      my_role: { Args: never; Returns: Database["public"]["Enums"]["app_role"] }
     }
     Enums: {
       app_role:

@@ -44,13 +44,13 @@ Deno.serve(async (req) => {
     // Get company API key
     const { data: company } = await serviceClient
       .from("companies")
-      .select("elevenlabs_api_key")
+      .select("el_api_key")
       .eq("id", company_id)
       .single();
 
-    const apiKey = company?.elevenlabs_api_key || Deno.env.get("ELEVENLABS_API_KEY");
+    const apiKey = company?.el_api_key || Deno.env.get("ELEVENLABS_API_KEY");
 
-    let elevenlabs_agent_id = null;
+    let el_agent_id = null;
 
     // Create ElevenLabs agent if API key exists
     if (apiKey && voice_id) {
@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
 
         if (elResponse.ok) {
           const elData = await elResponse.json();
-          elevenlabs_agent_id = elData.agent_id;
+          el_agent_id = elData.agent_id;
         } else {
           console.error("ElevenLabs error:", await elResponse.text());
         }
@@ -95,8 +95,8 @@ Deno.serve(async (req) => {
         use_case: use_case || null,
         sector: sector || null,
         language: language || "it",
-        elevenlabs_voice_id: voice_id || null,
-        elevenlabs_agent_id,
+        el_voice_id: voice_id || null,
+        el_agent_id,
         system_prompt: system_prompt || null,
         first_message: first_message || null,
         status: agentStatus || "draft",

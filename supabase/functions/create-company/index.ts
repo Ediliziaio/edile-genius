@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { name, slug, sector, plan, admin_email, admin_password, elevenlabs_api_key } = body;
+    const { name, slug, sector, plan, admin_email, admin_password, el_api_key } = body;
 
     if (!name || !slug || !admin_email || !admin_password) {
       return new Response(
@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
         slug,
         sector: sector || null,
         plan: plan || "starter",
-        elevenlabs_api_key: elevenlabs_api_key || null,
+        el_api_key: el_api_key || null,
         created_by: callerId,
         status: "active",
       })

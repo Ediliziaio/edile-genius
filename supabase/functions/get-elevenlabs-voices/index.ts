@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
 
     const { data: company, error: companyError } = await serviceClient
       .from("companies")
-      .select("elevenlabs_api_key")
+      .select("el_api_key")
       .eq("id", company_id)
       .single();
 
@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Company not found" }), { status: 404, headers: corsHeaders });
     }
 
-    const apiKey = company.elevenlabs_api_key || Deno.env.get("ELEVENLABS_API_KEY");
+    const apiKey = company.el_api_key || Deno.env.get("ELEVENLABS_API_KEY");
     if (!apiKey) {
       return new Response(JSON.stringify({ error: "No ElevenLabs API key configured" }), { status: 400, headers: corsHeaders });
     }
