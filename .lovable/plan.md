@@ -2,7 +2,7 @@
 
 # Analisi Completa: Stato Attuale vs Documento
 
-## Completato (Fasi A-D1)
+## Completato (Fasi A-D1-fix)
 
 | Fase | Stato |
 |------|-------|
@@ -10,16 +10,9 @@
 | B - Schema DB rename columns | DONE |
 | C - Pagine base Contacts/Lists/Campaigns | DONE |
 | D1 - Colonne mancanti + funzioni DB | DONE |
-
-## Problema Critico: Trigger NON Attivi
-
-Le funzioni `set_updated_at()` e `sync_list_count()` esistono nel DB ma i **trigger non sono stati creati**. Il sistema Supabase conferma: "There are no triggers in the database." Serve una migration per creare i trigger effettivi (`CREATE TRIGGER ... ON ... FOR EACH ROW`).
+| D1-fix - Trigger effettivi + default status | DONE |
 
 ## Stato Dettagliato delle Mancanze
-
-### DB — Ancora mancante
-- **Trigger**: `set_updated_at` su companies, agents, contacts, profiles; `sync_list_count` su contact_list_members (funzioni esistono, trigger no)
-- **contacts.status default**: il DB ha ancora `'lead'` come default, ma il frontend usa `'new'`. Serve allineare il default a `'new'`
 
 ### Routing — Mancante
 | Route | Stato |
@@ -96,10 +89,6 @@ Le funzioni `set_updated_at()` e `sync_list_count()` esistono nel DB ma i **trig
 
 ## Piano Fasi Rimanenti (aggiornato)
 
-### Fase D1-fix — Fix trigger + default status (rapido)
-- Migration: creare i trigger `set_updated_at` e `sync_list_count` effettivi
-- Cambiare default `contacts.status` da `'lead'` a `'new'`
-
 ### Fase D2 — Contacts Avanzati
 - Side panel dettaglio contatto con tab
 - Filtri settore/priorità
@@ -122,4 +111,3 @@ Le funzioni `set_updated_at()` e `sync_list_count()` esistono nel DB ma i **trig
 
 ### Fase D6 — Agent Detail Enhancement
 - Tab Integrazione + Analytics + Base di Conoscenza
-
