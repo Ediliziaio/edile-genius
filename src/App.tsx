@@ -19,6 +19,8 @@ import CreateAgent from "./pages/app/CreateAgent";
 import AgentDetail from "./pages/app/AgentDetail";
 import ConversationsPage from "./pages/app/Conversations";
 import AnalyticsPage from "./pages/app/Analytics";
+import CompanyDetail from "./pages/superadmin/CompanyDetail";
+import SettingsPage from "./pages/app/Settings";
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -39,6 +41,7 @@ const App = () => (
                 <Route path="/superadmin" element={<SuperAdminDashboard />} />
                 <Route path="/superadmin/companies" element={<Companies />} />
                 <Route path="/superadmin/companies/new" element={<CreateCompany />} />
+                <Route path="/superadmin/companies/:id" element={<CompanyDetail />} />
               </Route>
             </Route>
 
@@ -51,6 +54,7 @@ const App = () => (
                 <Route path="/app/agents/:id" element={<AgentDetail />} />
                 <Route path="/app/conversations" element={<ConversationsPage />} />
                 <Route path="/app/analytics" element={<AnalyticsPage />} />
+                <Route path="/app/settings" element={<SettingsPage />} />
               </Route>
             </Route>
 
