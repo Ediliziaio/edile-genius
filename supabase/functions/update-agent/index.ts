@@ -38,17 +38,17 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Get current agent to check for elevenlabs_agent_id
+    // Get current agent to check for el_agent_id
     const { data: currentAgent } = await serviceClient
       .from("agents")
-      .select("elevenlabs_agent_id, company_id")
+      .select("el_agent_id, company_id")
       .eq("id", id)
       .single();
 
     // Update DB
     const allowedFields = [
       "name", "description", "sector", "language", "system_prompt",
-      "first_message", "status", "elevenlabs_voice_id", "config", "use_case"
+      "first_message", "status", "el_voice_id", "config", "use_case"
     ];
     const dbUpdates: Record<string, unknown> = {};
     for (const key of allowedFields) {
@@ -66,15 +66,15 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: corsHeaders });
     }
 
-    // Sync to ElevenLabs if agent has elevenlabs_agent_id
-    if (currentAgent?.elevenlabs_agent_id) {
+    // Sync to ElevenLabs if agent has el_agent_id
+    if (currentAgent?.el_agent_id) {
       const { data: company } = await serviceClient
         .from("companies")
-        .select("elevenlabs_api_key")
+        .select("el_api_key")
         .eq("id", currentAgent.company_id)
         .single();
 
-      const apiKey = company?.elevenlabs_api_key || Deno.env.get("ELEVENLABS_API_KEY");
+      const apiKey = company?.el_api_key || Deno.env.get("ELEVENLABS_API_KEY");
       if (apiKey) {
         const elBody: Record<string, unknown> = {
           conversation_config: {
@@ -88,10 +88,10 @@ Deno.serve(async (req) => {
           },
         };
 
-        if (updates.elevenlabs_voice_id) {
+        if (updates.el_voice_id) {
           elBody.conversation_config = {
             ...(elBody.conversation_config as Record<string, unknown>),
-            tts: { voice_id: updates.elevenlabs_voice_id },
+            tts: { voice_id: updates.el_voice_id },
           };
         }
 
@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
         }
 
         await fetch(
-          `https://api.elevenlabs.io/v1/convai/agents/${currentAgent.elevenlabs_agent_id}`,
+          `https://api.elevenlabs.io/v1/convai/agents/${currentAgent.el_agent_id}`,
           {
             method: "PATCH",
             headers: {

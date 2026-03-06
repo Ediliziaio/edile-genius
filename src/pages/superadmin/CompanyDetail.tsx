@@ -49,7 +49,7 @@ export default function CompanyDetail() {
         supabase.from("agents").select("*").eq("company_id", id),
         supabase.from("conversations").select("id", { count: "exact", head: true }).eq("company_id", id),
       ]);
-      if (compRes.data) { setCompany(compRes.data); setEditName(compRes.data.name); setEditSector(compRes.data.sector || ""); setEditPlan(compRes.data.plan || "starter"); setEditStatus(compRes.data.status || "active"); setEditApiKey(compRes.data.elevenlabs_api_key || ""); }
+      if (compRes.data) { setCompany(compRes.data); setEditName(compRes.data.name); setEditSector(compRes.data.sector || ""); setEditPlan(compRes.data.plan || "starter"); setEditStatus(compRes.data.status || "active"); setEditApiKey((compRes.data as any).el_api_key || ""); }
       setAgents(agentsRes.data || []);
       setConversationsCount(convsRes.count || 0);
       setLoading(false);
@@ -58,15 +58,15 @@ export default function CompanyDetail() {
   }, [id]);
 
   const activeAgents = agents.filter((a) => a.status === "active").length;
-  const callsThisMonth = agents.reduce((s, a) => s + (a.calls_this_month || 0), 0);
+  const callsThisMonth = agents.reduce((s, a) => s + ((a as any).calls_month || 0), 0);
 
   const handleSave = async () => {
     if (!id) return;
     setSaving(true);
-    const { error } = await supabase.from("companies").update({ name: editName, sector: editSector || null, plan: editPlan, status: editStatus, elevenlabs_api_key: editApiKey || null }).eq("id", id);
+    const { error } = await supabase.from("companies").update({ name: editName, sector: editSector || null, plan: editPlan, status: editStatus, el_api_key: editApiKey || null }).eq("id", id);
     setSaving(false);
     if (error) toast({ title: "Errore", description: error.message, variant: "destructive" });
-    else { toast({ title: "Salvato", description: "Azienda aggiornata con successo." }); setCompany((prev) => prev ? { ...prev, name: editName, sector: editSector || null, plan: editPlan, status: editStatus, elevenlabs_api_key: editApiKey || null } : prev); }
+    else { toast({ title: "Salvato", description: "Azienda aggiornata con successo." }); setCompany((prev) => prev ? { ...prev, name: editName, sector: editSector || null, plan: editPlan, status: editStatus, el_api_key: editApiKey || null } as any : prev); }
   };
 
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-brand" /></div>;
@@ -109,8 +109,8 @@ export default function CompanyDetail() {
           </div>
           <div className="rounded-card border border-ink-200 bg-white p-6 shadow-card">
             <h3 className="text-lg font-semibold text-ink-900 mb-2">ElevenLabs API Key</h3>
-            <Badge className={company.elevenlabs_api_key ? "bg-status-success-light text-status-success" : "bg-status-error-light text-status-error"}>
-              {company.elevenlabs_api_key ? "Configurata" : "Non configurata"}
+            <Badge className={(company as any).el_api_key ? "bg-status-success-light text-status-success" : "bg-status-error-light text-status-error"}>
+              {(company as any).el_api_key ? "Configurata" : "Non configurata"}
             </Badge>
           </div>
         </TabsContent>

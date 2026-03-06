@@ -26,7 +26,7 @@ export default function CreateCompany() {
   const { toast } = useToast();
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ name: "", sector: "", admin_email: "", admin_password: "", plan: "starter", elevenlabs_api_key: "" });
+  const [form, setForm] = useState({ name: "", sector: "", admin_email: "", admin_password: "", plan: "starter", el_api_key: "" });
 
   const updateField = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
   const slug = form.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -35,7 +35,7 @@ export default function CreateCompany() {
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      const res = await supabase.functions.invoke("create-company", { body: { name: form.name, slug, sector: form.sector || null, plan: form.plan, admin_email: form.admin_email, admin_password: form.admin_password, elevenlabs_api_key: form.elevenlabs_api_key || null } });
+      const res = await supabase.functions.invoke("create-company", { body: { name: form.name, slug, sector: form.sector || null, plan: form.plan, admin_email: form.admin_email, admin_password: form.admin_password, el_api_key: form.el_api_key || null } });
       if (res.error) throw new Error(res.error.message);
       toast({ title: "Azienda creata!", description: `${form.name} è stata creata con successo.` });
       navigate("/superadmin/companies");
@@ -115,7 +115,7 @@ export default function CreateCompany() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-ink-900">ElevenLabs API Key</Label>
-              <Input type="password" value={form.elevenlabs_api_key} onChange={(e) => updateField("elevenlabs_api_key", e.target.value)} placeholder="xi-..." className="bg-ink-50 border-ink-200 text-ink-900" />
+              <Input type="password" value={form.el_api_key} onChange={(e) => updateField("el_api_key", e.target.value)} placeholder="xi-..." className="bg-ink-50 border-ink-200 text-ink-900" />
               <p className="text-xs text-ink-400">Opzionale. Puoi configurarla anche in seguito.</p>
             </div>
           </div>
@@ -125,7 +125,7 @@ export default function CreateCompany() {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-ink-900">Riepilogo</h3>
             <div className="space-y-3 text-sm">
-              {[["Nome Azienda", form.name], ["Slug", slug], ["Settore", form.sector || "Non specificato"], ["Piano", PLANS.find((p) => p.value === form.plan)?.label || form.plan], ["Email Admin", form.admin_email], ["ElevenLabs API Key", form.elevenlabs_api_key ? "••••••••" : "Non configurata"]].map(([label, value]) => (
+              {[["Nome Azienda", form.name], ["Slug", slug], ["Settore", form.sector || "Non specificato"], ["Piano", PLANS.find((p) => p.value === form.plan)?.label || form.plan], ["Email Admin", form.admin_email], ["ElevenLabs API Key", form.el_api_key ? "••••••••" : "Non configurata"]].map(([label, value]) => (
                 <div key={label} className="flex justify-between py-2 border-b border-ink-100">
                   <span className="text-ink-500">{label}</span>
                   <span className="text-ink-900 font-medium">{value}</span>

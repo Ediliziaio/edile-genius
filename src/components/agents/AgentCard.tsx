@@ -40,7 +40,7 @@ export default function AgentCard({ agent, onClick }: AgentCardProps) {
 
       <div className="flex items-center gap-4 text-xs text-ink-400">
         <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {agent.calls_total ?? 0}</span>
-        <span className="flex items-center gap-1"><Activity className="w-3 h-3" /> {agent.calls_this_month ?? 0}/mese</span>
+        <span className="flex items-center gap-1"><Activity className="w-3 h-3" /> {(agent as any).calls_month ?? 0}/mese</span>
       </div>
     </Link>
   );

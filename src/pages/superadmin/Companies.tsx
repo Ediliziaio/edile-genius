@@ -26,12 +26,12 @@ export default function Companies() {
       try {
         const [{ data: companiesData }, { data: agentsData }] = await Promise.all([
           supabase.from("companies").select("*").order("created_at", { ascending: false }),
-          supabase.from("agents").select("company_id, status, calls_this_month"),
+          supabase.from("agents").select("company_id, status, calls_month"),
         ]);
         const agentsByCompany = (agentsData || []).reduce<Record<string, { count: number; calls: number }>>((acc, a) => {
           if (!acc[a.company_id]) acc[a.company_id] = { count: 0, calls: 0 };
           acc[a.company_id].count++;
-          acc[a.company_id].calls += a.calls_this_month || 0;
+          acc[a.company_id].calls += (a as any).calls_month || 0;
           return acc;
         }, {});
         setCompanies((companiesData || []).map((c) => ({ id: c.id, name: c.name, sector: c.sector, plan: c.plan, status: c.status, created_at: c.created_at, agents_count: agentsByCompany[c.id]?.count || 0, calls_month: agentsByCompany[c.id]?.calls || 0 })));

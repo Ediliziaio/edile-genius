@@ -37,9 +37,9 @@ export default function Settings() {
     setFullName(profile.full_name || "");
     setAvatarUrl(profile.avatar_url || "");
     if (profile.company_id) {
-      supabase.from("companies").select("elevenlabs_api_key, settings").eq("id", profile.company_id).single().then(({ data }) => {
+      supabase.from("companies").select("el_api_key, settings").eq("id", profile.company_id).single().then(({ data }) => {
         if (data) {
-          setApiKey(data.elevenlabs_api_key || "");
+          setApiKey(data.el_api_key || "");
           const s = (data.settings as Record<string, unknown>) || {};
           setNotif({ new_conversation: s.new_conversation !== false, daily_report: !!s.daily_report, weekly_report: s.weekly_report !== false });
         }
@@ -59,7 +59,7 @@ export default function Settings() {
   const saveApiKey = async () => {
     if (!profile?.company_id) return;
     setSavingApi(true);
-    const { error } = await supabase.from("companies").update({ elevenlabs_api_key: apiKey || null }).eq("id", profile.company_id);
+    const { error } = await supabase.from("companies").update({ el_api_key: apiKey || null }).eq("id", profile.company_id);
     setSavingApi(false);
     toast(error ? { title: "Errore", description: error.message, variant: "destructive" } : { title: "API Key aggiornata" });
   };

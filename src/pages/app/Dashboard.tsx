@@ -27,7 +27,7 @@ export default function AppDashboard() {
   });
 
   const activeAgents = agents?.filter((a) => a.status === "active").length ?? 0;
-  const totalCalls = agents?.reduce((s, a) => s + (a.calls_this_month ?? 0), 0) ?? 0;
+  const totalCalls = agents?.reduce((s, a) => s + ((a as any).calls_month ?? 0), 0) ?? 0;
   const appointments = conversations?.filter((c) => c.outcome === "appointment").length ?? 0;
 
   const stats = [
@@ -94,7 +94,7 @@ export default function AppDashboard() {
                 <span className={`w-2 h-2 rounded-full flex-shrink-0 ${a.status === "active" ? "bg-status-success" : "bg-ink-300"}`} />
                 <div className="min-w-0">
                   <p className="text-sm font-medium truncate text-ink-900">{a.name}</p>
-                  <p className="text-xs text-ink-400">{a.calls_this_month ?? 0} chiamate/mese</p>
+                  <p className="text-xs text-ink-400">{(a as any).calls_month ?? 0} chiamate/mese</p>
                 </div>
               </div>
             ))}
