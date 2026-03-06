@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Check, Building2, Key, ClipboardList } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Building2, Key, ClipboardList, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const STEPS = [
   { label: "Informazioni Azienda", icon: Building2 },
+  { label: "Dettagli Extra", icon: Info },
   { label: "Configurazione API", icon: Key },
   { label: "Riepilogo", icon: ClipboardList },
 ];
@@ -26,21 +27,39 @@ export default function CreateCompany() {
   const { toast } = useToast();
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ name: "", sector: "", admin_email: "", admin_password: "", plan: "starter", el_api_key: "" });
+  const [form, setForm] = useState({
+    name: "", sector: "", admin_email: "", admin_password: "", plan: "starter", el_api_key: "",
+    phone: "", vat_number: "", address: "", city: "", website: "", trial_days: "14",
+  });
 
   const updateField = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
   const slug = form.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  const canNext = () => { if (step === 0) return form.name && form.admin_email && form.admin_password.length >= 6; return true; };
+  const canNext = () => {
+    if (step === 0) return form.name && form.admin_email && form.admin_password.length >= 6;
+    return true;
+  };
 
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      const res = await supabase.functions.invoke("create-company", { body: { name: form.name, slug, sector: form.sector || null, plan: form.plan, admin_email: form.admin_email, admin_password: form.admin_password, el_api_key: form.el_api_key || null } });
+      const trialDays = parseInt(form.trial_days) || 0;
+      const trial_ends_at = trialDays > 0 ? new Date(Date.now() + trialDays * 86400000).toISOString() : null;
+      const res = await supabase.functions.invoke("create-company", {
+        body: {
+          name: form.name, slug, sector: form.sector || null, plan: form.plan,
+          admin_email: form.admin_email, admin_password: form.admin_password,
+          el_api_key: form.el_api_key || null,
+          phone: form.phone || null, vat_number: form.vat_number || null,
+          address: form.address || null, city: form.city || null,
+          website: form.website || null, trial_ends_at,
+        },
+      });
       if (res.error) throw new Error(res.error.message);
       toast({ title: "Azienda creata!", description: `${form.name} è stata creata con successo.` });
       navigate("/superadmin/companies");
-    } catch (err: any) { toast({ title: "Errore", description: err.message || "Impossibile creare l'azienda.", variant: "destructive" }); }
-    finally { setSubmitting(false); }
+    } catch (err: any) {
+      toast({ title: "Errore", description: err.message || "Impossibile creare l'azienda.", variant: "destructive" });
+    } finally { setSubmitting(false); }
   };
 
   return (
@@ -113,6 +132,42 @@ export default function CreateCompany() {
 
         {step === 1 && (
           <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-ink-900">Telefono</Label>
+                <Input value={form.phone} onChange={(e) => updateField("phone", e.target.value)} placeholder="+39 02 1234567" className="bg-ink-50 border-ink-200 text-ink-900" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-ink-900">P. IVA</Label>
+                <Input value={form.vat_number} onChange={(e) => updateField("vat_number", e.target.value)} placeholder="IT12345678901" className="bg-ink-50 border-ink-200 text-ink-900" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-ink-900">Indirizzo</Label>
+                <Input value={form.address} onChange={(e) => updateField("address", e.target.value)} placeholder="Via Roma 1" className="bg-ink-50 border-ink-200 text-ink-900" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-ink-900">Città</Label>
+                <Input value={form.city} onChange={(e) => updateField("city", e.target.value)} placeholder="Milano" className="bg-ink-50 border-ink-200 text-ink-900" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-ink-900">Sito Web</Label>
+                <Input value={form.website} onChange={(e) => updateField("website", e.target.value)} placeholder="https://www.azienda.it" className="bg-ink-50 border-ink-200 text-ink-900" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-ink-900">Giorni Trial</Label>
+                <Input type="number" value={form.trial_days} onChange={(e) => updateField("trial_days", e.target.value)} placeholder="14" className="bg-ink-50 border-ink-200 text-ink-900" />
+                <p className="text-xs text-ink-400">0 = nessun trial</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-ink-900">ElevenLabs API Key</Label>
               <Input type="password" value={form.el_api_key} onChange={(e) => updateField("el_api_key", e.target.value)} placeholder="xi-..." className="bg-ink-50 border-ink-200 text-ink-900" />
@@ -121,11 +176,20 @@ export default function CreateCompany() {
           </div>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-ink-900">Riepilogo</h3>
             <div className="space-y-3 text-sm">
-              {[["Nome Azienda", form.name], ["Slug", slug], ["Settore", form.sector || "Non specificato"], ["Piano", PLANS.find((p) => p.value === form.plan)?.label || form.plan], ["Email Admin", form.admin_email], ["ElevenLabs API Key", form.el_api_key ? "••••••••" : "Non configurata"]].map(([label, value]) => (
+              {([
+                ["Nome Azienda", form.name], ["Slug", slug], ["Settore", form.sector || "Non specificato"],
+                ["Piano", PLANS.find((p) => p.value === form.plan)?.label || form.plan],
+                ["Email Admin", form.admin_email],
+                ["Telefono", form.phone || "—"], ["P. IVA", form.vat_number || "—"],
+                ["Indirizzo", [form.address, form.city].filter(Boolean).join(", ") || "—"],
+                ["Sito Web", form.website || "—"],
+                ["Trial", form.trial_days && parseInt(form.trial_days) > 0 ? `${form.trial_days} giorni` : "Nessuno"],
+                ["ElevenLabs API Key", form.el_api_key ? "••••••••" : "Non configurata"],
+              ] as [string, string][]).map(([label, value]) => (
                 <div key={label} className="flex justify-between py-2 border-b border-ink-100">
                   <span className="text-ink-500">{label}</span>
                   <span className="text-ink-900 font-medium">{value}</span>
@@ -140,7 +204,7 @@ export default function CreateCompany() {
         <Button variant="outline" onClick={() => setStep((s) => s - 1)} disabled={step === 0} className="border-ink-200 text-ink-700">
           <ArrowLeft className="mr-2 h-4 w-4" /> Indietro
         </Button>
-        {step < 2 ? (
+        {step < 3 ? (
           <Button onClick={() => setStep((s) => s + 1)} disabled={!canNext()} className="bg-brand hover:bg-brand-hover text-white">
             Avanti <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
