@@ -83,38 +83,53 @@ export default function CreateAgent() {
 
   const canSubmit = !!form.name && !!form.system_prompt;
 
+  const buildConfig = () => ({
+    temperature: form.temperature,
+    llm_model: form.llm_model,
+    turn_timeout_sec: form.turn_timeout_sec,
+    soft_timeout_sec: form.soft_timeout_sec,
+    soft_timeout_message: form.soft_timeout_message,
+    interruptions_enabled: form.interruptions_enabled,
+    turn_eagerness: form.turn_eagerness,
+    max_duration_sec: form.max_duration_sec,
+    end_call_enabled: form.end_call_enabled,
+    end_call_prompt: form.end_call_prompt,
+    language_detection_enabled: form.language_detection_enabled,
+    voice_stability: form.voice_stability,
+    voice_similarity: form.voice_similarity,
+    voice_speed: form.voice_speed,
+    evaluation_criteria: form.evaluation_criteria,
+    data_retention: form.data_retention,
+  });
+
+  const createAgent = async (statusOverride?: string) => {
+    if (!companyId) return null;
+    const body = {
+      company_id: companyId, name: form.name, description: form.description,
+      use_case: form.use_case, sector: form.sector, language: form.language,
+      voice_id: form.voice_id, system_prompt: form.system_prompt,
+      first_message: form.first_message, status: statusOverride || form.status, config: buildConfig(),
+    };
+    const { data, error } = await supabase.functions.invoke("create-elevenlabs-agent", { body });
+    if (error || data?.error) throw new Error(data?.error || "Errore creazione agente");
+    return data;
+  };
+
+  const handleCreateDraft = async (): Promise<string | null> => {
+    try {
+      const data = await createAgent("draft");
+      return data?.el_agent_id || null;
+    } catch (e: any) {
+      toast({ title: "Errore", description: e.message, variant: "destructive" });
+      return null;
+    }
+  };
+
   const handleSubmit = async () => {
     if (!companyId) return;
     setSubmitting(true);
     try {
-      const config = {
-        temperature: form.temperature,
-        llm_model: form.llm_model,
-        turn_timeout_sec: form.turn_timeout_sec,
-        soft_timeout_sec: form.soft_timeout_sec,
-        soft_timeout_message: form.soft_timeout_message,
-        interruptions_enabled: form.interruptions_enabled,
-        turn_eagerness: form.turn_eagerness,
-        max_duration_sec: form.max_duration_sec,
-        end_call_enabled: form.end_call_enabled,
-        end_call_prompt: form.end_call_prompt,
-        language_detection_enabled: form.language_detection_enabled,
-        voice_stability: form.voice_stability,
-        voice_similarity: form.voice_similarity,
-        voice_speed: form.voice_speed,
-        evaluation_criteria: form.evaluation_criteria,
-        data_retention: form.data_retention,
-      };
-
-      const { data, error } = await supabase.functions.invoke("create-elevenlabs-agent", {
-        body: {
-          company_id: companyId, name: form.name, description: form.description,
-          use_case: form.use_case, sector: form.sector, language: form.language,
-          voice_id: form.voice_id, system_prompt: form.system_prompt,
-          first_message: form.first_message, status: form.status, config,
-        },
-      });
-      if (error || data?.error) throw new Error(data?.error || "Errore creazione agente");
+      await createAgent();
       toast({ title: "Agente creato!", description: `${form.name} è stato creato con successo.` });
       navigate("/app/agents");
     } catch (e: any) {
@@ -163,7 +178,7 @@ export default function CreateAgent() {
                 {step === 1 && companyId && <StepVoice companyId={companyId} form={form} update={update} />}
                 {step === 2 && <StepConversation form={form} update={update} />}
                 {step === 3 && <StepAdvanced form={form} update={update} />}
-                {step === 4 && <StepReview form={form} update={update} />}
+                {step === 4 && <StepReview form={form} update={update} companyId={companyId || undefined} onCreateDraft={handleCreateDraft} />}
               </motion.div>
             </AnimatePresence>
           </div>

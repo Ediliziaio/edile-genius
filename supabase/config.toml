@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.dispatch-webhook]
 verify_jwt = false
+
+[functions.elevenlabs-tts]
+verify_jwt = false
