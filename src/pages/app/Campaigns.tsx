@@ -3,26 +3,31 @@ import { useAuth } from "@/context/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Megaphone, Loader2, Play, Pause, CheckCircle2 } from "lucide-react";
+import { Plus, Search, Megaphone, Loader2, Play, Pause, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Progress } from "@/components/ui/progress";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
   draft: { label: "Bozza", color: "bg-ink-100 text-ink-500", icon: null },
+  scheduled: { label: "Pianificata", color: "bg-violet-100 text-violet-700", icon: Clock },
   running: { label: "In corso", color: "bg-status-success-light text-status-success", icon: Play },
   paused: { label: "In pausa", color: "bg-status-warning-light text-status-warning", icon: Pause },
   completed: { label: "Completata", color: "bg-status-info-light text-status-info", icon: CheckCircle2 },
+  cancelled: { label: "Annullata", color: "bg-status-error-light text-status-error", icon: XCircle },
 };
 
 interface CampaignForm {
   name: string;
+  description: string;
   agent_id: string;
   contact_list_id: string;
 }
@@ -36,7 +41,7 @@ export default function CampaignsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showCreate, setShowCreate] = useState(false);
-  const [form, setForm] = useState<CampaignForm>({ name: "", agent_id: "", contact_list_id: "" });
+  const [form, setForm] = useState<CampaignForm>({ name: "", description: "", agent_id: "", contact_list_id: "" });
   const [submitting, setSubmitting] = useState(false);
 
   const { data: campaigns = [], isLoading } = useQuery({
@@ -90,6 +95,7 @@ export default function CampaignsPage() {
       const { error } = await supabase.from("campaigns").insert({
         company_id: companyId!,
         name: form.name.trim(),
+        description: form.description.trim() || null,
         agent_id: form.agent_id || null,
         contact_list_id: form.contact_list_id || null,
         status: "draft",
@@ -98,13 +104,18 @@ export default function CampaignsPage() {
       if (error) throw error;
       toast({ title: "Campagna creata" });
       setShowCreate(false);
-      setForm({ name: "", agent_id: "", contact_list_id: "" });
+      setForm({ name: "", description: "", agent_id: "", contact_list_id: "" });
       queryClient.invalidateQueries({ queryKey: ["campaigns", companyId] });
     } catch (err: any) {
       toast({ title: "Errore", description: err.message, variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const getProgress = (c: any) => {
+    if (!c.contacts_total || c.contacts_total === 0) return 0;
+    return Math.round((c.contacts_called / c.contacts_total) * 100);
   };
 
   return (
@@ -122,22 +133,13 @@ export default function CampaignsPage() {
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-400" />
-          <Input
-            placeholder="Cerca campagne..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 bg-white border-ink-200 text-ink-900 placeholder:text-ink-300"
-          />
+          <Input placeholder="Cerca campagne..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-white border-ink-200 text-ink-900 placeholder:text-ink-300" />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[160px] bg-white border-ink-200 text-ink-900">
-            <SelectValue placeholder="Stato" />
-          </SelectTrigger>
+          <SelectTrigger className="w-[170px] bg-white border-ink-200 text-ink-900"><SelectValue placeholder="Stato" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tutti gli stati</SelectItem>
-            {Object.entries(STATUS_CONFIG).map(([k, v]) => (
-              <SelectItem key={k} value={k}>{v.label}</SelectItem>
-            ))}
+            {Object.entries(STATUS_CONFIG).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
@@ -159,22 +161,33 @@ export default function CampaignsPage() {
               <TableRow className="bg-ink-50">
                 <TableHead className="text-ink-500">Nome</TableHead>
                 <TableHead className="text-ink-500">Stato</TableHead>
+                <TableHead className="text-ink-500">Progresso</TableHead>
                 <TableHead className="text-ink-500">Agente</TableHead>
                 <TableHead className="text-ink-500">Lista</TableHead>
-                <TableHead className="text-ink-500">Tipo</TableHead>
                 <TableHead className="text-ink-500">Creata</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((c: any) => {
                 const st = STATUS_CONFIG[c.status] || STATUS_CONFIG.draft;
+                const progress = getProgress(c);
                 return (
                   <TableRow key={c.id} className="hover:bg-ink-50">
-                    <TableCell className="font-medium text-ink-900">{c.name}</TableCell>
+                    <TableCell>
+                      <div>
+                        <span className="font-medium text-ink-900">{c.name}</span>
+                        {c.description && <p className="text-xs text-ink-400 mt-0.5 line-clamp-1">{c.description}</p>}
+                      </div>
+                    </TableCell>
                     <TableCell><Badge className={`${st.color} border-none text-xs`}>{st.label}</Badge></TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2 min-w-[120px]">
+                        <Progress value={progress} className="h-2 flex-1" />
+                        <span className="text-xs text-ink-400 w-8">{progress}%</span>
+                      </div>
+                    </TableCell>
                     <TableCell className="text-ink-500">{agentMap[c.agent_id] || "—"}</TableCell>
                     <TableCell className="text-ink-500">{listMap[c.contact_list_id] || "—"}</TableCell>
-                    <TableCell className="text-ink-500 capitalize">{c.type}</TableCell>
                     <TableCell className="text-ink-400 text-xs">
                       {c.created_at ? format(new Date(c.created_at), "dd MMM yyyy", { locale: it }) : "—"}
                     </TableCell>
@@ -195,6 +208,10 @@ export default function CampaignsPage() {
             <div className="space-y-1">
               <Label className="text-ink-600">Nome campagna *</Label>
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="bg-ink-50 border-ink-200 text-ink-900" placeholder="es. Campagna Q1 2026" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-ink-600">Descrizione</Label>
+              <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-ink-50 border-ink-200 text-ink-900 min-h-[60px]" placeholder="Descrizione opzionale..." />
             </div>
             <div className="space-y-1">
               <Label className="text-ink-600">Agente AI</Label>

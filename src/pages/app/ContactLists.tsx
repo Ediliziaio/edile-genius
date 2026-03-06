@@ -7,11 +7,24 @@ import { Plus, Search, Users, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+
+const COLOR_OPTIONS = [
+  { value: "#6366f1", label: "Indaco" },
+  { value: "#8b5cf6", label: "Viola" },
+  { value: "#06b6d4", label: "Ciano" },
+  { value: "#10b981", label: "Verde" },
+  { value: "#f59e0b", label: "Ambra" },
+  { value: "#ef4444", label: "Rosso" },
+  { value: "#ec4899", label: "Rosa" },
+  { value: "#64748b", label: "Grigio" },
+];
 
 interface ListForm {
   name: string;
   description: string;
+  color: string;
 }
 
 export default function ContactListsPage() {
@@ -22,7 +35,7 @@ export default function ContactListsPage() {
 
   const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);
-  const [form, setForm] = useState<ListForm>({ name: "", description: "" });
+  const [form, setForm] = useState<ListForm>({ name: "", description: "", color: "#6366f1" });
   const [submitting, setSubmitting] = useState(false);
 
   const { data: lists = [], isLoading } = useQuery({
@@ -31,7 +44,7 @@ export default function ContactListsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("contact_lists")
-        .select("*, contact_list_members(count)")
+        .select("*")
         .eq("company_id", companyId!)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -55,11 +68,12 @@ export default function ContactListsPage() {
         company_id: companyId!,
         name: form.name.trim(),
         description: form.description.trim() || null,
+        color: form.color,
       });
       if (error) throw error;
       toast({ title: "Lista creata" });
       setShowCreate(false);
-      setForm({ name: "", description: "" });
+      setForm({ name: "", description: "", color: "#6366f1" });
       queryClient.invalidateQueries({ queryKey: ["contact-lists", companyId] });
     } catch (err: any) {
       toast({ title: "Errore", description: err.message, variant: "destructive" });
@@ -77,14 +91,6 @@ export default function ContactListsPage() {
     }
   };
 
-  const getMemberCount = (list: any) => {
-    const members = list.contact_list_members;
-    if (Array.isArray(members) && members.length > 0 && typeof members[0] === "object" && "count" in members[0]) {
-      return members[0].count;
-    }
-    return 0;
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -99,12 +105,7 @@ export default function ContactListsPage() {
 
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-400" />
-        <Input
-          placeholder="Cerca liste..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-10 bg-white border-ink-200 text-ink-900 placeholder:text-ink-300"
-        />
+        <Input placeholder="Cerca liste..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-white border-ink-200 text-ink-900 placeholder:text-ink-300" />
       </div>
 
       {isLoading ? (
@@ -123,12 +124,12 @@ export default function ContactListsPage() {
             <div key={list.id} className="rounded-card border border-ink-200 bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 rounded-btn bg-brand-light flex items-center justify-center">
-                    <Users className="w-4 h-4 text-brand-text" />
+                  <div className="w-9 h-9 rounded-btn flex items-center justify-center" style={{ backgroundColor: `${list.color || '#6366f1'}20` }}>
+                    <Users className="w-4 h-4" style={{ color: list.color || '#6366f1' }} />
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm text-ink-900">{list.name}</h3>
-                    <p className="text-xs text-ink-400">{getMemberCount(list)} contatti</p>
+                    <p className="text-xs text-ink-400">{list.contact_count || 0} contatti</p>
                   </div>
                 </div>
                 <button onClick={() => handleDelete(list.id)} className="text-ink-300 hover:text-status-error transition-colors">
@@ -156,6 +157,16 @@ export default function ContactListsPage() {
             <div className="space-y-1">
               <Label className="text-ink-600">Descrizione</Label>
               <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-ink-50 border-ink-200 text-ink-900" placeholder="Descrizione opzionale..." />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-ink-600">Colore</Label>
+              <div className="flex gap-2">
+                {COLOR_OPTIONS.map((c) => (
+                  <button key={c.value} onClick={() => setForm({ ...form, color: c.value })}
+                    className={`w-8 h-8 rounded-full border-2 transition-all ${form.color === c.value ? "border-ink-900 scale-110" : "border-transparent"}`}
+                    style={{ backgroundColor: c.value }} title={c.label} />
+                ))}
+              </div>
             </div>
           </div>
           <DialogFooter>
