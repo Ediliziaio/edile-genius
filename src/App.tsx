@@ -25,6 +25,8 @@ import ContactsPage from "./pages/app/Contacts";
 import ContactListsPage from "./pages/app/ContactLists";
 import CampaignsPage from "./pages/app/Campaigns";
 import ImportContactsPage from "./pages/app/ImportContacts";
+import CreateCampaignPage from "./pages/app/CreateCampaign";
+import CampaignDetailPage from "./pages/app/CampaignDetail";
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -61,6 +63,8 @@ const App = () => (
                 <Route path="/app/contacts/import" element={<ImportContactsPage />} />
                 <Route path="/app/lists" element={<ContactListsPage />} />
                 <Route path="/app/campaigns" element={<CampaignsPage />} />
+                <Route path="/app/campaigns/new" element={<CreateCampaignPage />} />
+                <Route path="/app/campaigns/:id" element={<CampaignDetailPage />} />
                 <Route path="/app/analytics" element={<AnalyticsPage />} />
                 <Route path="/app/settings" element={<SettingsPage />} />
               </Route>
