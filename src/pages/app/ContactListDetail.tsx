@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import { useCompanyId } from "@/hooks/useCompanyId";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -14,10 +14,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export default function ContactListDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { profile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const companyId = profile?.company_id;
+  const companyId = useCompanyId();
 
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);

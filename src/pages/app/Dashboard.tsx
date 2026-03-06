@@ -1,5 +1,5 @@
 import { useAuth } from "@/context/AuthContext";
-import { useImpersonation } from "@/context/ImpersonationContext";
+import { useCompanyId } from "@/hooks/useCompanyId";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
@@ -12,8 +12,7 @@ import { it } from "date-fns/locale";
 
 export default function AppDashboard() {
   const { profile } = useAuth();
-  const { impersonatingCompanyId } = useImpersonation();
-  const companyId = impersonatingCompanyId || profile?.company_id;
+  const companyId = useCompanyId();
 
   const { data: agents } = useQuery({
     queryKey: ["company-agents", companyId],

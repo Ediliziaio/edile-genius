@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useCompanyId } from "@/hooks/useCompanyId";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -63,10 +63,9 @@ const defaultForm: CampaignForm = {
 };
 
 export default function CreateCampaignPage() {
-  const { profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const companyId = profile?.company_id;
+  const companyId = useCompanyId();
 
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<CampaignForm>({ ...defaultForm });

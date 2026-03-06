@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useCompanyId } from "@/hooks/useCompanyId";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
@@ -8,8 +8,7 @@ import { Input } from "@/components/ui/input";
 import AgentCard from "@/components/agents/AgentCard";
 
 export default function AgentsPage() {
-  const { profile } = useAuth();
-  const companyId = profile?.company_id;
+  const companyId = useCompanyId();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 

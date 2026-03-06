@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import { useCompanyId } from "@/hooks/useCompanyId";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Check, Mic, Settings, FileText, Send } from "lucide-react";
@@ -39,12 +39,11 @@ const defaultForm: AgentForm = {
 
 export default function CreateAgent() {
   const navigate = useNavigate();
-  const { profile } = useAuth();
   const { toast } = useToast();
+  const companyId = useCompanyId();
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<AgentForm>(defaultForm);
-  const companyId = profile?.company_id;
 
   const update = <K extends keyof AgentForm>(key: K, value: AgentForm[K]) => setForm((f) => ({ ...f, [key]: value }));
 

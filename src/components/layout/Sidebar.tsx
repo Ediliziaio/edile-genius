@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useImpersonation } from "@/context/ImpersonationContext";
 import {
   LayoutDashboard, Bot, MessageSquare, BarChart3, Settings,
   CreditCard, HelpCircle, Building2, UserPlus, Users, Key, FileText,
@@ -78,8 +79,9 @@ const superadminNav: NavSection[] = [
 
 export default function Sidebar() {
   const { isSuperAdmin } = useAuth();
+  const { isImpersonating } = useImpersonation();
   const location = useLocation();
-  const sections = isSuperAdmin ? superadminNav : companyNav;
+  const sections = (isSuperAdmin && !isImpersonating) ? superadminNav : companyNav;
 
   return (
     <aside className="w-[240px] shrink-0 flex flex-col h-screen sticky top-0 bg-white border-r border-ink-200">

@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/context/AuthContext";
+import { useCompanyId } from "@/hooks/useCompanyId";
 import { BarChart3, Phone, Clock, TrendingUp, Target } from "lucide-react";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { subDays, format, startOfDay, isAfter } from "date-fns";
@@ -14,8 +14,7 @@ const RANGES = [
 ];
 
 export default function AnalyticsPage() {
-  const { profile } = useAuth();
-  const companyId = profile?.company_id;
+  const companyId = useCompanyId();
   const [rangeDays, setRangeDays] = useState(30);
 
   const { data: conversations = [] } = useQuery({

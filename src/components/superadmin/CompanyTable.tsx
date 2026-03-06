@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Eye, LogIn } from "lucide-react";
+import { useImpersonation } from "@/context/ImpersonationContext";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,12 @@ const planLabels: Record<string, string> = { starter: "Starter", professional: "
 
 export default function CompanyTable({ companies, loading }: CompanyTableProps) {
   const navigate = useNavigate();
+  const { startImpersonation } = useImpersonation();
+
+  const handleImpersonate = (company: Company) => {
+    startImpersonation(company.id, company.name);
+    navigate("/app");
+  };
 
   if (loading) return <div className="rounded-card border border-ink-200 bg-white p-12 text-center shadow-card"><div className="text-ink-500">Caricamento...</div></div>;
   if (companies.length === 0) return <div className="rounded-card border border-ink-200 bg-white p-12 text-center shadow-card"><div className="text-ink-500">Nessuna azienda trovata</div></div>;
@@ -48,7 +55,7 @@ export default function CompanyTable({ companies, loading }: CompanyTableProps) 
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-1">
                   <Button variant="ghost" size="icon" className="h-8 w-8 text-ink-400 hover:text-ink-900 hover:bg-ink-100" onClick={() => navigate(`/superadmin/companies/${company.id}`)}><Eye className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-ink-400 hover:text-ink-900 hover:bg-ink-100" title="Accedi come azienda" disabled><LogIn className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-ink-400 hover:text-ink-900 hover:bg-ink-100" title="Accedi come azienda" onClick={() => handleImpersonate(company)}><LogIn className="h-4 w-4" /></Button>
                 </div>
               </TableCell>
             </TableRow>
