@@ -1,20 +1,44 @@
 
 
-# Create SuperAdmin User
+# Implementazione Accesso SuperAdmin nelle Aziende (Impersonazione)
 
-There are no hardcoded credentials or existing edge functions to create a standalone superadmin user (without a company). I need to:
+## Problema Attuale
 
-## Plan
+L'infrastruttura di impersonazione esiste (context, banner, session storage) ma non funziona perché:
 
-1. **Create a temporary edge function** `create-superadmin` that:
-   - Uses the service role key to call `supabase.auth.admin.createUser()` with email `f.andriciuc@overthemol.com` and password `Password2025!`
-   - The `handle_new_user` trigger will auto-create the profile and assign `company_user` role
-   - The function then updates the role from `company_user` to `superadmin` in `user_roles`
-   - Returns success confirmation
+1. **Il bottone "Accedi come azienda"** nella tabella aziende è `disabled`
+2. **Solo Dashboard.tsx** usa `impersonatingCompanyId` — le altre 10 pagine app usano direttamente `profile?.company_id`, quindi mostrano dati vuoti durante l'impersonazione
+3. **La Sidebar** mostra sempre il menu superadmin anche durante l'impersonazione — il superadmin non vede le voci di navigazione dell'azienda
+4. **AuthGuard** blocca i superadmin che accedono a `/app` senza essere `company_user`
 
-2. **Deploy and invoke** the function to create the user
+## Piano di Implementazione
 
-3. **Delete the edge function** after use (it's a one-time operation)
+### 1. Creare un hook centralizzato `useCompanyId`
+Nuovo file `src/hooks/useCompanyId.ts` che incapsula la logica:
+```
+impersonatingCompanyId || profile?.company_id
+```
+Tutti i file lo useranno al posto della logica inline.
 
-This is the only way since Supabase Auth user creation requires the service role key, which is only available server-side in edge functions.
+### 2. Aggiornare tutte le pagine app (10 file)
+Sostituire `const companyId = profile?.company_id` con `const companyId = useCompanyId()` in:
+- Agents, AgentDetail, CreateAgent
+- Contacts, ContactLists, ContactListDetail
+- Conversations, Campaigns, CreateCampaign
+- ImportContacts, Analytics, Settings
+
+### 3. Abilitare il bottone nella CompanyTable
+Rimuovere `disabled` dal bottone LogIn e collegarlo a `useImpersonation().startImpersonation()` + `navigate("/app")`.
+
+### 4. Sidebar: mostrare menu azienda durante impersonazione
+Quando `isImpersonating` è true, la sidebar mostra `companyNav` invece di `superadminNav`.
+
+### 5. AuthGuard: permettere superadmin su /app
+La guardia `requiredRole="company"` deve permettere anche i superadmin (che possono impersonare).
+
+### File coinvolti
+- **Nuovo**: `src/hooks/useCompanyId.ts`
+- **Modificati**: `CompanyTable.tsx`, `Sidebar.tsx`, `AuthGuard.tsx`, + 11 pagine in `src/pages/app/`
+
+Nessuna migrazione DB necessaria.
 
