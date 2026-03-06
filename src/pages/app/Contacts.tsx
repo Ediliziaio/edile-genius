@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Plus, Search, Phone, Mail, Loader2, Download, Trash2, ListChecks, Bot, ArrowUpDown,
+  Plus, Search, Phone, Mail, Loader2, Download, Trash2, ListChecks, Bot, ArrowUpDown, Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -322,6 +323,9 @@ export default function ContactsPage() {
         <div className="flex gap-2">
           <Button variant="outline" onClick={exportCSV} className="border-ink-200 text-ink-700">
             <Download className="w-4 h-4 mr-2" /> Export CSV
+          </Button>
+          <Button variant="outline" asChild className="border-ink-200 text-ink-700">
+            <Link to="/app/contacts/import"><Upload className="w-4 h-4 mr-2" /> Importa</Link>
           </Button>
           <Button onClick={() => setShowCreate(true)} className="bg-brand hover:bg-brand-hover text-white">
             <Plus className="w-4 h-4 mr-2" /> Nuovo Contatto
