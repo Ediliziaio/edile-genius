@@ -23,52 +23,26 @@ export default function Topbar() {
     : profile?.email?.slice(0, 2).toUpperCase() ?? "U";
 
   return (
-    <header
-      className="h-14 shrink-0 flex items-center justify-between px-6"
-      style={{
-        backgroundColor: "hsl(var(--app-bg-secondary))",
-        borderBottom: "1px solid hsl(var(--app-border-subtle))",
-      }}
-    >
+    <header className="h-14 shrink-0 flex items-center justify-between px-6 bg-white border-b border-ink-200">
       <div />
 
       <div className="flex items-center gap-3">
-        {/* Notifications */}
-        <button
-          className="p-2 rounded-lg transition-colors"
-          style={{ color: "hsl(var(--app-text-secondary))" }}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "hsl(var(--app-bg-elevated))")}
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-        >
+        <button className="p-2 rounded-btn text-ink-400 hover:bg-ink-50 hover:text-ink-700 transition-colors">
           <Bell size={18} />
         </button>
 
-        {/* Avatar Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button
-              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-              style={{
-                backgroundColor: "hsl(var(--app-brand-dim))",
-                color: "hsl(var(--app-brand))",
-              }}
-            >
+            <button className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-brand-light text-brand-text">
               {initials}
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="w-48"
-            style={{
-              backgroundColor: "hsl(var(--app-bg-elevated))",
-              border: "1px solid hsl(var(--app-border-default))",
-            }}
-          >
-            <DropdownMenuItem className="gap-2 text-sm cursor-pointer" style={{ color: "hsl(var(--app-text-primary))" }}>
+          <DropdownMenuContent align="end" className="w-48 bg-white border border-ink-200 shadow-modal">
+            <DropdownMenuItem className="gap-2 text-sm cursor-pointer text-ink-700">
               <User size={14} /> Profilo
             </DropdownMenuItem>
-            <DropdownMenuSeparator style={{ backgroundColor: "hsl(var(--app-border-subtle))" }} />
-            <DropdownMenuItem onClick={handleLogout} className="gap-2 text-sm cursor-pointer" style={{ color: "hsl(var(--app-error))" }}>
+            <DropdownMenuSeparator className="bg-ink-100" />
+            <DropdownMenuItem onClick={handleLogout} className="gap-2 text-sm cursor-pointer text-status-error">
               <LogOut size={14} /> Esci
             </DropdownMenuItem>
           </DropdownMenuContent>

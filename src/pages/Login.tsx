@@ -16,7 +16,6 @@ export default function Login() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Redirect if already logged in
   useEffect(() => {
     if (!loading && user) {
       if (isSuperAdmin) navigate("/superadmin", { replace: true });
@@ -41,104 +40,93 @@ export default function Login() {
       setIsLoading(false);
       return;
     }
-
-    // Auth state change listener will handle redirect
     setIsLoading(false);
   };
 
   return (
-    <div className="dark-app min-h-screen flex flex-col items-center justify-center px-4" style={{ backgroundColor: "hsl(var(--app-bg-primary))" }}>
-      {/* Logo */}
-      <div className="mb-8 text-center">
-        <span className="text-[22px] font-bold" style={{ color: "hsl(var(--app-text-primary))" }}>
-          EdiliziaInCloud<span style={{ color: "hsl(var(--app-brand))" }}>.</span>
-        </span>
-      </div>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-ink-50 relative overflow-hidden">
+      {/* SVG dot grid background */}
+      <svg className="absolute inset-0 w-full h-full opacity-[0.35]" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="dotgrid" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+            <circle cx="2" cy="2" r="1" fill="#3ECF6E" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#dotgrid)" />
+      </svg>
 
-      {/* Login Card */}
-      <div
-        className="w-full max-w-[400px] rounded-2xl p-10"
-        style={{
-          backgroundColor: "hsl(var(--app-bg-tertiary))",
-          border: "1px solid hsl(var(--app-border-subtle))",
-        }}
-      >
-        <h1 className="text-xl font-semibold mb-1" style={{ color: "hsl(var(--app-text-primary))" }}>
-          Accedi alla piattaforma
-        </h1>
-        <p className="text-sm mb-8" style={{ color: "hsl(var(--app-text-tertiary))" }}>
-          Inserisci le tue credenziali per continuare
-        </p>
+      <div className="relative z-10 w-full max-w-[400px]">
+        {/* Logo */}
+        <div className="mb-8 text-center">
+          <span className="text-[22px] font-bold text-ink-900">
+            edilizia<span className="text-brand">.io</span>
+          </span>
+        </div>
 
-        <form onSubmit={handleLogin} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: "hsl(var(--app-text-secondary))" }}>
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="la.tua@email.com"
-              required
-              className="w-full rounded-lg px-3.5 py-2.5 text-sm outline-none transition-colors"
-              style={{
-                backgroundColor: "hsl(var(--app-bg-input))",
-                border: `1px solid hsl(var(--app-border-${hasError ? "error" : "default"}))`,
-                color: "hsl(var(--app-text-primary))",
-              }}
-              onFocus={(e) => (e.target.style.borderColor = `hsl(var(--app-border-focus))`)}
-              onBlur={(e) => (e.target.style.borderColor = `hsl(var(--app-border-default))`)}
-            />
-          </div>
+        {/* Login Card */}
+        <div className="w-full rounded-card p-10 bg-white border border-ink-200 shadow-card">
+          <h1 className="text-xl font-semibold mb-1 text-ink-900">
+            Bentornato
+          </h1>
+          <p className="text-sm mb-8 text-ink-400">
+            Accedi alla tua piattaforma AI
+          </p>
 
-          <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: "hsl(var(--app-text-secondary))" }}>
-              Password
-            </label>
-            <div className="relative">
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium mb-1.5 text-ink-600">
+                Email
+              </label>
               <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="la.tua@email.com"
                 required
-                className="w-full rounded-lg px-3.5 py-2.5 text-sm outline-none transition-colors pr-10"
-                style={{
-                  backgroundColor: "hsl(var(--app-bg-input))",
-                  border: `1px solid hsl(var(--app-border-${hasError ? "error" : "default"}))`,
-                  color: "hsl(var(--app-text-primary))",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = `hsl(var(--app-border-focus))`)}
-                onBlur={(e) => (e.target.style.borderColor = `hsl(var(--app-border-default))`)}
+                className={`w-full rounded-btn px-3.5 py-2.5 text-sm outline-none transition-colors bg-ink-50 border text-ink-900 placeholder:text-ink-300 focus:border-brand focus:ring-2 focus:ring-brand/20 ${
+                  hasError ? "border-status-error" : "border-ink-200"
+                }`}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2"
-                style={{ color: "hsl(var(--app-text-tertiary))" }}
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
             </div>
-          </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full rounded-lg py-2.5 text-sm font-medium transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            style={{
-              backgroundColor: "hsl(var(--app-brand))",
-              color: "#fff",
-            }}
-          >
-            {isLoading && <Loader2 size={16} className="animate-spin" />}
-            {isLoading ? "Accesso in corso..." : "Accedi"}
-          </button>
-        </form>
+            <div>
+              <label className="block text-sm font-medium mb-1.5 text-ink-600">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className={`w-full rounded-btn px-3.5 py-2.5 text-sm outline-none transition-colors pr-10 bg-ink-50 border text-ink-900 placeholder:text-ink-300 focus:border-brand focus:ring-2 focus:ring-brand/20 ${
+                    hasError ? "border-status-error" : "border-ink-200"
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
 
-        <p className="text-center text-xs mt-6" style={{ color: "hsl(var(--app-text-tertiary))" }}>
-          Accedendo, accetti i Termini di Servizio e la Privacy Policy.
-        </p>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full rounded-btn py-2.5 text-sm font-medium transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-brand text-white shadow-button-green"
+            >
+              {isLoading && <Loader2 size={16} className="animate-spin" />}
+              {isLoading ? "Accesso in corso..." : "Accedi"}
+            </button>
+          </form>
+
+          <p className="text-center text-xs mt-6 text-ink-400">
+            Accedendo, accetti i Termini di Servizio e la Privacy Policy.
+          </p>
+        </div>
       </div>
     </div>
   );

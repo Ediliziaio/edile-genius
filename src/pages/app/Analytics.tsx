@@ -19,26 +19,13 @@ export default function AnalyticsPage() {
   const [rangeDays, setRangeDays] = useState(30);
 
   const { data: conversations = [] } = useQuery({
-    queryKey: ["analytics-conversations", companyId],
-    enabled: !!companyId,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("conversations")
-        .select("*")
-        .eq("company_id", companyId!)
-        .order("started_at", { ascending: false })
-        .limit(1000);
-      return data || [];
-    },
+    queryKey: ["analytics-conversations", companyId], enabled: !!companyId,
+    queryFn: async () => { const { data } = await supabase.from("conversations").select("*").eq("company_id", companyId!).order("started_at", { ascending: false }).limit(1000); return data || []; },
   });
 
   const { data: agents = [] } = useQuery({
-    queryKey: ["analytics-agents", companyId],
-    enabled: !!companyId,
-    queryFn: async () => {
-      const { data } = await supabase.from("agents").select("id, name").eq("company_id", companyId!);
-      return data || [];
-    },
+    queryKey: ["analytics-agents", companyId], enabled: !!companyId,
+    queryFn: async () => { const { data } = await supabase.from("agents").select("id, name").eq("company_id", companyId!); return data || []; },
   });
 
   const agentMap = Object.fromEntries(agents.map(a => [a.id, a.name]));
@@ -55,32 +42,19 @@ export default function AnalyticsPage() {
     return { total, avgDuration, successRate, topOutcome };
   }, [filtered]);
 
-  // Calls over time
   const callsOverTime = useMemo(() => {
     const buckets: Record<string, number> = {};
-    for (let i = rangeDays - 1; i >= 0; i--) {
-      buckets[format(subDays(new Date(), i), "yyyy-MM-dd")] = 0;
-    }
-    filtered.forEach(c => {
-      if (c.started_at) {
-        const day = format(new Date(c.started_at), "yyyy-MM-dd");
-        if (day in buckets) buckets[day]++;
-      }
-    });
-    return Object.entries(buckets).map(([date, count]) => ({
-      date: format(new Date(date), "dd/MM", { locale: it }),
-      chiamate: count,
-    }));
+    for (let i = rangeDays - 1; i >= 0; i--) buckets[format(subDays(new Date(), i), "yyyy-MM-dd")] = 0;
+    filtered.forEach(c => { if (c.started_at) { const day = format(new Date(c.started_at), "yyyy-MM-dd"); if (day in buckets) buckets[day]++; } });
+    return Object.entries(buckets).map(([date, count]) => ({ date: format(new Date(date), "dd/MM", { locale: it }), chiamate: count }));
   }, [filtered, rangeDays]);
 
-  // Outcome distribution
   const outcomeData = useMemo(() => {
     const map: Record<string, number> = {};
     filtered.forEach(c => { if (c.outcome) map[c.outcome] = (map[c.outcome] || 0) + 1; });
     return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [filtered]);
 
-  // Calls by agent
   const agentData = useMemo(() => {
     const map: Record<string, number> = {};
     filtered.forEach(c => { map[c.agent_id] = (map[c.agent_id] || 0) + 1; });
@@ -88,89 +62,76 @@ export default function AnalyticsPage() {
   }, [filtered, agentMap]);
 
   const statCards = [
-    { label: "Chiamate totali", value: stats.total, icon: Phone },
-    { label: "Durata media", value: `${stats.avgDuration}s`, icon: Clock },
-    { label: "Tasso successo", value: `${stats.successRate}%`, icon: TrendingUp },
-    { label: "Esito principale", value: stats.topOutcome, icon: Target },
+    { label: "Chiamate totali", value: stats.total, icon: Phone, colorClass: "text-brand bg-brand-light" },
+    { label: "Durata media", value: `${stats.avgDuration}s`, icon: Clock, colorClass: "text-status-info bg-status-info-light" },
+    { label: "Tasso successo", value: `${stats.successRate}%`, icon: TrendingUp, colorClass: "text-status-success bg-status-success-light" },
+    { label: "Esito principale", value: stats.topOutcome, icon: Target, colorClass: "text-status-warning bg-status-warning-light" },
   ];
 
   return (
-    <div className="p-6 md:p-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <BarChart3 className="w-6 h-6" style={{ color: "hsl(var(--app-brand))" }} />
-          <h1 className="text-2xl font-bold" style={{ color: "hsl(var(--app-text-primary))" }}>Analytics</h1>
+          <BarChart3 className="w-6 h-6 text-brand" />
+          <h1 className="text-2xl font-bold text-ink-900">Analytics</h1>
         </div>
-        <div className="flex gap-1 rounded-lg p-1" style={{ backgroundColor: "hsl(var(--app-bg-tertiary))" }}>
+        <div className="flex gap-1 rounded-btn p-1 bg-ink-100">
           {RANGES.map(r => (
-            <button
-              key={r.days}
-              onClick={() => setRangeDays(r.days)}
-              className="px-3 py-1 rounded-md text-xs font-medium transition-colors"
-              style={{
-                backgroundColor: rangeDays === r.days ? "hsl(var(--app-brand-dim))" : "transparent",
-                color: rangeDays === r.days ? "hsl(var(--app-brand))" : "hsl(var(--app-text-secondary))",
-              }}
-            >
+            <button key={r.days} onClick={() => setRangeDays(r.days)} className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${rangeDays === r.days ? "bg-brand-light text-brand-text" : "text-ink-500 hover:text-ink-700"}`}>
               {r.label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statCards.map(s => (
-          <div key={s.label} className="rounded-xl p-4" style={{ backgroundColor: "hsl(var(--app-bg-secondary))", border: "1px solid hsl(var(--app-border-subtle))" }}>
+          <div key={s.label} className="rounded-card p-4 bg-white border border-ink-200 shadow-card">
             <div className="flex items-center gap-2 mb-1">
-              <s.icon className="w-4 h-4" style={{ color: "hsl(var(--app-text-tertiary))" }} />
-              <span className="text-xs" style={{ color: "hsl(var(--app-text-tertiary))" }}>{s.label}</span>
+              <div className={`w-8 h-8 rounded-btn flex items-center justify-center ${s.colorClass}`}><s.icon className="w-4 h-4" /></div>
+              <span className="text-xs text-ink-400">{s.label}</span>
             </div>
-            <p className="text-xl font-bold" style={{ color: "hsl(var(--app-text-primary))" }}>{s.value}</p>
+            <p className="text-xl font-bold text-ink-900">{s.value}</p>
           </div>
         ))}
       </div>
 
-      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Calls over time */}
-        <div className="rounded-xl p-5" style={{ backgroundColor: "hsl(var(--app-bg-secondary))", border: "1px solid hsl(var(--app-border-subtle))" }}>
-          <h3 className="text-sm font-semibold mb-4" style={{ color: "hsl(var(--app-text-primary))" }}>Chiamate nel tempo</h3>
+        <div className="rounded-card p-5 bg-white border border-ink-200 shadow-card">
+          <h3 className="text-sm font-semibold mb-4 text-ink-900">Chiamate nel tempo</h3>
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={callsOverTime}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 100% / 0.06)" />
-              <XAxis dataKey="date" tick={{ fill: "hsl(0 0% 100% / 0.35)", fontSize: 10 }} />
-              <YAxis tick={{ fill: "hsl(0 0% 100% / 0.35)", fontSize: 10 }} />
-              <Tooltip contentStyle={{ backgroundColor: "hsl(0 0% 10%)", border: "none", borderRadius: 8, color: "#fff" }} />
-              <Area type="monotone" dataKey="chiamate" stroke="hsl(25 95% 53%)" fill="hsl(25 95% 53% / 0.15)" strokeWidth={2} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#D9E2EA" />
+              <XAxis dataKey="date" tick={{ fill: "#637485", fontSize: 10 }} />
+              <YAxis tick={{ fill: "#637485", fontSize: 10 }} />
+              <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #D9E2EA", borderRadius: 10, color: "#0D1117" }} />
+              <Area type="monotone" dataKey="chiamate" stroke="#3ECF6E" fill="rgba(62,207,110,0.1)" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Outcome distribution */}
-        <div className="rounded-xl p-5" style={{ backgroundColor: "hsl(var(--app-bg-secondary))", border: "1px solid hsl(var(--app-border-subtle))" }}>
-          <h3 className="text-sm font-semibold mb-4" style={{ color: "hsl(var(--app-text-primary))" }}>Distribuzione esiti</h3>
+        <div className="rounded-card p-5 bg-white border border-ink-200 shadow-card">
+          <h3 className="text-sm font-semibold mb-4 text-ink-900">Distribuzione esiti</h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={outcomeData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 100% / 0.06)" />
-              <XAxis dataKey="name" tick={{ fill: "hsl(0 0% 100% / 0.35)", fontSize: 10 }} />
-              <YAxis tick={{ fill: "hsl(0 0% 100% / 0.35)", fontSize: 10 }} />
-              <Tooltip contentStyle={{ backgroundColor: "hsl(0 0% 10%)", border: "none", borderRadius: 8, color: "#fff" }} />
-              <Bar dataKey="value" fill="hsl(142 71% 45%)" radius={[4, 4, 0, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#D9E2EA" />
+              <XAxis dataKey="name" tick={{ fill: "#637485", fontSize: 10 }} />
+              <YAxis tick={{ fill: "#637485", fontSize: 10 }} />
+              <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #D9E2EA", borderRadius: 10, color: "#0D1117" }} />
+              <Bar dataKey="value" fill="#3ECF6E" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Calls by agent */}
-        <div className="rounded-xl p-5 lg:col-span-2" style={{ backgroundColor: "hsl(var(--app-bg-secondary))", border: "1px solid hsl(var(--app-border-subtle))" }}>
-          <h3 className="text-sm font-semibold mb-4" style={{ color: "hsl(var(--app-text-primary))" }}>Chiamate per agente</h3>
+        <div className="rounded-card p-5 lg:col-span-2 bg-white border border-ink-200 shadow-card">
+          <h3 className="text-sm font-semibold mb-4 text-ink-900">Chiamate per agente</h3>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={agentData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 100% / 0.06)" />
-              <XAxis type="number" tick={{ fill: "hsl(0 0% 100% / 0.35)", fontSize: 10 }} />
-              <YAxis dataKey="name" type="category" tick={{ fill: "hsl(0 0% 100% / 0.35)", fontSize: 10 }} width={120} />
-              <Tooltip contentStyle={{ backgroundColor: "hsl(0 0% 10%)", border: "none", borderRadius: 8, color: "#fff" }} />
-              <Bar dataKey="value" fill="hsl(217 91% 60%)" radius={[0, 4, 4, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#D9E2EA" />
+              <XAxis type="number" tick={{ fill: "#637485", fontSize: 10 }} />
+              <YAxis dataKey="name" type="category" tick={{ fill: "#637485", fontSize: 10 }} width={120} />
+              <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #D9E2EA", borderRadius: 10, color: "#0D1117" }} />
+              <Bar dataKey="value" fill="#3B82F6" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
