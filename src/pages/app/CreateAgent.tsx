@@ -1,23 +1,17 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCompanyId } from "@/hooks/useCompanyId";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Check, Mic, Settings, FileText, Send } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import UseCaseSelector from "@/components/agents/UseCaseSelector";
-import VoicePicker from "@/components/agents/VoicePicker";
-import { PROMPT_TEMPLATES, SECTORS, LANGUAGES, type UseCaseId } from "@/components/agents/PromptTemplates";
-
-const STEPS = [
-  { label: "Tipo", icon: Mic },
-  { label: "Configurazione", icon: Settings },
-  { label: "Prompt", icon: FileText },
-  { label: "Riepilogo", icon: Send },
-];
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { PROMPT_TEMPLATES, type UseCaseId } from "@/components/agents/PromptTemplates";
+import AgentStepSidebar from "@/components/agents/create/AgentStepSidebar";
+import StepAgent from "@/components/agents/create/StepAgent";
+import StepVoice from "@/components/agents/create/StepVoice";
+import StepConversation from "@/components/agents/create/StepConversation";
+import StepAdvanced from "@/components/agents/create/StepAdvanced";
+import StepReview from "@/components/agents/create/StepReview";
 
 interface AgentForm {
   use_case: UseCaseId | null;
@@ -30,11 +24,33 @@ interface AgentForm {
   first_message: string;
   temperature: number;
   status: "active" | "draft";
+  llm_model: string;
+  turn_timeout_sec: number;
+  soft_timeout_sec: number;
+  soft_timeout_message: string;
+  interruptions_enabled: boolean;
+  turn_eagerness: string;
+  max_duration_sec: number;
+  end_call_enabled: boolean;
+  end_call_prompt: string;
+  language_detection_enabled: boolean;
+  voice_stability: number;
+  voice_similarity: number;
+  voice_speed: number;
+  evaluation_criteria: string;
+  data_retention: boolean;
 }
 
 const defaultForm: AgentForm = {
   use_case: null, name: "", description: "", sector: "", language: "it",
   voice_id: "", system_prompt: "", first_message: "", temperature: 0.7, status: "draft",
+  llm_model: "gpt-4o-mini",
+  turn_timeout_sec: 10, soft_timeout_sec: -1, soft_timeout_message: "",
+  interruptions_enabled: true, turn_eagerness: "normal",
+  max_duration_sec: 600, end_call_enabled: false, end_call_prompt: "",
+  language_detection_enabled: false,
+  voice_stability: 0.5, voice_similarity: 0.75, voice_speed: 1.0,
+  evaluation_criteria: "", data_retention: true,
 };
 
 export default function CreateAgent() {
@@ -44,169 +60,142 @@ export default function CreateAgent() {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<AgentForm>(defaultForm);
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [direction, setDirection] = useState(1);
 
-  const update = <K extends keyof AgentForm>(key: K, value: AgentForm[K]) => setForm((f) => ({ ...f, [key]: value }));
+  const update = useCallback((key: string, value: any) => setForm(f => ({ ...f, [key]: value })), []);
 
-  const selectUseCase = (id: UseCaseId) => {
+  const selectUseCase = useCallback((id: UseCaseId) => {
     const template = PROMPT_TEMPLATES[id];
-    setForm((f) => ({ ...f, use_case: id, system_prompt: f.system_prompt || template.system_prompt, first_message: f.first_message || template.first_message }));
+    setForm(f => ({
+      ...f,
+      use_case: id,
+      system_prompt: f.system_prompt || template.system_prompt,
+      first_message: f.first_message || template.first_message,
+    }));
+  }, []);
+
+  const goToStep = (next: number) => {
+    setCompletedSteps(prev => new Set([...prev, step]));
+    setDirection(next > step ? 1 : -1);
+    setStep(next);
   };
 
-  const canNext = () => {
-    if (step === 0) return !!form.use_case;
-    if (step === 1) return !!form.name;
-    if (step === 2) return !!form.system_prompt;
-    return true;
-  };
+  const canSubmit = !!form.name && !!form.system_prompt;
 
   const handleSubmit = async () => {
     if (!companyId) return;
     setSubmitting(true);
     try {
+      const config = {
+        temperature: form.temperature,
+        llm_model: form.llm_model,
+        turn_timeout_sec: form.turn_timeout_sec,
+        soft_timeout_sec: form.soft_timeout_sec,
+        soft_timeout_message: form.soft_timeout_message,
+        interruptions_enabled: form.interruptions_enabled,
+        turn_eagerness: form.turn_eagerness,
+        max_duration_sec: form.max_duration_sec,
+        end_call_enabled: form.end_call_enabled,
+        end_call_prompt: form.end_call_prompt,
+        language_detection_enabled: form.language_detection_enabled,
+        voice_stability: form.voice_stability,
+        voice_similarity: form.voice_similarity,
+        voice_speed: form.voice_speed,
+        evaluation_criteria: form.evaluation_criteria,
+        data_retention: form.data_retention,
+      };
+
       const { data, error } = await supabase.functions.invoke("create-elevenlabs-agent", {
-        body: { company_id: companyId, name: form.name, description: form.description, use_case: form.use_case, sector: form.sector, language: form.language, voice_id: form.voice_id, system_prompt: form.system_prompt, first_message: form.first_message, status: form.status, config: { temperature: form.temperature } },
+        body: {
+          company_id: companyId, name: form.name, description: form.description,
+          use_case: form.use_case, sector: form.sector, language: form.language,
+          voice_id: form.voice_id, system_prompt: form.system_prompt,
+          first_message: form.first_message, status: form.status, config,
+        },
       });
       if (error || data?.error) throw new Error(data?.error || "Errore creazione agente");
       toast({ title: "Agente creato!", description: `${form.name} è stato creato con successo.` });
       navigate("/app/agents");
     } catch (e: any) {
       toast({ title: "Errore", description: e.message, variant: "destructive" });
-    } finally { setSubmitting(false); }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const variants = {
+    enter: (d: number) => ({ x: d > 0 ? 40 : -40, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (d: number) => ({ x: d > 0 ? -40 : 40, opacity: 0 }),
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto space-y-6">
+      {/* Header */}
       <div className="flex items-center gap-3">
         <button onClick={() => navigate("/app/agents")} className="p-2 rounded-btn bg-ink-100 hover:bg-ink-200 transition-colors">
           <ArrowLeft className="w-4 h-4 text-ink-500" />
         </button>
-        <h1 className="text-xl font-bold text-ink-900">Crea Agente</h1>
+        <div>
+          <h1 className="text-xl font-bold text-ink-900">Crea Agente Vocale</h1>
+          <p className="text-xs text-ink-400">Configura il tuo agente AI con voce naturale</p>
+        </div>
       </div>
 
-      {/* Progress */}
-      <div className="flex items-center gap-2">
-        {STEPS.map((s, i) => (
-          <div key={i} className="flex items-center gap-2 flex-1">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${i <= step ? "bg-brand text-white" : "bg-ink-100 text-ink-400"}`}>
-              {i < step ? <Check className="w-4 h-4" /> : i + 1}
-            </div>
-            <span className={`text-xs hidden sm:inline ${i <= step ? "text-ink-900" : "text-ink-400"}`}>{s.label}</span>
-            {i < STEPS.length - 1 && <div className={`flex-1 h-px ${i < step ? "bg-brand" : "bg-ink-200"}`} />}
-          </div>
-        ))}
-      </div>
+      {/* Layout: Sidebar + Content */}
+      <div className="flex gap-6">
+        <AgentStepSidebar currentStep={step} onStepChange={goToStep} completedSteps={completedSteps} />
 
-      {/* Step Content */}
-      <div className="rounded-card p-6 border border-ink-200 bg-white shadow-card">
-        {step === 0 && (
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-lg font-semibold mb-1 text-ink-900">Tipo di Agente</h2>
-              <p className="text-sm mb-4 text-ink-500">Seleziona il caso d'uso per il tuo agente vocale.</p>
-            </div>
-            <div className="rounded-btn p-3 mb-4 flex items-center gap-3 bg-brand-light">
-              <Mic className="w-5 h-5 text-brand" />
-              <div>
-                <p className="text-sm font-medium text-ink-900">Agente Vocale</p>
-                <p className="text-xs text-ink-500">Gestisce chiamate telefoniche con voce AI</p>
-              </div>
-            </div>
-            <UseCaseSelector selected={form.use_case} onSelect={selectUseCase} />
+        <div className="flex-1 min-w-0">
+          <div className="rounded-card p-6 border border-ink-200 bg-white shadow-card min-h-[500px]">
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={step}
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.2, ease: "easeOut" }}
+              >
+                {step === 0 && <StepAgent form={form} update={update} selectUseCase={selectUseCase} />}
+                {step === 1 && companyId && <StepVoice companyId={companyId} form={form} update={update} />}
+                {step === 2 && <StepConversation form={form} update={update} />}
+                {step === 3 && <StepAdvanced form={form} update={update} />}
+                {step === 4 && <StepReview form={form} update={update} />}
+              </motion.div>
+            </AnimatePresence>
           </div>
-        )}
 
-        {step === 1 && (
-          <div className="space-y-5">
-            <h2 className="text-lg font-semibold text-ink-900">Configurazione</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs font-medium mb-1.5 block text-ink-600">Nome agente *</label>
-                <Input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Es. Assistente Vendite" className="border border-ink-200 bg-ink-50 text-ink-900" />
-              </div>
-              <div>
-                <label className="text-xs font-medium mb-1.5 block text-ink-600">Descrizione</label>
-                <Textarea value={form.description} onChange={(e) => update("description", e.target.value)} placeholder="Breve descrizione dell'agente..." className="border border-ink-200 bg-ink-50 text-ink-900 min-h-[80px]" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-medium mb-1.5 block text-ink-600">Settore</label>
-                  <Select value={form.sector} onValueChange={(v) => update("sector", v)}>
-                    <SelectTrigger className="border border-ink-200 bg-ink-50 text-ink-900"><SelectValue placeholder="Seleziona settore" /></SelectTrigger>
-                    <SelectContent>{SECTORS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-xs font-medium mb-1.5 block text-ink-600">Lingua</label>
-                  <Select value={form.language} onValueChange={(v) => update("language", v)}>
-                    <SelectTrigger className="border border-ink-200 bg-ink-50 text-ink-900"><SelectValue /></SelectTrigger>
-                    <SelectContent>{LANGUAGES.map((l) => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-              </div>
-              {companyId && (
-                <div>
-                  <label className="text-xs font-medium mb-1.5 block text-ink-600">Voce</label>
-                  <VoicePicker companyId={companyId} selected={form.voice_id || null} onSelect={(v) => update("voice_id", v)} />
-                </div>
-              )}
-            </div>
+          {/* Navigation */}
+          <div className="flex justify-between mt-4">
+            <button
+              onClick={() => step > 0 && goToStep(step - 1)}
+              disabled={step === 0}
+              className="px-4 py-2.5 rounded-btn text-sm font-medium disabled:opacity-30 bg-ink-100 text-ink-600 hover:bg-ink-200"
+            >
+              Indietro
+            </button>
+            {step < 4 ? (
+              <button
+                onClick={() => goToStep(step + 1)}
+                className="px-6 py-2.5 rounded-btn text-sm font-medium bg-brand text-white hover:bg-brand-hover"
+              >
+                Avanti
+              </button>
+            ) : (
+              <button
+                onClick={handleSubmit}
+                disabled={submitting || !canSubmit}
+                className="px-6 py-2.5 rounded-btn text-sm font-medium disabled:opacity-50 bg-brand text-white hover:bg-brand-hover flex items-center gap-2"
+              >
+                {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                {submitting ? "Creazione..." : "Crea Agente"}
+              </button>
+            )}
           </div>
-        )}
-
-        {step === 2 && (
-          <div className="space-y-5">
-            <h2 className="text-lg font-semibold text-ink-900">Prompt & Impostazioni</h2>
-            <div>
-              <label className="text-xs font-medium mb-1.5 block text-ink-600">System Prompt *</label>
-              <Textarea value={form.system_prompt} onChange={(e) => update("system_prompt", e.target.value)} className="border border-ink-200 bg-ink-50 text-ink-900 font-mono-brand min-h-[200px] text-xs" />
-            </div>
-            <div>
-              <label className="text-xs font-medium mb-1.5 block text-ink-600">Primo Messaggio</label>
-              <Textarea value={form.first_message} onChange={(e) => update("first_message", e.target.value)} className="border border-ink-200 bg-ink-50 text-ink-900 min-h-[80px] text-sm" />
-            </div>
-            <div>
-              <label className="text-xs font-medium mb-1.5 block text-ink-600">Temperatura: {form.temperature.toFixed(1)}</label>
-              <Slider value={[form.temperature]} onValueChange={([v]) => update("temperature", v)} min={0} max={1} step={0.1} className="mt-2" />
-              <div className="flex justify-between text-[10px] mt-1 text-ink-400"><span>Preciso</span><span>Creativo</span></div>
-            </div>
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="space-y-5">
-            <h2 className="text-lg font-semibold text-ink-900">Riepilogo</h2>
-            <div className="space-y-3 text-sm">
-              {[["Nome", form.name], ["Caso d'uso", form.use_case], ["Settore", form.sector || "—"], ["Lingua", LANGUAGES.find((l) => l.value === form.language)?.label || form.language], ["Voce", form.voice_id ? `ID: ${form.voice_id.slice(0, 12)}…` : "Non selezionata"], ["Temperatura", form.temperature.toFixed(1)]].map(([k, v]) => (
-                <div key={k} className="flex justify-between py-2 border-b border-ink-100">
-                  <span className="text-ink-500">{k}</span>
-                  <span className="text-ink-900">{v}</span>
-                </div>
-              ))}
-            </div>
-            <div>
-              <label className="text-xs font-medium mb-2 block text-ink-600">Modalità pubblicazione</label>
-              <div className="flex gap-3">
-                {(["draft", "active"] as const).map((s) => (
-                  <button key={s} onClick={() => update("status", s)} className={`flex-1 py-3 rounded-btn text-sm font-medium border transition-all ${form.status === s ? "border-brand bg-brand-light text-brand-text" : "border-ink-200 text-ink-500 bg-ink-50"}`}>
-                    {s === "draft" ? "🔒 Bozza" : "🟢 Attivo"}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Navigation */}
-      <div className="flex justify-between">
-        <button onClick={() => step > 0 && setStep(step - 1)} disabled={step === 0} className="px-4 py-2.5 rounded-btn text-sm font-medium disabled:opacity-30 bg-ink-100 text-ink-600 hover:bg-ink-200">Indietro</button>
-        {step < 3 ? (
-          <button onClick={() => canNext() && setStep(step + 1)} disabled={!canNext()} className="px-6 py-2.5 rounded-btn text-sm font-medium disabled:opacity-30 bg-brand text-white hover:bg-brand-hover">Avanti</button>
-        ) : (
-          <button onClick={handleSubmit} disabled={submitting} className="px-6 py-2.5 rounded-btn text-sm font-medium disabled:opacity-50 bg-brand text-white hover:bg-brand-hover">
-            {submitting ? "Creazione..." : "Crea Agente"}
-          </button>
-        )}
+        </div>
       </div>
     </div>
   );

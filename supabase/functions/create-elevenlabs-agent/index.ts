@@ -55,6 +55,38 @@ Deno.serve(async (req) => {
     // Create ElevenLabs agent if API key exists
     if (apiKey && voice_id) {
       try {
+        // Build conversation_config with advanced settings
+        const conversationConfig: Record<string, unknown> = {
+          agent: {
+            prompt: {
+              prompt: system_prompt || "",
+              ...(config?.llm_model ? { llm: config.llm_model } : {}),
+              ...(config?.temperature !== undefined ? { temperature: config.temperature } : {}),
+            },
+            first_message: first_message || "",
+            language: language || "it",
+            ...(config?.max_duration_sec ? { max_duration_seconds: config.max_duration_sec } : {}),
+          },
+          tts: {
+            voice_id,
+            ...(config?.voice_stability !== undefined || config?.voice_similarity !== undefined || config?.voice_speed !== undefined ? {
+              voice_settings: {
+                stability: config?.voice_stability ?? 0.5,
+                similarity_boost: config?.voice_similarity ?? 0.75,
+                speed: config?.voice_speed ?? 1.0,
+              },
+            } : {}),
+          },
+        };
+
+        // Turn settings
+        if (config?.turn_timeout_sec || config?.turn_eagerness) {
+          conversationConfig.turn = {
+            ...(config.turn_timeout_sec ? { timeout: config.turn_timeout_sec } : {}),
+            ...(config.turn_eagerness ? { mode: config.turn_eagerness } : {}),
+          };
+        }
+
         const elResponse = await fetch("https://api.elevenlabs.io/v1/convai/agents/create", {
           method: "POST",
           headers: {
@@ -62,14 +94,7 @@ Deno.serve(async (req) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            conversation_config: {
-              agent: {
-                prompt: { prompt: system_prompt || "" },
-                first_message: first_message || "",
-                language: language || "it",
-              },
-              tts: { voice_id },
-            },
+            conversation_config: conversationConfig,
             name,
           }),
         });
