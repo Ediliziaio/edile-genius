@@ -12,13 +12,22 @@ import StepVoice from "@/components/agents/create/StepVoice";
 import StepConversation from "@/components/agents/create/StepConversation";
 import StepAdvanced from "@/components/agents/create/StepAdvanced";
 import StepReview from "@/components/agents/create/StepReview";
+import { Progress } from "@/components/ui/progress";
 
-interface AgentForm {
+export interface CustomTool {
+  name: string;
+  description: string;
+  url: string;
+  method: string;
+}
+
+export interface AgentForm {
   use_case: UseCaseId | null;
   name: string;
   description: string;
   sector: string;
   language: string;
+  additional_languages: string[];
   voice_id: string;
   system_prompt: string;
   first_message: string;
@@ -39,10 +48,16 @@ interface AgentForm {
   voice_speed: number;
   evaluation_criteria: string;
   data_retention: boolean;
+  webhook_url: string;
+  custom_tools: CustomTool[];
+  pii_redaction: boolean;
+  blocked_topics: string;
+  _pendingKBFiles?: File[];
 }
 
 const defaultForm: AgentForm = {
   use_case: null, name: "", description: "", sector: "", language: "it",
+  additional_languages: [],
   voice_id: "", system_prompt: "", first_message: "", temperature: 0.7, status: "draft",
   llm_model: "gpt-4o-mini",
   turn_timeout_sec: 10, soft_timeout_sec: -1, soft_timeout_message: "",
@@ -51,7 +66,34 @@ const defaultForm: AgentForm = {
   language_detection_enabled: false,
   voice_stability: 0.5, voice_similarity: 0.75, voice_speed: 1.0,
   evaluation_criteria: "", data_retention: true,
+  webhook_url: "", custom_tools: [],
+  pii_redaction: false, blocked_topics: "",
 };
+
+// Step validation rules
+export function validateStep(step: number, form: AgentForm): boolean {
+  switch (step) {
+    case 0: return !!form.name.trim() && !!form.system_prompt.trim();
+    case 1: return !!form.voice_id;
+    case 2: return true; // conversation has sensible defaults
+    case 3: return true; // advanced is optional
+    case 4: return true;
+    default: return true;
+  }
+}
+
+export function getCompletionPercent(form: AgentForm): number {
+  let score = 0;
+  const total = 7;
+  if (form.name.trim()) score++;
+  if (form.system_prompt.trim()) score++;
+  if (form.voice_id) score++;
+  if (form.first_message.trim()) score++;
+  if (form.description.trim()) score++;
+  if (form.sector) score++;
+  if (form.use_case) score++;
+  return Math.round((score / total) * 100);
+}
 
 export default function CreateAgent() {
   const navigate = useNavigate();
@@ -75,12 +117,19 @@ export default function CreateAgent() {
     }));
   }, []);
 
+  // Smart completion: only mark step completed if it passes validation
+  const validatedSteps = new Set<number>();
+  for (let i = 0; i <= 4; i++) {
+    if (validateStep(i, form)) validatedSteps.add(i);
+  }
+
   const goToStep = (next: number) => {
     setCompletedSteps(prev => new Set([...prev, step]));
     setDirection(next > step ? 1 : -1);
     setStep(next);
   };
 
+  const canAdvance = validateStep(step, form);
   const canSubmit = !!form.name && !!form.system_prompt;
 
   const buildConfig = () => ({
@@ -100,6 +149,10 @@ export default function CreateAgent() {
     voice_speed: form.voice_speed,
     evaluation_criteria: form.evaluation_criteria,
     data_retention: form.data_retention,
+    webhook_url: form.webhook_url,
+    custom_tools: form.custom_tools,
+    pii_redaction: form.pii_redaction,
+    blocked_topics: form.blocked_topics,
   });
 
   const createAgent = async (statusOverride?: string) => {
@@ -107,12 +160,38 @@ export default function CreateAgent() {
     const body = {
       company_id: companyId, name: form.name, description: form.description,
       use_case: form.use_case, sector: form.sector, language: form.language,
+      additional_languages: form.additional_languages,
       voice_id: form.voice_id, system_prompt: form.system_prompt,
       first_message: form.first_message, status: statusOverride || form.status, config: buildConfig(),
     };
     const { data, error } = await supabase.functions.invoke("create-elevenlabs-agent", { body });
     if (error || data?.error) throw new Error(data?.error || "Errore creazione agente");
     return data;
+  };
+
+  const uploadKBFiles = async (agentId: string) => {
+    const files = form._pendingKBFiles;
+    if (!files?.length || !companyId) return;
+
+    const session = (await supabase.auth.getSession()).data.session;
+    for (const file of files) {
+      const path = `${companyId}/${agentId}/${file.name}`;
+      const { error: uploadErr } = await supabase.storage.from("knowledge-base").upload(path, file);
+      if (uploadErr) {
+        console.error("KB upload error:", uploadErr);
+        continue;
+      }
+      // Save reference in DB
+      await supabase.from("knowledge_base_files").insert({
+        agent_id: agentId,
+        company_id: companyId,
+        file_name: file.name,
+        file_path: path,
+        file_size: file.size,
+        file_type: file.name.split(".").pop() || null,
+        uploaded_by: session?.user?.id || null,
+      });
+    }
   };
 
   const handleCreateDraft = async (): Promise<string | null> => {
@@ -129,7 +208,9 @@ export default function CreateAgent() {
     if (!companyId) return;
     setSubmitting(true);
     try {
-      await createAgent();
+      const data = await createAgent();
+      const agentId = data?.agent?.id;
+      if (agentId) await uploadKBFiles(agentId);
       toast({ title: "Agente creato!", description: `${form.name} è stato creato con successo.` });
       navigate("/app/agents");
     } catch (e: any) {
@@ -145,6 +226,8 @@ export default function CreateAgent() {
     exit: (d: number) => ({ x: d > 0 ? -40 : 40, opacity: 0 }),
   };
 
+  const completionPercent = getCompletionPercent(form);
+
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Header */}
@@ -152,15 +235,19 @@ export default function CreateAgent() {
         <button onClick={() => navigate("/app/agents")} className="p-2 rounded-btn bg-ink-100 hover:bg-ink-200 transition-colors">
           <ArrowLeft className="w-4 h-4 text-ink-500" />
         </button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-xl font-bold text-ink-900">Crea Agente Vocale</h1>
           <p className="text-xs text-ink-400">Configura il tuo agente AI con voce naturale</p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs text-ink-400 mb-1">{completionPercent}% completato</p>
+          <Progress value={completionPercent} className="w-32 h-1.5" />
         </div>
       </div>
 
       {/* Layout: Sidebar + Content */}
       <div className="flex gap-6">
-        <AgentStepSidebar currentStep={step} onStepChange={goToStep} completedSteps={completedSteps} />
+        <AgentStepSidebar currentStep={step} onStepChange={goToStep} completedSteps={completedSteps} validatedSteps={validatedSteps} />
 
         <div className="flex-1 min-w-0">
           <div className="rounded-card p-6 border border-ink-200 bg-white shadow-card min-h-[500px]">
@@ -195,7 +282,8 @@ export default function CreateAgent() {
             {step < 4 ? (
               <button
                 onClick={() => goToStep(step + 1)}
-                className="px-6 py-2.5 rounded-btn text-sm font-medium bg-brand text-white hover:bg-brand-hover"
+                disabled={!canAdvance}
+                className="px-6 py-2.5 rounded-btn text-sm font-medium bg-brand text-white hover:bg-brand-hover disabled:opacity-40 transition-opacity"
               >
                 Avanti
               </button>

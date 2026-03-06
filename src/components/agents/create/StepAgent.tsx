@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import UseCaseSelector from "@/components/agents/UseCaseSelector";
 import { SECTORS, LANGUAGES, type UseCaseId } from "@/components/agents/PromptTemplates";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, X } from "lucide-react";
+import React from "react";
 
 const LLM_MODELS = [
   { value: "gpt-4o-mini", label: "GPT-4o Mini (default)" },
@@ -24,8 +25,6 @@ interface StepAgentProps {
   selectUseCase: (id: UseCaseId) => void;
 }
 
-import React from "react";
-
 const Tip = React.forwardRef<HTMLSpanElement, { text: string }>(({ text }, ref) => (
   <TooltipProvider delayDuration={200}>
     <Tooltip>
@@ -41,6 +40,16 @@ const Tip = React.forwardRef<HTMLSpanElement, { text: string }>(({ text }, ref) 
 Tip.displayName = "Tip";
 
 export default function StepAgent({ form, update, selectUseCase }: StepAgentProps) {
+  const additionalLangs: string[] = form.additional_languages || [];
+
+  const toggleAdditionalLang = (val: string) => {
+    if (val === form.language) return;
+    const updated = additionalLangs.includes(val)
+      ? additionalLangs.filter((l: string) => l !== val)
+      : [...additionalLangs, val];
+    update("additional_languages", updated);
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -89,6 +98,31 @@ export default function StepAgent({ form, update, selectUseCase }: StepAgentProp
             <SelectTrigger className="border border-ink-200 bg-ink-50 text-ink-900"><SelectValue /></SelectTrigger>
             <SelectContent>{LLM_MODELS.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}</SelectContent>
           </Select>
+        </div>
+      </div>
+
+      {/* Additional Languages */}
+      <div className="space-y-2">
+        <Label className="text-ink-600">Lingue aggiuntive <Tip text="L'agente potrà rispondere anche in queste lingue se rileva che l'utente le parla." /></Label>
+        <div className="flex flex-wrap gap-2">
+          {LANGUAGES.filter(l => l.value !== form.language).map(l => {
+            const isSelected = additionalLangs.includes(l.value);
+            return (
+              <button
+                key={l.value}
+                type="button"
+                onClick={() => toggleAdditionalLang(l.value)}
+                className={`px-3 py-1.5 rounded-btn text-xs font-medium border transition-all ${
+                  isSelected
+                    ? "border-brand bg-brand-light text-brand-text"
+                    : "border-ink-200 text-ink-500 bg-ink-50 hover:border-ink-300"
+                }`}
+              >
+                {l.label}
+                {isSelected && <X className="w-3 h-3 inline ml-1" />}
+              </button>
+            );
+          })}
         </div>
       </div>
 

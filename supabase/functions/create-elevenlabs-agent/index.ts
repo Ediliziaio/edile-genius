@@ -30,7 +30,11 @@ Deno.serve(async (req) => {
     const userId = claimsData.claims.sub;
 
     const body = await req.json();
-    const { company_id, name, description, use_case, sector, language, voice_id, system_prompt, first_message, status: agentStatus, config } = body;
+    const {
+      company_id, name, description, use_case, sector, language,
+      additional_languages, voice_id, system_prompt, first_message,
+      status: agentStatus, config
+    } = body;
 
     if (!company_id || !name) {
       return new Response(JSON.stringify({ error: "company_id and name required" }), { status: 400, headers: corsHeaders });
@@ -56,17 +60,24 @@ Deno.serve(async (req) => {
     if (apiKey && voice_id) {
       try {
         // Build conversation_config with advanced settings
-        const conversationConfig: Record<string, unknown> = {
-          agent: {
-            prompt: {
-              prompt: system_prompt || "",
-              ...(config?.llm_model ? { llm: config.llm_model } : {}),
-              ...(config?.temperature !== undefined ? { temperature: config.temperature } : {}),
-            },
-            first_message: first_message || "",
-            language: language || "it",
-            ...(config?.max_duration_sec ? { max_duration_seconds: config.max_duration_sec } : {}),
+        const agentConfig: Record<string, unknown> = {
+          prompt: {
+            prompt: system_prompt || "",
+            ...(config?.llm_model ? { llm: config.llm_model } : {}),
+            ...(config?.temperature !== undefined ? { temperature: config.temperature } : {}),
           },
+          first_message: first_message || "",
+          language: language || "it",
+          ...(config?.max_duration_sec ? { max_duration_seconds: config.max_duration_sec } : {}),
+        };
+
+        // Additional languages
+        if (additional_languages?.length > 0) {
+          agentConfig.supported_languages = additional_languages;
+        }
+
+        const conversationConfig: Record<string, unknown> = {
+          agent: agentConfig,
           tts: {
             voice_id,
             ...(config?.voice_stability !== undefined || config?.voice_similarity !== undefined || config?.voice_speed !== undefined ? {
@@ -85,6 +96,38 @@ Deno.serve(async (req) => {
             ...(config.turn_timeout_sec ? { timeout: config.turn_timeout_sec } : {}),
             ...(config.turn_eagerness ? { mode: config.turn_eagerness } : {}),
           };
+        }
+
+        // Custom tools (server tools)
+        const customTools = config?.custom_tools || [];
+        if (customTools.length > 0) {
+          conversationConfig.tools = customTools.map((tool: any) => ({
+            type: "webhook",
+            name: tool.name,
+            description: tool.description,
+            api: {
+              url: tool.url,
+              method: tool.method || "GET",
+            },
+          }));
+        }
+
+        // Safety / guardrails
+        const safety: Record<string, unknown> = {};
+        if (config?.pii_redaction) {
+          safety.pii_redaction = { enabled: true };
+        }
+        if (config?.blocked_topics) {
+          const topics = config.blocked_topics
+            .split(/[,\n]/)
+            .map((t: string) => t.trim())
+            .filter(Boolean);
+          if (topics.length > 0) {
+            safety.blocked_topics = topics;
+          }
+        }
+        if (Object.keys(safety).length > 0) {
+          conversationConfig.safety = safety;
         }
 
         const elResponse = await fetch("https://api.elevenlabs.io/v1/convai/agents/create", {
@@ -126,7 +169,10 @@ Deno.serve(async (req) => {
         first_message: first_message || null,
         status: agentStatus || "draft",
         type: "vocal",
-        config: config || {},
+        config: {
+          ...(config || {}),
+          additional_languages: additional_languages || [],
+        },
         created_by: userId,
       })
       .select()
@@ -136,7 +182,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: insertError.message }), { status: 500, headers: corsHeaders });
     }
 
-    return new Response(JSON.stringify({ agent }), {
+    return new Response(JSON.stringify({ agent, el_agent_id }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {

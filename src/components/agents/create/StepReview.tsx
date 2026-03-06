@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { LANGUAGES } from "@/components/agents/PromptTemplates";
-import { MessageSquare, Play, Square, Loader2, Mic, Volume2 } from "lucide-react";
+import { MessageSquare, Play, Square, Loader2, Mic, Volume2, Wrench, Shield, FileText, Globe } from "lucide-react";
 import VoiceTestPanel from "@/components/agents/VoiceTestPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +25,9 @@ const LLM_LABELS: Record<string, string> = {
 export default function StepReview({ form, update, companyId, onCreateDraft }: StepReviewProps) {
   const { toast } = useToast();
   const langLabel = LANGUAGES.find(l => l.value === form.language)?.label || form.language;
+  const additionalLangs = (form.additional_languages || [])
+    .map((v: string) => LANGUAGES.find(l => l.value === v)?.label || v)
+    .join(", ");
 
   // TTS preview state
   const [ttsLoading, setTtsLoading] = useState(false);
@@ -62,6 +65,11 @@ export default function StepReview({ form, update, companyId, onCreateDraft }: S
           text: form.first_message,
           voice_id: form.voice_id,
           company_id: companyId,
+          voice_settings: {
+            stability: form.voice_stability ?? 0.5,
+            similarity_boost: form.voice_similarity ?? 0.75,
+            speed: form.voice_speed ?? 1.0,
+          },
         }),
       });
 
@@ -79,7 +87,7 @@ export default function StepReview({ form, update, companyId, onCreateDraft }: S
     } finally {
       setTtsLoading(false);
     }
-  }, [form.first_message, form.voice_id, companyId, ttsPlaying, toast]);
+  }, [form.first_message, form.voice_id, form.voice_stability, form.voice_similarity, form.voice_speed, companyId, ttsPlaying, toast]);
 
   const handleCreateDraftAndTest = useCallback(async () => {
     if (!onCreateDraft) return;
@@ -97,6 +105,9 @@ export default function StepReview({ form, update, companyId, onCreateDraft }: S
     }
   }, [onCreateDraft, toast]);
 
+  const kbFiles = form._pendingKBFiles || [];
+  const customTools = form.custom_tools || [];
+
   const sections = [
     {
       title: "Identità",
@@ -105,6 +116,7 @@ export default function StepReview({ form, update, companyId, onCreateDraft }: S
         ["Caso d'uso", form.use_case || "—"],
         ["Settore", form.sector || "—"],
         ["Lingua", langLabel],
+        ...(additionalLangs ? [["Lingue aggiuntive", additionalLangs]] : []),
         ["Modello LLM", LLM_LABELS[form.llm_model] || form.llm_model],
         ["Temperatura", form.temperature.toFixed(1)],
       ],
@@ -184,6 +196,35 @@ export default function StepReview({ form, update, companyId, onCreateDraft }: S
           </div>
         </div>
       ))}
+
+      {/* Advanced summary: KB, Tools, Webhook, Guardrails */}
+      <div className="rounded-card border border-ink-200 bg-white overflow-hidden">
+        <div className="px-4 py-2.5 bg-ink-50 border-b border-ink-200">
+          <h3 className="text-xs font-semibold text-ink-500 uppercase tracking-wide">Avanzate</h3>
+        </div>
+        <div className="divide-y divide-ink-100">
+          <div className="flex justify-between px-4 py-2.5 text-sm">
+            <span className="text-ink-400 flex items-center gap-1"><FileText className="w-3 h-3" /> Knowledge Base</span>
+            <span className="text-ink-900 font-medium">{kbFiles.length > 0 ? `${kbFiles.length} file` : "Nessuno"}</span>
+          </div>
+          <div className="flex justify-between px-4 py-2.5 text-sm">
+            <span className="text-ink-400 flex items-center gap-1"><Wrench className="w-3 h-3" /> Custom Tools</span>
+            <span className="text-ink-900 font-medium">{customTools.length > 0 ? customTools.map((t: any) => t.name || "Senza nome").join(", ") : "Nessuno"}</span>
+          </div>
+          <div className="flex justify-between px-4 py-2.5 text-sm">
+            <span className="text-ink-400 flex items-center gap-1"><Globe className="w-3 h-3" /> Webhook</span>
+            <span className="text-ink-900 font-medium truncate max-w-[200px]">{form.webhook_url || "Non configurato"}</span>
+          </div>
+          <div className="flex justify-between px-4 py-2.5 text-sm">
+            <span className="text-ink-400 flex items-center gap-1"><Shield className="w-3 h-3" /> PII Redaction</span>
+            <span className="text-ink-900 font-medium">{form.pii_redaction ? "Attivo" : "Disattivo"}</span>
+          </div>
+          <div className="flex justify-between px-4 py-2.5 text-sm">
+            <span className="text-ink-400">Data Retention</span>
+            <span className="text-ink-900 font-medium">{form.data_retention ? "Sì" : "No"}</span>
+          </div>
+        </div>
+      </div>
 
       {/* System Prompt Preview */}
       {form.system_prompt && (
