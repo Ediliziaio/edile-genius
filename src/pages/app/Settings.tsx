@@ -7,14 +7,44 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Eye, EyeOff, Save, Loader2, CheckCircle2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Eye, EyeOff, Save, Loader2, CheckCircle2, Plus, Trash2, Send, Globe, History } from "lucide-react";
 import type { Json } from "@/integrations/supabase/types";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { format } from "date-fns";
+import { it } from "date-fns/locale";
 
 interface NotifSettings {
   new_conversation: boolean;
   daily_report: boolean;
   weekly_report: boolean;
 }
+
+interface Webhook {
+  id: string;
+  url: string;
+  secret: string | null;
+  events: string[];
+  is_active: boolean;
+  created_at: string;
+}
+
+interface WebhookLog {
+  id: string;
+  event_type: string;
+  status_code: number | null;
+  success: boolean;
+  created_at: string;
+}
+
+const EVENT_TYPES = [
+  { value: "conversation.created", label: "Nuova conversazione" },
+  { value: "appointment.set", label: "Appuntamento fissato" },
+  { value: "campaign.completed", label: "Campagna completata" },
+  { value: "contact.created", label: "Nuovo contatto" },
+  { value: "agent.status_changed", label: "Stato agente cambiato" },
+];
 
 export default function Settings() {
   const { profile, user } = useAuth();
@@ -32,21 +62,46 @@ export default function Settings() {
   const [showApiKey, setShowApiKey] = useState(false);
   const [notif, setNotif] = useState<NotifSettings>({ new_conversation: true, daily_report: false, weekly_report: true });
 
+  // Webhooks state
+  const [webhooks, setWebhooks] = useState<Webhook[]>([]);
+  const [loadingWebhooks, setLoadingWebhooks] = useState(false);
+  const [showCreateWh, setShowCreateWh] = useState(false);
+  const [whForm, setWhForm] = useState({ url: "", secret: "", events: [] as string[] });
+  const [savingWh, setSavingWh] = useState(false);
+  const [testingWh, setTestingWh] = useState<string | null>(null);
+  const [showLogs, setShowLogs] = useState<string | null>(null);
+  const [whLogs, setWhLogs] = useState<WebhookLog[]>([]);
+  const [loadingLogs, setLoadingLogs] = useState(false);
+
   useEffect(() => {
     if (!profile) return;
     setFullName(profile.full_name || "");
     setAvatarUrl(profile.avatar_url || "");
     if (profile.company_id) {
-      supabase.from("companies").select("el_api_key, settings").eq("id", profile.company_id).single().then(({ data }) => {
-        if (data) {
-          setApiKey(data.el_api_key || "");
-          const s = (data.settings as Record<string, unknown>) || {};
+      Promise.all([
+        supabase.from("companies").select("el_api_key, settings").eq("id", profile.company_id).single(),
+        loadWebhooks(profile.company_id),
+      ]).then(([compRes]) => {
+        if (compRes.data) {
+          setApiKey(compRes.data.el_api_key || "");
+          const s = (compRes.data.settings as Record<string, unknown>) || {};
           setNotif({ new_conversation: s.new_conversation !== false, daily_report: !!s.daily_report, weekly_report: s.weekly_report !== false });
         }
         setLoading(false);
       });
     } else { setLoading(false); }
   }, [profile]);
+
+  const loadWebhooks = async (companyId: string) => {
+    setLoadingWebhooks(true);
+    const { data } = await supabase
+      .from("webhooks")
+      .select("id, url, secret, events, is_active, created_at")
+      .eq("company_id", companyId)
+      .order("created_at", { ascending: false });
+    setWebhooks((data as Webhook[]) || []);
+    setLoadingWebhooks(false);
+  };
 
   const saveProfile = async () => {
     if (!user) return;
@@ -85,6 +140,78 @@ export default function Settings() {
     toast(error ? { title: "Errore", description: error.message, variant: "destructive" } : { title: "Preferenze salvate" });
   };
 
+  // Webhook CRUD
+  const createWebhook = async () => {
+    if (!profile?.company_id || !whForm.url || whForm.events.length === 0) return;
+    setSavingWh(true);
+    const { error } = await supabase.from("webhooks").insert({
+      company_id: profile.company_id,
+      url: whForm.url,
+      secret: whForm.secret || null,
+      events: whForm.events,
+      is_active: true,
+    });
+    setSavingWh(false);
+    if (error) {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Webhook creato" });
+      setShowCreateWh(false);
+      setWhForm({ url: "", secret: "", events: [] });
+      loadWebhooks(profile.company_id);
+    }
+  };
+
+  const toggleWebhook = async (id: string, active: boolean) => {
+    await supabase.from("webhooks").update({ is_active: active }).eq("id", id);
+    if (profile?.company_id) loadWebhooks(profile.company_id);
+  };
+
+  const deleteWebhook = async (id: string) => {
+    await supabase.from("webhooks").delete().eq("id", id);
+    if (profile?.company_id) loadWebhooks(profile.company_id);
+    toast({ title: "Webhook eliminato" });
+  };
+
+  const testWebhook = async (wh: Webhook) => {
+    if (!profile?.company_id) return;
+    setTestingWh(wh.id);
+    try {
+      const { error } = await supabase.functions.invoke("dispatch-webhook", {
+        body: {
+          company_id: profile.company_id,
+          event_type: "test.ping",
+          payload: { message: "Test webhook from settings", timestamp: new Date().toISOString() },
+        },
+      });
+      if (error) throw error;
+      toast({ title: "Test inviato", description: "Controlla il log per il risultato." });
+    } catch (err: any) {
+      toast({ title: "Errore test", description: err.message, variant: "destructive" });
+    }
+    setTestingWh(null);
+  };
+
+  const openLogs = async (webhookId: string) => {
+    setShowLogs(webhookId);
+    setLoadingLogs(true);
+    const { data } = await supabase
+      .from("webhook_logs")
+      .select("id, event_type, status_code, success, created_at")
+      .eq("webhook_id", webhookId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setWhLogs((data as WebhookLog[]) || []);
+    setLoadingLogs(false);
+  };
+
+  const toggleEvent = (event: string) => {
+    setWhForm((prev) => ({
+      ...prev,
+      events: prev.events.includes(event) ? prev.events.filter((e) => e !== event) : [...prev.events, event],
+    }));
+  };
+
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-brand" /></div>;
 
   return (
@@ -95,9 +222,11 @@ export default function Settings() {
         <TabsList className="bg-ink-100 border-none">
           <TabsTrigger value="profile">Profilo</TabsTrigger>
           <TabsTrigger value="api">API & Integrazioni</TabsTrigger>
+          <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
           <TabsTrigger value="notif">Notifiche</TabsTrigger>
         </TabsList>
 
+        {/* Profile Tab */}
         <TabsContent value="profile">
           <div className="rounded-card border border-ink-200 bg-white p-6 space-y-4 max-w-lg shadow-card">
             <h3 className="text-lg font-semibold text-ink-900">Profilo utente</h3>
@@ -120,6 +249,7 @@ export default function Settings() {
           </div>
         </TabsContent>
 
+        {/* API Tab */}
         <TabsContent value="api">
           <div className="rounded-card border border-ink-200 bg-white p-6 space-y-4 max-w-lg shadow-card">
             <h3 className="text-lg font-semibold text-ink-900">ElevenLabs API Key</h3>
@@ -146,6 +276,130 @@ export default function Settings() {
           </div>
         </TabsContent>
 
+        {/* Webhooks Tab */}
+        <TabsContent value="webhooks">
+          <div className="space-y-4 max-w-2xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-ink-900">Webhooks</h3>
+                <p className="text-sm text-ink-500">Ricevi notifiche in tempo reale su endpoint esterni quando si verificano eventi.</p>
+              </div>
+              <Button onClick={() => setShowCreateWh(true)} className="bg-brand hover:bg-brand-hover text-white">
+                <Plus className="h-4 w-4 mr-2" /> Nuovo webhook
+              </Button>
+            </div>
+
+            {loadingWebhooks ? (
+              <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-brand" /></div>
+            ) : webhooks.length === 0 ? (
+              <div className="rounded-card border border-ink-200 bg-white p-8 text-center shadow-card">
+                <Globe className="h-10 w-10 mx-auto text-ink-300 mb-3" />
+                <p className="text-ink-500">Nessun webhook configurato</p>
+                <p className="text-xs text-ink-400 mt-1">Crea un webhook per ricevere notifiche push sugli eventi.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {webhooks.map((wh) => (
+                  <div key={wh.id} className="rounded-card border border-ink-200 bg-white p-4 shadow-card">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <code className="text-sm font-mono text-ink-800 truncate block">{wh.url}</code>
+                          <Badge variant={wh.is_active ? "default" : "secondary"} className="text-xs shrink-0">
+                            {wh.is_active ? "Attivo" : "Disattivo"}
+                          </Badge>
+                        </div>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {wh.events.map((ev) => (
+                            <Badge key={ev} variant="outline" className="text-xs border-ink-200 text-ink-600">
+                              {EVENT_TYPES.find((e) => e.value === ev)?.label || ev}
+                            </Badge>
+                          ))}
+                        </div>
+                        {wh.secret && <p className="text-xs text-ink-400 mt-1">🔐 Firma HMAC attiva</p>}
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Switch checked={wh.is_active} onCheckedChange={(v) => toggleWebhook(wh.id, v)} />
+                        <Button variant="ghost" size="icon" onClick={() => testWebhook(wh)} disabled={testingWh === wh.id} className="text-ink-500 hover:text-ink-700">
+                          {testingWh === wh.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => openLogs(wh.id)} className="text-ink-500 hover:text-ink-700">
+                          <History className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => deleteWebhook(wh.id)} className="text-red-500 hover:text-red-700">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Create Webhook Dialog */}
+          <Dialog open={showCreateWh} onOpenChange={setShowCreateWh}>
+            <DialogContent className="bg-white">
+              <DialogHeader><DialogTitle className="text-ink-900">Nuovo Webhook</DialogTitle></DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-ink-600">URL Endpoint</Label>
+                  <Input value={whForm.url} onChange={(e) => setWhForm((p) => ({ ...p, url: e.target.value }))} placeholder="https://example.com/webhook" className="bg-ink-50 border-ink-200 text-ink-900" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-ink-600">Secret (opzionale)</Label>
+                  <Input value={whForm.secret} onChange={(e) => setWhForm((p) => ({ ...p, secret: e.target.value }))} placeholder="Chiave segreta per firma HMAC" className="bg-ink-50 border-ink-200 text-ink-900" />
+                  <p className="text-xs text-ink-400">Se fornito, ogni richiesta includerà un header X-Webhook-Signature con firma HMAC-SHA256.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-ink-600">Eventi</Label>
+                  <div className="space-y-2">
+                    {EVENT_TYPES.map((ev) => (
+                      <label key={ev.value} className="flex items-center gap-2 cursor-pointer">
+                        <Checkbox checked={whForm.events.includes(ev.value)} onCheckedChange={() => toggleEvent(ev.value)} />
+                        <span className="text-sm text-ink-700">{ev.label}</span>
+                        <span className="text-xs text-ink-400 font-mono">{ev.value}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <Button onClick={createWebhook} disabled={savingWh || !whForm.url || whForm.events.length === 0} className="w-full bg-brand hover:bg-brand-hover text-white">
+                  {savingWh ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                  Crea Webhook
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Logs Dialog */}
+          <Dialog open={!!showLogs} onOpenChange={() => setShowLogs(null)}>
+            <DialogContent className="bg-white max-w-lg">
+              <DialogHeader><DialogTitle className="text-ink-900">Log Consegne</DialogTitle></DialogHeader>
+              {loadingLogs ? (
+                <div className="flex justify-center py-6"><Loader2 className="h-6 w-6 animate-spin text-brand" /></div>
+              ) : whLogs.length === 0 ? (
+                <p className="text-center text-ink-400 py-6">Nessun log disponibile</p>
+              ) : (
+                <div className="max-h-80 overflow-y-auto space-y-2">
+                  {whLogs.map((log) => (
+                    <div key={log.id} className="flex items-center justify-between text-sm border-b border-ink-100 pb-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${log.success ? "bg-green-500" : "bg-red-500"}`} />
+                        <span className="font-mono text-xs text-ink-600">{log.event_type}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-ink-400 text-xs">
+                        {log.status_code && <span>HTTP {log.status_code}</span>}
+                        <span>{format(new Date(log.created_at), "dd/MM HH:mm", { locale: it })}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+        </TabsContent>
+
+        {/* Notifications Tab */}
         <TabsContent value="notif">
           <div className="rounded-card border border-ink-200 bg-white p-6 space-y-5 max-w-lg shadow-card">
             <h3 className="text-lg font-semibold text-ink-900">Preferenze notifiche</h3>
