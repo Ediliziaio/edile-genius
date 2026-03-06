@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
     }
 
-    const { text, voice_id, company_id } = await req.json();
+    const { text, voice_id, company_id, voice_settings } = await req.json();
     if (!text || !voice_id) {
       return new Response(JSON.stringify({ error: "text and voice_id required" }), { status: 400, headers: corsHeaders });
     }
@@ -53,6 +53,20 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "No ElevenLabs API key configured" }), { status: 400, headers: corsHeaders });
     }
 
+    // Build voice_settings for the TTS call
+    const ttsBody: Record<string, unknown> = {
+      text,
+      model_id: "eleven_multilingual_v2",
+    };
+
+    if (voice_settings) {
+      ttsBody.voice_settings = {
+        stability: voice_settings.stability ?? 0.5,
+        similarity_boost: voice_settings.similarity_boost ?? 0.75,
+        speed: voice_settings.speed ?? 1.0,
+      };
+    }
+
     const elResponse = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${voice_id}?output_format=mp3_44100_128`,
       {
@@ -61,10 +75,7 @@ Deno.serve(async (req) => {
           "xi-api-key": apiKey,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          text,
-          model_id: "eleven_multilingual_v2",
-        }),
+        body: JSON.stringify(ttsBody),
       }
     );
 
