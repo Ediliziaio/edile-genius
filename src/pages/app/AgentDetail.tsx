@@ -4,13 +4,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { ArrowLeft, Save, Loader2, Power, Phone, Clock } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Power, Phone, Clock, Plug, BarChart3, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AgentConfigForm, { type AgentConfigData } from "@/components/agents/AgentConfigForm";
 import VoiceTestPanel from "@/components/agents/VoiceTestPanel";
 import TranscriptViewer from "@/components/conversations/TranscriptViewer";
+import AgentIntegrationTab from "@/components/agents/AgentIntegrationTab";
+import AgentAnalyticsTab from "@/components/agents/AgentAnalyticsTab";
+import AgentKnowledgeTab from "@/components/agents/AgentKnowledgeTab";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
@@ -92,11 +95,14 @@ export default function AgentDetail() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="bg-ink-100 border-none">
+        <TabsList className="bg-ink-100 border-none flex-wrap">
           <TabsTrigger value="overview">Panoramica</TabsTrigger>
           <TabsTrigger value="config">Configurazione</TabsTrigger>
           <TabsTrigger value="test">Test Vocale</TabsTrigger>
           <TabsTrigger value="conversations">Conversazioni</TabsTrigger>
+          <TabsTrigger value="analytics"><BarChart3 className="w-3.5 h-3.5 mr-1" />Analytics</TabsTrigger>
+          <TabsTrigger value="integration"><Plug className="w-3.5 h-3.5 mr-1" />Integrazione</TabsTrigger>
+          <TabsTrigger value="knowledge"><BookOpen className="w-3.5 h-3.5 mr-1" />Knowledge Base</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
@@ -174,6 +180,18 @@ export default function AgentDetail() {
               </Table>
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <AgentAnalyticsTab conversations={conversations} />
+        </TabsContent>
+
+        <TabsContent value="integration">
+          <AgentIntegrationTab agentId={agent.id} elAgentId={agent.el_agent_id} agentName={agent.name} />
+        </TabsContent>
+
+        <TabsContent value="knowledge">
+          <AgentKnowledgeTab agentId={agent.id} companyId={companyId} />
         </TabsContent>
       </Tabs>
 
