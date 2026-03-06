@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +36,7 @@ interface CampaignForm {
 export default function CampaignsPage() {
   const { profile } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const companyId = profile?.company_id;
 
@@ -125,8 +127,8 @@ export default function CampaignsPage() {
           <h1 className="text-2xl font-bold text-ink-900">Campagne</h1>
           <p className="text-sm text-ink-500 mt-1">Gestisci le tue campagne outbound</p>
         </div>
-        <Button onClick={() => setShowCreate(true)} className="bg-brand hover:bg-brand-hover text-white">
-          <Plus className="w-4 h-4 mr-2" /> Nuova Campagna
+        <Button asChild className="bg-brand hover:bg-brand-hover text-white">
+          <Link to="/app/campaigns/new"><Plus className="w-4 h-4 mr-2" /> Nuova Campagna</Link>
         </Button>
       </div>
 
@@ -172,7 +174,7 @@ export default function CampaignsPage() {
                 const st = STATUS_CONFIG[c.status] || STATUS_CONFIG.draft;
                 const progress = getProgress(c);
                 return (
-                  <TableRow key={c.id} className="hover:bg-ink-50">
+                  <TableRow key={c.id} className="hover:bg-ink-50 cursor-pointer" onClick={() => navigate(`/app/campaigns/${c.id}`)}>
                     <TableCell>
                       <div>
                         <span className="font-medium text-ink-900">{c.name}</span>
