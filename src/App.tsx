@@ -14,9 +14,10 @@ import SuperAdminDashboard from "./pages/superadmin/Dashboard";
 import Companies from "./pages/superadmin/Companies";
 import CreateCompany from "./pages/superadmin/CreateCompany";
 import AppDashboard from "./pages/app/Dashboard";
+import AgentsPage from "./pages/app/Agents";
+import CreateAgent from "./pages/app/CreateAgent";
 
 const queryClient = new QueryClient();
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -42,6 +43,8 @@ const App = () => (
             <Route element={<AuthGuard requiredRole="company" />}>
               <Route element={<Shell />}>
                 <Route path="/app" element={<AppDashboard />} />
+                <Route path="/app/agents" element={<AgentsPage />} />
+                <Route path="/app/agents/new" element={<CreateAgent />} />
               </Route>
             </Route>
 

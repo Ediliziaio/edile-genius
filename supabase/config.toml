@@ -2,3 +2,9 @@ project_id = "wahnkxfmgqvxfjeeuiep"
 
 [functions.create-company]
 verify_jwt = false
+
+[functions.get-elevenlabs-voices]
+verify_jwt = false
+
+[functions.create-elevenlabs-agent]
+verify_jwt = false
