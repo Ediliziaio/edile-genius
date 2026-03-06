@@ -17,12 +17,14 @@ interface AgentStepSidebarProps {
 }
 
 export default function AgentStepSidebar({ currentStep, onStepChange, completedSteps, validatedSteps }: AgentStepSidebarProps) {
+  const safeCompleted = completedSteps ?? new Set<number>();
+  const safeValidated = validatedSteps ?? new Set<number>();
   return (
     <nav className="w-56 shrink-0 space-y-1">
       {STEPS.map((step) => {
         const isActive = currentStep === step.id;
-        const wasVisited = completedSteps.has(step.id);
-        const isValid = validatedSteps.has(step.id);
+        const wasVisited = safeCompleted.has(step.id);
+        const isValid = safeValidated.has(step.id);
         const showCheck = wasVisited && isValid && !isActive;
         const showWarning = wasVisited && !isValid && !isActive;
         const Icon = step.icon;
