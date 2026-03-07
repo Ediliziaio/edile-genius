@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Bot, MessageSquare, BarChart3, Settings,
   CreditCard, HelpCircle, Building2, UserPlus, Users, FileText,
   BookUser, ListChecks, Megaphone, Phone, BookOpen, Coins, type LucideIcon,
-  AlertTriangle, MessageCircle, Puzzle
+  AlertTriangle, MessageCircle, Puzzle, Paintbrush, Palette
 } from "lucide-react";
 
 interface NavItem { label: string; icon: LucideIcon; href: string; }
