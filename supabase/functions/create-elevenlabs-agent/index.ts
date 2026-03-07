@@ -45,21 +45,14 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Get company API key
-    const { data: company } = await serviceClient
-      .from("companies")
-      .select("el_api_key")
-      .eq("id", company_id)
-      .single();
-
-    const apiKey = company?.el_api_key || Deno.env.get("ELEVENLABS_API_KEY");
+    // Use centralized platform API key
+    const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
 
     let el_agent_id = null;
 
     // Create ElevenLabs agent if API key exists
     if (apiKey && voice_id) {
       try {
-        // Build conversation_config with advanced settings
         const agentConfig: Record<string, unknown> = {
           prompt: {
             prompt: system_prompt || "",
@@ -71,7 +64,6 @@ Deno.serve(async (req) => {
           ...(config?.max_duration_sec ? { max_duration_seconds: config.max_duration_sec } : {}),
         };
 
-        // Additional languages
         if (additional_languages?.length > 0) {
           agentConfig.supported_languages = additional_languages;
         }
@@ -90,7 +82,6 @@ Deno.serve(async (req) => {
           },
         };
 
-        // Turn settings
         if (config?.turn_timeout_sec || config?.turn_eagerness) {
           conversationConfig.turn = {
             ...(config.turn_timeout_sec ? { timeout: config.turn_timeout_sec } : {}),
@@ -98,7 +89,6 @@ Deno.serve(async (req) => {
           };
         }
 
-        // Custom tools (server tools)
         const customTools = config?.custom_tools || [];
         if (customTools.length > 0) {
           conversationConfig.tools = customTools.map((tool: any) => ({
@@ -112,7 +102,6 @@ Deno.serve(async (req) => {
           }));
         }
 
-        // Safety / guardrails
         const safety: Record<string, unknown> = {};
         if (config?.pii_redaction) {
           safety.pii_redaction = { enabled: true };
@@ -153,7 +142,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Insert agent in DB
     const { data: agent, error: insertError } = await serviceClient
       .from("agents")
       .insert({

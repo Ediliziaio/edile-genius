@@ -34,6 +34,7 @@ import SASettingsPage from "./pages/superadmin/SASettings";
 import GlobalAnalyticsPage from "./pages/superadmin/GlobalAnalytics";
 import ApiKeysPage from "./pages/superadmin/ApiKeys";
 import SystemLogsPage from "./pages/superadmin/SystemLogs";
+import PlatformSettingsPage from "./pages/superadmin/PlatformSettings";
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -61,6 +62,7 @@ const App = () => (
                 <Route path="/superadmin/analytics" element={<GlobalAnalyticsPage />} />
                 <Route path="/superadmin/api-keys" element={<ApiKeysPage />} />
                 <Route path="/superadmin/logs" element={<SystemLogsPage />} />
+                <Route path="/superadmin/platform-settings" element={<PlatformSettingsPage />} />
               </Route>
             </Route>
 

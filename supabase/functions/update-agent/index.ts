@@ -68,13 +68,9 @@ Deno.serve(async (req) => {
 
     // Sync to ElevenLabs if agent has el_agent_id
     if (currentAgent?.el_agent_id) {
-      const { data: company } = await serviceClient
-        .from("companies")
-        .select("el_api_key")
-        .eq("id", currentAgent.company_id)
-        .single();
+      // Use centralized platform API key
+      const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
 
-      const apiKey = company?.el_api_key || Deno.env.get("ELEVENLABS_API_KEY");
       if (apiKey) {
         const cfg = (updates.config && typeof updates.config === "object") ? updates.config : {};
         const agentCfg = (agent.config && typeof agent.config === "object") ? agent.config as Record<string, unknown> : {};

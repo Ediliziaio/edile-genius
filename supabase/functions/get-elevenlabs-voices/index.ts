@@ -28,28 +28,8 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
     }
 
-    const { company_id } = await req.json();
-    if (!company_id) {
-      return new Response(JSON.stringify({ error: "company_id required" }), { status: 400, headers: corsHeaders });
-    }
-
-    // Fetch company's ElevenLabs API key
-    const serviceClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-
-    const { data: company, error: companyError } = await serviceClient
-      .from("companies")
-      .select("el_api_key")
-      .eq("id", company_id)
-      .single();
-
-    if (companyError || !company) {
-      return new Response(JSON.stringify({ error: "Company not found" }), { status: 404, headers: corsHeaders });
-    }
-
-    const apiKey = company.el_api_key || Deno.env.get("ELEVENLABS_API_KEY");
+    // Use centralized platform API key
+    const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
     if (!apiKey) {
       return new Response(JSON.stringify({ error: "No ElevenLabs API key configured" }), { status: 400, headers: corsHeaders });
     }
