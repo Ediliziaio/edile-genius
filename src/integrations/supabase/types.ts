@@ -1756,6 +1756,319 @@ export type Database = {
           },
         ]
       }
+      render_credits: {
+        Row: {
+          balance: number | null
+          company_id: string
+          id: string
+          total_purchased: number | null
+          total_used: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          balance?: number | null
+          company_id: string
+          id?: string
+          total_purchased?: number | null
+          total_used?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          balance?: number | null
+          company_id?: string
+          id?: string
+          total_purchased?: number | null
+          total_used?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_credits_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      render_gallery: {
+        Row: {
+          company_id: string
+          config_summary: Json | null
+          contact_id: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_favorite: boolean | null
+          notes: string | null
+          original_url: string
+          render_url: string
+          session_id: string
+          share_token: string | null
+          title: string | null
+        }
+        Insert: {
+          company_id: string
+          config_summary?: Json | null
+          contact_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          notes?: string | null
+          original_url: string
+          render_url: string
+          session_id: string
+          share_token?: string | null
+          title?: string | null
+        }
+        Update: {
+          company_id?: string
+          config_summary?: Json | null
+          contact_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          notes?: string | null
+          original_url?: string
+          render_url?: string
+          session_id?: string
+          share_token?: string | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_gallery_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "render_gallery_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "render_gallery_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "render_gallery_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "render_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      render_infissi_presets: {
+        Row: {
+          category: string
+          color_hex: string | null
+          company_id: string | null
+          created_at: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          is_global: boolean | null
+          name: string
+          prompt_fragment: string
+          sort_order: number | null
+          value: string
+        }
+        Insert: {
+          category: string
+          color_hex?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_global?: boolean | null
+          name: string
+          prompt_fragment: string
+          sort_order?: number | null
+          value: string
+        }
+        Update: {
+          category?: string
+          color_hex?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_global?: boolean | null
+          name?: string
+          prompt_fragment?: string
+          sort_order?: number | null
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_infissi_presets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      render_provider_config: {
+        Row: {
+          api_endpoint: string | null
+          cost_billed_per_render: number | null
+          cost_real_per_render: number | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          label: string
+          markup_multiplier: number | null
+          max_resolution: number | null
+          model: string
+          notes: string | null
+          provider_key: string
+          quality: string | null
+          renders_generated: number | null
+          timeout_sec: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          api_endpoint?: string | null
+          cost_billed_per_render?: number | null
+          cost_real_per_render?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          label: string
+          markup_multiplier?: number | null
+          max_resolution?: number | null
+          model: string
+          notes?: string | null
+          provider_key: string
+          quality?: string | null
+          renders_generated?: number | null
+          timeout_sec?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          api_endpoint?: string | null
+          cost_billed_per_render?: number | null
+          cost_real_per_render?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          label?: string
+          markup_multiplier?: number | null
+          max_resolution?: number | null
+          model?: string
+          notes?: string | null
+          provider_key?: string
+          quality?: string | null
+          renders_generated?: number | null
+          timeout_sec?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      render_sessions: {
+        Row: {
+          company_id: string
+          config: Json
+          contact_id: string | null
+          cost_billed: number | null
+          cost_real: number | null
+          created_at: string | null
+          created_by: string | null
+          error_message: string | null
+          id: string
+          original_analysis: Json | null
+          original_photo_url: string
+          processing_completed_at: string | null
+          processing_started_at: string | null
+          prompt_used: string | null
+          provider_key: string | null
+          result_urls: Json | null
+          selected_result_index: number | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          config?: Json
+          contact_id?: string | null
+          cost_billed?: number | null
+          cost_real?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          id?: string
+          original_analysis?: Json | null
+          original_photo_url: string
+          processing_completed_at?: string | null
+          processing_started_at?: string | null
+          prompt_used?: string | null
+          provider_key?: string | null
+          result_urls?: Json | null
+          selected_result_index?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          config?: Json
+          contact_id?: string | null
+          cost_billed?: number | null
+          cost_real?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          id?: string
+          original_analysis?: Json | null
+          original_photo_url?: string
+          processing_completed_at?: string | null
+          processing_started_at?: string | null
+          prompt_used?: string | null
+          provider_key?: string | null
+          result_urls?: Json | null
+          selected_result_index?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "render_sessions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "render_sessions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       superadmin_whatsapp_config: {
         Row: {
           created_at: string | null
