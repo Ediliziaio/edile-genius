@@ -982,100 +982,76 @@ function TabBroadcast({ companyId, templates, numbers }: {
 }
 
 // ── Tab Impostazioni ──
-function TabSettings({ companyId, subscription, wabaConfig, numbers, onRefresh, onDeactivate }: {
+function TabSettings({ companyId, subscription, wabaConfig, numbers, onRefresh, onDeactivate, onReconnect }: {
   companyId: string;
   subscription: WaSubscription | null;
   wabaConfig: WabaConfig | null;
   numbers: WaNumber[];
   onRefresh: () => void;
   onDeactivate: () => void;
+  onReconnect: () => void;
 }) {
-  const [showToken, setShowToken] = useState(false);
-  const [savingWaba, setSavingWaba] = useState(false);
-  const [wabaId, setWabaId] = useState(wabaConfig?.waba_id || "");
-  const [businessName, setBusinessName] = useState(wabaConfig?.business_name || "");
-  const [accessToken, setAccessToken] = useState("");
-
-  const handleSaveWaba = async () => {
-    if (!wabaId.trim()) { toast.error("WABA ID obbligatorio"); return; }
-    setSavingWaba(true);
-
-    if (wabaConfig) {
-      const updateData: any = { waba_id: wabaId, business_name: businessName };
-      if (accessToken) updateData.access_token_encrypted = accessToken;
-      const { error } = await supabase.from("whatsapp_waba_config").update(updateData).eq("id", wabaConfig.id);
-      if (error) { toast.error(error.message); } else { toast.success("Configurazione salvata"); }
-    } else {
-      const { error } = await supabase.from("whatsapp_waba_config").insert({
-        company_id: companyId,
-        waba_id: wabaId,
-        business_name: businessName,
-        access_token_encrypted: accessToken || null,
-      });
-      if (error) { toast.error(error.message); } else { toast.success("Configurazione creata"); }
-    }
-    setSavingWaba(false);
-    onRefresh();
-  };
-
   return (
     <div className="space-y-4">
-      {/* WABA Config */}
+      {/* WABA Config — Read Only */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Shield className="h-4 w-4 text-blue-600" />
-            Configurazione WABA
+            Account WhatsApp Business
           </CardTitle>
-          <CardDescription>WhatsApp Business Account — credenziali e verifica Meta</CardDescription>
+          <CardDescription>Collegato tramite Meta Embedded Signup</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>WABA ID *</Label>
-              <Input value={wabaId} onChange={e => setWabaId(e.target.value)} placeholder="es. 123456789012345" />
-            </div>
-            <div className="space-y-2">
-              <Label>Nome Business</Label>
-              <Input value={businessName} onChange={e => setBusinessName(e.target.value)} placeholder="es. Edilizia SRL" />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Access Token (Meta System User)</Label>
-            <div className="flex gap-2">
-              <Input
-                type={showToken ? "text" : "password"}
-                value={accessToken}
-                onChange={e => setAccessToken(e.target.value)}
-                placeholder={wabaConfig?.access_token_encrypted ? "••••••••••• (già configurato)" : "Incolla il token qui"}
-                className="font-mono text-xs"
-              />
-              <Button variant="outline" size="icon" onClick={() => setShowToken(!showToken)}>
-                {showToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          {wabaConfig ? (
+            <>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">WABA ID</p>
+                  <p className="text-sm font-mono font-medium text-foreground">{wabaConfig.waba_id}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Nome Business</p>
+                  <p className="text-sm font-medium text-foreground">{wabaConfig.business_name || "—"}</p>
+                </div>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Verifica Meta</p>
+                  <Badge variant={wabaConfig.meta_verified ? "default" : "secondary"}>
+                    {wabaConfig.meta_verification_status === "verified" ? "✓ Verificato" :
+                     wabaConfig.meta_verification_status === "in_progress" ? "In corso" :
+                     wabaConfig.meta_verification_status === "rejected" ? "Rifiutato" : "Non avviata"}
+                  </Badge>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Token</p>
+                  <div className="flex items-center gap-2">
+                    {wabaConfig.access_token_encrypted ? (
+                      <Badge variant="default" className="bg-green-600 text-white">
+                        <CheckCircle2 className="h-3 w-3 mr-1" />Configurato (cifrato AES-256)
+                      </Badge>
+                    ) : (
+                      <Badge variant="destructive">Non configurato</Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <Separator />
+              <Button variant="outline" size="sm" onClick={onReconnect}>
+                <RefreshCw className="h-3.5 w-3.5 mr-1" />
+                Ricollega Account
+              </Button>
+            </>
+          ) : (
+            <div className="text-center py-6">
+              <Shield className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground mb-3">Nessun account WhatsApp Business collegato</p>
+              <Button size="sm" onClick={onReconnect}>
+                <Plus className="h-4 w-4 mr-1" />Collega Account
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Il token viene cifrato con AES-256 prima del salvataggio
-            </p>
-          </div>
-
-          {wabaConfig && (
-            <div className="flex items-center gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">Verifica Meta:</span>
-                <Badge variant={wabaConfig.meta_verified ? "default" : "secondary"}>
-                  {wabaConfig.meta_verification_status === "verified" ? "✓ Verificato" :
-                   wabaConfig.meta_verification_status === "in_progress" ? "In corso" :
-                   wabaConfig.meta_verification_status === "rejected" ? "Rifiutato" : "Non avviata"}
-                </Badge>
-              </div>
-            </div>
           )}
-
-          <Button onClick={handleSaveWaba} disabled={savingWaba || !wabaId.trim()}>
-            {savingWaba && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-            Salva Configurazione WABA
-          </Button>
         </CardContent>
       </Card>
 
