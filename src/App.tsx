@@ -46,6 +46,11 @@ import PlatformSettingsPage from "./pages/superadmin/PlatformSettings";
 import SATemplatesPage from "./pages/superadmin/Templates";
 import WhatsAppPage from "./pages/app/WhatsApp";
 import WhatsAppAdminPage from "./pages/superadmin/WhatsAppAdmin";
+import RenderHub from "./pages/app/RenderHub";
+import RenderNew from "./pages/app/RenderNew";
+import RenderGallery from "./pages/app/RenderGallery";
+import RenderGalleryDetail from "./pages/app/RenderGalleryDetail";
+import RenderConfig from "./pages/superadmin/RenderConfig";
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -76,6 +81,7 @@ const App = () => (
                 <Route path="/superadmin/api-keys" element={<ApiKeysPage />} />
                 <Route path="/superadmin/logs" element={<SystemLogsPage />} />
                 <Route path="/superadmin/platform-settings" element={<PlatformSettingsPage />} />
+                <Route path="/superadmin/render-config" element={<RenderConfig />} />
               </Route>
             </Route>
 
@@ -97,6 +103,10 @@ const App = () => (
                 <Route path="/app/templates/:slug" element={<TemplateDetailPage />} />
                 <Route path="/app/templates/:slug/setup" element={<TemplateSetupPage />} />
                 <Route path="/app/whatsapp" element={<WhatsAppPage />} />
+                <Route path="/app/render" element={<RenderHub />} />
+                <Route path="/app/render/new" element={<RenderNew />} />
+                <Route path="/app/render/gallery" element={<RenderGallery />} />
+                <Route path="/app/render/gallery/:id" element={<RenderGalleryDetail />} />
                 <Route path="/app/lists" element={<ContactListsPage />} />
                 <Route path="/app/lists/:id" element={<ContactListDetailPage />} />
                 <Route path="/app/campaigns" element={<CampaignsPage />} />
