@@ -151,32 +151,76 @@ function ConnectNumberDialog({ open, onOpenChange, companyId, onConnected }: {
 }) {
   const [displayName, setDisplayName] = useState("");
   const [phone, setPhone] = useState("");
+  const [wabaId, setWabaId] = useState("");
+  const [phoneNumberId, setPhoneNumberId] = useState("");
+  const [userAccessToken, setUserAccessToken] = useState("");
   const [step, setStep] = useState<"form" | "connecting" | "done">("form");
+  const [useEmbeddedSignup, setUseEmbeddedSignup] = useState(true);
 
   const handleConnect = async () => {
-    if (!displayName.trim() || !phone.trim()) { toast.error("Compila tutti i campi"); return; }
+    if (useEmbeddedSignup) {
+      if (!userAccessToken.trim() || !wabaId.trim() || !phoneNumberId.trim()) {
+        toast.error("Token, WABA ID e Phone Number ID obbligatori");
+        return;
+      }
+    } else {
+      if (!displayName.trim() || !phone.trim()) {
+        toast.error("Compila tutti i campi");
+        return;
+      }
+    }
+
     setStep("connecting");
-    await new Promise(r => setTimeout(r, 2000));
-    const { error } = await supabase.from("whatsapp_phone_numbers").insert({
-      company_id: companyId,
-      waba_id: "demo_waba_" + Date.now(),
-      phone_number_id: "pn_" + Date.now(),
-      display_phone_number: phone,
-      display_name: displayName,
-      status: "CONNECTED",
-      quality_rating: "UNKNOWN",
-    });
-    if (error) { toast.error("Errore: " + error.message); setStep("form"); return; }
-    setStep("done");
-    onConnected();
-    toast.success("Numero collegato con successo!");
+
+    if (useEmbeddedSignup) {
+      try {
+        const { data, error } = await supabase.functions.invoke("whatsapp-connect-number", {
+          body: {
+            company_id: companyId,
+            user_access_token: userAccessToken,
+            waba_id: wabaId,
+            phone_number_id: phoneNumberId,
+            display_phone_number: phone || undefined,
+            display_name: displayName || undefined,
+          },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        setStep("done");
+        onConnected();
+        toast.success("Numero collegato con successo via Meta!");
+      } catch (err: any) {
+        toast.error("Errore connessione: " + (err.message || "Errore sconosciuto"));
+        setStep("form");
+        return;
+      }
+    } else {
+      // Manual fallback (demo)
+      await new Promise(r => setTimeout(r, 2000));
+      const { error } = await supabase.from("whatsapp_phone_numbers").insert({
+        company_id: companyId,
+        waba_id: "demo_waba_" + Date.now(),
+        phone_number_id: "pn_" + Date.now(),
+        display_phone_number: phone,
+        display_name: displayName,
+        status: "CONNECTED",
+        quality_rating: "UNKNOWN",
+      });
+      if (error) { toast.error("Errore: " + error.message); setStep("form"); return; }
+      setStep("done");
+      onConnected();
+      toast.success("Numero collegato con successo!");
+    }
   };
 
-  const handleClose = () => { setStep("form"); setDisplayName(""); setPhone(""); onOpenChange(false); };
+  const handleClose = () => {
+    setStep("form"); setDisplayName(""); setPhone(""); setWabaId(""); setPhoneNumberId(""); setUserAccessToken("");
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
@@ -184,29 +228,71 @@ function ConnectNumberDialog({ open, onOpenChange, companyId, onConnected }: {
             </div>
             Collega Numero WhatsApp
           </DialogTitle>
-          <DialogDescription>Via Meta Business Manager</DialogDescription>
+          <DialogDescription>Via Meta Embedded Signup o inserimento manuale</DialogDescription>
         </DialogHeader>
         {step === "form" && (
           <div className="space-y-4">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex gap-2 text-xs text-yellow-800">
-              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-              Una volta collegato, il numero funzionerà sia su WhatsApp mobile che su questo CRM tramite Cloud API.
+            <div className="flex items-center gap-2 text-sm">
+              <Label>Modalità</Label>
+              <Switch checked={useEmbeddedSignup} onCheckedChange={setUseEmbeddedSignup} />
+              <span className="text-muted-foreground text-xs">{useEmbeddedSignup ? "Embedded Signup (consigliato)" : "Inserimento manuale"}</span>
             </div>
-            <div className="space-y-2">
-              <Label>Nome visualizzato *</Label>
-              <Input value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="es. Flo | Marketing Edile" />
-              <p className="text-xs text-muted-foreground">Deve corrispondere al nome dell'azienda (linee guida Meta)</p>
-            </div>
-            <div className="space-y-2">
-              <Label>Numero di telefono *</Label>
-              <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+39 350 000 0000" />
-            </div>
+
+            {useEmbeddedSignup ? (
+              <>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex gap-2 text-xs text-blue-800">
+                  <Shield className="h-4 w-4 shrink-0 mt-0.5" />
+                  Inserisci le credenziali ottenute dal flusso Meta Embedded Signup. Il token verrà scambiato per uno long-lived e cifrato con AES-256.
+                </div>
+                <div className="space-y-2">
+                  <Label>User Access Token *</Label>
+                  <Input type="password" value={userAccessToken} onChange={e => setUserAccessToken(e.target.value)} placeholder="EAAxxxxxxx..." className="font-mono text-xs" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>WABA ID *</Label>
+                    <Input value={wabaId} onChange={e => setWabaId(e.target.value)} placeholder="es. 123456789012345" className="font-mono text-xs" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Phone Number ID *</Label>
+                    <Input value={phoneNumberId} onChange={e => setPhoneNumberId(e.target.value)} placeholder="es. 109876543210" className="font-mono text-xs" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>Nome visualizzato (opz.)</Label>
+                    <Input value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="es. Flo | Marketing" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Numero (opz.)</Label>
+                    <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+39 350 000 0000" />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex gap-2 text-xs text-yellow-800">
+                  <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+                  Modalità demo: il numero verrà registrato con dati fittizi. Usa Embedded Signup per una connessione reale.
+                </div>
+                <div className="space-y-2">
+                  <Label>Nome visualizzato *</Label>
+                  <Input value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="es. Flo | Marketing Edile" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Numero di telefono *</Label>
+                  <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+39 350 000 0000" />
+                </div>
+              </>
+            )}
           </div>
         )}
         {step === "connecting" && (
           <div className="flex flex-col items-center py-8 gap-4">
             <Loader2 className="h-10 w-10 animate-spin text-green-600" />
-            <p className="text-sm text-muted-foreground">Connessione a Meta Business in corso...</p>
+            <p className="text-sm text-muted-foreground">
+              {useEmbeddedSignup ? "Scambio token e registrazione numero su Meta..." : "Connessione a Meta Business in corso..."}
+            </p>
           </div>
         )}
         {step === "done" && (
@@ -222,7 +308,7 @@ function ConnectNumberDialog({ open, onOpenChange, companyId, onConnected }: {
             <>
               <Button variant="outline" onClick={handleClose}>Annulla</Button>
               <Button onClick={handleConnect} className="bg-green-600 hover:bg-green-700 text-white">
-                <ExternalLink className="h-4 w-4 mr-2" />Procedi con Meta
+                <ExternalLink className="h-4 w-4 mr-2" />{useEmbeddedSignup ? "Collega via Meta" : "Procedi con Meta"}
               </Button>
             </>
           )}
