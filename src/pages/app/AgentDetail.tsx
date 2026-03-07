@@ -14,6 +14,7 @@ import TranscriptViewer from "@/components/conversations/TranscriptViewer";
 import AgentIntegrationTab from "@/components/agents/AgentIntegrationTab";
 import AgentAnalyticsTab from "@/components/agents/AgentAnalyticsTab";
 import AgentKnowledgeTab from "@/components/agents/AgentKnowledgeTab";
+import AgentPhoneTab from "@/components/agents/AgentPhoneTab";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
@@ -128,6 +129,7 @@ export default function AgentDetail() {
           <TabsTrigger value="analytics"><BarChart3 className="w-3.5 h-3.5 mr-1" />Analytics</TabsTrigger>
           <TabsTrigger value="integration"><Plug className="w-3.5 h-3.5 mr-1" />Integrazione</TabsTrigger>
           <TabsTrigger value="knowledge"><BookOpen className="w-3.5 h-3.5 mr-1" />Knowledge Base</TabsTrigger>
+          <TabsTrigger value="phone"><Phone className="w-3.5 h-3.5 mr-1" />Numero</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
@@ -217,6 +219,10 @@ export default function AgentDetail() {
 
         <TabsContent value="knowledge">
           <AgentKnowledgeTab agentId={agent.id} companyId={companyId} />
+        </TabsContent>
+
+        <TabsContent value="phone">
+          <AgentPhoneTab agentId={agent.id} companyId={companyId} />
         </TabsContent>
       </Tabs>
 

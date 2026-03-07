@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Building2, Bot, Phone, DollarSign, ArrowRight, Plus, Users, AlertTriangle, TrendingUp, Coins } from "lucide-react";
+import { Building2, Bot, Phone, DollarSign, ArrowRight, Plus, Users, AlertTriangle, TrendingUp, Coins, Image } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +44,7 @@ export default function SuperAdminDashboard() {
   const [companies, setCompanies] = useState<CompanyRow[]>([]);
   const [companyCredits, setCompanyCredits] = useState<(CreditRow & { companyName: string })[]>([]);
   const [ecoStats, setEcoStats] = useState({ billed: 0, real: 0, margin: 0, marginPct: 0 });
+  const [renderStats, setRenderStats] = useState({ total: 0, revenue: 0, creditsUsed: 0 });
   const [loading, setLoading] = useState(true);
   const [unlockModal, setUnlockModal] = useState<{ companyId: string; companyName: string } | null>(null);
   const [unlockAmount, setUnlockAmount] = useState("10");
@@ -52,11 +53,13 @@ export default function SuperAdminDashboard() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        const [companiesRes, agentsRes, creditsRes, billingRes] = await Promise.all([
+        const [companiesRes, agentsRes, creditsRes, billingRes, renderSessionsRes, renderCreditsRes] = await Promise.all([
           supabase.from("companies").select("id, name, plan, status, trial_ends_at, calls_used_month, monthly_calls_limit, created_at, sector"),
           supabase.from("agents").select("id, status, calls_month"),
           supabase.from("ai_credits").select("company_id, balance_eur, calls_blocked, auto_recharge_enabled, total_recharged_eur"),
           supabase.from("monthly_billing_summary").select("company_name, total_cost_billed_eur, total_cost_real_eur, total_margin_eur"),
+          supabase.from("render_sessions").select("id, cost_billed, status"),
+          supabase.from("render_credits").select("total_used"),
         ]);
         const comps = (companiesRes.data || []) as CompanyRow[];
         const agents = agentsRes.data || [];
@@ -74,6 +77,15 @@ export default function SuperAdminDashboard() {
           comps.forEach(c => { nameMap[c.id] = c.name; });
           setCompanyCredits((creditsRes.data as unknown as CreditRow[]).map(cr => ({ ...cr, companyName: nameMap[cr.company_id] || "—" })));
         }
+
+        // Render stats
+        const rSessions = renderSessionsRes.data || [];
+        const rCredits = renderCreditsRes.data || [];
+        setRenderStats({
+          total: rSessions.filter((s: any) => s.status === "completed").length,
+          revenue: rSessions.reduce((s: number, r: any) => s + (r.cost_billed || 0), 0),
+          creditsUsed: rCredits.reduce((s: number, r: any) => s + (r.total_used || 0), 0),
+        });
 
         // Economics
         if (billingRes.data) {
@@ -225,6 +237,16 @@ export default function SuperAdminDashboard() {
           <StatsCard icon={Coins} value={`€${ecoStats.real.toFixed(2)}`} label="Costo reale EL" deltaType="neutral" />
           <StatsCard icon={TrendingUp} value={`€${ecoStats.margin.toFixed(2)}`} label="Margine lordo" deltaType="positive" />
           <StatsCard icon={TrendingUp} value={`${ecoStats.marginPct.toFixed(0)}%`} label="Margine %" deltaType="positive" />
+        </div>
+      </div>
+
+      {/* Render AI Stats */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-bold text-ink-900 flex items-center gap-2"><Image className="h-5 w-5 text-brand" /> Render AI</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <StatsCard icon={Image} value={renderStats.total} label="Render Completati" deltaType="neutral" />
+          <StatsCard icon={DollarSign} value={`€${renderStats.revenue.toFixed(2)}`} label="Revenue Render" deltaType="positive" />
+          <StatsCard icon={Coins} value={renderStats.creditsUsed} label="Crediti Utilizzati" deltaType="neutral" />
         </div>
       </div>
 
