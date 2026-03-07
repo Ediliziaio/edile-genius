@@ -81,6 +81,10 @@ const App = () => (
                 <Route path="/app/conversations" element={<ConversationsPage />} />
                 <Route path="/app/contacts" element={<ContactsPage />} />
                 <Route path="/app/contacts/import" element={<ImportContactsPage />} />
+                <Route path="/app/contacts/:id" element={<ContactDetailPage />} />
+                <Route path="/app/phone-numbers" element={<PhoneNumbersPage />} />
+                <Route path="/app/phone-numbers/buy" element={<BuyPhoneNumberPage />} />
+                <Route path="/app/knowledge-base" element={<KnowledgeBasePage />} />
                 <Route path="/app/lists" element={<ContactListsPage />} />
                 <Route path="/app/lists/:id" element={<ContactListDetailPage />} />
                 <Route path="/app/campaigns" element={<CampaignsPage />} />

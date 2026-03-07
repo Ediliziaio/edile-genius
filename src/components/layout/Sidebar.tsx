@@ -17,6 +17,10 @@ const companyNav: NavSection[] = [
   { header: "PRINCIPALE", items: [
     { label: "Dashboard", icon: LayoutDashboard, href: "/app" },
     { label: "Agenti AI", icon: Bot, href: "/app/agents" },
+  ]},
+  { header: "COMUNICAZIONE", items: [
+    { label: "Numeri di Telefono", icon: Phone, href: "/app/phone-numbers" },
+    { label: "Knowledge Base", icon: BookOpen, href: "/app/knowledge-base" },
     { label: "Conversazioni", icon: MessageSquare, href: "/app/conversations" },
   ]},
   { header: "CONTATTI", items: [
@@ -24,17 +28,12 @@ const companyNav: NavSection[] = [
     { label: "Liste & Gruppi", icon: ListChecks, href: "/app/lists" },
     { label: "Campagne", icon: Megaphone, href: "/app/campaigns" },
   ]},
-  { header: "RISORSE", items: [
-    { label: "Numeri di Telefono", icon: Phone, href: "/app/phone-numbers" },
-    { label: "Knowledge Base", icon: BookOpen, href: "/app/knowledge-base" },
-    { label: "Crediti & Utilizzo", icon: Coins, href: "/app/credits" },
-  ]},
   { header: "REPORT", items: [
     { label: "Analytics", icon: BarChart3, href: "/app/analytics" },
+    { label: "Crediti & Utilizzo", icon: Coins, href: "/app/credits" },
   ]},
   { header: "ACCOUNT", items: [
     { label: "Impostazioni", icon: Settings, href: "/app/settings" },
-    { label: "Piano & Fatturazione", icon: CreditCard, href: "/app/settings/billing" },
     { label: "Supporto", icon: HelpCircle, href: "#" },
   ]},
 ];

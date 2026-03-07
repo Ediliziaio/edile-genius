@@ -216,6 +216,83 @@ export default function SuperAdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Economics Section */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-bold text-ink-900 flex items-center gap-2"><TrendingUp className="h-5 w-5 text-brand" /> Revenue & Margini</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatsCard icon={DollarSign} value={`€${ecoStats.billed.toFixed(2)}`} label="Incassato da aziende" deltaType="positive" />
+          <StatsCard icon={Coins} value={`€${ecoStats.real.toFixed(2)}`} label="Costo reale EL" deltaType="neutral" />
+          <StatsCard icon={TrendingUp} value={`€${ecoStats.margin.toFixed(2)}`} label="Margine lordo" deltaType="positive" />
+          <StatsCard icon={TrendingUp} value={`${ecoStats.marginPct.toFixed(0)}%`} label="Margine %" deltaType="positive" />
+        </div>
+      </div>
+
+      {/* Company Credits Table */}
+      {companyCredits.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-lg font-bold text-ink-900">Saldo Crediti per Azienda</h3>
+          <div className="rounded-card border border-ink-200 bg-white shadow-card overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-ink-50">
+                  <TableHead className="text-xs font-mono uppercase text-ink-400">Azienda</TableHead>
+                  <TableHead className="text-xs font-mono uppercase text-ink-400 text-right">Saldo €</TableHead>
+                  <TableHead className="text-xs font-mono uppercase text-ink-400">Stato</TableHead>
+                  <TableHead className="text-xs font-mono uppercase text-ink-400">Auto-Ricarica</TableHead>
+                  <TableHead className="text-xs font-mono uppercase text-ink-400 text-right">Azione</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {companyCredits.map((cr) => (
+                  <TableRow key={cr.company_id}>
+                    <TableCell className="font-medium text-sm">{cr.companyName}</TableCell>
+                    <TableCell className="text-right font-mono text-sm font-semibold">€{(cr.balance_eur || 0).toFixed(2)}</TableCell>
+                    <TableCell>
+                      {cr.calls_blocked ? (
+                        <Badge variant="destructive" className="text-xs">Bloccato</Badge>
+                      ) : (cr.balance_eur || 0) <= 10 ? (
+                        <Badge className="bg-amber-light text-amber border-amber-border text-xs">Basso</Badge>
+                      ) : (
+                        <Badge className="bg-brand-light text-brand-text border-brand-border text-xs">Regolare</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-sm text-ink-500">{cr.auto_recharge_enabled ? "✅ Attiva" : "—"}</TableCell>
+                    <TableCell className="text-right">
+                      {(cr.calls_blocked || (cr.balance_eur || 0) <= 0) && (
+                        <Button size="sm" variant="destructive" onClick={() => setUnlockModal({ companyId: cr.company_id, companyName: cr.companyName })}>
+                          Sblocca
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
+
+      {/* Unlock Modal */}
+      <Dialog open={!!unlockModal} onOpenChange={() => setUnlockModal(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Aggiungi crediti a {unlockModal?.companyName}</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Importo (€)</Label>
+              <Input type="number" min="1" value={unlockAmount} onChange={e => setUnlockAmount(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Note interne</Label>
+              <Input placeholder="Es. Credito promozionale" value={unlockNotes} onChange={e => setUnlockNotes(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUnlockModal(null)}>Annulla</Button>
+            <Button className="bg-brand hover:bg-brand-hover text-white" onClick={handleUnlock}>Accredita</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
