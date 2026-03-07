@@ -13,7 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
   CheckCircle, XCircle, RefreshCw, Cpu, DollarSign, Package,
-  Loader2, Plus, Pencil, Trash2, Zap, Clock, Brain, Save
+  Loader2, Plus, Pencil, Trash2, Zap, Clock, Brain, Save,
+  MessageSquare, Eye, EyeOff
 } from "lucide-react";
 
 interface PlatformConfig {
