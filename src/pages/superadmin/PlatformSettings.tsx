@@ -266,6 +266,27 @@ export default function PlatformSettings() {
     } finally { setWaSaving(false); }
   };
 
+  const testWaConnection = async () => {
+    setWaTesting(true);
+    setWaTestResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("whatsapp-test-connection", {
+        body: { meta_app_id: waAppId, meta_app_secret: waAppSecret },
+      });
+      if (error) {
+        setWaTestResult({ success: false, message: error.message });
+      } else if (data?.success) {
+        setWaTestResult({ success: true, message: `App: ${data.app_name}` });
+      } else {
+        setWaTestResult({ success: false, message: data?.error || "Test fallito" });
+      }
+    } catch (err: any) {
+      setWaTestResult({ success: false, message: err.message || "Errore di rete" });
+    } finally { setWaTesting(false); }
+  };
+
+  const waFieldsValid = waAppId.trim().length > 0 && waAppSecret.trim().length > 0;
+
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
 
   // Preview for global markup
