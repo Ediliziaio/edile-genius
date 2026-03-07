@@ -124,6 +124,31 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === "apply_global_markup") {
+      const { markup } = body;
+      if (!markup || markup < 1) {
+        return new Response(JSON.stringify({ error: "Invalid markup" }), { status: 400, headers: corsHeaders });
+      }
+
+      // Update all pricing rows
+      const { data: rows } = await serviceClient.from("platform_pricing").select("id, cost_real_per_min");
+      if (rows) {
+        for (const row of rows) {
+          const costBilled = Number((Number(row.cost_real_per_min) * markup).toFixed(6));
+          await serviceClient.from("platform_pricing").update({
+            markup_multiplier: markup,
+            cost_billed_per_min: costBilled,
+            updated_by: userId,
+            updated_at: new Date().toISOString(),
+          }).eq("id", row.id);
+        }
+      }
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify({ error: "Unknown action" }), { status: 400, headers: corsHeaders });
   } catch (err) {
     return new Response(JSON.stringify({ error: (err as Error).message }), { status: 500, headers: corsHeaders });
