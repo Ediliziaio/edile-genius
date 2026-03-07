@@ -40,6 +40,8 @@ import GlobalAnalyticsPage from "./pages/superadmin/GlobalAnalytics";
 import ApiKeysPage from "./pages/superadmin/ApiKeys";
 import SystemLogsPage from "./pages/superadmin/SystemLogs";
 import PlatformSettingsPage from "./pages/superadmin/PlatformSettings";
+import WhatsAppPage from "./pages/app/WhatsApp";
+import WhatsAppAdminPage from "./pages/superadmin/WhatsAppAdmin";
 
 const queryClient = new QueryClient();
 const App = () => (
