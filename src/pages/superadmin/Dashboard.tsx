@@ -78,6 +78,15 @@ export default function SuperAdminDashboard() {
           setCompanyCredits((creditsRes.data as unknown as CreditRow[]).map(cr => ({ ...cr, companyName: nameMap[cr.company_id] || "—" })));
         }
 
+        // Render stats
+        const rSessions = renderSessionsRes.data || [];
+        const rCredits = renderCreditsRes.data || [];
+        setRenderStats({
+          total: rSessions.filter((s: any) => s.status === "completed").length,
+          revenue: rSessions.reduce((s: number, r: any) => s + (r.cost_billed || 0), 0),
+          creditsUsed: rCredits.reduce((s: number, r: any) => s + (r.total_used || 0), 0),
+        });
+
         // Economics
         if (billingRes.data) {
           const billing = billingRes.data as unknown as BillingSummary[];
