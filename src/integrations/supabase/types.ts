@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       agents: {
         Row: {
+          additional_languages: string[] | null
           avg_duration_sec: number | null
           calls_month: number | null
           calls_qualified: number | null
@@ -27,24 +28,41 @@ export type Database = {
           description: string | null
           el_agent_id: string | null
           el_voice_id: string | null
+          evaluation_criteria: string | null
           first_message: string | null
           id: string
           interrupt_enabled: boolean | null
           language: string | null
           last_call_at: string | null
+          llm_backup_enabled: boolean | null
+          llm_backup_model: string | null
+          llm_max_tokens: number | null
+          llm_model: string | null
+          llm_temperature: number | null
           max_duration_sec: number | null
           name: string
+          phone_number_id: string | null
+          post_call_prompt: string | null
+          post_call_summary: boolean | null
           sector: string | null
           silence_sec: number | null
           status: string | null
           system_prompt: string | null
           temperature: number | null
+          tts_model: string | null
           type: string | null
           updated_at: string | null
           use_case: string | null
           voice_name: string | null
+          voice_similarity: number | null
+          voice_speed: number | null
+          voice_stability: number | null
+          voicemail_detection: boolean | null
+          voicemail_message: string | null
+          webhook_url: string | null
         }
         Insert: {
+          additional_languages?: string[] | null
           avg_duration_sec?: number | null
           calls_month?: number | null
           calls_qualified?: number | null
@@ -56,24 +74,41 @@ export type Database = {
           description?: string | null
           el_agent_id?: string | null
           el_voice_id?: string | null
+          evaluation_criteria?: string | null
           first_message?: string | null
           id?: string
           interrupt_enabled?: boolean | null
           language?: string | null
           last_call_at?: string | null
+          llm_backup_enabled?: boolean | null
+          llm_backup_model?: string | null
+          llm_max_tokens?: number | null
+          llm_model?: string | null
+          llm_temperature?: number | null
           max_duration_sec?: number | null
           name: string
+          phone_number_id?: string | null
+          post_call_prompt?: string | null
+          post_call_summary?: boolean | null
           sector?: string | null
           silence_sec?: number | null
           status?: string | null
           system_prompt?: string | null
           temperature?: number | null
+          tts_model?: string | null
           type?: string | null
           updated_at?: string | null
           use_case?: string | null
           voice_name?: string | null
+          voice_similarity?: number | null
+          voice_speed?: number | null
+          voice_stability?: number | null
+          voicemail_detection?: boolean | null
+          voicemail_message?: string | null
+          webhook_url?: string | null
         }
         Update: {
+          additional_languages?: string[] | null
           avg_duration_sec?: number | null
           calls_month?: number | null
           calls_qualified?: number | null
@@ -85,26 +120,154 @@ export type Database = {
           description?: string | null
           el_agent_id?: string | null
           el_voice_id?: string | null
+          evaluation_criteria?: string | null
           first_message?: string | null
           id?: string
           interrupt_enabled?: boolean | null
           language?: string | null
           last_call_at?: string | null
+          llm_backup_enabled?: boolean | null
+          llm_backup_model?: string | null
+          llm_max_tokens?: number | null
+          llm_model?: string | null
+          llm_temperature?: number | null
           max_duration_sec?: number | null
           name?: string
+          phone_number_id?: string | null
+          post_call_prompt?: string | null
+          post_call_summary?: boolean | null
           sector?: string | null
           silence_sec?: number | null
           status?: string | null
           system_prompt?: string | null
           temperature?: number | null
+          tts_model?: string | null
           type?: string | null
           updated_at?: string | null
           use_case?: string | null
           voice_name?: string | null
+          voice_similarity?: number | null
+          voice_speed?: number | null
+          voice_stability?: number | null
+          voicemail_detection?: boolean | null
+          voicemail_message?: string | null
+          webhook_url?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "agents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agents_phone_number_id_fkey"
+            columns: ["phone_number_id"]
+            isOneToOne: false
+            referencedRelation: "ai_phone_numbers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_tools: {
+        Row: {
+          agent_id: string
+          company_id: string
+          config: Json | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_enabled: boolean | null
+          name: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          agent_id: string
+          company_id: string
+          config?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          name: string
+          type?: string
+          updated_at?: string | null
+        }
+        Update: {
+          agent_id?: string
+          company_id?: string
+          config?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          name?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_tools_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_agent_tools_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_workflows: {
+        Row: {
+          agent_id: string
+          company_id: string
+          created_at: string | null
+          edges: Json | null
+          id: string
+          is_active: boolean | null
+          name: string
+          nodes: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          agent_id: string
+          company_id: string
+          created_at?: string | null
+          edges?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          nodes?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          agent_id?: string
+          company_id?: string
+          created_at?: string | null
+          edges?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          nodes?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_workflows_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_agent_workflows_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
@@ -279,6 +442,144 @@ export type Database = {
             foreignKeyName: "ai_credits_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_knowledge_docs: {
+        Row: {
+          agent_id: string | null
+          company_id: string
+          content_preview: string | null
+          created_at: string | null
+          created_by: string | null
+          el_doc_id: string | null
+          file_path: string | null
+          id: string
+          name: string
+          size_bytes: number | null
+          source_url: string | null
+          status: string | null
+          type: string
+        }
+        Insert: {
+          agent_id?: string | null
+          company_id: string
+          content_preview?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          el_doc_id?: string | null
+          file_path?: string | null
+          id?: string
+          name: string
+          size_bytes?: number | null
+          source_url?: string | null
+          status?: string | null
+          type?: string
+        }
+        Update: {
+          agent_id?: string | null
+          company_id?: string
+          content_preview?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          el_doc_id?: string | null
+          file_path?: string | null
+          id?: string
+          name?: string
+          size_bytes?: number | null
+          source_url?: string | null
+          status?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_knowledge_docs_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_knowledge_docs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_phone_numbers: {
+        Row: {
+          active_days: string[] | null
+          active_hours_end: string | null
+          active_hours_start: string | null
+          agent_id: string | null
+          company_id: string
+          country_code: string | null
+          created_at: string | null
+          el_phone_id: string | null
+          id: string
+          label: string | null
+          monthly_cost: number | null
+          out_of_hours_msg: string | null
+          phone_number: string
+          provider: string | null
+          status: string | null
+          updated_at: string | null
+          voicemail_enabled: boolean | null
+        }
+        Insert: {
+          active_days?: string[] | null
+          active_hours_end?: string | null
+          active_hours_start?: string | null
+          agent_id?: string | null
+          company_id: string
+          country_code?: string | null
+          created_at?: string | null
+          el_phone_id?: string | null
+          id?: string
+          label?: string | null
+          monthly_cost?: number | null
+          out_of_hours_msg?: string | null
+          phone_number: string
+          provider?: string | null
+          status?: string | null
+          updated_at?: string | null
+          voicemail_enabled?: boolean | null
+        }
+        Update: {
+          active_days?: string[] | null
+          active_hours_end?: string | null
+          active_hours_start?: string | null
+          agent_id?: string | null
+          company_id?: string
+          country_code?: string | null
+          created_at?: string | null
+          el_phone_id?: string | null
+          id?: string
+          label?: string | null
+          monthly_cost?: number | null
+          out_of_hours_msg?: string | null
+          phone_number?: string
+          provider?: string | null
+          status?: string | null
+          updated_at?: string | null
+          voicemail_enabled?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_phone_numbers_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_phone_numbers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -665,16 +966,22 @@ export type Database = {
       conversations: {
         Row: {
           agent_id: string
+          appointment_created: boolean | null
           caller_number: string | null
           campaign_id: string | null
+          collected_data: Json | null
           company_id: string
           contact_id: string | null
           direction: string | null
           duration_sec: number | null
           el_conv_id: string | null
           ended_at: string | null
+          eval_notes: string | null
+          eval_score: number | null
           id: string
+          lead_created: boolean | null
           metadata: Json | null
+          minutes_billed: number | null
           outcome: string | null
           phone_number: string | null
           sentiment: string | null
@@ -685,16 +992,22 @@ export type Database = {
         }
         Insert: {
           agent_id: string
+          appointment_created?: boolean | null
           caller_number?: string | null
           campaign_id?: string | null
+          collected_data?: Json | null
           company_id: string
           contact_id?: string | null
           direction?: string | null
           duration_sec?: number | null
           el_conv_id?: string | null
           ended_at?: string | null
+          eval_notes?: string | null
+          eval_score?: number | null
           id?: string
+          lead_created?: boolean | null
           metadata?: Json | null
+          minutes_billed?: number | null
           outcome?: string | null
           phone_number?: string | null
           sentiment?: string | null
@@ -705,16 +1018,22 @@ export type Database = {
         }
         Update: {
           agent_id?: string
+          appointment_created?: boolean | null
           caller_number?: string | null
           campaign_id?: string | null
+          collected_data?: Json | null
           company_id?: string
           contact_id?: string | null
           direction?: string | null
           duration_sec?: number | null
           el_conv_id?: string | null
           ended_at?: string | null
+          eval_notes?: string | null
+          eval_score?: number | null
           id?: string
+          lead_created?: boolean | null
           metadata?: Json | null
+          minutes_billed?: number | null
           outcome?: string | null
           phone_number?: string | null
           sentiment?: string | null

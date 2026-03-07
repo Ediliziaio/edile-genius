@@ -4,7 +4,7 @@ import { useImpersonation } from "@/context/ImpersonationContext";
 import {
   LayoutDashboard, Bot, MessageSquare, BarChart3, Settings,
   CreditCard, HelpCircle, Building2, UserPlus, Users, Key, FileText,
-  BookUser, ListChecks, Megaphone, type LucideIcon
+  BookUser, ListChecks, Megaphone, Phone, BookOpen, Coins, type LucideIcon
 } from "lucide-react";
 
 interface NavItem {
@@ -33,6 +33,14 @@ const companyNav: NavSection[] = [
       { label: "Rubrica", icon: BookUser, href: "/app/contacts" },
       { label: "Liste & Gruppi", icon: ListChecks, href: "/app/lists" },
       { label: "Campagne", icon: Megaphone, href: "/app/campaigns" },
+    ],
+  },
+  {
+    header: "RISORSE",
+    items: [
+      { label: "Numeri di Telefono", icon: Phone, href: "/app/phone-numbers" },
+      { label: "Knowledge Base", icon: BookOpen, href: "/app/knowledge-base" },
+      { label: "Crediti & Utilizzo", icon: Coins, href: "/app/credits" },
     ],
   },
   {

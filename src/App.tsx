@@ -29,6 +29,7 @@ import ImportContactsPage from "./pages/app/ImportContacts";
 import CreateCampaignPage from "./pages/app/CreateCampaign";
 import CampaignDetailPage from "./pages/app/CampaignDetail";
 import ContactListDetailPage from "./pages/app/ContactListDetail";
+import CreditsPage from "./pages/app/Credits";
 import TeamPage from "./pages/superadmin/Team";
 import SASettingsPage from "./pages/superadmin/SASettings";
 import GlobalAnalyticsPage from "./pages/superadmin/GlobalAnalytics";
@@ -82,6 +83,7 @@ const App = () => (
                 <Route path="/app/campaigns/new" element={<CreateCampaignPage />} />
                 <Route path="/app/campaigns/:id" element={<CampaignDetailPage />} />
                 <Route path="/app/analytics" element={<AnalyticsPage />} />
+                <Route path="/app/credits" element={<CreditsPage />} />
                 <Route path="/app/settings" element={<SettingsPage />} />
               </Route>
             </Route>
