@@ -14,6 +14,7 @@ import TranscriptViewer from "@/components/conversations/TranscriptViewer";
 import AgentIntegrationTab from "@/components/agents/AgentIntegrationTab";
 import AgentAnalyticsTab from "@/components/agents/AgentAnalyticsTab";
 import AgentKnowledgeTab from "@/components/agents/AgentKnowledgeTab";
+import AgentPhoneTab from "@/components/agents/AgentPhoneTab";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
