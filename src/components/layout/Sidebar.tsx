@@ -44,6 +44,7 @@ const superadminNav: NavSection[] = [
     { label: "Dashboard", icon: LayoutDashboard, href: "/superadmin" },
     { label: "Aziende", icon: Building2, href: "/superadmin/companies" },
     { label: "Nuova Azienda", icon: UserPlus, href: "/superadmin/companies/new" },
+    { label: "WhatsApp", icon: MessageCircle, href: "/superadmin/whatsapp" },
     { label: "Team SuperAdmin", icon: Users, href: "/superadmin/team" },
   ]},
   { header: "REPORT", items: [

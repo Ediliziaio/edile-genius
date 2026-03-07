@@ -32,3 +32,15 @@ verify_jwt = false
 
 [functions.elevenlabs-webhook]
 verify_jwt = false
+
+[functions.whatsapp-webhook]
+verify_jwt = false
+
+[functions.whatsapp-send]
+verify_jwt = false
+
+[functions.whatsapp-templates-sync]
+verify_jwt = false
+
+[functions.whatsapp-subscription]
+verify_jwt = false
