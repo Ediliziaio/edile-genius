@@ -44,6 +44,7 @@ export default function SuperAdminDashboard() {
   const [companies, setCompanies] = useState<CompanyRow[]>([]);
   const [companyCredits, setCompanyCredits] = useState<(CreditRow & { companyName: string })[]>([]);
   const [ecoStats, setEcoStats] = useState({ billed: 0, real: 0, margin: 0, marginPct: 0 });
+  const [renderStats, setRenderStats] = useState({ total: 0, revenue: 0, creditsUsed: 0 });
   const [loading, setLoading] = useState(true);
   const [unlockModal, setUnlockModal] = useState<{ companyId: string; companyName: string } | null>(null);
   const [unlockAmount, setUnlockAmount] = useState("10");
