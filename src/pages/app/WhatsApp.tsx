@@ -549,8 +549,8 @@ function TemplateEditorDialog({ open, onOpenChange, companyId, onSaved }: {
 }
 
 // ── Tab Panoramica ──
-function TabOverview({ numbers, templates, conversations, subscription }: {
-  numbers: WaNumber[]; templates: WaTemplate[]; conversations: WaConversation[]; subscription: WaSubscription | null;
+function TabOverview({ numbers, templates, conversations, subscription, wabaConfig }: {
+  numbers: WaNumber[]; templates: WaTemplate[]; conversations: WaConversation[]; subscription: WaSubscription | null; wabaConfig: WabaConfig | null;
 }) {
   const connectedNumbers = numbers.filter(n => n.status === "CONNECTED").length;
   const approvedTemplates = templates.filter(t => t.status === "APPROVED").length;
