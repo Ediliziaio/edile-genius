@@ -1,5 +1,5 @@
 
-# Stato Implementazione — Blocco 1-5 Completato
+# Stato Implementazione — Blocco 1-5 + Render AI
 
 ## ✅ Completato in questo blocco
 
@@ -45,14 +45,45 @@
 
 ### Frontend — Wizard 5 Step (TemplateSetup.tsx)
 - Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + **importa CSV** con template scaricabile
-- Step 3 Manager: canali multi-checkbox + **anteprima email mockup HTML**
-- Step 4 Canali: WA status check + Telegram con **salvataggio in company_channels** + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + **stima costi giornaliera/mensile** + **crediti disponibili** + **4 deploy steps visibili** (config, ElevenLabs, n8n, scheduling) + salva bozza
+- Step 2 Operai: lista card + importa CSV con template scaricabile
+- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
+- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
 
 ### SuperAdmin
 - /superadmin/templates: CRUD completo con JSON editor per config_schema
-- **Link "Template Agenti" aggiunto alla sidebar superadmin**
+
+## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+
+### Database (5 tabelle)
+- render_provider_config: configurazione provider AI (OpenAI GPT-Image, Gemini Flash)
+- render_infissi_presets: 24 preset globali (materiali, colori, stili, vetri, oscuranti) con prompt_fragment
+- render_sessions: sessioni render con status, config, result_urls, costi
+- render_gallery: render salvati con share_token, favoriti
+- render_credits: crediti render separati (5 gratis per azienda)
+- RLS PERMISSIVE per tutte le tabelle
+- Trigger set_updated_at + init_render_credits su companies
+- Funzione deduct_render_credit
+- Storage buckets: render-originals (privato), render-results (pubblico)
+
+### Edge Functions
+- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
+- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+
+### Frontend
+- RenderHub (/app/render): hero, come funziona, ultimi render, widget crediti
+- RenderNew (/app/render/new): wizard 4 step mobile-first (foto, config, elaborazione, risultati)
+- RenderGallery (/app/render/gallery): grid con ricerca, download, elimina
+- RenderGalleryDetail (/app/render/gallery/:id): BeforeAfterSlider, config, favoriti
+- RenderConfig (/superadmin/render-config): config provider con costi e markup
+
+### Componenti
+- BeforeAfterSlider: slider interattivo prima/dopo con drag handle
+- promptBuilder.ts: costruttore prompt, validazione foto, check dimensioni
+
+### Sidebar
+- Nuova sezione "STRUMENTI VENDITA" con "Render AI"
+- SuperAdmin: sezione "RENDER AI" con "Config Provider"
 
 ## 🔜 Prossimi Blocchi
 - Pagine: /app/phone-numbers, /app/knowledge-base
