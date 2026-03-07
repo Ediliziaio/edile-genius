@@ -77,6 +77,16 @@ export default function PlatformSettings() {
   const [editingPkg, setEditingPkg] = useState<CreditPackage | null>(null);
   const [pkgForm, setPkgForm] = useState({ name: "", minutes: "", price_eur: "", badge: "", sort_order: "" });
 
+  // WhatsApp API state
+  const [waConfig, setWaConfig] = useState<any>(null);
+  const [waAppId, setWaAppId] = useState("");
+  const [waAppSecret, setWaAppSecret] = useState("");
+  const [waWebhookUrl, setWaWebhookUrl] = useState("");
+  const [waVerifyToken, setWaVerifyToken] = useState("");
+  const [waPrice, setWaPrice] = useState("29.99");
+  const [waShowSecret, setWaShowSecret] = useState(false);
+  const [waSaving, setWaSaving] = useState(false);
+
   const fetchConfig = useCallback(async () => {
     const { data } = await supabase.functions.invoke("platform-config", { method: "GET" });
     if (data?.config) {
