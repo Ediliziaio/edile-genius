@@ -363,10 +363,10 @@ export default function PlatformSettings() {
                           <p className="text-xs font-mono text-muted-foreground">{row.llm_model} · {row.tts_model}</p>
                         </TableCell>
                         <TableCell>
-                          <Input type="number" step="0.0001" className="w-28 font-mono text-sm" value={getPricingValue(row, "cost_real_per_min")} onChange={(e) => updatePricingField(row.id, "cost_real_per_min", parseFloat(e.target.value))} />
+                          <Input type="number" step="0.0001" className="w-28 font-mono text-sm" value={String(getPricingValue(row, "cost_real_per_min"))} onChange={(e) => updatePricingField(row.id, "cost_real_per_min", parseFloat(e.target.value))} />
                         </TableCell>
                         <TableCell>
-                          <Input type="number" step="0.1" className="w-20 font-mono text-sm" value={getPricingValue(row, "markup_multiplier")} onChange={(e) => updatePricingField(row.id, "markup_multiplier", parseFloat(e.target.value))} />
+                          <Input type="number" step="0.1" className="w-20 font-mono text-sm" value={String(getPricingValue(row, "markup_multiplier"))} onChange={(e) => updatePricingField(row.id, "markup_multiplier", parseFloat(e.target.value))} />
                         </TableCell>
                         <TableCell className="font-mono text-sm font-semibold text-primary">€{costBilled.toFixed(4)}</TableCell>
                         <TableCell><Badge variant="secondary" className="text-xs">{margin.toFixed(0)}%</Badge></TableCell>
