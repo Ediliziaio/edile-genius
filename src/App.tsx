@@ -29,6 +29,7 @@ import ImportContactsPage from "./pages/app/ImportContacts";
 import CreateCampaignPage from "./pages/app/CreateCampaign";
 import CampaignDetailPage from "./pages/app/CampaignDetail";
 import ContactListDetailPage from "./pages/app/ContactListDetail";
+import CreditsPage from "./pages/app/Credits";
 import TeamPage from "./pages/superadmin/Team";
 import SASettingsPage from "./pages/superadmin/SASettings";
 import GlobalAnalyticsPage from "./pages/superadmin/GlobalAnalytics";

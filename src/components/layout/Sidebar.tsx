@@ -36,6 +36,14 @@ const companyNav: NavSection[] = [
     ],
   },
   {
+    header: "RISORSE",
+    items: [
+      { label: "Numeri di Telefono", icon: Phone, href: "/app/phone-numbers" },
+      { label: "Knowledge Base", icon: BookOpen, href: "/app/knowledge-base" },
+      { label: "Crediti & Utilizzo", icon: Coins, href: "/app/credits" },
+    ],
+  },
+  {
     header: "REPORT",
     items: [
       { label: "Analytics", icon: BarChart3, href: "/app/analytics" },
