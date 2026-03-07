@@ -66,6 +66,7 @@ export default function PlatformSettings() {
   const [packages, setPackages] = useState<CreditPackage[]>([]);
   const [pricing, setPricing] = useState<PricingRow[]>([]);
   const [editedPricing, setEditedPricing] = useState<Record<string, Partial<PricingRow>>>({});
+  const [ecoStats, setEcoStats] = useState({ billed: 0, real: 0, margin: 0, marginPct: 0 });
   const [loading, setLoading] = useState(true);
   const [testing, setTesting] = useState(false);
   const [saving, setSaving] = useState(false);
