@@ -630,6 +630,13 @@ export default function PlatformSettings() {
                   <Label>Prezzo Abbonamento Mensile (€)</Label>
                   <Input type="number" step="0.01" value={waPrice} onChange={e => setWaPrice(e.target.value)} />
                 </div>
+                <div className="space-y-2">
+                  <Label>Meta Config ID <span className="text-xs text-muted-foreground">(opzionale)</span></Label>
+                  <Input value={waConfigId} onChange={e => setWaConfigId(e.target.value)} placeholder="Es. 123456789012345" />
+                  <p className="text-xs text-muted-foreground">
+                    Creato nella Meta Business Dashboard → WhatsApp → Configurazioni Embedded Signup. Pre-seleziona soluzioni e permessi nel flusso OAuth.
+                  </p>
+                </div>
               </div>
               <Separator />
               <Button onClick={saveWaConfig} disabled={waSaving || !waFieldsValid}>
