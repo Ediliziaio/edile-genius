@@ -84,6 +84,8 @@ interface WabaConfig {
   meta_verification_status: string;
   access_token_encrypted: string | null;
   meta_verified: boolean;
+  token_refreshed_at: string | null;
+  token_refresh_error: string | null;
 }
 
 const qualityColors: Record<string, string> = {
