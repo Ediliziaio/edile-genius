@@ -2297,6 +2297,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_installs_count: { Args: { tpl_id: string }; Returns: undefined }
       my_company: { Args: never; Returns: string }
       my_role: { Args: never; Returns: Database["public"]["Enums"]["app_role"] }
     }
