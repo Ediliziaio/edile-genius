@@ -40,6 +40,8 @@ import GlobalAnalyticsPage from "./pages/superadmin/GlobalAnalytics";
 import ApiKeysPage from "./pages/superadmin/ApiKeys";
 import SystemLogsPage from "./pages/superadmin/SystemLogs";
 import PlatformSettingsPage from "./pages/superadmin/PlatformSettings";
+import WhatsAppPage from "./pages/app/WhatsApp";
+import WhatsAppAdminPage from "./pages/superadmin/WhatsAppAdmin";
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -62,6 +64,7 @@ const App = () => (
                 <Route path="/superadmin/companies" element={<Companies />} />
                 <Route path="/superadmin/companies/new" element={<CreateCompany />} />
                 <Route path="/superadmin/companies/:id" element={<CompanyDetail />} />
+                <Route path="/superadmin/whatsapp" element={<WhatsAppAdminPage />} />
                 <Route path="/superadmin/team" element={<TeamPage />} />
                 <Route path="/superadmin/settings" element={<SASettingsPage />} />
                 <Route path="/superadmin/analytics" element={<GlobalAnalyticsPage />} />
@@ -85,6 +88,7 @@ const App = () => (
                 <Route path="/app/phone-numbers" element={<PhoneNumbersPage />} />
                 <Route path="/app/phone-numbers/buy" element={<BuyPhoneNumberPage />} />
                 <Route path="/app/knowledge-base" element={<KnowledgeBasePage />} />
+                <Route path="/app/whatsapp" element={<WhatsAppPage />} />
                 <Route path="/app/lists" element={<ContactListsPage />} />
                 <Route path="/app/lists/:id" element={<ContactListDetailPage />} />
                 <Route path="/app/campaigns" element={<CampaignsPage />} />

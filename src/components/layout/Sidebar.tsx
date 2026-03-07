@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Bot, MessageSquare, BarChart3, Settings,
   CreditCard, HelpCircle, Building2, UserPlus, Users, FileText,
   BookUser, ListChecks, Megaphone, Phone, BookOpen, Coins, type LucideIcon,
-  AlertTriangle
+  AlertTriangle, MessageCircle
 } from "lucide-react";
 
 interface NavItem { label: string; icon: LucideIcon; href: string; }
@@ -20,6 +20,7 @@ const companyNav: NavSection[] = [
   ]},
   { header: "COMUNICAZIONE", items: [
     { label: "Numeri di Telefono", icon: Phone, href: "/app/phone-numbers" },
+    { label: "WhatsApp", icon: MessageCircle, href: "/app/whatsapp" },
     { label: "Knowledge Base", icon: BookOpen, href: "/app/knowledge-base" },
     { label: "Conversazioni", icon: MessageSquare, href: "/app/conversations" },
   ]},
@@ -43,6 +44,7 @@ const superadminNav: NavSection[] = [
     { label: "Dashboard", icon: LayoutDashboard, href: "/superadmin" },
     { label: "Aziende", icon: Building2, href: "/superadmin/companies" },
     { label: "Nuova Azienda", icon: UserPlus, href: "/superadmin/companies/new" },
+    { label: "WhatsApp", icon: MessageCircle, href: "/superadmin/whatsapp" },
     { label: "Team SuperAdmin", icon: Users, href: "/superadmin/team" },
   ]},
   { header: "REPORT", items: [
