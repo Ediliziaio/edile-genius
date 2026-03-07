@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Plus, Trash2, CheckCircle2, Loader2, ExternalLink } from "lucide-react";
+import {
+  ArrowLeft, ArrowRight, Plus, Trash2, CheckCircle2, Loader2,
+  ExternalLink, Upload, Download, Circle
+} from "lucide-react";
 
 /* ── Types ────────────────────────────────────────────── */
 
@@ -57,6 +60,11 @@ interface Recipient {
   receive_partial: boolean;
 }
 
+interface CreditInfo {
+  balance_eur: number;
+  total_recharged_eur: number;
+}
+
 const STEPS = ["Personalizza", "Operai", "Manager", "Canali", "Attiva"];
 
 /* ── Component ───────────────────────────────────────── */
@@ -64,6 +72,7 @@ const STEPS = ["Personalizza", "Operai", "Manager", "Canali", "Attiva"];
 export default function TemplateSetupPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const csvInputRef = useRef<HTMLInputElement>(null);
 
   const [template, setTemplate] = useState<Template | null>(null);
   const [loading, setLoading] = useState(true);
@@ -89,7 +98,9 @@ export default function TemplateSetupPage() {
 
   // Step 5
   const [deploying, setDeploying] = useState(false);
-  const [deploySteps, setDeploySteps] = useState<string[]>([]);
+  const [deploySteps, setDeploySteps] = useState<{ label: string; status: "pending" | "loading" | "done" | "error" }[]>([]);
+  const [creditInfo, setCreditInfo] = useState<CreditInfo | null>(null);
+  const [costPerMin, setCostPerMin] = useState(0.07);
 
   /* ── Load template ─────────────────────────────────── */
 
@@ -105,7 +116,6 @@ export default function TemplateSetupPage() {
         const t = data as any as Template;
         setTemplate(t);
         setAgentName(`${t.name} — `);
-        // Init config defaults
         const defaults: Record<string, any> = {};
         (t.config_schema as any[] || []).forEach((f: ConfigField) => {
           if (f.default !== undefined) defaults[f.key] = f.default;
@@ -116,17 +126,29 @@ export default function TemplateSetupPage() {
     })();
   }, [slug]);
 
-  /* ── Check WA status ───────────────────────────────── */
+  /* ── Check WA + credits ────────────────────────────── */
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
+      const { data: waData } = await supabase
         .from("company_channels")
         .select("id")
         .eq("channel_type", "whatsapp")
         .eq("is_verified", true)
         .limit(1);
-      if (data && data.length > 0) setWaConnected(true);
+      if (waData && waData.length > 0) setWaConnected(true);
+
+      // Load credits
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: profile } = await supabase.from("profiles").select("company_id").eq("id", user.id).single();
+      if (!profile?.company_id) return;
+      const { data: credits } = await supabase.from("ai_credits").select("balance_eur, total_recharged_eur").eq("company_id", profile.company_id).single();
+      if (credits) setCreditInfo(credits as unknown as CreditInfo);
+
+      // Load pricing
+      const { data: pricing } = await supabase.from("platform_pricing").select("cost_billed_per_min").eq("is_active", true).limit(1);
+      if (pricing && pricing.length > 0) setCostPerMin(pricing[0].cost_billed_per_min);
     })();
   }, []);
 
@@ -158,6 +180,53 @@ export default function TemplateSetupPage() {
     msg = msg.replace(/\{\{NOME_CAPOCANTIERE\}\}/g, responders[0]?.name || "[Capo Cantiere]");
     return msg;
   }, [template, configValues, responders]);
+
+  /* ── CSV Import ────────────────────────────────────── */
+
+  const handleCsvImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string;
+      const lines = text.split("\n").filter((l) => l.trim());
+      if (lines.length < 2) { toast.error("CSV vuoto o senza dati"); return; }
+
+      const header = lines[0].toLowerCase().split(/[;,\t]/);
+      const nameIdx = header.findIndex((h) => /nome|name/i.test(h));
+      const phoneIdx = header.findIndex((h) => /telefon|phone|cellulare|mobile/i.test(h));
+      const cantiereIdx = header.findIndex((h) => /cantiere|site|luogo/i.test(h));
+
+      if (nameIdx === -1 || phoneIdx === -1) {
+        toast.error("Il CSV deve avere colonne 'nome' e 'telefono'");
+        return;
+      }
+
+      const imported: Responder[] = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(/[;,\t]/);
+        const name = cols[nameIdx]?.trim();
+        const phone = cols[phoneIdx]?.trim();
+        const cantiere = cantiereIdx >= 0 ? cols[cantiereIdx]?.trim() || "" : "";
+        if (name && phone) imported.push({ name, phone, cantiere });
+      }
+
+      if (imported.length === 0) { toast.error("Nessun operaio valido trovato nel CSV"); return; }
+      setResponders((prev) => [...prev.filter((r) => r.name.trim()), ...imported]);
+      toast.success(`${imported.length} operai importati dal CSV`);
+    };
+    reader.readAsText(file);
+    if (csvInputRef.current) csvInputRef.current.value = "";
+  };
+
+  const downloadCsvTemplate = () => {
+    const csv = "nome;telefono;cantiere\nMario Rossi;+39 333 1234567;Via Roma 15 Milano\n";
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "template_operai.csv";
+    a.click();
+  };
 
   /* ── Validation ────────────────────────────────────── */
 
@@ -211,6 +280,39 @@ export default function TemplateSetupPage() {
     }
   };
 
+  /* ── Save Telegram to company_channels ─────────────── */
+
+  const saveTelegramChannel = async () => {
+    if (!telegramToken || !telegramBotName) return;
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData?.user) return;
+    const { data: profile } = await supabase.from("profiles").select("company_id").eq("id", userData.user.id).single();
+    if (!profile?.company_id) return;
+
+    // Check if telegram channel already exists
+    const { data: existing } = await supabase
+      .from("company_channels")
+      .select("id")
+      .eq("company_id", profile.company_id)
+      .eq("channel_type", "telegram")
+      .limit(1);
+
+    if (existing && existing.length > 0) {
+      await supabase.from("company_channels").update({
+        telegram_bot_token: telegramToken,
+        telegram_bot_name: telegramBotName,
+      }).eq("id", existing[0].id);
+    } else {
+      await supabase.from("company_channels").insert({
+        company_id: profile.company_id,
+        channel_type: "telegram",
+        telegram_bot_token: telegramToken,
+        telegram_bot_name: telegramBotName,
+        label: telegramBotName,
+      });
+    }
+  };
+
   /* ── Deploy ────────────────────────────────────────── */
 
   const deploy = async () => {
@@ -218,17 +320,24 @@ export default function TemplateSetupPage() {
       await saveInstance();
     }
     setDeploying(true);
-    const steps: string[] = [];
+
+    const steps = [
+      { label: "Salvataggio configurazione...", status: "loading" as const },
+      { label: "Creazione agente su ElevenLabs...", status: "pending" as const },
+      { label: "Configurazione workflow n8n...", status: "pending" as const },
+      { label: "Connessione canali e scheduling...", status: "pending" as const },
+    ];
+    setDeploySteps([...steps]);
 
     try {
-      steps.push("Salvataggio configurazione...");
-      setDeploySteps([...steps]);
+      // Step 1: Save config
       await saveInstance();
-      steps[steps.length - 1] = "✅ Configurazione salvata";
-
-      steps.push("Creazione agente su ElevenLabs...");
+      if (telegramToken) await saveTelegramChannel();
+      steps[0].status = "done";
+      steps[1].status = "loading";
       setDeploySteps([...steps]);
 
+      // Step 2-4: Call deploy function
       const { data: session } = await supabase.auth.getSession();
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
 
@@ -249,13 +358,21 @@ export default function TemplateSetupPage() {
         throw new Error(err.error || "Errore deploy");
       }
 
-      steps[steps.length - 1] = "✅ Agente creato";
-      steps.push("✅ Attivazione completata!");
+      const result = await res.json();
+
+      steps[1].status = "done";
+      steps[2].status = result.n8nWorkflowId ? "done" : "done";
+      steps[2].label = result.n8nWorkflowId ? "✅ Workflow n8n configurato" : "Workflow n8n — configurazione manuale";
+      steps[3].status = "done";
+      steps[3].label = `Primo invio programmato per le ${configValues.orario_invio || "17:30"}`;
       setDeploySteps([...steps]);
 
-      toast.success("Agente attivato! 🎉");
-      setTimeout(() => navigate("/app/agents"), 1500);
+      toast.success(`✅ Agente attivato! Il primo report partirà alle ${configValues.orario_invio || "17:30"}.`);
+      setTimeout(() => navigate("/app/agents"), 2000);
     } catch (e: any) {
+      const failIdx = steps.findIndex((s) => s.status === "loading");
+      if (failIdx >= 0) steps[failIdx].status = "error";
+      setDeploySteps([...steps]);
       toast.error(e.message || "Errore durante il deploy");
       setDeploying(false);
     }
@@ -266,11 +383,19 @@ export default function TemplateSetupPage() {
   const goNext = async () => {
     if (step < 4) {
       await saveInstance();
+      if (step === 3 && telegramToken) await saveTelegramChannel();
       setStep(step + 1);
     }
   };
 
   const goBack = () => step > 0 && setStep(step - 1);
+
+  /* ── Cost calculations ─────────────────────────────── */
+
+  const activeResponders = responders.filter((r) => r.name.trim()).length;
+  const dailyCost = activeResponders * 4 * costPerMin;
+  const monthlyCost = dailyCost * 22;
+  const availableNights = creditInfo && dailyCost > 0 ? Math.floor(creditInfo.balance_eur / dailyCost) : 0;
 
   /* ── Render ────────────────────────────────────────── */
 
@@ -421,8 +546,21 @@ export default function TemplateSetupPage() {
         {/* ── STEP 1: Operai ─────────────────────────────── */}
         {step === 1 && (
           <div>
-            <h2 className="text-2xl font-extrabold text-foreground">Chi deve rispondere al report?</h2>
-            <p className="text-sm text-muted-foreground mt-1">Aggiungi i capi-cantiere che riceveranno il messaggio ogni sera.</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-extrabold text-foreground">Chi deve rispondere al report?</h2>
+                <p className="text-sm text-muted-foreground mt-1">Aggiungi i capi-cantiere che riceveranno il messaggio ogni sera.</p>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={downloadCsvTemplate}>
+                  <Download size={14} className="mr-1" /> Template CSV
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => csvInputRef.current?.click()}>
+                  <Upload size={14} className="mr-1" /> Importa CSV
+                </Button>
+                <input ref={csvInputRef} type="file" accept=".csv" className="hidden" onChange={handleCsvImport} />
+              </div>
+            </div>
 
             <div className="space-y-3 mt-6">
               {responders.map((r, i) => (
@@ -493,7 +631,7 @@ export default function TemplateSetupPage() {
               <Plus size={16} className="mr-1" /> Aggiungi Operaio
             </Button>
 
-            <div className="bg-status-info-light border border-status-info/20 rounded-lg p-3 mt-4 text-sm text-foreground">
+            <div className="bg-muted/50 border border-border rounded-lg p-3 mt-4 text-sm text-foreground">
               ℹ️ Il numero WhatsApp deve essere registrato su WhatsApp. L'agente invierà il messaggio a questo numero ogni sera all'orario impostato.
             </div>
           </div>
@@ -578,38 +716,18 @@ export default function TemplateSetupPage() {
                                 <span className="text-sm">{ch.label}</span>
                               </div>
                               {active && ch.key === "email" && (
-                                <Input
-                                  type="email"
-                                  placeholder="email@azienda.it"
-                                  value={r.email}
-                                  onChange={(e) => {
-                                    const copy = [...recipients];
-                                    copy[i].email = e.target.value;
-                                    setRecipients(copy);
-                                  }}
+                                <Input type="email" placeholder="email@azienda.it" value={r.email}
+                                  onChange={(e) => { const copy = [...recipients]; copy[i].email = e.target.value; setRecipients(copy); }}
                                 />
                               )}
                               {active && ch.key === "whatsapp" && (
-                                <Input
-                                  type="tel"
-                                  placeholder="+39 333..."
-                                  value={r.phone}
-                                  onChange={(e) => {
-                                    const copy = [...recipients];
-                                    copy[i].phone = e.target.value;
-                                    setRecipients(copy);
-                                  }}
+                                <Input type="tel" placeholder="+39 333..." value={r.phone}
+                                  onChange={(e) => { const copy = [...recipients]; copy[i].phone = e.target.value; setRecipients(copy); }}
                                 />
                               )}
                               {active && ch.key === "telegram" && (
-                                <Input
-                                  placeholder="@username"
-                                  value={r.telegram}
-                                  onChange={(e) => {
-                                    const copy = [...recipients];
-                                    copy[i].telegram = e.target.value;
-                                    setRecipients(copy);
-                                  }}
+                                <Input placeholder="@username" value={r.telegram}
+                                  onChange={(e) => { const copy = [...recipients]; copy[i].telegram = e.target.value; setRecipients(copy); }}
                                 />
                               )}
                             </div>
@@ -646,6 +764,44 @@ export default function TemplateSetupPage() {
             >
               <Plus size={16} className="mr-1" /> Aggiungi Destinatario
             </Button>
+
+            {/* Email Preview Mockup */}
+            {recipients.some((r) => r.channels.includes("email") && r.name.trim()) && (
+              <Card className="mt-6 overflow-hidden">
+                <div className="bg-primary h-1" />
+                <CardContent className="p-5">
+                  <p className="text-[11px] font-mono uppercase text-muted-foreground mb-3">📧 Anteprima Email Report</p>
+                  <div className="border border-border rounded-lg p-5 bg-card text-sm space-y-3">
+                    <div className="text-xs text-muted-foreground">
+                      Da: reportistica@edilizia.io<br />
+                      Oggetto: 📋 Report Cantiere {responders[0]?.cantiere || "Via Roma"} — {new Date().toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" })}
+                    </div>
+                    <hr className="border-border" />
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-bold text-foreground">edilizia<span className="text-primary">.io</span></span>
+                      <span className="text-muted-foreground">· {configValues.nome_azienda || "Azienda"}</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-foreground">Report Giornaliero Cantiere</h3>
+                    <p className="text-muted-foreground text-xs">{new Date().toLocaleDateString("it-IT")} · {responders[0]?.cantiere || "Cantiere"}</p>
+                    <div className="grid grid-cols-3 gap-3 mt-3">
+                      <div className="bg-muted rounded-lg p-3 text-center">
+                        <p className="text-lg font-bold text-foreground">—</p>
+                        <p className="text-[10px] text-muted-foreground">Operai</p>
+                      </div>
+                      <div className="bg-muted rounded-lg p-3 text-center">
+                        <p className="text-lg font-bold text-primary">Pari</p>
+                        <p className="text-[10px] text-muted-foreground">Avanzamento</p>
+                      </div>
+                      <div className="bg-muted rounded-lg p-3 text-center">
+                        <p className="text-lg font-bold text-foreground">✅</p>
+                        <p className="text-[10px] text-muted-foreground">Problemi</p>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-4 text-center">Generato da edilizia.io · {configValues.nome_azienda || "Azienda"}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
 
@@ -663,11 +819,11 @@ export default function TemplateSetupPage() {
 
               <TabsContent value="whatsapp" className="mt-4">
                 {waConnected ? (
-                  <Card className="bg-primary-light border-primary/20">
+                  <Card className="border-primary/20">
                     <CardContent className="p-5">
                       <div className="flex items-center gap-2">
                         <CheckCircle2 className="text-primary" size={20} />
-                        <span className="text-[15px] font-bold text-brand-text">WhatsApp configurato e attivo</span>
+                        <span className="text-[15px] font-bold text-foreground">WhatsApp configurato e attivo</span>
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">
                         Il tuo numero WhatsApp Business è già collegato tramite il modulo WhatsApp.
@@ -692,7 +848,7 @@ export default function TemplateSetupPage() {
               <TabsContent value="telegram" className="mt-4">
                 <Card>
                   <CardContent className="p-5 space-y-4">
-                    <div className="bg-status-info-light border border-status-info/20 rounded-lg p-4">
+                    <div className="bg-muted/50 border border-border rounded-lg p-4">
                       <p className="text-sm font-semibold text-foreground mb-2">Come creare il bot (2 minuti):</p>
                       <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
                         <li>Apri Telegram e cerca @BotFather</li>
@@ -700,6 +856,10 @@ export default function TemplateSetupPage() {
                         <li>Copia il token API che ti manda BotFather</li>
                         <li>Incollalo qui sotto</li>
                       </ol>
+                      <a href="https://t.me/BotFather" target="_blank" rel="noopener noreferrer"
+                        className="text-sm text-primary hover:underline mt-2 inline-flex items-center gap-1">
+                        Apri @BotFather su Telegram <ExternalLink size={12} />
+                      </a>
                     </div>
 
                     <div>
@@ -723,9 +883,20 @@ export default function TemplateSetupPage() {
                       />
                     </div>
 
-                    <div className="bg-status-warning-light border border-status-warning/20 rounded-lg p-3 text-sm">
-                      ⚠️ Gli operai devono prima inviare /start al bot Telegram per poter ricevere messaggi.
-                    </div>
+                    {telegramBotName && (
+                      <div className="bg-muted/50 border border-border rounded-lg p-3 text-sm">
+                        ⚠️ Gli operai devono prima inviare <code className="bg-muted px-1 rounded">/start</code> al bot Telegram per poter ricevere messaggi. Condividi questo link:
+                        <div className="flex items-center gap-2 mt-2">
+                          <code className="text-xs bg-muted px-2 py-1 rounded flex-1 overflow-hidden">
+                            https://t.me/{telegramBotName.replace("@", "")}?start=cantiere
+                          </code>
+                          <Button variant="outline" size="sm" onClick={() => {
+                            navigator.clipboard.writeText(`https://t.me/${telegramBotName.replace("@", "")}?start=cantiere`);
+                            toast.success("Link copiato!");
+                          }}>Copia</Button>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -748,6 +919,7 @@ export default function TemplateSetupPage() {
                     {configValues.nome_azienda && <div className="flex justify-between"><span className="text-muted-foreground">Azienda</span><span className="font-medium text-foreground">{configValues.nome_azienda}</span></div>}
                     {configValues.settore && <div className="flex justify-between"><span className="text-muted-foreground">Settore</span><span className="font-medium text-foreground">{configValues.settore}</span></div>}
                     <div className="flex justify-between"><span className="text-muted-foreground">Orario invio</span><span className="font-mono font-medium text-primary">{configValues.orario_invio || "17:30"}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Giorni</span><span className="font-medium text-foreground">{(configValues.giorni_attivi as string[])?.join(", ") || "Lun-Sab"}</span></div>
                   </div>
                   <Button variant="ghost" size="sm" className="mt-2 text-xs" onClick={() => setStep(0)}>Modifica</Button>
                 </CardContent>
@@ -755,11 +927,12 @@ export default function TemplateSetupPage() {
 
               <Card>
                 <CardContent className="p-5">
-                  <p className="text-sm font-bold text-foreground mb-3">👷 Operai configurati</p>
+                  <p className="text-sm font-bold text-foreground mb-3">👷 Operai configurati ({activeResponders})</p>
                   <div className="space-y-1 text-sm">
-                    {responders.filter((r) => r.name.trim()).map((r, i) => (
+                    {responders.filter((r) => r.name.trim()).slice(0, 5).map((r, i) => (
                       <p key={i} className="text-foreground">{r.name} — <span className="text-muted-foreground">{r.cantiere}</span></p>
                     ))}
+                    {activeResponders > 5 && <p className="text-muted-foreground">+ {activeResponders - 5} altri</p>}
                   </div>
                   <Button variant="ghost" size="sm" className="mt-2 text-xs" onClick={() => setStep(1)}>Modifica</Button>
                 </CardContent>
@@ -790,18 +963,26 @@ export default function TemplateSetupPage() {
               </Card>
             </div>
 
-            {/* Stima costi */}
-            <Card className="mt-5 bg-muted/50">
+            {/* Cost Estimate */}
+            <Card className="mt-5 border-primary/20">
               <CardContent className="p-5">
-                <p className="text-sm text-muted-foreground">Stima costo giornaliero:</p>
-                <div className="flex items-center gap-3 mt-2">
-                  <span className="text-sm text-muted-foreground">
-                    {responders.filter((r) => r.name.trim()).length} operai × ~4 min × €0.07/min
-                  </span>
-                  <span className="text-xl text-muted-foreground">=</span>
-                  <span className="text-2xl font-bold text-primary">
-                    ~€{(responders.filter((r) => r.name.trim()).length * 4 * 0.07).toFixed(2)} / sera
-                  </span>
+                <p className="text-sm font-bold text-foreground mb-3">💰 Stima costi</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Costo giornaliero</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{activeResponders} operai × ~4 min × €{costPerMin.toFixed(2)}/min</p>
+                    <p className="text-2xl font-bold text-primary mt-1">~€{dailyCost.toFixed(2)} / sera</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Costo mensile stimato</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">22 giorni lavorativi</p>
+                    <p className="text-2xl font-bold text-foreground mt-1">~€{monthlyCost.toFixed(2)} / mese</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Crediti disponibili</p>
+                    <p className="text-2xl font-bold text-primary mt-1">€{creditInfo?.balance_eur?.toFixed(2) || "0.00"}</p>
+                    {dailyCost > 0 && <p className="text-sm text-muted-foreground mt-0.5">≈ {availableNights} sere</p>}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -810,23 +991,31 @@ export default function TemplateSetupPage() {
             {deploying ? (
               <Card className="mt-6">
                 <CardContent className="p-6">
-                  <p className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+                  <p className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
                     <Loader2 size={16} className="animate-spin" /> Stiamo creando il tuo agente...
                   </p>
-                  <div className="space-y-2 text-sm">
+                  <div className="space-y-3">
                     {deploySteps.map((s, i) => (
-                      <p key={i} className={s.startsWith("✅") ? "text-primary" : "text-muted-foreground"}>{s}</p>
+                      <div key={i} className="flex items-center gap-3 text-sm">
+                        {s.status === "done" && <CheckCircle2 size={16} className="text-primary shrink-0" />}
+                        {s.status === "loading" && <Loader2 size={16} className="animate-spin text-primary shrink-0" />}
+                        {s.status === "pending" && <Circle size={16} className="text-muted-foreground shrink-0" />}
+                        {s.status === "error" && <Circle size={16} className="text-destructive shrink-0" />}
+                        <span className={s.status === "done" ? "text-foreground" : s.status === "error" ? "text-destructive" : "text-muted-foreground"}>
+                          {s.label}
+                        </span>
+                      </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
             ) : (
               <div className="mt-8 text-center space-y-3">
-                <Button size="lg" className="px-10 py-4 text-lg" onClick={deploy}>
+                <Button size="lg" className="px-10 py-4 text-lg shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-transform" onClick={deploy}>
                   🚀 Attiva Agente
                 </Button>
                 <div>
-                  <Button variant="ghost" onClick={async () => { await saveInstance(); toast.success("Bozza salvata"); }}>
+                  <Button variant="ghost" onClick={async () => { await saveInstance(); if (telegramToken) await saveTelegramChannel(); toast.success("Bozza salvata"); }}>
                     Salva bozza e attiva dopo
                   </Button>
                 </div>
