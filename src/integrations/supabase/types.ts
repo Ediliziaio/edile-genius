@@ -406,35 +406,192 @@ export type Database = {
           },
         ]
       }
+      ai_credit_topups: {
+        Row: {
+          amount_eur: number
+          company_id: string
+          created_at: string | null
+          id: string
+          invoice_number: string | null
+          notes: string | null
+          payment_method: string | null
+          payment_ref: string | null
+          processed_at: string | null
+          status: string
+          triggered_by: string | null
+          type: string
+        }
+        Insert: {
+          amount_eur: number
+          company_id: string
+          created_at?: string | null
+          id?: string
+          invoice_number?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          payment_ref?: string | null
+          processed_at?: string | null
+          status?: string
+          triggered_by?: string | null
+          type?: string
+        }
+        Update: {
+          amount_eur?: number
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          invoice_number?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          payment_ref?: string | null
+          processed_at?: string | null
+          status?: string
+          triggered_by?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_credit_topups_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_credit_usage: {
+        Row: {
+          agent_id: string | null
+          balance_after: number
+          balance_before: number
+          call_direction: string | null
+          company_id: string
+          conversation_id: string | null
+          cost_billed_per_min: number
+          cost_billed_total: number
+          cost_real_per_min: number
+          cost_real_total: number
+          created_at: string | null
+          duration_min: number
+          duration_sec: number
+          id: string
+          llm_model: string
+          margin_total: number
+          tts_model: string
+        }
+        Insert: {
+          agent_id?: string | null
+          balance_after: number
+          balance_before: number
+          call_direction?: string | null
+          company_id: string
+          conversation_id?: string | null
+          cost_billed_per_min: number
+          cost_billed_total: number
+          cost_real_per_min: number
+          cost_real_total: number
+          created_at?: string | null
+          duration_min: number
+          duration_sec: number
+          id?: string
+          llm_model: string
+          margin_total: number
+          tts_model: string
+        }
+        Update: {
+          agent_id?: string | null
+          balance_after?: number
+          balance_before?: number
+          call_direction?: string | null
+          company_id?: string
+          conversation_id?: string | null
+          cost_billed_per_min?: number
+          cost_billed_total?: number
+          cost_real_per_min?: number
+          cost_real_total?: number
+          created_at?: string | null
+          duration_min?: number
+          duration_sec?: number
+          id?: string
+          llm_model?: string
+          margin_total?: number
+          tts_model?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_credit_usage_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_credits: {
         Row: {
           alert_email_sent_at: string | null
+          alert_threshold_eur: number | null
           alert_threshold_pct: number
+          auto_recharge_amount: number | null
+          auto_recharge_enabled: boolean | null
+          auto_recharge_method: string | null
+          auto_recharge_payment_ref: string | null
+          auto_recharge_threshold: number | null
+          balance_eur: number | null
+          blocked_at: string | null
+          blocked_reason: string | null
+          calls_blocked: boolean | null
           company_id: string
           id: string
           minutes_purchased: number
           minutes_reserved: number
           minutes_used: number
+          total_recharged_eur: number | null
+          total_spent_eur: number | null
           updated_at: string | null
         }
         Insert: {
           alert_email_sent_at?: string | null
+          alert_threshold_eur?: number | null
           alert_threshold_pct?: number
+          auto_recharge_amount?: number | null
+          auto_recharge_enabled?: boolean | null
+          auto_recharge_method?: string | null
+          auto_recharge_payment_ref?: string | null
+          auto_recharge_threshold?: number | null
+          balance_eur?: number | null
+          blocked_at?: string | null
+          blocked_reason?: string | null
+          calls_blocked?: boolean | null
           company_id: string
           id?: string
           minutes_purchased?: number
           minutes_reserved?: number
           minutes_used?: number
+          total_recharged_eur?: number | null
+          total_spent_eur?: number | null
           updated_at?: string | null
         }
         Update: {
           alert_email_sent_at?: string | null
+          alert_threshold_eur?: number | null
           alert_threshold_pct?: number
+          auto_recharge_amount?: number | null
+          auto_recharge_enabled?: boolean | null
+          auto_recharge_method?: string | null
+          auto_recharge_payment_ref?: string | null
+          auto_recharge_threshold?: number | null
+          balance_eur?: number | null
+          blocked_at?: string | null
+          blocked_reason?: string | null
+          calls_blocked?: boolean | null
           company_id?: string
           id?: string
           minutes_purchased?: number
           minutes_reserved?: number
           minutes_used?: number
+          total_recharged_eur?: number | null
+          total_spent_eur?: number | null
           updated_at?: string | null
         }
         Relationships: [
@@ -1218,6 +1375,45 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_pricing: {
+        Row: {
+          cost_billed_per_min: number
+          cost_real_per_min: number
+          id: string
+          is_active: boolean | null
+          label: string | null
+          llm_model: string
+          markup_multiplier: number
+          tts_model: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          cost_billed_per_min: number
+          cost_real_per_min: number
+          id?: string
+          is_active?: boolean | null
+          label?: string | null
+          llm_model: string
+          markup_multiplier?: number
+          tts_model: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          cost_billed_per_min?: number
+          cost_real_per_min?: number
+          id?: string
+          is_active?: boolean | null
+          label?: string | null
+          llm_model?: string
+          markup_multiplier?: number
+          tts_model?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1364,7 +1560,29 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      monthly_billing_summary: {
+        Row: {
+          agents_used: number | null
+          avg_cost_per_min: number | null
+          company_id: string | null
+          company_name: string | null
+          conversations_count: number | null
+          month: string | null
+          total_cost_billed_eur: number | null
+          total_cost_real_eur: number | null
+          total_margin_eur: number | null
+          total_minutes: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_credit_usage_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       get_user_company_id: { Args: { _user_id: string }; Returns: string }
