@@ -119,9 +119,22 @@ export default function PlatformSettings() {
     }
   }, []);
 
+  const fetchWaConfig = useCallback(async () => {
+    const { data } = await supabase.from("superadmin_whatsapp_config").select("*").limit(1).maybeSingle();
+    if (data) {
+      const c = data as any;
+      setWaConfig(c);
+      setWaAppId(c.meta_app_id || "");
+      setWaAppSecret(c.meta_app_secret_encrypted || "");
+      setWaWebhookUrl(c.webhook_url || "");
+      setWaVerifyToken(c.webhook_verify_token || "");
+      setWaPrice(String(c.subscription_price_monthly || 29.99));
+    }
+  }, []);
+
   useEffect(() => {
-    Promise.all([fetchConfig(), fetchPricing(), fetchPackages(), fetchEconomics()]).finally(() => setLoading(false));
-  }, [fetchConfig, fetchPricing, fetchPackages, fetchEconomics]);
+    Promise.all([fetchConfig(), fetchPricing(), fetchPackages(), fetchEconomics(), fetchWaConfig()]).finally(() => setLoading(false));
+  }, [fetchConfig, fetchPricing, fetchPackages, fetchEconomics, fetchWaConfig]);
 
   const testApiKey = async () => {
     setTesting(true);
