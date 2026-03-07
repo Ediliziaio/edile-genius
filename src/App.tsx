@@ -46,6 +46,11 @@ import PlatformSettingsPage from "./pages/superadmin/PlatformSettings";
 import SATemplatesPage from "./pages/superadmin/Templates";
 import WhatsAppPage from "./pages/app/WhatsApp";
 import WhatsAppAdminPage from "./pages/superadmin/WhatsAppAdmin";
+import RenderHub from "./pages/app/RenderHub";
+import RenderNew from "./pages/app/RenderNew";
+import RenderGallery from "./pages/app/RenderGallery";
+import RenderGalleryDetail from "./pages/app/RenderGalleryDetail";
+import RenderConfig from "./pages/superadmin/RenderConfig";
 
 const queryClient = new QueryClient();
 const App = () => (
