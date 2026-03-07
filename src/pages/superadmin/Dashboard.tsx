@@ -240,6 +240,16 @@ export default function SuperAdminDashboard() {
         </div>
       </div>
 
+      {/* Render AI Stats */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-bold text-ink-900 flex items-center gap-2"><Image className="h-5 w-5 text-brand" /> Render AI</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <StatsCard icon={Image} value={renderStats.total} label="Render Completati" deltaType="neutral" />
+          <StatsCard icon={DollarSign} value={`€${renderStats.revenue.toFixed(2)}`} label="Revenue Render" deltaType="positive" />
+          <StatsCard icon={Coins} value={renderStats.creditsUsed} label="Crediti Utilizzati" deltaType="neutral" />
+        </div>
+      </div>
+
       {/* Company Credits Table */}
       {companyCredits.length > 0 && (
         <div className="space-y-3">

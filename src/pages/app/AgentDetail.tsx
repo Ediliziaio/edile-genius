@@ -220,6 +220,10 @@ export default function AgentDetail() {
         <TabsContent value="knowledge">
           <AgentKnowledgeTab agentId={agent.id} companyId={companyId} />
         </TabsContent>
+
+        <TabsContent value="phone">
+          <AgentPhoneTab agentId={agent.id} companyId={companyId} />
+        </TabsContent>
       </Tabs>
 
       <TranscriptViewer open={!!viewTranscript} onOpenChange={() => setViewTranscript(null)} transcript={viewTranscript?.transcript ?? null} agentName={agent.name} />

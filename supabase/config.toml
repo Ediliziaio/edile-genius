@@ -71,3 +71,6 @@ verify_jwt = false
 
 [functions.analyze-window-photo]
 verify_jwt = false
+
+[functions.add-knowledge-doc]
+verify_jwt = false
