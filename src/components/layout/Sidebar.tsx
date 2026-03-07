@@ -18,6 +18,9 @@ const companyNav: NavSection[] = [
     { label: "Dashboard", icon: LayoutDashboard, href: "/app" },
     { label: "Agenti AI", icon: Bot, href: "/app/agents" },
   ]},
+  { header: "AUTOMAZIONI", items: [
+    { label: "Template Agenti", icon: ListChecks, href: "/app/templates" },
+  ]},
   { header: "COMUNICAZIONE", items: [
     { label: "Numeri di Telefono", icon: Phone, href: "/app/phone-numbers" },
     { label: "WhatsApp", icon: MessageCircle, href: "/app/whatsapp" },

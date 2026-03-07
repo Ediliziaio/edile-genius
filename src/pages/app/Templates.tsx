@@ -118,7 +118,7 @@ export default function TemplatesPage() {
               <TemplateCard key={t.id} {...t} />
             ))}
             {upcomingFiltered.map((t) => (
-              <TemplateCard key={t.slug} {...t} id="" disabled />
+              <TemplateCard key={t.slug} {...t} disabled />
             ))}
           </div>
         )}
