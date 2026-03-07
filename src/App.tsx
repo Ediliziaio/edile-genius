@@ -69,6 +69,7 @@ const App = () => (
                 <Route path="/superadmin/companies/new" element={<CreateCompany />} />
                 <Route path="/superadmin/companies/:id" element={<CompanyDetail />} />
                 <Route path="/superadmin/whatsapp" element={<WhatsAppAdminPage />} />
+                <Route path="/superadmin/templates" element={<SATemplatesPage />} />
                 <Route path="/superadmin/team" element={<TeamPage />} />
                 <Route path="/superadmin/settings" element={<SASettingsPage />} />
                 <Route path="/superadmin/analytics" element={<GlobalAnalyticsPage />} />
