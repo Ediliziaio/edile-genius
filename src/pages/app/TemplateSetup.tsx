@@ -321,11 +321,11 @@ export default function TemplateSetupPage() {
     }
     setDeploying(true);
 
-    const steps = [
-      { label: "Salvataggio configurazione...", status: "loading" as const },
-      { label: "Creazione agente su ElevenLabs...", status: "pending" as const },
-      { label: "Configurazione workflow n8n...", status: "pending" as const },
-      { label: "Connessione canali e scheduling...", status: "pending" as const },
+    const steps: { label: string; status: "pending" | "loading" | "done" | "error" }[] = [
+      { label: "Salvataggio configurazione...", status: "loading" },
+      { label: "Creazione agente su ElevenLabs...", status: "pending" },
+      { label: "Configurazione workflow n8n...", status: "pending" },
+      { label: "Connessione canali e scheduling...", status: "pending" },
     ];
     setDeploySteps([...steps]);
 
