@@ -399,6 +399,34 @@ export default function PlatformSettings() {
               </Table>
             </CardContent>
           </Card>
+
+          {/* Economic Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Riepilogo Economico Piattaforma</CardTitle>
+              <CardDescription>Dati aggregati da tutte le conversazioni fatturate</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 rounded-lg bg-primary/5 border border-primary/20">
+                  <p className="text-xs text-muted-foreground">Incassato</p>
+                  <p className="text-2xl font-extrabold text-primary mt-1">€{ecoStats.billed.toFixed(2)}</p>
+                </div>
+                <div className="text-center p-4 rounded-lg bg-muted border">
+                  <p className="text-xs text-muted-foreground">Costo EL</p>
+                  <p className="text-2xl font-extrabold text-foreground mt-1">€{ecoStats.real.toFixed(2)}</p>
+                </div>
+                <div className="text-center p-4 rounded-lg bg-emerald-50 border border-emerald-200">
+                  <p className="text-xs text-muted-foreground">Margine</p>
+                  <p className="text-2xl font-extrabold text-emerald-700 mt-1">€{ecoStats.margin.toFixed(2)}</p>
+                </div>
+                <div className="text-center p-4 rounded-lg bg-emerald-50 border border-emerald-200">
+                  <p className="text-xs text-muted-foreground">Margine %</p>
+                  <p className="text-2xl font-extrabold text-emerald-700 mt-1">{ecoStats.marginPct.toFixed(0)}%</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* TAB: Packages (legacy) */}
