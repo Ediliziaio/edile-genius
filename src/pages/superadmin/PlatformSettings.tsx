@@ -416,13 +416,13 @@ export default function PlatformSettings() {
                   <p className="text-xs text-muted-foreground">Costo EL</p>
                   <p className="text-2xl font-extrabold text-foreground mt-1">€{ecoStats.real.toFixed(2)}</p>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-emerald-50 border border-emerald-200">
+                <div className="text-center p-4 rounded-lg bg-primary/5 border border-primary/20">
                   <p className="text-xs text-muted-foreground">Margine</p>
-                  <p className="text-2xl font-extrabold text-emerald-700 mt-1">€{ecoStats.margin.toFixed(2)}</p>
+                  <p className="text-2xl font-extrabold text-primary mt-1">€{ecoStats.margin.toFixed(2)}</p>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-emerald-50 border border-emerald-200">
+                <div className="text-center p-4 rounded-lg bg-primary/5 border border-primary/20">
                   <p className="text-xs text-muted-foreground">Margine %</p>
-                  <p className="text-2xl font-extrabold text-emerald-700 mt-1">{ecoStats.marginPct.toFixed(0)}%</p>
+                  <p className="text-2xl font-extrabold text-primary mt-1">{ecoStats.marginPct.toFixed(0)}%</p>
                 </div>
               </div>
             </CardContent>
