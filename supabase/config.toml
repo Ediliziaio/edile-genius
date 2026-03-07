@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.whatsapp-test-connection]
 verify_jwt = false
+
+[functions.whatsapp-get-app-id]
+verify_jwt = false
