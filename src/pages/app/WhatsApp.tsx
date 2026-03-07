@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import {
   MessageSquare, Phone, Plus, ExternalLink, Trash2, Star,
   CheckCircle2, AlertTriangle, Clock, Zap, Bot, Megaphone, Loader2,
-  BarChart3, Send, Settings, Eye, EyeOff, Shield, Wifi, WifiOff,
+  BarChart3, Send, Settings, Shield, Wifi, WifiOff,
   Users, MessageCircle, Radio, ArrowRight, RefreshCw, Hash, Globe
 } from "lucide-react";
 
