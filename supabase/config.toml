@@ -47,3 +47,6 @@ verify_jwt = false
 
 [functions.whatsapp-connect-number]
 verify_jwt = false
+
+[functions.whatsapp-test-connection]
+verify_jwt = false

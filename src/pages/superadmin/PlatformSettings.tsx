@@ -86,6 +86,8 @@ export default function PlatformSettings() {
   const [waPrice, setWaPrice] = useState("29.99");
   const [waShowSecret, setWaShowSecret] = useState(false);
   const [waSaving, setWaSaving] = useState(false);
+  const [waTesting, setWaTesting] = useState(false);
+  const [waTestResult, setWaTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   const fetchConfig = useCallback(async () => {
     const { data } = await supabase.functions.invoke("platform-config", { method: "GET" });
