@@ -59,6 +59,9 @@ const superadminNav: NavSection[] = [
   { header: "REPORT", items: [
     { label: "Analytics Globali", icon: BarChart3, href: "/superadmin/analytics" },
   ]},
+  { header: "RENDER AI", items: [
+    { label: "Config Provider", icon: Palette, href: "/superadmin/render-config" },
+  ]},
   { header: "ACCOUNT", items: [
     { label: "Impostazioni Piattaforma", icon: Settings, href: "/superadmin/platform-settings" },
     { label: "Log Sistema", icon: FileText, href: "/superadmin/logs" },

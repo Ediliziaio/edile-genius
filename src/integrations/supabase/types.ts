@@ -2602,6 +2602,10 @@ export type Database = {
       }
     }
     Functions: {
+      deduct_render_credit: {
+        Args: { _company_id: string }
+        Returns: undefined
+      }
       get_user_company_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {

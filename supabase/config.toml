@@ -65,3 +65,9 @@ verify_jwt = false
 
 [functions.save-report]
 verify_jwt = false
+
+[functions.generate-render]
+verify_jwt = false
+
+[functions.analyze-window-photo]
+verify_jwt = false

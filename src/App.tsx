@@ -103,6 +103,10 @@ const App = () => (
                 <Route path="/app/templates/:slug" element={<TemplateDetailPage />} />
                 <Route path="/app/templates/:slug/setup" element={<TemplateSetupPage />} />
                 <Route path="/app/whatsapp" element={<WhatsAppPage />} />
+                <Route path="/app/render" element={<RenderHub />} />
+                <Route path="/app/render/new" element={<RenderNew />} />
+                <Route path="/app/render/gallery" element={<RenderGallery />} />
+                <Route path="/app/render/gallery/:id" element={<RenderGalleryDetail />} />
                 <Route path="/app/lists" element={<ContactListsPage />} />
                 <Route path="/app/lists/:id" element={<ContactListDetailPage />} />
                 <Route path="/app/campaigns" element={<CampaignsPage />} />
