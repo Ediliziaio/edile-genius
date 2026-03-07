@@ -1306,7 +1306,7 @@ export default function WhatsAppPage() {
 
           {/* Overview */}
           <TabsContent value="overview">
-            <TabOverview numbers={numbers} templates={templates} conversations={conversations} subscription={subscription} />
+            <TabOverview numbers={numbers} templates={templates} conversations={conversations} subscription={subscription} wabaConfig={wabaConfig} />
           </TabsContent>
 
           {/* Numbers Tab */}
