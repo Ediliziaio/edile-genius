@@ -112,6 +112,178 @@ export type Database = {
           },
         ]
       }
+      ai_audit_log: {
+        Row: {
+          action: string
+          company_id: string | null
+          created_at: string | null
+          details: Json | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          ip_address: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          company_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          ip_address?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          company_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          ip_address?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_audit_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_credit_packages: {
+        Row: {
+          badge: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean
+          minutes: number
+          name: string
+          price_eur: number
+          price_per_min: number | null
+          sort_order: number
+        }
+        Insert: {
+          badge?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean
+          minutes: number
+          name: string
+          price_eur: number
+          price_per_min?: number | null
+          sort_order?: number
+        }
+        Update: {
+          badge?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean
+          minutes?: number
+          name?: string
+          price_eur?: number
+          price_per_min?: number | null
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      ai_credit_purchases: {
+        Row: {
+          amount_eur: number
+          company_id: string
+          cost_per_min: number
+          id: string
+          minutes_added: number
+          package_id: string | null
+          payment_ref: string | null
+          purchased_at: string | null
+          purchased_by: string | null
+        }
+        Insert: {
+          amount_eur: number
+          company_id: string
+          cost_per_min: number
+          id?: string
+          minutes_added: number
+          package_id?: string | null
+          payment_ref?: string | null
+          purchased_at?: string | null
+          purchased_by?: string | null
+        }
+        Update: {
+          amount_eur?: number
+          company_id?: string
+          cost_per_min?: number
+          id?: string
+          minutes_added?: number
+          package_id?: string | null
+          payment_ref?: string | null
+          purchased_at?: string | null
+          purchased_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_credit_purchases_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_credit_purchases_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "ai_credit_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_credits: {
+        Row: {
+          alert_email_sent_at: string | null
+          alert_threshold_pct: number
+          company_id: string
+          id: string
+          minutes_purchased: number
+          minutes_reserved: number
+          minutes_used: number
+          updated_at: string | null
+        }
+        Insert: {
+          alert_email_sent_at?: string | null
+          alert_threshold_pct?: number
+          company_id: string
+          id?: string
+          minutes_purchased?: number
+          minutes_reserved?: number
+          minutes_used?: number
+          updated_at?: string | null
+        }
+        Update: {
+          alert_email_sent_at?: string | null
+          alert_threshold_pct?: number
+          company_id?: string
+          id?: string
+          minutes_purchased?: number
+          minutes_reserved?: number
+          minutes_used?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_credits_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaigns: {
         Row: {
           agent_id: string | null
@@ -684,6 +856,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      platform_config: {
+        Row: {
+          cost_per_min_billed: number | null
+          cost_per_min_real: number
+          credit_markup: number
+          el_api_key_configured: boolean
+          el_api_key_tested_at: string | null
+          el_default_llm: string
+          el_default_voice_id: string | null
+          el_voices_count: number | null
+          id: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          cost_per_min_billed?: number | null
+          cost_per_min_real?: number
+          credit_markup?: number
+          el_api_key_configured?: boolean
+          el_api_key_tested_at?: string | null
+          el_default_llm?: string
+          el_default_voice_id?: string | null
+          el_voices_count?: number | null
+          id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          cost_per_min_billed?: number | null
+          cost_per_min_real?: number
+          credit_markup?: number
+          el_api_key_configured?: boolean
+          el_api_key_tested_at?: string | null
+          el_default_llm?: string
+          el_default_voice_id?: string | null
+          el_voices_count?: number | null
+          id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
