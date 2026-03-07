@@ -4,7 +4,7 @@ import { useImpersonation } from "@/context/ImpersonationContext";
 import {
   LayoutDashboard, Bot, MessageSquare, BarChart3, Settings,
   CreditCard, HelpCircle, Building2, UserPlus, Users, Key, FileText,
-  BookUser, ListChecks, Megaphone, type LucideIcon
+  BookUser, ListChecks, Megaphone, Phone, BookOpen, Coins, type LucideIcon
 } from "lucide-react";
 
 interface NavItem {
