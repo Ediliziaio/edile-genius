@@ -84,6 +84,7 @@ export default function PlatformSettings() {
   const [waWebhookUrl, setWaWebhookUrl] = useState("");
   const [waVerifyToken, setWaVerifyToken] = useState("");
   const [waPrice, setWaPrice] = useState("29.99");
+  const [waConfigId, setWaConfigId] = useState("");
   const [waShowSecret, setWaShowSecret] = useState(false);
   const [waSaving, setWaSaving] = useState(false);
   const [waTesting, setWaTesting] = useState(false);
