@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Bot, MessageSquare, BarChart3, Settings,
   CreditCard, HelpCircle, Building2, UserPlus, Users, FileText,
   BookUser, ListChecks, Megaphone, Phone, BookOpen, Coins, type LucideIcon,
-  AlertTriangle, MessageCircle
+  AlertTriangle, MessageCircle, Puzzle
 } from "lucide-react";
 
 interface NavItem { label: string; icon: LucideIcon; href: string; }
@@ -17,6 +17,9 @@ const companyNav: NavSection[] = [
   { header: "PRINCIPALE", items: [
     { label: "Dashboard", icon: LayoutDashboard, href: "/app" },
     { label: "Agenti AI", icon: Bot, href: "/app/agents" },
+  ]},
+  { header: "AUTOMAZIONI", items: [
+    { label: "Template Agenti", icon: Puzzle, href: "/app/templates" },
   ]},
   { header: "COMUNICAZIONE", items: [
     { label: "Numeri di Telefono", icon: Phone, href: "/app/phone-numbers" },

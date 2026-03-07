@@ -14,6 +14,245 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_reports: {
+        Row: {
+          company_id: string
+          conversation_id: string | null
+          date: string
+          generated_at: string | null
+          id: string
+          instance_id: string
+          pdf_url: string | null
+          raw_data: Json
+          report_html: string | null
+          report_summary: string | null
+          sent_to: Json | null
+          status: string | null
+        }
+        Insert: {
+          company_id: string
+          conversation_id?: string | null
+          date: string
+          generated_at?: string | null
+          id?: string
+          instance_id: string
+          pdf_url?: string | null
+          raw_data?: Json
+          report_html?: string | null
+          report_summary?: string | null
+          sent_to?: Json | null
+          status?: string | null
+        }
+        Update: {
+          company_id?: string
+          conversation_id?: string | null
+          date?: string
+          generated_at?: string | null
+          id?: string
+          instance_id?: string
+          pdf_url?: string | null
+          raw_data?: Json
+          report_html?: string | null
+          report_summary?: string | null
+          sent_to?: Json | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_reports_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_reports_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_reports_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "agent_template_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_template_instances: {
+        Row: {
+          agent_id: string | null
+          company_id: string
+          config_values: Json
+          created_at: string | null
+          created_by: string | null
+          id: string
+          last_report_url: string | null
+          last_run_at: string | null
+          n8n_workflow_active: boolean | null
+          n8n_workflow_id: string | null
+          name: string
+          recipients: Json | null
+          reports_generated: number | null
+          responders: Json | null
+          status: string | null
+          template_id: string
+          timezone: string | null
+          trigger_days: string[] | null
+          trigger_time: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          company_id: string
+          config_values?: Json
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          last_report_url?: string | null
+          last_run_at?: string | null
+          n8n_workflow_active?: boolean | null
+          n8n_workflow_id?: string | null
+          name: string
+          recipients?: Json | null
+          reports_generated?: number | null
+          responders?: Json | null
+          status?: string | null
+          template_id: string
+          timezone?: string | null
+          trigger_days?: string[] | null
+          trigger_time?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          company_id?: string
+          config_values?: Json
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          last_report_url?: string | null
+          last_run_at?: string | null
+          n8n_workflow_active?: boolean | null
+          n8n_workflow_id?: string | null
+          name?: string
+          recipients?: Json | null
+          reports_generated?: number | null
+          responders?: Json | null
+          status?: string | null
+          template_id?: string
+          timezone?: string | null
+          trigger_days?: string[] | null
+          trigger_time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_template_instances_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_template_instances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_template_instances_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_template_instances_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "agent_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_templates: {
+        Row: {
+          category: string | null
+          channel: string[] | null
+          config_schema: Json
+          created_at: string | null
+          description: string | null
+          difficulty: string | null
+          estimated_setup_min: number | null
+          first_message_template: string | null
+          icon: string | null
+          id: string
+          installs_count: number | null
+          is_featured: boolean | null
+          is_published: boolean | null
+          n8n_workflow_json: Json | null
+          name: string
+          output_schema: Json | null
+          preview_image_url: string | null
+          prompt_template: string
+          slug: string
+          updated_by: string | null
+        }
+        Insert: {
+          category?: string | null
+          channel?: string[] | null
+          config_schema?: Json
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          estimated_setup_min?: number | null
+          first_message_template?: string | null
+          icon?: string | null
+          id?: string
+          installs_count?: number | null
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          n8n_workflow_json?: Json | null
+          name: string
+          output_schema?: Json | null
+          preview_image_url?: string | null
+          prompt_template: string
+          slug: string
+          updated_by?: string | null
+        }
+        Update: {
+          category?: string | null
+          channel?: string[] | null
+          config_schema?: Json
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          estimated_setup_min?: number | null
+          first_message_template?: string | null
+          icon?: string | null
+          id?: string
+          installs_count?: number | null
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          n8n_workflow_json?: Json | null
+          name?: string
+          output_schema?: Json | null
+          preview_image_url?: string | null
+          prompt_template?: string
+          slug?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_templates_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agents: {
         Row: {
           additional_languages: string[] | null
@@ -934,6 +1173,65 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      company_channels: {
+        Row: {
+          channel_type: string
+          company_id: string
+          created_at: string | null
+          email_from: string | null
+          email_provider: string | null
+          id: string
+          is_verified: boolean | null
+          label: string | null
+          telegram_bot_name: string | null
+          telegram_bot_token: string | null
+          verified_at: string | null
+          whatsapp_number: string | null
+          whatsapp_provider: string | null
+          whatsapp_token: string | null
+        }
+        Insert: {
+          channel_type: string
+          company_id: string
+          created_at?: string | null
+          email_from?: string | null
+          email_provider?: string | null
+          id?: string
+          is_verified?: boolean | null
+          label?: string | null
+          telegram_bot_name?: string | null
+          telegram_bot_token?: string | null
+          verified_at?: string | null
+          whatsapp_number?: string | null
+          whatsapp_provider?: string | null
+          whatsapp_token?: string | null
+        }
+        Update: {
+          channel_type?: string
+          company_id?: string
+          created_at?: string | null
+          email_from?: string | null
+          email_provider?: string | null
+          id?: string
+          is_verified?: boolean | null
+          label?: string | null
+          telegram_bot_name?: string | null
+          telegram_bot_token?: string | null
+          verified_at?: string | null
+          whatsapp_number?: string | null
+          whatsapp_provider?: string | null
+          whatsapp_token?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_channels_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contact_list_members: {
         Row: {

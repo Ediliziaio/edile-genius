@@ -34,12 +34,16 @@ import CreditsPage from "./pages/app/Credits";
 import PhoneNumbersPage from "./pages/app/PhoneNumbers";
 import BuyPhoneNumberPage from "./pages/app/BuyPhoneNumber";
 import KnowledgeBasePage from "./pages/app/KnowledgeBase";
+import TemplatesPage from "./pages/app/Templates";
+import TemplateDetailPage from "./pages/app/TemplateDetail";
+import TemplateSetupPage from "./pages/app/TemplateSetup";
 import TeamPage from "./pages/superadmin/Team";
 import SASettingsPage from "./pages/superadmin/SASettings";
 import GlobalAnalyticsPage from "./pages/superadmin/GlobalAnalytics";
 import ApiKeysPage from "./pages/superadmin/ApiKeys";
 import SystemLogsPage from "./pages/superadmin/SystemLogs";
 import PlatformSettingsPage from "./pages/superadmin/PlatformSettings";
+import SATemplatesPage from "./pages/superadmin/Templates";
 import WhatsAppPage from "./pages/app/WhatsApp";
 import WhatsAppAdminPage from "./pages/superadmin/WhatsAppAdmin";
 
@@ -65,6 +69,7 @@ const App = () => (
                 <Route path="/superadmin/companies/new" element={<CreateCompany />} />
                 <Route path="/superadmin/companies/:id" element={<CompanyDetail />} />
                 <Route path="/superadmin/whatsapp" element={<WhatsAppAdminPage />} />
+                <Route path="/superadmin/templates" element={<SATemplatesPage />} />
                 <Route path="/superadmin/team" element={<TeamPage />} />
                 <Route path="/superadmin/settings" element={<SASettingsPage />} />
                 <Route path="/superadmin/analytics" element={<GlobalAnalyticsPage />} />
@@ -88,6 +93,9 @@ const App = () => (
                 <Route path="/app/phone-numbers" element={<PhoneNumbersPage />} />
                 <Route path="/app/phone-numbers/buy" element={<BuyPhoneNumberPage />} />
                 <Route path="/app/knowledge-base" element={<KnowledgeBasePage />} />
+                <Route path="/app/templates" element={<TemplatesPage />} />
+                <Route path="/app/templates/:slug" element={<TemplateDetailPage />} />
+                <Route path="/app/templates/:slug/setup" element={<TemplateSetupPage />} />
                 <Route path="/app/whatsapp" element={<WhatsAppPage />} />
                 <Route path="/app/lists" element={<ContactListsPage />} />
                 <Route path="/app/lists/:id" element={<ContactListDetailPage />} />
