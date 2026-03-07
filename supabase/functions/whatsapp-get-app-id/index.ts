@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ meta_app_id: config.meta_app_id }), {
+    return new Response(JSON.stringify({ meta_app_id: config.meta_app_id, meta_config_id: config.meta_config_id || null }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {

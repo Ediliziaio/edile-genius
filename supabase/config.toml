@@ -53,3 +53,6 @@ verify_jwt = false
 
 [functions.whatsapp-get-app-id]
 verify_jwt = false
+
+[functions.whatsapp-refresh-tokens]
+verify_jwt = false
