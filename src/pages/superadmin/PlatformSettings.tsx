@@ -97,9 +97,20 @@ export default function PlatformSettings() {
     if (data) setPackages(data as CreditPackage[]);
   }, []);
 
+  const fetchEconomics = useCallback(async () => {
+    const { data } = await supabase.from("monthly_billing_summary").select("total_cost_billed_eur, total_cost_real_eur, total_margin_eur");
+    if (data) {
+      const rows = data as any[];
+      const billed = rows.reduce((s, r) => s + (r.total_cost_billed_eur || 0), 0);
+      const real = rows.reduce((s, r) => s + (r.total_cost_real_eur || 0), 0);
+      const margin = billed - real;
+      setEcoStats({ billed, real, margin, marginPct: billed > 0 ? (margin / billed) * 100 : 0 });
+    }
+  }, []);
+
   useEffect(() => {
-    Promise.all([fetchConfig(), fetchPricing(), fetchPackages()]).finally(() => setLoading(false));
-  }, [fetchConfig, fetchPricing, fetchPackages]);
+    Promise.all([fetchConfig(), fetchPricing(), fetchPackages(), fetchEconomics()]).finally(() => setLoading(false));
+  }, [fetchConfig, fetchPricing, fetchPackages, fetchEconomics]);
 
   const testApiKey = async () => {
     setTesting(true);
