@@ -1440,6 +1440,7 @@ export default function WhatsAppPage() {
               numbers={numbers}
               onRefresh={fetchData}
               onDeactivate={handleDeactivate}
+              onReconnect={() => setShowConnectModal(true)}
             />
           </TabsContent>
         </Tabs>
