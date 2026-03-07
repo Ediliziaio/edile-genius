@@ -1,26 +1,39 @@
 
+# Stato Implementazione — Blocco 1 Completato
 
-# Piano: Aggiungere Tab "Meta WhatsApp API" nelle Impostazioni Piattaforma SuperAdmin
+## ✅ Completato in questo blocco
 
-## Cosa fare
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
-Spostare la configurazione delle API Meta WhatsApp (attualmente solo su `/superadmin/whatsapp`) anche dentro la pagina **Impostazioni Piattaforma** (`/superadmin/platform-settings`), aggiungendo un 5o tab "WhatsApp API" accanto a ElevenLabs, LLM, Prezzi e Pacchetti.
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
-## Modifiche
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-### `src/pages/superadmin/PlatformSettings.tsx`
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
-Aggiungere un 5o tab "WhatsApp API" con icona `MessageSquare`:
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
-- **Campi**: Meta App ID, App Secret (mascherato con toggle visibilita), Webhook URL, Verify Token, Prezzo Abbonamento Mensile (EUR)
-- **Stato**: Badge "Configurato" / "Non configurato" basato su presenza `meta_app_id`
-- **Salvataggio**: upsert su `superadmin_whatsapp_config` (stessa logica gia presente in `WhatsAppAdmin.tsx`)
-- **Griglia**: `grid-cols-5` per le tab invece di `grid-cols-4`
-
-I dati vengono letti/scritti dalla stessa tabella `superadmin_whatsapp_config` gia esistente. La pagina `/superadmin/whatsapp` resta per la gestione account (tabella aziende con sospendi/riattiva), mentre le credenziali API si configurano anche da Impostazioni Piattaforma.
-
-### File da modificare
-| File | Modifica |
-|------|----------|
-| `src/pages/superadmin/PlatformSettings.tsx` | Aggiungere 5o tab "WhatsApp API" con form credenziali Meta |
-
+## 🔜 Prossimi Blocchi
+- Pagine: /app/phone-numbers, /app/knowledge-base
+- Editor Agente 8 tab
+- Wizard 4 step
+- SuperAdmin Dashboard economics
+- Edge functions: add-knowledge-doc
+- Integrazioni CRM native

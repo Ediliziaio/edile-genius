@@ -13,7 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
   CheckCircle, XCircle, RefreshCw, Cpu, DollarSign, Package,
-  Loader2, Plus, Pencil, Trash2, Zap, Clock, Brain, Save
+  Loader2, Plus, Pencil, Trash2, Zap, Clock, Brain, Save,
+  MessageSquare, Eye, EyeOff
 } from "lucide-react";
 
 interface PlatformConfig {
@@ -76,6 +77,16 @@ export default function PlatformSettings() {
   const [editingPkg, setEditingPkg] = useState<CreditPackage | null>(null);
   const [pkgForm, setPkgForm] = useState({ name: "", minutes: "", price_eur: "", badge: "", sort_order: "" });
 
+  // WhatsApp API state
+  const [waConfig, setWaConfig] = useState<any>(null);
+  const [waAppId, setWaAppId] = useState("");
+  const [waAppSecret, setWaAppSecret] = useState("");
+  const [waWebhookUrl, setWaWebhookUrl] = useState("");
+  const [waVerifyToken, setWaVerifyToken] = useState("");
+  const [waPrice, setWaPrice] = useState("29.99");
+  const [waShowSecret, setWaShowSecret] = useState(false);
+  const [waSaving, setWaSaving] = useState(false);
+
   const fetchConfig = useCallback(async () => {
     const { data } = await supabase.functions.invoke("platform-config", { method: "GET" });
     if (data?.config) {
@@ -108,9 +119,22 @@ export default function PlatformSettings() {
     }
   }, []);
 
+  const fetchWaConfig = useCallback(async () => {
+    const { data } = await supabase.from("superadmin_whatsapp_config").select("*").limit(1).maybeSingle();
+    if (data) {
+      const c = data as any;
+      setWaConfig(c);
+      setWaAppId(c.meta_app_id || "");
+      setWaAppSecret(c.meta_app_secret_encrypted || "");
+      setWaWebhookUrl(c.webhook_url || "");
+      setWaVerifyToken(c.webhook_verify_token || "");
+      setWaPrice(String(c.subscription_price_monthly || 29.99));
+    }
+  }, []);
+
   useEffect(() => {
-    Promise.all([fetchConfig(), fetchPricing(), fetchPackages(), fetchEconomics()]).finally(() => setLoading(false));
-  }, [fetchConfig, fetchPricing, fetchPackages, fetchEconomics]);
+    Promise.all([fetchConfig(), fetchPricing(), fetchPackages(), fetchEconomics(), fetchWaConfig()]).finally(() => setLoading(false));
+  }, [fetchConfig, fetchPricing, fetchPackages, fetchEconomics, fetchWaConfig]);
 
   const testApiKey = async () => {
     setTesting(true);
@@ -218,6 +242,28 @@ export default function PlatformSettings() {
     fetchPackages();
   };
 
+  const saveWaConfig = async () => {
+    setWaSaving(true);
+    const payload = {
+      meta_app_id: waAppId,
+      meta_app_secret_encrypted: waAppSecret,
+      webhook_verify_token: waVerifyToken,
+      webhook_url: waWebhookUrl,
+      subscription_price_monthly: parseFloat(waPrice) || 29.99,
+    };
+    try {
+      if (waConfig) {
+        await supabase.from("superadmin_whatsapp_config").update(payload).eq("id", waConfig.id);
+      } else {
+        await supabase.from("superadmin_whatsapp_config").insert(payload);
+      }
+      toast({ title: "Configurazione WhatsApp salvata" });
+      fetchWaConfig();
+    } catch {
+      toast({ variant: "destructive", title: "Errore salvataggio WhatsApp" });
+    } finally { setWaSaving(false); }
+  };
+
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
 
   // Preview for global markup
@@ -234,11 +280,12 @@ export default function PlatformSettings() {
       </div>
 
       <Tabs defaultValue="api" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="api" className="gap-2"><Zap className="h-4 w-4" /> ElevenLabs API</TabsTrigger>
           <TabsTrigger value="llm" className="gap-2"><Brain className="h-4 w-4" /> LLM & Modelli</TabsTrigger>
           <TabsTrigger value="pricing" className="gap-2"><DollarSign className="h-4 w-4" /> Prezzi & Markup</TabsTrigger>
           <TabsTrigger value="packages" className="gap-2"><Package className="h-4 w-4" /> Pacchetti</TabsTrigger>
+          <TabsTrigger value="whatsapp" className="gap-2"><MessageSquare className="h-4 w-4" /> WhatsApp API</TabsTrigger>
         </TabsList>
 
         {/* TAB: ElevenLabs API */}
@@ -461,6 +508,67 @@ export default function PlatformSettings() {
                 ))}
                 {packages.length === 0 && <p className="text-center text-muted-foreground py-8">Nessun pacchetto configurato</p>}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* TAB: WhatsApp API */}
+        <TabsContent value="whatsapp" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-green-600" />
+                Meta WhatsApp Cloud API
+                {waConfig?.meta_app_id ? (
+                  <Badge className="ml-2 bg-green-600/10 text-green-700 border-green-600/20">Configurato</Badge>
+                ) : (
+                  <Badge variant="secondary" className="ml-2">Non configurato</Badge>
+                )}
+              </CardTitle>
+              <CardDescription>Credenziali globali Meta per WhatsApp Business Cloud API — usate da tutti gli account</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Meta App ID</Label>
+                  <Input value={waAppId} onChange={e => setWaAppId(e.target.value)} placeholder="1234567890" />
+                </div>
+                <div className="space-y-2">
+                  <Label>App Secret</Label>
+                  <div className="relative">
+                    <Input
+                      type={waShowSecret ? "text" : "password"}
+                      value={waAppSecret}
+                      onChange={e => setWaAppSecret(e.target.value)}
+                      placeholder="••••••••••••"
+                    />
+                    <Button variant="ghost" size="sm" className="absolute right-1 top-0.5 h-8 w-8 p-0" onClick={() => setWaShowSecret(!waShowSecret)}>
+                      {waShowSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Webhook URL</Label>
+                  <Input value={waWebhookUrl} onChange={e => setWaWebhookUrl(e.target.value)} placeholder="https://..." />
+                </div>
+                <div className="space-y-2">
+                  <Label>Verify Token</Label>
+                  <Input value={waVerifyToken} onChange={e => setWaVerifyToken(e.target.value)} placeholder="my_verify_token" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Prezzo Abbonamento Mensile (€)</Label>
+                  <Input type="number" step="0.01" value={waPrice} onChange={e => setWaPrice(e.target.value)} />
+                </div>
+              </div>
+              <Separator />
+              <Button onClick={saveWaConfig} disabled={waSaving}>
+                {waSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                Salva Configurazione WhatsApp
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
