@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
 
     const { data: config, error: configErr } = await adminClient
       .from("superadmin_whatsapp_config")
-      .select("meta_app_id, is_active")
+      .select("meta_app_id, is_active, meta_config_id")
       .limit(1)
       .single();
 
