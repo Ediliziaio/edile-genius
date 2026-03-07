@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Building2, Bot, Phone, DollarSign, ArrowRight, Plus, Users, AlertTriangle } from "lucide-react";
+import { Building2, Bot, Phone, DollarSign, ArrowRight, Plus, Users, AlertTriangle, TrendingUp, Coins } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
 import StatsCard from "@/components/superadmin/StatsCard";
 import { format, isAfter, isBefore, addDays } from "date-fns";
 import { it } from "date-fns/locale";
