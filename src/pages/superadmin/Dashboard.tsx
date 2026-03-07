@@ -52,9 +52,11 @@ export default function SuperAdminDashboard() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        const [companiesRes, agentsRes] = await Promise.all([
+        const [companiesRes, agentsRes, creditsRes, billingRes] = await Promise.all([
           supabase.from("companies").select("id, name, plan, status, trial_ends_at, calls_used_month, monthly_calls_limit, created_at, sector"),
           supabase.from("agents").select("id, status, calls_month"),
+          supabase.from("ai_credits").select("company_id, balance_eur, calls_blocked, auto_recharge_enabled, total_recharged_eur"),
+          supabase.from("monthly_billing_summary").select("company_name, total_cost_billed_eur, total_cost_real_eur, total_margin_eur"),
         ]);
         const comps = (companiesRes.data || []) as CompanyRow[];
         const agents = agentsRes.data || [];
@@ -65,11 +67,46 @@ export default function SuperAdminDashboard() {
           callsThisMonth: agents.reduce((sum, a) => sum + (a.calls_month || 0), 0),
           estimatedMRR: comps.filter((c) => c.status === "active").reduce((sum, c) => sum + (planPricing[c.plan || "starter"] || 0), 0),
         });
+
+        // Credits per company
+        if (creditsRes.data) {
+          const nameMap: Record<string, string> = {};
+          comps.forEach(c => { nameMap[c.id] = c.name; });
+          setCompanyCredits((creditsRes.data as unknown as CreditRow[]).map(cr => ({ ...cr, companyName: nameMap[cr.company_id] || "—" })));
+        }
+
+        // Economics
+        if (billingRes.data) {
+          const billing = billingRes.data as unknown as BillingSummary[];
+          const billed = billing.reduce((s, b) => s + (b.total_cost_billed_eur || 0), 0);
+          const real = billing.reduce((s, b) => s + (b.total_cost_real_eur || 0), 0);
+          const margin = billed - real;
+          setEcoStats({ billed, real, margin, marginPct: billed > 0 ? (margin / billed) * 100 : 0 });
+        }
       } catch (err) { console.error("Error fetching stats:", err); }
       finally { setLoading(false); }
     }
     fetchStats();
   }, []);
+
+  const handleUnlock = async () => {
+    if (!unlockModal) return;
+    const amt = parseFloat(unlockAmount);
+    if (amt <= 0) return;
+    try {
+      await supabase.functions.invoke("topup-credits", {
+        body: { companyId: unlockModal.companyId, amountEur: amt, paymentMethod: "manual_admin", type: "adjustment" },
+      });
+      toast({ title: "Crediti accreditati", description: `€${amt} aggiunti a ${unlockModal.companyName}` });
+      setUnlockModal(null);
+      setUnlockAmount("10");
+      setUnlockNotes("");
+      // Refetch
+      window.location.reload();
+    } catch {
+      toast({ variant: "destructive", title: "Errore" });
+    }
+  };
 
   const recentCompanies = [...companies].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()).slice(0, 5);
   const trialExpiring = companies.filter((c) => {
