@@ -511,6 +511,67 @@ export default function PlatformSettings() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* TAB: WhatsApp API */}
+        <TabsContent value="whatsapp" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-green-600" />
+                Meta WhatsApp Cloud API
+                {waConfig?.meta_app_id ? (
+                  <Badge className="ml-2 bg-green-600/10 text-green-700 border-green-600/20">Configurato</Badge>
+                ) : (
+                  <Badge variant="secondary" className="ml-2">Non configurato</Badge>
+                )}
+              </CardTitle>
+              <CardDescription>Credenziali globali Meta per WhatsApp Business Cloud API — usate da tutti gli account</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Meta App ID</Label>
+                  <Input value={waAppId} onChange={e => setWaAppId(e.target.value)} placeholder="1234567890" />
+                </div>
+                <div className="space-y-2">
+                  <Label>App Secret</Label>
+                  <div className="relative">
+                    <Input
+                      type={waShowSecret ? "text" : "password"}
+                      value={waAppSecret}
+                      onChange={e => setWaAppSecret(e.target.value)}
+                      placeholder="••••••••••••"
+                    />
+                    <Button variant="ghost" size="sm" className="absolute right-1 top-0.5 h-8 w-8 p-0" onClick={() => setWaShowSecret(!waShowSecret)}>
+                      {waShowSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Webhook URL</Label>
+                  <Input value={waWebhookUrl} onChange={e => setWaWebhookUrl(e.target.value)} placeholder="https://..." />
+                </div>
+                <div className="space-y-2">
+                  <Label>Verify Token</Label>
+                  <Input value={waVerifyToken} onChange={e => setWaVerifyToken(e.target.value)} placeholder="my_verify_token" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Prezzo Abbonamento Mensile (€)</Label>
+                  <Input type="number" step="0.01" value={waPrice} onChange={e => setWaPrice(e.target.value)} />
+                </div>
+              </div>
+              <Separator />
+              <Button onClick={saveWaConfig} disabled={waSaving}>
+                {waSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                Salva Configurazione WhatsApp
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* Package Modal */}
