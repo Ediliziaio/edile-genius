@@ -20,6 +20,7 @@ const companyNav: NavSection[] = [
   ]},
   { header: "COMUNICAZIONE", items: [
     { label: "Numeri di Telefono", icon: Phone, href: "/app/phone-numbers" },
+    { label: "WhatsApp", icon: MessageCircle, href: "/app/whatsapp" },
     { label: "Knowledge Base", icon: BookOpen, href: "/app/knowledge-base" },
     { label: "Conversazioni", icon: MessageSquare, href: "/app/conversations" },
   ]},
