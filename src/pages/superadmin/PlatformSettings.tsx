@@ -86,6 +86,8 @@ export default function PlatformSettings() {
   const [waPrice, setWaPrice] = useState("29.99");
   const [waShowSecret, setWaShowSecret] = useState(false);
   const [waSaving, setWaSaving] = useState(false);
+  const [waTesting, setWaTesting] = useState(false);
+  const [waTestResult, setWaTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   const fetchConfig = useCallback(async () => {
     const { data } = await supabase.functions.invoke("platform-config", { method: "GET" });
@@ -263,6 +265,27 @@ export default function PlatformSettings() {
       toast({ variant: "destructive", title: "Errore salvataggio WhatsApp" });
     } finally { setWaSaving(false); }
   };
+
+  const testWaConnection = async () => {
+    setWaTesting(true);
+    setWaTestResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("whatsapp-test-connection", {
+        body: { meta_app_id: waAppId, meta_app_secret: waAppSecret },
+      });
+      if (error) {
+        setWaTestResult({ success: false, message: error.message });
+      } else if (data?.success) {
+        setWaTestResult({ success: true, message: `App: ${data.app_name}` });
+      } else {
+        setWaTestResult({ success: false, message: data?.error || "Test fallito" });
+      }
+    } catch (err: any) {
+      setWaTestResult({ success: false, message: err.message || "Errore di rete" });
+    } finally { setWaTesting(false); }
+  };
+
+  const waFieldsValid = waAppId.trim().length > 0 && waAppSecret.trim().length > 0;
 
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
 
@@ -514,13 +537,54 @@ export default function PlatformSettings() {
 
         {/* TAB: WhatsApp API */}
         <TabsContent value="whatsapp" className="space-y-4">
+          {/* Connection Status Card */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-green-600" />
-                Meta WhatsApp Cloud API
+                {waTestResult?.success ? <CheckCircle className="h-5 w-5 text-primary" /> : waTestResult === null && waConfig?.meta_app_id ? <MessageSquare className="h-5 w-5 text-muted-foreground" /> : waTestResult ? <XCircle className="h-5 w-5 text-destructive" /> : <MessageSquare className="h-5 w-5 text-muted-foreground" />}
+                Stato Connessione Meta WhatsApp
+              </CardTitle>
+              <CardDescription>Verifica che le credenziali Meta siano valide chiamando le Graph API</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {waTestResult ? (
+                waTestResult.success ? (
+                  <div className="flex items-center gap-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
+                    <CheckCircle className="h-8 w-8 text-primary shrink-0" />
+                    <div>
+                      <p className="font-medium text-foreground">Connessione Riuscita</p>
+                      <p className="text-sm text-muted-foreground">{waTestResult.message}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-4 p-4 rounded-lg bg-destructive/5 border border-destructive/20">
+                    <XCircle className="h-8 w-8 text-destructive shrink-0" />
+                    <div>
+                      <p className="font-medium text-destructive">Connessione Fallita</p>
+                      <p className="text-sm text-muted-foreground">{waTestResult.message}</p>
+                    </div>
+                  </div>
+                )
+              ) : (
+                <div className="p-4 rounded-lg bg-muted/50 border border-border">
+                  <p className="text-sm text-muted-foreground">Inserisci App ID e App Secret, poi premi "Testa Connessione" per verificare le credenziali.</p>
+                </div>
+              )}
+              <Button onClick={testWaConnection} disabled={waTesting || !waFieldsValid} variant="outline">
+                {waTesting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+                {waTesting ? "Test in corso..." : "Testa Connessione"}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Config Form */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                Credenziali Meta API
                 {waConfig?.meta_app_id ? (
-                  <Badge className="ml-2 bg-green-600/10 text-green-700 border-green-600/20">Configurato</Badge>
+                  <Badge className="ml-2" variant="default">Configurato</Badge>
                 ) : (
                   <Badge variant="secondary" className="ml-2">Non configurato</Badge>
                 )}
@@ -530,11 +594,11 @@ export default function PlatformSettings() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Meta App ID</Label>
+                  <Label>Meta App ID <span className="text-destructive">*</span></Label>
                   <Input value={waAppId} onChange={e => setWaAppId(e.target.value)} placeholder="1234567890" />
                 </div>
                 <div className="space-y-2">
-                  <Label>App Secret</Label>
+                  <Label>App Secret <span className="text-destructive">*</span></Label>
                   <div className="relative">
                     <Input
                       type={waShowSecret ? "text" : "password"}
@@ -565,7 +629,7 @@ export default function PlatformSettings() {
                 </div>
               </div>
               <Separator />
-              <Button onClick={saveWaConfig} disabled={waSaving}>
+              <Button onClick={saveWaConfig} disabled={waSaving || !waFieldsValid}>
                 {waSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
                 Salva Configurazione WhatsApp
               </Button>

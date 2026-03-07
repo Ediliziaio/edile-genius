@@ -1,37 +1,39 @@
 
+# Stato Implementazione — Blocco 1 Completato
 
-# Piano: Test Connessione Meta WhatsApp API
+## ✅ Completato in questo blocco
 
-## Cosa fare
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
-Aggiungere al tab "WhatsApp API" in PlatformSettings.tsx:
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
-1. **Validazione campi** — disabilita il salvataggio se mancano campi obbligatori (App ID, App Secret)
-2. **Button "Testa Connessione"** — chiama Meta Graph API `GET /v21.0/app?access_token={app_id}|{app_secret}` tramite una edge function proxy per verificare che le credenziali siano valide
-3. **Stato connessione visivo** — card con icona verde/rossa e ultimo test riuscito (stessa UI del tab ElevenLabs)
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-## Implementazione
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
-### 1. Edge Function `whatsapp-test-connection/index.ts` (nuovo)
-- Riceve `{ meta_app_id, meta_app_secret }` dal frontend
-- Chiama `https://graph.facebook.com/v21.0/{meta_app_id}?access_token={meta_app_id}|{meta_app_secret}&fields=id,name`
-- Se OK → restituisce `{ success: true, app_name: "..." }`
-- Se errore → restituisce `{ success: false, error: "..." }`
-- Auth: verifica JWT superadmin
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
-### 2. Modifica `PlatformSettings.tsx`
-- Aggiungere stato `waTesting`, `waTestResult` (success/fail/null), `waLastTestedAt`
-- Card stato connessione in cima al tab WhatsApp (come ElevenLabs)
-- Button "Testa Connessione" che invoca la edge function
-- Validazione: disabilita "Salva" se `waAppId` o `waAppSecret` vuoti
-
-### 3. `supabase/config.toml`
-- Aggiungere `[functions.whatsapp-test-connection]` con `verify_jwt = false`
-
-### File da creare/modificare
-| File | Azione |
-|------|--------|
-| `supabase/functions/whatsapp-test-connection/index.ts` | Nuovo — proxy test Meta Graph API |
-| `src/pages/superadmin/PlatformSettings.tsx` | Aggiungere card stato + button test + validazione |
-| `supabase/config.toml` | Aggiungere entry per la nuova function |
-
+## 🔜 Prossimi Blocchi
+- Pagine: /app/phone-numbers, /app/knowledge-base
+- Editor Agente 8 tab
+- Wizard 4 step
+- SuperAdmin Dashboard economics
+- Edge functions: add-knowledge-doc
+- Integrazioni CRM native
