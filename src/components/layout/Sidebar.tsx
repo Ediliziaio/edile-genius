@@ -50,6 +50,9 @@ const superadminNav: NavSection[] = [
     { label: "WhatsApp", icon: MessageCircle, href: "/superadmin/whatsapp" },
     { label: "Team SuperAdmin", icon: Users, href: "/superadmin/team" },
   ]},
+  { header: "AUTOMAZIONI", items: [
+    { label: "Template Agenti", icon: Puzzle, href: "/superadmin/templates" },
+  ]},
   { header: "REPORT", items: [
     { label: "Analytics Globali", icon: BarChart3, href: "/superadmin/analytics" },
   ]},

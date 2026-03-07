@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 Deno.serve(async (req) => {
@@ -175,9 +175,9 @@ Deno.serve(async (req) => {
       .eq("id", instanceId);
 
     // 7. Increment installs_count
-    await serviceClient.rpc("increment_installs_count" as any, { tpl_id: template.id } as any).catch(() => {
+    await serviceClient.rpc("increment_installs_count" as any, { tpl_id: template.id } as any).catch(async () => {
       // Fallback: direct update
-      serviceClient
+      await serviceClient
         .from("agent_templates")
         .update({ installs_count: (template.installs_count || 0) + 1 })
         .eq("id", template.id);
