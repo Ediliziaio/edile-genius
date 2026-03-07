@@ -1,5 +1,5 @@
 
-# Stato Implementazione — Blocco 1 Completato
+# Stato Implementazione — Blocco 1-5 Completato
 
 ## ✅ Completato in questo blocco
 
@@ -30,10 +30,35 @@
 - Sidebar: footer saldo crediti con barra e alert
 - VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
+## ✅ Blocco 3-5 — Agent Templates System
+
+### Database
+- agent_templates + agent_template_instances + agent_reports + company_channels
+- RLS policies PERMISSIVE (fix da RESTRICTIVE)
+- Funzione DB `increment_installs_count(tpl_id UUID)`
+- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+
+### Edge Functions (CORS headers completi)
+- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
+- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
+- save-report: salva report in DB + aggiorna contatori istanza
+
+### Frontend — Wizard 5 Step (TemplateSetup.tsx)
+- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
+- Step 2 Operai: lista card + **importa CSV** con template scaricabile
+- Step 3 Manager: canali multi-checkbox + **anteprima email mockup HTML**
+- Step 4 Canali: WA status check + Telegram con **salvataggio in company_channels** + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + **stima costi giornaliera/mensile** + **crediti disponibili** + **4 deploy steps visibili** (config, ElevenLabs, n8n, scheduling) + salva bozza
+
+### SuperAdmin
+- /superadmin/templates: CRUD completo con JSON editor per config_schema
+- **Link "Template Agenti" aggiunto alla sidebar superadmin**
+
 ## 🔜 Prossimi Blocchi
 - Pagine: /app/phone-numbers, /app/knowledge-base
 - Editor Agente 8 tab
-- Wizard 4 step
+- Wizard 4 step (CreateAgent)
 - SuperAdmin Dashboard economics
 - Edge functions: add-knowledge-doc
 - Integrazioni CRM native
+- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets
