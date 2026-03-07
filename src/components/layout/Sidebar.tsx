@@ -70,8 +70,7 @@ const superadminNav: NavSection[] = [
   {
     header: "ACCOUNT",
     items: [
-      { label: "Impostazioni", icon: Settings, href: "/superadmin/settings" },
-      { label: "API Keys", icon: Key, href: "/superadmin/api-keys" },
+      { label: "Impostazioni Piattaforma", icon: Settings, href: "/superadmin/platform-settings" },
       { label: "Log Sistema", icon: FileText, href: "/superadmin/logs" },
     ],
   },

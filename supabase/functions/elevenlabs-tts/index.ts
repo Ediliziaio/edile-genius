@@ -28,32 +28,17 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
     }
 
-    const { text, voice_id, company_id, voice_settings } = await req.json();
+    const { text, voice_id, voice_settings } = await req.json();
     if (!text || !voice_id) {
       return new Response(JSON.stringify({ error: "text and voice_id required" }), { status: 400, headers: corsHeaders });
     }
 
-    // Get company API key
-    const serviceClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-
-    let apiKey = Deno.env.get("ELEVENLABS_API_KEY");
-    if (company_id) {
-      const { data: company } = await serviceClient
-        .from("companies")
-        .select("el_api_key")
-        .eq("id", company_id)
-        .single();
-      if (company?.el_api_key) apiKey = company.el_api_key;
-    }
-
+    // Use centralized platform API key
+    const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
     if (!apiKey) {
       return new Response(JSON.stringify({ error: "No ElevenLabs API key configured" }), { status: 400, headers: corsHeaders });
     }
 
-    // Build voice_settings for the TTS call
     const ttsBody: Record<string, unknown> = {
       text,
       model_id: "eleven_multilingual_v2",
