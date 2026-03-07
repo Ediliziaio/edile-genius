@@ -34,12 +34,16 @@ import CreditsPage from "./pages/app/Credits";
 import PhoneNumbersPage from "./pages/app/PhoneNumbers";
 import BuyPhoneNumberPage from "./pages/app/BuyPhoneNumber";
 import KnowledgeBasePage from "./pages/app/KnowledgeBase";
+import TemplatesPage from "./pages/app/Templates";
+import TemplateDetailPage from "./pages/app/TemplateDetail";
+import TemplateSetupPage from "./pages/app/TemplateSetup";
 import TeamPage from "./pages/superadmin/Team";
 import SASettingsPage from "./pages/superadmin/SASettings";
 import GlobalAnalyticsPage from "./pages/superadmin/GlobalAnalytics";
 import ApiKeysPage from "./pages/superadmin/ApiKeys";
 import SystemLogsPage from "./pages/superadmin/SystemLogs";
 import PlatformSettingsPage from "./pages/superadmin/PlatformSettings";
+import SATemplatesPage from "./pages/superadmin/Templates";
 import WhatsAppPage from "./pages/app/WhatsApp";
 import WhatsAppAdminPage from "./pages/superadmin/WhatsAppAdmin";
 
