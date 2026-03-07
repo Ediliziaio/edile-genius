@@ -22,11 +22,32 @@ interface CompanyRow {
   created_at: string | null; sector: string | null;
 }
 
+interface CreditRow {
+  company_id: string;
+  balance_eur: number;
+  calls_blocked: boolean;
+  auto_recharge_enabled: boolean;
+  total_recharged_eur: number;
+}
+
+interface BillingSummary {
+  company_name: string | null;
+  total_cost_billed_eur: number | null;
+  total_cost_real_eur: number | null;
+  total_margin_eur: number | null;
+}
+
 export default function SuperAdminDashboard() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [stats, setStats] = useState<Stats>({ companies: 0, activeAgents: 0, callsThisMonth: 0, estimatedMRR: 0 });
   const [companies, setCompanies] = useState<CompanyRow[]>([]);
+  const [companyCredits, setCompanyCredits] = useState<(CreditRow & { companyName: string })[]>([]);
+  const [ecoStats, setEcoStats] = useState({ billed: 0, real: 0, margin: 0, marginPct: 0 });
   const [loading, setLoading] = useState(true);
+  const [unlockModal, setUnlockModal] = useState<{ companyId: string; companyName: string } | null>(null);
+  const [unlockAmount, setUnlockAmount] = useState("10");
+  const [unlockNotes, setUnlockNotes] = useState("");
 
   useEffect(() => {
     async function fetchStats() {
