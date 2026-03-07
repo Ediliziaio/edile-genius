@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
 
     const { data: config, error: configErr } = await adminClient
       .from("superadmin_whatsapp_config")
-      .select("meta_app_id, is_active")
+      .select("meta_app_id, is_active, meta_config_id")
       .limit(1)
       .single();
 
@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ meta_app_id: config.meta_app_id }), {
+    return new Response(JSON.stringify({ meta_app_id: config.meta_app_id, meta_config_id: config.meta_config_id || null }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {

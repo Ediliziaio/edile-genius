@@ -1465,6 +1465,7 @@ export type Database = {
           is_active: boolean | null
           meta_app_id: string
           meta_app_secret_encrypted: string
+          meta_config_id: string | null
           subscription_price_monthly: number | null
           updated_at: string | null
           webhook_url: string
@@ -1476,6 +1477,7 @@ export type Database = {
           is_active?: boolean | null
           meta_app_id?: string
           meta_app_secret_encrypted?: string
+          meta_config_id?: string | null
           subscription_price_monthly?: number | null
           updated_at?: string | null
           webhook_url?: string
@@ -1487,6 +1489,7 @@ export type Database = {
           is_active?: boolean | null
           meta_app_id?: string
           meta_app_secret_encrypted?: string
+          meta_config_id?: string | null
           subscription_price_monthly?: number | null
           updated_at?: string | null
           webhook_url?: string
@@ -1916,6 +1919,8 @@ export type Database = {
           meta_verification_status: string | null
           meta_verified: boolean | null
           system_user_id: string | null
+          token_refresh_error: string | null
+          token_refreshed_at: string | null
           updated_at: string | null
           waba_id: string
         }
@@ -1929,6 +1934,8 @@ export type Database = {
           meta_verification_status?: string | null
           meta_verified?: boolean | null
           system_user_id?: string | null
+          token_refresh_error?: string | null
+          token_refreshed_at?: string | null
           updated_at?: string | null
           waba_id: string
         }
@@ -1942,6 +1949,8 @@ export type Database = {
           meta_verification_status?: string | null
           meta_verified?: boolean | null
           system_user_id?: string | null
+          token_refresh_error?: string | null
+          token_refreshed_at?: string | null
           updated_at?: string | null
           waba_id?: string
         }

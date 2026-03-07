@@ -177,7 +177,7 @@ function ConnectNumberDialog({ open, onOpenChange, companyId, onConnected }: {
     setErrorMsg("");
 
     try {
-      // 1. Get meta_app_id from edge function
+      // 1. Get meta_app_id + optional config_id from edge function
       const { data: appData, error: appErr } = await supabase.functions.invoke("whatsapp-get-app-id");
       if (appErr || !appData?.meta_app_id) {
         throw new Error(appData?.error || "Impossibile ottenere la configurazione Meta. Contatta l'amministratore.");
@@ -187,7 +187,21 @@ function ConnectNumberDialog({ open, onOpenChange, companyId, onConnected }: {
       await loadFacebookSDK(appData.meta_app_id);
       setStep("waiting-popup");
 
-      // 3. Launch FB.login with Embedded Signup
+      // 3. Build login options — use config_id if set by SuperAdmin
+      const loginOptions: any = {
+        response_type: "code",
+        override_default_response_type: true,
+        extras: {
+          feature: "whatsapp_embedded_signup",
+          sessionInfoVersion: 2,
+          setup: {},
+        },
+      };
+      if (appData.meta_config_id) {
+        loginOptions.config_id = appData.meta_config_id;
+      }
+
+      // 4. Launch FB.login with Embedded Signup
       const FB = (window as any).FB;
       FB.login(
         (response: any) => {
@@ -198,16 +212,7 @@ function ConnectNumberDialog({ open, onOpenChange, companyId, onConnected }: {
             toast.error("Autenticazione Facebook annullata");
           }
         },
-        {
-          config_id: undefined, // Optional: use if SuperAdmin sets a config_id
-          response_type: "code",
-          override_default_response_type: true,
-          extras: {
-            feature: "whatsapp_embedded_signup",
-            sessionInfoVersion: 2,
-            setup: {},
-          },
-        }
+        loginOptions
       );
     } catch (err: any) {
       setErrorMsg(err.message || "Errore sconosciuto");

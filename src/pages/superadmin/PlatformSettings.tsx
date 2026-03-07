@@ -84,6 +84,7 @@ export default function PlatformSettings() {
   const [waWebhookUrl, setWaWebhookUrl] = useState("");
   const [waVerifyToken, setWaVerifyToken] = useState("");
   const [waPrice, setWaPrice] = useState("29.99");
+  const [waConfigId, setWaConfigId] = useState("");
   const [waShowSecret, setWaShowSecret] = useState(false);
   const [waSaving, setWaSaving] = useState(false);
   const [waTesting, setWaTesting] = useState(false);
@@ -131,6 +132,7 @@ export default function PlatformSettings() {
       setWaWebhookUrl(c.webhook_url || "");
       setWaVerifyToken(c.webhook_verify_token || "");
       setWaPrice(String(c.subscription_price_monthly || 29.99));
+      setWaConfigId(c.meta_config_id || "");
     }
   }, []);
 
@@ -252,6 +254,7 @@ export default function PlatformSettings() {
       webhook_verify_token: waVerifyToken,
       webhook_url: waWebhookUrl,
       subscription_price_monthly: parseFloat(waPrice) || 29.99,
+      meta_config_id: waConfigId.trim() || null,
     };
     try {
       if (waConfig) {
@@ -626,6 +629,13 @@ export default function PlatformSettings() {
                 <div className="space-y-2">
                   <Label>Prezzo Abbonamento Mensile (€)</Label>
                   <Input type="number" step="0.01" value={waPrice} onChange={e => setWaPrice(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Meta Config ID <span className="text-xs text-muted-foreground">(opzionale)</span></Label>
+                  <Input value={waConfigId} onChange={e => setWaConfigId(e.target.value)} placeholder="Es. 123456789012345" />
+                  <p className="text-xs text-muted-foreground">
+                    Creato nella Meta Business Dashboard → WhatsApp → Configurazioni Embedded Signup. Pre-seleziona soluzioni e permessi nel flusso OAuth.
+                  </p>
                 </div>
               </div>
               <Separator />
