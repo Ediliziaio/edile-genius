@@ -81,6 +81,7 @@ const App = () => (
                 <Route path="/superadmin/api-keys" element={<ApiKeysPage />} />
                 <Route path="/superadmin/logs" element={<SystemLogsPage />} />
                 <Route path="/superadmin/platform-settings" element={<PlatformSettingsPage />} />
+                <Route path="/superadmin/render-config" element={<RenderConfig />} />
               </Route>
             </Route>
 
