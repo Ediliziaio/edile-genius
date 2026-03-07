@@ -129,6 +129,7 @@ export default function AgentDetail() {
           <TabsTrigger value="analytics"><BarChart3 className="w-3.5 h-3.5 mr-1" />Analytics</TabsTrigger>
           <TabsTrigger value="integration"><Plug className="w-3.5 h-3.5 mr-1" />Integrazione</TabsTrigger>
           <TabsTrigger value="knowledge"><BookOpen className="w-3.5 h-3.5 mr-1" />Knowledge Base</TabsTrigger>
+          <TabsTrigger value="phone"><Phone className="w-3.5 h-3.5 mr-1" />Numero</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
