@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import {
   MessageSquare, Phone, Plus, ExternalLink, Trash2, Star,
   CheckCircle2, AlertTriangle, Clock, Zap, Bot, Megaphone, Loader2,
-  BarChart3, Send, Settings, Eye, EyeOff, Shield, Wifi, WifiOff,
+  BarChart3, Send, Settings, Shield, Wifi, WifiOff,
   Users, MessageCircle, Radio, ArrowRight, RefreshCw, Hash, Globe
 } from "lucide-react";
 
@@ -145,174 +145,279 @@ function SubscriptionGate({ price, onActivate, loading }: { price: number; onAct
   );
 }
 
-// ── Connect Number Dialog ──
+// ── Facebook SDK loader ──
+function loadFacebookSDK(appId: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if ((window as any).FB) { resolve(); return; }
+    (window as any).fbAsyncInit = function () {
+      (window as any).FB.init({ appId, cookie: true, xfbml: false, version: "v21.0" });
+      resolve();
+    };
+    if (document.getElementById("facebook-jssdk")) { resolve(); return; }
+    const script = document.createElement("script");
+    script.id = "facebook-jssdk";
+    script.src = "https://connect.facebook.net/en_US/sdk.js";
+    script.async = true;
+    script.defer = true;
+    script.onerror = () => reject(new Error("Failed to load Facebook SDK"));
+    document.head.appendChild(script);
+  });
+}
+
+// ── Connect Number Dialog (Meta Embedded Signup) ──
 function ConnectNumberDialog({ open, onOpenChange, companyId, onConnected }: {
   open: boolean; onOpenChange: (o: boolean) => void; companyId: string; onConnected: () => void;
 }) {
-  const [displayName, setDisplayName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [wabaId, setWabaId] = useState("");
-  const [phoneNumberId, setPhoneNumberId] = useState("");
-  const [userAccessToken, setUserAccessToken] = useState("");
-  const [step, setStep] = useState<"form" | "connecting" | "done">("form");
-  const [useEmbeddedSignup, setUseEmbeddedSignup] = useState(true);
+  const [step, setStep] = useState<"idle" | "loading-sdk" | "waiting-popup" | "connecting" | "done" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [connectedInfo, setConnectedInfo] = useState<{ phone: string; waba_id: string } | null>(null);
 
-  const handleConnect = async () => {
-    if (useEmbeddedSignup) {
-      if (!userAccessToken.trim() || !wabaId.trim() || !phoneNumberId.trim()) {
-        toast.error("Token, WABA ID e Phone Number ID obbligatori");
-        return;
+  const startEmbeddedSignup = async () => {
+    setStep("loading-sdk");
+    setErrorMsg("");
+
+    try {
+      // 1. Get meta_app_id from edge function
+      const { data: appData, error: appErr } = await supabase.functions.invoke("whatsapp-get-app-id");
+      if (appErr || !appData?.meta_app_id) {
+        throw new Error(appData?.error || "Impossibile ottenere la configurazione Meta. Contatta l'amministratore.");
       }
-    } else {
-      if (!displayName.trim() || !phone.trim()) {
-        toast.error("Compila tutti i campi");
-        return;
-      }
-    }
 
-    setStep("connecting");
+      // 2. Load Facebook SDK
+      await loadFacebookSDK(appData.meta_app_id);
+      setStep("waiting-popup");
 
-    if (useEmbeddedSignup) {
-      try {
-        const { data, error } = await supabase.functions.invoke("whatsapp-connect-number", {
-          body: {
-            company_id: companyId,
-            user_access_token: userAccessToken,
-            waba_id: wabaId,
-            phone_number_id: phoneNumberId,
-            display_phone_number: phone || undefined,
-            display_name: displayName || undefined,
+      // 3. Launch FB.login with Embedded Signup
+      const FB = (window as any).FB;
+      FB.login(
+        (response: any) => {
+          if (response.status === "connected" && response.authResponse?.accessToken) {
+            handleFBCallback(response.authResponse.accessToken);
+          } else {
+            setStep("idle");
+            toast.error("Autenticazione Facebook annullata");
+          }
+        },
+        {
+          config_id: undefined, // Optional: use if SuperAdmin sets a config_id
+          response_type: "code",
+          override_default_response_type: true,
+          extras: {
+            feature: "whatsapp_embedded_signup",
+            sessionInfoVersion: 2,
+            setup: {},
           },
-        });
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
-        setStep("done");
-        onConnected();
-        toast.success("Numero collegato con successo via Meta!");
-      } catch (err: any) {
-        toast.error("Errore connessione: " + (err.message || "Errore sconosciuto"));
-        setStep("form");
-        return;
-      }
-    } else {
-      // Manual fallback (demo)
-      await new Promise(r => setTimeout(r, 2000));
-      const { error } = await supabase.from("whatsapp_phone_numbers").insert({
-        company_id: companyId,
-        waba_id: "demo_waba_" + Date.now(),
-        phone_number_id: "pn_" + Date.now(),
-        display_phone_number: phone,
-        display_name: displayName,
-        status: "CONNECTED",
-        quality_rating: "UNKNOWN",
-      });
-      if (error) { toast.error("Errore: " + error.message); setStep("form"); return; }
-      setStep("done");
-      onConnected();
-      toast.success("Numero collegato con successo!");
+        }
+      );
+    } catch (err: any) {
+      setErrorMsg(err.message || "Errore sconosciuto");
+      setStep("error");
     }
   };
 
+  // Listen for the embedded signup event to get WABA ID and phone number ID
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== "https://www.facebook.com" && event.origin !== "https://web.facebook.com") return;
+      try {
+        const data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+        if (data.type === "WA_EMBEDDED_SIGNUP") {
+          // Store for use in handleFBCallback
+          (window as any).__wa_embedded_data = data.data;
+        }
+      } catch { /* ignore non-JSON messages */ }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
+
+  const handleFBCallback = async (accessToken: string) => {
+    setStep("connecting");
+
+    // Try to get WABA ID and phone number from embedded signup event data
+    const embeddedData = (window as any).__wa_embedded_data;
+    let wabaId = embeddedData?.waba_id || "";
+    let phoneNumberId = embeddedData?.phone_number_id || "";
+
+    // If embedded data isn't available, try to get from the shared businesses endpoint
+    if (!wabaId) {
+      try {
+        const res = await fetch(
+          `https://graph.facebook.com/v21.0/debug_token?input_token=${accessToken}&access_token=${accessToken}`
+        );
+        const tokenInfo = await res.json();
+        // The granular scopes contain WABA info
+        const scopes = tokenInfo?.data?.granular_scopes || [];
+        const waScope = scopes.find((s: any) => s.scope === "whatsapp_business_management");
+        if (waScope?.target_ids?.length > 0) {
+          wabaId = waScope.target_ids[0];
+        }
+      } catch { /* continue without */ }
+    }
+
+    if (!wabaId) {
+      setErrorMsg("Non è stato possibile ottenere il WABA ID dal flusso Facebook. Riprova.");
+      setStep("error");
+      return;
+    }
+
+    // If we don't have phone_number_id, fetch it from WABA
+    if (!phoneNumberId) {
+      try {
+        const res = await fetch(
+          `https://graph.facebook.com/v21.0/${wabaId}/phone_numbers?access_token=${accessToken}`
+        );
+        const phoneData = await res.json();
+        if (phoneData?.data?.length > 0) {
+          phoneNumberId = phoneData.data[0].id;
+        }
+      } catch { /* continue without */ }
+    }
+
+    if (!phoneNumberId) {
+      setErrorMsg("Non è stato possibile ottenere il Phone Number ID. Verifica di aver selezionato un numero nel popup.");
+      setStep("error");
+      return;
+    }
+
+    // 4. Send to whatsapp-connect-number
+    try {
+      const { data, error } = await supabase.functions.invoke("whatsapp-connect-number", {
+        body: {
+          company_id: companyId,
+          user_access_token: accessToken,
+          waba_id: wabaId,
+          phone_number_id: phoneNumberId,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setConnectedInfo({
+        phone: data?.display_phone_number || phoneNumberId,
+        waba_id: wabaId,
+      });
+      setStep("done");
+      onConnected();
+      toast.success("Numero WhatsApp collegato con successo!");
+    } catch (err: any) {
+      setErrorMsg(err.message || "Errore durante il collegamento");
+      setStep("error");
+    }
+
+    // Cleanup
+    delete (window as any).__wa_embedded_data;
+  };
+
   const handleClose = () => {
-    setStep("form"); setDisplayName(""); setPhone(""); setWabaId(""); setPhoneNumberId(""); setUserAccessToken("");
+    setStep("idle");
+    setErrorMsg("");
+    setConnectedInfo(null);
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
               <Phone className="h-4 w-4 text-white" />
             </div>
-            Collega Numero WhatsApp
+            Collega WhatsApp Business
           </DialogTitle>
-          <DialogDescription>Via Meta Embedded Signup o inserimento manuale</DialogDescription>
+          <DialogDescription>
+            Collega il tuo account WhatsApp Business con un click tramite Facebook
+          </DialogDescription>
         </DialogHeader>
-        {step === "form" && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm">
-              <Label>Modalità</Label>
-              <Switch checked={useEmbeddedSignup} onCheckedChange={setUseEmbeddedSignup} />
-              <span className="text-muted-foreground text-xs">{useEmbeddedSignup ? "Embedded Signup (consigliato)" : "Inserimento manuale"}</span>
-            </div>
 
-            {useEmbeddedSignup ? (
-              <>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex gap-2 text-xs text-blue-800">
-                  <Shield className="h-4 w-4 shrink-0 mt-0.5" />
-                  Inserisci le credenziali ottenute dal flusso Meta Embedded Signup. Il token verrà scambiato per uno long-lived e cifrato con AES-256.
-                </div>
-                <div className="space-y-2">
-                  <Label>User Access Token *</Label>
-                  <Input type="password" value={userAccessToken} onChange={e => setUserAccessToken(e.target.value)} placeholder="EAAxxxxxxx..." className="font-mono text-xs" />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>WABA ID *</Label>
-                    <Input value={wabaId} onChange={e => setWabaId(e.target.value)} placeholder="es. 123456789012345" className="font-mono text-xs" />
+        {step === "idle" && (
+          <div className="space-y-4 py-4">
+            <div className="bg-muted/50 border border-border rounded-lg p-4 space-y-3">
+              <p className="text-sm text-foreground font-medium">Come funziona:</p>
+              <div className="space-y-2">
+                {[
+                  "Si apre il popup di Facebook",
+                  "Seleziona il tuo Business Manager",
+                  "Scegli l'account WhatsApp e il numero",
+                  "Tutto viene configurato automaticamente",
+                ].map((text, i) => (
+                  <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="w-5 h-5 rounded-full bg-green-100 text-green-700 text-xs font-bold flex items-center justify-center shrink-0">
+                      {i + 1}
+                    </div>
+                    {text}
                   </div>
-                  <div className="space-y-2">
-                    <Label>Phone Number ID *</Label>
-                    <Input value={phoneNumberId} onChange={e => setPhoneNumberId(e.target.value)} placeholder="es. 109876543210" className="font-mono text-xs" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>Nome visualizzato (opz.)</Label>
-                    <Input value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="es. Flo | Marketing" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Numero (opz.)</Label>
-                    <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+39 350 000 0000" />
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex gap-2 text-xs text-yellow-800">
-                  <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-                  Modalità demo: il numero verrà registrato con dati fittizi. Usa Embedded Signup per una connessione reale.
-                </div>
-                <div className="space-y-2">
-                  <Label>Nome visualizzato *</Label>
-                  <Input value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="es. Flo | Marketing Edile" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Numero di telefono *</Label>
-                  <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+39 350 000 0000" />
-                </div>
-              </>
-            )}
+                ))}
+              </div>
+            </div>
+            <Button
+              onClick={startEmbeddedSignup}
+              className="w-full h-12 bg-[#1877F2] hover:bg-[#166FE5] text-white font-semibold text-base"
+            >
+              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+              </svg>
+              Collega con Facebook
+            </Button>
           </div>
         )}
-        {step === "connecting" && (
-          <div className="flex flex-col items-center py-8 gap-4">
-            <Loader2 className="h-10 w-10 animate-spin text-green-600" />
+
+        {(step === "loading-sdk" || step === "waiting-popup") && (
+          <div className="flex flex-col items-center py-10 gap-4">
+            <Loader2 className="h-10 w-10 animate-spin text-[#1877F2]" />
             <p className="text-sm text-muted-foreground">
-              {useEmbeddedSignup ? "Scambio token e registrazione numero su Meta..." : "Connessione a Meta Business in corso..."}
+              {step === "loading-sdk" ? "Caricamento Facebook SDK..." : "In attesa del popup Facebook..."}
             </p>
+            <p className="text-xs text-muted-foreground">Se il popup non si apre, controlla il blocco popup del browser</p>
           </div>
         )}
+
+        {step === "connecting" && (
+          <div className="flex flex-col items-center py-10 gap-4">
+            <Loader2 className="h-10 w-10 animate-spin text-green-600" />
+            <p className="text-sm text-muted-foreground">Registrazione numero e scambio token in corso...</p>
+            <p className="text-xs text-muted-foreground">Il token viene cifrato con AES-256 prima del salvataggio</p>
+          </div>
+        )}
+
         {step === "done" && (
           <div className="flex flex-col items-center py-8 gap-4">
             <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
               <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
-            <p className="text-sm font-medium">Numero collegato con successo!</p>
+            <div className="text-center">
+              <p className="text-base font-semibold text-foreground">Collegamento completato!</p>
+              {connectedInfo && (
+                <div className="mt-2 space-y-1">
+                  <p className="text-sm text-muted-foreground">
+                    Numero: <span className="font-mono font-medium text-foreground">{connectedInfo.phone}</span>
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    WABA: <span className="font-mono text-xs text-foreground">{connectedInfo.waba_id}</span>
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         )}
+
+        {step === "error" && (
+          <div className="flex flex-col items-center py-8 gap-4">
+            <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
+              <AlertTriangle className="h-8 w-8 text-destructive" />
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-medium text-destructive">Errore di collegamento</p>
+              <p className="text-xs text-muted-foreground mt-1 max-w-sm">{errorMsg}</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setStep("idle")}>Riprova</Button>
+          </div>
+        )}
+
         <DialogFooter>
-          {step === "form" && (
-            <>
-              <Button variant="outline" onClick={handleClose}>Annulla</Button>
-              <Button onClick={handleConnect} className="bg-green-600 hover:bg-green-700 text-white">
-                <ExternalLink className="h-4 w-4 mr-2" />{useEmbeddedSignup ? "Collega via Meta" : "Procedi con Meta"}
-              </Button>
-            </>
-          )}
           {step === "done" && <Button onClick={handleClose}>Chiudi</Button>}
+          {step === "idle" && <Button variant="ghost" onClick={handleClose}>Annulla</Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -877,100 +982,76 @@ function TabBroadcast({ companyId, templates, numbers }: {
 }
 
 // ── Tab Impostazioni ──
-function TabSettings({ companyId, subscription, wabaConfig, numbers, onRefresh, onDeactivate }: {
+function TabSettings({ companyId, subscription, wabaConfig, numbers, onRefresh, onDeactivate, onReconnect }: {
   companyId: string;
   subscription: WaSubscription | null;
   wabaConfig: WabaConfig | null;
   numbers: WaNumber[];
   onRefresh: () => void;
   onDeactivate: () => void;
+  onReconnect: () => void;
 }) {
-  const [showToken, setShowToken] = useState(false);
-  const [savingWaba, setSavingWaba] = useState(false);
-  const [wabaId, setWabaId] = useState(wabaConfig?.waba_id || "");
-  const [businessName, setBusinessName] = useState(wabaConfig?.business_name || "");
-  const [accessToken, setAccessToken] = useState("");
-
-  const handleSaveWaba = async () => {
-    if (!wabaId.trim()) { toast.error("WABA ID obbligatorio"); return; }
-    setSavingWaba(true);
-
-    if (wabaConfig) {
-      const updateData: any = { waba_id: wabaId, business_name: businessName };
-      if (accessToken) updateData.access_token_encrypted = accessToken;
-      const { error } = await supabase.from("whatsapp_waba_config").update(updateData).eq("id", wabaConfig.id);
-      if (error) { toast.error(error.message); } else { toast.success("Configurazione salvata"); }
-    } else {
-      const { error } = await supabase.from("whatsapp_waba_config").insert({
-        company_id: companyId,
-        waba_id: wabaId,
-        business_name: businessName,
-        access_token_encrypted: accessToken || null,
-      });
-      if (error) { toast.error(error.message); } else { toast.success("Configurazione creata"); }
-    }
-    setSavingWaba(false);
-    onRefresh();
-  };
-
   return (
     <div className="space-y-4">
-      {/* WABA Config */}
+      {/* WABA Config — Read Only */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Shield className="h-4 w-4 text-blue-600" />
-            Configurazione WABA
+            Account WhatsApp Business
           </CardTitle>
-          <CardDescription>WhatsApp Business Account — credenziali e verifica Meta</CardDescription>
+          <CardDescription>Collegato tramite Meta Embedded Signup</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>WABA ID *</Label>
-              <Input value={wabaId} onChange={e => setWabaId(e.target.value)} placeholder="es. 123456789012345" />
-            </div>
-            <div className="space-y-2">
-              <Label>Nome Business</Label>
-              <Input value={businessName} onChange={e => setBusinessName(e.target.value)} placeholder="es. Edilizia SRL" />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Access Token (Meta System User)</Label>
-            <div className="flex gap-2">
-              <Input
-                type={showToken ? "text" : "password"}
-                value={accessToken}
-                onChange={e => setAccessToken(e.target.value)}
-                placeholder={wabaConfig?.access_token_encrypted ? "••••••••••• (già configurato)" : "Incolla il token qui"}
-                className="font-mono text-xs"
-              />
-              <Button variant="outline" size="icon" onClick={() => setShowToken(!showToken)}>
-                {showToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          {wabaConfig ? (
+            <>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">WABA ID</p>
+                  <p className="text-sm font-mono font-medium text-foreground">{wabaConfig.waba_id}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Nome Business</p>
+                  <p className="text-sm font-medium text-foreground">{wabaConfig.business_name || "—"}</p>
+                </div>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Verifica Meta</p>
+                  <Badge variant={wabaConfig.meta_verified ? "default" : "secondary"}>
+                    {wabaConfig.meta_verification_status === "verified" ? "✓ Verificato" :
+                     wabaConfig.meta_verification_status === "in_progress" ? "In corso" :
+                     wabaConfig.meta_verification_status === "rejected" ? "Rifiutato" : "Non avviata"}
+                  </Badge>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Token</p>
+                  <div className="flex items-center gap-2">
+                    {wabaConfig.access_token_encrypted ? (
+                      <Badge variant="default" className="bg-green-600 text-white">
+                        <CheckCircle2 className="h-3 w-3 mr-1" />Configurato (cifrato AES-256)
+                      </Badge>
+                    ) : (
+                      <Badge variant="destructive">Non configurato</Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <Separator />
+              <Button variant="outline" size="sm" onClick={onReconnect}>
+                <RefreshCw className="h-3.5 w-3.5 mr-1" />
+                Ricollega Account
+              </Button>
+            </>
+          ) : (
+            <div className="text-center py-6">
+              <Shield className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground mb-3">Nessun account WhatsApp Business collegato</p>
+              <Button size="sm" onClick={onReconnect}>
+                <Plus className="h-4 w-4 mr-1" />Collega Account
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Il token viene cifrato con AES-256 prima del salvataggio
-            </p>
-          </div>
-
-          {wabaConfig && (
-            <div className="flex items-center gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">Verifica Meta:</span>
-                <Badge variant={wabaConfig.meta_verified ? "default" : "secondary"}>
-                  {wabaConfig.meta_verification_status === "verified" ? "✓ Verificato" :
-                   wabaConfig.meta_verification_status === "in_progress" ? "In corso" :
-                   wabaConfig.meta_verification_status === "rejected" ? "Rifiutato" : "Non avviata"}
-                </Badge>
-              </div>
-            </div>
           )}
-
-          <Button onClick={handleSaveWaba} disabled={savingWaba || !wabaId.trim()}>
-            {savingWaba && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-            Salva Configurazione WABA
-          </Button>
         </CardContent>
       </Card>
 
@@ -1359,6 +1440,7 @@ export default function WhatsAppPage() {
               numbers={numbers}
               onRefresh={fetchData}
               onDeactivate={handleDeactivate}
+              onReconnect={() => setShowConnectModal(true)}
             />
           </TabsContent>
         </Tabs>
