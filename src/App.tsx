@@ -23,6 +23,7 @@ import AnalyticsPage from "./pages/app/Analytics";
 import CompanyDetail from "./pages/superadmin/CompanyDetail";
 import SettingsPage from "./pages/app/Settings";
 import ContactsPage from "./pages/app/Contacts";
+import ContactDetailPage from "./pages/app/ContactDetail";
 import ContactListsPage from "./pages/app/ContactLists";
 import CampaignsPage from "./pages/app/Campaigns";
 import ImportContactsPage from "./pages/app/ImportContacts";
@@ -30,6 +31,9 @@ import CreateCampaignPage from "./pages/app/CreateCampaign";
 import CampaignDetailPage from "./pages/app/CampaignDetail";
 import ContactListDetailPage from "./pages/app/ContactListDetail";
 import CreditsPage from "./pages/app/Credits";
+import PhoneNumbersPage from "./pages/app/PhoneNumbers";
+import BuyPhoneNumberPage from "./pages/app/BuyPhoneNumber";
+import KnowledgeBasePage from "./pages/app/KnowledgeBase";
 import TeamPage from "./pages/superadmin/Team";
 import SASettingsPage from "./pages/superadmin/SASettings";
 import GlobalAnalyticsPage from "./pages/superadmin/GlobalAnalytics";
@@ -77,6 +81,10 @@ const App = () => (
                 <Route path="/app/conversations" element={<ConversationsPage />} />
                 <Route path="/app/contacts" element={<ContactsPage />} />
                 <Route path="/app/contacts/import" element={<ImportContactsPage />} />
+                <Route path="/app/contacts/:id" element={<ContactDetailPage />} />
+                <Route path="/app/phone-numbers" element={<PhoneNumbersPage />} />
+                <Route path="/app/phone-numbers/buy" element={<BuyPhoneNumberPage />} />
+                <Route path="/app/knowledge-base" element={<KnowledgeBasePage />} />
                 <Route path="/app/lists" element={<ContactListsPage />} />
                 <Route path="/app/lists/:id" element={<ContactListDetailPage />} />
                 <Route path="/app/campaigns" element={<CampaignsPage />} />

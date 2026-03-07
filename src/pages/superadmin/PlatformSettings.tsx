@@ -66,6 +66,7 @@ export default function PlatformSettings() {
   const [packages, setPackages] = useState<CreditPackage[]>([]);
   const [pricing, setPricing] = useState<PricingRow[]>([]);
   const [editedPricing, setEditedPricing] = useState<Record<string, Partial<PricingRow>>>({});
+  const [ecoStats, setEcoStats] = useState({ billed: 0, real: 0, margin: 0, marginPct: 0 });
   const [loading, setLoading] = useState(true);
   const [testing, setTesting] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -96,9 +97,20 @@ export default function PlatformSettings() {
     if (data) setPackages(data as CreditPackage[]);
   }, []);
 
+  const fetchEconomics = useCallback(async () => {
+    const { data } = await supabase.from("monthly_billing_summary").select("total_cost_billed_eur, total_cost_real_eur, total_margin_eur");
+    if (data) {
+      const rows = data as any[];
+      const billed = rows.reduce((s, r) => s + (r.total_cost_billed_eur || 0), 0);
+      const real = rows.reduce((s, r) => s + (r.total_cost_real_eur || 0), 0);
+      const margin = billed - real;
+      setEcoStats({ billed, real, margin, marginPct: billed > 0 ? (margin / billed) * 100 : 0 });
+    }
+  }, []);
+
   useEffect(() => {
-    Promise.all([fetchConfig(), fetchPricing(), fetchPackages()]).finally(() => setLoading(false));
-  }, [fetchConfig, fetchPricing, fetchPackages]);
+    Promise.all([fetchConfig(), fetchPricing(), fetchPackages(), fetchEconomics()]).finally(() => setLoading(false));
+  }, [fetchConfig, fetchPricing, fetchPackages, fetchEconomics]);
 
   const testApiKey = async () => {
     setTesting(true);
@@ -385,6 +397,34 @@ export default function PlatformSettings() {
                   })}
                 </TableBody>
               </Table>
+            </CardContent>
+          </Card>
+
+          {/* Economic Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Riepilogo Economico Piattaforma</CardTitle>
+              <CardDescription>Dati aggregati da tutte le conversazioni fatturate</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 rounded-lg bg-primary/5 border border-primary/20">
+                  <p className="text-xs text-muted-foreground">Incassato</p>
+                  <p className="text-2xl font-extrabold text-primary mt-1">€{ecoStats.billed.toFixed(2)}</p>
+                </div>
+                <div className="text-center p-4 rounded-lg bg-muted border">
+                  <p className="text-xs text-muted-foreground">Costo EL</p>
+                  <p className="text-2xl font-extrabold text-foreground mt-1">€{ecoStats.real.toFixed(2)}</p>
+                </div>
+                <div className="text-center p-4 rounded-lg bg-primary/5 border border-primary/20">
+                  <p className="text-xs text-muted-foreground">Margine</p>
+                  <p className="text-2xl font-extrabold text-primary mt-1">€{ecoStats.margin.toFixed(2)}</p>
+                </div>
+                <div className="text-center p-4 rounded-lg bg-primary/5 border border-primary/20">
+                  <p className="text-xs text-muted-foreground">Margine %</p>
+                  <p className="text-2xl font-extrabold text-primary mt-1">{ecoStats.marginPct.toFixed(0)}%</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

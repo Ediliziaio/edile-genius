@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Building2, Bot, Phone, DollarSign, ArrowRight, Plus, Users, AlertTriangle } from "lucide-react";
+import { Building2, Bot, Phone, DollarSign, ArrowRight, Plus, Users, AlertTriangle, TrendingUp, Coins } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
 import StatsCard from "@/components/superadmin/StatsCard";
 import { format, isAfter, isBefore, addDays } from "date-fns";
 import { it } from "date-fns/locale";
@@ -16,18 +22,41 @@ interface CompanyRow {
   created_at: string | null; sector: string | null;
 }
 
+interface CreditRow {
+  company_id: string;
+  balance_eur: number;
+  calls_blocked: boolean;
+  auto_recharge_enabled: boolean;
+  total_recharged_eur: number;
+}
+
+interface BillingSummary {
+  company_name: string | null;
+  total_cost_billed_eur: number | null;
+  total_cost_real_eur: number | null;
+  total_margin_eur: number | null;
+}
+
 export default function SuperAdminDashboard() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [stats, setStats] = useState<Stats>({ companies: 0, activeAgents: 0, callsThisMonth: 0, estimatedMRR: 0 });
   const [companies, setCompanies] = useState<CompanyRow[]>([]);
+  const [companyCredits, setCompanyCredits] = useState<(CreditRow & { companyName: string })[]>([]);
+  const [ecoStats, setEcoStats] = useState({ billed: 0, real: 0, margin: 0, marginPct: 0 });
   const [loading, setLoading] = useState(true);
+  const [unlockModal, setUnlockModal] = useState<{ companyId: string; companyName: string } | null>(null);
+  const [unlockAmount, setUnlockAmount] = useState("10");
+  const [unlockNotes, setUnlockNotes] = useState("");
 
   useEffect(() => {
     async function fetchStats() {
       try {
-        const [companiesRes, agentsRes] = await Promise.all([
+        const [companiesRes, agentsRes, creditsRes, billingRes] = await Promise.all([
           supabase.from("companies").select("id, name, plan, status, trial_ends_at, calls_used_month, monthly_calls_limit, created_at, sector"),
           supabase.from("agents").select("id, status, calls_month"),
+          supabase.from("ai_credits").select("company_id, balance_eur, calls_blocked, auto_recharge_enabled, total_recharged_eur"),
+          supabase.from("monthly_billing_summary").select("company_name, total_cost_billed_eur, total_cost_real_eur, total_margin_eur"),
         ]);
         const comps = (companiesRes.data || []) as CompanyRow[];
         const agents = agentsRes.data || [];
@@ -38,11 +67,46 @@ export default function SuperAdminDashboard() {
           callsThisMonth: agents.reduce((sum, a) => sum + (a.calls_month || 0), 0),
           estimatedMRR: comps.filter((c) => c.status === "active").reduce((sum, c) => sum + (planPricing[c.plan || "starter"] || 0), 0),
         });
+
+        // Credits per company
+        if (creditsRes.data) {
+          const nameMap: Record<string, string> = {};
+          comps.forEach(c => { nameMap[c.id] = c.name; });
+          setCompanyCredits((creditsRes.data as unknown as CreditRow[]).map(cr => ({ ...cr, companyName: nameMap[cr.company_id] || "—" })));
+        }
+
+        // Economics
+        if (billingRes.data) {
+          const billing = billingRes.data as unknown as BillingSummary[];
+          const billed = billing.reduce((s, b) => s + (b.total_cost_billed_eur || 0), 0);
+          const real = billing.reduce((s, b) => s + (b.total_cost_real_eur || 0), 0);
+          const margin = billed - real;
+          setEcoStats({ billed, real, margin, marginPct: billed > 0 ? (margin / billed) * 100 : 0 });
+        }
       } catch (err) { console.error("Error fetching stats:", err); }
       finally { setLoading(false); }
     }
     fetchStats();
   }, []);
+
+  const handleUnlock = async () => {
+    if (!unlockModal) return;
+    const amt = parseFloat(unlockAmount);
+    if (amt <= 0) return;
+    try {
+      await supabase.functions.invoke("topup-credits", {
+        body: { companyId: unlockModal.companyId, amountEur: amt, paymentMethod: "manual_admin", type: "adjustment" },
+      });
+      toast({ title: "Crediti accreditati", description: `€${amt} aggiunti a ${unlockModal.companyName}` });
+      setUnlockModal(null);
+      setUnlockAmount("10");
+      setUnlockNotes("");
+      // Refetch
+      window.location.reload();
+    } catch {
+      toast({ variant: "destructive", title: "Errore" });
+    }
+  };
 
   const recentCompanies = [...companies].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()).slice(0, 5);
   const trialExpiring = companies.filter((c) => {
@@ -152,6 +216,83 @@ export default function SuperAdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Economics Section */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-bold text-ink-900 flex items-center gap-2"><TrendingUp className="h-5 w-5 text-brand" /> Revenue & Margini</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatsCard icon={DollarSign} value={`€${ecoStats.billed.toFixed(2)}`} label="Incassato da aziende" deltaType="positive" />
+          <StatsCard icon={Coins} value={`€${ecoStats.real.toFixed(2)}`} label="Costo reale EL" deltaType="neutral" />
+          <StatsCard icon={TrendingUp} value={`€${ecoStats.margin.toFixed(2)}`} label="Margine lordo" deltaType="positive" />
+          <StatsCard icon={TrendingUp} value={`${ecoStats.marginPct.toFixed(0)}%`} label="Margine %" deltaType="positive" />
+        </div>
+      </div>
+
+      {/* Company Credits Table */}
+      {companyCredits.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-lg font-bold text-ink-900">Saldo Crediti per Azienda</h3>
+          <div className="rounded-card border border-ink-200 bg-white shadow-card overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-ink-50">
+                  <TableHead className="text-xs font-mono uppercase text-ink-400">Azienda</TableHead>
+                  <TableHead className="text-xs font-mono uppercase text-ink-400 text-right">Saldo €</TableHead>
+                  <TableHead className="text-xs font-mono uppercase text-ink-400">Stato</TableHead>
+                  <TableHead className="text-xs font-mono uppercase text-ink-400">Auto-Ricarica</TableHead>
+                  <TableHead className="text-xs font-mono uppercase text-ink-400 text-right">Azione</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {companyCredits.map((cr) => (
+                  <TableRow key={cr.company_id}>
+                    <TableCell className="font-medium text-sm">{cr.companyName}</TableCell>
+                    <TableCell className="text-right font-mono text-sm font-semibold">€{(cr.balance_eur || 0).toFixed(2)}</TableCell>
+                    <TableCell>
+                      {cr.calls_blocked ? (
+                        <Badge variant="destructive" className="text-xs">Bloccato</Badge>
+                      ) : (cr.balance_eur || 0) <= 10 ? (
+                        <Badge className="bg-amber-light text-amber border-amber-border text-xs">Basso</Badge>
+                      ) : (
+                        <Badge className="bg-brand-light text-brand-text border-brand-border text-xs">Regolare</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-sm text-ink-500">{cr.auto_recharge_enabled ? "✅ Attiva" : "—"}</TableCell>
+                    <TableCell className="text-right">
+                      {(cr.calls_blocked || (cr.balance_eur || 0) <= 0) && (
+                        <Button size="sm" variant="destructive" onClick={() => setUnlockModal({ companyId: cr.company_id, companyName: cr.companyName })}>
+                          Sblocca
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
+
+      {/* Unlock Modal */}
+      <Dialog open={!!unlockModal} onOpenChange={() => setUnlockModal(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Aggiungi crediti a {unlockModal?.companyName}</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Importo (€)</Label>
+              <Input type="number" min="1" value={unlockAmount} onChange={e => setUnlockAmount(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Note interne</Label>
+              <Input placeholder="Es. Credito promozionale" value={unlockNotes} onChange={e => setUnlockNotes(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUnlockModal(null)}>Annulla</Button>
+            <Button className="bg-brand hover:bg-brand-hover text-white" onClick={handleUnlock}>Accredita</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
