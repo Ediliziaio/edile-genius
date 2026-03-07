@@ -53,11 +53,13 @@ export default function SuperAdminDashboard() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        const [companiesRes, agentsRes, creditsRes, billingRes] = await Promise.all([
+        const [companiesRes, agentsRes, creditsRes, billingRes, renderSessionsRes, renderCreditsRes] = await Promise.all([
           supabase.from("companies").select("id, name, plan, status, trial_ends_at, calls_used_month, monthly_calls_limit, created_at, sector"),
           supabase.from("agents").select("id, status, calls_month"),
           supabase.from("ai_credits").select("company_id, balance_eur, calls_blocked, auto_recharge_enabled, total_recharged_eur"),
           supabase.from("monthly_billing_summary").select("company_name, total_cost_billed_eur, total_cost_real_eur, total_margin_eur"),
+          supabase.from("render_sessions").select("id, cost_billed, status"),
+          supabase.from("render_credits").select("total_used"),
         ]);
         const comps = (companiesRes.data || []) as CompanyRow[];
         const agents = agentsRes.data || [];
