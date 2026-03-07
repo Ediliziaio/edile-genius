@@ -254,6 +254,7 @@ export default function PlatformSettings() {
       webhook_verify_token: waVerifyToken,
       webhook_url: waWebhookUrl,
       subscription_price_monthly: parseFloat(waPrice) || 29.99,
+      meta_config_id: waConfigId.trim() || null,
     };
     try {
       if (waConfig) {
