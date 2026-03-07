@@ -242,6 +242,28 @@ export default function PlatformSettings() {
     fetchPackages();
   };
 
+  const saveWaConfig = async () => {
+    setWaSaving(true);
+    const payload = {
+      meta_app_id: waAppId,
+      meta_app_secret_encrypted: waAppSecret,
+      webhook_verify_token: waVerifyToken,
+      webhook_url: waWebhookUrl,
+      subscription_price_monthly: parseFloat(waPrice) || 29.99,
+    };
+    try {
+      if (waConfig) {
+        await supabase.from("superadmin_whatsapp_config").update(payload).eq("id", waConfig.id);
+      } else {
+        await supabase.from("superadmin_whatsapp_config").insert(payload);
+      }
+      toast({ title: "Configurazione WhatsApp salvata" });
+      fetchWaConfig();
+    } catch {
+      toast({ variant: "destructive", title: "Errore salvataggio WhatsApp" });
+    } finally { setWaSaving(false); }
+  };
+
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
 
   // Preview for global markup
