@@ -19,7 +19,7 @@ const companyNav: NavSection[] = [
     { label: "Agenti AI", icon: Bot, href: "/app/agents" },
   ]},
   { header: "AUTOMAZIONI", items: [
-    { label: "Template Agenti", icon: ListChecks, href: "/app/templates" },
+    { label: "Template Agenti", icon: Puzzle, href: "/app/templates" },
   ]},
   { header: "COMUNICAZIONE", items: [
     { label: "Numeri di Telefono", icon: Phone, href: "/app/phone-numbers" },
