@@ -1045,6 +1045,47 @@ function TabSettings({ companyId, subscription, wabaConfig, numbers, onRefresh, 
   );
 }
 
+// ── Sync Templates Button ──
+function SyncTemplatesButton({ companyId, numbers, onSynced }: {
+  companyId: string; numbers: WaNumber[]; onSynced: () => void;
+}) {
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSync = async () => {
+    const connectedNumbers = numbers.filter(n => n.status === "CONNECTED");
+    if (connectedNumbers.length === 0) {
+      toast.error("Collega almeno un numero per sincronizzare i template");
+      return;
+    }
+    setSyncing(true);
+    let totalSynced = 0;
+    const uniqueWabaIds = [...new Set(connectedNumbers.map(n => n.waba_id))];
+
+    for (const wabaId of uniqueWabaIds) {
+      try {
+        const { data, error } = await supabase.functions.invoke("whatsapp-templates-sync", {
+          body: { company_id: companyId, waba_id: wabaId },
+        });
+        if (error) throw error;
+        if (data?.synced) totalSynced += data.synced;
+      } catch (err: any) {
+        toast.error(`Sync WABA ${wabaId}: ${err.message || "Errore"}`);
+      }
+    }
+
+    setSyncing(false);
+    toast.success(`Sincronizzati ${totalSynced} template da Meta`);
+    onSynced();
+  };
+
+  return (
+    <Button variant="outline" size="sm" onClick={handleSync} disabled={syncing}>
+      {syncing ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <RefreshCw className="h-3.5 w-3.5 mr-1" />}
+      Sincronizza da Meta
+    </Button>
+  );
+}
+
 // ════════════════════════════════════════════════════
 // MAIN PAGE
 // ════════════════════════════════════════════════════
