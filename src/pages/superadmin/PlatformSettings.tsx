@@ -132,6 +132,7 @@ export default function PlatformSettings() {
       setWaWebhookUrl(c.webhook_url || "");
       setWaVerifyToken(c.webhook_verify_token || "");
       setWaPrice(String(c.subscription_price_monthly || 29.99));
+      setWaConfigId(c.meta_config_id || "");
     }
   }, []);
 
