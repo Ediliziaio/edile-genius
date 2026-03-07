@@ -1242,9 +1242,12 @@ export default function WhatsAppPage() {
           <TabsContent value="templates" className="space-y-4">
             <div className="flex justify-between items-center">
               <p className="text-sm text-muted-foreground">{templates.length} modello/i</p>
-              <Button size="sm" onClick={() => setShowTemplateModal(true)}>
-                <Plus className="h-4 w-4 mr-1" />Crea Modello
-              </Button>
+              <div className="flex items-center gap-2">
+                <SyncTemplatesButton companyId={companyId!} numbers={numbers} onSynced={fetchData} />
+                <Button size="sm" onClick={() => setShowTemplateModal(true)}>
+                  <Plus className="h-4 w-4 mr-1" />Crea Modello
+                </Button>
+              </div>
             </div>
             {templates.length === 0 ? (
               <Card>
@@ -1262,26 +1265,34 @@ export default function WhatsAppPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Nome</TableHead>
+                      <TableHead>Corpo</TableHead>
                       <TableHead>Categoria</TableHead>
                       <TableHead>Lingua</TableHead>
                       <TableHead>Stato</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {templates.map(tpl => (
-                      <TableRow key={tpl.id}>
-                        <TableCell className="font-mono text-sm">{tpl.name}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{tpl.category === "MARKETING" ? "Marketing" : tpl.category === "UTILITY" ? "Utility" : "Auth"}</Badge>
-                        </TableCell>
-                        <TableCell className="text-sm">{tpl.language === "it" ? "🇮🇹 Italiano" : "🇬🇧 English"}</TableCell>
-                        <TableCell>
-                          <Badge variant={statusConfig[tpl.status]?.variant || "outline"}>
-                            {statusConfig[tpl.status]?.label || tpl.status}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {templates.map(tpl => {
+                      const bodyComp = tpl.components?.find((c: any) => c.type === "BODY");
+                      const bodyText = bodyComp?.text || "";
+                      return (
+                        <TableRow key={tpl.id}>
+                          <TableCell className="font-mono text-sm">{tpl.name}</TableCell>
+                          <TableCell className="text-xs text-muted-foreground max-w-[260px] truncate">
+                            {bodyText || <span className="italic">—</span>}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{tpl.category === "MARKETING" ? "Marketing" : tpl.category === "UTILITY" ? "Utility" : "Auth"}</Badge>
+                          </TableCell>
+                          <TableCell className="text-sm">{tpl.language === "it" ? "🇮🇹 Italiano" : "🇬🇧 English"}</TableCell>
+                          <TableCell>
+                            <Badge variant={statusConfig[tpl.status]?.variant || "outline"}>
+                              {statusConfig[tpl.status]?.label || tpl.status}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </Card>
