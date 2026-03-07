@@ -175,9 +175,9 @@ Deno.serve(async (req) => {
       .eq("id", instanceId);
 
     // 7. Increment installs_count
-    await serviceClient.rpc("increment_installs_count" as any, { tpl_id: template.id } as any).catch(() => {
+    await serviceClient.rpc("increment_installs_count" as any, { tpl_id: template.id } as any).catch(async () => {
       // Fallback: direct update
-      serviceClient
+      await serviceClient
         .from("agent_templates")
         .update({ installs_count: (template.installs_count || 0) + 1 })
         .eq("id", template.id);
