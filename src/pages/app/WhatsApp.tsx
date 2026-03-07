@@ -84,6 +84,8 @@ interface WabaConfig {
   meta_verification_status: string;
   access_token_encrypted: string | null;
   meta_verified: boolean;
+  token_refreshed_at: string | null;
+  token_refresh_error: string | null;
 }
 
 const qualityColors: Record<string, string> = {
@@ -547,8 +549,8 @@ function TemplateEditorDialog({ open, onOpenChange, companyId, onSaved }: {
 }
 
 // ── Tab Panoramica ──
-function TabOverview({ numbers, templates, conversations, subscription }: {
-  numbers: WaNumber[]; templates: WaTemplate[]; conversations: WaConversation[]; subscription: WaSubscription | null;
+function TabOverview({ numbers, templates, conversations, subscription, wabaConfig }: {
+  numbers: WaNumber[]; templates: WaTemplate[]; conversations: WaConversation[]; subscription: WaSubscription | null; wabaConfig: WabaConfig | null;
 }) {
   const connectedNumbers = numbers.filter(n => n.status === "CONNECTED").length;
   const approvedTemplates = templates.filter(t => t.status === "APPROVED").length;
@@ -634,6 +636,90 @@ function TabOverview({ numbers, templates, conversations, subscription }: {
             )}
           </CardContent>
         </Card>
+
+        {/* Token expiry indicator */}
+        {wabaConfig?.access_token_encrypted && (
+          <Card className="md:col-span-2">
+            <CardContent className="p-4">
+              {(() => {
+                const TOKEN_LIFETIME_DAYS = 60;
+                const REFRESH_INTERVAL_DAYS = 30;
+                const refreshedAt = wabaConfig.token_refreshed_at ? new Date(wabaConfig.token_refreshed_at) : null;
+                const now = new Date();
+                
+                let daysRemaining: number | null = null;
+                let nextRefreshIn: number | null = null;
+                
+                if (refreshedAt) {
+                  const expiresAt = new Date(refreshedAt.getTime() + TOKEN_LIFETIME_DAYS * 24 * 60 * 60 * 1000);
+                  daysRemaining = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                  const nextRefresh = new Date(refreshedAt.getTime() + REFRESH_INTERVAL_DAYS * 24 * 60 * 60 * 1000);
+                  nextRefreshIn = Math.ceil((nextRefresh.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                }
+
+                const hasError = !!wabaConfig.token_refresh_error;
+                const isExpiring = daysRemaining !== null && daysRemaining <= 14;
+                const isExpired = daysRemaining !== null && daysRemaining <= 0;
+
+                const barColor = isExpired || hasError
+                  ? "bg-destructive"
+                  : isExpiring
+                    ? "bg-yellow-500"
+                    : "bg-green-500";
+                const barWidth = daysRemaining !== null
+                  ? Math.max(0, Math.min(100, (daysRemaining / TOKEN_LIFETIME_DAYS) * 100))
+                  : 0;
+
+                return (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Shield className={`h-4 w-4 ${isExpired || hasError ? "text-destructive" : isExpiring ? "text-yellow-600" : "text-green-600"}`} />
+                        <span className="text-sm font-semibold text-foreground">Token Meta API</span>
+                      </div>
+                      {daysRemaining !== null ? (
+                        <Badge variant={isExpired ? "destructive" : isExpiring ? "secondary" : "default"} className={isExpired ? "" : isExpiring ? "bg-yellow-100 text-yellow-800 border-yellow-200" : "bg-green-100 text-green-800 border-green-200"}>
+                          {isExpired ? "Scaduto" : `${daysRemaining}g rimanenti`}
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary">Nessun refresh registrato</Badge>
+                      )}
+                    </div>
+
+                    {daysRemaining !== null && (
+                      <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
+                        <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${barWidth}%` }} />
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>
+                        {refreshedAt
+                          ? `Ultimo refresh: ${refreshedAt.toLocaleDateString("it")}`
+                          : "Mai aggiornato"}
+                      </span>
+                      {nextRefreshIn !== null && nextRefreshIn > 0 && (
+                        <span className="flex items-center gap-1">
+                          <RefreshCw className="h-3 w-3" />
+                          Prossimo refresh auto tra {nextRefreshIn}g
+                        </span>
+                      )}
+                    </div>
+
+                    {hasError && (
+                      <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-2">
+                        <p className="text-[11px] font-semibold text-destructive flex items-center gap-1">
+                          <AlertTriangle className="h-3 w-3" /> Errore ultimo refresh
+                        </p>
+                        <p className="text-[10px] text-destructive/80 truncate">{wabaConfig.token_refresh_error}</p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
@@ -1304,7 +1390,7 @@ export default function WhatsAppPage() {
 
           {/* Overview */}
           <TabsContent value="overview">
-            <TabOverview numbers={numbers} templates={templates} conversations={conversations} subscription={subscription} />
+            <TabOverview numbers={numbers} templates={templates} conversations={conversations} subscription={subscription} wabaConfig={wabaConfig} />
           </TabsContent>
 
           {/* Numbers Tab */}
