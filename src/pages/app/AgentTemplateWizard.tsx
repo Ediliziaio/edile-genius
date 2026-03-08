@@ -101,18 +101,6 @@ export default function AgentTemplateWizard() {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [direction, setDirection] = useState(1);
 
-  const update = useCallback((key: string, value: any) => setForm(f => ({ ...f, [key]: value })), []);
-
-  const agentType = getAgentType(slug || "");
-  const typeBadge = getTypeBadge(agentType);
-
-  // For render agents, redirect to render wizard
-  if (agentType === "render") {
-    navigate("/app/render/new", { replace: true });
-    return null;
-  }
-
-  const update = useCallback((key: string, value: any) => setForm(f => ({ ...f, [key]: value })), []);
 
   const selectUseCase = useCallback((id: UseCaseId) => {
     const template = PROMPT_TEMPLATES[id];
@@ -123,6 +111,15 @@ export default function AgentTemplateWizard() {
       first_message: f.first_message || template.first_message,
     }));
   }, []);
+
+  const agentType = getAgentType(slug || "");
+  const typeBadge = getTypeBadge(agentType);
+
+  // For render agents, redirect to render wizard
+  if (agentType === "render") {
+    navigate("/app/render/new", { replace: true });
+    return null;
+  }
 
   const validatedSteps = new Set<number>();
   for (let i = 0; i <= 4; i++) {
