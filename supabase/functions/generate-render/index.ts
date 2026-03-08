@@ -155,7 +155,7 @@ serve(async (req) => {
               role: "user",
               content: [
                 { type: "text", text: userPrompt },
-                { type: "image_url", image_url: { url: session.original_photo_url } },
+                { type: "image_url", image_url: { url: imageUrl } },
               ],
             },
           ],
