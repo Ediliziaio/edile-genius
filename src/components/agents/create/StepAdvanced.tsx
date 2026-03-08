@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { SECTORS } from "@/components/agents/PromptTemplates";
 import { Upload, FileText, X, Globe, Plus, Trash2, Wrench, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { CustomTool } from "@/pages/app/CreateAgent";
+import type { CustomTool } from "@/pages/app/CreateAgent.types";
 
 interface StepAdvancedProps {
   form: any;

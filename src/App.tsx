@@ -16,6 +16,7 @@ import Companies from "./pages/superadmin/Companies";
 import CreateCompany from "./pages/superadmin/CreateCompany";
 import AppDashboard from "./pages/app/Dashboard";
 import AgentsPage from "./pages/app/Agents";
+import AgentTemplateWizard from "./pages/app/AgentTemplateWizard";
 import CreateAgent from "./pages/app/CreateAgent";
 import AgentDetail from "./pages/app/AgentDetail";
 import ConversationsPage from "./pages/app/Conversations";
@@ -91,6 +92,7 @@ const App = () => (
                 <Route path="/app" element={<AppDashboard />} />
                 <Route path="/app/agents" element={<AgentsPage />} />
                 <Route path="/app/agents/new" element={<CreateAgent />} />
+                <Route path="/app/agents/new/:slug" element={<AgentTemplateWizard />} />
                 <Route path="/app/agents/:id" element={<AgentDetail />} />
                 <Route path="/app/conversations" element={<ConversationsPage />} />
                 <Route path="/app/contacts" element={<ContactsPage />} />

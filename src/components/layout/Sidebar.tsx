@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Bot, MessageSquare, BarChart3, Settings,
   CreditCard, HelpCircle, Building2, UserPlus, Users, FileText,
   BookUser, ListChecks, Megaphone, Phone, BookOpen, Coins, type LucideIcon,
-  AlertTriangle, MessageCircle, Puzzle, Paintbrush, Palette
+  AlertTriangle, MessageCircle, Puzzle, Palette
 } from "lucide-react";
 
 interface NavItem { label: string; icon: LucideIcon; href: string; }
@@ -31,9 +31,6 @@ const companyNav: NavSection[] = [
     { label: "Rubrica", icon: BookUser, href: "/app/contacts" },
     { label: "Liste & Gruppi", icon: ListChecks, href: "/app/lists" },
     { label: "Campagne", icon: Megaphone, href: "/app/campaigns" },
-  ]},
-  { header: "STRUMENTI VENDITA", items: [
-    { label: "Render AI", icon: Paintbrush, href: "/app/render" },
   ]},
   { header: "REPORT", items: [
     { label: "Analytics", icon: BarChart3, href: "/app/analytics" },
@@ -59,8 +56,8 @@ const superadminNav: NavSection[] = [
   { header: "REPORT", items: [
     { label: "Analytics Globali", icon: BarChart3, href: "/superadmin/analytics" },
   ]},
-  { header: "RENDER AI", items: [
-    { label: "Config Provider", icon: Palette, href: "/superadmin/render-config" },
+  { header: "PIATTAFORMA", items: [
+    { label: "Config Render AI", icon: Palette, href: "/superadmin/render-config" },
   ]},
   { header: "ACCOUNT", items: [
     { label: "Impostazioni Piattaforma", icon: Settings, href: "/superadmin/platform-settings" },
