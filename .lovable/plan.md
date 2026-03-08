@@ -1,73 +1,95 @@
 
+# Stato Implementazione — Blocco 1-5 + Render AI
 
-# Implementazione Sistema Prompt Master — Sostituzione Strutturale Infissi
+## ✅ Completato in questo blocco
 
-Il PDF descrive un sistema completo per passare dal prompt generico attuale (che produce una semplice "colorazione") a un sistema a blocchi (A-L) che genera una vera **sostituzione strutturale** degli infissi. L'implementazione copre: nuovo promptBuilder, analisi foto avanzata, schema DB, configuratore UX ampliato, e aggiornamento Edge Function.
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
----
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
-## Fase 1 — Schema DB (migration SQL)
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-Aggiungere colonne a `render_sessions`:
-- `prompt_blocks JSONB`
-- `prompt_version TEXT`
-- `prompt_char_count INTEGER`
-- `foto_analisi JSONB`
-- `config_snapshot JSONB`
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
-Aggiungere colonne a `render_infissi_presets`:
-- `materiale_tipo TEXT`
-- `colore_ral TEXT`
-- `colore_ncs TEXT`
-- `finitura TEXT DEFAULT 'liscio_opaco'`
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
----
+## ✅ Blocco 3-5 — Agent Templates System
 
-## Fase 2 — Nuovo `promptBuilder.ts`
+### Database
+- agent_templates + agent_template_instances + agent_reports + company_channels
+- RLS policies PERMISSIVE (fix da RESTRICTIVE)
+- Funzione DB `increment_installs_count(tpl_id UUID)`
+- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
 
-Riscrivere completamente `src/modules/render/lib/promptBuilder.ts` con:
-- Nuova `RenderConfig` estesa (interfacce `foto_analisi`, `nuovo_infisso`, `render_options`)
-- Tutti i tipi enumerati (`TipoApertura`, `MaterialeAttuale`, `MaterialeNuovo`, `StileEdificio`, `ColoreConfig`, `ProfiloTelaio`, `VetroConfig`, `OscuranteConfig`, `FerramentaConfig`, `CassonettoConfig`)
-- Dizionario `MATERIAL_PHYSICS` con descrizioni fisiche per materiale (PVC, alluminio, legno, legno-alluminio, acciaio)
-- Funzione `getMaterialDistinction(old, new)` per descrivere differenze fisiche tra vecchio e nuovo
-- Dizionario `APERTURA_DESCRIPTION` per ogni tipo apertura
-- 12 funzioni `buildBlock_A` → `buildBlock_L` che costruiscono i blocchi del prompt
-- Funzione principale `buildRenderPrompt(config, provider)` che assembla tutto e ritorna `{ systemPrompt, userPrompt, negativePrompt, promptVersion, charCount }`
-- Mantenere le funzioni `validatePhoto` e `checkImageDimensions` esistenti
+### Edge Functions (CORS headers completi)
+- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
+- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
+- save-report: salva report in DB + aggiorna contatori istanza
 
----
+### Frontend — Wizard 5 Step (TemplateSetup.tsx)
+- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
+- Step 2 Operai: lista card + importa CSV con template scaricabile
+- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
+- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
 
-## Fase 3 — Aggiornamento `analyze-window-photo` Edge Function
+### SuperAdmin
+- /superadmin/templates: CRUD completo con JSON editor per config_schema
 
-Aggiornare il prompt di analisi per restituire il JSON strutturato `foto_analisi` con tutti i campi richiesti dal nuovo sistema:
-- `tipo_apertura`, `materiale_attuale`, `colore_attuale`, `condizioni`, `num_ante_attuale`, `spessore_telaio`, `presenza_cassonetto`, `tipo_cassonetto`, `tipo_vetro_attuale`, `stile_edificio`, `materiale_muro`, `colore_muro`, `presenza_davanzale`, `presenza_inferriata`, `piano`, `luce`, `angolo_ripresa`
+## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
 
----
+### Database (5 tabelle)
+- render_provider_config: configurazione provider AI (OpenAI GPT-Image, Gemini Flash)
+- render_infissi_presets: 24 preset globali (materiali, colori, stili, vetri, oscuranti) con prompt_fragment
+- render_sessions: sessioni render con status, config, result_urls, costi
+- render_gallery: render salvati con share_token, favoriti
+- render_credits: crediti render separati (5 gratis per azienda)
+- RLS PERMISSIVE per tutte le tabelle
+- Trigger set_updated_at + init_render_credits su companies
+- Funzione deduct_render_credit
+- Storage buckets: render-originals (privato), render-results (pubblico)
 
-## Fase 4 — Aggiornamento `generate-render` Edge Function
+### Edge Functions
+- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
+- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
 
-Sostituire la sezione di costruzione prompt con:
-- Ricostruire `RenderConfig` dalla sessione DB (usando `session.foto_analisi`, `session.config`)
-- Chiamare `buildRenderPrompt()` con il provider
-- Inviare `systemPrompt` come system message + `userPrompt` come user message al gateway AI
-- Salvare `prompt_blocks`, `prompt_version`, `prompt_char_count`, `config_snapshot` nella sessione
+### Frontend
+- RenderHub (/app/render): hero, come funziona, ultimi render, widget crediti
+- RenderNew (/app/render/new): wizard 4 step mobile-first (foto, config, elaborazione, risultati)
+- RenderGallery (/app/render/gallery): grid con ricerca, download, elimina
+- RenderGalleryDetail (/app/render/gallery/:id): BeforeAfterSlider, config, favoriti
+- RenderConfig (/superadmin/render-config): config provider con costi e markup
 
----
+### Componenti
+- BeforeAfterSlider: slider interattivo prima/dopo con drag handle
+- promptBuilder.ts: costruttore prompt, validazione foto, check dimensioni
 
-## Fase 5 — Configuratore UX (`RenderNew.tsx`)
+### Sidebar
+- Nuova sezione "STRUMENTI VENDITA" con "Render AI"
+- SuperAdmin: sezione "RENDER AI" con "Config Provider"
 
-Aggiornare il flusso di configurazione (Step 1) con:
-- **Analisi automatica foto**: dopo l'upload, chiamare `analyze-window-photo` e salvare `foto_analisi` nella sessione. Mostrare un mini-riepilogo dei risultati rilevati (materiale attuale, tipo apertura, condizioni)
-- **Nuove sezioni configuratore**:
-  - "Profilo Telaio" — 3 card radio (Residenziale 70mm/3camere, Premium 82mm/5camere, Passivhaus 92mm/7camere) + radio pills forma profilo (Squadrato, Arrotondato, Europeo)
-  - "Ferramenta" — select maniglia (Leva Alluminio, Leva Acciaio, Pomolo, Alzante) + palette colore ferramenta (Argento, Nero opaco, Inox, Bronzo, Oro)
-- **Info box "Cambio strutturale"**: mostra cosa viene sostituito (prima/dopo) basandosi sull'analisi foto
-
----
-
-## Note tecniche
-
-- Il promptBuilder sarà un file frontend (`src/modules/render/lib/promptBuilder.ts`) ma la logica di assemblaggio verrà anche replicata inline nella Edge Function (dato che le Edge Functions non possono importare da `src/`)
-- I preset DB esistenti restano compatibili — i nuovi campi (`materiale_tipo`, `colore_ral`, etc.) saranno opzionali
-- Il `ANALYSIS_PROMPT` aggiornato nell'edge function `analyze-window-photo` produrrà dati strutturati che alimentano direttamente i blocchi B e C del prompt
-
+## 🔜 Prossimi Blocchi
+- Pagine: /app/phone-numbers, /app/knowledge-base
+- Editor Agente 8 tab
+- Wizard 4 step (CreateAgent)
+- SuperAdmin Dashboard economics
+- Edge functions: add-knowledge-doc
+- Integrazioni CRM native
+- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets

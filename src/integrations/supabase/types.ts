@@ -1872,12 +1872,16 @@ export type Database = {
         Row: {
           category: string
           color_hex: string | null
+          colore_ncs: string | null
+          colore_ral: string | null
           company_id: string | null
           created_at: string | null
+          finitura: string | null
           icon: string | null
           id: string
           is_active: boolean | null
           is_global: boolean | null
+          materiale_tipo: string | null
           name: string
           prompt_fragment: string
           sort_order: number | null
@@ -1886,12 +1890,16 @@ export type Database = {
         Insert: {
           category: string
           color_hex?: string | null
+          colore_ncs?: string | null
+          colore_ral?: string | null
           company_id?: string | null
           created_at?: string | null
+          finitura?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean | null
           is_global?: boolean | null
+          materiale_tipo?: string | null
           name: string
           prompt_fragment: string
           sort_order?: number | null
@@ -1900,12 +1908,16 @@ export type Database = {
         Update: {
           category?: string
           color_hex?: string | null
+          colore_ncs?: string | null
+          colore_ral?: string | null
           company_id?: string | null
           created_at?: string | null
+          finitura?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean | null
           is_global?: boolean | null
+          materiale_tipo?: string | null
           name?: string
           prompt_fragment?: string
           sort_order?: number | null
@@ -1985,18 +1997,23 @@ export type Database = {
         Row: {
           company_id: string
           config: Json
+          config_snapshot: Json | null
           contact_id: string | null
           cost_billed: number | null
           cost_real: number | null
           created_at: string | null
           created_by: string | null
           error_message: string | null
+          foto_analisi: Json | null
           id: string
           original_analysis: Json | null
           original_photo_url: string
           processing_completed_at: string | null
           processing_started_at: string | null
+          prompt_blocks: Json | null
+          prompt_char_count: number | null
           prompt_used: string | null
+          prompt_version: string | null
           provider_key: string | null
           result_urls: Json | null
           selected_result_index: number | null
@@ -2006,18 +2023,23 @@ export type Database = {
         Insert: {
           company_id: string
           config?: Json
+          config_snapshot?: Json | null
           contact_id?: string | null
           cost_billed?: number | null
           cost_real?: number | null
           created_at?: string | null
           created_by?: string | null
           error_message?: string | null
+          foto_analisi?: Json | null
           id?: string
           original_analysis?: Json | null
           original_photo_url: string
           processing_completed_at?: string | null
           processing_started_at?: string | null
+          prompt_blocks?: Json | null
+          prompt_char_count?: number | null
           prompt_used?: string | null
+          prompt_version?: string | null
           provider_key?: string | null
           result_urls?: Json | null
           selected_result_index?: number | null
@@ -2027,18 +2049,23 @@ export type Database = {
         Update: {
           company_id?: string
           config?: Json
+          config_snapshot?: Json | null
           contact_id?: string | null
           cost_billed?: number | null
           cost_real?: number | null
           created_at?: string | null
           created_by?: string | null
           error_message?: string | null
+          foto_analisi?: Json | null
           id?: string
           original_analysis?: Json | null
           original_photo_url?: string
           processing_completed_at?: string | null
           processing_started_at?: string | null
+          prompt_blocks?: Json | null
+          prompt_char_count?: number | null
           prompt_used?: string | null
+          prompt_version?: string | null
           provider_key?: string | null
           result_urls?: Json | null
           selected_result_index?: number | null
