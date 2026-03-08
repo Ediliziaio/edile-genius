@@ -95,6 +95,14 @@ export default function AgentTemplateWizard() {
   const { toast } = useToast();
   const companyId = useCompanyId();
 
+  const [step, setStep] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState<AgentForm>(defaultForm);
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [direction, setDirection] = useState(1);
+
+  const update = useCallback((key: string, value: any) => setForm(f => ({ ...f, [key]: value })), []);
+
   const agentType = getAgentType(slug || "");
   const typeBadge = getTypeBadge(agentType);
 
@@ -103,12 +111,6 @@ export default function AgentTemplateWizard() {
     navigate("/app/render/new", { replace: true });
     return null;
   }
-
-  const [step, setStep] = useState(0);
-  const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState<AgentForm>(defaultForm);
-  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [direction, setDirection] = useState(1);
 
   const update = useCallback((key: string, value: any) => setForm(f => ({ ...f, [key]: value })), []);
 
