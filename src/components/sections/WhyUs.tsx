@@ -1,5 +1,5 @@
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, forwardRef } from "react";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
 
 const cards = [
@@ -30,7 +30,7 @@ const item = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.25, 1, 0.35, 1] as const } },
 };
 
-const WhyUs = () => {
+const WhyUs = forwardRef<HTMLElement>(function WhyUs(_, _ref) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-50px" });
 
@@ -69,6 +69,8 @@ const WhyUs = () => {
       </div>
     </section>
   );
-};
+});
+
+WhyUs.displayName = "WhyUs";
 
 export default WhyUs;

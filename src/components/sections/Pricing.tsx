@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
 import { Check } from "lucide-react";
 
@@ -63,7 +64,7 @@ const plans = [
   },
 ];
 
-const Pricing = () => {
+const Pricing = forwardRef<HTMLElement>(function Pricing(_, _ref) {
   return (
     <section id="pricing" className="bg-background py-16 md:py-24">
       <div className="max-w-6xl mx-auto px-6">
@@ -131,6 +132,8 @@ const Pricing = () => {
       </div>
     </section>
   );
-};
+});
+
+Pricing.displayName = "Pricing";
 
 export default Pricing;
