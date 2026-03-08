@@ -20,6 +20,35 @@ import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import type { Tables } from "@/integrations/supabase/types";
 
+/* ── Tab config per type ───────────────────────────── */
+
+interface TabConfig { id: string; label: string; icon?: string; }
+
+const TABS_BY_TYPE: Record<string, TabConfig[]> = {
+  vocal: [
+    { id: "overview", label: "Panoramica" },
+    { id: "config", label: "Configurazione" },
+    { id: "test", label: "Test Vocale" },
+    { id: "conversations", label: "Conversazioni" },
+    { id: "analytics", label: "Analytics" },
+    { id: "integration", label: "Integrazione" },
+    { id: "knowledge", label: "Knowledge Base" },
+    { id: "phone", label: "Numero" },
+  ],
+  render: [
+    { id: "overview", label: "Panoramica" },
+    { id: "config", label: "Configurazione" },
+    { id: "analytics", label: "Analytics" },
+  ],
+  whatsapp: [
+    { id: "overview", label: "Panoramica" },
+    { id: "config", label: "Configurazione" },
+    { id: "conversations", label: "Conversazioni" },
+    { id: "analytics", label: "Analytics" },
+    { id: "knowledge", label: "Knowledge Base" },
+  ],
+};
+
 export default function AgentDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -95,41 +124,38 @@ export default function AgentDetail() {
   };
 
   if (isLoading) return <div className="p-8 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-brand" /></div>;
-  if (!agent) return <div className="p-8 text-center text-ink-500">Agente non trovato.</div>;
+  if (!agent) return <div className="p-8 text-center text-muted-foreground">Agente non trovato.</div>;
 
   const isActive = agent.status === "active";
+  const agentType = agent.type || "vocal";
+  const tabs = TABS_BY_TYPE[agentType] || TABS_BY_TYPE.vocal;
 
   return (
     <div className="p-6 md:p-8 max-w-5xl">
-      <button onClick={() => navigate("/app/agents")} className="flex items-center gap-1 text-sm mb-6 hover:opacity-80 text-ink-500">
+      <button onClick={() => navigate("/app/agents")} className="flex items-center gap-1 text-sm mb-6 hover:opacity-80 text-muted-foreground">
         <ArrowLeft className="w-4 h-4" /> Torna agli agenti
       </button>
 
       <div className="flex items-start justify-between mb-8">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-2xl font-bold text-ink-900">{agent.name}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{agent.name}</h1>
             <Badge className={isActive ? "bg-status-success-light text-status-success border-none" : "bg-ink-100 text-ink-400 border-none"}>
               {isActive ? "Attivo" : agent.status}
             </Badge>
           </div>
-          {agent.description && <p className="text-sm text-ink-500">{agent.description}</p>}
+          {agent.description && <p className="text-sm text-muted-foreground">{agent.description}</p>}
         </div>
-        <Button variant="outline" size="sm" onClick={toggleStatus} className="border-ink-200 text-ink-700 hover:bg-ink-50">
+        <Button variant="outline" size="sm" onClick={toggleStatus} className="border-border text-foreground hover:bg-muted">
           <Power className="w-4 h-4 mr-1" /> {isActive ? "Disattiva" : "Attiva"}
         </Button>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="bg-ink-100 border-none flex-wrap">
-          <TabsTrigger value="overview">Panoramica</TabsTrigger>
-          <TabsTrigger value="config">Configurazione</TabsTrigger>
-          <TabsTrigger value="test">Test Vocale</TabsTrigger>
-          <TabsTrigger value="conversations">Conversazioni</TabsTrigger>
-          <TabsTrigger value="analytics"><BarChart3 className="w-3.5 h-3.5 mr-1" />Analytics</TabsTrigger>
-          <TabsTrigger value="integration"><Plug className="w-3.5 h-3.5 mr-1" />Integrazione</TabsTrigger>
-          <TabsTrigger value="knowledge"><BookOpen className="w-3.5 h-3.5 mr-1" />Knowledge Base</TabsTrigger>
-          <TabsTrigger value="phone"><Phone className="w-3.5 h-3.5 mr-1" />Numero</TabsTrigger>
+        <TabsList className="bg-muted border-none flex-wrap">
+          {tabs.map((tab) => (
+            <TabsTrigger key={tab.id} value={tab.id}>{tab.label}</TabsTrigger>
+          ))}
         </TabsList>
 
         <TabsContent value="overview">
@@ -139,22 +165,22 @@ export default function AgentDetail() {
               { label: "Questo mese", value: (agent as any).calls_month ?? 0, icon: Phone },
               { label: "Durata media", value: `${agent.avg_duration_sec ?? 0}s`, icon: Clock },
             ].map(stat => (
-              <div key={stat.label} className="rounded-card p-4 bg-white border border-ink-200 shadow-card">
+              <div key={stat.label} className="rounded-card p-4 bg-card border border-border shadow-card">
                 <div className="flex items-center gap-2 mb-1">
-                  <stat.icon className="w-4 h-4 text-ink-400" />
-                  <span className="text-xs text-ink-400">{stat.label}</span>
+                  <stat.icon className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">{stat.label}</span>
                 </div>
-                <p className="text-xl font-bold text-ink-900">{stat.value}</p>
+                <p className="text-xl font-bold text-foreground">{stat.value}</p>
               </div>
             ))}
           </div>
 
-          <div className="rounded-card p-5 space-y-3 bg-white border border-ink-200 shadow-card">
-            <h3 className="text-sm font-semibold text-ink-900">Dettagli</h3>
+          <div className="rounded-card p-5 space-y-3 bg-card border border-border shadow-card">
+            <h3 className="text-sm font-semibold text-foreground">Dettagli</h3>
             {[["Use Case", agent.use_case], ["Settore", agent.sector], ["Lingua", agent.language], ["Tipo", agent.type], ["ElevenLabs ID", (agent as any).el_agent_id]].map(([label, val]) => (
               <div key={label as string} className="flex justify-between text-sm">
-                <span className="text-ink-400">{label}</span>
-                <span className="text-ink-900">{val || "—"}</span>
+                <span className="text-muted-foreground">{label}</span>
+                <span className="text-foreground">{val || "—"}</span>
               </div>
             ))}
           </div>
@@ -180,27 +206,27 @@ export default function AgentDetail() {
 
         <TabsContent value="conversations">
           {conversations.length === 0 ? (
-            <div className="text-center py-12 text-ink-400"><p>Nessuna conversazione per questo agente.</p></div>
+            <div className="text-center py-12 text-muted-foreground"><p>Nessuna conversazione per questo agente.</p></div>
           ) : (
-            <div className="rounded-card overflow-hidden border border-ink-200 bg-white shadow-card">
+            <div className="rounded-card overflow-hidden border border-border bg-card shadow-card">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-ink-50">
-                    <TableHead className="text-ink-500">Data</TableHead>
-                    <TableHead className="text-ink-500">Numero</TableHead>
-                    <TableHead className="text-ink-500">Durata</TableHead>
-                    <TableHead className="text-ink-500">Esito</TableHead>
-                    <TableHead className="text-ink-500">Stato</TableHead>
+                  <TableRow className="bg-muted">
+                    <TableHead>Data</TableHead>
+                    <TableHead>Numero</TableHead>
+                    <TableHead>Durata</TableHead>
+                    <TableHead>Esito</TableHead>
+                    <TableHead>Stato</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {conversations.map(conv => (
-                    <TableRow key={conv.id} className="cursor-pointer hover:bg-ink-50" onClick={() => setViewTranscript(conv)}>
-                      <TableCell className="text-ink-900">{conv.started_at ? format(new Date(conv.started_at), "dd MMM HH:mm", { locale: it }) : "—"}</TableCell>
-                      <TableCell className="text-ink-500">{conv.caller_number || "—"}</TableCell>
-                      <TableCell className="text-ink-500">{conv.duration_sec ? `${conv.duration_sec}s` : "—"}</TableCell>
-                      <TableCell className="text-ink-500">{conv.outcome || "—"}</TableCell>
-                      <TableCell><Badge className="bg-ink-100 text-ink-500 border-none">{conv.status || "—"}</Badge></TableCell>
+                    <TableRow key={conv.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setViewTranscript(conv)}>
+                      <TableCell>{conv.started_at ? format(new Date(conv.started_at), "dd MMM HH:mm", { locale: it }) : "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{conv.caller_number || "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{conv.duration_sec ? `${conv.duration_sec}s` : "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{conv.outcome || "—"}</TableCell>
+                      <TableCell><Badge className="bg-muted text-muted-foreground border-none">{conv.status || "—"}</Badge></TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

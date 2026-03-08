@@ -92,6 +92,7 @@ const App = () => (
                 <Route path="/app" element={<AppDashboard />} />
                 <Route path="/app/agents" element={<AgentsPage />} />
                 <Route path="/app/agents/new" element={<CreateAgent />} />
+                <Route path="/app/agents/new/:slug" element={<AgentTemplateWizard />} />
                 <Route path="/app/agents/:id" element={<AgentDetail />} />
                 <Route path="/app/conversations" element={<ConversationsPage />} />
                 <Route path="/app/contacts" element={<ContactsPage />} />
