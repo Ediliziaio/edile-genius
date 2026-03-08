@@ -5,16 +5,19 @@ import { useCompanyId } from "@/hooks/useCompanyId";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { validatePhoto, checkImageDimensions } from "@/modules/render/lib/promptBuilder";
+import type { FotoAnalisi, ProfiloTelaioSize, ProfiloForma, ManigliaType, ColoreFerratura } from "@/modules/render/lib/promptBuilder";
 import BeforeAfterSlider from "@/components/render/BeforeAfterSlider";
+import PhotoAnalysisCard from "@/components/render/PhotoAnalysisCard";
+import ProfileHardwareConfig from "@/components/render/ProfileHardwareConfig";
+import StructuralChangeBox from "@/components/render/StructuralChangeBox";
 import {
-  Camera, Upload, ArrowLeft, ArrowRight, Check, Loader2,
-  Sparkles, Image as ImageIcon, ChevronLeft
+  Upload, ArrowRight, Check, Loader2,
+  Sparkles, ChevronLeft
 } from "lucide-react";
 
 interface Preset {
@@ -44,6 +47,15 @@ export default function RenderNew() {
   const [status, setStatus] = useState<string>("pending");
   const [resultUrls, setResultUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+
+  // V2 state
+  const [analysisData, setAnalysisData] = useState<FotoAnalisi | null>(null);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string>("");
+  const [profiloDimensione, setProfiloDimensione] = useState<ProfiloTelaioSize>("70mm");
+  const [profiloForma, setProfiloForma] = useState<ProfiloForma>("arrotondato");
+  const [maniglia, setManiglia] = useState<ManigliaType>("leva_alluminio");
+  const [coloreFerratura, setColoreFerratura] = useState<ColoreFerratura>("argento");
 
   // Load presets
   useEffect(() => {
@@ -82,8 +94,35 @@ export default function RenderNew() {
     if (f) handleFile(f);
   }, [handleFile]);
 
-  // Step 1 → 2: Upload photo to storage
-  const goToStep2 = async () => {
+  // Run photo analysis after upload to storage
+  const runPhotoAnalysis = async (publicUrl: string) => {
+    setAnalysisLoading(true);
+    setAnalysisError("");
+    try {
+      // Generate a signed URL for the analysis function
+      const bucketPrefix = "/storage/v1/object/public/render-originals/";
+      const pathIndex = publicUrl.indexOf(bucketPrefix);
+      if (pathIndex === -1) throw new Error("Invalid URL");
+      const filePath = publicUrl.substring(pathIndex + bucketPrefix.length);
+      const { data: signedData } = await supabase.storage.from("render-originals").createSignedUrl(filePath, 3600);
+      
+      const { data, error } = await supabase.functions.invoke("analyze-window-photo", {
+        body: { image_url: signedData?.signedUrl || publicUrl },
+      });
+      if (error) throw error;
+      if (data?.analysis) {
+        setAnalysisData(data.analysis as FotoAnalisi);
+      }
+    } catch (err: any) {
+      setAnalysisError("Analisi non riuscita. Puoi comunque procedere manualmente.");
+      console.error("Analysis error:", err);
+    } finally {
+      setAnalysisLoading(false);
+    }
+  };
+
+  // Step 0 → 1: Upload photo to storage + run analysis
+  const goToStep1 = async () => {
     if (!file || !companyId) return;
     setUploading(true);
     try {
@@ -103,6 +142,9 @@ export default function RenderNew() {
       if (sessErr) throw sessErr;
       setSessionId(session.id);
       setStep(1);
+
+      // Trigger analysis in background
+      runPhotoAnalysis(urlData.publicUrl);
     } catch (err: any) {
       toast({ title: "Errore upload", description: err.message, variant: "destructive" });
     } finally {
@@ -110,20 +152,51 @@ export default function RenderNew() {
     }
   };
 
-  // Step 2 → 3: Start render
+  // Step 1 → 2: Start render
   const startRender = async () => {
     if (!sessionId || !companyId) return;
 
-    // Build fragments
+    // Build fragments from legacy presets
     const fragments: Record<string, string> = {};
     for (const cat of categories) {
       const preset = presets.find(p => p.category === cat && p.value === config[cat]);
       if (preset) fragments[cat] = preset.prompt_fragment;
     }
 
-    // Update session config
+    // Find selected colore preset name
+    const colorePreset = presets.find(p => p.category === "colore" && p.value === config.colore);
+    const materialePreset = presets.find(p => p.category === "materiale" && p.value === config.materiale);
+
+    // Build V2 config
+    const nuovoInfisso = {
+      materiale: config.materiale || "pvc",
+      colore: {
+        nome: colorePreset?.name || config.colore || "bianco",
+        finitura: "liscio_opaco",
+      },
+      profilo: {
+        dimensione: profiloDimensione,
+        camere: profiloDimensione === "70mm" ? 3 : profiloDimensione === "82mm" ? 5 : 7,
+        forma: profiloForma,
+      },
+      vetro: {
+        tipo: config.vetro || "doppio vetro basso emissivo",
+        prompt_fragment: fragments.vetro || "",
+      },
+      oscurante: {
+        tipo: config.oscurante || "nessuno",
+        prompt_fragment: fragments.oscurante || "",
+      },
+      ferramenta: {
+        maniglia,
+        colore: coloreFerratura,
+      },
+    };
+
+    // Update session with V2 config + analysis
     await supabase.from("render_sessions").update({
-      config: { ...config, notes, fragments },
+      config: { ...config, notes, fragments, nuovo_infisso: nuovoInfisso, options: { notes } },
+      foto_analisi: analysisData || {},
       status: "queued",
     }).eq("id", sessionId);
 
@@ -131,7 +204,7 @@ export default function RenderNew() {
 
     // Call edge function
     try {
-      const { data, error } = await supabase.functions.invoke("generate-render", {
+      const { error } = await supabase.functions.invoke("generate-render", {
         body: { session_id: sessionId },
       });
       if (error) throw error;
@@ -140,7 +213,7 @@ export default function RenderNew() {
     }
   };
 
-  // Poll status during step 3
+  // Poll status during step 2
   useEffect(() => {
     if (step !== 2 || !sessionId) return;
     const interval = setInterval(async () => {
@@ -185,7 +258,8 @@ export default function RenderNew() {
   const processingMessages = [
     "Analisi della foto in corso...",
     "Identificazione finestre esistenti...",
-    "Generazione del nuovo infisso...",
+    "Costruzione prompt strutturale...",
+    "Generazione sostituzione infisso...",
     "Applicazione materiali e texture...",
     "Regolazione luci e ombre...",
     "Rifinitura dettagli fotorealistici...",
@@ -197,6 +271,15 @@ export default function RenderNew() {
     const t = setInterval(() => setMsgIndex(i => (i + 1) % processingMessages.length), 4000);
     return () => clearInterval(t);
   }, [step]);
+
+  const handleProfileChange = (field: string, value: string) => {
+    switch (field) {
+      case "profiloDimensione": setProfiloDimensione(value as ProfiloTelaioSize); break;
+      case "profiloForma": setProfiloForma(value as ProfiloForma); break;
+      case "maniglia": setManiglia(value as ManigliaType); break;
+      case "coloreFerratura": setColoreFerratura(value as ColoreFerratura); break;
+    }
+  };
 
   return (
     <div className="max-w-[520px] mx-auto pb-12">
@@ -259,7 +342,7 @@ export default function RenderNew() {
                 <Button variant="outline" className="flex-1" onClick={() => { setFile(null); setPreview(""); }}>
                   Cambia Foto
                 </Button>
-                <Button className="flex-1" onClick={goToStep2} disabled={uploading}>
+                <Button className="flex-1" onClick={goToStep1} disabled={uploading}>
                   {uploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ArrowRight className="h-4 w-4 mr-2" />}
                   Continua
                 </Button>
@@ -272,6 +355,21 @@ export default function RenderNew() {
       {/* Step 1: Configure */}
       {step === 1 && (
         <div className="space-y-6">
+          {/* Photo Analysis */}
+          <PhotoAnalysisCard
+            analysisData={analysisData}
+            loading={analysisLoading}
+            error={analysisError}
+          />
+
+          {/* Structural Change Box */}
+          <StructuralChangeBox
+            analisi={analysisData}
+            nuovoMateriale={config.materiale}
+            nuovoColore={presets.find(p => p.category === "colore" && p.value === config.colore)?.name}
+          />
+
+          {/* Legacy preset categories */}
           {categories.map((cat) => {
             const catPresets = presets.filter(p => p.category === cat);
             if (catPresets.length === 0) return null;
@@ -297,6 +395,15 @@ export default function RenderNew() {
               </div>
             );
           })}
+
+          {/* Profile & Hardware Config */}
+          <ProfileHardwareConfig
+            profiloDimensione={profiloDimensione}
+            profiloForma={profiloForma}
+            maniglia={maniglia}
+            coloreFerratura={coloreFerratura}
+            onChange={handleProfileChange}
+          />
 
           <div>
             <Label className="text-sm font-semibold mb-2 block">Note Aggiuntive</Label>
