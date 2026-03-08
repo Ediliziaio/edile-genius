@@ -1,95 +1,92 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI
 
-## ✅ Completato in questo blocco
+# Piano: Refactor UX Navigazione Agenti AI — "Agent Hub"
 
-### Database Migration
-- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
-- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
-- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
-- RLS policies per tutte le nuove tabelle
+Ristrutturazione completa del flusso agenti per scalabilità a 50+ tipi di agente.
 
-## ✅ Blocco 2 — Sistema Crediti Euro-based
+---
 
-### Database
-- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
-- ai_credit_topups (ricariche manual/auto/promo/adjustment)
-- ai_credit_usage (consumo per conversazione con margini)
-- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
-- monthly_billing_summary view (security_invoker)
+## Riepilogo Modifiche
 
-### Edge Functions
-- check-credits-before-call: verifica saldo pre-chiamata
-- topup-credits: ricarica manuale con fattura
-- elevenlabs-webhook: post-call billing, auto-recharge, blocco
-- platform-config: +apply_global_markup action
+### 1. Sidebar — Rimuovere "STRUMENTI VENDITA" e "Render AI"
+**File:** `src/components/layout/Sidebar.tsx`
+- Eliminare la sezione `STRUMENTI VENDITA` con la voce `Render AI` dal `companyNav`
+- Nel `superadminNav`, rinominare la sezione "RENDER AI" in qualcosa di piu generico o spostare "Config Provider" sotto "ACCOUNT" o "PRINCIPALE"
+- Rimuovere import `Paintbrush` (non piu usato nel company nav)
 
-### Frontend
-- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
-- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
-- Sidebar: footer saldo crediti con barra e alert
-- VoiceTestPanel: check crediti pre-chiamata con blocco UI
+### 2. `/app/agents/new` — Da wizard diretto a Template Hub
+**File:** `src/pages/app/CreateAgent.tsx` — Riscrivere completamente
 
-## ✅ Blocco 3-5 — Agent Templates System
+La pagina diventa il **Template Hub**: griglia di template con filtri per categoria, ricerca, card colorate per tipo.
 
-### Database
-- agent_templates + agent_template_instances + agent_reports + company_channels
-- RLS policies PERMISSIVE (fix da RESTRICTIVE)
-- Funzione DB `increment_installs_count(tpl_id UUID)`
-- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+- Header sticky con titolo "Scegli il tipo di agente", bottone "← Agenti", barra ricerca
+- Filtri categoria come pill scrollabili: Tutti, Vocali, WhatsApp & Chat, Strumenti Vendita, Reportistica, Operativi, Prossimamente
+- Griglia responsive (4 col desktop, 2 tablet, 1 mobile)
+- Template card con striscia colorata in cima per categoria, icona, badges canale/difficolta, metriche, CTA "Configura →"
+- Template caricati da `agent_templates` DB + hardcoded upcoming/static templates
+- Click "Configura" → naviga a `/app/agents/new/:slug`
 
-### Edge Functions (CORS headers completi)
-- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
-- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
-- save-report: salva report in DB + aggiorna contatori istanza
+### 3. Nuova route `/app/agents/new/:slug` — Wizard per template specifico
+**File:** `src/App.tsx` — Aggiungere route
+**File:** `src/pages/app/AgentTemplateWizard.tsx` — Nuovo file
 
-### Frontend — Wizard 5 Step (TemplateSetup.tsx)
-- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + importa CSV con template scaricabile
-- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
-- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
+- Se slug = `vocale-custom` → mostra il wizard vocale esistente (logica da `CreateAgent.tsx` attuale)
+- Se slug = `render-infissi` → redirect a wizard render (riuso `RenderNew` o wrapper)
+- Se slug corrisponde a un template DB → carica template e mostra wizard configurazione (riuso logica `TemplateSetup`)
+- Header con breadcrumb "← Scegli Template" e banner con tipo template
 
-### SuperAdmin
-- /superadmin/templates: CRUD completo con JSON editor per config_schema
+### 4. `/app/agents` — Refactor pagina lista agenti
+**File:** `src/pages/app/Agents.tsx`
 
-## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+- Header con contatori "N agenti attivi · N in bozza"
+- Filtri: Select tipo (Tutti/Vocale/WhatsApp/Render/Operativo) + Select stato
+- Bottone "+ Nuovo Agente" → `/app/agents/new` (Template Hub)
+- Empty state con 3 icone tipo + CTA "Scegli un Template"
 
-### Database (5 tabelle)
-- render_provider_config: configurazione provider AI (OpenAI GPT-Image, Gemini Flash)
-- render_infissi_presets: 24 preset globali (materiali, colori, stili, vetri, oscuranti) con prompt_fragment
-- render_sessions: sessioni render con status, config, result_urls, costi
-- render_gallery: render salvati con share_token, favoriti
-- render_credits: crediti render separati (5 gratis per azienda)
-- RLS PERMISSIVE per tutte le tabelle
-- Trigger set_updated_at + init_render_credits su companies
-- Funzione deduct_render_credit
-- Storage buckets: render-originals (privato), render-results (pubblico)
+### 5. AgentCard — Striscia colorata per tipo + badge tipo
+**File:** `src/components/agents/AgentCard.tsx`
 
-### Edge Functions
-- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
-- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+- Aggiungere striscia sinistra 4px colorata per tipo (brand=vocale, green=whatsapp, violet=render, teal=operativo)
+- Badge tipo con emoji: "🎙️ VOCALE", "💬 WHATSAPP", "🎨 RENDER"
+- Metriche contestuali per tipo (chiamate per vocale, render per render, conversazioni per whatsapp)
+- Template di origine se disponibile
 
-### Frontend
-- RenderHub (/app/render): hero, come funziona, ultimi render, widget crediti
-- RenderNew (/app/render/new): wizard 4 step mobile-first (foto, config, elaborazione, risultati)
-- RenderGallery (/app/render/gallery): grid con ricerca, download, elimina
-- RenderGalleryDetail (/app/render/gallery/:id): BeforeAfterSlider, config, favoriti
-- RenderConfig (/superadmin/render-config): config provider con costi e markup
+### 6. AgentDetail — Tab adattive per tipo
+**File:** `src/pages/app/AgentDetail.tsx`
 
-### Componenti
-- BeforeAfterSlider: slider interattivo prima/dopo con drag handle
-- promptBuilder.ts: costruttore prompt, validazione foto, check dimensioni
+- Definire `TABS_BY_TYPE` map con tab diverse per vocal/render/whatsapp
+- Per render: Configurazione, Avvia Render, Galleria, Preset, Analytics, Impostazioni
+- Per whatsapp: Agente, Workflow, Scheduling, Conversazioni, Report, Impostazioni
+- Per vocal: tab attuali (invariate)
+- Determinare tipo da `agent.type`
 
-### Sidebar
-- Nuova sezione "STRUMENTI VENDITA" con "Render AI"
-- SuperAdmin: sezione "RENDER AI" con "Config Provider"
+### 7. Routing — Aggiornare App.tsx
+**File:** `src/App.tsx`
 
-## 🔜 Prossimi Blocchi
-- Pagine: /app/phone-numbers, /app/knowledge-base
-- Editor Agente 8 tab
-- Wizard 4 step (CreateAgent)
-- SuperAdmin Dashboard economics
-- Edge functions: add-knowledge-doc
-- Integrazioni CRM native
-- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets
+- Aggiungere route `/app/agents/new/:slug` → `AgentTemplateWizard`
+- Mantenere route render (`/app/render/*`) per ora come redirect/fallback ma non piu linkate dalla sidebar
+- Route `/app/templates` resta invariata (e il catalogo separato per automazioni)
+
+---
+
+## File coinvolti
+
+| File | Azione |
+|---|---|
+| `src/components/layout/Sidebar.tsx` | Rimuovere STRUMENTI VENDITA |
+| `src/pages/app/CreateAgent.tsx` | Riscrivere come Template Hub |
+| `src/pages/app/AgentTemplateWizard.tsx` | **Nuovo** — wizard per slug specifico |
+| `src/pages/app/Agents.tsx` | Refactor con filtri tipo, empty state, contatori |
+| `src/components/agents/AgentCard.tsx` | Striscia colorata + badge tipo |
+| `src/pages/app/AgentDetail.tsx` | Tab adattive per tipo |
+| `src/App.tsx` | Nuova route `/app/agents/new/:slug` |
+
+---
+
+## Note tecniche
+
+- Il Template Hub carica template da DB (`agent_templates` dove `is_published = true`) + template statici hardcoded per "upcoming" e per template non ancora nel DB (es. `vocale-custom`)
+- I template statici come "Agente Vocale Personalizzato" non sono nel DB — sono hardcoded nel Hub come entry point al wizard vocale esistente
+- Le route `/app/render/*` restano funzionanti ma senza link dalla sidebar — accessibili dal dettaglio agente render
+- Il campo `agents.type` nel DB (`vocal`, `render`, `whatsapp`, `operative`) determina la visualizzazione
+
