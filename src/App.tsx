@@ -16,6 +16,7 @@ import Companies from "./pages/superadmin/Companies";
 import CreateCompany from "./pages/superadmin/CreateCompany";
 import AppDashboard from "./pages/app/Dashboard";
 import AgentsPage from "./pages/app/Agents";
+import AgentTemplateWizard from "./pages/app/AgentTemplateWizard";
 import CreateAgent from "./pages/app/CreateAgent";
 import AgentDetail from "./pages/app/AgentDetail";
 import ConversationsPage from "./pages/app/Conversations";
