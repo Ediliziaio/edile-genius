@@ -1,46 +1,44 @@
 
+
 # Verifica Completa — Risultati
 
-## ✅ Tutto Funziona Correttamente
+## Database
 
-### 1. RLS Policies — TUTTE PERMISSIVE ✅
-Zero policy RESTRICTIVE nel database. Tutte le ~50 policy su ~25 tabelle sono correttamente PERMISSIVE, permettendo a SuperAdmin e company user di accedere ai dati senza conflitti.
+| Check | Stato |
+|---|---|
+| RLS Policies PERMISSIVE | **OK** — 0 policy RESTRICTIVE, tutte PERMISSIVE |
+| Preset globali infissi | **OK** — 24 preset attivi |
+| Tabelle render (5) | **OK** — `render_provider_config`, `render_infissi_presets`, `render_sessions`, `render_gallery`, `render_credits` |
+| Funzioni DB | **OK** — `has_role`, `get_user_company_id`, `my_company`, `my_role`, `deduct_render_credit`, `init_render_credits` |
+| Trigger | **OK** — `init_render_credits`, `init_company_credits`, `set_updated_at` |
+| Storage buckets | **OK** — `render-originals` (privato), `render-results` (pubblico), `knowledge-base` (privato) |
 
-### 2. Funzioni Database ✅
-Tutte presenti e funzionanti:
-- `has_role`, `get_user_company_id`, `my_company`, `my_role`
-- `increment_installs_count`
-- `deduct_render_credit`, `init_render_credits`
+## Frontend
 
-### 3. Tabelle ✅
-Tutte le 9 tabelle critiche esistono: `render_provider_config`, `render_infissi_presets` (24 preset globali), `render_sessions`, `render_gallery`, `render_credits`, `agent_templates`, `agent_template_instances`, `agent_reports`, `company_channels`.
+| Check | Stato |
+|---|---|
+| Routing (render + superadmin) | **OK** — 5 route render + 1 superadmin |
+| Sidebar "STRUMENTI VENDITA" | **OK** |
+| AgentDetail 8 tab | **OK** — incluso tab "Numero" |
+| Edge Functions (25) | **OK** — tutte configurate in `config.toml` |
 
-### 4. Trigger ✅
-- `trg_init_company_credits` su `companies` → inizializza crediti voce
-- `trg_init_render_credits` su `companies` → inizializza 5 render gratis
-- `set_render_sessions_updated_at` → auto-aggiorna timestamp
-- `set_render_credits_updated_at` → auto-aggiorna timestamp
+## Warning Console (non critici)
 
-### 5. Storage Buckets ✅
-- `render-originals` (privato)
-- `render-results` (pubblico)
-- `knowledge-base` (privato)
+3 warning `forwardRef` sulla landing page (`/`):
+- `WhyUs` e `Pricing` ricevono un ref implicito da React ma non usano `forwardRef`
+- `AnimatedBadge` stesso problema dentro `WhyUs`
 
-### 6. Routing & Sidebar ✅
-- 5 route Render AI company (`/app/render`, `/app/render/new`, `/app/render/gallery`, `/app/render/gallery/:id`)
-- 1 route SuperAdmin (`/superadmin/render-config`)
-- Sidebar: sezione "STRUMENTI VENDITA" con "Render AI" + sezione "RENDER AI" in SuperAdmin
+Questi sono **warning di sviluppo React**, non errori. Non impattano il funzionamento. Possono essere risolti wrappando i componenti con `React.forwardRef`.
 
-### 7. Edge Functions ✅
-Tutte configurate in `config.toml` con `verify_jwt = false`:
-- `generate-render`, `analyze-window-photo`, `add-knowledge-doc`
-- + tutte le altre 22 edge functions
+---
 
-### 8. Pagine UI ✅
-- `RenderHub.tsx`, `RenderNew.tsx` (wizard 4 step), `RenderGallery.tsx`, `RenderGalleryDetail.tsx`
-- `RenderConfig.tsx` (SuperAdmin)
-- `AgentDetail.tsx` con 8 tab (incluso "Numero")
-- `SuperAdmin Dashboard` con stats Render AI
+## Piano Fix (opzionale)
 
-### Nessun errore rilevato
-Console e network puliti. Il sistema e pronto per il testing end-to-end.
+Fix i 3 warning `forwardRef` nei componenti:
+
+1. **`AnimatedBadge.tsx`** — wrappare con `React.forwardRef`
+2. **`WhyUs.tsx`** — wrappare con `React.forwardRef`
+3. **`Pricing.tsx`** — wrappare con `React.forwardRef`
+
+Sono fix cosmetici (warning-only), il sistema funziona correttamente senza.
+
