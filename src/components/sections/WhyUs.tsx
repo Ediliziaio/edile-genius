@@ -1,5 +1,5 @@
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, forwardRef } from "react";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
 
 const cards = [
