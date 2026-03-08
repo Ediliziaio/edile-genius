@@ -134,4 +134,6 @@ const Pricing = forwardRef<HTMLElement>(function Pricing(_, _ref) {
   );
 };
 
+Pricing.displayName = "Pricing";
+
 export default Pricing;

@@ -71,4 +71,6 @@ const WhyUs = forwardRef<HTMLElement>(function WhyUs(_, _ref) {
   );
 };
 
+WhyUs.displayName = "WhyUs";
+
 export default WhyUs;
