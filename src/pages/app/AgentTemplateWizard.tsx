@@ -117,9 +117,18 @@ export default function AgentTemplateWizard() {
   const typeBadge = getTypeBadge(agentType);
 
   // For render agents, redirect to render wizard
+  useEffect(() => {
+    if (agentType === "render") {
+      navigate("/app/render/new", { replace: true });
+    }
+  }, [agentType, navigate]);
+
   if (agentType === "render") {
-    navigate("/app/render/new", { replace: true });
-    return null;
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
 
   const validatedSteps = new Set<number>();
