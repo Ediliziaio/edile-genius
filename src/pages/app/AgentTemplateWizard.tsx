@@ -101,6 +101,7 @@ export default function AgentTemplateWizard() {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [direction, setDirection] = useState(1);
 
+  const update = useCallback((key: string, value: any) => setForm(f => ({ ...f, [key]: value })), []);
 
   const selectUseCase = useCallback((id: UseCaseId) => {
     const template = PROMPT_TEMPLATES[id];
