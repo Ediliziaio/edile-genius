@@ -132,7 +132,7 @@ const Pricing = forwardRef<HTMLElement>(function Pricing(_, _ref) {
       </div>
     </section>
   );
-};
+});
 
 Pricing.displayName = "Pricing";
 

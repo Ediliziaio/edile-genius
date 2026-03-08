@@ -69,7 +69,7 @@ const WhyUs = forwardRef<HTMLElement>(function WhyUs(_, _ref) {
       </div>
     </section>
   );
-};
+});
 
 WhyUs.displayName = "WhyUs";
 
