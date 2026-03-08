@@ -1,95 +1,73 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI
 
-## ✅ Completato in questo blocco
+# Verifica Stato Attuale — Agent Hub Refactor
 
-### Database Migration
-- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
-- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
-- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
-- RLS policies per tutte le nuove tabelle
+## Risultati Verifica
 
-## ✅ Blocco 2 — Sistema Crediti Euro-based
+### 1. Sidebar — OK
+- "STRUMENTI VENDITA" e "Render AI" sono stati rimossi dal `companyNav`
+- La sidebar company ha esattamente le sezioni richieste: PRINCIPALE, AUTOMAZIONI, COMUNICAZIONE, CONTATTI, REPORT, ACCOUNT
+- SuperAdmin ha ancora "Config Render AI" sotto "PIATTAFORMA" (corretto, e accessibile solo da superadmin)
 
-### Database
-- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
-- ai_credit_topups (ricariche manual/auto/promo/adjustment)
-- ai_credit_usage (consumo per conversazione con margini)
-- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
-- monthly_billing_summary view (security_invoker)
+### 2. Template Hub `/app/agents/new` — OK
+- `CreateAgent.tsx` e stato riscritto come Template Hub con griglia, filtri categoria, ricerca
+- 9 template statici (5 vocali, 2 WhatsApp, 1 render attivo, 2 prossimamente)
+- Carica anche template da DB (`agent_templates`) e li mergia con quelli statici
+- Filtri categoria con pill scrollabili
+- Layout responsive (4 col desktop, 2 tablet, 1 mobile)
+- Card con striscia colorata in cima, icona, badge canale/difficolta, metriche, CTA
 
-### Edge Functions
-- check-credits-before-call: verifica saldo pre-chiamata
-- topup-credits: ricarica manuale con fattura
-- elevenlabs-webhook: post-call billing, auto-recharge, blocco
-- platform-config: +apply_global_markup action
+### 3. Route `/app/agents/new/:slug` — OK
+- Route presente in `App.tsx` (linea 95)
+- `AgentTemplateWizard.tsx` gestisce slug vocali (wizard 5 step) e redirect per render
+- Header con breadcrumb "← Scegli Template" e banner tipo template
 
-### Frontend
-- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
-- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
-- Sidebar: footer saldo crediti con barra e alert
-- VoiceTestPanel: check crediti pre-chiamata con blocco UI
+### 4. Pagina Agenti `/app/agents` — OK
+- Filtri per tipo e stato
+- Contatori "N agenti attivi · N in bozza"
+- Bottone "+ Nuovo Agente" naviga a `/app/agents/new` (Template Hub)
+- Empty state con 3 icone tipo + CTA "Scegli un Template"
 
-## ✅ Blocco 3-5 — Agent Templates System
+### 5. AgentCard — OK
+- Striscia sinistra 4px colorata per tipo (brand/green/violet/blue)
+- Badge tipo con emoji (VOCALE/WHATSAPP/RENDER/OPERATIVO)
+- Metriche contestuali per tipo
+- Template di origine mostrato da `agent.use_case`
 
-### Database
-- agent_templates + agent_template_instances + agent_reports + company_channels
-- RLS policies PERMISSIVE (fix da RESTRICTIVE)
-- Funzione DB `increment_installs_count(tpl_id UUID)`
-- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+### 6. AgentDetail — OK
+- `TABS_BY_TYPE` definito con tab diverse per vocal (8 tab), render (3 tab), whatsapp (5 tab)
+- Tipo determinato da `agent.type`
 
-### Edge Functions (CORS headers completi)
-- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
-- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
-- save-report: salva report in DB + aggiorna contatori istanza
+### 7. Routing — OK
+- Route render (`/app/render/*`) ancora presenti come fallback
+- Non piu linkate dalla sidebar
 
-### Frontend — Wizard 5 Step (TemplateSetup.tsx)
-- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + importa CSV con template scaricabile
-- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
-- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
+---
 
-### SuperAdmin
-- /superadmin/templates: CRUD completo con JSON editor per config_schema
+## Problemi Rilevati
 
-## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+### Bug 1: forwardRef warning in `CreateAgent.tsx`
+Console mostra 2 warning:
+- `TemplateHubCard` riceve un ref implicito
+- `Tooltip` dentro `TemplateHubCard` stesso problema
 
-### Database (5 tabelle)
-- render_provider_config: configurazione provider AI (OpenAI GPT-Image, Gemini Flash)
-- render_infissi_presets: 24 preset globali (materiali, colori, stili, vetri, oscuranti) con prompt_fragment
-- render_sessions: sessioni render con status, config, result_urls, costi
-- render_gallery: render salvati con share_token, favoriti
-- render_credits: crediti render separati (5 gratis per azienda)
-- RLS PERMISSIVE per tutte le tabelle
-- Trigger set_updated_at + init_render_credits su companies
-- Funzione deduct_render_credit
-- Storage buckets: render-originals (privato), render-results (pubblico)
+La `TemplateHubCard` e una funzione interna al file, non wrappata con `forwardRef`. Il warning viene dal Tooltip di Radix che tenta di passare un ref al suo child.
 
-### Edge Functions
-- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
-- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+**Fix**: Il `TooltipTrigger` usa `asChild` e passa un ref al `<button>` child. Il problema e che il button non riceve correttamente il ref. Verificando il codice (linee 364-368), il `TooltipTrigger asChild` wrappa un `<button>` — questo dovrebbe funzionare. Il warning potrebbe venire dal fatto che la card stessa (div) riceve un ref dal grid. Non critico, ma risolvibile.
 
-### Frontend
-- RenderHub (/app/render): hero, come funziona, ultimi render, widget crediti
-- RenderNew (/app/render/new): wizard 4 step mobile-first (foto, config, elaborazione, risultati)
-- RenderGallery (/app/render/gallery): grid con ricerca, download, elimina
-- RenderGalleryDetail (/app/render/gallery/:id): BeforeAfterSlider, config, favoriti
-- RenderConfig (/superadmin/render-config): config provider con costi e markup
+### Bug 2: RLS RESTRICTIVE sulle tabelle
+Dalle tabelle fornite nel contesto, TUTTE le policy risultano `Permissive: No` (cioe RESTRICTIVE). Questo e un problema critico: con policy RESTRICTIVE, l'utente deve soddisfare TUTTE le policy simultaneamente (AND), il che significa che un company user non potra mai accedere ai dati perche la policy superadmin fallira sempre per lui.
 
-### Componenti
-- BeforeAfterSlider: slider interattivo prima/dopo con drag handle
-- promptBuilder.ts: costruttore prompt, validazione foto, check dimensioni
+**Nota**: Le verifiche precedenti hanno detto "0 RESTRICTIVE" ma i dati nel contesto mostrano chiaramente `Permissive: No` su tutte le tabelle. Questo potrebbe essere un problema di visualizzazione del contesto oppure un problema reale.
 
-### Sidebar
-- Nuova sezione "STRUMENTI VENDITA" con "Render AI"
-- SuperAdmin: sezione "RENDER AI" con "Config Provider"
+---
 
-## 🔜 Prossimi Blocchi
-- Pagine: /app/phone-numbers, /app/knowledge-base
-- Editor Agente 8 tab
-- Wizard 4 step (CreateAgent)
-- SuperAdmin Dashboard economics
-- Edge functions: add-knowledge-doc
-- Integrazioni CRM native
-- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets
+## Piano Fix
+
+### Fix 1: Risolvere il warning forwardRef in TemplateHubCard
+**File**: `src/pages/app/CreateAgent.tsx`
+- Il warning viene dal Tooltip che non riesce a passare il ref. Wrappare il button del TooltipTrigger correttamente, oppure rimuovere `asChild` e usare il button di default del TooltipTrigger.
+
+### Fix 2: Verificare lo stato RLS delle policy
+Eseguire una query diretta su `pg_policies` per confermare se le policy sono effettivamente PERMISSIVE o RESTRICTIVE, dato che le informazioni nel contesto contrastano con le verifiche precedenti.
+
