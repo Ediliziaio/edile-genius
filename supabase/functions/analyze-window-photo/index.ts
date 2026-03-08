@@ -26,22 +26,34 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are an expert window and building analyst. Analyze the photo and return a JSON object with these fields:
-- window_type: string (e.g., "casement", "sliding", "fixed", "tilt-and-turn")
-- current_material: string (e.g., "wood", "aluminum", "pvc", "steel")
-- estimated_width_cm: number
-- estimated_height_cm: number
-- window_count: number (how many windows visible)
-- building_style: string (e.g., "modern", "classic", "industrial", "rural")
-- lighting: string (e.g., "daylight", "overcast", "sunset", "artificial")
-- condition: string (e.g., "good", "worn", "damaged")
-- notes: string (any relevant observations)
-Return ONLY valid JSON, no markdown.`,
+            content: `You are an expert window and building analyst for an architectural visualization system. Analyze the photo and return a JSON object with ALL of the following fields. Be precise and technical.
+
+Required JSON fields:
+- tipo_apertura: one of "battente_1_anta", "battente_2_ante", "battente_3_ante", "scorrevole", "scorrevole_alzante", "vasistas", "anta_ribalta", "bilico", "fisso", "portafinestra", "cassonetto_integrato"
+- materiale_attuale: one of "legno_vecchio", "legno_verniciato", "alluminio_anodizzato", "alluminio_verniciato", "pvc_bianco", "pvc_colorato", "ferro", "acciaio", "sconosciuto"
+- colore_attuale: string describing the current frame color (e.g., "bianco ingiallito", "marrone scuro", "grigio argento")
+- condizioni: one of "buone", "usurato", "danneggiato", "fatiscente"
+- num_ante_attuale: integer (number of window panels/leaves visible)
+- spessore_telaio: string estimate (e.g., "circa 60mm", "circa 80mm")
+- presenza_cassonetto: boolean (is there a roller shutter box above the window?)
+- tipo_cassonetto: string (e.g., "esterno sporgente", "a filo muro", "integrato", "assente")
+- tipo_vetro_attuale: string (e.g., "vetro singolo", "doppio vetro", "triplo vetro", "vetro con piombature")
+- stile_edificio: one of "moderno", "classico", "industriale", "rurale", "liberty", "anni_60_70", "contemporaneo", "storico"
+- materiale_muro: string (e.g., "intonaco", "mattone faccia vista", "pietra naturale", "cemento grezzo")
+- colore_muro: string (e.g., "bianco sporco", "giallo ocra", "grigio chiaro")
+- presenza_davanzale: boolean
+- presenza_inferriata: boolean
+- piano: string (e.g., "piano terra", "primo piano", "secondo piano")
+- luce: string (e.g., "luce diretta mattutina", "luce diffusa nuvoloso", "controluce", "ombra parziale")
+- angolo_ripresa: string (e.g., "frontale", "angolo 30° da sinistra", "dal basso verso alto")
+- note_aggiuntive: string (any additional relevant observations about the window, surroundings, or special features)
+
+Return ONLY valid JSON, no markdown code blocks, no additional text.`,
           },
           {
             role: "user",
             content: [
-              { type: "text", text: "Analyze the windows in this building photo." },
+              { type: "text", text: "Analizza le finestre/porte in questa foto dell'edificio. Fornisci un'analisi dettagliata e strutturata." },
               { type: "image_url", image_url: { url: image_url } },
             ],
           },
