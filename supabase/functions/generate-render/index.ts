@@ -25,6 +25,19 @@ serve(async (req) => {
       .single();
     if (sessErr || !session) throw new Error("Session not found");
 
+    // Generate signed URL for the private bucket image
+    const originalUrl: string = session.original_photo_url;
+    const bucketPrefix = "/storage/v1/object/public/render-originals/";
+    const pathIndex = originalUrl.indexOf(bucketPrefix);
+    if (pathIndex === -1) throw new Error("Cannot extract path from original_photo_url");
+    const filePath = originalUrl.substring(pathIndex + bucketPrefix.length);
+
+    const { data: signedData, error: signedErr } = await supabase.storage
+      .from("render-originals")
+      .createSignedUrl(filePath, 3600);
+    if (signedErr || !signedData?.signedUrl) throw new Error("Failed to create signed URL");
+    const imageUrl = signedData.signedUrl;
+
     // Check credits
     const { data: credits } = await supabase
       .from("render_credits")
