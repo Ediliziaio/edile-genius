@@ -34,7 +34,7 @@ const SolutionsHero = () => (
         </span>
       </motion.div>
 
-      <motion.h1 variants={item} className="font-display text-[44px] md:text-[72px] font-extrabold text-white leading-[1.05] mb-6">
+      <motion.h1 variants={item} className="font-display text-[32px] sm:text-[44px] md:text-[72px] font-extrabold text-white leading-[1.05] mb-6">
         Ogni Problema<br />della Tua Azienda<br />Edile — Risolto.<br />
         <span className="text-primary">Con l'AI.</span>
       </motion.h1>
