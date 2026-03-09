@@ -90,9 +90,24 @@ const BlogPost = () => {
     const s1 = inject("article", articleJsonLd);
     const s2 = inject("breadcrumb", breadcrumbJsonLd);
 
+    let s3: HTMLScriptElement | null = null;
+    if (post.faqs && post.faqs.length > 0) {
+      const faqJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: post.faqs.map((f) => ({
+          "@type": "Question",
+          name: f.question,
+          acceptedAnswer: { "@type": "Answer", text: f.answer },
+        })),
+      };
+      s3 = inject("faqpage", faqJsonLd);
+    }
+
     return () => {
       s1?.remove();
       s2?.remove();
+      s3?.remove();
     };
   }, [post]);
 
