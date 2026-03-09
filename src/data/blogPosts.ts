@@ -1071,6 +1071,12 @@ export const blogPosts: BlogPost[] = [
         type: "text",
         callout: "Promo attiva: setup campagna completa gratuita (valore €800) per le prime 10 imprese edili che si registrano questo mese. Include: configurazione Google Ads, landing page, agente vocale AI, dashboard analytics. Prenota il tuo posto."
       }
+    ],
+    faqs: [
+      { question: "Quanto devo investire in marketing digitale per un'impresa edile?", answer: "Per iniziare, €500-€1.500/mese in Google Ads sono sufficienti per generare 20-40 lead qualificati. Con l'agente vocale AI che risponde a tutte le chiamate, il tasso di conversione raddoppia rispetto alla gestione manuale. Il costo per lead acquisito scende a €15-€35." },
+      { question: "Google Ads o social media: cosa funziona meglio per l'edilizia?", answer: "Google Ads per lead caldi (chi cerca attivamente 'ristrutturazione casa'), social media per brand awareness e remarketing. La combinazione ideale è 70% Google Ads + 30% social. L'agente vocale AI gestisce le chiamate da entrambi i canali senza costi aggiuntivi." },
+      { question: "Come misuro il ROI del marketing digitale?", answer: "La dashboard traccia ogni euro: costo per click, costo per lead, costo per sopralluogo, costo per contratto chiuso. Sai esattamente quanto ti costa acquisire un cliente e quanto rende ogni canale. Il ROI medio dei nostri clienti edili è 5-8x sull'investimento marketing." },
+      { question: "Posso fare marketing digitale senza un sito web professionale?", answer: "Sì, con le landing page dedicate. Creiamo pagine di atterraggio ottimizzate per ogni servizio (ristrutturazione, fotovoltaico, infissi) che convertono il 3-5x rispetto a un sito generico. L'agente vocale AI gestisce i lead direttamente dalla landing page." }
     ]
   },
 
