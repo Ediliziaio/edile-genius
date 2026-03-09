@@ -296,12 +296,12 @@ const ComeFunziona = () => {
                     <span className="font-display font-bold text-neutral-400 line-through text-sm">{item.value}</span>
                   </div>
                 ))}
-                <div className="bg-primary-light px-7 py-6 flex items-center justify-between">
+                <div className="bg-primary-light px-5 sm:px-7 py-5 sm:py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <p className="font-display font-extrabold text-neutral-900 text-lg">Valore totale: <span className="line-through text-neutral-400">€10.500</span></p>
+                    <p className="font-display font-extrabold text-neutral-900 text-base sm:text-lg">Valore totale: <span className="line-through text-neutral-400">€10.500</span></p>
                     <p className="text-sm text-neutral-500 mt-1">Incluso nel tuo piano personalizzato</p>
                   </div>
-                  <span className="font-display font-extrabold text-primary text-2xl">INCLUSO</span>
+                  <span className="font-display font-extrabold text-primary text-xl sm:text-2xl">INCLUSO</span>
                 </div>
               </motion.div>
             </motion.div>
