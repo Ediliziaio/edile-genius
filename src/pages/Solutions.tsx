@@ -12,6 +12,7 @@ import AIComparison from "@/components/solutions/AIComparison";
 import ImplementationSteps from "@/components/solutions/ImplementationSteps";
 import SolutionsFAQ from "@/components/solutions/SolutionsFAQ";
 import SolutionsCTA from "@/components/solutions/SolutionsCTA";
+import Guarantee from "@/components/sections/Guarantee";
 import { solutions, type Solution } from "@/data/solutions";
 
 const Solutions = () => {
