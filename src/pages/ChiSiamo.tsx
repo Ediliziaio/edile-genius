@@ -127,7 +127,7 @@ const ChiSiamo = () => {
                   <d.icon className="w-7 h-7 text-primary" />
                 </div>
                 <h3 className="font-display text-xl font-bold text-white mb-3">{d.title}</h3>
-                <p className="text-[hsl(var(--neutral-400))] text-sm leading-relaxed">{d.text}</p>
+                <p className="text-[hsl(var(--neutral-300))] text-sm leading-relaxed">{d.text}</p>
               </motion.div>
             ))}
           </motion.div>
