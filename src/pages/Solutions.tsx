@@ -20,6 +20,12 @@ const Solutions = () => {
   const [filterActive, setFilterActive] = useState("tutte");
   const [modalOpen, setModalOpen] = useState<Solution | null>(null);
 
+  usePageSEO({
+    title: "20 Soluzioni AI per l'Edilizia | Edilizia.io",
+    description: "Scopri 20 agenti AI specializzati per infissi, fotovoltaico, ristrutturazioni e imprese edili. Automazione vendite, assistenza clienti e gestione cantieri.",
+    canonical: "/soluzioni",
+  });
+
   useEffect(() => {
     const hash = window.location.hash.replace("#", "");
     if (["infissi", "fotovoltaico", "ristrutturazioni", "edilizia"].includes(hash)) {
