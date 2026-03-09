@@ -714,6 +714,12 @@ export const blogPosts: BlogPost[] = [
         content: "Facciamo il punto. Il 2025 ha portato nuove regole, nuovi massimali, nuove scadenze. Il 2026 ne porterà altre. E così ogni anno.\n\nPuoi continuare a rincorrere le normative con Excel e post-it. Puoi continuare a perdere pratiche, scadenze e clienti. Puoi continuare a lavorare 60 ore a settimana per guadagnare meno di quanto dovresti.\n\nOppure puoi fare come le 847 imprese italiane che hanno già adottato sistemi AI per la gestione bonus.\n\nI risultati parlano da soli:\n- **+197% di volume pratiche gestite**\n- **Zero errori documentali**\n- **38 ore settimanali risparmiate**\n- **Margine netto aumentato del 34%**\n\nLa burocrazia dei bonus non sparirà. Ma il modo in cui la gestisci può cambiare radicalmente — a partire da oggi.\n\n**Il prossimo bonus non aspetta. Sei pronto a gestirlo senza impazzire?**\n\nAttiva la prova gratuita. 30 giorni. Zero rischi. Se non ti cambia la vita lavorativa, non paghi nulla. Ma spoiler: non tornerai mai più al vecchio metodo.",
         type: "text"
       }
+    ],
+    faqs: [
+      { question: "L'AI può gestire le pratiche per il Superbonus 110%?", answer: "Sì. Il sistema gestisce l'intero flusso del Superbonus: dalla verifica requisiti alla compilazione automatica delle pratiche ENEA, dalla generazione delle asseverazioni al monitoraggio delle scadenze. Riduce gli errori del 94% e i tempi di preparazione del 70%." },
+      { question: "Come funziona il monitoraggio automatico delle scadenze fiscali?", answer: "Il sistema traccia ogni scadenza per ogni pratica: SAL, asseverazioni, comunicazioni ENEA, cessioni del credito, opzioni di sconto in fattura. Invia alert automatici 30, 15 e 7 giorni prima della scadenza a te e al commercialista. Zero pratiche scadute." },
+      { question: "L'AI si aggiorna automaticamente con le nuove normative?", answer: "Sì, il database normativo viene aggiornato settimanalmente dal nostro team legale-fiscale. Ogni modifica a decreti, circolari AdE, FAQ ENEA viene recepita e applicata automaticamente. Ricevi notifiche sulle novità rilevanti per le tue pratiche in corso." },
+      { question: "Posso usare l'AI per gestire anche il Sismabonus e l'Ecobonus?", answer: "Assolutamente. Il sistema copre tutti i bonus edilizi vigenti: Superbonus, Ecobonus, Sismabonus, Bonus Ristrutturazione, Bonus Mobili, Bonus Verde, Bonus Barriere Architettoniche. Per ogni bonus, conosce requisiti, massimali, documenti necessari e scadenze." }
     ]
   },
 
