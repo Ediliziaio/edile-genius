@@ -25,7 +25,7 @@ const Hero = () => {
               </AnimatedBadge>
             </motion.div>
 
-            <motion.h1 variants={item} className="font-display text-[44px] md:text-[72px] font-extrabold leading-[1.05] text-neutral-900">
+            <motion.h1 variants={item} className="font-display text-[32px] sm:text-[44px] md:text-[72px] font-extrabold leading-[1.05] text-neutral-900">
               Licenzia i Costi.{" "}
               <span className="text-primary">Assumi l'AI.</span>{" "}
               Fai Esplodere la tua{" "}
