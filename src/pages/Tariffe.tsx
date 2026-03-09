@@ -5,6 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
 import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
+import Guarantee from "@/components/sections/Guarantee";
 import { Link } from "react-router-dom";
 
 const formatEuro = (n: number) =>
