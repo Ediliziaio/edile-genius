@@ -115,6 +115,7 @@ const BlogPost = () => {
 
   if (!post) return <Navigate to="/blog" replace />;
 
+  const shareUrl = `https://edilizia.io/blog/${post.slug}`;
   const related = blogPosts.filter((p) => p.slug !== post.slug).slice(0, 3);
 
   return (
