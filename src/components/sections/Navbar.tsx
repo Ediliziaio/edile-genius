@@ -180,7 +180,7 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
 
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-4">
-          <Link to="/login" className="text-sm font-medium text-neutral-500 hover:text-primary transition-colors">
+          <Link to="/login" className={`text-sm font-medium ${isDark ? "text-neutral-300 hover:text-white" : "text-neutral-500 hover:text-primary"} transition-colors`}>
             Accedi
           </Link>
           <Link
