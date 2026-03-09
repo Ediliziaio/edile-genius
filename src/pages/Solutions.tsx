@@ -32,13 +32,6 @@ const Solutions = () => {
       setFilterActive(hash);
     }
   }, []);
-
-  useEffect(() => {
-    const hash = window.location.hash.replace("#", "");
-    if (["infissi", "fotovoltaico", "ristrutturazioni", "edilizia"].includes(hash)) {
-      setFilterActive(hash);
-    }
-  }, []);
   const filtered = filterActive === "tutte" ? solutions : solutions.filter((s) => s.settore === filterActive);
 
   const handleOpenDetail = useCallback((id: number) => {
