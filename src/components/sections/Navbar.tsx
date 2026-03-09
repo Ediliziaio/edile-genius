@@ -42,8 +42,14 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
   const [mobileSectorOpen, setMobileSectorOpen] = useState(false);
   const megaRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
-  const navBg = useTransform(scrollY, [0, 60], ["rgba(255,255,255,0)", "rgba(255,255,255,0.97)"]);
-  const navShadow = useTransform(scrollY, [0, 60], ["none", "0 1px 0 hsl(214 32% 91%)"]);
+  const navBg = useTransform(scrollY, [0, 60], [
+    "rgba(255,255,255,0)",
+    isDark ? "rgba(13,17,23,0.97)" : "rgba(255,255,255,0.97)"
+  ]);
+  const navShadow = useTransform(scrollY, [0, 60], [
+    "none",
+    isDark ? "0 1px 0 rgba(255,255,255,0.08)" : "0 1px 0 hsl(214 32% 91%)"
+  ]);
   const location = useLocation();
 
   // Close mega-menu on click outside
