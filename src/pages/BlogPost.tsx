@@ -206,6 +206,25 @@ const BlogPost = () => {
         {/* Content */}
         <BlogArticle sections={post.sections} />
 
+        {/* FAQ Section */}
+        {post.faqs && post.faqs.length > 0 && (
+          <section className="mt-16 mb-10">
+            <h2 className="text-xl md:text-2xl font-bold text-foreground mb-6">Domande Frequenti</h2>
+            <Accordion type="single" collapsible className="space-y-3">
+              {post.faqs.map((faq, i) => (
+                <AccordionItem key={i} value={`faq-${i}`} className="border border-border rounded-xl px-5 data-[state=open]:border-primary/30 data-[state=open]:bg-primary/5 transition-colors">
+                  <AccordionTrigger className="text-left font-semibold text-foreground hover:no-underline py-4">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground leading-relaxed">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </section>
+        )}
+
         {/* CTA */}
         <BlogCTA />
 
