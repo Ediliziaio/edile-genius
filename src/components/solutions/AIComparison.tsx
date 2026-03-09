@@ -16,16 +16,16 @@ const AIComparison = () => {
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-primary font-medium">Capire la Differenza</span>
           </div>
-          <h2 className="font-display text-[28px] sm:text-[28px] sm:text-[28px] sm:text-[36px] md:text-[48px] font-extrabold text-white leading-[1.1]">
+          <h2 className="font-display text-[28px] sm:text-[28px] sm:text-[28px] sm:text-[28px] sm:text-[36px] md:text-[48px] font-extrabold text-white leading-[1.1]">
             Agente Vocale AI<br />vs. Agente AI Operativo:<br /><span className="text-primary">Quale Fa Per Te?</span>
           </h2>
         </motion.div>
 
         <div className="grid md:grid-cols-[1fr_auto_1fr] gap-6 items-stretch">
           {/* Vocale */}
-          <motion.div variants={item} className="bg-neutral-800 rounded-3xl bord5 sm:p-er-t-[3px] bord5 sm:p-er-t-primary p-8">
+          <motion.div variants={item} className="bg-neutral-800 r5 sm:p-ounded-3xl bord5 sm:p-er-t-[3px] bord5 sm:p-er-t-primary p-8">
             <div className="w-16 h-16 rounded-full bg-[rgba(62,207,110,0.15)] flex items-center justify-center text-[32px] mb-4">🎙️</div>
-            <h3 classNaxl sm:text-me="font-display text-[28px] font-extrabold text-white mb-1">Agente Vocale AI</h3>
+ xl sm:text-           <h3 classNaxl sm:text-me="font-display text-[28px] font-extrabold text-white mb-1">Agente Vocale AI</h3>
             <p className="font-mono text-xs text-primary uppercase tracking-wider mb-6">Interazione Telefonica in Tempo Reale</p>
             <p className="text-neutral-400 leading-relaxed mb-6">
               Gestisce conversazioni telefoniche reali con i tuoi clienti e lead.
@@ -55,7 +55,7 @@ const AIComparison = () => {
           </motion.div>
 
           {/* Operativo */}
-          <motion.div variants={item} className="bg-neutral-800 rounded-3xl border-t-[3px] border-t-[#3B82F6] p-8">
+          <motion.div variants={item} className="bg-neutral-800 rounded-3xl bor5 sm:p-der-t-[3px] border-t-[#3B82F6] p-8">
             <div className="w-16 h-16 rounded-full bg-[rgba(59,130,246,0.15)] flex items-center justify-center text-[32px] mb-4">🤖</div>
             <h3 className="font-display text-[28px] font-extrabold text-white mb-1">Agente AI Operativo</h3>
             <p className="font-mono text-xs text-[#3B82F6] uppercase tracking-wider mb-6">Elaborazione Dati & Automazione Processi</p>
