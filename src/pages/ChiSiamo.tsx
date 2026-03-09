@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { Hammer, FlaskConical, HardHat, Eye, Target, ShieldCheck, Building2, Rocket, TrendingUp } from "lucide-react";
 import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
@@ -48,6 +49,12 @@ const values = [
 ];
 
 const ChiSiamo = () => {
+  usePageSEO({
+    title: "Chi Siamo — La Prima Agenzia AI per l'Edilizia | Edilizia.io",
+    description: "Nati in cantiere, non in ufficio. Scopri il team dietro Edilizia.io: la prima agenzia AI specializzata per serramenti, fotovoltaico e ristrutturazioni in Italia.",
+    canonical: "/chi-siamo",
+  });
+
   const heroRef = useRef(null);
   const heroInView = useInView(heroRef, { once: true, margin: "-60px" });
   const diffRef = useRef(null);

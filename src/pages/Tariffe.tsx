@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { Check, Calculator, TrendingUp, Clock, BarChart3, Users, Building2, Sliders, ArrowRight, Shield, Zap, Target } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
@@ -147,6 +148,12 @@ const SliderCard = ({
 );
 
 const Tariffe = () => {
+  usePageSEO({
+    title: "Tariffe Agenti AI per l'Edilizia — Calcola il Risparmio | Edilizia.io",
+    description: "Confronta i piani Starter, Growth e Scale per agenti AI nell'edilizia. Calcolatore ROI integrato: scopri quanto risparmi rispetto a un dipendente tradizionale.",
+    canonical: "/tariffe",
+  });
+
   const [dipendenti, setDipendenti] = useState(2);
   const [stipendio, setStipendio] = useState(1800);
   const [leadMensili, setLeadMensili] = useState(60);

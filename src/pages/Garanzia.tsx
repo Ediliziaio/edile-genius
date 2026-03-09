@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
@@ -85,6 +86,12 @@ const testimonials = [
 /* ───────────── COMPONENT ───────────── */
 
 const Garanzia = () => {
+  usePageSEO({
+    title: "Garanzia 30 Giorni Soddisfatti o Rimborsati | Edilizia.io",
+    description: "Zero rischi con la nostra garanzia 30 giorni. Se il tuo Agente AI non genera risultati misurabili, ti rimborsiamo al 100%. Nessuna domanda.",
+    canonical: "/garanzia",
+  });
+
   const heroRef = useRef(null);
   const heroInView = useInView(heroRef, { once: true });
   const reasonRef = useRef(null);

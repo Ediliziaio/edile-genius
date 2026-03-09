@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { icons } from "lucide-react";
 import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
@@ -36,6 +37,12 @@ const CategoryCard = ({ cat, index }: { cat: PerChiECategory; index: number }) =
 };
 
 const PerChiE = () => {
+  usePageSEO({
+    title: "Per Chi È — Soluzioni AI per Ogni Azienda Edile | Edilizia.io",
+    description: "Soluzioni AI su misura per artigiani, PMI, grandi imprese, serramentisti, fotovoltaico, ristrutturazioni e tutti i settori dell'edilizia italiana.",
+    canonical: "/per-chi-e",
+  });
+
   return (
     <main className="min-h-screen bg-background">
       <Navbar />

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
@@ -19,17 +20,18 @@ const Solutions = () => {
   const [filterActive, setFilterActive] = useState("tutte");
   const [modalOpen, setModalOpen] = useState<Solution | null>(null);
 
+  usePageSEO({
+    title: "20 Soluzioni AI per l'Edilizia | Edilizia.io",
+    description: "Scopri 20 agenti AI specializzati per infissi, fotovoltaico, ristrutturazioni e imprese edili. Automazione vendite, assistenza clienti e gestione cantieri.",
+    canonical: "/soluzioni",
+  });
+
   useEffect(() => {
     const hash = window.location.hash.replace("#", "");
     if (["infissi", "fotovoltaico", "ristrutturazioni", "edilizia"].includes(hash)) {
       setFilterActive(hash);
     }
   }, []);
-
-  useEffect(() => {
-    document.title = "Soluzioni AI per l'Edilizia — 20 Agenti AI | Edilizia.io";
-  }, []);
-
   const filtered = filterActive === "tutte" ? solutions : solutions.filter((s) => s.settore === filterActive);
 
   const handleOpenDetail = useCallback((id: number) => {

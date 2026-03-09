@@ -1,6 +1,7 @@
 import { useParams, Navigate, Link } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { icons, XCircle, CheckCircle2, ArrowRight, Quote } from "lucide-react";
 import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
@@ -13,6 +14,13 @@ import { perChiECategories } from "@/data/perChiE";
 const PerChiEDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const cat = perChiECategories.find(c => c.slug === slug);
+
+  usePageSEO({
+    title: cat ? `${cat.name} — AI per l'Edilizia | Edilizia.io` : "Per Chi È | Edilizia.io",
+    description: cat?.heroSubtitle || "Soluzioni AI specializzate per il settore edile italiano.",
+    canonical: `/per-chi-e/${slug}`,
+  });
+
   const problemsRef = useRef(null);
   const solutionsRef = useRef(null);
   const roiRef = useRef(null);
