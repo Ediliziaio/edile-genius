@@ -94,7 +94,7 @@ const PerChiE = () => {
         <div className="max-w-6xl mx-auto px-6">
           <div className="mb-10">
             <span className="font-mono text-xs uppercase tracking-wider text-primary font-bold">Per Settore</span>
-            <h2 className="font-display text-3xl md:text-4xl font-extrabold text-foreground mt-2">
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold text-foreground mt-2">
               Il tuo settore. I tuoi problemi. Le nostre soluzioni.
             </h2>
           </div>

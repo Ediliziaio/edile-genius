@@ -157,7 +157,7 @@ const ComeFunziona = () => {
             {/* 3 mini-stats */}
             <div className="flex flex-wrap justify-center gap-6 pt-4">
               {heroStats.map((s) => (
-                <div key={s.label} className="flex items-center gap-3 bg-background rounded-xl border border-border px-5 py-3 shadow-card">
+                <div key={s.label} className="flex items-center gap-3 bg-background rounded-xl border border-border px-4 sm:px-5 py-3 shadow-card">
                   <s.icon className="w-5 h-5 text-primary" />
                   <div className="text-left">
                     <p className="font-display font-extrabold text-neutral-900 text-lg leading-none">{s.value}</p>

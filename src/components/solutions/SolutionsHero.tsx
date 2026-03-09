@@ -49,14 +49,14 @@ const SolutionsHero = () => (
         <p className="text-white font-semibold mt-4">Non template generici. Soluzioni verticali costruite per voi.</p>
       </motion.div>
 
-      <motion.div variants={item} className="flex flex-wrap justify-center gap-3 mb-12">
-        {stats.map((s, i) => (
-          <div key={i} className="bg-neutral-800 border border-neutral-700 rounded-xl px-5 py-3 flex items-center gap-3">
-            <span className="font-display text-[32px] font-extrabold text-primary">{s.value}</span>
-            <span className="font-mono text-[10px] text-neutral-400 uppercase tracking-wider text-left max-w-[120px] leading-tight">{s.label}</span>
-          </div>
-        ))}
-      </motion.div>
+      <motion.div variants={item} className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-3 mb-12">
+          {stats.map((s, i) => (
+            <div key={i} className="bg-neutral-800 border border-neutral-700 rounded-xl px-4 sm:px-5 py-3 flex items-center gap-2 sm:gap-3">
+              <span className="font-display text-[24px] sm:text-[32px] font-extrabold text-primary">{s.value}</span>
+              <span className="font-mono text-[9px] sm:text-[10px] text-neutral-400 uppercase tracking-wider text-left max-w-[120px] leading-tight">{s.label}</span>
+            </div>
+          ))}
+        </motion.div>
 
       <motion.button
         variants={item}

@@ -133,7 +133,7 @@ const Blog = () => {
             {filtered.length} risultat{filtered.length === 1 ? "o" : "i"} per "<span className="font-medium text-foreground">{searchQuery}</span>"
           </p>
         )}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {filtered.map((post) => (
             <BlogCard key={post.slug} post={post} searchQuery={searchQuery} />
           ))}
