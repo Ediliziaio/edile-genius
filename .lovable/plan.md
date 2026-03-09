@@ -1,60 +1,95 @@
 
+# Stato Implementazione — Blocco 1-5 + Render AI
 
-# Blog SEO-Friendly per Edilizia + AI
+## ✅ Completato in questo blocco
 
-## Struttura
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
-### 1. Dati articoli — `src/data/blogPosts.ts`
-Array statico di 6 articoli ottimizzati per keyword ad alto volume:
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
-| # | Slug | Keyword target | Title |
-|---|------|---------------|-------|
-| 1 | `agenti-vocali-ai-edilizia` | agenti vocali AI edilizia | Come gli Agenti Vocali AI Stanno Rivoluzionando l'Edilizia |
-| 2 | `intelligenza-artificiale-serramenti` | AI serramenti infissi | Intelligenza Artificiale per Serramentisti: Guida Completa |
-| 3 | `automazione-preventivi-edilizia` | automazione preventivi edilizia | Automazione Preventivi nell'Edilizia: Risparmiare Tempo e Chiudere Più Contratti |
-| 4 | `ai-fotovoltaico-vendite` | AI fotovoltaico vendite | Come l'AI Aumenta le Vendite nel Fotovoltaico del 40% |
-| 5 | `ridurre-costi-operativi-impresa-edile` | ridurre costi impresa edile | 5 Modi per Ridurre i Costi Operativi nella Tua Impresa Edile con l'AI |
-| 6 | `call-center-ai-ristrutturazioni` | call center AI ristrutturazioni | Call Center AI per Ristrutturazioni: Mai Più Chiamate Perse |
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-Ogni articolo avrà: `slug`, `title`, `description`, `date`, `readTime`, `category`, `tags[]`, `heroImage` (placeholder), `sections[]` con heading + paragrafi in markdown-like struttura.
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
-### 2. Pagina lista blog — `src/pages/Blog.tsx`
-- Hero con titolo "Blog — AI e Innovazione nell'Edilizia"
-- Griglia card con immagine, titolo, excerpt, data, tempo lettura, tag
-- Filtro per categoria (Tutti, Vocale, Operativo, Guide)
-- `usePageSEO` con title/description dedicati
-- Layout: Navbar + Footer (come le altre pagine pubbliche)
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
-### 3. Pagina articolo — `src/pages/BlogPost.tsx`
-- Route `/blog/:slug`, legge da `blogPosts` per slug
-- Layout article con heading strutturati (h1, h2, h3) per SEO
-- Sidebar "Articoli correlati"
-- CTA finale verso `/tariffe`
-- Schema.org `Article` JSON-LD iniettato via `useEffect`
-- `usePageSEO` dinamico dal post data
+## ✅ Blocco 3-5 — Agent Templates System
 
-### 4. Componenti blog
-- `src/components/blog/BlogCard.tsx` — card singolo articolo nella lista
-- `src/components/blog/BlogArticle.tsx` — render del contenuto articolo
-- `src/components/blog/BlogCTA.tsx` — CTA in fondo all'articolo
+### Database
+- agent_templates + agent_template_instances + agent_reports + company_channels
+- RLS policies PERMISSIVE (fix da RESTRICTIVE)
+- Funzione DB `increment_installs_count(tpl_id UUID)`
+- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
 
-### 5. Routing — `src/App.tsx`
-Aggiungere:
-```
-<Route path="/blog" element={<Blog />} />
-<Route path="/blog/:slug" element={<BlogPost />} />
-```
+### Edge Functions (CORS headers completi)
+- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
+- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
+- save-report: salva report in DB + aggiorna contatori istanza
 
-### 6. Navigazione — `src/components/sections/Navbar.tsx`
-Aggiungere `{ label: "Blog", href: "/blog" }` a `navLinks`.
+### Frontend — Wizard 5 Step (TemplateSetup.tsx)
+- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
+- Step 2 Operai: lista card + importa CSV con template scaricabile
+- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
+- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
 
-### 7. Footer — `src/components/sections/Footer.tsx`
-Il link "Blog" nella colonna "Azienda" già esiste, collegarlo a `/blog`.
+### SuperAdmin
+- /superadmin/templates: CRUD completo con JSON editor per config_schema
 
-### 8. Sitemap — `public/sitemap.xml`
-Aggiungere `/blog` e i 6 URL `/blog/:slug`.
+## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
 
-### File coinvolti
-- **Creare**: `src/data/blogPosts.ts`, `src/pages/Blog.tsx`, `src/pages/BlogPost.tsx`, `src/components/blog/BlogCard.tsx`, `src/components/blog/BlogArticle.tsx`, `src/components/blog/BlogCTA.tsx`
-- **Modificare**: `src/App.tsx`, `src/components/sections/Navbar.tsx`, `src/components/sections/Footer.tsx`, `public/sitemap.xml`
+### Database (5 tabelle)
+- render_provider_config: configurazione provider AI (OpenAI GPT-Image, Gemini Flash)
+- render_infissi_presets: 24 preset globali (materiali, colori, stili, vetri, oscuranti) con prompt_fragment
+- render_sessions: sessioni render con status, config, result_urls, costi
+- render_gallery: render salvati con share_token, favoriti
+- render_credits: crediti render separati (5 gratis per azienda)
+- RLS PERMISSIVE per tutte le tabelle
+- Trigger set_updated_at + init_render_credits su companies
+- Funzione deduct_render_credit
+- Storage buckets: render-originals (privato), render-results (pubblico)
 
+### Edge Functions
+- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
+- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+
+### Frontend
+- RenderHub (/app/render): hero, come funziona, ultimi render, widget crediti
+- RenderNew (/app/render/new): wizard 4 step mobile-first (foto, config, elaborazione, risultati)
+- RenderGallery (/app/render/gallery): grid con ricerca, download, elimina
+- RenderGalleryDetail (/app/render/gallery/:id): BeforeAfterSlider, config, favoriti
+- RenderConfig (/superadmin/render-config): config provider con costi e markup
+
+### Componenti
+- BeforeAfterSlider: slider interattivo prima/dopo con drag handle
+- promptBuilder.ts: costruttore prompt, validazione foto, check dimensioni
+
+### Sidebar
+- Nuova sezione "STRUMENTI VENDITA" con "Render AI"
+- SuperAdmin: sezione "RENDER AI" con "Config Provider"
+
+## 🔜 Prossimi Blocchi
+- Pagine: /app/phone-numbers, /app/knowledge-base
+- Editor Agente 8 tab
+- Wizard 4 step (CreateAgent)
+- SuperAdmin Dashboard economics
+- Edge functions: add-knowledge-doc
+- Integrazioni CRM native
+- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets

@@ -1,11 +1,28 @@
-const footerCols = [
+import { Link } from "react-router-dom";
+
+type FooterLink = string | { label: string; href: string };
+
+const footerCols: { title: string; links: FooterLink[] }[] = [
   {
     title: "Servizi",
-    links: ["Agenti Vocali", "Agenti AI Operativi", "Analisi Offerte", "Reportistica Operai", "Gestione Assistenze", "Call Center AI"],
+    links: [
+      { label: "Agenti Vocali", href: "/soluzioni" },
+      { label: "Agenti AI Operativi", href: "/soluzioni" },
+      { label: "Analisi Offerte", href: "/soluzioni" },
+      { label: "Reportistica Operai", href: "/soluzioni" },
+      { label: "Gestione Assistenze", href: "/soluzioni" },
+      { label: "Call Center AI", href: "/soluzioni" },
+    ],
   },
   {
     title: "Azienda",
-    links: ["Chi Siamo", "Come Funziona", "Casi d'Uso", "Blog", "Lavora con Noi"],
+    links: [
+      { label: "Chi Siamo", href: "/chi-siamo" },
+      { label: "Come Funziona", href: "/come-funziona" },
+      { label: "Soluzioni", href: "/soluzioni" },
+      { label: "Blog", href: "/blog" },
+      { label: "Per Chi È", href: "/per-chi-e" },
+    ],
   },
 ];
 
@@ -31,11 +48,15 @@ const Footer = () => {
             <div key={col.title}>
               <p className="font-mono text-xs uppercase tracking-wider text-neutral-500 mb-4">{col.title}</p>
               <ul className="space-y-2">
-                {col.links.map((l) => (
-                  <li key={l}>
-                    <a href="#" className="text-sm text-neutral-400 hover:text-primary transition-colors">{l}</a>
-                  </li>
-                ))}
+                {col.links.map((l) => {
+                  const label = typeof l === "string" ? l : l.label;
+                  const href = typeof l === "string" ? "#" : l.href;
+                  return (
+                    <li key={label}>
+                      <Link to={href} className="text-sm text-neutral-400 hover:text-primary transition-colors">{label}</Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
