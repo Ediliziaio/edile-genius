@@ -1,45 +1,95 @@
 
+# Stato Implementazione — Blocco 1-5 + Render AI
 
-# Miglioramento Pagina "Come Funziona"
+## ✅ Completato in questo blocco
 
-## Problema attuale
-La pagina e' piatta e informativa. Manca impatto emotivo, social proof, urgency e persuasione. Rispetto alla Garanzia e Tariffe (gia' migliorate), e' la pagina piu' debole. I 3 step + ImplementationSteps sono ridondanti (dicono la stessa cosa due volte).
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
-## Piano di riscrittura
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
-### 1. Hero potenziato
-- Badge "OPERATIVO IN 14 GIORNI"
-- H1 piu' aggressivo: "Mentre Tu Leggi Questa Pagina, Un Tuo Competitor Sta Gia' Usando L'AI. Tu Quanto Vuoi Aspettare?"
-- Sottotitolo con reason-why + 3 mini-stat inline (14 giorni setup, 0 competenze tecniche, 100% gestito da noi)
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-### 2. Sezione "Il Problema" (prima dei 3 step)
-- "Perche' Le Altre Soluzioni Ti Hanno Deluso": 3 card con problemi comuni (software complicati, consulenti generici, mesi di implementazione) con icone XCircle rosse
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
-### 3. I 3 Step — Redesign visivo
-- Rimuovere layout grid-cols attuale, passare a layout verticale con **linea connettore** verde verticale tra i 3 step
-- Ogni step: numero grande a sinistra, card con titolo + descrizione + checklist + risultato atteso in grassetto verde ("Risultato: Agente configurato e testato")
-- Aggiungere un "deliverable" concreto per ogni step
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
-### 4. Rimuovere ImplementationSteps (ridondante)
-- I 4 step di ImplementationSteps dicono le stesse cose dei 3 step. Integrare i dettagli migliori dentro i 3 step principali e togliere il componente
+## ✅ Blocco 3-5 — Agent Templates System
 
-### 5. Sezione "Cosa Ti Consegniamo" — Value Stack
-- H2: "Ecco Cosa Ricevi. Gratis. Prima Di Pagare Qualsiasi Cosa."
-- Lista di deliverable concreti con valore percepito (es. "Audit processo vendita — valore €2.000", "Configurazione agente personalizzato — valore €3.500", etc.)
-- Totale valore stack vs costo reale
+### Database
+- agent_templates + agent_template_instances + agent_reports + company_channels
+- RLS policies PERMISSIVE (fix da RESTRICTIVE)
+- Funzione DB `increment_installs_count(tpl_id UUID)`
+- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
 
-### 6. Sezione "Domande Frequenti" — 4 FAQ
-- "Devo avere competenze tecniche?" → No, facciamo tutto noi
-- "Quanto tempo devo dedicare?" → 30 min call iniziale, poi zero
-- "E se non mi piace il risultato?" → Garanzia 30 giorni (link a /garanzia)
-- "Funziona per il mio settore specifico?" → Solo edilizia, niente generalisti
+### Edge Functions (CORS headers completi)
+- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
+- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
+- save-report: salva report in DB + aggiorna contatori istanza
 
-### 7. CTA Finale potenziato
-- Stile dark come Garanzia (bg-neutral-900)
-- H2: "Ogni Giorno Che Aspetti, Paghi Uno Stipendio In Piu'."
-- P.S. strategico
-- CTA button grande
+### Frontend — Wizard 5 Step (TemplateSetup.tsx)
+- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
+- Step 2 Operai: lista card + importa CSV con template scaricabile
+- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
+- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
 
-## File da modificare
-- **`src/pages/ComeFunziona.tsx`** — riscrittura completa
+### SuperAdmin
+- /superadmin/templates: CRUD completo con JSON editor per config_schema
 
+## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+
+### Database (5 tabelle)
+- render_provider_config: configurazione provider AI (OpenAI GPT-Image, Gemini Flash)
+- render_infissi_presets: 24 preset globali (materiali, colori, stili, vetri, oscuranti) con prompt_fragment
+- render_sessions: sessioni render con status, config, result_urls, costi
+- render_gallery: render salvati con share_token, favoriti
+- render_credits: crediti render separati (5 gratis per azienda)
+- RLS PERMISSIVE per tutte le tabelle
+- Trigger set_updated_at + init_render_credits su companies
+- Funzione deduct_render_credit
+- Storage buckets: render-originals (privato), render-results (pubblico)
+
+### Edge Functions
+- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
+- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+
+### Frontend
+- RenderHub (/app/render): hero, come funziona, ultimi render, widget crediti
+- RenderNew (/app/render/new): wizard 4 step mobile-first (foto, config, elaborazione, risultati)
+- RenderGallery (/app/render/gallery): grid con ricerca, download, elimina
+- RenderGalleryDetail (/app/render/gallery/:id): BeforeAfterSlider, config, favoriti
+- RenderConfig (/superadmin/render-config): config provider con costi e markup
+
+### Componenti
+- BeforeAfterSlider: slider interattivo prima/dopo con drag handle
+- promptBuilder.ts: costruttore prompt, validazione foto, check dimensioni
+
+### Sidebar
+- Nuova sezione "STRUMENTI VENDITA" con "Render AI"
+- SuperAdmin: sezione "RENDER AI" con "Config Provider"
+
+## 🔜 Prossimi Blocchi
+- Pagine: /app/phone-numbers, /app/knowledge-base
+- Editor Agente 8 tab
+- Wizard 4 step (CreateAgent)
+- SuperAdmin Dashboard economics
+- Edge functions: add-knowledge-doc
+- Integrazioni CRM native
+- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets
