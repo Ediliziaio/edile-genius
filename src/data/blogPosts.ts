@@ -983,6 +983,12 @@ export const blogPosts: BlogPost[] = [
         type: "text",
         callout: "Primi 30 iscritti: migrazione assistita gratuita del tuo archivio clienti (foglio Excel, rubrica telefono, contatti WhatsApp). Valore: €300. Disponibilità limitata."
       }
+    ],
+    faqs: [
+      { question: "Un CRM per edilizia è diverso da un CRM generico?", answer: "Sì, profondamente. Un CRM edile gestisce cantieri, non solo contatti. Traccia sopralluoghi, preventivi, SAL, garanzie post-lavoro. Ha campi specifici per metrature, materiali, permessi edilizi. Un CRM generico ti obbliga a personalizzazioni infinite che non funzionano mai bene." },
+      { question: "Posso importare i contatti dal mio foglio Excel?", answer: "Sì, l'importazione è guidata e automatica. Carichi il file Excel o CSV, il sistema mappa le colonne ai campi CRM, rileva duplicati e normalizza numeri di telefono. Per i primi 30 iscritti, offriamo migrazione assistita gratuita con un nostro operatore." },
+      { question: "Il CRM funziona anche da smartphone in cantiere?", answer: "Sì, l'app mobile è progettata per l'uso in cantiere: interfaccia semplificata, funzionamento offline, foto con geotag automatico, note vocali. Puoi aggiornare lo stato di un lead, aggiungere note e consultare lo storico clienti direttamente dal telefono." },
+      { question: "Come gestisce il CRM il follow-up automatico?", answer: "Imposti regole di follow-up: dopo il sopralluogo invia il preventivo entro 2 ore, dopo 3 giorni senza risposta richiama automaticamente, dopo 7 giorni invia promemoria WhatsApp. L'agente vocale AI esegue le richiamate, tu intervieni solo sui lead caldi." }
     ]
   },
 
