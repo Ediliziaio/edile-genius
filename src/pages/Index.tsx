@@ -12,6 +12,7 @@ import CostCalculator from "@/components/sections/CostCalculator";
 import HowItWorks from "@/components/sections/HowItWorks";
 import Results from "@/components/sections/Results";
 import WhyUs from "@/components/sections/WhyUs";
+import WhyDifferent from "@/components/sections/WhyDifferent";
 import Pricing from "@/components/sections/Pricing";
 import Guarantee from "@/components/sections/Guarantee";
 import FinalCTA from "@/components/sections/FinalCTA";
@@ -35,6 +36,7 @@ const Index = () => {
         <HowItWorks />
         <Results />
         <WhyUs />
+        <WhyDifferent />
         <Pricing />
         <Guarantee />
         <FinalCTA />

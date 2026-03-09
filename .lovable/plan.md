@@ -1,44 +1,95 @@
 
+# Stato Implementazione — Blocco 1-5 + Render AI
 
-# Piano: Sezione "Perché Diverso" + Pagina "Chi Siamo"
+## ✅ Completato in questo blocco
 
-## 1. Nuova sezione homepage: `WhyDifferent.tsx`
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
-Creare `src/components/sections/WhyDifferent.tsx` con:
-- Layout a due colonne (desktop) / una colonna (mobile)
-- **Colonna sinistra** "Edilizia.io": 5 item con emoji, titolo bold, testo — stile positivo con accent primary
-- **Colonna destra** "Le alternative": 5 item con testo barrato, icone grigie, tono dimesso
-- Linea divisoria verticale sottile al centro (desktop)
-- Badge "IL NOSTRO DIFFERENZIALE", H2 "Perché Edilizia.io è radicalmente diverso?"
-- Animazioni fade-up con `useInView` + `staggerChildren` (stesso pattern delle altre sezioni)
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
-**Inserimento in `Index.tsx`**: dopo `WhyUs` e prima di `Pricing`
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-## 2. Nuova pagina: `src/pages/ChiSiamo.tsx`
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
-Creare la pagina con:
-- Navbar + Footer (stessi della homepage)
-- **Sezione narrativa** a due colonne: testo storia a sinistra (più largo), timeline verticale a destra
-- Quote block con bordo sinistro primary e sfondo tintato
-- **Timeline**: 5 milestone con dot connessi da linea verticale, ultimo dot più grande/prominente con glow
-- **Barra statistiche** in fondo: 4 numeri (10+, 500+, 24/7, 48h) separati da linee verticali
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
-Lo sfondo sarà `bg-neutral-900` (dark) per coerenza col tema edile. I testi saranno `text-neutral-300/400`, accent `text-primary`.
+## ✅ Blocco 3-5 — Agent Templates System
 
-## 3. Routing
+### Database
+- agent_templates + agent_template_instances + agent_reports + company_channels
+- RLS policies PERMISSIVE (fix da RESTRICTIVE)
+- Funzione DB `increment_installs_count(tpl_id UUID)`
+- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
 
-Aggiungere in `App.tsx`:
-- `import ChiSiamo from "./pages/ChiSiamo"`
-- `<Route path="/chi-siamo" element={<ChiSiamo />} />`
+### Edge Functions (CORS headers completi)
+- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
+- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
+- save-report: salva report in DB + aggiorna contatori istanza
 
-## 4. Navbar
+### Frontend — Wizard 5 Step (TemplateSetup.tsx)
+- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
+- Step 2 Operai: lista card + importa CSV con template scaricabile
+- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
+- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
 
-Aggiungere link "Chi Siamo" nella navigazione desktop e mobile in `Navbar.tsx`
+### SuperAdmin
+- /superadmin/templates: CRUD completo con JSON editor per config_schema
 
-## File da creare/modificare
-- **Creare**: `src/components/sections/WhyDifferent.tsx`
-- **Creare**: `src/pages/ChiSiamo.tsx`
-- **Modificare**: `src/pages/Index.tsx` (aggiungere WhyDifferent)
-- **Modificare**: `src/App.tsx` (nuova route)
-- **Modificare**: `src/components/sections/Navbar.tsx` (link Chi Siamo)
+## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
 
+### Database (5 tabelle)
+- render_provider_config: configurazione provider AI (OpenAI GPT-Image, Gemini Flash)
+- render_infissi_presets: 24 preset globali (materiali, colori, stili, vetri, oscuranti) con prompt_fragment
+- render_sessions: sessioni render con status, config, result_urls, costi
+- render_gallery: render salvati con share_token, favoriti
+- render_credits: crediti render separati (5 gratis per azienda)
+- RLS PERMISSIVE per tutte le tabelle
+- Trigger set_updated_at + init_render_credits su companies
+- Funzione deduct_render_credit
+- Storage buckets: render-originals (privato), render-results (pubblico)
+
+### Edge Functions
+- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
+- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+
+### Frontend
+- RenderHub (/app/render): hero, come funziona, ultimi render, widget crediti
+- RenderNew (/app/render/new): wizard 4 step mobile-first (foto, config, elaborazione, risultati)
+- RenderGallery (/app/render/gallery): grid con ricerca, download, elimina
+- RenderGalleryDetail (/app/render/gallery/:id): BeforeAfterSlider, config, favoriti
+- RenderConfig (/superadmin/render-config): config provider con costi e markup
+
+### Componenti
+- BeforeAfterSlider: slider interattivo prima/dopo con drag handle
+- promptBuilder.ts: costruttore prompt, validazione foto, check dimensioni
+
+### Sidebar
+- Nuova sezione "STRUMENTI VENDITA" con "Render AI"
+- SuperAdmin: sezione "RENDER AI" con "Config Provider"
+
+## 🔜 Prossimi Blocchi
+- Pagine: /app/phone-numbers, /app/knowledge-base
+- Editor Agente 8 tab
+- Wizard 4 step (CreateAgent)
+- SuperAdmin Dashboard economics
+- Edge functions: add-knowledge-doc
+- Integrazioni CRM native
+- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets

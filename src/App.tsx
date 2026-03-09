@@ -7,6 +7,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ImpersonationProvider } from "@/context/ImpersonationContext";
 import Index from "./pages/Index";
 import Solutions from "./pages/Solutions";
+import ChiSiamo from "./pages/ChiSiamo";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import AuthGuard from "./components/auth/AuthGuard";
@@ -65,6 +66,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/soluzioni" element={<Solutions />} />
+            <Route path="/chi-siamo" element={<ChiSiamo />} />
             <Route path="/login" element={<Login />} />
 
             {/* SuperAdmin routes */}
