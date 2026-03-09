@@ -1,10 +1,12 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useEffect } from "react";
-import { ArrowLeft, Calendar, Clock, Tag } from "lucide-react";
+import { Calendar, Clock, Tag } from "lucide-react";
 import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
 import BlogArticle from "@/components/blog/BlogArticle";
 import BlogCTA from "@/components/blog/BlogCTA";
+import SocialShareButtons from "@/components/blog/SocialShareButtons";
+import ScrollProgress from "@/components/custom/ScrollProgress";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { blogPosts } from "@/data/blogPosts";
 import { usePageSEO } from "@/hooks/usePageSEO";
