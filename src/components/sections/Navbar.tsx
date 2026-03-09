@@ -3,22 +3,19 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
+const navLinks = [
+  { label: "Soluzioni", href: "/soluzioni" },
+  { label: "Come Funziona", href: "/come-funziona" },
+  { label: "Garanzia", href: "/garanzia" },
+  { label: "Chi Siamo", href: "/chi-siamo" },
+];
+
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const { scrollY } = useScroll();
   const navBg = useTransform(scrollY, [0, 60], ["rgba(255,255,255,0)", "rgba(255,255,255,0.97)"]);
   const navShadow = useTransform(scrollY, [0, 60], ["none", "0 1px 0 hsl(214 32% 91%)"]);
   const location = useLocation();
-  const isHome = location.pathname === "/";
-  const isSoluzioni = location.pathname === "/soluzioni";
-
-  const homeLinks = [
-    { label: "Agenti Vocali", href: "#soluzione" },
-    { label: "Agenti AI", href: "#use-cases" },
-    { label: "Come Funziona", href: "#come-funziona" },
-    { label: "Risultati", href: "#risultati" },
-    { label: "Pricing", href: "#pricing" },
-  ];
 
   return (
     <motion.nav
@@ -29,7 +26,6 @@ const Navbar = () => {
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
       <div className="max-w-6xl mx-auto px-6 h-[68px] flex items-center justify-between">
-        {/* Logo */}
         <Link to="/" className="flex flex-col">
           <span className="font-display text-[22px] font-extrabold text-neutral-900">
             edilizia<span className="text-primary">.io</span>
@@ -41,41 +37,19 @@ const Navbar = () => {
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-8">
-          {homeLinks.map((link) => (
-            isHome ? (
-              <a
-                key={link.href}
-                href={link.href}
-                className="relative text-sm font-medium text-neutral-500 hover:text-neutral-900 transition-colors group"
-              >
-                {link.label}
-                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
-              </a>
-            ) : (
+          {navLinks.map((link) => {
+            const isActive = location.pathname === link.href;
+            return (
               <Link
                 key={link.href}
-                to={`/${link.href}`}
-                className="relative text-sm font-medium text-neutral-500 hover:text-neutral-900 transition-colors group"
+                to={link.href}
+                className={`relative text-sm font-medium transition-colors group ${isActive ? 'text-primary' : 'text-neutral-500 hover:text-neutral-900'}`}
               >
                 {link.label}
-                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
+                <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary origin-left transition-transform duration-300 ${isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
               </Link>
-            )
-          ))}
-          <Link
-            to="/soluzioni"
-            className={`relative text-sm font-medium transition-colors group ${isSoluzioni ? 'text-primary' : 'text-neutral-500 hover:text-neutral-900'}`}
-          >
-            Soluzioni
-            <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary origin-left transition-transform duration-300 ${isSoluzioni ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
-          </Link>
-          <Link
-            to="/chi-siamo"
-            className={`relative text-sm font-medium transition-colors group ${location.pathname === '/chi-siamo' ? 'text-primary' : 'text-neutral-500 hover:text-neutral-900'}`}
-          >
-            Chi Siamo
-            <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary origin-left transition-transform duration-300 ${location.pathname === '/chi-siamo' ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
-          </Link>
+            );
+          })}
         </div>
 
         {/* Desktop CTA */}
@@ -84,13 +58,7 @@ const Navbar = () => {
             Accedi
           </Link>
           <Link
-            to={isHome ? "#cta-finale" : "/soluzioni#cta-soluzioni"}
-            onClick={(e) => {
-              if (isHome) {
-                e.preventDefault();
-                document.getElementById("cta-finale")?.scrollIntoView({ behavior: "smooth" });
-              }
-            }}
+            to="/soluzioni"
             className="bg-primary text-primary-foreground px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-primary-dark hover:scale-[1.02] shadow-button-green transition-all"
           >
             Prenota Demo
@@ -110,43 +78,21 @@ const Navbar = () => {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
         >
-          {homeLinks.map((link) => (
-            isHome ? (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="block text-base font-medium text-neutral-700 hover:text-primary"
-              >
-                {link.label}
-              </a>
-            ) : (
+          {navLinks.map((link) => {
+            const isActive = location.pathname === link.href;
+            return (
               <Link
                 key={link.href}
-                to={`/${link.href}`}
+                to={link.href}
                 onClick={() => setOpen(false)}
-                className="block text-base font-medium text-neutral-700 hover:text-primary"
+                className={`block text-base font-medium ${isActive ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}
               >
                 {link.label}
               </Link>
-            )
-          ))}
+            );
+          })}
           <Link
             to="/soluzioni"
-            onClick={() => setOpen(false)}
-            className={`block text-base font-medium ${isSoluzioni ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}
-          >
-            Soluzioni
-          </Link>
-          <Link
-            to="/chi-siamo"
-            onClick={() => setOpen(false)}
-            className={`block text-base font-medium ${location.pathname === '/chi-siamo' ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}
-          >
-            Chi Siamo
-          </Link>
-          <Link
-            to={isSoluzioni ? "#cta-soluzioni" : "/"}
             onClick={() => setOpen(false)}
             className="block bg-primary text-primary-foreground text-center px-5 py-3 rounded-xl font-bold"
           >
