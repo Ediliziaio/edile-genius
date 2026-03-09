@@ -1,10 +1,24 @@
 import { Link } from "react-router-dom";
 import { Calendar, Clock } from "lucide-react";
 import type { BlogPost } from "@/data/blogPosts";
+import type { ReactNode } from "react";
 
 interface BlogCardProps {
   post: BlogPost;
+  searchQuery?: string;
 }
+
+const highlightText = (text: string, query: string): ReactNode => {
+  if (!query?.trim()) return text;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = text.split(new RegExp(`(${escaped})`, "gi"));
+  if (parts.length === 1) return text;
+  return parts.map((part, i) =>
+    part.toLowerCase() === query.toLowerCase() ? (
+      <mark key={i} className="bg-primary/20 text-foreground rounded-sm px-0.5">{part}</mark>
+    ) : part
+  );
+};
 
 const categoryColors: Record<string, string> = {
   Vocale: "bg-primary/10 text-primary",
