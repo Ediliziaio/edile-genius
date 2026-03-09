@@ -408,6 +408,12 @@ export const blogPosts: BlogPost[] = [
         content: "Ogni giorno che passa senza un agente AI è un giorno di lead persi, sopralluoghi inutili e contratti sfumati.\n\nIl mercato fotovoltaico è in esplosione. La domanda c'è. I clienti ci sono. Il sole continua a splendere.\n\nL'unica cosa che manca sei tu — con un sistema che ti permetta di intercettare, qualificare e chiudere tutti quei clienti che oggi stai perdendo.\n\n**I numeri non mentono:**\n• +40% di contratti chiusi in 90 giorni\n• -55% di costo per lead acquisito\n• €200.000+ di fatturato incrementale per trimestre\n• ROI del primo giorno\n\n30 minuti di setup. 30 giorni di prova. Zero rischi. Il tuo prossimo impianto si vende da solo.",
         type: "text"
       }
+    ],
+    faqs: [
+      { question: "L'AI per fotovoltaico funziona anche per pompe di calore e storage?", answer: "Sì, il sistema gestisce l'intero ecosistema energetico: fotovoltaico, accumulo, pompe di calore, wallbox e sistemi ibridi. L'agente vocale qualifica il lead per tutti i prodotti e genera preventivi combinati con calcolo del risparmio energetico totale." },
+      { question: "Come calcola l'AI la dimensione dell'impianto fotovoltaico?", answer: "L'agente raccoglie consumo annuo in kWh, superficie disponibile (tetto o terreno), orientamento e inclinazione, zona climatica. Con questi dati genera una stima di dimensionamento accurata al 90%, che il tecnico valida al sopralluogo. Integrazione con Google Solar API disponibile." },
+      { question: "Funziona con il Superbonus e le detrazioni fiscali?", answer: "Assolutamente. Il sistema è aggiornato con tutte le detrazioni vigenti: Superbonus, Ecobonus 50%/65%, Bonus Ristrutturazione. Genera preventivi con calcolo automatico della detrazione, rata mensile effettiva e payback period. Si aggiorna automaticamente alle normative." },
+      { question: "Quanti lead in più posso gestire con l'AI?", answer: "I nostri clienti nel fotovoltaico gestiscono in media il 340% di lead in più rispetto al metodo tradizionale. L'agente vocale risponde a tutte le chiamate, qualifica i lead in 3 minuti e fissa i sopralluoghi automaticamente. Zero lead persi, zero attese." }
     ]
   },
 
