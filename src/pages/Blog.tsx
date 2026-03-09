@@ -46,9 +46,24 @@ const Blog = () => {
     return () => { script?.remove(); };
   }, []);
 
-  const filtered = activeCategory === "Tutti"
-    ? blogPosts
-    : blogPosts.filter((p) => p.category === activeCategory);
+  const filtered = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    return blogPosts.filter((p) => {
+      // Category filter
+      if (activeCategory !== "Tutti" && p.category !== activeCategory) return false;
+      // Search filter
+      if (!q) return true;
+      const haystack = [
+        p.title,
+        p.description,
+        ...(p.tags ?? []),
+        ...(p.sections?.map((s) => `${s.heading} ${s.content}`) ?? []),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [activeCategory, searchQuery]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -68,6 +83,29 @@ const Blog = () => {
           </p>
         </div>
       </section>
+
+      {/* Search */}
+      <div className="max-w-lg mx-auto px-6 pb-6">
+        <div className="relative">
+          <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Cerca articoli…"
+            className="w-full h-11 pl-10 pr-10 rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background text-sm"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Cancella ricerca"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* Filters */}
       <div className="max-w-6xl mx-auto px-6 pb-8">
@@ -90,13 +128,22 @@ const Blog = () => {
 
       {/* Grid */}
       <section className="max-w-6xl mx-auto px-6 pb-20">
+        {searchQuery && (
+          <p className="text-sm text-muted-foreground mb-4 text-center">
+            {filtered.length} risultat{filtered.length === 1 ? "o" : "i"} per "<span className="font-medium text-foreground">{searchQuery}</span>"
+          </p>
+        )}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filtered.map((post) => (
             <BlogCard key={post.slug} post={post} />
           ))}
         </div>
         {filtered.length === 0 && (
-          <p className="text-center text-muted-foreground py-12">Nessun articolo in questa categoria.</p>
+          <p className="text-center text-muted-foreground py-12">
+            {searchQuery
+              ? `Nessun risultato per "${searchQuery}". Prova con un altro termine.`
+              : "Nessun articolo in questa categoria."}
+          </p>
         )}
       </section>
 
