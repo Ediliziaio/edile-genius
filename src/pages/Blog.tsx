@@ -75,10 +75,10 @@ const Blog = () => {
           <span className="inline-block font-mono text-xs uppercase tracking-wider bg-primary/10 text-primary px-3 py-1 rounded-full font-bold">
             Blog
           </span>
-          <h1 className="text-4xl md:text-5xl font-display font-extrabold text-foreground leading-tight">
+          <h1 className="text-3xl sm:text-3xl sm:text-4xl md:text-5xl font-display font-extrabold text-foreground leading-tight">
             AI e Innovazione<br className="hidden md:block" /> nell'Edilizia
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
             Guide pratiche, casi studio e strategie per portare l'intelligenza artificiale nella tua impresa edile.
           </p>
         </div>
@@ -108,8 +108,8 @@ const Blog = () => {
       </div>
 
       {/* Filters */}
-      <div className="max-w-6xl mx-auto px-6 pb-8">
-        <div className="flex flex-wrap gap-2 justify-center">
+      <div className="max-w-6xl mx-auto px-6 pb-8 overflow-x-auto">
+        <div className="flex gap-2 justify-start sm:justify-center min-w-0">
           {blogCategories.map((cat) => (
             <button
               key={cat}
@@ -133,7 +133,7 @@ const Blog = () => {
             {filtered.length} risultat{filtered.length === 1 ? "o" : "i"} per "<span className="font-medium text-foreground">{searchQuery}</span>"
           </p>
         )}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {filtered.map((post) => (
             <BlogCard key={post.slug} post={post} searchQuery={searchQuery} />
           ))}

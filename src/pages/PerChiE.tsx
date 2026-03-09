@@ -52,7 +52,7 @@ const PerChiE = () => {
         <div className="max-w-5xl mx-auto px-6 text-center">
           <AnimatedBadge>PER CHI È</AnimatedBadge>
           <motion.h1
-            className="font-display text-4xl md:text-6xl font-extrabold text-foreground leading-tight mt-6 mb-6"
+            className="font-display text-3xl sm:text-3xl sm:text-4xl md:text-6xl font-extrabold text-foreground leading-tight mt-6 mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -61,7 +61,7 @@ const PerChiE = () => {
             <span className="text-primary">Costruisce l'Italia.</span>
           </motion.h1>
           <motion.p
-            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto"
+            className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15, duration: 0.5 }}
@@ -77,7 +77,7 @@ const PerChiE = () => {
         <div className="max-w-6xl mx-auto px-6">
           <div className="mb-10">
             <span className="font-mono text-xs uppercase tracking-wider text-primary font-bold">Per Dimensione Azienda</span>
-            <h2 className="font-display text-3xl md:text-4xl font-extrabold text-foreground mt-2">
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold text-foreground mt-2">
               Che tu sia un artigiano o un general contractor.
             </h2>
           </div>
@@ -94,7 +94,7 @@ const PerChiE = () => {
         <div className="max-w-6xl mx-auto px-6">
           <div className="mb-10">
             <span className="font-mono text-xs uppercase tracking-wider text-primary font-bold">Per Settore</span>
-            <h2 className="font-display text-3xl md:text-4xl font-extrabold text-foreground mt-2">
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold text-foreground mt-2">
               Il tuo settore. I tuoi problemi. Le nostre soluzioni.
             </h2>
           </div>

@@ -157,7 +157,7 @@ const ComeFunziona = () => {
             {/* 3 mini-stats */}
             <div className="flex flex-wrap justify-center gap-6 pt-4">
               {heroStats.map((s) => (
-                <div key={s.label} className="flex items-center gap-3 bg-background rounded-xl border border-border px-5 py-3 shadow-card">
+                <div key={s.label} className="flex items-center gap-3 bg-background rounded-xl border border-border px-4 sm:px-5 py-3 shadow-card">
                   <s.icon className="w-5 h-5 text-primary" />
                   <div className="text-left">
                     <p className="font-display font-extrabold text-neutral-900 text-lg leading-none">{s.value}</p>
@@ -225,22 +225,22 @@ const ComeFunziona = () => {
 
               <div className="space-y-10">
                 {steps.map((step, i) => (
-                  <motion.div key={step.num} variants={fadeUp} className="flex gap-6 md:gap-10">
+                  <motion.div key={step.num} variants={fadeUp} className="flex gap-4 sm:gap-6 md:gap-10">
                     {/* Left: number circle */}
                     <div className="flex-shrink-0 flex flex-col items-center">
-                      <div className="w-[80px] h-[80px] rounded-full bg-primary text-primary-foreground font-display font-extrabold text-2xl flex items-center justify-center relative z-10 shadow-card-green">
+                      <div className="w-[56px] h-[56px] sm:w-[80px] sm:h-[80px] rounded-full bg-primary text-primary-foreground font-display font-extrabold text-lg sm:text-2xl flex items-center justify-center relative z-10 shadow-card-green">
                         {step.num}
                       </div>
-                      <span className="mt-3 font-mono text-[9px] uppercase tracking-wider bg-primary-light text-primary-dark px-3 py-1 rounded-full font-medium whitespace-nowrap">
+                      <span className="mt-2 sm:mt-3 font-mono text-[8px] sm:text-[9px] uppercase tracking-wider bg-primary-light text-primary-dark px-2 sm:px-3 py-1 rounded-full font-medium whitespace-nowrap">
                         {step.days}
                       </span>
                     </div>
 
                     {/* Right: card */}
-                    <div className="flex-1 bg-background border border-border rounded-2xl p-7 md:p-8 space-y-4 shadow-card">
+                    <div className="flex-1 bg-background border border-border rounded-2xl p-5 sm:p-7 md:p-8 space-y-4 shadow-card">
                       <div className="flex items-center gap-3">
                         <span className="text-3xl">{step.icon}</span>
-                        <h3 className="font-display text-2xl font-bold text-neutral-900">{step.title}</h3>
+                        <h3 className="font-display text-lg sm:text-2xl font-bold text-neutral-900">{step.title}</h3>
                       </div>
                       <p className="text-neutral-500 leading-relaxed">{step.text}</p>
                       <ul className="grid sm:grid-cols-2 gap-2.5 pt-1">
@@ -287,7 +287,7 @@ const ComeFunziona = () => {
                 {valueStack.map((item, i) => (
                   <div
                     key={i}
-                    className={`flex items-center justify-between px-7 py-5 ${i < valueStack.length - 1 ? "border-b border-border" : ""}`}
+                    className={`flex flex-col sm:flex-row sm:items-center justify-between px-5 sm:px-7 py-4 sm:py-5 ${i < valueStack.length - 1 ? "border-b border-border" : ""}`}
                   >
                     <div className="flex items-center gap-3">
                       <Check className="w-5 h-5 text-primary flex-shrink-0" />
@@ -296,12 +296,12 @@ const ComeFunziona = () => {
                     <span className="font-display font-bold text-neutral-400 line-through text-sm">{item.value}</span>
                   </div>
                 ))}
-                <div className="bg-primary-light px-7 py-6 flex items-center justify-between">
+                <div className="bg-primary-light px-5 sm:px-7 py-5 sm:py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <p className="font-display font-extrabold text-neutral-900 text-lg">Valore totale: <span className="line-through text-neutral-400">€10.500</span></p>
+                    <p className="font-display font-extrabold text-neutral-900 text-base sm:text-lg">Valore totale: <span className="line-through text-neutral-400">€10.500</span></p>
                     <p className="text-sm text-neutral-500 mt-1">Incluso nel tuo piano personalizzato</p>
                   </div>
-                  <span className="font-display font-extrabold text-primary text-2xl">INCLUSO</span>
+                  <span className="font-display font-extrabold text-primary text-xl sm:text-2xl">INCLUSO</span>
                 </div>
               </motion.div>
             </motion.div>
