@@ -4,6 +4,7 @@ import Navbar from "@/components/sections/Navbar";
 import ScrollProgress from "@/components/custom/ScrollProgress";
 import CustomCursor from "@/components/custom/CustomCursor";
 import Hero from "@/components/sections/Hero";
+import StickyMobileCTA from "@/components/sections/StickyMobileCTA";
 import LogoBar from "@/components/sections/LogoBar";
 import PainSection from "@/components/sections/PainSection";
 import SolutionSection from "@/components/sections/SolutionSection";
