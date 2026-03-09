@@ -64,7 +64,7 @@ const FinalCTA = () => {
         </div>
 
         {/* Form Card */}
-        <div className="bg-neutral-8006rounded-3xl p-8 md:p-12 border border-neutral-700">
+        <div className="bg-neutral-800 rounded-3xl p-6 md:p-12 border border-neutral-700">
           {status === "success" ? (
             <motion.div
               className="text-center space-y-4 py-8"
