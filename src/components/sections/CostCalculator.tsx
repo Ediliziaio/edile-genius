@@ -94,14 +94,14 @@ const CostCalculator = () => {
       >
         {/* Header */}
         <motion.div variants={itemVariants} className="text-center mb-12 space-y-4">
-          <AnimatedBadge variant="verde" pulse>ANALISI DEI COSTI REALI</AnimatedBadge>
+          <AnimatedBadge variant="verde" pulse>CALCOLA IL TUO LICENZIAMENTO</AnimatedBadge>
           <h2 className="font-display text-[32px] md:text-5xl font-extrabold text-foreground leading-tight">
-            Quanto Ti Costa<br />un Dipendente Oggi<br />
-            <span className="text-primary">vs. un Agente AI</span>
+            Quanto Ti Costa il Dipendente<br />
+            <span className="text-primary">Che Potresti Sostituire Oggi?</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-[580px] mx-auto leading-relaxed">
-            Sposta i cursori in base alla tua situazione e scopri in tempo reale
-            quanto stai spendendo davvero — e quanto potresti risparmiare ogni mese.
+            Inserisci i dati del dipendente da sostituire e scopri in tempo reale
+            il risparmio annuo per ogni sostituzione con un Agente AI.
           </p>
         </motion.div>
 
