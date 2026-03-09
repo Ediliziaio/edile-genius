@@ -26,6 +26,11 @@ export interface BlogSection {
   callout?: string;
 }
 
+export interface BlogFAQ {
+  question: string;
+  answer: string;
+}
+
 export interface BlogPost {
   slug: string;
   title: string;
@@ -38,6 +43,7 @@ export interface BlogPost {
   heroImage: string;
   heroImageAlt: string;
   sections: BlogSection[];
+  faqs?: BlogFAQ[];
 }
 
 export const blogPosts: BlogPost[] = [
@@ -137,6 +143,13 @@ export const blogPosts: BlogPost[] = [
         content: "Questo non è un articolo per farti riflettere domani. È un articolo per farti agire **oggi**.\n\nMentre leggi queste righe, qualcuno sta chiamando la tua impresa. Se non rispondi tu, risponde qualcun altro. E quel qualcun altro si prende il tuo cliente, il tuo preventivo, il tuo contratto.\n\nI tuoi concorrenti più svegli stanno già usando l'intelligenza artificiale. Non tra un anno. Non tra sei mesi. **Adesso.**\n\nLa domanda non è \"posso permettermi un agente vocale AI?\". La domanda è: **\"posso permettermi di non averlo?\"**\n\nOgni giorno senza un agente vocale AI sono 5-10 chiamate perse. Ogni chiamata persa sono €5.000-€50.000 di opportunità sfumata. Fai i conti su un mese. Su un anno.\n\nAttiva il tuo agente vocale AI oggi. In 30 minuti. Senza rischi. Con garanzia di rimborso.\n\nIl tuo telefono non smetterà di squillare. Ma da oggi, non smetterai più di rispondere.",
         type: "text"
       }
+    ],
+    faqs: [
+      { question: "Quanto costa un agente vocale AI per un'impresa edile?", answer: "I piani partono da €149/mese per l'agente base con gestione chiamate 24/7 e qualificazione lead. Il ROI medio è 10x: per ogni euro investito, le imprese recuperano circa €10 in contratti che altrimenti sarebbero andati persi. Prova gratuita di 30 giorni senza carta di credito." },
+      { question: "L'agente vocale AI sostituisce la segretaria?", answer: "No, la potenzia. L'agente gestisce il primo contatto, qualifica il lead e fissa appuntamenti. La segretaria si concentra su attività ad alto valore: gestione clienti acquisiti, coordinamento cantieri, amministrazione. Il risultato è più efficienza per tutti." },
+      { question: "Funziona anche fuori orario e nei weekend?", answer: "Sì, l'agente vocale AI risponde 24 ore su 24, 7 giorni su 7, festivi inclusi. Le chiamate del sabato mattina e della sera — i momenti in cui i privati cercano imprese edili — vengono gestite automaticamente con la stessa qualità delle ore lavorative." },
+      { question: "Quanto tempo serve per configurare l'agente vocale?", answer: "Il setup base richiede 15-30 minuti: carichi le informazioni sulla tua azienda, scegli la voce, definisci le domande di qualificazione. In 24 ore l'agente è operativo. Il team di supporto ti assiste nella configurazione iniziale gratuitamente." },
+      { question: "I clienti capiscono che stanno parlando con un'AI?", answer: "La maggior parte no. Le voci di ultima generazione sono indistinguibili da un operatore umano, con gestione naturale di interruzioni, pause e dialetto. Il 92% dei chiamanti non percepisce la differenza. L'agente si presenta sempre con nome e ruolo." }
     ]
   },
 
@@ -217,6 +230,12 @@ export const blogPosts: BlogPost[] = [
         content: "Il settore dei serramenti sta cambiando. I tuoi concorrenti più smart stanno già adottando l'intelligenza artificiale. Non tra un anno. **Adesso.**\n\nMentre leggi questo articolo, qualcuno sta chiamando il tuo showroom. Se non rispondi, risponde il tuo concorrente — quello con l'agente AI attivo 24/7.\n\nI numeri non mentono:\n• Il 78% dei clienti sceglie il primo serramentista che risponde\n• Il costo dell'AI è l'1-2% del fatturato incrementale che genera\n• Il ROI si raggiunge entro la prima settimana di utilizzo\n• Zero rischio grazie alla garanzia soddisfatti o rimborsati\n\nNon aspettare che sia il mercato a decidere per te. Non aspettare che tutti i tuoi concorrenti siano già digitalizzati. Non aspettare il \"momento giusto\" — il momento giusto è **ora**.\n\nAttiva il tuo agente vocale AI oggi. In 30 minuti sarai operativo. In 30 giorni vedrai i risultati. In 90 giorni ti chiederai come facevi senza.\n\nIl tuo prossimo cliente sta chiamando. Chi risponde?",
         type: "text"
       }
+    ],
+    faqs: [
+      { question: "L'AI per serramentisti funziona con tutti i tipi di infissi?", answer: "Sì, il sistema gestisce preventivi per finestre, porte-finestre, portoncini, persiane, zanzariere, tende da sole e facciate continue. Supporta tutti i materiali: PVC, alluminio, legno, legno-alluminio e acciaio. Le configurazioni si personalizzano in base al tuo catalogo prodotti." },
+      { question: "Posso integrare l'AI con il mio gestionale serramenti?", answer: "Assolutamente. Ci integriamo con i principali gestionali del settore: Windor, Orgadata, LogiKal, Sez Soft e software personalizzati. L'integrazione avviene via API e il nostro team tecnico la configura gratuitamente durante il setup." },
+      { question: "Quanti preventivi può gestire l'AI al giorno?", answer: "Non c'è limite. L'agente vocale può gestire chiamate simultanee illimitate e generare preventivi in tempo reale. Un nostro cliente serramentista gestisce 85 richieste al giorno con un solo agente AI, contro le 12-15 che gestiva manualmente prima." },
+      { question: "Come funziona la qualificazione lead per i serramentisti?", answer: "L'agente chiede tipo di intervento (sostituzione o nuova installazione), numero e dimensioni approssimative, materiale preferito, budget indicativo e tempistiche. In 3 minuti hai un lead completo con punteggio di qualità, pronto per il sopralluogo." }
     ]
   },
 
@@ -303,6 +322,12 @@ export const blogPosts: BlogPost[] = [
         content: "Ecco una verità scomoda: mentre leggi questo articolo, qualche tuo concorrente sta attivando il suo agente vocale AI.\n\nNon tra un anno. Non il mese prossimo. **Oggi.**\n\nE quando il suo agente AI risponderà al cliente che ha chiamato te senza trovare risposta, quel cliente non ti richiamerà. Mai.\n\nL'automazione della preventivazione non è un lusso. Non è una moda. È un **vantaggio competitivo** che si trasforma in **barriera all'ingresso** per chi arriva dopo.\n\nLe imprese che hanno automatizzato per prime nel loro territorio stanno raccogliendo i frutti: più lead, più contratti, più fatturato, meno stress. Quelle che aspettano stanno vedendo i margini ridursi e i clienti spostarsi.\n\nIl momento migliore per automatizzare era un anno fa. Il secondo momento migliore è **adesso**.\n\n30 minuti di setup. 30 giorni di prova. Zero rischi.\n\nIl tuo prossimo preventivo potrebbe essere il primo che si prepara da solo.",
         type: "text"
       }
+    ],
+    faqs: [
+      { question: "L'automazione preventivi funziona per lavori complessi come ristrutturazioni complete?", answer: "Sì. Il sistema gestisce preventivi per qualsiasi tipo di lavoro: dal semplice rifacimento bagno alla ristrutturazione integrale. Per lavori complessi, genera un preventivo preliminare basato sui parametri raccolti, che il tecnico può poi raffinare con dati di sopralluogo." },
+      { question: "I preventivi automatici sono accurati?", answer: "L'accuratezza media è del 92% rispetto al preventivo definitivo post-sopralluogo. Il sistema usa preziari regionali aggiornati, listini fornitori e lo storico dei tuoi lavori precedenti per calibrare le stime. Più lo usi, più diventa preciso." },
+      { question: "Posso personalizzare il template del preventivo con il mio logo e i miei termini?", answer: "Completamente. Il preventivo viene generato con il tuo brand: logo, colori, intestazione, condizioni di pagamento, tempi di validità, clausole contrattuali. Puoi creare template diversi per tipo di lavoro e modificarli in qualsiasi momento." },
+      { question: "Quanto tempo risparmio con i preventivi automatici?", answer: "In media 8-12 ore a settimana. Un preventivo manuale richiede 45-90 minuti tra sopralluogo, calcoli, stesura e invio. Il sistema automatico genera un preventivo preliminare in 3 minuti e quello definitivo in 10 minuti dopo il sopralluogo." }
     ]
   },
 
@@ -383,6 +408,12 @@ export const blogPosts: BlogPost[] = [
         content: "Ogni giorno che passa senza un agente AI è un giorno di lead persi, sopralluoghi inutili e contratti sfumati.\n\nIl mercato fotovoltaico è in esplosione. La domanda c'è. I clienti ci sono. Il sole continua a splendere.\n\nL'unica cosa che manca sei tu — con un sistema che ti permetta di intercettare, qualificare e chiudere tutti quei clienti che oggi stai perdendo.\n\n**I numeri non mentono:**\n• +40% di contratti chiusi in 90 giorni\n• -55% di costo per lead acquisito\n• €200.000+ di fatturato incrementale per trimestre\n• ROI del primo giorno\n\n30 minuti di setup. 30 giorni di prova. Zero rischi. Il tuo prossimo impianto si vende da solo.",
         type: "text"
       }
+    ],
+    faqs: [
+      { question: "L'AI per fotovoltaico funziona anche per pompe di calore e storage?", answer: "Sì, il sistema gestisce l'intero ecosistema energetico: fotovoltaico, accumulo, pompe di calore, wallbox e sistemi ibridi. L'agente vocale qualifica il lead per tutti i prodotti e genera preventivi combinati con calcolo del risparmio energetico totale." },
+      { question: "Come calcola l'AI la dimensione dell'impianto fotovoltaico?", answer: "L'agente raccoglie consumo annuo in kWh, superficie disponibile (tetto o terreno), orientamento e inclinazione, zona climatica. Con questi dati genera una stima di dimensionamento accurata al 90%, che il tecnico valida al sopralluogo. Integrazione con Google Solar API disponibile." },
+      { question: "Funziona con il Superbonus e le detrazioni fiscali?", answer: "Assolutamente. Il sistema è aggiornato con tutte le detrazioni vigenti: Superbonus, Ecobonus 50%/65%, Bonus Ristrutturazione. Genera preventivi con calcolo automatico della detrazione, rata mensile effettiva e payback period. Si aggiorna automaticamente alle normative." },
+      { question: "Quanti lead in più posso gestire con l'AI?", answer: "I nostri clienti nel fotovoltaico gestiscono in media il 340% di lead in più rispetto al metodo tradizionale. L'agente vocale risponde a tutte le chiamate, qualifica i lead in 3 minuti e fissa i sopralluoghi automaticamente. Zero lead persi, zero attese." }
     ]
   },
 
@@ -488,6 +519,12 @@ export const blogPosts: BlogPost[] = [
         content: "Facciamo un ultimo calcolo. Il risparmio medio annuo con l'agente AI è €45.000 (stima conservativa). Diviso 250 giorni lavorativi = **€180 al giorno** di costi inutili.\n\nOgni giorno che rimandi la decisione, la tua impresa perde €180 in inefficienze operative. Non domani. Non la prossima settimana. **Oggi.**\n\nE non stiamo parlando di risparmi teorici. Stiamo parlando di:\n• Chiamate che non perdi più → clienti che non regali alla concorrenza\n• Sopralluoghi solo con lead qualificati → tempo investito, non sprecato\n• Preventivi seguiti sistematicamente → contratti che non ti sfuggono\n• Rapportini automatizzati → cantiere sotto controllo\n• Assistenza impeccabile → passaparola che lavora per te\n\nIl costo è €10 al giorno. Il risparmio è €180 al giorno. La matematica non mente.\n\n30 minuti di setup. 30 giorni di prova gratuita. Garanzia soddisfatti o rimborsati.\n\nI tuoi margini non miglioreranno da soli. Ma con il giusto strumento, possono migliorare dal primo giorno.\n\nSmetti di perdere €180 al giorno. Inizia adesso.",
         type: "text"
       }
+    ],
+    faqs: [
+      { question: "Quali sono i costi operativi che l'AI taglia per primi?", answer: "I primi tre costi che si riducono sono: gestione chiamate (fino a -75%), tempo di preventivazione (-70%) e follow-up commerciale (-80%). Questi tre interventi da soli generano un risparmio medio di €35.000-€50.000 annui per un'impresa con 10-30 dipendenti." },
+      { question: "Quanto tempo serve per vedere il ROI dell'investimento in AI?", answer: "Il breakeven si raggiunge mediamente in 45-60 giorni. Le imprese che implementano l'agente vocale vedono i primi risultati dalla prima settimana: chiamate gestite, lead qualificati, appuntamenti fissati. Il ROI completo a 12 mesi è in media 8-12x l'investimento." },
+      { question: "L'AI funziona anche per le piccole imprese edili?", answer: "Sì, anzi è proprio dove genera il maggior impatto relativo. Un'impresa con 3-5 dipendenti che perde 5 chiamate al giorno recupera €80.000-€120.000 di fatturato potenziale. Il costo dell'AI (da €149/mese) si ripaga con un solo contratto acquisito in più." },
+      { question: "Devo cambiare i miei processi aziendali per usare l'AI?", answer: "No. L'AI si adatta ai tuoi processi, non il contrario. Si integra con il tuo numero di telefono, il tuo calendario, il tuo CRM (o anche solo WhatsApp e Google Calendar). Non devi cambiare nulla: aggiungi uno strumento che lavora per te 24/7." }
     ]
   },
 
@@ -579,6 +616,12 @@ export const blogPosts: BlogPost[] = [
         content: "Siamo arrivati al punto. Hai letto i dati, i casi studio, i confronti. Sai che il problema esiste. Sai che la soluzione funziona.\n\nOra hai due opzioni:\n\n**Opzione A — Non cambiare nulla.**\nContinua a perdere il 42% delle chiamate. Continua a fare sopralluoghi con lead non qualificati. Continua a lavorare 60 ore a settimana per un fatturato che potrebbe essere il doppio. Continua a regalare clienti alla concorrenza.\n\n**Opzione B — Attiva il call center AI oggi.**\n30 minuti di setup. Zero competenze tecniche richieste. Template \"Ristrutturazioni\" pre-configurato. 30 giorni di prova con garanzia soddisfatti o rimborsati. Nessun vincolo contrattuale.\n\nDa domani mattina, ogni chiamata troverà risposta. Ogni lead sarà qualificato. Ogni sopralluogo sarà fissato automaticamente. Tu riceverai tutto via WhatsApp, senza dover toccare il telefono.\n\nIl costo? €10 al giorno. Il valore? I tuoi prossimi €250.000 di fatturato che oggi stai perdendo.\n\nLa domanda non è \"posso permettermi un call center AI?\"\n\nLa domanda è: **\"posso permettermi di non averlo?\"**\n\nIl tuo prossimo cliente sta chiamando in questo momento. Assicurati che qualcuno risponda.",
         type: "text"
       }
+    ],
+    faqs: [
+      { question: "Un call center AI può gestire anche le emergenze dei clienti?", answer: "Sì. L'agente vocale riconosce le situazioni urgenti (infiltrazioni, rotture, danni strutturali) e attiva il protocollo emergenze: notifica immediata al tecnico reperibile, SMS al cliente con conferma presa in carico, escalation automatica se non c'è risposta entro 15 minuti." },
+      { question: "Quante chiamate contemporanee gestisce il call center AI?", answer: "Non c'è limite. A differenza di un call center umano con 2-3 linee, l'agente AI gestisce chiamate simultanee illimitate. Anche nei momenti di picco (lunedì mattina, dopo una campagna pubblicitaria), nessun cliente trova la linea occupata." },
+      { question: "Il call center AI può fissare appuntamenti direttamente nel mio calendario?", answer: "Sì, si integra con Google Calendar, Outlook, Calendly e i principali sistemi di prenotazione. L'agente verifica la disponibilità in tempo reale, propone slot al cliente e conferma l'appuntamento con promemoria automatico via SMS 24 ore prima." },
+      { question: "Come gestisce l'agente le richieste in dialetto o con accento regionale?", answer: "I modelli vocali sono addestrati sull'italiano parlato reale, incluse varianti regionali e dialettali. L'agente comprende accenti del Nord e del Sud, espressioni colloquiali e termini tecnici del settore edile. La comprensione è superiore al 95% anche con interlocutori anziani." }
     ]
   },
 
@@ -671,6 +714,12 @@ export const blogPosts: BlogPost[] = [
         content: "Facciamo il punto. Il 2025 ha portato nuove regole, nuovi massimali, nuove scadenze. Il 2026 ne porterà altre. E così ogni anno.\n\nPuoi continuare a rincorrere le normative con Excel e post-it. Puoi continuare a perdere pratiche, scadenze e clienti. Puoi continuare a lavorare 60 ore a settimana per guadagnare meno di quanto dovresti.\n\nOppure puoi fare come le 847 imprese italiane che hanno già adottato sistemi AI per la gestione bonus.\n\nI risultati parlano da soli:\n- **+197% di volume pratiche gestite**\n- **Zero errori documentali**\n- **38 ore settimanali risparmiate**\n- **Margine netto aumentato del 34%**\n\nLa burocrazia dei bonus non sparirà. Ma il modo in cui la gestisci può cambiare radicalmente — a partire da oggi.\n\n**Il prossimo bonus non aspetta. Sei pronto a gestirlo senza impazzire?**\n\nAttiva la prova gratuita. 30 giorni. Zero rischi. Se non ti cambia la vita lavorativa, non paghi nulla. Ma spoiler: non tornerai mai più al vecchio metodo.",
         type: "text"
       }
+    ],
+    faqs: [
+      { question: "L'AI può gestire le pratiche per il Superbonus 110%?", answer: "Sì. Il sistema gestisce l'intero flusso del Superbonus: dalla verifica requisiti alla compilazione automatica delle pratiche ENEA, dalla generazione delle asseverazioni al monitoraggio delle scadenze. Riduce gli errori del 94% e i tempi di preparazione del 70%." },
+      { question: "Come funziona il monitoraggio automatico delle scadenze fiscali?", answer: "Il sistema traccia ogni scadenza per ogni pratica: SAL, asseverazioni, comunicazioni ENEA, cessioni del credito, opzioni di sconto in fattura. Invia alert automatici 30, 15 e 7 giorni prima della scadenza a te e al commercialista. Zero pratiche scadute." },
+      { question: "L'AI si aggiorna automaticamente con le nuove normative?", answer: "Sì, il database normativo viene aggiornato settimanalmente dal nostro team legale-fiscale. Ogni modifica a decreti, circolari AdE, FAQ ENEA viene recepita e applicata automaticamente. Ricevi notifiche sulle novità rilevanti per le tue pratiche in corso." },
+      { question: "Posso usare l'AI per gestire anche il Sismabonus e l'Ecobonus?", answer: "Assolutamente. Il sistema copre tutti i bonus edilizi vigenti: Superbonus, Ecobonus, Sismabonus, Bonus Ristrutturazione, Bonus Mobili, Bonus Verde, Bonus Barriere Architettoniche. Per ogni bonus, conosce requisiti, massimali, documenti necessari e scadenze." }
     ]
   },
 
@@ -758,6 +807,12 @@ export const blogPosts: BlogPost[] = [
         type: "text",
         callout: "Promozione attiva: setup guidato gratuito per le prime 15 imprese. Un nostro tecnico configura il sistema insieme a te in videochiamata. Nessun costo, nessun obbligo. Prenota il tuo slot prima che finiscano."
       }
+    ],
+    faqs: [
+      { question: "Il software di gestione cantiere funziona offline?", answer: "Sì. L'app mobile funziona in modalità offline per le operazioni in cantiere dove la connessione è limitata. I dati si sincronizzano automaticamente quando torni online. Foto, checklist e rapportini vengono salvati localmente e caricati appena disponibile la rete." },
+      { question: "Posso collegare il sistema alla mia contabilità di cantiere?", answer: "Sì, ci integriamo con i principali software di contabilità edile: Primus, STR, TeamSystem Construction, Namirial. L'integrazione sincronizza voci di computo, SAL, contabilità lavori e varianti in tempo reale." },
+      { question: "Quanti cantieri posso gestire contemporaneamente?", answer: "Non c'è limite. Il sistema scala con la tua azienda: dai 2-3 cantieri di una piccola impresa ai 50+ cantieri di un general contractor. Ogni cantiere ha la sua dashboard, i suoi alert e i suoi KPI indipendenti." },
+      { question: "Come gestisce l'AI i ritardi e le varianti in corso d'opera?", answer: "L'AI monitora il cronoprogramma in tempo reale e rileva i ritardi prima che diventino critici. Suggerisce azioni correttive, ricalcola automaticamente le date successive e genera alert per il direttore lavori. Per le varianti, calcola l'impatto su tempi e costi in tempo reale." }
     ]
   },
 
@@ -845,6 +900,12 @@ export const blogPosts: BlogPost[] = [
         type: "text",
         callout: "Garanzia risultati: se dopo 60 giorni il tuo tasso di chiusura non è aumentato di almeno il 25%, ti rimborsiamo ogni centesimo. Nessuna domanda, nessuna burocrazia. Ci assumiamo noi il rischio perché sappiamo che funziona."
       }
+    ],
+    faqs: [
+      { question: "I preventivi online funzionano anche per lavori complessi?", answer: "Sì. Il sistema genera preventivi preliminari anche per ristrutturazioni complete, ampliamenti e lavori strutturali. Per lavori sopra €50.000, il preventivo online serve come stima iniziale che qualifica il lead; il preventivo definitivo viene perfezionato dopo il sopralluogo tecnico." },
+      { question: "Il cliente può personalizzare il preventivo online?", answer: "Sì. Il configuratore permette al cliente di selezionare finiture, materiali, opzioni aggiuntive e vedere in tempo reale come cambia il prezzo. Questo aumenta l'engagement del 340% rispetto a un preventivo statico e riduce le richieste di modifica successive del 60%." },
+      { question: "Come si integra il preventivo online con il mio sito web?", answer: "Con un semplice widget da incorporare nel tuo sito (copia-incolla di un codice). Non serve modificare il sito. Il widget si adatta automaticamente al design, funziona su mobile e desktop, e invia i dati direttamente al tuo CRM o email." },
+      { question: "Posso aggiornare i prezzi facilmente?", answer: "Sì, dalla dashboard aggiorni listini, margini e sconti in un click. Puoi impostare regole automatiche: aumento del 5% per lavori urgenti, sconto del 10% per importi sopra €20.000, maggiorazione per zone disagiate. Le modifiche si applicano istantaneamente a tutti i nuovi preventivi." }
     ]
   },
 
@@ -922,6 +983,12 @@ export const blogPosts: BlogPost[] = [
         type: "text",
         callout: "Primi 30 iscritti: migrazione assistita gratuita del tuo archivio clienti (foglio Excel, rubrica telefono, contatti WhatsApp). Valore: €300. Disponibilità limitata."
       }
+    ],
+    faqs: [
+      { question: "Un CRM per edilizia è diverso da un CRM generico?", answer: "Sì, profondamente. Un CRM edile gestisce cantieri, non solo contatti. Traccia sopralluoghi, preventivi, SAL, garanzie post-lavoro. Ha campi specifici per metrature, materiali, permessi edilizi. Un CRM generico ti obbliga a personalizzazioni infinite che non funzionano mai bene." },
+      { question: "Posso importare i contatti dal mio foglio Excel?", answer: "Sì, l'importazione è guidata e automatica. Carichi il file Excel o CSV, il sistema mappa le colonne ai campi CRM, rileva duplicati e normalizza numeri di telefono. Per i primi 30 iscritti, offriamo migrazione assistita gratuita con un nostro operatore." },
+      { question: "Il CRM funziona anche da smartphone in cantiere?", answer: "Sì, l'app mobile è progettata per l'uso in cantiere: interfaccia semplificata, funzionamento offline, foto con geotag automatico, note vocali. Puoi aggiornare lo stato di un lead, aggiungere note e consultare lo storico clienti direttamente dal telefono." },
+      { question: "Come gestisce il CRM il follow-up automatico?", answer: "Imposti regole di follow-up: dopo il sopralluogo invia il preventivo entro 2 ore, dopo 3 giorni senza risposta richiama automaticamente, dopo 7 giorni invia promemoria WhatsApp. L'agente vocale AI esegue le richiamate, tu intervieni solo sui lead caldi." }
     ]
   },
 
@@ -1004,6 +1071,12 @@ export const blogPosts: BlogPost[] = [
         type: "text",
         callout: "Promo attiva: setup campagna completa gratuita (valore €800) per le prime 10 imprese edili che si registrano questo mese. Include: configurazione Google Ads, landing page, agente vocale AI, dashboard analytics. Prenota il tuo posto."
       }
+    ],
+    faqs: [
+      { question: "Quanto devo investire in marketing digitale per un'impresa edile?", answer: "Per iniziare, €500-€1.500/mese in Google Ads sono sufficienti per generare 20-40 lead qualificati. Con l'agente vocale AI che risponde a tutte le chiamate, il tasso di conversione raddoppia rispetto alla gestione manuale. Il costo per lead acquisito scende a €15-€35." },
+      { question: "Google Ads o social media: cosa funziona meglio per l'edilizia?", answer: "Google Ads per lead caldi (chi cerca attivamente 'ristrutturazione casa'), social media per brand awareness e remarketing. La combinazione ideale è 70% Google Ads + 30% social. L'agente vocale AI gestisce le chiamate da entrambi i canali senza costi aggiuntivi." },
+      { question: "Come misuro il ROI del marketing digitale?", answer: "La dashboard traccia ogni euro: costo per click, costo per lead, costo per sopralluogo, costo per contratto chiuso. Sai esattamente quanto ti costa acquisire un cliente e quanto rende ogni canale. Il ROI medio dei nostri clienti edili è 5-8x sull'investimento marketing." },
+      { question: "Posso fare marketing digitale senza un sito web professionale?", answer: "Sì, con le landing page dedicate. Creiamo pagine di atterraggio ottimizzate per ogni servizio (ristrutturazione, fotovoltaico, infissi) che convertono il 3-5x rispetto a un sito generico. L'agente vocale AI gestisce i lead direttamente dalla landing page." }
     ]
   },
 
@@ -1091,6 +1164,12 @@ export const blogPosts: BlogPost[] = [
         type: "text",
         callout: "Offerta primo mese: sopralluogo virtuale illimitato + agente vocale AI + report analisi foto. €0 per 30 giorni. Poi €149/mese. Disdici quando vuoi, senza penali. Il tuo tempo vale troppo per sprecarlo in macchina."
       }
+    ],
+    faqs: [
+      { question: "Come funziona un sopralluogo virtuale con AI?", answer: "Il cliente invia foto e video dell'ambiente tramite WhatsApp o l'app dedicata. L'AI analizza le immagini, rileva dimensioni, stato delle superfici, materiali presenti e criticità. In 7 minuti hai un report completo con misure, diagnosi e stima costi, senza muoverti dall'ufficio." },
+      { question: "Il sopralluogo virtuale è accurato quanto quello fisico?", answer: "Per la fase di qualificazione, l'accuratezza è del 90-95%. L'AI rileva dimensioni con margine di errore del 3-5%, identifica materiali e criticità strutturali visibili. Per il preventivo definitivo, il sopralluogo fisico resta necessario, ma lo fai solo sui lead già qualificati." },
+      { question: "Quanti sopralluoghi fisici posso evitare?", answer: "In media il 60-70% dei sopralluoghi. L'analisi AI ti permette di capire subito se il lavoro è nel tuo range, se il cliente ha budget adeguato e se ci sono criticità bloccanti. Vai fisicamente solo dove vale davvero la pena. Risparmio medio: 12 ore a settimana." },
+      { question: "Funziona per tutti i tipi di intervento edilizio?", answer: "Sì: ristrutturazioni, infissi, fotovoltaico, facciate, impermeabilizzazioni, impiantistica. Per ogni tipologia, l'AI sa cosa cercare: per gli infissi misura i vani, per il fotovoltaico analizza l'orientamento del tetto, per le ristrutturazioni valuta stato di pavimenti, pareti e impianti." }
     ]
   }
 ];
