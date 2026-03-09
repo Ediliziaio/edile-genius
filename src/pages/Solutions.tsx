@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
