@@ -1,16 +1,16 @@
 const logos = Array.from({ length: 8 }, (_, i) => `Cliente Edile ${i + 1}`);
 
 const stats = [
-  { icon: "🏗️", text: "50+ aziende attive" },
-  { icon: "📞", text: "100.000+ chiamate gestite" },
-  { icon: "⚡", text: "Setup medio: 9 giorni" },
+  { icon: "🏗️", text: "50+ dipendenti sostituiti" },
+  { icon: "💰", text: "€2.3M risparmiati dai clienti" },
+  { icon: "⚡", text: "Setup medio: 7 giorni" },
 ];
 
 const LogoBar = () => {
   return (
     <section className="bg-neutral-50 py-12">
       <p className="text-center font-display text-[13px] font-medium text-neutral-500 uppercase tracking-[0.08em] mb-8">
-        Scelto da aziende edili in tutta Italia
+        Aziende edili che hanno già sostituito dipendenti con Agenti AI
       </p>
 
       {/* Marquee logos */}

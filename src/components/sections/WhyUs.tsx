@@ -5,23 +5,23 @@ import AnimatedBadge from "@/components/custom/AnimatedBadge";
 const cards = [
   {
     icon: "🏗️",
-    title: "Solo Settore Edile",
-    text: "Non siamo un'agenzia AI generalista. Esistiamo esclusivamente per serramenti, infissi, fotovoltaico, ristrutturazioni e impianti. Conosciamo il linguaggio tecnico, le obiezioni tipiche, la stagionalità del settore. Questa specializzazione vale +30% di conversione rispetto a soluzioni generiche.",
+    title: "Specializzati nel Sostituire Figure Edili",
+    text: "Non siamo un'agenzia AI generalista. Esistiamo esclusivamente per serramenti, infissi, fotovoltaico, ristrutturazioni e impianti. Sappiamo esattamente quali figure puoi sostituire, come farlo e quanto risparmierai. Questa specializzazione vale +30% di efficacia rispetto a soluzioni generiche.",
   },
   {
     icon: "🎙️",
-    title: "Voci Italiane Naturali",
-    text: "Nessun accento straniero, nessun robot. Le nostre voci sono costruite su modelli linguistici italiani, con gestione del dialetto, delle interruzioni, delle esitazioni naturali. I tuoi clienti non si accorgono di parlare con un AI.",
+    title: "Voci Italiane Indistinguibili da un Umano",
+    text: "Nessun accento straniero, nessun robot. Le nostre voci sono costruite su modelli linguistici italiani, con gestione del dialetto, delle interruzioni, delle esitazioni naturali. I tuoi clienti non si accorgono di parlare con un AI. Il dipendente sostituito non mancherà a nessuno.",
   },
   {
     icon: "⚡",
-    title: "Operativo in 7-14 Giorni",
-    text: "Nessun mese di integrazione. Nessun consulente a tempo indeterminato. Il nostro processo di onboarding è ottimizzato per il settore edile: dalla firma del contratto alla prima chiamata gestita dall'agente, in meno di due settimane.",
+    title: "Operativi in 7 Giorni — Il Dipendente Se Ne Va, l'AI Arriva",
+    text: "Nessun mese di integrazione. Nessun consulente a tempo indeterminato. Dal momento in cui decidi chi sostituire alla prima chiamata gestita dall'Agente AI: meno di due settimane. Zero downtime operativo.",
   },
   {
     icon: "📈",
-    title: "Ottimizzazione Settimanale",
-    text: "Non consegniamo un prodotto e ci dimentichiamo di te. Ogni settimana analizziamo le conversazioni, identifichiamo i punti di miglioramento e ottimizziamo script e risposte. L'agente diventa più bravo ogni giorno che passa.",
+    title: "Ottimizzazione Settimanale — Meglio di Qualsiasi Formazione",
+    text: "Non consegniamo un prodotto e ci dimentichiamo di te. Ogni settimana analizziamo le conversazioni, identifichiamo i punti di miglioramento e ottimizziamo script e risposte. L'Agente AI diventa più bravo ogni giorno — nessun dipendente umano migliora così velocemente.",
   },
 ];
 
@@ -40,8 +40,9 @@ const WhyUs = forwardRef<HTMLElement>(function WhyUs(_, _ref) {
         <div className="text-center mb-12 space-y-4">
           <AnimatedBadge variant="verde">IL NOSTRO VANTAGGIO</AnimatedBadge>
           <h2 className="font-display text-[32px] md:text-5xl font-extrabold text-neutral-900 leading-tight">
-            Specializzazione<br />Verticale.{" "}
-            <span className="text-primary">Non<br />Siamo per Tutti.</span>
+            L'Agenzia che{" "}
+            <span className="text-primary">Licenzia<br />i Tuoi Costi.</span>{" "}
+            Non per Tutti.
           </h2>
         </div>
 
