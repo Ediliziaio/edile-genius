@@ -34,9 +34,11 @@ const Solutions = () => {
   }, []);
 
   useEffect(() => {
-    document.title = "Soluzioni AI per l'Edilizia — 20 Agenti AI | Edilizia.io";
+    const hash = window.location.hash.replace("#", "");
+    if (["infissi", "fotovoltaico", "ristrutturazioni", "edilizia"].includes(hash)) {
+      setFilterActive(hash);
+    }
   }, []);
-
   const filtered = filterActive === "tutte" ? solutions : solutions.filter((s) => s.settore === filterActive);
 
   const handleOpenDetail = useCallback((id: number) => {

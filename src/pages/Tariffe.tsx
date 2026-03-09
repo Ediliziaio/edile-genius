@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { Check, Calculator, TrendingUp, Clock, BarChart3, Users, Building2, Sliders, ArrowRight, Shield, Zap, Target } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";

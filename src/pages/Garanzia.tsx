@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";

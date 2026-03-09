@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { Hammer, FlaskConical, HardHat, Eye, Target, ShieldCheck, Building2, Rocket, TrendingUp } from "lucide-react";
 import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
