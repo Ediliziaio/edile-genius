@@ -322,6 +322,12 @@ export const blogPosts: BlogPost[] = [
         content: "Ecco una verità scomoda: mentre leggi questo articolo, qualche tuo concorrente sta attivando il suo agente vocale AI.\n\nNon tra un anno. Non il mese prossimo. **Oggi.**\n\nE quando il suo agente AI risponderà al cliente che ha chiamato te senza trovare risposta, quel cliente non ti richiamerà. Mai.\n\nL'automazione della preventivazione non è un lusso. Non è una moda. È un **vantaggio competitivo** che si trasforma in **barriera all'ingresso** per chi arriva dopo.\n\nLe imprese che hanno automatizzato per prime nel loro territorio stanno raccogliendo i frutti: più lead, più contratti, più fatturato, meno stress. Quelle che aspettano stanno vedendo i margini ridursi e i clienti spostarsi.\n\nIl momento migliore per automatizzare era un anno fa. Il secondo momento migliore è **adesso**.\n\n30 minuti di setup. 30 giorni di prova. Zero rischi.\n\nIl tuo prossimo preventivo potrebbe essere il primo che si prepara da solo.",
         type: "text"
       }
+    ],
+    faqs: [
+      { question: "L'automazione preventivi funziona per lavori complessi come ristrutturazioni complete?", answer: "Sì. Il sistema gestisce preventivi per qualsiasi tipo di lavoro: dal semplice rifacimento bagno alla ristrutturazione integrale. Per lavori complessi, genera un preventivo preliminare basato sui parametri raccolti, che il tecnico può poi raffinare con dati di sopralluogo." },
+      { question: "I preventivi automatici sono accurati?", answer: "L'accuratezza media è del 92% rispetto al preventivo definitivo post-sopralluogo. Il sistema usa preziari regionali aggiornati, listini fornitori e lo storico dei tuoi lavori precedenti per calibrare le stime. Più lo usi, più diventa preciso." },
+      { question: "Posso personalizzare il template del preventivo con il mio logo e i miei termini?", answer: "Completamente. Il preventivo viene generato con il tuo brand: logo, colori, intestazione, condizioni di pagamento, tempi di validità, clausole contrattuali. Puoi creare template diversi per tipo di lavoro e modificarli in qualsiasi momento." },
+      { question: "Quanto tempo risparmio con i preventivi automatici?", answer: "In media 8-12 ore a settimana. Un preventivo manuale richiede 45-90 minuti tra sopralluogo, calcoli, stesura e invio. Il sistema automatico genera un preventivo preliminare in 3 minuti e quello definitivo in 10 minuti dopo il sopralluogo." }
     ]
   },
 
