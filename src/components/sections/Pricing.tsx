@@ -85,7 +85,7 @@ const Pricing = forwardRef<HTMLElement>(function Pricing(_, _ref) {
               key={plan.name}
               className={`relative bg-background rounded-3xl p-8 border transition-all ${
                 plan.featured
-                  ? "border-2 border-primary shadow-card-green scale-[1.03] z-10"
+                  ? "border-2 border-primary shadow-card-green md:scale-[1.03] z-10"
                   : "border-neutral-200 shadow-card"
               }`}
             >

@@ -262,37 +262,62 @@ const CostCalculator = () => {
             impatto diretto su clienti, reputazione e fatturato. Questi costi non
             appaiono mai in nessun contratto — ma li paghi comunque.
           </p>
-          <div className="rounded-[20px] overflow-hidden shadow-card border border-border">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm min-w-[700px]">
-                <thead>
-                  <tr className="bg-[hsl(var(--neutral-900))]">
-                    <th className="text-left p-4 font-mono text-[11px] uppercase tracking-wider text-[hsl(var(--neutral-400,0_0%_63%))]">Tipo di Errore</th>
-                    <th className="text-left p-4 font-mono text-[11px] uppercase tracking-wider text-destructive">👤 Con Dipendente</th>
-                    <th className="text-left p-4 font-mono text-[11px] uppercase tracking-wider text-primary">🤖 Con Agente AI</th>
-                    <th className="text-left p-4 font-mono text-[11px] uppercase tracking-wider text-[hsl(var(--neutral-400,0_0%_63%))]">Impatto</th>
+          {/* Desktop table */}
+          <div className="hidden md:block rounded-[20px] overflow-hidden shadow-card border border-border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-[hsl(var(--neutral-900))]">
+                  <th className="text-left p-4 font-mono text-[11px] uppercase tracking-wider text-[hsl(var(--neutral-400,0_0%_63%))]">Tipo di Errore</th>
+                  <th className="text-left p-4 font-mono text-[11px] uppercase tracking-wider text-destructive">👤 Con Dipendente</th>
+                  <th className="text-left p-4 font-mono text-[11px] uppercase tracking-wider text-primary">🤖 Con Agente AI</th>
+                  <th className="text-left p-4 font-mono text-[11px] uppercase tracking-wider text-[hsl(var(--neutral-400,0_0%_63%))]">Impatto</th>
+                </tr>
+              </thead>
+              <tbody>
+                {errorRows.map((r, i) => (
+                  <tr key={i} className={`border-b border-border hover:bg-muted/50 ${i % 2 === 1 ? "bg-muted/30" : "bg-background"}`}>
+                    <td className="p-4 font-semibold text-foreground">{r.tipo}</td>
+                    <td className="p-4 text-[13px] text-destructive/80">{r.umano}</td>
+                    <td className="p-4 text-[13px] font-bold text-primary-dark">{r.ai}</td>
+                    <td className="p-4">
+                      <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${
+                        r.impatto === "Alto"
+                          ? "bg-[hsl(0_80%_92%)] text-destructive"
+                          : "bg-[hsl(30_100%_97%)] text-[hsl(30_80%_40%)]"
+                      }`}>
+                        {r.impatto}
+                      </span>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {errorRows.map((r, i) => (
-                    <tr key={i} className={`border-b border-border hover:bg-muted/50 ${i % 2 === 1 ? "bg-muted/30" : "bg-background"}`}>
-                      <td className="p-4 font-semibold text-foreground">{r.tipo}</td>
-                      <td className="p-4 text-[13px] text-destructive/80">{r.umano}</td>
-                      <td className="p-4 text-[13px] font-bold text-primary-dark">{r.ai}</td>
-                      <td className="p-4">
-                        <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${
-                          r.impatto === "Alto"
-                            ? "bg-[hsl(0_80%_92%)] text-destructive"
-                            : "bg-[hsl(30_100%_97%)] text-[hsl(30_80%_40%)]"
-                        }`}>
-                          {r.impatto}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="md:hidden space-y-4">
+            {errorRows.map((r, i) => (
+              <div key={i} className="rounded-xl border border-border p-4 space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="font-semibold text-sm text-foreground">{r.tipo}</span>
+                  <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold flex-shrink-0 ${
+                    r.impatto === "Alto"
+                      ? "bg-[hsl(0_80%_92%)] text-destructive"
+                      : "bg-[hsl(30_100%_97%)] text-[hsl(30_80%_40%)]"
+                  }`}>
+                    {r.impatto}
+                  </span>
+                </div>
+                <div>
+                  <div className="font-mono text-[10px] uppercase tracking-wider text-destructive mb-1">👤 Dipendente</div>
+                  <p className="text-[13px] text-destructive/80">{r.umano}</p>
+                </div>
+                <div>
+                  <div className="font-mono text-[10px] uppercase tracking-wider text-primary mb-1">🤖 Agente AI</div>
+                  <p className="text-[13px] font-bold text-primary-dark">{r.ai}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </motion.div>
 

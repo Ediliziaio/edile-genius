@@ -50,7 +50,7 @@ const FinalCTA = () => {
             ⚡ Posti Limitati — 12 Aziende al Mese
           </div>
 
-          <h2 className="font-display text-[28px] sm:text-[36px] md:text-[72px] font-extrabold text-white leading-[1.05]">
+          <h2 className="font-display text-[28px] sm:text-[28px] sm:text-[36px] md:text-[72px] font-extrabold text-white leading-[1.05]">
             Scopri Chi Puoi<br />
             <span className="text-primary">Licenziare.</span><br />
             Prenota l'Analisi.
@@ -64,7 +64,7 @@ const FinalCTA = () => {
         </div>
 
         {/* Form Card */}
-        <div className="bg-neutral-800 rounded-3xl p-8 md:p-12 border border-neutral-700">
+        <div className="bg-neutral-8006rounded-3xl p-8 md:p-12 border border-neutral-700">
           {status === "success" ? (
             <motion.div
               className="text-center space-y-4 py-8"

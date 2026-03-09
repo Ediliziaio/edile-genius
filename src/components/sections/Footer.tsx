@@ -30,7 +30,7 @@ const Footer = () => {
   return (
     <footer className="bg-neutral-900 border-t border-neutral-800 pt-16 pb-10">
       <div className="max-w-6xl mx-auto px-6">
-        <div className="grid md:grid-cols-4 gap-10 mb-10">
+        <div className="grid md:grid-cols-4 gap-8 md:gap-10 mb-10">
           {/* Logo col */}
           <div className="space-y-4">
             <span className="font-display text-[22px] font-extrabold text-white">
