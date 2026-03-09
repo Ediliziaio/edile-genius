@@ -26,6 +26,11 @@ export interface BlogSection {
   callout?: string;
 }
 
+export interface BlogFAQ {
+  question: string;
+  answer: string;
+}
+
 export interface BlogPost {
   slug: string;
   title: string;
@@ -38,6 +43,7 @@ export interface BlogPost {
   heroImage: string;
   heroImageAlt: string;
   sections: BlogSection[];
+  faqs?: BlogFAQ[];
 }
 
 export const blogPosts: BlogPost[] = [
