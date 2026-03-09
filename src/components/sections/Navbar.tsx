@@ -139,6 +139,13 @@ const Navbar = () => {
             Soluzioni
           </Link>
           <Link
+            to="/chi-siamo"
+            onClick={() => setOpen(false)}
+            className={`block text-base font-medium ${location.pathname === '/chi-siamo' ? 'text-primary' : 'text-neutral-700 hover:text-primary'}`}
+          >
+            Chi Siamo
+          </Link>
+          <Link
             to={isSoluzioni ? "#cta-soluzioni" : "/"}
             onClick={() => setOpen(false)}
             className="block bg-primary text-primary-foreground text-center px-5 py-3 rounded-xl font-bold"

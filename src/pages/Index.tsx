@@ -36,6 +36,7 @@ const Index = () => {
         <HowItWorks />
         <Results />
         <WhyUs />
+        <WhyDifferent />
         <Pricing />
         <Guarantee />
         <FinalCTA />
