@@ -365,6 +365,7 @@ const ComeFunziona = () => {
           </div>
         </section>
       </main>
+      <Guarantee />
       <Footer />
     </div>
   );

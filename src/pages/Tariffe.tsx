@@ -546,6 +546,7 @@ const Tariffe = () => {
         </motion.div>
       </section>
 
+      <Guarantee />
       <Footer />
     </div>
   );

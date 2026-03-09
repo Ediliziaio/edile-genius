@@ -72,6 +72,7 @@ const Solutions = () => {
         <SolutionsFAQ />
         <SolutionsCTA />
       </main>
+      <Guarantee />
       <Footer />
       <SolutionModal solution={modalOpen} onClose={() => setModalOpen(null)} />
     </div>
