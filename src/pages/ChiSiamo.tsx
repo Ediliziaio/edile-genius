@@ -298,7 +298,7 @@ const ChiSiamo = () => {
                   <v.icon className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="font-display text-lg font-bold text-white mb-3">{v.title}</h3>
-                <p className="text-[hsl(var(--neutral-400))] text-sm leading-relaxed">{v.text}</p>
+                <p className="text-[hsl(var(--neutral-300))] text-sm leading-relaxed">{v.text}</p>
               </motion.div>
             ))}
           </motion.div>
