@@ -1,13 +1,28 @@
+export interface ServiceItem {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+export interface CalculatorDefaults {
+  defaultStipendio: number;
+  defaultLeadMensili: number;
+  defaultOreRipetitive: number;
+  valoreCommessaMedia: number;
+}
+
 export interface PerChiECategory {
   slug: string;
   name: string;
-  icon: string; // lucide icon name
+  icon: string;
   group: "dimensione" | "settore";
   heroTitle: string;
   heroSubtitle: string;
   stats: { value: string; label: string }[];
   problems: { title: string; description: string }[];
   solutions: { title: string; description: string }[];
+  services: ServiceItem[];
+  calculator: CalculatorDefaults;
   roi: { metric: string; value: string }[];
   caseStudy: {
     company: string;
@@ -38,10 +53,19 @@ export const perChiECategories: PerChiECategory[] = [
       { title: "Zero marketing, zero crescita", description: "Non hai tempo per farti pubblicità. I clienti arrivano solo col passaparola — e quando si ferma, il lavoro si ferma." },
     ],
     solutions: [
-      { title: "Receptionist AI 24/7", description: "Risponde a ogni chiamata, qualifica il cliente, fissa l'appuntamento. Tu lavori, l'AI gestisce." },
-      { title: "Preventivi automatici", description: "L'AI raccoglie le informazioni dal cliente e prepara una bozza di preventivo. Tu la rivedi e invii." },
-      { title: "Follow-up automatico", description: "Nessun cliente viene dimenticato. L'AI richiama, manda WhatsApp, chiude il cerchio." },
+      { title: "Agente Vocale + WhatsApp H24", description: "L'AI risponde al telefono e su WhatsApp mentre sei in cantiere. Qualifica il cliente, raccoglie dati, fissa l'appuntamento." },
+      { title: "Preventivi Automatici in 5 Minuti", description: "L'AI raccoglie misure, materiali, specifiche dal cliente e genera una bozza di preventivo pronta da inviare." },
+      { title: "Campagne Outbound Anti-Stagionalità", description: "L'AI chiama i vecchi clienti, propone manutenzioni e nuovi lavori. Lavoro costante anche nei mesi morti." },
     ],
+    services: [
+      { icon: "Phone", title: "Agente Vocale AI", description: "Risponde a ogni chiamata in <2 secondi, qualifica il cliente, fissa appuntamenti. Funziona mentre sei sul ponteggio." },
+      { icon: "MessageSquare", title: "WhatsApp AI", description: "Gestisce le conversazioni WhatsApp, invia foto lavori, risponde a richieste preventivo automaticamente." },
+      { icon: "HardHat", title: "Gestione Cantieri", description: "Coordina fornitori e clienti con aggiornamenti automatici sullo stato dei lavori e scadenze." },
+      { icon: "FileText", title: "Gestione Documenti", description: "Organizza DDT, fatture, certificazioni di conformità. Tutto digitale, zero carta persa." },
+      { icon: "Calculator", title: "Preventivi Automatici", description: "Raccoglie dati dal cliente (misure, materiali, tempistiche) e genera preventivi professionali in automatico." },
+      { icon: "Megaphone", title: "Campagne Outbound", description: "Chiama la tua lista clienti passati, propone manutenzioni e nuovi lavori. Tu arrivi e chiudi." },
+    ],
+    calculator: { defaultStipendio: 1600, defaultLeadMensili: 20, defaultOreRipetitive: 3, valoreCommessaMedia: 2500 },
     roi: [
       { metric: "Lead recuperati", value: "+340%" },
       { metric: "Ore risparmiate/mese", value: "60+" },
@@ -73,10 +97,19 @@ export const perChiECategories: PerChiECategory[] = [
       { title: "Costi fissi che salgono", description: "TFR, ferie, malattia, contributi. La segretaria costa €36K/anno e non risponde di notte." },
     ],
     solutions: [
-      { title: "AI che sostituisce il front-office", description: "Gestisce chiamate, qualifica lead, fissa sopralluoghi. Lavora 24/7, costa come 2 giorni di segretaria al mese." },
-      { title: "CRM automatico", description: "Ogni conversazione viene trascritta, il lead viene catalogato, il follow-up parte automaticamente." },
-      { title: "Campagne outbound", description: "L'AI chiama la tua lista contatti, presenta i tuoi servizi, fissa appuntamenti. Tu arrivi e chiudi." },
+      { title: "Front-Office AI con Vocale + WhatsApp", description: "Gestisce chiamate e messaggi WhatsApp contemporaneamente. Qualifica lead, fissa sopralluoghi, tutto H24." },
+      { title: "Preventivi e Documenti Automatici", description: "L'AI genera preventivi dalla conversazione col cliente e archivia DDT, contratti e certificazioni." },
+      { title: "Gestione Cantieri + Campagne Outbound", description: "Coordina i cantieri con aggiornamenti automatici e lancia campagne per acquisire nuovi clienti." },
     ],
+    services: [
+      { icon: "Phone", title: "Agente Vocale AI", description: "Sostituisce la segretaria: gestisce 50+ chiamate/giorno, qualifica lead, fissa appuntamenti. H24, costo 1/10." },
+      { icon: "MessageSquare", title: "WhatsApp AI", description: "Risponde ai clienti su WhatsApp, invia preventivi, gestisce follow-up e conferme appuntamento." },
+      { icon: "HardHat", title: "Gestione Cantieri", description: "Aggiornamenti automatici ai clienti sullo stato lavori, coordinamento squadre, scadenze materiali." },
+      { icon: "FileText", title: "Gestione Documenti", description: "Archiviazione automatica DDT, fatture, contratti. Ricerca istantanea, zero documenti persi." },
+      { icon: "Calculator", title: "Preventivi Automatici", description: "Genera preventivi professionali dalla telefonata. Il cliente riceve il preventivo entro 10 minuti." },
+      { icon: "Megaphone", title: "Campagne Outbound", description: "L'AI chiama la tua lista contatti, presenta servizi, fissa appuntamenti. Il commerciale chiude." },
+    ],
+    calculator: { defaultStipendio: 1800, defaultLeadMensili: 40, defaultOreRipetitive: 5, valoreCommessaMedia: 5000 },
     roi: [
       { metric: "Risparmio annuo", value: "€30K+" },
       { metric: "Lead qualificati/mese", value: "3x" },
@@ -108,10 +141,19 @@ export const perChiECategories: PerChiECategory[] = [
       { title: "Scaling impossibile", description: "Per crescere del 30% devi assumere altri 2 commerciali. Più costi fissi, più rischio." },
     ],
     solutions: [
-      { title: "Pre-qualifica AI automatica", description: "L'AI chiama, qualifica, e passa al commerciale solo i lead pronti. Zero sopralluoghi a vuoto." },
-      { title: "Dashboard analytics completa", description: "Ogni chiamata tracciata, ogni lead scorato, ogni conversazione trascritta. Controllo totale." },
-      { title: "Scaling senza assunzioni", description: "Raddoppia le chiamate senza raddoppiare il team. L'AI scala linearmente, i costi no." },
+      { title: "Agente Vocale per Pre-Qualifica", description: "L'AI chiama, qualifica con criteri oggettivi, e passa al commerciale solo i lead pronti a firmare." },
+      { title: "WhatsApp AI + Preventivi Automatici", description: "Follow-up automatico via WhatsApp, preventivi generati dalla conversazione, documenti inviati in tempo reale." },
+      { title: "Gestione Cantieri + Analytics", description: "Coordinamento cantieri automatizzato, report giornalieri, dashboard performance su ogni lead e commerciale." },
     ],
+    services: [
+      { icon: "Phone", title: "Agente Vocale AI", description: "Pre-qualifica ogni lead con criteri oggettivi. Il commerciale riceve solo opportunità concrete, pronte alla chiusura." },
+      { icon: "MessageSquare", title: "WhatsApp AI", description: "Follow-up automatico post-chiamata, invio preventivi, conferme sopralluogo. Tutto tracciato e misurabile." },
+      { icon: "HardHat", title: "Gestione Cantieri", description: "Dashboard cantieri in tempo reale, notifiche automatiche a squadre e clienti, zero ritardi per mancata comunicazione." },
+      { icon: "FileText", title: "Gestione Documenti", description: "Generazione automatica contratti, DDT, certificazioni. Firma digitale integrata, archivio consultabile." },
+      { icon: "Calculator", title: "Preventivi Automatici", description: "L'AI raccoglie specifiche tecniche dalla chiamata e genera preventivi professionali in minuti, non giorni." },
+      { icon: "Megaphone", title: "Campagne Outbound", description: "Scaling commerciale senza assunzioni: l'AI chiama 200 lead/giorno, qualifica e fissa appuntamenti." },
+    ],
+    calculator: { defaultStipendio: 2200, defaultLeadMensili: 80, defaultOreRipetitive: 6, valoreCommessaMedia: 15000 },
     roi: [
       { metric: "Costo per lead", value: "-65%" },
       { metric: "Conversione", value: "+180%" },
@@ -143,10 +185,19 @@ export const perChiECategories: PerChiECategory[] = [
       { title: "Dati frammentati", description: "CRM che nessuno aggiorna, report manuali, zero visibilità real-time sulle performance." },
     ],
     solutions: [
-      { title: "AI come primo filtro commerciale", description: "Gestisce il primo contatto, qualifica, raccoglie dati tecnici. Il team riceve solo opportunità concrete." },
-      { title: "Automazione report e follow-up", description: "Report giornalieri automatici, follow-up AI su ogni lead, zero task manuali ripetitivi." },
-      { title: "Integrazione completa", description: "Si collega al tuo CRM, ERP, calendario. Un ecosistema unico, non un altro tool isolato." },
+      { title: "Agente Vocale + WhatsApp Multicanale", description: "Primo contatto AI su telefono e WhatsApp. Qualifica, raccoglie dati tecnici, smista al reparto giusto." },
+      { title: "Preventivi e Documenti Enterprise", description: "Generazione automatica preventivi complessi, gestione documentale integrata con ERP e CRM aziendale." },
+      { title: "Gestione Cantieri + Outbound su Scala", description: "Coordinamento multi-cantiere con AI, campagne outbound su migliaia di lead, report automatici giornalieri." },
     ],
+    services: [
+      { icon: "Phone", title: "Agente Vocale AI", description: "Primo filtro commerciale enterprise: gestisce il contatto iniziale, qualifica, raccoglie dati tecnici e smista." },
+      { icon: "MessageSquare", title: "WhatsApp AI", description: "Comunicazione multicanale con clienti e fornitori. Aggiornamenti automatici, conferme, raccolta documenti." },
+      { icon: "HardHat", title: "Gestione Cantieri", description: "Coordinamento multi-cantiere: notifiche a subappaltatori, scadenze, varianti, aggiornamenti real-time al cliente." },
+      { icon: "FileText", title: "Gestione Documenti", description: "Integrazione ERP/CRM, generazione contratti, DDT, certificazioni. Workflow approvativo automatizzato." },
+      { icon: "Calculator", title: "Preventivi Automatici", description: "Preventivi complessi multi-lotto generati dall'AI. Da 14 giorni a 3. Integrazione listini fornitori." },
+      { icon: "Megaphone", title: "Campagne Outbound", description: "L'AI contatta migliaia di prospect, qualifica per bando/progetto, genera pipeline commerciale automatica." },
+    ],
+    calculator: { defaultStipendio: 2800, defaultLeadMensili: 200, defaultOreRipetitive: 8, valoreCommessaMedia: 50000 },
     roi: [
       { metric: "Efficienza commerciale", value: "+300%" },
       { metric: "Time-to-quote", value: "-70%" },
@@ -180,10 +231,19 @@ export const perChiECategories: PerChiECategory[] = [
       { title: "Stagionalità che ti uccide", description: "Da ottobre a marzo il telefono non suona. Non hai un sistema per generare domanda costante." },
     ],
     solutions: [
-      { title: "Risposta istantanea ai lead", description: "L'AI risponde in 2 secondi, raccoglie misure, tipologia infissi, budget. Tu arrivi al sopralluogo già preparato." },
-      { title: "Qualifica prima del sopralluogo", description: "L'AI verifica budget, tempistiche, decisore. Vai solo dove c'è un contratto da chiudere." },
-      { title: "Campagne anti-stagionalità", description: "L'AI chiama i vecchi clienti, propone manutenzione, sostituzione. Lavoro anche nei mesi morti." },
+      { title: "Agente Vocale che Raccoglie Misure e Budget", description: "L'AI risponde in 2 secondi, raccoglie tipo infisso, misure, materiale, budget. Tu arrivi al sopralluogo già preparato." },
+      { title: "Preventivi Automatici + Follow-up WhatsApp", description: "Preventivo generato dalla chiamata AI, inviato via WhatsApp. Follow-up automatico a 3, 7, 14 giorni." },
+      { title: "Campagne Outbound + Gestione Documenti", description: "L'AI chiama vecchi clienti per sostituzione infissi, gestisce certificazioni energetiche e pratiche detrazione." },
     ],
+    services: [
+      { icon: "Phone", title: "Agente Vocale AI", description: "Risponde in 2 secondi, raccoglie tipo infisso (PVC, alluminio, legno), misure finestre, piano, budget. Qualifica e fissa sopralluogo." },
+      { icon: "MessageSquare", title: "WhatsApp AI", description: "Invia catalogo materiali, raccoglie foto finestre attuali, conferma appuntamenti, follow-up post-preventivo." },
+      { icon: "HardHat", title: "Gestione Cantieri", description: "Traccia ordini fornitori, tempi di produzione infissi, coordina posa e muratore. Aggiornamenti automatici al cliente." },
+      { icon: "FileText", title: "Gestione Documenti", description: "Certificazioni energetiche, pratiche ENEA per detrazioni, DDT, garanzie. Tutto archiviato e tracciabile." },
+      { icon: "Calculator", title: "Preventivi Automatici", description: "Dalla telefonata al preventivo in 10 minuti: tipo infisso, misure, accessori, posa, muratura. Pronto da firmare." },
+      { icon: "Megaphone", title: "Campagne Outbound", description: "Chiama clienti con infissi vecchi 15+ anni, propone sostituzione con incentivi. Lavoro anche nei mesi morti." },
+    ],
+    calculator: { defaultStipendio: 1800, defaultLeadMensili: 30, defaultOreRipetitive: 4, valoreCommessaMedia: 4200 },
     roi: [
       { metric: "Sopralluoghi qualificati", value: "+200%" },
       { metric: "Tempo preventivazione", value: "-50%" },
@@ -215,10 +275,19 @@ export const perChiECategories: PerChiECategory[] = [
       { title: "Installazioni che slittano", description: "Il cliente dice sì ma poi rimanda. Nessuno lo segue. Dopo 3 mesi ha cambiato idea." },
     ],
     solutions: [
-      { title: "Gestione lead massiva", description: "L'AI risponde a tutte le 50 richieste, qualifica, spiega gli incentivi, fissa il sopralluogo. Tu installi." },
-      { title: "Educazione automatica", description: "L'AI spiega bonus fiscali, tempi di rientro, risparmio in bolletta. Il cliente arriva già convinto." },
-      { title: "Follow-up anti-rinvio", description: "L'AI segue il cliente fino alla firma. Promemoria, aggiornamenti, urgenza. Zero clienti persi per inerzia." },
+      { title: "Agente Vocale + WhatsApp per Lead Massivi", description: "L'AI gestisce 50+ richieste/settimana, spiega incentivi, qualifica tetto e consumo. Tu installi e basta." },
+      { title: "Preventivi Automatici con Simulazione Risparmio", description: "L'AI calcola kWp necessari, risparmio in bolletta, tempi di rientro e genera il preventivo completo." },
+      { title: "Gestione Cantieri + Documenti Pratiche GSE", description: "Coordina installazione, gestisce pratiche GSE/ENEA, archivia certificazioni. Zero burocrazia manuale." },
     ],
+    services: [
+      { icon: "Phone", title: "Agente Vocale AI", description: "Risponde a tutte le richieste, raccoglie consumi bolletta, orientamento tetto, superficie disponibile. Qualifica e fissa sopralluogo." },
+      { icon: "MessageSquare", title: "WhatsApp AI", description: "Spiega bonus fiscali, invia simulazione risparmio, raccoglie bollette via foto, follow-up anti-rinvio." },
+      { icon: "HardHat", title: "Gestione Cantieri", description: "Pianifica installazioni, coordina elettricista e muratore, notifica cliente su avanzamento e allaccio GSE." },
+      { icon: "FileText", title: "Gestione Documenti", description: "Pratiche GSE, comunicazione ENEA, certificazione impianto, garanzie pannelli e inverter. Tutto automatizzato." },
+      { icon: "Calculator", title: "Preventivi Automatici", description: "Da bolletta e tetto a preventivo completo: kWp, pannelli, inverter, batteria, costo, risparmio annuo, rientro." },
+      { icon: "Megaphone", title: "Campagne Outbound", description: "Chiama proprietari di case in zone target, spiega vantaggi fotovoltaico con incentivi attuali. Pipeline infinita." },
+    ],
+    calculator: { defaultStipendio: 2000, defaultLeadMensili: 50, defaultOreRipetitive: 5, valoreCommessaMedia: 15000 },
     roi: [
       { metric: "Lead gestiti", value: "5x" },
       { metric: "Tempo al sopralluogo", value: "-60%" },
@@ -250,10 +319,19 @@ export const perChiECategories: PerChiECategory[] = [
       { title: "Dipendenza dal passaparola", description: "Quando il passaparola si ferma, il lavoro si ferma. Nessun sistema attivo di acquisizione clienti." },
     ],
     solutions: [
-      { title: "Pre-qualifica budget e tempistiche", description: "L'AI verifica budget reale, tempistiche, decisore prima che tu muova un dito. Solo clienti seri." },
-      { title: "Follow-up automatico post-preventivo", description: "L'AI richiama il cliente dopo 3, 7, 14 giorni. Risponde alle obiezioni. Chiude il cerchio." },
-      { title: "Acquisizione attiva", description: "Campagne AI su vecchi contatti, clienti passati, zona geografica. Lavoro costante tutto l'anno." },
+      { title: "Agente Vocale per Pre-Qualifica Budget", description: "L'AI verifica budget reale, tempistiche, tipo intervento prima del sopralluogo. Solo clienti seri, zero perditempo." },
+      { title: "Preventivi Automatici + Follow-up WhatsApp", description: "Preventivo generato in ore, non giorni. Follow-up AI via WhatsApp a 3, 7, 14 giorni. Chiude il cerchio." },
+      { title: "Gestione Cantieri + Documenti + Outbound", description: "Coordina squadre e fornitori, gestisce pratiche edilizie, e lancia campagne per acquisire nuovi clienti." },
     ],
+    services: [
+      { icon: "Phone", title: "Agente Vocale AI", description: "Pre-qualifica ogni richiesta: tipo intervento, budget, tempistiche, decisore. Passa al commerciale solo chi è pronto." },
+      { icon: "MessageSquare", title: "WhatsApp AI", description: "Follow-up post-preventivo automatico, risponde a obiezioni, invia referenze e foto lavori simili completati." },
+      { icon: "HardHat", title: "Gestione Cantieri", description: "Coordina muratore, idraulico, elettricista, piastrellista. Aggiornamenti automatici al cliente con foto avanzamento." },
+      { icon: "FileText", title: "Gestione Documenti", description: "CILA/SCIA, pratiche comunali, computi metrici, certificazioni fine lavori. Zero burocrazia manuale." },
+      { icon: "Calculator", title: "Preventivi Automatici", description: "Da sopralluogo a preventivo dettagliato in ore: demolizioni, impianti, finiture, tempistiche, costi per voce." },
+      { icon: "Megaphone", title: "Campagne Outbound", description: "Contatta proprietari di immobili datati nella tua zona, propone ristrutturazione con incentivi. Lead costanti." },
+    ],
+    calculator: { defaultStipendio: 2000, defaultLeadMensili: 25, defaultOreRipetitive: 5, valoreCommessaMedia: 25000 },
     roi: [
       { metric: "Preventivi accettati", value: "+120%" },
       { metric: "Tempo commerciale", value: "-70%" },
@@ -285,10 +363,19 @@ export const perChiECategories: PerChiECategory[] = [
       { title: "Coordinamento subappaltatori caotico", description: "Telefonate, WhatsApp, email. Nessuno sa chi deve fare cosa e quando. Ritardi e costi extra." },
     ],
     solutions: [
-      { title: "Front-office AI completo", description: "Gestione chiamate, lead, appuntamenti, follow-up. Zero personale aggiuntivo." },
-      { title: "Pre-screening gare automatico", description: "L'AI analizza i bandi, verifica i requisiti, ti segnala solo quelli che puoi vincere." },
-      { title: "Coordinamento automatizzato", description: "Notifiche AI ai subappaltatori, reminder scadenze, aggiornamenti automatici al cliente." },
+      { title: "Agente Vocale + WhatsApp come Front-Office", description: "Gestisce chiamate, qualifica lead, fissa sopralluoghi, risponde su WhatsApp. Zero personale aggiuntivo, H24." },
+      { title: "Preventivi Automatici + Screening Gare", description: "L'AI genera preventivi da specifiche tecniche e analizza bandi di gara per segnalarti solo quelli vincibili." },
+      { title: "Gestione Cantieri + Documenti Completa", description: "Coordina subappaltatori con notifiche AI, gestisce DDT, certificazioni, sicurezza cantiere. Zero caos." },
     ],
+    services: [
+      { icon: "Phone", title: "Agente Vocale AI", description: "Front-office completo: gestisce chiamate clienti, fornitori, subappaltatori. Smista per urgenza e tipo richiesta." },
+      { icon: "MessageSquare", title: "WhatsApp AI", description: "Canale dedicato per aggiornamenti cantiere, coordinamento squadre, invio foto e documenti in tempo reale." },
+      { icon: "HardHat", title: "Gestione Cantieri", description: "Dashboard multi-cantiere: scadenze, materiali, avanzamento, sicurezza. Notifiche automatiche a tutte le parti." },
+      { icon: "FileText", title: "Gestione Documenti", description: "DDT, POS, PSC, certificazioni SOA, DURC. Tutto digitalizzato, scadenze monitorate, alert automatici." },
+      { icon: "Calculator", title: "Preventivi Automatici", description: "Computi metrici automatici, listini integrati, preventivi multi-lotto. Da settimane a ore." },
+      { icon: "Megaphone", title: "Campagne Outbound", description: "Contatta amministratori condominio, costruttori, studi tecnici. Presenta i tuoi servizi, genera pipeline." },
+    ],
+    calculator: { defaultStipendio: 2200, defaultLeadMensili: 40, defaultOreRipetitive: 6, valoreCommessaMedia: 30000 },
     roi: [
       { metric: "Costi fissi", value: "-60%" },
       { metric: "Win rate gare", value: "+90%" },
@@ -320,10 +407,19 @@ export const perChiECategories: PerChiECategory[] = [
       { title: "Zero visibilità online", description: "I clienti cercano su Google. Tu non ci sei. Il lavoro arriva solo dal passaparola." },
     ],
     solutions: [
-      { title: "Receptionist AI dedicato", description: "Risponde mentre lavori, raccoglie tipo pavimento, metratura, tempistiche. Tu richiami solo chi vale." },
-      { title: "Qualifica budget automatica", description: "L'AI chiede il budget prima che tu faccia il sopralluogo. Basta lavori sottopagati." },
-      { title: "Follow-up e recensioni", description: "L'AI chiede recensioni Google ai clienti soddisfatti. Più recensioni = più visibilità = più lavoro." },
+      { title: "Agente Vocale Mentre Sei a Terra", description: "L'AI risponde mentre posi, raccoglie tipo pavimento, metratura, tempistiche. Tu richiami solo chi vale." },
+      { title: "Preventivi Automatici + Qualifica Budget", description: "L'AI chiede budget e specifiche, genera preventivo con margine giusto. Basta lavori sottopagati." },
+      { title: "WhatsApp AI + Campagne Recensioni", description: "Follow-up via WhatsApp, richiesta recensioni Google automatica. Più recensioni = più visibilità = più lavoro." },
     ],
+    services: [
+      { icon: "Phone", title: "Agente Vocale AI", description: "Risponde mentre posi: raccoglie tipo pavimento (gres, parquet, marmo), metratura, piano, tempistiche." },
+      { icon: "MessageSquare", title: "WhatsApp AI", description: "Invia catalogo materiali, raccoglie foto ambiente, conferma appuntamenti. Chiede recensioni post-lavoro." },
+      { icon: "HardHat", title: "Gestione Cantieri", description: "Pianifica lavori settimanali, coordina consegna materiali, notifica cliente su inizio e fine lavori." },
+      { icon: "FileText", title: "Gestione Documenti", description: "DDT materiali, fatture, garanzie pavimenti. Archiviazione digitale, ricerca istantanea per cliente." },
+      { icon: "Calculator", title: "Preventivi Automatici", description: "Da metratura e tipo pavimento a preventivo completo: materiale, massetto, posa, battiscopa, costo totale." },
+      { icon: "Megaphone", title: "Campagne Outbound", description: "Contatta imprese di ristrutturazione, architetti, negozi ceramiche. Propone collaborazione continuativa." },
+    ],
+    calculator: { defaultStipendio: 1600, defaultLeadMensili: 20, defaultOreRipetitive: 3, valoreCommessaMedia: 3500 },
     roi: [
       { metric: "Chiamate gestite", value: "100%" },
       { metric: "Valore medio lavoro", value: "+35%" },
@@ -355,10 +451,19 @@ export const perChiECategories: PerChiECategory[] = [
       { title: "Preventivi complessi da remoto", description: "Devi salire sul tetto per capire il danno. Ma il cliente vuole un prezzo prima del sopralluogo." },
     ],
     solutions: [
-      { title: "Gestione picchi automatica", description: "L'AI gestisce 100 chiamate simultanee. Ogni cliente viene registrato, classificato per urgenza, richiamato." },
-      { title: "Triage intelligente", description: "L'AI classifica urgenze vs programmati, gestisce le aspettative, pianifica gli interventi." },
-      { title: "Pre-assessment fotografico", description: "L'AI chiede foto al cliente via WhatsApp, stima il danno, ti prepara prima del sopralluogo." },
+      { title: "Agente Vocale per Gestione Picchi", description: "L'AI gestisce 100 chiamate simultanee. Ogni cliente viene registrato, classificato per urgenza, richiamato." },
+      { title: "WhatsApp AI per Triage e Foto Danni", description: "L'AI chiede foto del danno via WhatsApp, classifica urgenza, ti prepara prima del sopralluogo." },
+      { title: "Gestione Cantieri + Preventivi per Urgenze", description: "Pianifica interventi urgenti vs programmati, genera preventivi rapidi da foto e descrizione danno." },
     ],
+    services: [
+      { icon: "Phone", title: "Agente Vocale AI", description: "Gestisce 100+ chiamate simultanee post-maltempo. Registra ogni richiesta, classifica per urgenza, prenota intervento." },
+      { icon: "MessageSquare", title: "WhatsApp AI", description: "Raccoglie foto danni via WhatsApp, stima gravità, invia tempistiche intervento. Triage automatico." },
+      { icon: "HardHat", title: "Gestione Cantieri", description: "Pianifica interventi urgenti e programmati su mappa, coordina squadre, ottimizza percorsi giornalieri." },
+      { icon: "FileText", title: "Gestione Documenti", description: "Perizie danni, documentazione assicurativa, certificazioni impermeabilizzazione. Tutto digitalizzato." },
+      { icon: "Calculator", title: "Preventivi Automatici", description: "Da foto danno e descrizione a preventivo rapido: tipo copertura, metratura stimata, materiali, costo." },
+      { icon: "Megaphone", title: "Campagne Outbound", description: "Contatta proprietari zona per ispezioni preventive tetti, manutenzione grondaie. Lavoro costante tutto l'anno." },
+    ],
+    calculator: { defaultStipendio: 1800, defaultLeadMensili: 25, defaultOreRipetitive: 4, valoreCommessaMedia: 6000 },
     roi: [
       { metric: "Lead gestiti nei picchi", value: "+500%" },
       { metric: "Tempo organizzazione", value: "-60%" },
@@ -390,10 +495,19 @@ export const perChiECategories: PerChiECategory[] = [
       { title: "Concorrenza feroce sui prezzi", description: "Il cliente chiama 5 idraulici e sceglie il più economico. Non hai modo di differenziarti." },
     ],
     solutions: [
-      { title: "Pronto intervento AI h24", description: "L'AI risponde di notte, valuta l'urgenza, prenota l'intervento per la mattina dopo. Il cliente è gestito." },
-      { title: "Recall manutenzione automatico", description: "L'AI chiama ogni cliente a scadenza caldaia/impianto. Rinnovi automatici senza sforzo." },
-      { title: "Qualifica e differenziazione", description: "L'AI spiega perché il tuo servizio vale di più. Garanzia, tempistiche, professionalità. Non solo prezzo." },
+      { title: "Agente Vocale H24 per Emergenze", description: "L'AI risponde di notte, valuta urgenza (tubo rotto vs rubinetto che gocciola), prenota intervento prioritario." },
+      { title: "WhatsApp AI + Recall Manutenzione", description: "Richiama ogni cliente a scadenza caldaia/impianto via WhatsApp. Rinnovi automatici senza sforzo." },
+      { title: "Preventivi Automatici + Gestione Documenti", description: "Genera preventivi da tipo intervento, gestisce libretti impianto, certificazioni F-Gas, garanzie." },
     ],
+    services: [
+      { icon: "Phone", title: "Agente Vocale AI", description: "Pronto intervento H24: valuta urgenza, classifica tipo problema, prenota intervento. Risponde anche alle 3 di notte." },
+      { icon: "MessageSquare", title: "WhatsApp AI", description: "Recall manutenzione caldaie, invio promemoria tagliandi, raccolta foto problemi per pre-diagnosi." },
+      { icon: "HardHat", title: "Gestione Cantieri", description: "Pianifica interventi giornalieri, ottimizza percorsi, coordina consegna materiali e ricambi." },
+      { icon: "FileText", title: "Gestione Documenti", description: "Libretti impianto, certificazioni F-Gas, rapporti di intervento, garanzie. Scadenze monitorate automaticamente." },
+      { icon: "Calculator", title: "Preventivi Automatici", description: "Da tipo intervento (caldaia, bagno, riscaldamento) a preventivo: materiali, manodopera, tempistiche, costo." },
+      { icon: "Megaphone", title: "Campagne Outbound", description: "Chiama clienti con caldaie in scadenza revisione, propone contratti manutenzione annuali. Ricavi ricorrenti." },
+    ],
+    calculator: { defaultStipendio: 1700, defaultLeadMensili: 30, defaultOreRipetitive: 3, valoreCommessaMedia: 1800 },
     roi: [
       { metric: "Interventi notturni gestiti", value: "+100%" },
       { metric: "Rinnovi manutenzione", value: "+250%" },
@@ -425,10 +539,19 @@ export const perChiECategories: PerChiECategory[] = [
       { title: "Preventivi tecnici complessi", description: "Ogni impianto è diverso. Fare un preventivo richiede sopralluogo e ore di calcolo." },
     ],
     solutions: [
-      { title: "Receptionist tecnico AI", description: "L'AI risponde, capisce il tipo di intervento (nuovo impianto, manutenzione, emergenza), qualifica e prenota." },
-      { title: "Pre-raccolta dati tecnici", description: "L'AI chiede al cliente planimetria, potenza attuale, tipo di impianto. Tu arrivi già con le idee chiare." },
-      { title: "Follow-up certificazioni", description: "L'AI ricorda ai clienti le scadenze di conformità. Nuovi interventi senza cercare clienti." },
+      { title: "Agente Vocale Tecnico Specializzato", description: "L'AI risponde, capisce tipo intervento (nuovo impianto, manutenzione, emergenza), raccoglie dati tecnici e prenota." },
+      { title: "WhatsApp AI + Gestione Documenti", description: "Raccoglie planimetrie via WhatsApp, gestisce DiCo/DiRi, reminder scadenze conformità ai clienti." },
+      { title: "Preventivi Automatici + Outbound", description: "Genera preventivi da specifiche tecniche, contatta condomini e imprese per proporre verifiche impianti." },
     ],
+    services: [
+      { icon: "Phone", title: "Agente Vocale AI", description: "Receptionist tecnico: capisce tipo intervento, raccoglie kW, numero punti luce, tipo impianto. Qualifica e prenota." },
+      { icon: "MessageSquare", title: "WhatsApp AI", description: "Raccoglie planimetrie e foto quadri elettrici, invia preventivi, reminder scadenze conformità." },
+      { icon: "HardHat", title: "Gestione Cantieri", description: "Pianifica interventi multi-cantiere, coordina forniture cavi e materiali, traccia avanzamento." },
+      { icon: "FileText", title: "Gestione Documenti", description: "DiCo, DiRi, certificazioni conformità, schemi impianto. Generazione automatica, archivio digitale." },
+      { icon: "Calculator", title: "Preventivi Automatici", description: "Da planimetria e specifiche a preventivo: punti luce, prese, quadro, canalizzazioni, costo dettagliato." },
+      { icon: "Megaphone", title: "Campagne Outbound", description: "Contatta amministratori condominio per verifiche impianti, aziende per manutenzione programmata." },
+    ],
+    calculator: { defaultStipendio: 1700, defaultLeadMensili: 25, defaultOreRipetitive: 3, valoreCommessaMedia: 2500 },
     roi: [
       { metric: "Chiamate gestite", value: "100%" },
       { metric: "Tempo pre-sopralluogo", value: "-40%" },
@@ -460,10 +583,19 @@ export const perChiECategories: PerChiECategory[] = [
       { title: "Clienti che non capiscono i costi", description: "'Ma quanto costa un controsoffitto?' Il cliente non capisce la complessità e vuole prezzi da discount." },
     ],
     solutions: [
-      { title: "Lead generation automatica", description: "L'AI gestisce le richieste online, qualifica il cliente, spiega il valore del tuo lavoro." },
-      { title: "Campagne anti-buchi", description: "L'AI chiama vecchi clienti, propone lavori aggiuntivi, riempie i mesi vuoti." },
-      { title: "Educazione al valore", description: "L'AI spiega perché il cartongesso professionale costa di più e vale di più. Clienti educati = margini migliori." },
+      { title: "Agente Vocale + WhatsApp per Lead Online", description: "L'AI gestisce ogni richiesta online e telefonica, qualifica il cliente, spiega il valore del lavoro professionale." },
+      { title: "Preventivi Automatici con Educazione al Valore", description: "L'AI genera preventivi dettagliati spiegando ogni voce. Il cliente capisce perché il lavoro vale quel prezzo." },
+      { title: "Campagne Outbound + Gestione Cantieri", description: "Chiama imprese di ristrutturazione per collaborazioni, gestisce planning lavori settimanale. Zero mesi vuoti." },
     ],
+    services: [
+      { icon: "Phone", title: "Agente Vocale AI", description: "Gestisce richieste: tipo lavoro (controsoffitto, pareti, isolamento), metratura, altezze, finiture. Qualifica budget." },
+      { icon: "MessageSquare", title: "WhatsApp AI", description: "Invia portfolio lavori, raccoglie foto ambienti, preventivi rapidi. Educa il cliente sul valore artigianale." },
+      { icon: "HardHat", title: "Gestione Cantieri", description: "Pianifica lavori settimanali, coordina consegna lastre e profili, notifica cliente su inizio/fine lavori." },
+      { icon: "FileText", title: "Gestione Documenti", description: "Schede tecniche materiali, certificazioni acustiche/termiche, DDT, fatture. Tutto digitalizzato." },
+      { icon: "Calculator", title: "Preventivi Automatici", description: "Da metratura e tipo lavoro a preventivo: struttura, lastre, stuccatura, pittura, dettaglio per voce." },
+      { icon: "Megaphone", title: "Campagne Outbound", description: "Contatta imprese di ristrutturazione, architetti, interior designer. Propone collaborazione continuativa." },
+    ],
+    calculator: { defaultStipendio: 1500, defaultLeadMensili: 15, defaultOreRipetitive: 2, valoreCommessaMedia: 2000 },
     roi: [
       { metric: "Lead da online", value: "+300%" },
       { metric: "Mesi vuoti/anno", value: "-80%" },
@@ -495,10 +627,19 @@ export const perChiECategories: PerChiECategory[] = [
       { title: "Gestione cantiere a distanza", description: "Devi coordinare imprese, aggiornare il cliente, gestire varianti. Tutto via telefono e email. Caos." },
     ],
     solutions: [
-      { title: "Filtro intelligente chiamate", description: "L'AI risponde, capisce il tipo di progetto, verifica budget e tempistiche. Ti passa solo i clienti seri." },
-      { title: "Aggiornamenti cantiere automatici", description: "L'AI manda report settimanali al cliente con foto e avanzamento. Zero telefonate di aggiornamento." },
-      { title: "Acquisizione progettuale", description: "L'AI contatta costruttori, imprese, proprietari per proporre i tuoi servizi di progettazione." },
+      { title: "Agente Vocale come Filtro Intelligente", description: "L'AI risponde, capisce tipo progetto, verifica budget e tempistiche. Ti passa solo i clienti con progetti reali." },
+      { title: "WhatsApp AI + Gestione Cantieri", description: "Aggiornamenti cantiere automatici via WhatsApp con foto e avanzamento. Zero telefonate di aggiornamento." },
+      { title: "Preventivi + Documenti + Outbound", description: "Genera proposte progettuali da brief, gestisce pratiche edilizie, contatta imprese per collaborazioni." },
     ],
+    services: [
+      { icon: "Phone", title: "Agente Vocale AI", description: "Filtro intelligente: capisce tipo progetto, dimensione, budget. Ti passa solo chi ha un incarico vero da affidare." },
+      { icon: "MessageSquare", title: "WhatsApp AI", description: "Aggiornamenti cantiere con foto ai committenti, raccolta documenti da imprese, comunicazioni DL." },
+      { icon: "HardHat", title: "Gestione Cantieri", description: "Coordinamento imprese esecutrici, verbali avanzamento, gestione varianti e SAL. Report automatici." },
+      { icon: "FileText", title: "Gestione Documenti", description: "CILA, SCIA, permessi, pratiche catastali, computi metrici. Workflow approvativo con firma digitale." },
+      { icon: "Calculator", title: "Preventivi Automatici", description: "Da brief progettuale a proposta economica: fasi, tempistiche, onorari, spese tecniche. Professionale in minuti." },
+      { icon: "Megaphone", title: "Campagne Outbound", description: "Contatta costruttori, imprese, proprietari immobili per proporre servizi di progettazione e DL." },
+    ],
+    calculator: { defaultStipendio: 2000, defaultLeadMensili: 15, defaultOreRipetitive: 4, valoreCommessaMedia: 8000 },
     roi: [
       { metric: "Ore produttive/giorno", value: "+3h" },
       { metric: "Clienti qualificati", value: "+200%" },
