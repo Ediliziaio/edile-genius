@@ -67,6 +67,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <AuthProvider>
           <ImpersonationProvider>
           <Routes>
