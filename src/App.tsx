@@ -14,6 +14,7 @@ import Tariffe from "./pages/Tariffe";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import AuthGuard from "./components/auth/AuthGuard";
+import ScrollToTop from "./components/ScrollToTop";
 import Shell from "./components/layout/Shell";
 import SuperAdminDashboard from "./pages/superadmin/Dashboard";
 import Companies from "./pages/superadmin/Companies";
