@@ -6,6 +6,8 @@ import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
 import Guarantee from "@/components/sections/Guarantee";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
+import SectorServicesGrid from "@/components/perchie/SectorServicesGrid";
+import SectorCalculator from "@/components/perchie/SectorCalculator";
 import { perChiECategories } from "@/data/perChiE";
 
 const PerChiEDetail = () => {
@@ -48,8 +50,6 @@ const PerChiEDetail = () => {
           >
             {cat.heroSubtitle}
           </motion.p>
-
-          {/* Mini stats */}
           <motion.div
             className="grid grid-cols-3 gap-4 max-w-xl mx-auto"
             initial={{ opacity: 0, y: 16 }}
@@ -120,11 +120,17 @@ const PerChiEDetail = () => {
         </div>
       </section>
 
+      {/* SERVIZI AI */}
+      <SectorServicesGrid sectorName={cat.name} services={cat.services} />
+
+      {/* CALCOLATORE RISPARMIO */}
+      <SectorCalculator sectorName={cat.name} defaults={cat.calculator} />
+
       {/* ROI */}
       <section ref={roiRef} className="py-16 md:py-20">
         <div className="max-w-3xl mx-auto px-6">
           <motion.div
-            className="bg-neutral-900 rounded-3xl p-10 md:p-14 text-center"
+            className="bg-[hsl(var(--neutral-900))] rounded-3xl p-10 md:p-14 text-center"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={roiInView ? { opacity: 1, scale: 1 } : {}}
             transition={{ duration: 0.5 }}
@@ -142,7 +148,7 @@ const PerChiEDetail = () => {
                   transition={{ delay: 0.2 + i * 0.1, duration: 0.4 }}
                 >
                   <div className="font-display text-3xl md:text-4xl font-extrabold text-primary">{r.value}</div>
-                  <div className="font-mono text-[10px] uppercase tracking-wider text-neutral-400 mt-2">{r.metric}</div>
+                  <div className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--neutral-300))] mt-2">{r.metric}</div>
                 </motion.div>
               ))}
             </div>
@@ -182,12 +188,12 @@ const PerChiEDetail = () => {
       <Guarantee />
 
       {/* CTA DARK */}
-      <section className="py-16 md:py-24 bg-neutral-900">
+      <section className="py-16 md:py-24 bg-[hsl(var(--neutral-900))]">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h2 className="font-display text-3xl md:text-4xl font-extrabold text-white leading-tight mb-6">
             {cat.ctaLine}
           </h2>
-          <p className="text-neutral-400 text-lg mb-8">
+          <p className="text-[hsl(var(--neutral-300))] text-lg mb-8">
             Ogni giorno che aspetti, un tuo competitor chiude un contratto in più.
           </p>
           <Link
