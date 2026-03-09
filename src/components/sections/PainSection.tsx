@@ -5,28 +5,28 @@ import AnimatedBadge from "@/components/custom/AnimatedBadge";
 
 const pains = [
   {
-    title: "Il telefono squilla — ma nessuno risponde in tempo",
-    text: "Il tuo commerciale è in cantiere. Il preventivista è in riunione. Il lead aspetta 3 minuti, poi chiama il concorrente. Succede ogni giorno, più volte al giorno. Ogni chiamata persa è un preventivo mancato e un cliente regalato.",
+    title: "La segretaria che perde il 40% delle chiamate inbound",
+    text: "È in pausa, è al telefono, è impegnata con un cliente. Nel frattempo il lead chiama il concorrente. Ogni chiamata persa è un preventivo regalato. La stai pagando €2.200/mese per perdere clienti.",
     stat: "78% dei clienti edili sceglie chi risponde per primo",
   },
   {
-    title: "Hai centinaia di lead nel CRM che nessuno ha mai richiamato",
-    text: "Soldi spesi in campagne Google e Meta che dormono in un database. Ogni contatto non richiamato è fatturato fantasma. Un archivio di opportunità perse che si accumula ogni mese.",
+    title: "Il commerciale che richiama i lead dopo 3 giorni (se li richiama)",
+    text: "Soldi spesi in campagne Google e Meta che dormono nel CRM. Il tuo commerciale costa €3.000/mese e richiama — forse — il 30% dei lead. Il resto? Fatturato fantasma che si accumula ogni mese.",
     stat: "68% dei lead edili non viene ricontattato entro 24h",
   },
   {
-    title: "I tuoi venditori perdono ore su attività che non producono vendite",
-    text: "Cold calling, qualifica lead freddi, aggiornamenti clienti, compilazione report. Ore e ore sottratte all'unica cosa che conta: stare davanti ai clienti pronti a firmare.",
-    stat: "-65% di produttività commerciale per attività non-vendita",
-  },
-  {
-    title: "La gestione operativa e la reportistica ti occupa metà giornata",
-    text: "Fogli Excel, reportistica operai, analisi preventivi, gestione assistenze. Attività ripetitive, manuali, ad alto rischio di errore. Ogni ora che ci passi è un'ora sottratta alla strategia.",
+    title: "L'impiegata che passa 3,5 ore/giorno a fare report",
+    text: "Fogli Excel, reportistica operai, analisi preventivi. €2.400/mese per attività ripetitive che un Agente AI fa in 5 minuti. Ogni ora che lei ci passa è un'ora che tu paghi senza ritorno.",
     stat: "Media: 3,5 ore/giorno perse in attività amministrative ripetitive",
   },
   {
-    title: "I tuoi concorrenti si stanno già automatizzando — tu no",
-    text: "Non tra 2 anni. Adesso. Ogni settimana senza automazione AI è un vantaggio competitivo regalato a chi ha avuto il coraggio di muoversi prima. Il mercato edile cambia. Chi non cambia con lui, sparisce.",
+    title: "Il call center che costa €3.500/mese e lavora solo 8 ore",
+    text: "Copre solo il 33% della giornata. Il 30% dei lead arriva fuori orario — la sera, il weekend, ad agosto. Li stai perdendo tutti. Un Agente AI costa una frazione e lavora H24, 365 giorni.",
+    stat: "30% dei lead edili arriva fuori orario lavorativo",
+  },
+  {
+    title: "I tuoi concorrenti stanno già licenziando — e assumendo AI",
+    text: "Non tra 2 anni. Adesso. Ogni settimana senza sostituzione AI è un vantaggio competitivo regalato a chi ha avuto il coraggio di muoversi prima. Il mercato edile cambia. Chi non cambia con lui, sparisce.",
     stat: "+180% crescita adozione AI nel settore costruzioni 2023-2025",
   },
 ];
@@ -40,14 +40,14 @@ const PainSection = () => {
         <div className="text-center mb-12 space-y-4">
           <AnimatedBadge variant="arancio">IL PROBLEMA</AnimatedBadge>
           <h2 className="font-display text-[32px] md:text-5xl font-extrabold text-neutral-900 leading-tight">
-            Ogni Giorno Perdi Clienti<br />
-            per Problemi che <span className="text-primary">l'AI</span><br />
-            Risolve in Automatico
+            Ogni Dipendente Improduttivo<br />
+            Ti Costa <span className="text-primary">€45.000/anno.</span><br />
+            E Tu Lo Sai.
           </h2>
           <p className="text-lg text-neutral-500 max-w-xl mx-auto leading-relaxed">
             Hai un ottimo prodotto. Hai una squadra. Investi in pubblicità.
-            Eppure i numeri non ti convincono. Il problema non è il tuo settore —
-            è che stai gestendo un'azienda del 2025 con processi del 2015.
+            Ma stai pagando persone che fanno il lavoro che un Agente AI
+            farebbe meglio, più veloce, e a una frazione del costo.
           </p>
         </div>
 

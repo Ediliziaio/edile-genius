@@ -1,5 +1,5 @@
 const AnnouncementBar = () => {
-  const text = "⚡ Solo 12 aziende edili accettate ogni mese  •  Setup completato in 7 giorni  •  Agenti AI attivi 24/7 — zero lead persi  •  Garanzia rimborso 30 giorni  •  Primo a muoversi, primo a vincere il mercato  •  ";
+  const text = "🔥 La 1ª Agenzia di Licenziamento AI per l'Edilizia  •  Sostituisci dipendenti improduttivi con Agenti AI  •  -60% costi del personale garantito  •  Setup in 7 giorni  •  Garanzia rimborso 30 giorni  •  ";
 
   return (
     <div className="bg-primary h-11 flex items-center overflow-hidden relative">
@@ -14,7 +14,7 @@ const AnnouncementBar = () => {
         href="#cta-finale"
         className="flex-shrink-0 px-4 text-white text-xs font-medium underline hover:opacity-75 transition-opacity font-mono"
       >
-        Prenota Demo Gratuita →
+        Scopri Chi Puoi Sostituire →
       </a>
     </div>
   );

@@ -51,16 +51,15 @@ const FinalCTA = () => {
           </div>
 
           <h2 className="font-display text-[36px] md:text-[72px] font-extrabold text-white leading-[1.05]">
-            Prenota la Tua<br />
-            <span className="text-primary">Demo Gratuita.</span><br />
-            Senza Impegno.
+            Scopri Chi Puoi<br />
+            <span className="text-primary">Licenziare.</span><br />
+            Prenota l'Analisi.
           </h2>
 
           <p className="text-neutral-500 text-lg max-w-xl mx-auto leading-relaxed">
-            30 minuti con uno specialista AI del settore edile.
-            Analizziamo il tuo processo di vendita attuale, identifichiamo
-            dove stai perdendo clienti e ti mostriamo — con numeri concreti —
-            quanto risparmieresti e quanto cresceresti con gli Agenti AI.
+            30 minuti con uno specialista. Analizziamo il tuo organico,
+            identifichiamo le figure sostituibili e ti mostriamo —
+            con numeri concreti — quanto risparmieresti dal primo mese.
           </p>
         </div>
 
@@ -81,7 +80,7 @@ const FinalCTA = () => {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <p className="font-mono text-xs text-primary uppercase tracking-wider font-medium mb-4">
-                Inizia Ora — È Gratuito
+                Analisi Gratuita — Scopri Chi Puoi Sostituire
               </p>
 
               <input
@@ -135,7 +134,7 @@ const FinalCTA = () => {
                     Invio in corso...
                   </>
                 ) : (
-                  "PRENOTA LA TUA DEMO GRATUITA →"
+                  "PRENOTA LA TUA ANALISI GRATUITA →"
                 )}
               </button>
 
@@ -149,9 +148,9 @@ const FinalCTA = () => {
         {/* P.S. */}
         <div className="mt-10 space-y-4 text-[15px] italic text-neutral-500">
           <p>
-            <span className="font-bold text-primary not-italic">P.S.</span> — Nel peggiore dei casi esci con una mappa chiara dei tuoi
-            processi e dei punti dove stai perdendo clienti. Nel migliore dei casi,
-            implementi un sistema che trasforma la tua azienda edile per sempre.
+            <span className="font-bold text-primary not-italic">P.S.</span> — Nel peggiore dei casi esci con una mappa chiara del tuo
+            organico e delle figure che potresti sostituire subito. Nel migliore dei casi,
+            inizi a risparmiare migliaia di euro al mese dal giorno dopo.
           </p>
           <p>
             <span className="font-bold text-primary not-italic">P.P.S.</span> — Lavoriamo solo con titolari e soci che prendono decisioni.

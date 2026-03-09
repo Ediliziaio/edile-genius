@@ -21,14 +21,14 @@ const Hero = () => {
           <motion.div variants={container} initial="hidden" animate="visible" className="space-y-8">
             <motion.div variants={item}>
               <AnimatedBadge variant="verde">
-                🤖 Prima Agenzia AI Verticale per l'Edilizia Italiana
+                🔥 La 1ª Agenzia di Licenziamento AI per l'Edilizia Italiana
               </AnimatedBadge>
             </motion.div>
 
             <motion.h1 variants={item} className="font-display text-[44px] md:text-[72px] font-extrabold leading-[1.05] text-neutral-900">
-              Riduci i Costi.{" "}
-              <span className="text-primary">Automatizza Tutto.</span>{" "}
-              Fai Crescere la tua{" "}
+              Licenzia i Costi.{" "}
+              <span className="text-primary">Assumi l'AI.</span>{" "}
+              Fai Esplodere la tua{" "}
               <span className="relative inline-block">
                 <span className="relative z-10">Azienda Edile.</span>
                 <span className="absolute bottom-1 left-0 w-full h-3 bg-primary-light rounded-sm -z-0" />
@@ -36,10 +36,9 @@ const Hero = () => {
             </motion.h1>
 
             <motion.p variants={item} className="text-lg text-neutral-500 max-w-[540px] leading-relaxed">
-              Edilizia.io porta l'intelligenza artificiale direttamente dentro la tua azienda edile.
-              Agenti Vocali AI che rispondono ai clienti 24/7. Agenti AI che gestiscono
-              processi, analisi, reportistica e operatività — riducendo i costi del personale
-              fino al 60% senza perdere qualità.
+              Edilizia.io è l'agenzia che sostituisce segretarie, commerciali improduttivi
+              e addetti alla reportistica con Agenti AI che costano 10x meno e lavorano
+              10x meglio. 24/7, 365 giorni l'anno. Senza ferie, malattie o dimissioni.
             </motion.p>
 
             <motion.div variants={item} className="flex flex-wrap gap-4">
@@ -54,14 +53,14 @@ const Hero = () => {
                 className="flex items-center gap-2 border border-neutral-200 bg-background text-neutral-700 px-6 py-4 rounded-xl text-base font-medium hover:border-primary hover:text-primary transition-all"
               >
                 <span className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs">▶</span>
-                Guarda un Agente in Azione
+                Scopri Chi Puoi Sostituire
               </a>
             </motion.div>
 
             <motion.div variants={item} className="flex flex-wrap gap-4 font-mono text-xs text-neutral-500">
+              <span><span className="text-primary">✓</span> Già 50+ dipendenti sostituiti</span>
               <span><span className="text-primary">✓</span> Setup in 7 giorni</span>
               <span><span className="text-primary">✓</span> Garanzia 30 giorni</span>
-              <span><span className="text-primary">✓</span> Solo settore edile</span>
             </motion.div>
           </motion.div>
 
@@ -83,14 +82,14 @@ const Hero = () => {
               style={{ willChange: "transform" }}
             >
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">Agenti AI Attivi</span>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">Dipendenti Sostituiti</span>
                 <span className="bg-primary text-primary-foreground font-bold text-sm px-3 py-1 rounded-full">12</span>
               </div>
               {[
-                { name: "Agente Inbound", status: "ATTIVO" },
-                { name: "Agente Lead", status: "ATTIVO" },
-                { name: "Agente Reportistica", status: "ATTIVO" },
-                { name: "Agente Assistenza", status: "ATTIVO" },
+                { name: "Segretaria Inbound", status: "SOSTITUITA" },
+                { name: "Commerciale Lead", status: "SOSTITUITO" },
+                { name: "Addetta Reportistica", status: "SOSTITUITA" },
+                { name: "Operatore Assistenza", status: "SOSTITUITO" },
               ].map((a) => (
                 <div key={a.name} className="flex items-center justify-between py-2 border-b border-neutral-100 last:border-0">
                   <span className="text-sm font-medium text-neutral-700">{a.name}</span>
@@ -110,11 +109,11 @@ const Hero = () => {
               📞 47 appuntamenti fissati oggi
             </FloatingCard>
             <FloatingCard delay={1.2} className="absolute top-1/2 -left-8">
-              ⚡ -63% costi operativi
+              💰 -60% costi del personale
             </FloatingCard>
             <FloatingCard delay={0.6} className="absolute -bottom-4 right-8 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              🤖 Agente online 24/7
+              🤖 Agente AI online 24/7
             </FloatingCard>
           </motion.div>
         </div>

@@ -31,14 +31,15 @@ const Guarantee = () => {
           </h2>
 
           <p className="text-lg text-neutral-700 leading-relaxed mb-4">
-            Se dopo 30 giorni operativi il tuo Agente AI non ha prodotto almeno
-            10 appuntamenti qualificati, ti rimborsiamo il primo mese.
-            Integralmente. Senza domande. Senza clausole.
+            Se il tuo Agente AI non supera il dipendente che ha sostituito
+            entro 30 giorni — in termini di risultati, velocità e costi —
+            ti rimborsiamo il primo mese. Integralmente. Senza domande.
+            Senza clausole.
           </p>
           <p className="text-lg leading-relaxed">
             <span className="font-bold text-neutral-900">
-              Guadagniamo bene solo quando tu guadagni.
-              Questo è il nostro patto con ogni azienda edile che sceglie Edilizia.io.
+              Guadagniamo bene solo quando tu risparmi.
+              Questo è il nostro patto con ogni azienda edile che sceglie di licenziare i costi.
             </span>
           </p>
         </motion.div>

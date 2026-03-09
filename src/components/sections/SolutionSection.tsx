@@ -13,9 +13,8 @@ const SolutionSection = () => {
         <div className="text-center mb-12 space-y-4">
           <AnimatedBadge variant="verde">LA SOLUZIONE</AnimatedBadge>
           <h2 className="font-display text-[32px] md:text-5xl font-extrabold text-neutral-900 leading-tight">
-            <span className="text-primary">Due Tipi di Agenti AI.</span><br />
-            Un Solo Obiettivo:<br />
-            Far Crescere la Tua Azienda.
+            <span className="text-primary">Non Assumiamo Persone.</span><br />
+            Le Sostituiamo.
           </h2>
         </div>
 
@@ -29,9 +28,12 @@ const SolutionSection = () => {
           >
             <AnimatedBadge variant="verde">AGENTI VOCALI</AnimatedBadge>
             <Mic className="text-primary mt-6 mb-4" size={64} strokeWidth={1.5} />
-            <h3 className="font-display text-[28px] md:text-[32px] font-extrabold text-neutral-900 leading-tight mb-4">
+            <h3 className="font-display text-[28px] md:text-[32px] font-extrabold text-neutral-900 leading-tight mb-2">
               Rispondono.<br />Qualificano.<br />Vendono.
             </h3>
+            <p className="font-mono text-xs text-primary-dark font-bold mb-4">
+              Sostituisce: Segretaria, Commerciale Inbound, Operatore Call Center
+            </p>
             <p className="text-neutral-500 leading-relaxed mb-6">
               Il tuo Agente Vocale AI risponde a ogni chiamata in entrata
               con voce naturale, gestisce la conversazione come un venditore
@@ -51,7 +53,7 @@ const SolutionSection = () => {
               ))}
             </ul>
             <div className="bg-primary-light rounded-xl px-5 py-3 font-mono text-xs text-primary-dark font-medium">
-              📞 Media: +45 appuntamenti qualificati/mese per azienda
+              💰 Costo Dipendente: €2.800/mese → Costo Agente AI: da €590/mese
             </div>
           </motion.div>
 
@@ -64,14 +66,17 @@ const SolutionSection = () => {
           >
             <AnimatedBadge variant="dark">AGENTI AI</AnimatedBadge>
             <Bot className="text-primary mt-6 mb-4" size={64} strokeWidth={1.5} />
-            <h3 className="font-display text-[28px] md:text-[32px] font-extrabold text-white leading-tight mb-4">
+            <h3 className="font-display text-[28px] md:text-[32px] font-extrabold text-white leading-tight mb-2">
               Automatizzano.<br />Analizzano.<br />Sostituiscono.
             </h3>
+            <p className="font-mono text-xs text-primary font-bold mb-4">
+              Sostituisce: Impiegata Reportistica, Analista Offerte, Addetto Customer Care
+            </p>
             <p className="text-neutral-500 leading-relaxed mb-6">
               Gli Agenti AI operativi entrano nei tuoi processi interni e
-              gestiscono in autonomia le attività ripetitive che oggi costano
-              ore di lavoro umano. Dalla reportistica operai all'analisi
-              delle offerte — precisi, veloci, sempre disponibili.
+              sostituiscono le figure che oggi gestiscono attività ripetitive.
+              Dalla reportistica operai all'analisi delle offerte — precisi,
+              veloci, senza ferie, malattie o errori umani.
             </p>
             <ul className="space-y-2 mb-6">
               {[
@@ -88,7 +93,7 @@ const SolutionSection = () => {
               ))}
             </ul>
             <div className="bg-neutral-800 rounded-xl px-5 py-3 font-mono text-xs text-primary font-medium">
-              🤖 Risparmio medio: 3,5 ore/giorno per dipendente
+              💰 Costo Dipendente: €2.400/mese → Costo Agente AI: da €590/mese
             </div>
           </motion.div>
         </div>

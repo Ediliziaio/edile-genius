@@ -4,14 +4,14 @@ import { Check } from "lucide-react";
 
 const plans = [
   {
-    badge: "PER INIZIARE",
+    badge: "1 SOSTITUZIONE",
     badgeVariant: "neutral" as const,
     name: "Starter",
     price: "Su Richiesta",
-    sub: "Aziende fino a 15 dipendenti",
+    sub: "Sostituisci 1 figura operativa",
     features: [
-      "1 Agente Vocale AI configurato",
-      "Fino a 500 chiamate/mese gestite",
+      "1 Agente AI configurato (vocale o operativo)",
+      "Fino a 500 interazioni/mese gestite",
       "Qualifica inbound + calendario",
       "Dashboard reportistica base",
       "Setup dedicato (7 giorni)",
@@ -22,14 +22,14 @@ const plans = [
     featured: false,
   },
   {
-    badge: "PIÙ SCELTO",
+    badge: "TEAM SOSTITUZIONE",
     badgeVariant: "verde" as const,
     name: "Professional",
     price: "Su Richiesta",
-    sub: "Aziende con team commerciale strutturato",
+    sub: "Sostituisci 2-3 figure operative",
     features: [
       "2 Agenti AI (Vocale + Operativo)",
-      "Chiamate illimitate",
+      "Interazioni illimitate",
       "Riattivazione database lead",
       "Agente AI per reportistica/analisi",
       "Integrazione CRM",
@@ -43,11 +43,11 @@ const plans = [
     featured: true,
   },
   {
-    badge: "GRANDI AZIENDE",
+    badge: "SOSTITUZIONE TOTALE",
     badgeVariant: "neutral" as const,
     name: "Enterprise",
     price: "Custom",
-    sub: "Multi-sede, contact center, 50+ dipendenti",
+    sub: "Sostituisci l'intero reparto operativo",
     features: [
       "Agenti AI illimitati",
       "Architettura multi-sede",
@@ -71,11 +71,11 @@ const Pricing = forwardRef<HTMLElement>(function Pricing(_, _ref) {
         <div className="text-center mb-4 space-y-4">
           <AnimatedBadge variant="verde">PIANI E PREZZI</AnimatedBadge>
           <h2 className="font-display text-[32px] md:text-5xl font-extrabold text-neutral-900 leading-tight">
-            Scegli il Piano.<br />
-            <span className="text-primary">Scala Quando Vuoi.</span>
+            Scegli Quanti Dipendenti<br />
+            <span className="text-primary">Vuoi Sostituire.</span>
           </h2>
           <p className="text-neutral-500 text-base">
-            Tutti i piani includono setup, training, ottimizzazione continua e garanzia 30 giorni.
+            Tutti i piani includono setup, training, ottimizzazione continua e garanzia rimborso 30 giorni.
           </p>
         </div>
 
@@ -92,7 +92,7 @@ const Pricing = forwardRef<HTMLElement>(function Pricing(_, _ref) {
               {plan.featured && (
                 <div className="absolute -top-3 right-6 rotate-[15deg]">
                   <span className="bg-primary text-primary-foreground font-mono text-[10px] uppercase tracking-wider px-3 py-1 rounded-full font-bold">
-                    {plan.badge}
+                    PIÙ SCELTO
                   </span>
                 </div>
               )}
