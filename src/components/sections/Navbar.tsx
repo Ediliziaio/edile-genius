@@ -7,7 +7,7 @@ const navLinks = [
   { label: "Soluzioni", href: "/soluzioni" },
   { label: "Come Funziona", href: "/come-funziona" },
   { label: "Tariffe", href: "/tariffe" },
-  { label: "Garanzia", href: "/garanzia" },
+  { label: "Blog", href: "/blog" },
   { label: "Chi Siamo", href: "/chi-siamo" },
 ];
 

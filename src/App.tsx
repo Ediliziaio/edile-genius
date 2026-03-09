@@ -81,6 +81,8 @@ const App = () => (
             <Route path="/come-funziona" element={<ComeFunziona />} />
             <Route path="/garanzia" element={<Garanzia />} />
             <Route path="/tariffe" element={<Tariffe />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/login" element={<Login />} />
 
             {/* SuperAdmin routes */}

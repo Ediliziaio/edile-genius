@@ -5,7 +5,13 @@ const footerCols = [
   },
   {
     title: "Azienda",
-    links: ["Chi Siamo", "Come Funziona", "Casi d'Uso", "Blog", "Lavora con Noi"],
+    links: [
+      { label: "Chi Siamo", href: "/chi-siamo" },
+      { label: "Come Funziona", href: "/come-funziona" },
+      { label: "Soluzioni", href: "/soluzioni" },
+      { label: "Blog", href: "/blog" },
+      { label: "Per Chi È", href: "/per-chi-e" },
+    ],
   },
 ];
 
