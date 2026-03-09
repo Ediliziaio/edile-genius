@@ -26,7 +26,7 @@ const categoryColors: Record<string, string> = {
   Guide: "bg-blue-500/10 text-blue-600",
 };
 
-const BlogCard = ({ post }: BlogCardProps) => (
+const BlogCard = ({ post, searchQuery = "" }: BlogCardProps) => (
   <Link
     to={`/blog/${post.slug}`}
     className="group block bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
