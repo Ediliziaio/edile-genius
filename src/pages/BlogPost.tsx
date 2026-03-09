@@ -1,10 +1,12 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useEffect } from "react";
-import { ArrowLeft, Calendar, Clock, Tag } from "lucide-react";
+import { Calendar, Clock, Tag } from "lucide-react";
 import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
 import BlogArticle from "@/components/blog/BlogArticle";
 import BlogCTA from "@/components/blog/BlogCTA";
+import SocialShareButtons from "@/components/blog/SocialShareButtons";
+import ScrollProgress from "@/components/custom/ScrollProgress";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { blogPosts } from "@/data/blogPosts";
 import { usePageSEO } from "@/hooks/usePageSEO";
@@ -113,11 +115,13 @@ const BlogPost = () => {
 
   if (!post) return <Navigate to="/blog" replace />;
 
+  const shareUrl = `https://edilizia.io/blog/${post.slug}`;
   const related = blogPosts.filter((p) => p.slug !== post.slug).slice(0, 3);
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      <ScrollProgress />
 
       <article className="max-w-4xl mx-auto px-6 pt-12 pb-20">
         {/* Breadcrumb */}
@@ -175,6 +179,7 @@ const BlogPost = () => {
               </span>
             ))}
           </div>
+          <SocialShareButtons url={shareUrl} title={post.title} />
         </div>
 
         {/* Hero Image */}
@@ -224,6 +229,11 @@ const BlogPost = () => {
             </Accordion>
           </section>
         )}
+
+        {/* Bottom Social Share */}
+        <div className="flex justify-center py-8 border-t border-border mt-12">
+          <SocialShareButtons url={shareUrl} title={post.title} />
+        </div>
 
         {/* CTA */}
         <BlogCTA />
