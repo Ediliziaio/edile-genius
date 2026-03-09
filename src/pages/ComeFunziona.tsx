@@ -120,6 +120,12 @@ const heroStats = [
 ];
 
 const ComeFunziona = () => {
+  usePageSEO({
+    title: "Come Funziona — Agenti AI Operativi in 7 Giorni | Edilizia.io",
+    description: "Scopri il processo in 3 step per attivare il tuo Agente Vocale AI: setup in 48 ore, prime chiamate gestite, ottimizzazione continua. Zero configurazione da parte tua.",
+    canonical: "/come-funziona",
+  });
+
   const problemRef = useRef(null);
   const stepsRef = useRef(null);
   const valueRef = useRef(null);

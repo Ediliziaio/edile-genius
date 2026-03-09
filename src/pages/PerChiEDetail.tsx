@@ -14,6 +14,13 @@ import { perChiECategories } from "@/data/perChiE";
 const PerChiEDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const cat = perChiECategories.find(c => c.slug === slug);
+
+  usePageSEO({
+    title: cat ? `${cat.name} — AI per l'Edilizia | Edilizia.io` : "Per Chi È | Edilizia.io",
+    description: cat?.heroSubtitle || "Soluzioni AI specializzate per il settore edile italiano.",
+    canonical: `/per-chi-e/${slug}`,
+  });
+
   const problemsRef = useRef(null);
   const solutionsRef = useRef(null);
   const roiRef = useRef(null);

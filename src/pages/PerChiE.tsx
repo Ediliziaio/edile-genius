@@ -37,6 +37,12 @@ const CategoryCard = ({ cat, index }: { cat: PerChiECategory; index: number }) =
 };
 
 const PerChiE = () => {
+  usePageSEO({
+    title: "Per Chi È — Soluzioni AI per Ogni Azienda Edile | Edilizia.io",
+    description: "Soluzioni AI su misura per artigiani, PMI, grandi imprese, serramentisti, fotovoltaico, ristrutturazioni e tutti i settori dell'edilizia italiana.",
+    canonical: "/per-chi-e",
+  });
+
   return (
     <main className="min-h-screen bg-background">
       <Navbar />

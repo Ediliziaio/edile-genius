@@ -148,6 +148,12 @@ const SliderCard = ({
 );
 
 const Tariffe = () => {
+  usePageSEO({
+    title: "Tariffe Agenti AI per l'Edilizia — Calcola il Risparmio | Edilizia.io",
+    description: "Confronta i piani Starter, Growth e Scale per agenti AI nell'edilizia. Calcolatore ROI integrato: scopri quanto risparmi rispetto a un dipendente tradizionale.",
+    canonical: "/tariffe",
+  });
+
   const [dipendenti, setDipendenti] = useState(2);
   const [stipendio, setStipendio] = useState(1800);
   const [leadMensili, setLeadMensili] = useState(60);

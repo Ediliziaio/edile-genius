@@ -86,6 +86,12 @@ const testimonials = [
 /* ───────────── COMPONENT ───────────── */
 
 const Garanzia = () => {
+  usePageSEO({
+    title: "Garanzia 30 Giorni Soddisfatti o Rimborsati | Edilizia.io",
+    description: "Zero rischi con la nostra garanzia 30 giorni. Se il tuo Agente AI non genera risultati misurabili, ti rimborsiamo al 100%. Nessuna domanda.",
+    canonical: "/garanzia",
+  });
+
   const heroRef = useRef(null);
   const heroInView = useInView(heroRef, { once: true });
   const reasonRef = useRef(null);

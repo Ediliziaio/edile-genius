@@ -49,6 +49,12 @@ const values = [
 ];
 
 const ChiSiamo = () => {
+  usePageSEO({
+    title: "Chi Siamo — La Prima Agenzia AI per l'Edilizia | Edilizia.io",
+    description: "Nati in cantiere, non in ufficio. Scopri il team dietro Edilizia.io: la prima agenzia AI specializzata per serramenti, fotovoltaico e ristrutturazioni in Italia.",
+    canonical: "/chi-siamo",
+  });
+
   const heroRef = useRef(null);
   const heroInView = useInView(heroRef, { once: true, margin: "-60px" });
   const diffRef = useRef(null);
