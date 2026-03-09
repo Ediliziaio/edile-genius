@@ -1097,6 +1097,12 @@ export const blogPosts: BlogPost[] = [
         type: "text",
         callout: "Offerta primo mese: sopralluogo virtuale illimitato + agente vocale AI + report analisi foto. €0 per 30 giorni. Poi €149/mese. Disdici quando vuoi, senza penali. Il tuo tempo vale troppo per sprecarlo in macchina."
       }
+    ],
+    faqs: [
+      { question: "Come funziona un sopralluogo virtuale con AI?", answer: "Il cliente invia foto e video dell'ambiente tramite WhatsApp o l'app dedicata. L'AI analizza le immagini, rileva dimensioni, stato delle superfici, materiali presenti e criticità. In 7 minuti hai un report completo con misure, diagnosi e stima costi, senza muoverti dall'ufficio." },
+      { question: "Il sopralluogo virtuale è accurato quanto quello fisico?", answer: "Per la fase di qualificazione, l'accuratezza è del 90-95%. L'AI rileva dimensioni con margine di errore del 3-5%, identifica materiali e criticità strutturali visibili. Per il preventivo definitivo, il sopralluogo fisico resta necessario, ma lo fai solo sui lead già qualificati." },
+      { question: "Quanti sopralluoghi fisici posso evitare?", answer: "In media il 60-70% dei sopralluoghi. L'analisi AI ti permette di capire subito se il lavoro è nel tuo range, se il cliente ha budget adeguato e se ci sono criticità bloccanti. Vai fisicamente solo dove vale davvero la pena. Risparmio medio: 12 ore a settimana." },
+      { question: "Funziona per tutti i tipi di intervento edilizio?", answer: "Sì: ristrutturazioni, infissi, fotovoltaico, facciate, impermeabilizzazioni, impiantistica. Per ogni tipologia, l'AI sa cosa cercare: per gli infissi misura i vani, per il fotovoltaico analizza l'orientamento del tetto, per le ristrutturazioni valuta stato di pavimenti, pareti e impianti." }
     ]
   }
 ];
