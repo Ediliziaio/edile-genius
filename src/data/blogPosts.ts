@@ -230,6 +230,12 @@ export const blogPosts: BlogPost[] = [
         content: "Il settore dei serramenti sta cambiando. I tuoi concorrenti più smart stanno già adottando l'intelligenza artificiale. Non tra un anno. **Adesso.**\n\nMentre leggi questo articolo, qualcuno sta chiamando il tuo showroom. Se non rispondi, risponde il tuo concorrente — quello con l'agente AI attivo 24/7.\n\nI numeri non mentono:\n• Il 78% dei clienti sceglie il primo serramentista che risponde\n• Il costo dell'AI è l'1-2% del fatturato incrementale che genera\n• Il ROI si raggiunge entro la prima settimana di utilizzo\n• Zero rischio grazie alla garanzia soddisfatti o rimborsati\n\nNon aspettare che sia il mercato a decidere per te. Non aspettare che tutti i tuoi concorrenti siano già digitalizzati. Non aspettare il \"momento giusto\" — il momento giusto è **ora**.\n\nAttiva il tuo agente vocale AI oggi. In 30 minuti sarai operativo. In 30 giorni vedrai i risultati. In 90 giorni ti chiederai come facevi senza.\n\nIl tuo prossimo cliente sta chiamando. Chi risponde?",
         type: "text"
       }
+    ],
+    faqs: [
+      { question: "L'AI per serramentisti funziona con tutti i tipi di infissi?", answer: "Sì, il sistema gestisce preventivi per finestre, porte-finestre, portoncini, persiane, zanzariere, tende da sole e facciate continue. Supporta tutti i materiali: PVC, alluminio, legno, legno-alluminio e acciaio. Le configurazioni si personalizzano in base al tuo catalogo prodotti." },
+      { question: "Posso integrare l'AI con il mio gestionale serramenti?", answer: "Assolutamente. Ci integriamo con i principali gestionali del settore: Windor, Orgadata, LogiKal, Sez Soft e software personalizzati. L'integrazione avviene via API e il nostro team tecnico la configura gratuitamente durante il setup." },
+      { question: "Quanti preventivi può gestire l'AI al giorno?", answer: "Non c'è limite. L'agente vocale può gestire chiamate simultanee illimitate e generare preventivi in tempo reale. Un nostro cliente serramentista gestisce 85 richieste al giorno con un solo agente AI, contro le 12-15 che gestiva manualmente prima." },
+      { question: "Come funziona la qualificazione lead per i serramentisti?", answer: "L'agente chiede tipo di intervento (sostituzione o nuova installazione), numero e dimensioni approssimative, materiale preferito, budget indicativo e tempistiche. In 3 minuti hai un lead completo con punteggio di qualità, pronto per il sopralluogo." }
     ]
   },
 
