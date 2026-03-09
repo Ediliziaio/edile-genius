@@ -1,95 +1,57 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI
 
-## ✅ Completato in questo blocco
+# SEO e Ottimizzazione Meta Tag
 
-### Database Migration
-- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
-- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
-- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
-- RLS policies per tutte le nuove tabelle
+## Stato attuale
+- **index.html**: ha title, description, OG tags e schema.org base — ma servono solo per la homepage
+- **Pagine interne**: solo `/soluzioni` imposta `document.title`; le altre 6 pagine pubbliche (Chi Siamo, Come Funziona, Garanzia, Tariffe, Per Chi È, Per Chi È Detail) non hanno né title né meta description dinamici
+- **Nessun sitemap.xml**
+- **robots.txt**: presente ma manca riferimento al sitemap
+- **Schema.org**: solo Organization base, manca LocalBusiness, FAQPage, Service
+- **Canonical**: hardcoded solo in index.html
+- **Nessun react-helmet** o equivalente installato
 
-## ✅ Blocco 2 — Sistema Crediti Euro-based
+## Piano
 
-### Database
-- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
-- ai_credit_topups (ricariche manual/auto/promo/adjustment)
-- ai_credit_usage (consumo per conversazione con margini)
-- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
-- monthly_billing_summary view (security_invoker)
+### 1. Creare un hook `usePageSEO` (`src/hooks/usePageSEO.ts`)
+Hook riutilizzabile che imposta dinamicamente:
+- `document.title`
+- `<meta name="description">`
+- `<meta property="og:title">`, `og:description`, `og:url`
+- `<link rel="canonical">`
 
-### Edge Functions
-- check-credits-before-call: verifica saldo pre-chiamata
-- topup-credits: ricarica manuale con fattura
-- elevenlabs-webhook: post-call billing, auto-recharge, blocco
-- platform-config: +apply_global_markup action
+Usa `useEffect` con manipolazione DOM diretta (no librerie esterne necessarie).
 
-### Frontend
-- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
-- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
-- Sidebar: footer saldo crediti con barra e alert
-- VoiceTestPanel: check crediti pre-chiamata con blocco UI
+### 2. Applicare `usePageSEO` a tutte le pagine pubbliche
 
-## ✅ Blocco 3-5 — Agent Templates System
+| Pagina | Title | Description (sintetica) |
+|--------|-------|------------------------|
+| `/` (Index) | Edilizia.io — Agenti Vocali AI per l'Edilizia | La prima agenzia AI specializzata... |
+| `/soluzioni` | 20 Soluzioni AI per l'Edilizia \| Edilizia.io | Scopri 20 agenti AI per infissi... |
+| `/per-chi-e` | Per Chi È \| Edilizia.io | Soluzioni AI per ogni tipo di azienda edile |
+| `/per-chi-e/:slug` | {cat.name} — AI per l'Edilizia \| Edilizia.io | {cat.heroSubtitle} |
+| `/chi-siamo` | Chi Siamo \| Edilizia.io | La prima agenzia AI specializzata... |
+| `/come-funziona` | Come Funziona \| Edilizia.io | Scopri il processo in 3 step... |
+| `/garanzia` | Garanzia 30 Giorni \| Edilizia.io | Zero rischi. Garanzia rimborso... |
+| `/tariffe` | Tariffe \| Edilizia.io | Calcola quanto risparmi con gli agenti AI |
 
-### Database
-- agent_templates + agent_template_instances + agent_reports + company_channels
-- RLS policies PERMISSIVE (fix da RESTRICTIVE)
-- Funzione DB `increment_installs_count(tpl_id UUID)`
-- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+### 3. Arricchire schema.org in `index.html`
+Espandere il JSON-LD con:
+- `@type: LocalBusiness` (settore, contatto, area servita)
+- `sameAs` per i profili social (LinkedIn, Instagram)
 
-### Edge Functions (CORS headers completi)
-- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
-- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
-- save-report: salva report in DB + aggiorna contatori istanza
+### 4. Creare `public/sitemap.xml`
+Sitemap statico con tutte le pagine pubbliche (8 URL + le 16 pagine per-chi-e dinamiche).
 
-### Frontend — Wizard 5 Step (TemplateSetup.tsx)
-- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + importa CSV con template scaricabile
-- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
-- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
+### 5. Aggiornare `public/robots.txt`
+Aggiungere `Sitemap: https://edilizia.io/sitemap.xml`.
 
-### SuperAdmin
-- /superadmin/templates: CRUD completo con JSON editor per config_schema
+### 6. Aggiungere meta tag mancanti in `index.html`
+- `<meta name="robots" content="index, follow">`
+- `<meta name="theme-color" content="#22c55e">`
+- `<meta name="language" content="it">`
 
-## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+### File coinvolti
+- **Creare**: `src/hooks/usePageSEO.ts`, `public/sitemap.xml`
+- **Modificare**: `index.html`, `public/robots.txt`, `src/pages/Index.tsx`, `src/pages/Solutions.tsx`, `src/pages/ChiSiamo.tsx`, `src/pages/ComeFunziona.tsx`, `src/pages/Garanzia.tsx`, `src/pages/Tariffe.tsx`, `src/pages/PerChiE.tsx`, `src/pages/PerChiEDetail.tsx`
 
-### Database (5 tabelle)
-- render_provider_config: configurazione provider AI (OpenAI GPT-Image, Gemini Flash)
-- render_infissi_presets: 24 preset globali (materiali, colori, stili, vetri, oscuranti) con prompt_fragment
-- render_sessions: sessioni render con status, config, result_urls, costi
-- render_gallery: render salvati con share_token, favoriti
-- render_credits: crediti render separati (5 gratis per azienda)
-- RLS PERMISSIVE per tutte le tabelle
-- Trigger set_updated_at + init_render_credits su companies
-- Funzione deduct_render_credit
-- Storage buckets: render-originals (privato), render-results (pubblico)
-
-### Edge Functions
-- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
-- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
-
-### Frontend
-- RenderHub (/app/render): hero, come funziona, ultimi render, widget crediti
-- RenderNew (/app/render/new): wizard 4 step mobile-first (foto, config, elaborazione, risultati)
-- RenderGallery (/app/render/gallery): grid con ricerca, download, elimina
-- RenderGalleryDetail (/app/render/gallery/:id): BeforeAfterSlider, config, favoriti
-- RenderConfig (/superadmin/render-config): config provider con costi e markup
-
-### Componenti
-- BeforeAfterSlider: slider interattivo prima/dopo con drag handle
-- promptBuilder.ts: costruttore prompt, validazione foto, check dimensioni
-
-### Sidebar
-- Nuova sezione "STRUMENTI VENDITA" con "Render AI"
-- SuperAdmin: sezione "RENDER AI" con "Config Provider"
-
-## 🔜 Prossimi Blocchi
-- Pagine: /app/phone-numbers, /app/knowledge-base
-- Editor Agente 8 tab
-- Wizard 4 step (CreateAgent)
-- SuperAdmin Dashboard economics
-- Edge functions: add-knowledge-doc
-- Integrazioni CRM native
-- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets
