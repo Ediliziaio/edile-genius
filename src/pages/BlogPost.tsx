@@ -121,6 +121,7 @@ const BlogPost = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      <ScrollProgress />
 
       <article className="max-w-4xl mx-auto px-6 pt-12 pb-20">
         {/* Breadcrumb */}
