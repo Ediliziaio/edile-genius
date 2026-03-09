@@ -86,7 +86,7 @@ const ChiSiamo = () => {
           </motion.h1>
           <motion.p
             variants={fadeUp}
-            className="text-lg md:text-xl text-[hsl(var(--neutral-400))] mt-6 max-w-2xl mx-auto leading-relaxed"
+            className="text-lg md:text-xl text-[hsl(var(--neutral-300))] mt-6 max-w-2xl mx-auto leading-relaxed"
           >
             Veniamo dal settore edile. Abbiamo gestito cantieri, posatori e commerciali prima di scrivere una sola riga di codice.
             Ogni strumento che ti proponiamo ha funzionato <span className="text-white font-semibold">prima sulla nostra azienda</span>.
@@ -106,7 +106,7 @@ const ChiSiamo = () => {
             <h2 className="font-display text-3xl md:text-5xl font-extrabold text-white">
               Perché Siamo <span className="text-primary">Diversi</span>
             </h2>
-            <p className="text-[hsl(var(--neutral-400))] mt-4 max-w-xl mx-auto">
+            <p className="text-[hsl(var(--neutral-300))] mt-4 max-w-xl mx-auto">
               Non siamo consulenti generici. Non siamo una software house. Siamo imprenditori edili che hanno costruito gli strumenti che mancavano.
             </p>
           </motion.div>
@@ -127,7 +127,7 @@ const ChiSiamo = () => {
                   <d.icon className="w-7 h-7 text-primary" />
                 </div>
                 <h3 className="font-display text-xl font-bold text-white mb-3">{d.title}</h3>
-                <p className="text-[hsl(var(--neutral-400))] text-sm leading-relaxed">{d.text}</p>
+                <p className="text-[hsl(var(--neutral-300))] text-sm leading-relaxed">{d.text}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -277,7 +277,7 @@ const ChiSiamo = () => {
             <h2 className="font-display text-3xl md:text-5xl font-extrabold text-white">
               I Nostri <span className="text-primary">Valori</span>
             </h2>
-            <p className="text-[hsl(var(--neutral-400))] mt-4 max-w-xl mx-auto">
+            <p className="text-[hsl(var(--neutral-300))] mt-4 max-w-xl mx-auto">
               Non sono slogan. Sono le regole con cui gestiamo ogni progetto.
             </p>
           </motion.div>
@@ -298,7 +298,7 @@ const ChiSiamo = () => {
                   <v.icon className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="font-display text-lg font-bold text-white mb-3">{v.title}</h3>
-                <p className="text-[hsl(var(--neutral-400))] text-sm leading-relaxed">{v.text}</p>
+                <p className="text-[hsl(var(--neutral-300))] text-sm leading-relaxed">{v.text}</p>
               </motion.div>
             ))}
           </motion.div>
