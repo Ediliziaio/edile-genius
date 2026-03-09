@@ -25,7 +25,7 @@ const Hero = () => {
               </AnimatedBadge>
             </motion.div>
 
-            <motion.h1 variants={item} className="font-display text-[32px] sm:text-[44px] md:text-[72px] font-extrabold leading-[1.05] text-neutral-900">
+            <motion.h1 variants={item} className="font-display text-[32px] sm:text-[32px] sm:text-[44px] md:text-[72px] font-extrabold leading-[1.05] text-neutral-900">
               Licenzia i Costi.{" "}
               <span className="text-primary">Assumi l'AI.</span>{" "}
               Fai Esplodere la tua{" "}
@@ -35,7 +35,7 @@ const Hero = () => {
               </span>
             </motion.h1>
 
-            <motion.p variants={item} className="text-lg text-neutral-500 max-w-[540px] leading-relaxed">
+            <motion.p variants={item} cbase sm:text-lassName="text-lg text-neutral-500 max-w-[540px] leading-relaxed">
               Edilizia.io è l'agenzia che sostituisce segretarie, commerciali improduttivi
               e addetti alla reportistica con Agenti AI che costano 10x meno e lavorano
               10x meglio. 24/7, 365 giorni l'anno. Senza ferie, malattie o dimissioni.
