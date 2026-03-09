@@ -31,14 +31,25 @@ const settoreItems = [
   { label: "Progettisti e Studi Tecnici", slug: "progettisti-studi-tecnici", icon: Compass },
 ];
 
-const Navbar = () => {
+interface NavbarProps {
+  variant?: "light" | "dark";
+}
+
+const Navbar = ({ variant = "light" }: NavbarProps) => {
+  const isDark = variant === "dark";
   const [open, setOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
   const [mobileSectorOpen, setMobileSectorOpen] = useState(false);
   const megaRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
-  const navBg = useTransform(scrollY, [0, 60], ["rgba(255,255,255,0)", "rgba(255,255,255,0.97)"]);
-  const navShadow = useTransform(scrollY, [0, 60], ["none", "0 1px 0 hsl(214 32% 91%)"]);
+  const navBg = useTransform(scrollY, [0, 60], [
+    "rgba(255,255,255,0)",
+    isDark ? "rgba(13,17,23,0.97)" : "rgba(255,255,255,0.97)"
+  ]);
+  const navShadow = useTransform(scrollY, [0, 60], [
+    "none",
+    isDark ? "0 1px 0 rgba(255,255,255,0.08)" : "0 1px 0 hsl(214 32% 91%)"
+  ]);
   const location = useLocation();
 
   // Close mega-menu on click outside
@@ -69,7 +80,7 @@ const Navbar = () => {
     >
       <div className="max-w-6xl mx-auto px-6 h-[68px] flex items-center justify-between">
         <Link to="/" className="flex flex-col">
-          <span className="font-display text-[22px] font-extrabold text-neutral-900">
+          <span className={`font-display text-[22px] font-extrabold ${isDark ? "text-white" : "text-neutral-900"}`}>
             edilizia<span className="text-primary">.io</span>
           </span>
           <span className="font-mono text-[10px] uppercase tracking-wider bg-primary-light text-primary-dark px-2 py-0.5 rounded-full -mt-0.5 w-fit">
@@ -84,7 +95,7 @@ const Navbar = () => {
             <button
               onClick={() => setMegaOpen(!megaOpen)}
               className={`relative text-sm font-medium transition-colors flex items-center gap-1 ${
-                location.pathname.startsWith("/per-chi-e") ? "text-primary" : "text-neutral-500 hover:text-neutral-900"
+                location.pathname.startsWith("/per-chi-e") ? "text-primary" : isDark ? "text-neutral-300 hover:text-white" : "text-neutral-500 hover:text-neutral-900"
               }`}
             >
               Per Chi È
@@ -164,7 +175,7 @@ const Navbar = () => {
               <Link
                 key={link.href}
                 to={link.href}
-                className={`relative text-sm font-medium transition-colors group ${isActive ? 'text-primary' : 'text-neutral-500 hover:text-neutral-900'}`}
+                className={`relative text-sm font-medium transition-colors group ${isActive ? 'text-primary' : isDark ? 'text-neutral-300 hover:text-white' : 'text-neutral-500 hover:text-neutral-900'}`}
               >
                 {link.label}
                 <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary origin-left transition-transform duration-300 ${isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
@@ -175,7 +186,7 @@ const Navbar = () => {
 
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-4">
-          <Link to="/login" className="text-sm font-medium text-neutral-500 hover:text-primary transition-colors">
+          <Link to="/login" className={`text-sm font-medium ${isDark ? "text-neutral-300 hover:text-white" : "text-neutral-500 hover:text-primary"} transition-colors`}>
             Accedi
           </Link>
           <Link
@@ -187,7 +198,7 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Toggle */}
-        <button onClick={() => setOpen(!open)} className="md:hidden text-neutral-900" aria-label="Menu">
+        <button onClick={() => setOpen(!open)} className={`md:hidden ${isDark ? "text-white" : "text-neutral-900"}`} aria-label="Menu">
           {open ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>

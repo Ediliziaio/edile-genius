@@ -63,7 +63,7 @@ const ChiSiamo = () => {
 
   return (
     <div className="min-h-screen bg-[hsl(var(--neutral-900))]">
-      <Navbar />
+      <Navbar variant="dark" />
 
       {/* ─── Hero ─── */}
       <section className="pt-32 pb-20 px-6" ref={heroRef}>
