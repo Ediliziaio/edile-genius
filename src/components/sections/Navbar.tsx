@@ -89,7 +89,7 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
             <button
               onClick={() => setMegaOpen(!megaOpen)}
               className={`relative text-sm font-medium transition-colors flex items-center gap-1 ${
-                location.pathname.startsWith("/per-chi-e") ? "text-primary" : "text-neutral-500 hover:text-neutral-900"
+                location.pathname.startsWith("/per-chi-e") ? "text-primary" : isDark ? "text-neutral-300 hover:text-white" : "text-neutral-500 hover:text-neutral-900"
               }`}
             >
               Per Chi È
