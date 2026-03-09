@@ -74,7 +74,7 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
     >
       <div className="max-w-6xl mx-auto px-6 h-[68px] flex items-center justify-between">
         <Link to="/" className="flex flex-col">
-          <span className="font-display text-[22px] font-extrabold text-neutral-900">
+          <span className={`font-display text-[22px] font-extrabold ${isDark ? "text-white" : "text-neutral-900"}`}>
             edilizia<span className="text-primary">.io</span>
           </span>
           <span className="font-mono text-[10px] uppercase tracking-wider bg-primary-light text-primary-dark px-2 py-0.5 rounded-full -mt-0.5 w-fit">
