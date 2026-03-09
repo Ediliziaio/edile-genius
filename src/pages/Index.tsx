@@ -1,3 +1,4 @@
+import { usePageSEO } from "@/hooks/usePageSEO";
 import AnnouncementBar from "@/components/sections/AnnouncementBar";
 import Navbar from "@/components/sections/Navbar";
 import ScrollProgress from "@/components/custom/ScrollProgress";
