@@ -16,7 +16,7 @@ const AIComparison = () => {
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-primary font-medium">Capire la Differenza</span>
           </div>
-          <h2 className="font-display text-[36px] md:text-[48px] font-extrabold text-white leading-[1.1]">
+          <h2 className="font-display text-[28px] sm:text-[36px] md:text-[48px] font-extrabold text-white leading-[1.1]">
             Agente Vocale AI<br />vs. Agente AI Operativo:<br /><span className="text-primary">Quale Fa Per Te?</span>
           </h2>
         </motion.div>
