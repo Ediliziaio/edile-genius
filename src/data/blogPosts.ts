@@ -519,6 +519,12 @@ export const blogPosts: BlogPost[] = [
         content: "Facciamo un ultimo calcolo. Il risparmio medio annuo con l'agente AI è €45.000 (stima conservativa). Diviso 250 giorni lavorativi = **€180 al giorno** di costi inutili.\n\nOgni giorno che rimandi la decisione, la tua impresa perde €180 in inefficienze operative. Non domani. Non la prossima settimana. **Oggi.**\n\nE non stiamo parlando di risparmi teorici. Stiamo parlando di:\n• Chiamate che non perdi più → clienti che non regali alla concorrenza\n• Sopralluoghi solo con lead qualificati → tempo investito, non sprecato\n• Preventivi seguiti sistematicamente → contratti che non ti sfuggono\n• Rapportini automatizzati → cantiere sotto controllo\n• Assistenza impeccabile → passaparola che lavora per te\n\nIl costo è €10 al giorno. Il risparmio è €180 al giorno. La matematica non mente.\n\n30 minuti di setup. 30 giorni di prova gratuita. Garanzia soddisfatti o rimborsati.\n\nI tuoi margini non miglioreranno da soli. Ma con il giusto strumento, possono migliorare dal primo giorno.\n\nSmetti di perdere €180 al giorno. Inizia adesso.",
         type: "text"
       }
+    ],
+    faqs: [
+      { question: "Quali sono i costi operativi che l'AI taglia per primi?", answer: "I primi tre costi che si riducono sono: gestione chiamate (fino a -75%), tempo di preventivazione (-70%) e follow-up commerciale (-80%). Questi tre interventi da soli generano un risparmio medio di €35.000-€50.000 annui per un'impresa con 10-30 dipendenti." },
+      { question: "Quanto tempo serve per vedere il ROI dell'investimento in AI?", answer: "Il breakeven si raggiunge mediamente in 45-60 giorni. Le imprese che implementano l'agente vocale vedono i primi risultati dalla prima settimana: chiamate gestite, lead qualificati, appuntamenti fissati. Il ROI completo a 12 mesi è in media 8-12x l'investimento." },
+      { question: "L'AI funziona anche per le piccole imprese edili?", answer: "Sì, anzi è proprio dove genera il maggior impatto relativo. Un'impresa con 3-5 dipendenti che perde 5 chiamate al giorno recupera €80.000-€120.000 di fatturato potenziale. Il costo dell'AI (da €149/mese) si ripaga con un solo contratto acquisito in più." },
+      { question: "Devo cambiare i miei processi aziendali per usare l'AI?", answer: "No. L'AI si adatta ai tuoi processi, non il contrario. Si integra con il tuo numero di telefono, il tuo calendario, il tuo CRM (o anche solo WhatsApp e Google Calendar). Non devi cambiare nulla: aggiungi uno strumento che lavora per te 24/7." }
     ]
   },
 
