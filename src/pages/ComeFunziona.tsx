@@ -225,13 +225,13 @@ const ComeFunziona = () => {
 
               <div className="space-y-10">
                 {steps.map((step, i) => (
-                  <motion.div key={step.num} variants={fadeUp} className="flex gap-6 md:gap-10">
+                  <motion.div key={step.num} variants={fadeUp} className="flex gap-4 sm:gap-6 md:gap-10">
                     {/* Left: number circle */}
                     <div className="flex-shrink-0 flex flex-col items-center">
-                      <div className="w-[80px] h-[80px] rounded-full bg-primary text-primary-foreground font-display font-extrabold text-2xl flex items-center justify-center relative z-10 shadow-card-green">
+                      <div className="w-[56px] h-[56px] sm:w-[80px] sm:h-[80px] rounded-full bg-primary text-primary-foreground font-display font-extrabold text-lg sm:text-2xl flex items-center justify-center relative z-10 shadow-card-green">
                         {step.num}
                       </div>
-                      <span className="mt-3 font-mono text-[9px] uppercase tracking-wider bg-primary-light text-primary-dark px-3 py-1 rounded-full font-medium whitespace-nowrap">
+                      <span className="mt-2 sm:mt-3 font-mono text-[8px] sm:text-[9px] uppercase tracking-wider bg-primary-light text-primary-dark px-2 sm:px-3 py-1 rounded-full font-medium whitespace-nowrap">
                         {step.days}
                       </span>
                     </div>
