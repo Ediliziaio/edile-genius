@@ -31,7 +31,12 @@ const settoreItems = [
   { label: "Progettisti e Studi Tecnici", slug: "progettisti-studi-tecnici", icon: Compass },
 ];
 
-const Navbar = () => {
+interface NavbarProps {
+  variant?: "light" | "dark";
+}
+
+const Navbar = ({ variant = "light" }: NavbarProps) => {
+  const isDark = variant === "dark";
   const [open, setOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
   const [mobileSectorOpen, setMobileSectorOpen] = useState(false);
