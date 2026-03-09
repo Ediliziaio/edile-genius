@@ -287,7 +287,7 @@ const ComeFunziona = () => {
                 {valueStack.map((item, i) => (
                   <div
                     key={i}
-                    className={`flex items-center justify-between px-7 py-5 ${i < valueStack.length - 1 ? "border-b border-border" : ""}`}
+                    className={`flex flex-col sm:flex-row sm:items-center justify-between px-5 sm:px-7 py-4 sm:py-5 ${i < valueStack.length - 1 ? "border-b border-border" : ""}`}
                   >
                     <div className="flex items-center gap-3">
                       <Check className="w-5 h-5 text-primary flex-shrink-0" />
