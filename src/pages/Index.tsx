@@ -50,6 +50,7 @@ const Index = () => {
         <FinalCTA />
       </main>
       <Footer />
+      <StickyMobileCTA />
     </div>
   );
 };
