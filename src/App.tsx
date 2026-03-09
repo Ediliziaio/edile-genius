@@ -59,6 +59,8 @@ import RenderGalleryDetail from "./pages/app/RenderGalleryDetail";
 import RenderConfig from "./pages/superadmin/RenderConfig";
 import PerChiE from "./pages/PerChiE";
 import PerChiEDetail from "./pages/PerChiEDetail";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 
 const queryClient = new QueryClient();
 const App = () => (
