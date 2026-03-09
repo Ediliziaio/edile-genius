@@ -1,95 +1,90 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI
 
-## ✅ Completato in questo blocco
+# Revisione Homepage — Posizionamento come "Agenzia di Licenziamento AI" per l'Edilizia
 
-### Database Migration
-- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
-- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
-- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
-- RLS policies per tutte le nuove tabelle
+## Analisi Attuale
 
-## ✅ Blocco 2 — Sistema Crediti Euro-based
+La homepage attualmente si posiziona come **"Agenzia AI verticale per l'edilizia"** con focus su automazione e riduzione costi. Il messaging è generico: "Riduci i Costi, Automatizza Tutto". Manca completamente il concetto provocatorio e differenziante di **"1ª Azienda di Licenziamento per Aziende Edili"** — l'idea che edilizia.io sostituisce concretamente figure operative con agenti AI, liberando l'imprenditore dalla dipendenza dal personale.
 
-### Database
-- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
-- ai_credit_topups (ricariche manual/auto/promo/adjustment)
-- ai_credit_usage (consumo per conversazione con margini)
-- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
-- monthly_billing_summary view (security_invoker)
+## Nuovo Posizionamento
 
-### Edge Functions
-- check-credits-before-call: verifica saldo pre-chiamata
-- topup-credits: ricarica manuale con fattura
-- elevenlabs-webhook: post-call billing, auto-recharge, blocco
-- platform-config: +apply_global_markup action
+Il concept "Agenzia di Licenziamento" ribalta la narrazione: non "aggiungiamo AI ai tuoi processi" ma **"sostituiamo i tuoi dipendenti improduttivi con agenti AI che lavorano meglio, 24/7, a una frazione del costo"**. Provocatorio, memorabile, differenziante.
 
-### Frontend
-- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
-- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
-- Sidebar: footer saldo crediti con barra e alert
-- VoiceTestPanel: check crediti pre-chiamata con blocco UI
+## Modifiche per Sezione
 
-## ✅ Blocco 3-5 — Agent Templates System
+### 1. AnnouncementBar
+- Testo attuale: generico su "12 aziende/mese"
+- **Nuovo**: `"🔥 La 1ª Agenzia di Licenziamento AI per l'Edilizia  •  Sostituisci dipendenti improduttivi con Agenti AI  •  -60% costi del personale garantito  •  Setup in 7 giorni  •"`
 
-### Database
-- agent_templates + agent_template_instances + agent_reports + company_channels
-- RLS policies PERMISSIVE (fix da RESTRICTIVE)
-- Funzione DB `increment_installs_count(tpl_id UUID)`
-- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+### 2. Hero
+- **Badge**: `"🔥 La 1ª Agenzia di Licenziamento AI per l'Edilizia Italiana"`
+- **H1**: `"Licenzia i Costi. Assumi l'AI. Fai Esplodere la tua Azienda Edile."`
+- **Sottotitolo**: Riscrivere con il concetto che edilizia.io è l'agenzia che ti permette di sostituire segretarie, commerciali improduttivi, addetti reportistica con agenti AI che costano 10x meno e lavorano 10x meglio.
+- **CTA secondario**: "Scopri Chi Puoi Sostituire" (al posto di "Guarda un Agente in Azione")
+- **Trust badges**: Aggiungere `"✓ Già 50+ dipendenti sostituiti"` 
 
-### Edge Functions (CORS headers completi)
-- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
-- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
-- save-report: salva report in DB + aggiorna contatori istanza
+### 3. PainSection
+- **Titolo sezione**: `"Ogni Dipendente Improduttivo Ti Costa €45.000/anno. E Tu Lo Sai."`
+- Riscrivere i 5 pain points focalizzandoli sul **costo del personale** non sulla tecnologia:
+  1. "La segretaria che perde il 40% delle chiamate inbound"
+  2. "Il commerciale che richiama i lead dopo 3 giorni (se li richiama)"
+  3. "L'impiegata che passa 3,5 ore/giorno a fare report"
+  4. "Il call center che costa €3.500/mese e lavora 8 ore"
+  5. "I tuoi concorrenti stanno già licenziando — e assumendo AI"
 
-### Frontend — Wizard 5 Step (TemplateSetup.tsx)
-- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + importa CSV con template scaricabile
-- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
-- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
+### 4. SolutionSection
+- **Titolo**: `"Non Assumiamo Persone. Le Sostituiamo."`
+- Card Vocali sottotitolo: `"Sostituisce: Segretaria, Commerciale Inbound, Operatore Call Center"`
+- Card Operativi sottotitolo: `"Sostituisce: Impiegata Reportistica, Analista Offerte, Addetto Customer Care"`
+- Aggiungere in ogni card un mini comparativo `"Costo Dipendente: €2.800/mese → Costo Agente AI: €XXX/mese"`
 
-### SuperAdmin
-- /superadmin/templates: CRUD completo con JSON editor per config_schema
+### 5. ROISection
+- **Titolo**: `"Quanto Ti Costa Ogni Dipendente Che Potresti Già Aver Sostituito?"`
+- Aggiornare la tabella con colonna "Oggi (Dipendente)" vs "Con Agente AI (Edilizia.io)"
 
-## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+### 6. CostCalculator
+- Aggiornare label slider: "Stipendio lordo dipendente da sostituire"
+- Enfatizzare il risultato come "Risparmio annuo per ogni licenziamento"
 
-### Database (5 tabelle)
-- render_provider_config: configurazione provider AI (OpenAI GPT-Image, Gemini Flash)
-- render_infissi_presets: 24 preset globali (materiali, colori, stili, vetri, oscuranti) con prompt_fragment
-- render_sessions: sessioni render con status, config, result_urls, costi
-- render_gallery: render salvati con share_token, favoriti
-- render_credits: crediti render separati (5 gratis per azienda)
-- RLS PERMISSIVE per tutte le tabelle
-- Trigger set_updated_at + init_render_credits su companies
-- Funzione deduct_render_credit
-- Storage buckets: render-originals (privato), render-results (pubblico)
+### 7. Results
+- **Titolo**: `"50+ Dipendenti Già Sostituiti. Ecco i Numeri."`
+- Aggiornare testimonial con angolo "licenziamento":
+  - "Ho sostituito la segretaria e il primo commerciale. In 30 giorni l'agente AI ha fissato più appuntamenti di entrambi messi insieme."
 
-### Edge Functions
-- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
-- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+### 8. WhyUs
+- Aggiornare le 4 card per riflettere il posizionamento:
+  1. "Specializzati nel sostituire figure edili"
+  2. "Voci italiane indistinguibili da un umano"  
+  3. "Operativi in 7 giorni — il dipendente se ne va, l'AI arriva"
+  4. "Ottimizzazione settimanale — meglio di qualsiasi formazione"
 
-### Frontend
-- RenderHub (/app/render): hero, come funziona, ultimi render, widget crediti
-- RenderNew (/app/render/new): wizard 4 step mobile-first (foto, config, elaborazione, risultati)
-- RenderGallery (/app/render/gallery): grid con ricerca, download, elimina
-- RenderGalleryDetail (/app/render/gallery/:id): BeforeAfterSlider, config, favoriti
-- RenderConfig (/superadmin/render-config): config provider con costi e markup
+### 9. Pricing
+- Rinominare i piani: "1 Sostituzione" / "Team Sostituzione" / "Sostituzione Totale"
+- Sottotitoli: "Sostituisci 1 figura" / "Sostituisci 2-3 figure" / "Sostituisci l'intero reparto"
 
-### Componenti
-- BeforeAfterSlider: slider interattivo prima/dopo con drag handle
-- promptBuilder.ts: costruttore prompt, validazione foto, check dimensioni
+### 10. Guarantee
+- Riscrivere: "Se il tuo Agente AI non supera il dipendente che ha sostituito entro 30 giorni, ti rimborsiamo."
 
-### Sidebar
-- Nuova sezione "STRUMENTI VENDITA" con "Render AI"
-- SuperAdmin: sezione "RENDER AI" con "Config Provider"
+### 11. FinalCTA  
+- **Titolo**: `"Scopri Chi Puoi Licenziare. Prenota la Tua Analisi Gratuita."`
+- **Sottotitolo**: "30 minuti con uno specialista. Analizziamo il tuo organico, identifichiamo le figure sostituibili e ti mostriamo quanto risparmieresti dal primo mese."
 
-## 🔜 Prossimi Blocchi
-- Pagine: /app/phone-numbers, /app/knowledge-base
-- Editor Agente 8 tab
-- Wizard 4 step (CreateAgent)
-- SuperAdmin Dashboard economics
-- Edge functions: add-knowledge-doc
-- Integrazioni CRM native
-- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets
+### 12. LogoBar  
+- Stat pills: `"🏗️ 50+ dipendenti sostituiti"` / `"💰 €2.3M risparmiati dai clienti"` / `"⚡ Setup medio: 7 giorni"`
+
+## File da modificare
+- `src/components/sections/AnnouncementBar.tsx`
+- `src/components/sections/Hero.tsx`
+- `src/components/sections/LogoBar.tsx`
+- `src/components/sections/PainSection.tsx`
+- `src/components/sections/SolutionSection.tsx`
+- `src/components/sections/ROISection.tsx`
+- `src/components/sections/CostCalculator.tsx`
+- `src/components/sections/Results.tsx`
+- `src/components/sections/WhyUs.tsx`
+- `src/components/sections/Pricing.tsx`
+- `src/components/sections/Guarantee.tsx`
+- `src/components/sections/FinalCTA.tsx`
+
+Nessuna modifica strutturale/layout. Solo copy e contenuti testuali aggiornati per sposare il posizionamento "Agenzia di Licenziamento".
+
