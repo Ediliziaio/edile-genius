@@ -192,7 +192,7 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
         </div>
 
         {/* Mobile Toggle */}
-        <button onClick={() => setOpen(!open)} className="md:hidden text-neutral-900" aria-label="Menu">
+        <button onClick={() => setOpen(!open)} className={`md:hidden ${isDark ? "text-white" : "text-neutral-900"}`} aria-label="Menu">
           {open ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
