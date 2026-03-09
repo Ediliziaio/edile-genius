@@ -86,7 +86,7 @@ const ChiSiamo = () => {
           </motion.h1>
           <motion.p
             variants={fadeUp}
-            className="text-lg md:text-xl text-[hsl(var(--neutral-400))] mt-6 max-w-2xl mx-auto leading-relaxed"
+            className="text-lg md:text-xl text-[hsl(var(--neutral-300))] mt-6 max-w-2xl mx-auto leading-relaxed"
           >
             Veniamo dal settore edile. Abbiamo gestito cantieri, posatori e commerciali prima di scrivere una sola riga di codice.
             Ogni strumento che ti proponiamo ha funzionato <span className="text-white font-semibold">prima sulla nostra azienda</span>.
