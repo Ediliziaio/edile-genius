@@ -56,6 +56,8 @@ import RenderNew from "./pages/app/RenderNew";
 import RenderGallery from "./pages/app/RenderGallery";
 import RenderGalleryDetail from "./pages/app/RenderGalleryDetail";
 import RenderConfig from "./pages/superadmin/RenderConfig";
+import PerChiE from "./pages/PerChiE";
+import PerChiEDetail from "./pages/PerChiEDetail";
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -69,6 +71,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/soluzioni" element={<Solutions />} />
+            <Route path="/per-chi-e" element={<PerChiE />} />
+            <Route path="/per-chi-e/:slug" element={<PerChiEDetail />} />
             <Route path="/chi-siamo" element={<ChiSiamo />} />
             <Route path="/come-funziona" element={<ComeFunziona />} />
             <Route path="/garanzia" element={<Garanzia />} />

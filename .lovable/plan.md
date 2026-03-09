@@ -1,75 +1,95 @@
 
+# Stato Implementazione — Blocco 1-5 + Render AI
 
-# Piano: Pagina "Per Chi È" con Mega-Menu e Sotto-Pagine per Settore
+## ✅ Completato in questo blocco
 
-## Concept
-Ispirandosi al riferimento JetHR (screenshot), creare un sistema di navigazione con dropdown "Per Chi È" che mostra categorie del settore edile, con una landing page principale e sotto-pagine dedicate per ogni tipo di azienda. Stile persuasivo Kennedy/Abraham/Belfort.
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
-## Struttura
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
-### 1. Categorie aziende edili
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-**Per Dimensione:**
-- Artigiani e Micro Imprese (1-5 dipendenti)
-- Piccole Imprese (6-25 dipendenti)
-- Medie Imprese (26-100 dipendenti)
-- Grandi Aziende e General Contractor (100+)
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
-**Per Settore:**
-- Serramentisti e Infissi
-- Installatori Fotovoltaico
-- Imprese di Ristrutturazione
-- Imprese Edili Generali
-- Posatori e Pavimentisti
-- Lattonieri e Coperture
-- Impianti Idraulici e Termici
-- Impianti Elettrici
-- Cartongessisti e Finiture
-- Progettisti e Studi Tecnici
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
-### 2. File da creare/modificare
+## ✅ Blocco 3-5 — Agent Templates System
 
-**Nuovo file `src/data/perChiE.ts`** — dati centralizzati per tutte le categorie (slug, titolo, icon lucide, pain points, soluzioni AI, ROI, CTA copy). Ogni categoria ha i dati per generare la pagina dinamica.
+### Database
+- agent_templates + agent_template_instances + agent_reports + company_channels
+- RLS policies PERMISSIVE (fix da RESTRICTIVE)
+- Funzione DB `increment_installs_count(tpl_id UUID)`
+- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
 
-**Nuovo file `src/pages/PerChiE.tsx`** — pagina indice che mostra tutte le categorie in grid (dimensione + settore), ciascuna cliccabile verso `/per-chi-e/:slug`.
+### Edge Functions (CORS headers completi)
+- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
+- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
+- save-report: salva report in DB + aggiorna contatori istanza
 
-**Nuovo file `src/pages/PerChiEDetail.tsx`** — pagina dinamica che legge lo slug dall'URL, trova i dati in `perChiE.ts` e renderizza una landing page persuasiva con:
-- Hero con H1 specifico per il settore ("Sei Un Serramentista? Ecco Perché I Tuoi Competitor Ti Stanno Superando.")
-- Sezione "Il Tuo Problema" — 3 pain point specifici del settore con icone XCircle rosse
-- Sezione "La Nostra Soluzione Per Te" — 3 soluzioni AI mappate al settore specifico
-- Numeri/ROI specifici per settore
-- Testimonianza/caso studio fittizio ma realistico
-- Sezione Garanzia
-- CTA finale dark stile Belfort
+### Frontend — Wizard 5 Step (TemplateSetup.tsx)
+- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
+- Step 2 Operai: lista card + importa CSV con template scaricabile
+- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
+- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
 
-**Modifica `src/components/sections/Navbar.tsx`** — aggiungere "Per Chi È" con mega-dropdown che mostra 2 colonne (Dimensione Azienda | Settore) con icone, come nel riferimento JetHR. Il dropdown appare on hover/click.
+### SuperAdmin
+- /superadmin/templates: CRUD completo con JSON editor per config_schema
 
-**Modifica `src/App.tsx`** — aggiungere routes:
-- `/per-chi-e` → `PerChiE`
-- `/per-chi-e/:slug` → `PerChiEDetail`
+## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
 
-### 3. Struttura pagina singola (PerChiEDetail) — Stile Kennedy
+### Database (5 tabelle)
+- render_provider_config: configurazione provider AI (OpenAI GPT-Image, Gemini Flash)
+- render_infissi_presets: 24 preset globali (materiali, colori, stili, vetri, oscuranti) con prompt_fragment
+- render_sessions: sessioni render con status, config, result_urls, costi
+- render_gallery: render salvati con share_token, favoriti
+- render_credits: crediti render separati (5 gratis per azienda)
+- RLS PERMISSIVE per tutte le tabelle
+- Trigger set_updated_at + init_render_credits su companies
+- Funzione deduct_render_credit
+- Storage buckets: render-originals (privato), render-results (pubblico)
 
-Ogni pagina settore segue questo schema persuasivo:
+### Edge Functions
+- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
+- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
 
-1. **Hero**: Badge settore, H1 aggressivo personalizzato, sottotitolo con pain + promise, 3 mini-stat
-2. **"Il Problema"**: 3 card con i problemi specifici di quel tipo di azienda (es. per serramentisti: "Lead che chiedono preventivi e spariscono", "Commerciali che fanno sopralluoghi a vuoto", "Telefonate perse = soldi persi")
-3. **"La Soluzione"**: Come l'AI risolve quei problemi specifici, con 3 card verdi
-4. **ROI Box**: Numeri concreti di risparmio per quel settore
-5. **Caso Studio**: Mini-storia di un'azienda tipo (fittizio ma credibile)
-6. **Guarantee**: Componente `<Guarantee />` riutilizzato
-7. **CTA Dark**: "Ogni Giorno Che Aspetti, Un Tuo Competitor Chiude Un Contratto In Più."
+### Frontend
+- RenderHub (/app/render): hero, come funziona, ultimi render, widget crediti
+- RenderNew (/app/render/new): wizard 4 step mobile-first (foto, config, elaborazione, risultati)
+- RenderGallery (/app/render/gallery): grid con ricerca, download, elimina
+- RenderGalleryDetail (/app/render/gallery/:id): BeforeAfterSlider, config, favoriti
+- RenderConfig (/superadmin/render-config): config provider con costi e markup
 
-### 4. Mega-menu Navbar
+### Componenti
+- BeforeAfterSlider: slider interattivo prima/dopo con drag handle
+- promptBuilder.ts: costruttore prompt, validazione foto, check dimensioni
 
-Il link "Per Chi È" nella navbar avrà un dropdown con:
-- Colonna sinistra: "DIMENSIONE AZIENDA" — 4 link con icone lucide
-- Colonna destra: "SETTORE" — 10 link con icone lucide
-- Stile: bg-white, shadow, rounded, con hover states, linea separator verticale
+### Sidebar
+- Nuova sezione "STRUMENTI VENDITA" con "Render AI"
+- SuperAdmin: sezione "RENDER AI" con "Config Provider"
 
-Sul mobile: accordion/collapsible che mostra le stesse categorie.
-
-## File totali
-- **Creare**: `src/data/perChiE.ts`, `src/pages/PerChiE.tsx`, `src/pages/PerChiEDetail.tsx`
-- **Modificare**: `src/components/sections/Navbar.tsx`, `src/App.tsx`
-
+## 🔜 Prossimi Blocchi
+- Pagine: /app/phone-numbers, /app/knowledge-base
+- Editor Agente 8 tab
+- Wizard 4 step (CreateAgent)
+- SuperAdmin Dashboard economics
+- Edge functions: add-knowledge-doc
+- Integrazioni CRM native
+- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets
