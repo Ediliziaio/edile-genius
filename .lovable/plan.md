@@ -1,95 +1,65 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI
 
-## ✅ Completato in questo blocco
+# Pagina Garanzia — Riscrittura stile Dan Kennedy / Jay Abraham / Belfort
 
-### Database Migration
-- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
-- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
-- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
-- RLS policies per tutte le nuove tabelle
+## Filosofia della riscrittura
 
-## ✅ Blocco 2 — Sistema Crediti Euro-based
+La pagina attuale è informativa ma **debole dal punto di vista persuasivo**. Kennedy, Abraham e Belfort usano:
+- **Risk reversal totale** (il rischio è tutto nostro, non tuo)
+- **Reason why** (perché offriamo questa garanzia? Perché siamo sicuri dei risultati)
+- **Future pacing** (farti immaginare il risultato prima di comprare)
+- **Stack the value** (mostrare quanto vale ciò che ottieni vs quanto costa)
+- **Urgency + scarcity reali** (non finti countdown)
+- **Social proof specifico** (nomi, numeri, settori)
+- **Pattern interrupt** (aprire con qualcosa di inaspettato)
+- **P.S. strategici** (la parte più letta dopo il titolo)
 
-### Database
-- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
-- ai_credit_topups (ricariche manual/auto/promo/adjustment)
-- ai_credit_usage (consumo per conversazione con margini)
-- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
-- monthly_billing_summary view (security_invoker)
+## Struttura nuova pagina
 
-### Edge Functions
-- check-credits-before-call: verifica saldo pre-chiamata
-- topup-credits: ricarica manuale con fattura
-- elevenlabs-webhook: post-call billing, auto-recharge, blocco
-- platform-config: +apply_global_markup action
+### 1. HERO — Pattern Interrupt
+- Badge: "RISCHIO ZERO"
+- H1: **"Se Non Funziona, Non Paghi. Se Funziona, Ti Cambia l'Azienda. In Entrambi i Casi, Vinci Tu."**
+- Sottotitolo provocatorio: Perché ti offriamo una garanzia che nessun competitor oserebbe dare? Perché sappiamo cosa succede quando un imprenditore edile smette di pagare stipendi inutili.
+- Scudo emoji con animazione
 
-### Frontend
-- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
-- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
-- Sidebar: footer saldo crediti con barra e alert
-- VoiceTestPanel: check crediti pre-chiamata con blocco UI
+### 2. SEZIONE "PERCHÉ QUESTA GARANZIA ESISTE" — Reason Why (Kennedy)
+- H2: "Non Ti Offriamo Questa Garanzia Perché Siamo Generosi. Te La Offriamo Perché Siamo Sicuri."
+- Testo narrativo stile long-form copy: spiegare che in X mesi, Y aziende hanno iniziato, e il tasso di rimborso richiesto è stato inferiore al Z%. Dare il numero reale (o indicativo). Questo è il "reason why" — la garanzia non è un rischio per noi perché i risultati sono prevedibili.
 
-## ✅ Blocco 3-5 — Agent Templates System
+### 3. SEZIONE "COSA OTTIENI NEI PRIMI 30 GIORNI" — Value Stack (Abraham)
+- H2: "Ecco Cosa Succede Nei Primi 30 Giorni (E Perché Non Chiederai Mai Il Rimborso)"
+- Timeline verticale con 4 milestone: Giorno 1-3, Giorno 4-7, Giorno 8-14, Giorno 15-30
+- Ogni milestone con risultato concreto atteso (es. "Agente attivo, prime chiamate gestite", "Primi appuntamenti qualificati in agenda", "Dashboard ROI attiva, sai esattamente quanto risparmi")
+- Chiudere con: "A questo punto il 97% dei nostri clienti ha già deciso di restare. Non perché sono vincolati. Perché tornare indietro non ha senso."
 
-### Database
-- agent_templates + agent_template_instances + agent_reports + company_channels
-- RLS policies PERMISSIVE (fix da RESTRICTIVE)
-- Funzione DB `increment_installs_count(tpl_id UUID)`
-- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+### 4. SEZIONE "IL PATTO" — Certificato visivo
+- Card stile "certificato" con bordo primary, sfondo leggero
+- Testo formale: "Noi, Edilizia.io, garantiamo che..." con i 3 pilastri:
+  1. Rimborso integrale primo mese se KPI non raggiunti
+  2. Nessun vincolo contrattuale, disdici quando vuoi
+  3. KPI definiti PRIMA di partire, misurabili in dashboard
+- Firma stilizzata + "Edilizia.io — Il sistema che usiamo noi stessi"
 
-### Edge Functions (CORS headers completi)
-- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
-- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
-- save-report: salva report in DB + aggiorna contatori istanza
+### 5. SEZIONE "LE OBIEZIONI CHE HAI IN TESTA" — FAQ riscritte stile Belfort (Straight Line)
+- H2: "Lo So Cosa Stai Pensando..."
+- 6 FAQ riscritte in modo aggressivo/empatico:
+  1. "E se il mio settore è diverso?" → Risposta con specificità edilizia
+  2. "Sembra troppo bello per essere vero" → Reason why + numeri
+  3. "Non ho tempo per implementare qualcosa di nuovo" → 48h, facciamo noi tutto
+  4. "Ho già provato software che non funzionavano" → Noi non siamo software, siamo il tuo reparto AI
+  5. "Cosa succede se non funziona?" → Rimborso, fine, zero rischio
+  6. "E se funziona ma poi i costi aumentano?" → Prezzi bloccati, zero sorprese
 
-### Frontend — Wizard 5 Step (TemplateSetup.tsx)
-- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + importa CSV con template scaricabile
-- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
-- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
+### 6. SEZIONE "I NUMERI PARLANO" — Social Proof
+- Barra con 4 stat: "97% tasso di rinnovo", "50+ dipendenti sostituiti", "<2% richieste rimborso", "€2.3M risparmiati"
+- 2 mini-testimonial con nome, settore, risultato specifico
 
-### SuperAdmin
-- /superadmin/templates: CRUD completo con JSON editor per config_schema
+### 7. CTA FINALE — Urgency + Future Pacing
+- H2: "Fra 30 Giorni Sarai In Una Di Queste Due Situazioni."
+- Due colonne: Sinistra "Se non prenoti" (stesso organico, stessi costi, stessi problemi) vs Destra "Se prenoti oggi" (agente attivo, costi tagliati, lead gestiti 24/7)
+- CTA button
+- P.S. + P.P.S. stile Kennedy (la parte più letta)
 
-## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+## File da modificare
+- **`src/pages/Garanzia.tsx`** — riscrittura completa
 
-### Database (5 tabelle)
-- render_provider_config: configurazione provider AI (OpenAI GPT-Image, Gemini Flash)
-- render_infissi_presets: 24 preset globali (materiali, colori, stili, vetri, oscuranti) con prompt_fragment
-- render_sessions: sessioni render con status, config, result_urls, costi
-- render_gallery: render salvati con share_token, favoriti
-- render_credits: crediti render separati (5 gratis per azienda)
-- RLS PERMISSIVE per tutte le tabelle
-- Trigger set_updated_at + init_render_credits su companies
-- Funzione deduct_render_credit
-- Storage buckets: render-originals (privato), render-results (pubblico)
-
-### Edge Functions
-- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
-- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
-
-### Frontend
-- RenderHub (/app/render): hero, come funziona, ultimi render, widget crediti
-- RenderNew (/app/render/new): wizard 4 step mobile-first (foto, config, elaborazione, risultati)
-- RenderGallery (/app/render/gallery): grid con ricerca, download, elimina
-- RenderGalleryDetail (/app/render/gallery/:id): BeforeAfterSlider, config, favoriti
-- RenderConfig (/superadmin/render-config): config provider con costi e markup
-
-### Componenti
-- BeforeAfterSlider: slider interattivo prima/dopo con drag handle
-- promptBuilder.ts: costruttore prompt, validazione foto, check dimensioni
-
-### Sidebar
-- Nuova sezione "STRUMENTI VENDITA" con "Render AI"
-- SuperAdmin: sezione "RENDER AI" con "Config Provider"
-
-## 🔜 Prossimi Blocchi
-- Pagine: /app/phone-numbers, /app/knowledge-base
-- Editor Agente 8 tab
-- Wizard 4 step (CreateAgent)
-- SuperAdmin Dashboard economics
-- Edge functions: add-knowledge-doc
-- Integrazioni CRM native
-- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets
