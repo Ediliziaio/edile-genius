@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://edilizia.io/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://edilizia.io/soluzioni</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://edilizia.io/per-chi-e</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://edilizia.io/chi-siamo</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/come-funziona</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/garanzia</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://edilizia.io/tariffe</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <!-- Per Chi È - Dimensione -->
+  <url><loc>https://edilizia.io/per-chi-e/artigiani-micro-imprese</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/per-chi-e/piccole-imprese</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/per-chi-e/medie-imprese</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/per-chi-e/grandi-aziende-general-contractor</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <!-- Per Chi È - Settore -->
+  <url><loc>https://edilizia.io/per-chi-e/serramentisti-infissi</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/per-chi-e/installatori-fotovoltaico</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/per-chi-e/imprese-ristrutturazione</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/per-chi-e/imprese-edili-generali</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/per-chi-e/posatori-pavimentisti</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/per-chi-e/lattonieri-coperture</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/per-chi-e/impianti-idraulici-termici</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/per-chi-e/impianti-elettrici</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/per-chi-e/cartongessisti-finiture</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/per-chi-e/progettisti-studi-tecnici</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+</urlset>
