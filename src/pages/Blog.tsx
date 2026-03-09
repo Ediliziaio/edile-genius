@@ -75,10 +75,10 @@ const Blog = () => {
           <span className="inline-block font-mono text-xs uppercase tracking-wider bg-primary/10 text-primary px-3 py-1 rounded-full font-bold">
             Blog
           </span>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold text-foreground leading-tight">
+          <h1 className="text-3xl sm:text-3xl sm:text-4xl md:text-5xl font-display font-extrabold text-foreground leading-tight">
             AI e Innovazione<br className="hidden md:block" /> nell'Edilizia
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p clasbase sm:text-sName="text-lg text-muted-foreground max-w-2xl mx-auto">
             Guide pratiche, casi studio e strategie per portare l'intelligenza artificiale nella tua impresa edile.
           </p>
         </div>
