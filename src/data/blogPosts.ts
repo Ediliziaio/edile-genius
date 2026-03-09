@@ -807,6 +807,12 @@ export const blogPosts: BlogPost[] = [
         type: "text",
         callout: "Promozione attiva: setup guidato gratuito per le prime 15 imprese. Un nostro tecnico configura il sistema insieme a te in videochiamata. Nessun costo, nessun obbligo. Prenota il tuo slot prima che finiscano."
       }
+    ],
+    faqs: [
+      { question: "Il software di gestione cantiere funziona offline?", answer: "Sì. L'app mobile funziona in modalità offline per le operazioni in cantiere dove la connessione è limitata. I dati si sincronizzano automaticamente quando torni online. Foto, checklist e rapportini vengono salvati localmente e caricati appena disponibile la rete." },
+      { question: "Posso collegare il sistema alla mia contabilità di cantiere?", answer: "Sì, ci integriamo con i principali software di contabilità edile: Primus, STR, TeamSystem Construction, Namirial. L'integrazione sincronizza voci di computo, SAL, contabilità lavori e varianti in tempo reale." },
+      { question: "Quanti cantieri posso gestire contemporaneamente?", answer: "Non c'è limite. Il sistema scala con la tua azienda: dai 2-3 cantieri di una piccola impresa ai 50+ cantieri di un general contractor. Ogni cantiere ha la sua dashboard, i suoi alert e i suoi KPI indipendenti." },
+      { question: "Come gestisce l'AI i ritardi e le varianti in corso d'opera?", answer: "L'AI monitora il cronoprogramma in tempo reale e rileva i ritardi prima che diventino critici. Suggerisce azioni correttive, ricalcola automaticamente le date successive e genera alert per il direttore lavori. Per le varianti, calcola l'impatto su tempi e costi in tempo reale." }
     ]
   },
 
