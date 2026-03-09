@@ -10,6 +10,7 @@ import Solutions from "./pages/Solutions";
 import ChiSiamo from "./pages/ChiSiamo";
 import ComeFunziona from "./pages/ComeFunziona";
 import Garanzia from "./pages/Garanzia";
+import Tariffe from "./pages/Tariffe";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import AuthGuard from "./components/auth/AuthGuard";
@@ -71,6 +72,7 @@ const App = () => (
             <Route path="/chi-siamo" element={<ChiSiamo />} />
             <Route path="/come-funziona" element={<ComeFunziona />} />
             <Route path="/garanzia" element={<Garanzia />} />
+            <Route path="/tariffe" element={<Tariffe />} />
             <Route path="/login" element={<Login />} />
 
             {/* SuperAdmin routes */}
