@@ -8,6 +8,8 @@ import { ImpersonationProvider } from "@/context/ImpersonationContext";
 import Index from "./pages/Index";
 import Solutions from "./pages/Solutions";
 import ChiSiamo from "./pages/ChiSiamo";
+import ComeFunziona from "./pages/ComeFunziona";
+import Garanzia from "./pages/Garanzia";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import AuthGuard from "./components/auth/AuthGuard";
@@ -67,6 +69,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/soluzioni" element={<Solutions />} />
             <Route path="/chi-siamo" element={<ChiSiamo />} />
+            <Route path="/come-funziona" element={<ComeFunziona />} />
+            <Route path="/garanzia" element={<Garanzia />} />
             <Route path="/login" element={<Login />} />
 
             {/* SuperAdmin routes */}
