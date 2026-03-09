@@ -35,7 +35,7 @@ const Hero = () => {
               </span>
             </motion.h1>
 
-            <motion.p vabase sm:text-riants={item} cbase sm:text-lassName="text-lg text-neutral-500 max-w-[540px] leading-relaxed">
+            <motion.p variants={item} className="text-base sm:text-lg text-neutral-500 max-w-[540px] leading-relaxed">
               Edilizia.io è l'agenzia che sostituisce segretarie, commerciali improduttivi
               e addetti alla reportistica con Agenti AI che costano 10x meno e lavorano
               10x meglio. 24/7, 365 giorni l'anno. Senza ferie, malattie o dimissioni.
