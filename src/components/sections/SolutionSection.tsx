@@ -27,7 +27,7 @@ const SolutionSection = () => {
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
             <AnimatedBadge variant="verde">AGENTI VOCALI</AnimatedBadge>
-            <Mic className="text-primary mt-6 mb-4" size={64} strokeWidth={1.5} />
+            <Mic className="text-primary mt-6 mb-4" size={40} strokeWidth={1.5} />
             <h3 className="font-display text-[28px] md:text-[32px] font-extrabold text-neutral-900 leading-tight mb-2">
               Rispondono.<br />Qualificano.<br />Vendono.
             </h3>
