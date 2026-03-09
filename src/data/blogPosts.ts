@@ -143,6 +143,13 @@ export const blogPosts: BlogPost[] = [
         content: "Questo non è un articolo per farti riflettere domani. È un articolo per farti agire **oggi**.\n\nMentre leggi queste righe, qualcuno sta chiamando la tua impresa. Se non rispondi tu, risponde qualcun altro. E quel qualcun altro si prende il tuo cliente, il tuo preventivo, il tuo contratto.\n\nI tuoi concorrenti più svegli stanno già usando l'intelligenza artificiale. Non tra un anno. Non tra sei mesi. **Adesso.**\n\nLa domanda non è \"posso permettermi un agente vocale AI?\". La domanda è: **\"posso permettermi di non averlo?\"**\n\nOgni giorno senza un agente vocale AI sono 5-10 chiamate perse. Ogni chiamata persa sono €5.000-€50.000 di opportunità sfumata. Fai i conti su un mese. Su un anno.\n\nAttiva il tuo agente vocale AI oggi. In 30 minuti. Senza rischi. Con garanzia di rimborso.\n\nIl tuo telefono non smetterà di squillare. Ma da oggi, non smetterai più di rispondere.",
         type: "text"
       }
+    ],
+    faqs: [
+      { question: "Quanto costa un agente vocale AI per un'impresa edile?", answer: "I piani partono da €149/mese per l'agente base con gestione chiamate 24/7 e qualificazione lead. Il ROI medio è 10x: per ogni euro investito, le imprese recuperano circa €10 in contratti che altrimenti sarebbero andati persi. Prova gratuita di 30 giorni senza carta di credito." },
+      { question: "L'agente vocale AI sostituisce la segretaria?", answer: "No, la potenzia. L'agente gestisce il primo contatto, qualifica il lead e fissa appuntamenti. La segretaria si concentra su attività ad alto valore: gestione clienti acquisiti, coordinamento cantieri, amministrazione. Il risultato è più efficienza per tutti." },
+      { question: "Funziona anche fuori orario e nei weekend?", answer: "Sì, l'agente vocale AI risponde 24 ore su 24, 7 giorni su 7, festivi inclusi. Le chiamate del sabato mattina e della sera — i momenti in cui i privati cercano imprese edili — vengono gestite automaticamente con la stessa qualità delle ore lavorative." },
+      { question: "Quanto tempo serve per configurare l'agente vocale?", answer: "Il setup base richiede 15-30 minuti: carichi le informazioni sulla tua azienda, scegli la voce, definisci le domande di qualificazione. In 24 ore l'agente è operativo. Il team di supporto ti assiste nella configurazione iniziale gratuitamente." },
+      { question: "I clienti capiscono che stanno parlando con un'AI?", answer: "La maggior parte no. Le voci di ultima generazione sono indistinguibili da un operatore umano, con gestione naturale di interruzioni, pause e dialetto. Il 92% dei chiamanti non percepisce la differenza. L'agente si presenta sempre con nome e ruolo." }
     ]
   },
 
