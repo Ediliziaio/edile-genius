@@ -580,7 +580,6 @@ export const blogPosts: BlogPost[] = [
         type: "text"
       }
     ]
-  }
   },
 
   // ─── ARTICOLO 7: BONUS EDILIZI AI ──────────────────────────────────
