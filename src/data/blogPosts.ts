@@ -900,6 +900,12 @@ export const blogPosts: BlogPost[] = [
         type: "text",
         callout: "Garanzia risultati: se dopo 60 giorni il tuo tasso di chiusura non è aumentato di almeno il 25%, ti rimborsiamo ogni centesimo. Nessuna domanda, nessuna burocrazia. Ci assumiamo noi il rischio perché sappiamo che funziona."
       }
+    ],
+    faqs: [
+      { question: "I preventivi online funzionano anche per lavori complessi?", answer: "Sì. Il sistema genera preventivi preliminari anche per ristrutturazioni complete, ampliamenti e lavori strutturali. Per lavori sopra €50.000, il preventivo online serve come stima iniziale che qualifica il lead; il preventivo definitivo viene perfezionato dopo il sopralluogo tecnico." },
+      { question: "Il cliente può personalizzare il preventivo online?", answer: "Sì. Il configuratore permette al cliente di selezionare finiture, materiali, opzioni aggiuntive e vedere in tempo reale come cambia il prezzo. Questo aumenta l'engagement del 340% rispetto a un preventivo statico e riduce le richieste di modifica successive del 60%." },
+      { question: "Come si integra il preventivo online con il mio sito web?", answer: "Con un semplice widget da incorporare nel tuo sito (copia-incolla di un codice). Non serve modificare il sito. Il widget si adatta automaticamente al design, funziona su mobile e desktop, e invia i dati direttamente al tuo CRM o email." },
+      { question: "Posso aggiornare i prezzi facilmente?", answer: "Sì, dalla dashboard aggiorni listini, margini e sconti in un click. Puoi impostare regole automatiche: aumento del 5% per lavori urgenti, sconto del 10% per importi sopra €20.000, maggiorazione per zone disagiate. Le modifiche si applicano istantaneamente a tutti i nuovi preventivi." }
     ]
   },
 
