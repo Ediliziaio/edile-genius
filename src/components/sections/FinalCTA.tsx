@@ -50,7 +50,7 @@ const FinalCTA = () => {
             ⚡ Posti Limitati — 12 Aziende al Mese
           </div>
 
-          <h2 className="font-display text-[36px] md:text-[72px] font-extrabold text-white leading-[1.05]">
+          <h2 className="font-display text-[28px] sm:text-[36px] md:text-[72px] font-extrabold text-white leading-[1.05]">
             Scopri Chi Puoi<br />
             <span className="text-primary">Licenziare.</span><br />
             Prenota l'Analisi.
