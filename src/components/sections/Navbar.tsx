@@ -268,6 +268,13 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
             );
           })}
           <Link
+            to="/login"
+            onClick={() => setOpen(false)}
+            className="block text-center text-base font-medium text-neutral-700 hover:text-primary"
+          >
+            Accedi
+          </Link>
+          <Link
             to="/soluzioni"
             onClick={() => setOpen(false)}
             className="block bg-primary text-primary-foreground text-center px-5 py-3 rounded-xl font-bold"

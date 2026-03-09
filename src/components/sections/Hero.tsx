@@ -25,7 +25,7 @@ const Hero = () => {
               </AnimatedBadge>
             </motion.div>
 
-            <motion.h1 variants={item} className="font-display text-[44px] md:text-[72px] font-extrabold leading-[1.05] text-neutral-900">
+            <motion.h1 variants={item} className="font-display text-[32px] sm:text-[32px] sm:text-[32px] sm:text-[44px] md:text-[72px] font-extrabold leading-[1.05] text-neutral-900">
               Licenzia i Costi.{" "}
               <span className="text-primary">Assumi l'AI.</span>{" "}
               Fai Esplodere la tua{" "}
@@ -35,13 +35,13 @@ const Hero = () => {
               </span>
             </motion.h1>
 
-            <motion.p variants={item} className="text-lg text-neutral-500 max-w-[540px] leading-relaxed">
+            <motion.p variants={item} className="text-base sm:text-lg text-neutral-500 max-w-[540px] leading-relaxed">
               Edilizia.io è l'agenzia che sostituisce segretarie, commerciali improduttivi
               e addetti alla reportistica con Agenti AI che costano 10x meno e lavorano
               10x meglio. 24/7, 365 giorni l'anno. Senza ferie, malattie o dimissioni.
             </motion.p>
 
-            <motion.div variants={item} className="flex flex-wrap gap-4">
+            <motion.div variants={item} className="flex flex-col sm:flex-row gap-4">
               <a
                 href="#cta-finale"
                 className="bg-primary text-primary-foreground px-8 py-4 rounded-xl text-base font-bold hover:bg-primary-dark hover:-translate-y-0.5 shadow-button-green transition-all"

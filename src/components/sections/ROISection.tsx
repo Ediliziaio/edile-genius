@@ -34,7 +34,8 @@ const ROISection = () => {
 
         {/* Table */}
         <div ref={ref} className="mb-16 rounded-2xl overflow-hidden border border-neutral-800">
-          <div className="grid grid-cols-3 font-mono text-xs uppercase tracking-wider py-3 px-5 border-b border-neutral-800">
+          {/* Desktop table header */}
+          <div className="hidden md:grid grid-cols-3 font-mono text-xs uppercase tracking-wider py-3 px-5 border-b border-neutral-800">
             <span className="text-neutral-500">Voce</span>
             <span className="text-neutral-500">Oggi (Dipendente)</span>
             <span className="text-primary">Con Agente AI</span>
@@ -42,14 +43,16 @@ const ROISection = () => {
           {rows.map((r, i) => (
             <motion.div
               key={r.label}
-              className={`grid grid-cols-3 py-3 px-5 text-sm ${i % 2 === 1 ? "bg-neutral-800/50" : ""}`}
+              className={`md:grid md:grid-cols-3 py-4 px-5 text-sm ${i % 2 === 1 ? "bg-neutral-800/50" : ""} ${i > 0 ? "border-t border-neutral-800 md:border-t-0" : ""}`}
               initial={{ opacity: 0, y: 10 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: i * 0.08, duration: 0.4 }}
             >
-              <span className="text-neutral-300 font-medium">{r.label}</span>
-              <span className="text-neutral-500">{r.oggi}</span>
-              <span className="text-primary font-bold">{r.conAi}</span>
+              <span className="text-neutral-300 font-medium block mb-2 md:mb-0">{r.label}</span>
+              <div className="flex flex-col gap-1 md:contents">
+                <span className="text-neutral-500"><span className="md:hidden font-mono text-[10px] uppercase tracking-wider text-neutral-600 mr-2">Oggi:</span>{r.oggi}</span>
+                <span className="text-primary font-bold"><span className="md:hidden font-mono text-[10px] uppercase tracking-wider text-neutral-600 mr-2">AI:</span>{r.conAi}</span>
+              </div>
             </motion.div>
           ))}
         </div>

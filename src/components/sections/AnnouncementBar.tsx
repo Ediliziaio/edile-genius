@@ -12,7 +12,7 @@ const AnnouncementBar = () => {
       </div>
       <a
         href="#cta-finale"
-        className="flex-shrink-0 px-4 text-white text-xs font-medium underline hover:opacity-75 transition-opacity font-mono"
+        className="hidden sm:flex flex-shrink-0 px-4 text-white text-xs font-medium underline hover:opacity-75 transition-opacity font-mono"
       >
         Scopri Chi Puoi Sostituire →
       </a>

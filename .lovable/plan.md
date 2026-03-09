@@ -1,68 +1,95 @@
 
+# Stato Implementazione — Blocco 1-5 + Render AI
 
-# Ottimizzazione Mobile della Homepage (/)
+## ✅ Completato in questo blocco
 
-## Problemi identificati
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
-1. **Hero**: H1 a `text-[44px]` troppo grande su schermi <375px, testo overflow. CTA buttons non stackano bene. Badge testo lungo va a capo male.
-2. **AnnouncementBar**: Il link "Scopri Chi Puoi Sostituire →" è schiacciato a destra, testo marquee troppo piccolo.
-3. **LogoBar**: Stats pills non wrappano bene, testo lungo va a capo.
-4. **ROISection**: Tabella a 3 colonne con `grid-cols-3` — testo troncato/sovrapposto su mobile. Illeggibile.
-5. **CostCalculator**: Comparison cards e error table (min-w-[700px]) richiedono scroll orizzontale. Slider cards OK ma i breakdown text-size piccoli.
-6. **SolutionSection**: Cards con `p-8 md:p-10` — padding eccessivo su mobile. Icona 64px troppo grande.
-7. **Pricing**: 3 cards in colonna OK, ma il plan "featured" ha `scale-[1.03]` che causa overflow orizzontale.
-8. **FinalCTA**: H2 a `text-[36px]` OK ma il form card padding `p-8 md:p-12` è troppo su small screens.
-9. **Footer**: Grid `md:grid-cols-4` — su mobile tutto in colonna ma spacing eccessivo.
-10. **Navbar mobile menu**: Manca CTA "Accedi" nel menu mobile.
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
-## Piano di modifiche
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-### `src/components/sections/Hero.tsx`
-- H1: `text-[32px] sm:text-[44px] md:text-[72px]` (ridurre base)
-- Subtitle: `text-base sm:text-lg`
-- CTA buttons: `flex-col sm:flex-row` per stackare su mobile
-- Badge: wrapping migliore con text più piccolo su mobile
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
-### `src/components/sections/AnnouncementBar.tsx`
-- Nascondere il link CTA su mobile (`hidden sm:flex`), lasciare solo il marquee full-width
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
-### `src/components/sections/ROISection.tsx`
-- Cambiare la tabella da `grid-cols-3` a layout a card su mobile: ogni riga diventa una card con label/oggi/AI stacked verticalmente
-- Header nascosto su mobile, mostrato su `md:`
+## ✅ Blocco 3-5 — Agent Templates System
 
-### `src/components/sections/CostCalculator.tsx`
-- Error table: rimuovere `min-w-[700px]`, renderizzare come card stacked su mobile invece di tabella
-- Saving box stats: `grid-cols-1 sm:grid-cols-3`
-- Comparison cards: già `grid-cols-1` su mobile, OK. Ridurre padding `p-5 md:p-8`
+### Database
+- agent_templates + agent_template_instances + agent_reports + company_channels
+- RLS policies PERMISSIVE (fix da RESTRICTIVE)
+- Funzione DB `increment_installs_count(tpl_id UUID)`
+- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
 
-### `src/components/sections/SolutionSection.tsx`
-- Ridurre icona: `size={40}` su mobile con classe responsive
-- Padding: `p-6 md:p-8 lg:p-10`
+### Edge Functions (CORS headers completi)
+- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
+- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
+- save-report: salva report in DB + aggiorna contatori istanza
 
-### `src/components/sections/Pricing.tsx`
-- Rimuovere `scale-[1.03]` su mobile: `md:scale-[1.03]`
+### Frontend — Wizard 5 Step (TemplateSetup.tsx)
+- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
+- Step 2 Operai: lista card + importa CSV con template scaricabile
+- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
+- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
 
-### `src/components/sections/FinalCTA.tsx`
-- H2: `text-[28px] sm:text-[36px] md:text-[72px]`
-- Form card: `p-6 md:p-12`
+### SuperAdmin
+- /superadmin/templates: CRUD completo con JSON editor per config_schema
 
-### `src/components/sections/Navbar.tsx`
-- Aggiungere link "Accedi" nel mobile menu prima del CTA "Prenota Demo"
+## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
 
-### `src/components/sections/Footer.tsx`
-- Ridurre gap mobile: `gap-8 md:gap-10`
+### Database (5 tabelle)
+- render_provider_config: configurazione provider AI (OpenAI GPT-Image, Gemini Flash)
+- render_infissi_presets: 24 preset globali (materiali, colori, stili, vetri, oscuranti) con prompt_fragment
+- render_sessions: sessioni render con status, config, result_urls, costi
+- render_gallery: render salvati con share_token, favoriti
+- render_credits: crediti render separati (5 gratis per azienda)
+- RLS PERMISSIVE per tutte le tabelle
+- Trigger set_updated_at + init_render_credits su companies
+- Funzione deduct_render_credit
+- Storage buckets: render-originals (privato), render-results (pubblico)
 
-## File da modificare (9 file)
+### Edge Functions
+- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
+- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
 
-| File | Tipo modifica |
-|------|--------------|
-| `Hero.tsx` | Font size responsive, CTA stack, badge |
-| `AnnouncementBar.tsx` | Nascondere CTA link su mobile |
-| `ROISection.tsx` | Tabella → card layout su mobile |
-| `CostCalculator.tsx` | Error table responsive, saving box grid |
-| `SolutionSection.tsx` | Padding e icon size ridotti |
-| `Pricing.tsx` | Rimuovere scale su mobile |
-| `FinalCTA.tsx` | Font e padding responsive |
-| `Navbar.tsx` | Aggiungere "Accedi" nel menu mobile |
-| `Footer.tsx` | Spacing ridotto |
+### Frontend
+- RenderHub (/app/render): hero, come funziona, ultimi render, widget crediti
+- RenderNew (/app/render/new): wizard 4 step mobile-first (foto, config, elaborazione, risultati)
+- RenderGallery (/app/render/gallery): grid con ricerca, download, elimina
+- RenderGalleryDetail (/app/render/gallery/:id): BeforeAfterSlider, config, favoriti
+- RenderConfig (/superadmin/render-config): config provider con costi e markup
 
+### Componenti
+- BeforeAfterSlider: slider interattivo prima/dopo con drag handle
+- promptBuilder.ts: costruttore prompt, validazione foto, check dimensioni
+
+### Sidebar
+- Nuova sezione "STRUMENTI VENDITA" con "Render AI"
+- SuperAdmin: sezione "RENDER AI" con "Config Provider"
+
+## 🔜 Prossimi Blocchi
+- Pagine: /app/phone-numbers, /app/knowledge-base
+- Editor Agente 8 tab
+- Wizard 4 step (CreateAgent)
+- SuperAdmin Dashboard economics
+- Edge functions: add-knowledge-doc
+- Integrazioni CRM native
+- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets

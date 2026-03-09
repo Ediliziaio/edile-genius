@@ -21,13 +21,13 @@ const SolutionSection = () => {
         <div ref={ref} className="grid md:grid-cols-2 gap-6">
           {/* Card Vocali */}
           <motion.div
-            className="bg-background rounded-3xl shadow-card p-8 md:p-10 border-t-4 border-t-primary"
+            className="bg-background rounded-3xl shadow-card p-6 md:p-10 border-t-4 border-t-primary"
             initial={{ opacity: 0, x: -60 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
             <AnimatedBadge variant="verde">AGENTI VOCALI</AnimatedBadge>
-            <Mic className="text-primary mt-6 mb-4" size={64} strokeWidth={1.5} />
+            <Mic className="text-primary mt-6 mb-4" size={40} strokeWidth={1.5} />
             <h3 className="font-display text-[28px] md:text-[32px] font-extrabold text-neutral-900 leading-tight mb-2">
               Rispondono.<br />Qualificano.<br />Vendono.
             </h3>
@@ -59,13 +59,13 @@ const SolutionSection = () => {
 
           {/* Card Operativi */}
           <motion.div
-            className="bg-neutral-900 rounded-3xl shadow-card p-8 md:p-10 border-t-4 border-t-primary"
+            className="bg-neutral-900 rounded-3xl shadow-card p-6 md:p-10 border-t-4 border-t-primary"
             initial={{ opacity: 0, x: 60 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
             <AnimatedBadge variant="dark">AGENTI AI</AnimatedBadge>
-            <Bot className="text-primary mt-6 mb-4" size={64} strokeWidth={1.5} />
+            <Bot className="text-primary mt-6 mb-4" size={40} strokeWidth={1.5} />
             <h3 className="font-display text-[28px] md:text-[32px] font-extrabold text-white leading-tight mb-2">
               Automatizzano.<br />Analizzano.<br />Sostituiscono.
             </h3>
