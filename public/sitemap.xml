@@ -23,4 +23,12 @@
   <url><loc>https://edilizia.io/per-chi-e/impianti-elettrici</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edilizia.io/per-chi-e/cartongessisti-finiture</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edilizia.io/per-chi-e/progettisti-studi-tecnici</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <!-- Blog -->
+  <url><loc>https://edilizia.io/blog</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://edilizia.io/blog/agenti-vocali-ai-edilizia</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/blog/intelligenza-artificiale-serramenti</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/blog/automazione-preventivi-edilizia</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/blog/ai-fotovoltaico-vendite</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/blog/ridurre-costi-operativi-impresa-edile</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edilizia.io/blog/call-center-ai-ristrutturazioni</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>
