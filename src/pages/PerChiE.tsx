@@ -61,7 +61,7 @@ const PerChiE = () => {
             <span className="text-primary">Costruisce l'Italia.</span>
           </motion.h1>
           <motion.p
-            clasbase sm:text-sName="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto"
+            className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15, duration: 0.5 }}

@@ -55,9 +55,9 @@ const AIComparison = () => {
           </motion.div>
 
           {/* Operativo */}
-          <motion.div variants={item} classNam5 sm:p-e="bg-neutral-800 rounded-3xl bor5 sm:p-der-t-[3px] border-t-[#3B82F6] p-8">
+          <motion.div variants={item} className="bg-neutral-800 rounded-3xl border-t-[3px] border-t-[#3B82F6] p-5 sm:p-8">
             <div className="w-16 h-16 rounded-full bg-[rgba(59,130,246,0.15)] flex items-center justify-center text-[32px] mb-4">🤖</div>
-     xl sm:text-       <h3 className="font-display text-[28px] font-extrabold text-white mb-1">Agente AI Operativo</h3>
+            <h3 className="font-display text-xl sm:text-[28px] font-extrabold text-white mb-1">Agente AI Operativo</h3>
             <p className="font-mono text-xs text-[#3B82F6] uppercase tracking-wider mb-6">Elaborazione Dati & Automazione Processi</p>
             <p className="text-neutral-400 leading-relaxed mb-6">
               Non interagisce in tempo reale con le persone — elabora dati,
