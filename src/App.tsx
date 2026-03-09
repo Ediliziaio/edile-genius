@@ -10,6 +10,7 @@ import Solutions from "./pages/Solutions";
 import ChiSiamo from "./pages/ChiSiamo";
 import ComeFunziona from "./pages/ComeFunziona";
 import Garanzia from "./pages/Garanzia";
+import Tariffe from "./pages/Tariffe";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import AuthGuard from "./components/auth/AuthGuard";
