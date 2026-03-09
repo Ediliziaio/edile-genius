@@ -7,6 +7,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ImpersonationProvider } from "@/context/ImpersonationContext";
 import Index from "./pages/Index";
 import Solutions from "./pages/Solutions";
+import ChiSiamo from "./pages/ChiSiamo";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import AuthGuard from "./components/auth/AuthGuard";
