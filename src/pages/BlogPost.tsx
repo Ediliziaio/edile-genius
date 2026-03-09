@@ -179,6 +179,7 @@ const BlogPost = () => {
               </span>
             ))}
           </div>
+          <SocialShareButtons url={shareUrl} title={post.title} />
         </div>
 
         {/* Hero Image */}
