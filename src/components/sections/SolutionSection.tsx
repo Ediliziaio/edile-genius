@@ -59,7 +59,7 @@ const SolutionSection = () => {
 
           {/* Card Operativi */}
           <motion.div
-            className="bg-neutral-900 rounded-3xl shadow-card p-8 md:p-10 border-t-4 border-t-primary"
+            className="bg-neutral-900 rounded-3xl shadow-card p-6 md:p-10 border-t-4 border-t-primary"
             initial={{ opacity: 0, x: 60 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.6, ease: "easeOut" }}
