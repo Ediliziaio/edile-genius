@@ -31,7 +31,7 @@ const PerChiEDetail = () => {
       {/* Hero */}
       <section className="py-20 md:py-28 bg-primary-bg">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <AnimatedBadge text={cat.name.toUpperCase()} />
+          <AnimatedBadge>{cat.name.toUpperCase()}</AnimatedBadge>
           <motion.h1
             className="font-display text-3xl md:text-5xl lg:text-[56px] font-extrabold text-foreground leading-tight mt-6 mb-6"
             initial={{ opacity: 0, y: 20 }}

@@ -43,7 +43,7 @@ const PerChiE = () => {
       {/* Hero */}
       <section className="py-20 md:py-28 bg-primary-bg">
         <div className="max-w-5xl mx-auto px-6 text-center">
-          <AnimatedBadge text="PER CHI È" />
+          <AnimatedBadge>PER CHI È</AnimatedBadge>
           <motion.h1
             className="font-display text-4xl md:text-6xl font-extrabold text-foreground leading-tight mt-6 mb-6"
             initial={{ opacity: 0, y: 20 }}
