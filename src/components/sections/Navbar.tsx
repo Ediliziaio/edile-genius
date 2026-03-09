@@ -69,6 +69,13 @@ const Navbar = () => {
             Soluzioni
             <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary origin-left transition-transform duration-300 ${isSoluzioni ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
           </Link>
+          <Link
+            to="/chi-siamo"
+            className={`relative text-sm font-medium transition-colors group ${location.pathname === '/chi-siamo' ? 'text-primary' : 'text-neutral-500 hover:text-neutral-900'}`}
+          >
+            Chi Siamo
+            <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary origin-left transition-transform duration-300 ${location.pathname === '/chi-siamo' ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
+          </Link>
         </div>
 
         {/* Desktop CTA */}
