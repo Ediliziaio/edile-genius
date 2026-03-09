@@ -108,8 +108,8 @@ const Blog = () => {
       </div>
 
       {/* Filters */}
-      <div className="max-w-6xl mx-auto px-6 pb-8">
-        <div className="flex flex-wrap gap-2 justify-center">
+      <div className="max-w-6xl mx-auto px-6 pb-8 overflow-x-auto">
+        <div className="flex gap-2 justify-start sm:justify-center min-w-0">
           {blogCategories.map((cat) => (
             <button
               key={cat}
