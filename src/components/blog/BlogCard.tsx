@@ -17,8 +17,13 @@ const BlogCard = ({ post }: BlogCardProps) => (
     to={`/blog/${post.slug}`}
     className="group block bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
   >
-    <div className="aspect-video bg-muted flex items-center justify-center">
-      <span className="font-mono text-xs text-muted-foreground">Immagine articolo</span>
+    <div className="aspect-video overflow-hidden bg-muted">
+      <img
+        src={post.heroImage}
+        alt={post.heroImageAlt}
+        loading="lazy"
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      />
     </div>
     <div className="p-6 space-y-3">
       <span className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${categoryColors[post.category] ?? "bg-muted text-muted-foreground"}`}>

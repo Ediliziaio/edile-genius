@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
 import BlogCard from "@/components/blog/BlogCard";
@@ -13,6 +13,36 @@ const Blog = () => {
     description: "Articoli, guide e casi studio sull'intelligenza artificiale applicata al settore edile italiano. Scopri come l'AI trasforma serramenti, fotovoltaico e ristrutturazioni.",
     canonical: "/blog",
   });
+
+  // CollectionPage JSON-LD
+  useEffect(() => {
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: "Blog — AI e Innovazione nell'Edilizia",
+      description: "Articoli, guide e casi studio sull'intelligenza artificiale applicata al settore edile italiano.",
+      url: "https://edilizia.io/blog",
+      publisher: { "@type": "Organization", name: "Edilizia.io", url: "https://edilizia.io" },
+      mainEntity: {
+        "@type": "ItemList",
+        itemListElement: blogPosts.map((p, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          url: `https://edilizia.io/blog/${p.slug}`,
+          name: p.title,
+        })),
+      },
+    };
+    let script = document.querySelector('script[data-jsonld="collection"]') as HTMLScriptElement | null;
+    if (!script) {
+      script = document.createElement("script");
+      script.type = "application/ld+json";
+      script.setAttribute("data-jsonld", "collection");
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(jsonLd);
+    return () => { script?.remove(); };
+  }, []);
 
   const filtered = activeCategory === "Tutti"
     ? blogPosts
