@@ -23,9 +23,9 @@ const AIComparison = () => {
 
         <div className="grid md:grid-cols-[1fr_auto_1fr] gap-6 items-stretch">
           {/* Vocale */}
-          <motion.div variants={item} className="b5 sm:p-g-neutral-800 r5 sm:p-ounded-3xl bord5 sm:p-er-t-[3px] bord5 sm:p-er-t-primary p-8">
-            <div className="w-16 h-16 rounded-full bg-[rgba(62,207,110,0.15)] flex items-center justify-center text-[32px]xl sm:text- mb-4">🎙️</div>
- xl sm:text-           <h3 classNaxl sm:text-me="font-display text-[28px] font-extrabold text-white mb-1">Agente Vocale AI</h3>
+          <motion.div variants={item} className="bg-neutral-800 rounded-3xl border-t-[3px] border-t-primary p-5 sm:p-8">
+            <div className="w-16 h-16 rounded-full bg-[rgba(62,207,110,0.15)] flex items-center justify-center text-[32px] mb-4">🎙️</div>
+            <h3 className="font-display text-xl sm:text-[28px] font-extrabold text-white mb-1">Agente Vocale AI</h3>
             <p className="font-mono text-xs text-primary uppercase tracking-wider mb-6">Interazione Telefonica in Tempo Reale</p>
             <p className="text-neutral-400 leading-relaxed mb-6">
               Gestisce conversazioni telefoniche reali con i tuoi clienti e lead.
