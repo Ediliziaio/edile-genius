@@ -277,7 +277,7 @@ const ChiSiamo = () => {
             <h2 className="font-display text-3xl md:text-5xl font-extrabold text-white">
               I Nostri <span className="text-primary">Valori</span>
             </h2>
-            <p className="text-[hsl(var(--neutral-400))] mt-4 max-w-xl mx-auto">
+            <p className="text-[hsl(var(--neutral-300))] mt-4 max-w-xl mx-auto">
               Non sono slogan. Sono le regole con cui gestiamo ogni progetto.
             </p>
           </motion.div>
