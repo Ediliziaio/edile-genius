@@ -230,6 +230,11 @@ const BlogPost = () => {
           </section>
         )}
 
+        {/* Bottom Social Share */}
+        <div className="flex justify-center py-8 border-t border-border mt-12">
+          <SocialShareButtons url={shareUrl} title={post.title} />
+        </div>
+
         {/* CTA */}
         <BlogCTA />
 
