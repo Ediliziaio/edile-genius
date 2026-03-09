@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { Search, X } from "lucide-react";
 import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
 import BlogCard from "@/components/blog/BlogCard";
@@ -7,6 +8,7 @@ import { usePageSEO } from "@/hooks/usePageSEO";
 
 const Blog = () => {
   const [activeCategory, setActiveCategory] = useState<string>("Tutti");
+  const [searchQuery, setSearchQuery] = useState("");
 
   usePageSEO({
     title: "Blog — AI e Innovazione nell'Edilizia | Edilizia.io",
