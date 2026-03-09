@@ -52,7 +52,7 @@ const PerChiE = () => {
         <div className="max-w-5xl mx-auto px-6 text-center">
           <AnimatedBadge>PER CHI È</AnimatedBadge>
           <motion.h1
-            className="font-display text-3xl sm:text-4xl md:text-6xl font-extrabold text-foreground leading-tight mt-6 mb-6"
+            className="font-display text-3xl sm:text-3xl sm:text-4xl md:text-6xl font-extrabold text-foreground leading-tight mt-6 mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -61,7 +61,7 @@ const PerChiE = () => {
             <span className="text-primary">Costruisce l'Italia.</span>
           </motion.h1>
           <motion.p
-            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto"
+            clasbase sm:text-sName="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15, duration: 0.5 }}
