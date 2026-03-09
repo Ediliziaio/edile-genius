@@ -5,6 +5,7 @@ import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
 import BlogArticle from "@/components/blog/BlogArticle";
 import BlogCTA from "@/components/blog/BlogCTA";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { blogPosts } from "@/data/blogPosts";
 import { usePageSEO } from "@/hooks/usePageSEO";
 import {
