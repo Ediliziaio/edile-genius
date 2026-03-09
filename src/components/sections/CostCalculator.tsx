@@ -231,7 +231,7 @@ const CostCalculator = () => {
         </motion.div>
 
         {/* PART 3 — Saving Box */}
-        <motion.div variants={itemVariants} className="bg-[hsl(var(--neutral-900))] rounded-3xl p-8 md:p-10 mb-12">
+        <motion.div variants={itemVariants} className="bg-[hsl(var(--neutral-900))] rounded-3xl p-5 md:p-10 mb-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:divide-x md:divide-[rgba(255,255,255,0.1)]">
             <div className="text-center">
               <div className="font-display font-extrabold text-3xl md:text-5xl text-primary mb-1" role="status" aria-live="polite">
