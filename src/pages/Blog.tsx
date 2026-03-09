@@ -135,7 +135,7 @@ const Blog = () => {
         )}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filtered.map((post) => (
-            <BlogCard key={post.slug} post={post} />
+            <BlogCard key={post.slug} post={post} searchQuery={searchQuery} />
           ))}
         </div>
         {filtered.length === 0 && (

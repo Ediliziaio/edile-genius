@@ -44,9 +44,9 @@ const BlogCard = ({ post, searchQuery = "" }: BlogCardProps) => (
         {post.category}
       </span>
       <h3 className="text-lg font-bold text-foreground leading-snug group-hover:text-primary transition-colors line-clamp-2">
-        {post.title}
+        {highlightText(post.title, searchQuery)}
       </h3>
-      <p className="text-sm text-muted-foreground line-clamp-2">{post.description}</p>
+      <p className="text-sm text-muted-foreground line-clamp-2">{highlightText(post.description, searchQuery)}</p>
       <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
         <span className="flex items-center gap-1"><Calendar size={12} />{new Date(post.date).toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" })}</span>
         <span className="flex items-center gap-1"><Clock size={12} />{post.readTime}</span>
