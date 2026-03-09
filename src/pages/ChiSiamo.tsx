@@ -106,7 +106,7 @@ const ChiSiamo = () => {
             <h2 className="font-display text-3xl md:text-5xl font-extrabold text-white">
               Perché Siamo <span className="text-primary">Diversi</span>
             </h2>
-            <p className="text-[hsl(var(--neutral-400))] mt-4 max-w-xl mx-auto">
+            <p className="text-[hsl(var(--neutral-300))] mt-4 max-w-xl mx-auto">
               Non siamo consulenti generici. Non siamo una software house. Siamo imprenditori edili che hanno costruito gli strumenti che mancavano.
             </p>
           </motion.div>
