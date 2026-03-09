@@ -3,6 +3,7 @@ import { motion, useInView } from "framer-motion";
 import { XCircle, Check, ArrowRight, Clock, Brain, Headphones } from "lucide-react";
 import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
+import Guarantee from "@/components/sections/Guarantee";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
 import {
   Accordion,
