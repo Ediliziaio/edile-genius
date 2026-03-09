@@ -237,7 +237,7 @@ const ComeFunziona = () => {
                     </div>
 
                     {/* Right: card */}
-                    <div className="flex-1 bg-background border border-border rounded-2xl p-7 md:p-8 space-y-4 shadow-card">
+                    <div className="flex-1 bg-background border border-border rounded-2xl p-5 sm:p-7 md:p-8 space-y-4 shadow-card">
                       <div className="flex items-center gap-3">
                         <span className="text-3xl">{step.icon}</span>
                         <h3 className="font-display text-2xl font-bold text-neutral-900">{step.title}</h3>
