@@ -240,7 +240,7 @@ const ComeFunziona = () => {
                     <div className="flex-1 bg-background border border-border rounded-2xl p-5 sm:p-7 md:p-8 space-y-4 shadow-card">
                       <div className="flex items-center gap-3">
                         <span className="text-3xl">{step.icon}</span>
-                        <h3 className="font-display text-2xl font-bold text-neutral-900">{step.title}</h3>
+                        <h3 className="font-display text-lg sm:text-2xl font-bold text-neutral-900">{step.title}</h3>
                       </div>
                       <p className="text-neutral-500 leading-relaxed">{step.text}</p>
                       <ul className="grid sm:grid-cols-2 gap-2.5 pt-1">
