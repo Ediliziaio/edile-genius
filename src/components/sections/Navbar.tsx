@@ -169,7 +169,7 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
               <Link
                 key={link.href}
                 to={link.href}
-                className={`relative text-sm font-medium transition-colors group ${isActive ? 'text-primary' : 'text-neutral-500 hover:text-neutral-900'}`}
+                className={`relative text-sm font-medium transition-colors group ${isActive ? 'text-primary' : isDark ? 'text-neutral-300 hover:text-white' : 'text-neutral-500 hover:text-neutral-900'}`}
               >
                 {link.label}
                 <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary origin-left transition-transform duration-300 ${isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
