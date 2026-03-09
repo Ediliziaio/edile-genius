@@ -41,7 +41,7 @@ const Hero = () => {
               10x meglio. 24/7, 365 giorni l'anno. Senza ferie, malattie o dimissioni.
             </motion.p>
 
-            <motion.div variants=col sm:flex-rowm} className="flex flex-wrap gap-4">
+            <motion.div variants={item} className="flex flex-col sm:flex-row gap-4">
               <a
                 href="#cta-finale"
                 className="bg-primary text-primary-foreground px-8 py-4 rounded-xl text-base font-bold hover:bg-primary-dark hover:-translate-y-0.5 shadow-button-green transition-all"
