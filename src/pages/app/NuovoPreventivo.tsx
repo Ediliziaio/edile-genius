@@ -226,14 +226,17 @@ export default function NuovoPreventivo() {
     const { error } = await (supabase.from("preventivi") as any)
       .update({
         voci,
-        subtotale,
+        subtotale: imponibile,
         imponibile,
         iva_importo: ivaImporto,
         totale: totaleFinale,
         totale_finale: totaleFinale,
+        sconto_globale_percentuale: scontoGlobalePerc,
+        sconto_globale_importo: scontoGlobaleImporto,
         note: noteGenerali,
         oggetto,
         titolo,
+        luogo_lavori: luogoLavori,
         tempi_esecuzione: tempiEsecuzione,
       })
       .eq("id", preventivoId);
