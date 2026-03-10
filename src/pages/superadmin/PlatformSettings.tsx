@@ -704,6 +704,106 @@ export default function PlatformSettings() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* TAB: N8N Automation */}
+        <TabsContent value="n8n" className="space-y-4">
+          {/* Connection Status */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                {n8nStatus?.configured ? <CheckCircle className="h-5 w-5 text-primary" /> : <XCircle className="h-5 w-5 text-destructive" />}
+                Stato Connessione N8N
+              </CardTitle>
+              <CardDescription>Automazione workflow per template agenti e scheduling</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {n8nStatus?.configured ? (
+                <div className="flex items-center gap-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
+                  <CheckCircle className="h-8 w-8 text-primary shrink-0" />
+                  <div>
+                    <p className="font-medium text-foreground">N8N Connesso</p>
+                    <p className="text-sm text-muted-foreground">
+                      Ultimo test: {n8nStatus.testedAt ? new Date(n8nStatus.testedAt).toLocaleString("it-IT") : "Mai testato"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Workflow trovati: <strong>{n8nStatus.workflowsCount}</strong>
+                    </p>
+                    {n8nStatus.apiKeySet && <Badge variant="secondary" className="mt-1">API Key configurata</Badge>}
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 rounded-lg bg-destructive/5 border border-destructive/20">
+                  <p className="font-medium text-destructive">N8N Non Configurato</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Inserisci l'URL base del tuo server N8N e la API key per abilitare l'automazione dei workflow.
+                  </p>
+                </div>
+              )}
+              <Button onClick={testN8nConnection} disabled={n8nTesting || !n8nFieldsValid} variant="outline">
+                {n8nTesting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+                {n8nTesting ? "Test in corso..." : "Testa Connessione"}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Config Form */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Workflow className="h-5 w-5 text-muted-foreground" />
+                Configurazione N8N
+                {n8nStatus?.configured ? (
+                  <Badge className="ml-2" variant="default">Configurato</Badge>
+                ) : (
+                  <Badge variant="secondary" className="ml-2">Non configurato</Badge>
+                )}
+              </CardTitle>
+              <CardDescription>
+                URL base e API key del tuo server N8N — la API key viene passata alla edge function per il test, 
+                per l'uso in produzione configura il secret <code className="bg-muted px-1 rounded">N8N_API_KEY</code> nelle impostazioni Supabase.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>N8N Base URL <span className="text-destructive">*</span></Label>
+                  <Input
+                    value={n8nBaseUrl}
+                    onChange={e => setN8nBaseUrl(e.target.value)}
+                    placeholder="https://n8n.tuodominio.com"
+                  />
+                  <p className="text-xs text-muted-foreground">L'URL del tuo server N8N (senza slash finale)</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>N8N API Key</Label>
+                  <div className="relative">
+                    <Input
+                      type={n8nShowKey ? "text" : "password"}
+                      value={n8nApiKey}
+                      onChange={e => setN8nApiKey(e.target.value)}
+                      placeholder={n8nStatus?.apiKeySet ? "••••••••• (già configurata)" : "Inserisci API key"}
+                    />
+                    <Button variant="ghost" size="sm" className="absolute right-1 top-0.5 h-8 w-8 p-0" onClick={() => setN8nShowKey(!n8nShowKey)}>
+                      {n8nShowKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Generata da N8N → Settings → API → Create API Key</p>
+                </div>
+              </div>
+              <Separator />
+              <div className="flex gap-3">
+                <Button onClick={saveN8nConfig} disabled={n8nSaving || !n8nFieldsValid}>
+                  {n8nSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                  Salva Configurazione
+                </Button>
+                <Button onClick={testN8nConnection} disabled={n8nTesting || !n8nFieldsValid} variant="outline">
+                  {n8nTesting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+                  Testa e Salva
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* Package Modal */}
