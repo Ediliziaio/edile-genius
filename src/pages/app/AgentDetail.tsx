@@ -377,6 +377,13 @@ export default function AgentDetail() {
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{conv.duration_sec ? `${Math.floor(conv.duration_sec / 60)}:${String(conv.duration_sec % 60).padStart(2, "0")}` : "—"}</TableCell>
                       <TableCell>
+                        {conv.eval_score !== null && conv.eval_score !== undefined ? (
+                          <Badge className={`text-xs ${Number(conv.eval_score) >= 70 ? "bg-green-100 text-green-700" : Number(conv.eval_score) >= 40 ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>
+                            {conv.eval_score}
+                          </Badge>
+                        ) : "—"}
+                      </TableCell>
+                      <TableCell>
                         <Badge variant="outline" className={`text-xs ${conv.outcome === "appointment" ? "border-status-success text-status-success" : conv.outcome === "qualified" ? "border-brand text-brand" : ""}`}>
                           {conv.outcome || "—"}
                         </Badge>
