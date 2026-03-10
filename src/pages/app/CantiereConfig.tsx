@@ -24,7 +24,7 @@ export default function CantiereConfig() {
   }, [companyId]);
 
   const fetchConfig = async () => {
-    const { data } = await supabase.from("telegram_config").select("*").eq("company_id", companyId!).maybeSingle();
+    const { data } = await (supabase.from("telegram_config") as any).select("*").eq("company_id", companyId!).maybeSingle();
     if (data) {
       setConfig(data);
       setBotToken((data as any).bot_token || "");
