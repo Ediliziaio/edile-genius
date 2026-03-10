@@ -279,6 +279,74 @@ export default function Settings() {
     }));
   };
 
+  // CRM Handlers
+  const testCrmConnection = async (provider: string) => {
+    if (!companyId) return;
+    setCrmTesting(provider);
+    try {
+      const { data, error } = await supabase.functions.invoke("crm-sync", {
+        body: { action: "test_connection", provider, api_key: crmApiKey, instance_url: crmInstanceUrl || undefined, company_id: companyId },
+      });
+      if (error || data?.error) {
+        toast({ variant: "destructive", title: "Test fallito", description: data?.error || error?.message });
+      } else {
+        toast({ title: "Connessione riuscita", description: `${data.contacts_count} contatti trovati nel CRM` });
+      }
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Errore", description: err.message });
+    } finally { setCrmTesting(null); }
+  };
+
+  const saveCrmIntegration = async (provider: string) => {
+    if (!companyId || !crmApiKey) return;
+    setCrmSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("crm-sync", {
+        body: { action: "save_integration", provider, api_key: crmApiKey, instance_url: crmInstanceUrl || undefined, company_id: companyId },
+      });
+      if (error || data?.error) {
+        toast({ variant: "destructive", title: "Errore", description: data?.error || error?.message });
+      } else {
+        toast({ title: "Integrazione salvata" });
+        setCrmConfigOpen(null);
+        setCrmApiKey("");
+        setCrmInstanceUrl("");
+        await loadCrmIntegrations();
+      }
+    } finally { setCrmSaving(false); }
+  };
+
+  const disconnectCrm = async (provider: string) => {
+    if (!companyId) return;
+    const { error } = await supabase.functions.invoke("crm-sync", {
+      body: { action: "disconnect", provider, company_id: companyId },
+    });
+    if (error) {
+      toast({ variant: "destructive", title: "Errore", description: error.message });
+    } else {
+      toast({ title: "Integrazione disconnessa" });
+      await loadCrmIntegrations();
+    }
+  };
+
+  const syncCrmContacts = async (provider: string) => {
+    if (!companyId) return;
+    setCrmSyncing(provider);
+    try {
+      const { data, error } = await supabase.functions.invoke("crm-sync", {
+        body: { action: "sync_contacts", provider, company_id: companyId },
+      });
+      if (error || data?.error) {
+        toast({ variant: "destructive", title: "Sync fallito", description: data?.error || error?.message });
+      } else {
+        toast({ title: "Sync completato", description: `${data.imported} importati, ${data.skipped} saltati su ${data.total} totali` });
+        await loadCrmIntegrations();
+      }
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Errore sync", description: err.message });
+    } finally { setCrmSyncing(null); }
+  };
+
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-brand" /></div>;
 
   return (
@@ -288,10 +356,11 @@ export default function Settings() {
       <Tabs defaultValue="profile" className="space-y-4">
         <TabsList className="bg-ink-100 border-none">
           <TabsTrigger value="profile">Profilo</TabsTrigger>
-          <TabsTrigger value="api">API & Integrazioni</TabsTrigger>
+          <TabsTrigger value="api">API</TabsTrigger>
+          <TabsTrigger value="integrations">CRM</TabsTrigger>
           <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
           <TabsTrigger value="notif">Notifiche</TabsTrigger>
-          <TabsTrigger value="billing">Piano & Fatturazione</TabsTrigger>
+          <TabsTrigger value="billing">Fatturazione</TabsTrigger>
         </TabsList>
 
         {/* Profile Tab */}
