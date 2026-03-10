@@ -360,6 +360,7 @@ export default function AgentDetail() {
                     <TableHead>Numero</TableHead>
                     <TableHead>Direzione</TableHead>
                     <TableHead>Durata</TableHead>
+                    <TableHead>Score</TableHead>
                     <TableHead>Esito</TableHead>
                     <TableHead>Sentiment</TableHead>
                   </TableRow>
