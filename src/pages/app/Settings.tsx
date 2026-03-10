@@ -120,6 +120,25 @@ export default function Settings() {
   const [whLogs, setWhLogs] = useState<WebhookLog[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(false);
 
+  // CRM Integrations state
+  const [crmIntegrations, setCrmIntegrations] = useState<CrmIntegration[]>([]);
+  const [crmConfigOpen, setCrmConfigOpen] = useState<string | null>(null);
+  const [crmApiKey, setCrmApiKey] = useState("");
+  const [crmInstanceUrl, setCrmInstanceUrl] = useState("");
+  const [crmShowKey, setCrmShowKey] = useState(false);
+  const [crmSaving, setCrmSaving] = useState(false);
+  const [crmTesting, setCrmTesting] = useState<string | null>(null);
+  const [crmSyncing, setCrmSyncing] = useState<string | null>(null);
+
+  const loadCrmIntegrations = useCallback(async () => {
+    if (!companyId) return;
+    const { data } = await supabase
+      .from("company_integrations")
+      .select("id, provider, is_active, status, last_sync_at, last_sync_status, last_sync_count, instance_url")
+      .eq("company_id", companyId);
+    setCrmIntegrations((data as CrmIntegration[]) || []);
+  }, [companyId]);
+
   useEffect(() => {
     if (!profile) return;
     setFullName(profile.full_name || "");
@@ -128,6 +147,7 @@ export default function Settings() {
       Promise.all([
         supabase.from("companies").select("el_api_key, settings").eq("id", companyId).single(),
         loadWebhooks(companyId),
+        loadCrmIntegrations(),
       ]).then(([compRes]) => {
         if (compRes.data) {
           setApiKey(compRes.data.el_api_key || "");
@@ -137,7 +157,7 @@ export default function Settings() {
         setLoading(false);
       });
     } else { setLoading(false); }
-  }, [profile, companyId]);
+  }, [profile, companyId, loadCrmIntegrations]);
 
   const loadWebhooks = async (companyId: string) => {
     setLoadingWebhooks(true);
