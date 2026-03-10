@@ -37,7 +37,7 @@ export default function CantiereDetail() {
   };
 
   const fetchReports = async () => {
-    let query = supabase.from("agent_reports").select("*").eq("cantiere_id" as any, id!).order("date", { ascending: false });
+    let query = (supabase.from("agent_reports") as any).select("*").eq("cantiere_id", id!).order("date", { ascending: false });
     if (dateFilter === "today") {
       query = query.eq("date", new Date().toISOString().split("T")[0]);
     } else if (dateFilter === "week") {
