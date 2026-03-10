@@ -523,7 +523,7 @@ export default function AgentDetail() {
         </div>
       )}
 
-      <TranscriptViewer open={!!viewTranscript} onOpenChange={() => setViewTranscript(null)} transcript={viewTranscript?.transcript ?? null} agentName={agent.name} />
+      <TranscriptViewer open={!!viewTranscript} onOpenChange={() => setViewTranscript(null)} transcript={viewTranscript?.transcript ?? null} agentName={agent.name} evalScore={viewTranscript?.eval_score ?? null} evalNotes={viewTranscript?.eval_notes ?? null} collectedData={viewTranscript?.collected_data ?? null} />
     </div>
   );
 }
