@@ -43,12 +43,12 @@ export default function CantierePage() {
   const fetchCantieri = async () => {
     if (!companyId) return;
     setLoading(true);
-    const { data } = await supabase.from("cantieri").select("*").eq("company_id", companyId).order("created_at", { ascending: false });
+    const { data } = await (supabase.from("cantieri") as any).select("*").eq("company_id", companyId).order("created_at", { ascending: false });
     if (data) {
       // Get counts
       const enriched = await Promise.all(data.map(async (c: any) => {
-        const { count: operaiCount } = await supabase.from("cantiere_operai").select("id", { count: "exact", head: true }).eq("cantiere_id", c.id);
-        const { data: reports } = await supabase.from("agent_reports").select("date").eq("cantiere_id" as any, c.id).order("date", { ascending: false }).limit(1);
+        const { count: operaiCount } = await (supabase.from("cantiere_operai") as any).select("id", { count: "exact", head: true }).eq("cantiere_id", c.id);
+        const { data: reports } = await (supabase.from("agent_reports") as any).select("date").eq("cantiere_id", c.id).order("date", { ascending: false }).limit(1);
         return { ...c, operai_count: operaiCount || 0, report_count: 0, last_report_date: reports?.[0]?.date || null };
       }));
       setCantieri(enriched);
