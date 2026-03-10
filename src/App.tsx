@@ -64,6 +64,11 @@ import BlogPost from "./pages/BlogPost";
 import CantierePage from "./pages/app/Cantieri";
 import CantiereDetail from "./pages/app/CantiereDetail";
 import CantiereConfig from "./pages/app/CantiereConfig";
+import PreventiviList from "./pages/app/PreventiviList";
+import NuovoPreventivo from "./pages/app/NuovoPreventivo";
+import PreventivoDetail from "./pages/app/PreventivoDetail";
+import DocumentiScadenze from "./pages/app/DocumentiScadenze";
+import FoglioPresenze from "./pages/app/FoglioPresenze";
 
 const queryClient = new QueryClient();
 const App = () => (
