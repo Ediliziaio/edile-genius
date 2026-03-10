@@ -140,6 +140,7 @@ const App = () => (
                 <Route path="/app/preventivi/:id" element={<PreventivoDetail />} />
                 <Route path="/app/documenti" element={<DocumentiScadenze />} />
                 <Route path="/app/presenze" element={<FoglioPresenze />} />
+                <Route path="/app/impostazioni/template-preventivo" element={<TemplatePreventivo />} />
                 <Route path="/app/render" element={<RenderHub />} />
                 <Route path="/app/render/new" element={<RenderNew />} />
                 <Route path="/app/render/gallery" element={<RenderGallery />} />

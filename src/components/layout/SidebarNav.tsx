@@ -22,6 +22,7 @@ const companyNav: NavSection[] = [
   { header: "AUTOMAZIONI", items: [
     { label: "Template Agenti", icon: Puzzle, href: "/app/templates" },
     { label: "Preventivi", icon: FileSignature, href: "/app/preventivi" },
+    { label: "Template PDF", icon: FileText, href: "/app/impostazioni/template-preventivo" },
     { label: "Documenti", icon: ShieldCheck, href: "/app/documenti" },
     { label: "Presenze", icon: ClipboardList, href: "/app/presenze" },
   ]},
