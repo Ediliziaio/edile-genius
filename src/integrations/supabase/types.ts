@@ -2304,72 +2304,156 @@ export type Database = {
       }
       preventivi: {
         Row: {
+          accettato_at: string | null
           audio_url: string | null
           cantiere_id: string | null
+          clausole: string | null
+          cliente_codice_fiscale: string | null
           cliente_email: string | null
           cliente_indirizzo: string | null
           cliente_nome: string | null
+          cliente_piva: string | null
           cliente_telefono: string | null
           company_id: string
+          condizioni: string | null
           created_at: string | null
           created_by: string | null
+          data_scadenza: string | null
+          firma_cliente_url: string | null
+          firma_testo: string | null
+          foto_copertina_url: string | null
+          foto_sopralluogo_urls: string[] | null
           id: string
+          imponibile: number | null
+          intro: string | null
+          inviato_at: string | null
+          inviato_via: string | null
+          iva_importo: number | null
           iva_percentuale: number | null
+          link_accettazione: string | null
           note: string | null
           numero_preventivo: string
           oggetto: string | null
+          parent_id: string | null
           pdf_url: string | null
+          rifiutato_at: string | null
+          rifiuto_motivo: string | null
+          sconto_globale: number | null
           stato: string | null
           subtotale: number | null
+          tempi_esecuzione: string | null
+          template_id: string | null
+          titolo: string | null
           totale: number | null
+          totale_finale: number | null
+          tracking_aperto_at: string | null
+          tracking_aperto_count: number | null
           trascrizione: string | null
           updated_at: string | null
+          validita_giorni: number | null
+          versione: number | null
           voci: Json
         }
         Insert: {
+          accettato_at?: string | null
           audio_url?: string | null
           cantiere_id?: string | null
+          clausole?: string | null
+          cliente_codice_fiscale?: string | null
           cliente_email?: string | null
           cliente_indirizzo?: string | null
           cliente_nome?: string | null
+          cliente_piva?: string | null
           cliente_telefono?: string | null
           company_id: string
+          condizioni?: string | null
           created_at?: string | null
           created_by?: string | null
+          data_scadenza?: string | null
+          firma_cliente_url?: string | null
+          firma_testo?: string | null
+          foto_copertina_url?: string | null
+          foto_sopralluogo_urls?: string[] | null
           id?: string
+          imponibile?: number | null
+          intro?: string | null
+          inviato_at?: string | null
+          inviato_via?: string | null
+          iva_importo?: number | null
           iva_percentuale?: number | null
+          link_accettazione?: string | null
           note?: string | null
           numero_preventivo: string
           oggetto?: string | null
+          parent_id?: string | null
           pdf_url?: string | null
+          rifiutato_at?: string | null
+          rifiuto_motivo?: string | null
+          sconto_globale?: number | null
           stato?: string | null
           subtotale?: number | null
+          tempi_esecuzione?: string | null
+          template_id?: string | null
+          titolo?: string | null
           totale?: number | null
+          totale_finale?: number | null
+          tracking_aperto_at?: string | null
+          tracking_aperto_count?: number | null
           trascrizione?: string | null
           updated_at?: string | null
+          validita_giorni?: number | null
+          versione?: number | null
           voci?: Json
         }
         Update: {
+          accettato_at?: string | null
           audio_url?: string | null
           cantiere_id?: string | null
+          clausole?: string | null
+          cliente_codice_fiscale?: string | null
           cliente_email?: string | null
           cliente_indirizzo?: string | null
           cliente_nome?: string | null
+          cliente_piva?: string | null
           cliente_telefono?: string | null
           company_id?: string
+          condizioni?: string | null
           created_at?: string | null
           created_by?: string | null
+          data_scadenza?: string | null
+          firma_cliente_url?: string | null
+          firma_testo?: string | null
+          foto_copertina_url?: string | null
+          foto_sopralluogo_urls?: string[] | null
           id?: string
+          imponibile?: number | null
+          intro?: string | null
+          inviato_at?: string | null
+          inviato_via?: string | null
+          iva_importo?: number | null
           iva_percentuale?: number | null
+          link_accettazione?: string | null
           note?: string | null
           numero_preventivo?: string
           oggetto?: string | null
+          parent_id?: string | null
           pdf_url?: string | null
+          rifiutato_at?: string | null
+          rifiuto_motivo?: string | null
+          sconto_globale?: number | null
           stato?: string | null
           subtotale?: number | null
+          tempi_esecuzione?: string | null
+          template_id?: string | null
+          titolo?: string | null
           totale?: number | null
+          totale_finale?: number | null
+          tracking_aperto_at?: string | null
+          tracking_aperto_count?: number | null
           trascrizione?: string | null
           updated_at?: string | null
+          validita_giorni?: number | null
+          versione?: number | null
           voci?: Json
         }
         Relationships: [
@@ -2382,6 +2466,100 @@ export type Database = {
           },
           {
             foreignKeyName: "preventivi_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "preventivi_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "preventivi"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "preventivi_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "preventivo_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      preventivo_templates: {
+        Row: {
+          clausole_default: string | null
+          colore_primario: string | null
+          colore_secondario: string | null
+          company_id: string
+          condizioni_default: string | null
+          created_at: string | null
+          firma_testo: string | null
+          id: string
+          intestazione_azienda: string | null
+          intro_default: string | null
+          iva_default: number | null
+          logo_url: string | null
+          nome: string
+          piede_pagina: string | null
+          show_condizioni: boolean | null
+          show_firma: boolean | null
+          show_foto_copertina: boolean | null
+          show_foto_voci: boolean | null
+          show_subtotali_categoria: boolean | null
+          updated_at: string | null
+          validita_giorni_default: number | null
+        }
+        Insert: {
+          clausole_default?: string | null
+          colore_primario?: string | null
+          colore_secondario?: string | null
+          company_id: string
+          condizioni_default?: string | null
+          created_at?: string | null
+          firma_testo?: string | null
+          id?: string
+          intestazione_azienda?: string | null
+          intro_default?: string | null
+          iva_default?: number | null
+          logo_url?: string | null
+          nome?: string
+          piede_pagina?: string | null
+          show_condizioni?: boolean | null
+          show_firma?: boolean | null
+          show_foto_copertina?: boolean | null
+          show_foto_voci?: boolean | null
+          show_subtotali_categoria?: boolean | null
+          updated_at?: string | null
+          validita_giorni_default?: number | null
+        }
+        Update: {
+          clausole_default?: string | null
+          colore_primario?: string | null
+          colore_secondario?: string | null
+          company_id?: string
+          condizioni_default?: string | null
+          created_at?: string | null
+          firma_testo?: string | null
+          id?: string
+          intestazione_azienda?: string | null
+          intro_default?: string | null
+          iva_default?: number | null
+          logo_url?: string | null
+          nome?: string
+          piede_pagina?: string | null
+          show_condizioni?: boolean | null
+          show_firma?: boolean | null
+          show_foto_copertina?: boolean | null
+          show_foto_voci?: boolean | null
+          show_subtotali_categoria?: boolean | null
+          updated_at?: string | null
+          validita_giorni_default?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preventivo_templates_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
