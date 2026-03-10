@@ -1233,6 +1233,65 @@ export type Database = {
           },
         ]
       }
+      company_integrations: {
+        Row: {
+          api_key_encrypted: string | null
+          company_id: string
+          created_at: string | null
+          field_mapping: Json
+          id: string
+          instance_url: string | null
+          is_active: boolean
+          last_sync_at: string | null
+          last_sync_count: number | null
+          last_sync_status: string | null
+          provider: string
+          status: string
+          sync_settings: Json
+          updated_at: string | null
+        }
+        Insert: {
+          api_key_encrypted?: string | null
+          company_id: string
+          created_at?: string | null
+          field_mapping?: Json
+          id?: string
+          instance_url?: string | null
+          is_active?: boolean
+          last_sync_at?: string | null
+          last_sync_count?: number | null
+          last_sync_status?: string | null
+          provider: string
+          status?: string
+          sync_settings?: Json
+          updated_at?: string | null
+        }
+        Update: {
+          api_key_encrypted?: string | null
+          company_id?: string
+          created_at?: string | null
+          field_mapping?: Json
+          id?: string
+          instance_url?: string | null
+          is_active?: boolean
+          last_sync_at?: string | null
+          last_sync_count?: number | null
+          last_sync_status?: string | null
+          provider?: string
+          status?: string
+          sync_settings?: Json
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_integrations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_list_members: {
         Row: {
           added_at: string | null
