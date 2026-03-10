@@ -2305,6 +2305,8 @@ export type Database = {
       preventivi: {
         Row: {
           accettato_at: string | null
+          accettato_online_at: string | null
+          ai_elaborato: boolean | null
           audio_url: string | null
           cantiere_id: string | null
           clausole: string | null
@@ -2316,9 +2318,12 @@ export type Database = {
           cliente_telefono: string | null
           company_id: string
           condizioni: string | null
+          condizioni_pagamento: string | null
           created_at: string | null
           created_by: string | null
+          data_invio: string | null
           data_scadenza: string | null
+          email_aperta_at: string | null
           firma_cliente_url: string | null
           firma_testo: string | null
           foto_copertina_url: string | null
@@ -2326,19 +2331,29 @@ export type Database = {
           id: string
           imponibile: number | null
           intro: string | null
+          intro_testo: string | null
           inviato_at: string | null
           inviato_via: string | null
+          invio_email: string | null
           iva_importo: number | null
           iva_percentuale: number | null
           link_accettazione: string | null
+          link_aperto_at: string | null
+          link_aperto_count: number | null
+          luogo_lavori: string | null
           note: string | null
+          note_finali: string | null
           numero_preventivo: string
           oggetto: string | null
           parent_id: string | null
+          pdf_generato_at: string | null
           pdf_url: string | null
+          pdf_versione: number | null
           rifiutato_at: string | null
           rifiuto_motivo: string | null
           sconto_globale: number | null
+          sconto_globale_importo: number | null
+          sconto_globale_percentuale: number | null
           stato: string | null
           subtotale: number | null
           tempi_esecuzione: string | null
@@ -2356,6 +2371,8 @@ export type Database = {
         }
         Insert: {
           accettato_at?: string | null
+          accettato_online_at?: string | null
+          ai_elaborato?: boolean | null
           audio_url?: string | null
           cantiere_id?: string | null
           clausole?: string | null
@@ -2367,9 +2384,12 @@ export type Database = {
           cliente_telefono?: string | null
           company_id: string
           condizioni?: string | null
+          condizioni_pagamento?: string | null
           created_at?: string | null
           created_by?: string | null
+          data_invio?: string | null
           data_scadenza?: string | null
+          email_aperta_at?: string | null
           firma_cliente_url?: string | null
           firma_testo?: string | null
           foto_copertina_url?: string | null
@@ -2377,19 +2397,29 @@ export type Database = {
           id?: string
           imponibile?: number | null
           intro?: string | null
+          intro_testo?: string | null
           inviato_at?: string | null
           inviato_via?: string | null
+          invio_email?: string | null
           iva_importo?: number | null
           iva_percentuale?: number | null
           link_accettazione?: string | null
+          link_aperto_at?: string | null
+          link_aperto_count?: number | null
+          luogo_lavori?: string | null
           note?: string | null
+          note_finali?: string | null
           numero_preventivo: string
           oggetto?: string | null
           parent_id?: string | null
+          pdf_generato_at?: string | null
           pdf_url?: string | null
+          pdf_versione?: number | null
           rifiutato_at?: string | null
           rifiuto_motivo?: string | null
           sconto_globale?: number | null
+          sconto_globale_importo?: number | null
+          sconto_globale_percentuale?: number | null
           stato?: string | null
           subtotale?: number | null
           tempi_esecuzione?: string | null
@@ -2407,6 +2437,8 @@ export type Database = {
         }
         Update: {
           accettato_at?: string | null
+          accettato_online_at?: string | null
+          ai_elaborato?: boolean | null
           audio_url?: string | null
           cantiere_id?: string | null
           clausole?: string | null
@@ -2418,9 +2450,12 @@ export type Database = {
           cliente_telefono?: string | null
           company_id?: string
           condizioni?: string | null
+          condizioni_pagamento?: string | null
           created_at?: string | null
           created_by?: string | null
+          data_invio?: string | null
           data_scadenza?: string | null
+          email_aperta_at?: string | null
           firma_cliente_url?: string | null
           firma_testo?: string | null
           foto_copertina_url?: string | null
@@ -2428,19 +2463,29 @@ export type Database = {
           id?: string
           imponibile?: number | null
           intro?: string | null
+          intro_testo?: string | null
           inviato_at?: string | null
           inviato_via?: string | null
+          invio_email?: string | null
           iva_importo?: number | null
           iva_percentuale?: number | null
           link_accettazione?: string | null
+          link_aperto_at?: string | null
+          link_aperto_count?: number | null
+          luogo_lavori?: string | null
           note?: string | null
+          note_finali?: string | null
           numero_preventivo?: string
           oggetto?: string | null
           parent_id?: string | null
+          pdf_generato_at?: string | null
           pdf_url?: string | null
+          pdf_versione?: number | null
           rifiutato_at?: string | null
           rifiuto_motivo?: string | null
           sconto_globale?: number | null
+          sconto_globale_importo?: number | null
+          sconto_globale_percentuale?: number | null
           stato?: string | null
           subtotale?: number | null
           tempi_esecuzione?: string | null
@@ -2489,6 +2534,15 @@ export type Database = {
       }
       preventivo_templates: {
         Row: {
+          attivo: boolean | null
+          azienda_cf: string | null
+          azienda_email: string | null
+          azienda_indirizzo: string | null
+          azienda_nome: string | null
+          azienda_piva: string | null
+          azienda_rea: string | null
+          azienda_sito: string | null
+          azienda_telefono: string | null
           clausole_default: string | null
           colore_primario: string | null
           colore_secondario: string | null
@@ -2496,12 +2550,16 @@ export type Database = {
           condizioni_default: string | null
           created_at: string | null
           firma_testo: string | null
+          font: string | null
           id: string
           intestazione_azienda: string | null
           intro_default: string | null
           iva_default: number | null
+          iva_inclusa_default: boolean | null
           logo_url: string | null
           nome: string
+          note_finali: string | null
+          oggetto_default: string | null
           piede_pagina: string | null
           show_condizioni: boolean | null
           show_firma: boolean | null
@@ -2510,8 +2568,18 @@ export type Database = {
           show_subtotali_categoria: boolean | null
           updated_at: string | null
           validita_giorni_default: number | null
+          valuta: string | null
         }
         Insert: {
+          attivo?: boolean | null
+          azienda_cf?: string | null
+          azienda_email?: string | null
+          azienda_indirizzo?: string | null
+          azienda_nome?: string | null
+          azienda_piva?: string | null
+          azienda_rea?: string | null
+          azienda_sito?: string | null
+          azienda_telefono?: string | null
           clausole_default?: string | null
           colore_primario?: string | null
           colore_secondario?: string | null
@@ -2519,12 +2587,16 @@ export type Database = {
           condizioni_default?: string | null
           created_at?: string | null
           firma_testo?: string | null
+          font?: string | null
           id?: string
           intestazione_azienda?: string | null
           intro_default?: string | null
           iva_default?: number | null
+          iva_inclusa_default?: boolean | null
           logo_url?: string | null
           nome?: string
+          note_finali?: string | null
+          oggetto_default?: string | null
           piede_pagina?: string | null
           show_condizioni?: boolean | null
           show_firma?: boolean | null
@@ -2533,8 +2605,18 @@ export type Database = {
           show_subtotali_categoria?: boolean | null
           updated_at?: string | null
           validita_giorni_default?: number | null
+          valuta?: string | null
         }
         Update: {
+          attivo?: boolean | null
+          azienda_cf?: string | null
+          azienda_email?: string | null
+          azienda_indirizzo?: string | null
+          azienda_nome?: string | null
+          azienda_piva?: string | null
+          azienda_rea?: string | null
+          azienda_sito?: string | null
+          azienda_telefono?: string | null
           clausole_default?: string | null
           colore_primario?: string | null
           colore_secondario?: string | null
@@ -2542,12 +2624,16 @@ export type Database = {
           condizioni_default?: string | null
           created_at?: string | null
           firma_testo?: string | null
+          font?: string | null
           id?: string
           intestazione_azienda?: string | null
           intro_default?: string | null
           iva_default?: number | null
+          iva_inclusa_default?: boolean | null
           logo_url?: string | null
           nome?: string
+          note_finali?: string | null
+          oggetto_default?: string | null
           piede_pagina?: string | null
           show_condizioni?: boolean | null
           show_firma?: boolean | null
@@ -2556,6 +2642,7 @@ export type Database = {
           show_subtotali_categoria?: boolean | null
           updated_at?: string | null
           validita_giorni_default?: number | null
+          valuta?: string | null
         }
         Relationships: [
           {
