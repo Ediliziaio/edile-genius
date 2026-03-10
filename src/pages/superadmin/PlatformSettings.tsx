@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import {
   CheckCircle, XCircle, RefreshCw, Cpu, DollarSign, Package,
   Loader2, Plus, Pencil, Trash2, Zap, Clock, Brain, Save,
-  MessageSquare, Eye, EyeOff
+  MessageSquare, Eye, EyeOff, Workflow
 } from "lucide-react";
 
 interface PlatformConfig {
