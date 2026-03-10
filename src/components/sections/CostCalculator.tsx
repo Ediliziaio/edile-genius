@@ -73,7 +73,7 @@ const CostCalculator = () => {
   ];
 
   const aiBreakdown = [
-    { label: "Canone mensile Agente AI", desc: "Piano Professional — in base al volume", value: aiCosts.canone * 12 },
+    { label: "Canone annuale Agente AI", desc: "Piano Professional — in base al volume", value: aiCosts.canone * 12 },
     { label: "Setup e configurazione", desc: "Una tantum — ammort. €125/mese", value: aiCosts.setupAmmort * 12 },
     { label: "Ottimizzazione continua", desc: "Inclusa nel canone mensile", value: 0 },
     { label: "Formazione", desc: "Non necessaria — aggiornamenti automatici", value: 0 },
