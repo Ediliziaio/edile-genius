@@ -61,6 +61,9 @@ import PerChiE from "./pages/PerChiE";
 import PerChiEDetail from "./pages/PerChiEDetail";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import CantierePage from "./pages/app/Cantieri";
+import CantiereDetail from "./pages/app/CantiereDetail";
+import CantiereConfig from "./pages/app/CantiereConfig";
 
 const queryClient = new QueryClient();
 const App = () => (
