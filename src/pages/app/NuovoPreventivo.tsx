@@ -247,7 +247,9 @@ export default function NuovoPreventivo() {
   };
 
   // Computed totals
-  const subtotale = voci.reduce((s, v) => s + v.totale, 0);
+  const subtotaleBruto = voci.reduce((s, v) => s + v.totale, 0);
+  const scontoGlobaleImporto = subtotaleBruto * (scontoGlobalePerc / 100);
+  const subtotale = subtotaleBruto - scontoGlobaleImporto;
   const ivaImporto = subtotale * 0.22;
   const totaleFinale = subtotale + ivaImporto;
 
