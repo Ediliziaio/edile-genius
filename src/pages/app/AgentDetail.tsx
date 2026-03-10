@@ -399,6 +399,11 @@ export default function AgentDetail() {
           )}
         </TabsContent>
 
+        {/* ═══ TAB: Outbound ═══ */}
+        <TabsContent value="outbound">
+          <AgentOutboundTab agentId={agent.id} companyId={companyId} outboundEnabled={(agent as any).outbound_enabled ?? false} elAgentId={agent.el_agent_id} />
+        </TabsContent>
+
         {/* ═══ TAB: Analytics ═══ */}
         <TabsContent value="analytics">
           <AgentAnalyticsTab conversations={conversations} />
