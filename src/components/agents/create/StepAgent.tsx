@@ -4,9 +4,9 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import UseCaseSelector from "@/components/agents/UseCaseSelector";
-import { SECTORS, LANGUAGES, type UseCaseId } from "@/components/agents/PromptTemplates";
+import { SECTORS, LANGUAGES, EDILIZIA_PROMPT_TEMPLATES, type UseCaseId } from "@/components/agents/PromptTemplates";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { HelpCircle, X } from "lucide-react";
+import { HelpCircle, X, Zap } from "lucide-react";
 import React from "react";
 
 const LLM_MODELS = [
