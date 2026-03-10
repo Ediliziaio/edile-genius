@@ -136,7 +136,10 @@ export default function PreventivoDetail() {
   if (isLoading) return <div className="text-center py-12 text-muted-foreground">Caricamento...</div>;
   if (!prev) return <div className="text-center py-12 text-muted-foreground">Preventivo non trovato</div>;
 
-  const subtotale = voci.reduce((s, v) => s + v.totale, 0);
+  const subtotaleBruto = voci.reduce((s, v) => s + v.totale, 0);
+  const scontoPerc = prev.sconto_globale_percentuale || 0;
+  const scontoImporto = subtotaleBruto * (scontoPerc / 100);
+  const subtotale = subtotaleBruto - scontoImporto;
   const iva = subtotale * ((prev.iva_percentuale || 22) / 100);
   const totale = subtotale + iva;
   const categories = [...new Set(voci.map(v => v.categoria || "Generale"))];
