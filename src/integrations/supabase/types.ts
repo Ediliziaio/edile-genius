@@ -1118,6 +1118,51 @@ export type Database = {
           },
         ]
       }
+      alert_mancato_report: {
+        Row: {
+          cantiere_id: string
+          company_id: string
+          data_mancanza: string
+          id: string
+          inviato_a: Json | null
+          inviato_at: string | null
+          tipo_alert: string | null
+        }
+        Insert: {
+          cantiere_id: string
+          company_id: string
+          data_mancanza: string
+          id?: string
+          inviato_a?: Json | null
+          inviato_at?: string | null
+          tipo_alert?: string | null
+        }
+        Update: {
+          cantiere_id?: string
+          company_id?: string
+          data_mancanza?: string
+          id?: string
+          inviato_a?: Json | null
+          inviato_at?: string | null
+          tipo_alert?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_mancato_report_cantiere_id_fkey"
+            columns: ["cantiere_id"]
+            isOneToOne: false
+            referencedRelation: "cantieri"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alert_mancato_report_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaigns: {
         Row: {
           agent_id: string | null
@@ -1298,49 +1343,58 @@ export type Database = {
       }
       cantieri: {
         Row: {
+          alert_mancato_report_ore: number | null
           committente: string | null
           company_id: string
           created_at: string | null
           data_fine_prevista: string | null
           data_inizio: string | null
           email_report: string[] | null
+          fine_turno_ora: string | null
           foto_url: string | null
           id: string
           indirizzo: string | null
           nome: string
           note: string | null
+          reminder_ora: string | null
           responsabile: string | null
           stato: string | null
           telegram_chat_ids: string[] | null
         }
         Insert: {
+          alert_mancato_report_ore?: number | null
           committente?: string | null
           company_id: string
           created_at?: string | null
           data_fine_prevista?: string | null
           data_inizio?: string | null
           email_report?: string[] | null
+          fine_turno_ora?: string | null
           foto_url?: string | null
           id?: string
           indirizzo?: string | null
           nome: string
           note?: string | null
+          reminder_ora?: string | null
           responsabile?: string | null
           stato?: string | null
           telegram_chat_ids?: string[] | null
         }
         Update: {
+          alert_mancato_report_ore?: number | null
           committente?: string | null
           company_id?: string
           created_at?: string | null
           data_fine_prevista?: string | null
           data_inizio?: string | null
           email_report?: string[] | null
+          fine_turno_ora?: string | null
           foto_url?: string | null
           id?: string
           indirizzo?: string | null
           nome?: string
           note?: string | null
+          reminder_ora?: string | null
           responsabile?: string | null
           stato?: string | null
           telegram_chat_ids?: string[] | null
@@ -1843,6 +1897,81 @@ export type Database = {
           },
         ]
       }
+      documenti_azienda: {
+        Row: {
+          alert_15g: boolean | null
+          alert_30g: boolean | null
+          alert_7g: boolean | null
+          alert_scaduto: boolean | null
+          company_id: string
+          created_at: string | null
+          data_emissione: string | null
+          data_scadenza: string
+          file_url: string | null
+          id: string
+          nome: string
+          note: string | null
+          numero_documento: string | null
+          operaio_id: string | null
+          stato: string | null
+          tipo: string
+          updated_at: string | null
+        }
+        Insert: {
+          alert_15g?: boolean | null
+          alert_30g?: boolean | null
+          alert_7g?: boolean | null
+          alert_scaduto?: boolean | null
+          company_id: string
+          created_at?: string | null
+          data_emissione?: string | null
+          data_scadenza: string
+          file_url?: string | null
+          id?: string
+          nome: string
+          note?: string | null
+          numero_documento?: string | null
+          operaio_id?: string | null
+          stato?: string | null
+          tipo: string
+          updated_at?: string | null
+        }
+        Update: {
+          alert_15g?: boolean | null
+          alert_30g?: boolean | null
+          alert_7g?: boolean | null
+          alert_scaduto?: boolean | null
+          company_id?: string
+          created_at?: string | null
+          data_emissione?: string | null
+          data_scadenza?: string
+          file_url?: string | null
+          id?: string
+          nome?: string
+          note?: string | null
+          numero_documento?: string | null
+          operaio_id?: string | null
+          stato?: string | null
+          tipo?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documenti_azienda_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documenti_azienda_operaio_id_fkey"
+            columns: ["operaio_id"]
+            isOneToOne: false
+            referencedRelation: "cantiere_operai"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       knowledge_base_files: {
         Row: {
           agent_id: string
@@ -2108,6 +2237,157 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: []
+      }
+      presenze_mensili: {
+        Row: {
+          anno: number
+          cantiere_id: string | null
+          company_id: string
+          created_at: string | null
+          id: string
+          mese: number
+          note: string | null
+          operaio_id: string
+          ore_giornaliere: Json
+          ore_totali: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          anno: number
+          cantiere_id?: string | null
+          company_id: string
+          created_at?: string | null
+          id?: string
+          mese: number
+          note?: string | null
+          operaio_id: string
+          ore_giornaliere?: Json
+          ore_totali?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          anno?: number
+          cantiere_id?: string | null
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          mese?: number
+          note?: string | null
+          operaio_id?: string
+          ore_giornaliere?: Json
+          ore_totali?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "presenze_mensili_cantiere_id_fkey"
+            columns: ["cantiere_id"]
+            isOneToOne: false
+            referencedRelation: "cantieri"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presenze_mensili_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presenze_mensili_operaio_id_fkey"
+            columns: ["operaio_id"]
+            isOneToOne: false
+            referencedRelation: "cantiere_operai"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      preventivi: {
+        Row: {
+          audio_url: string | null
+          cantiere_id: string | null
+          cliente_email: string | null
+          cliente_indirizzo: string | null
+          cliente_nome: string | null
+          cliente_telefono: string | null
+          company_id: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          iva_percentuale: number | null
+          note: string | null
+          numero_preventivo: string
+          oggetto: string | null
+          pdf_url: string | null
+          stato: string | null
+          subtotale: number | null
+          totale: number | null
+          trascrizione: string | null
+          updated_at: string | null
+          voci: Json
+        }
+        Insert: {
+          audio_url?: string | null
+          cantiere_id?: string | null
+          cliente_email?: string | null
+          cliente_indirizzo?: string | null
+          cliente_nome?: string | null
+          cliente_telefono?: string | null
+          company_id: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          iva_percentuale?: number | null
+          note?: string | null
+          numero_preventivo: string
+          oggetto?: string | null
+          pdf_url?: string | null
+          stato?: string | null
+          subtotale?: number | null
+          totale?: number | null
+          trascrizione?: string | null
+          updated_at?: string | null
+          voci?: Json
+        }
+        Update: {
+          audio_url?: string | null
+          cantiere_id?: string | null
+          cliente_email?: string | null
+          cliente_indirizzo?: string | null
+          cliente_nome?: string | null
+          cliente_telefono?: string | null
+          company_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          iva_percentuale?: number | null
+          note?: string | null
+          numero_preventivo?: string
+          oggetto?: string | null
+          pdf_url?: string | null
+          stato?: string | null
+          subtotale?: number | null
+          totale?: number | null
+          trascrizione?: string | null
+          updated_at?: string | null
+          voci?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preventivi_cantiere_id_fkey"
+            columns: ["cantiere_id"]
+            isOneToOne: false
+            referencedRelation: "cantieri"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "preventivi_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -2489,6 +2769,72 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sal_milestones: {
+        Row: {
+          alert_ritardo_inviato: boolean | null
+          cantiere_id: string
+          company_id: string
+          created_at: string | null
+          data_completamento: string | null
+          data_prevista: string | null
+          descrizione: string | null
+          id: string
+          nome: string
+          ordine: number | null
+          percentuale_attuale: number | null
+          stato: string | null
+          target_percentuale: number
+          updated_at: string | null
+        }
+        Insert: {
+          alert_ritardo_inviato?: boolean | null
+          cantiere_id: string
+          company_id: string
+          created_at?: string | null
+          data_completamento?: string | null
+          data_prevista?: string | null
+          descrizione?: string | null
+          id?: string
+          nome: string
+          ordine?: number | null
+          percentuale_attuale?: number | null
+          stato?: string | null
+          target_percentuale: number
+          updated_at?: string | null
+        }
+        Update: {
+          alert_ritardo_inviato?: boolean | null
+          cantiere_id?: string
+          company_id?: string
+          created_at?: string | null
+          data_completamento?: string | null
+          data_prevista?: string | null
+          descrizione?: string | null
+          id?: string
+          nome?: string
+          ordine?: number | null
+          percentuale_attuale?: number | null
+          stato?: string | null
+          target_percentuale?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sal_milestones_cantiere_id_fkey"
+            columns: ["cantiere_id"]
+            isOneToOne: false
+            referencedRelation: "cantieri"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sal_milestones_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]

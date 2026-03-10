@@ -7,7 +7,8 @@ import {
   LayoutDashboard, Bot, MessageSquare, BarChart3, Settings,
   HelpCircle, Building2, UserPlus, Users, FileText,
   BookUser, ListChecks, Megaphone, Phone, BookOpen, Coins, type LucideIcon,
-  AlertTriangle, MessageCircle, Puzzle, Palette, HardHat, Wrench
+  AlertTriangle, MessageCircle, Puzzle, Palette, HardHat, Wrench,
+  FileSignature, ShieldCheck, ClipboardList
 } from "lucide-react";
 
 interface NavItem { label: string; icon: LucideIcon; href: string; }
@@ -20,6 +21,9 @@ const companyNav: NavSection[] = [
   ]},
   { header: "AUTOMAZIONI", items: [
     { label: "Template Agenti", icon: Puzzle, href: "/app/templates" },
+    { label: "Preventivi", icon: FileSignature, href: "/app/preventivi" },
+    { label: "Documenti", icon: ShieldCheck, href: "/app/documenti" },
+    { label: "Presenze", icon: ClipboardList, href: "/app/presenze" },
   ]},
   { header: "COMUNICAZIONE", items: [
     { label: "Numeri di Telefono", icon: Phone, href: "/app/phone-numbers" },

@@ -64,6 +64,11 @@ import BlogPost from "./pages/BlogPost";
 import CantierePage from "./pages/app/Cantieri";
 import CantiereDetail from "./pages/app/CantiereDetail";
 import CantiereConfig from "./pages/app/CantiereConfig";
+import PreventiviList from "./pages/app/PreventiviList";
+import NuovoPreventivo from "./pages/app/NuovoPreventivo";
+import PreventivoDetail from "./pages/app/PreventivoDetail";
+import DocumentiScadenze from "./pages/app/DocumentiScadenze";
+import FoglioPresenze from "./pages/app/FoglioPresenze";
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -129,6 +134,11 @@ const App = () => (
                 <Route path="/app/cantieri" element={<CantierePage />} />
                 <Route path="/app/cantieri/configurazione" element={<CantiereConfig />} />
                 <Route path="/app/cantieri/:id" element={<CantiereDetail />} />
+                <Route path="/app/preventivi" element={<PreventiviList />} />
+                <Route path="/app/preventivi/nuovo" element={<NuovoPreventivo />} />
+                <Route path="/app/preventivi/:id" element={<PreventivoDetail />} />
+                <Route path="/app/documenti" element={<DocumentiScadenze />} />
+                <Route path="/app/presenze" element={<FoglioPresenze />} />
                 <Route path="/app/render" element={<RenderHub />} />
                 <Route path="/app/render/new" element={<RenderNew />} />
                 <Route path="/app/render/gallery" element={<RenderGallery />} />
