@@ -313,7 +313,38 @@ export default function PlatformSettings() {
     } finally { setWaTesting(false); }
   };
 
-  const waFieldsValid = waAppId.trim().length > 0 && waAppSecret.trim().length > 0;
+  const n8nFieldsValid = n8nBaseUrl.trim().length > 0;
+
+  const saveN8nConfig = async () => {
+    setN8nSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("manage-n8n-config", {
+        body: { action: "save_config", base_url: n8nBaseUrl, api_key: n8nApiKey || undefined },
+      });
+      if (error || data?.error) {
+        toast({ variant: "destructive", title: "Errore", description: data?.error || error?.message });
+      } else {
+        toast({ title: "Configurazione N8N salvata" });
+        await fetchN8nStatus();
+      }
+    } finally { setN8nSaving(false); }
+  };
+
+  const testN8nConnection = async () => {
+    setN8nTesting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("manage-n8n-config", {
+        body: { action: "test_connection", base_url: n8nBaseUrl, api_key: n8nApiKey || undefined },
+      });
+      if (error || data?.error) {
+        toast({ variant: "destructive", title: "Test N8N fallito", description: data?.error || data?.details || error?.message });
+      } else {
+        toast({ title: "Connessione N8N OK", description: `${data.workflows_count} workflow trovati` });
+        await fetchN8nStatus();
+      }
+    } finally { setN8nTesting(false); }
+  };
+
 
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
 
