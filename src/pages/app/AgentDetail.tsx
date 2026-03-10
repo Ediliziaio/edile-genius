@@ -21,6 +21,7 @@ import AgentIntegrationTab from "@/components/agents/AgentIntegrationTab";
 import AgentAnalyticsTab from "@/components/agents/AgentAnalyticsTab";
 import AgentKnowledgeTab from "@/components/agents/AgentKnowledgeTab";
 import AgentPhoneTab from "@/components/agents/AgentPhoneTab";
+import AgentOutboundTab from "@/components/agents/AgentOutboundTab";
 import { SECTORS, LANGUAGES } from "@/components/agents/PromptTemplates";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
