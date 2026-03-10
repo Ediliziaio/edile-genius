@@ -43,6 +43,47 @@ interface WebhookLog {
   created_at: string;
 }
 
+interface CrmIntegration {
+  id: string;
+  provider: string;
+  is_active: boolean;
+  status: string;
+  last_sync_at: string | null;
+  last_sync_status: string | null;
+  last_sync_count: number;
+  instance_url: string | null;
+}
+
+const CRM_PROVIDERS = [
+  {
+    id: "hubspot",
+    name: "HubSpot",
+    icon: "🟠",
+    color: "bg-orange-500/10 border-orange-500/20",
+    desc: "Importa contatti dal tuo CRM HubSpot",
+    fields: [{ key: "api_key", label: "API Key (Private App Token)", placeholder: "pat-xx-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" }],
+  },
+  {
+    id: "salesforce",
+    name: "Salesforce",
+    icon: "☁️",
+    color: "bg-blue-500/10 border-blue-500/20",
+    desc: "Importa contatti dalla tua org Salesforce",
+    fields: [
+      { key: "api_key", label: "Access Token", placeholder: "00Dxx0000001gPL!AR..." },
+      { key: "instance_url", label: "Instance URL", placeholder: "https://yourorg.my.salesforce.com" },
+    ],
+  },
+  {
+    id: "pipedrive",
+    name: "Pipedrive",
+    icon: "🟢",
+    color: "bg-green-500/10 border-green-500/20",
+    desc: "Importa persone dal tuo account Pipedrive",
+    fields: [{ key: "api_key", label: "API Token", placeholder: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" }],
+  },
+];
+
 const EVENT_TYPES = [
   { value: "conversation.created", label: "Nuova conversazione" },
   { value: "appointment.set", label: "Appuntamento fissato" },
