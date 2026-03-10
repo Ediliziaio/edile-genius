@@ -4,6 +4,8 @@ import { Search, Play, Pause, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 interface Voice {
@@ -11,6 +13,11 @@ interface Voice {
   name: string;
   preview_url: string;
   labels: Record<string, string>;
+  category?: string;
+  gender?: string | null;
+  accent?: string | null;
+  age?: string | null;
+  use_case?: string | null;
 }
 
 interface VoicePickerEnhancedProps {
@@ -21,13 +28,12 @@ interface VoicePickerEnhancedProps {
   onSettingsChange: (settings: { stability: number; similarity: number; speed: number }) => void;
 }
 
-const CATEGORIES = ["Tutti", "Professional", "Casual", "Young", "Old", "Male", "Female"] as const;
-
 export default function VoicePickerEnhanced({ companyId, selected, onSelect, voiceSettings, onSettingsChange }: VoicePickerEnhancedProps) {
   const [voices, setVoices] = useState<Voice[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState<string>("Tutti");
+  const [genderFilter, setGenderFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [playing, setPlaying] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -56,32 +62,43 @@ export default function VoicePickerEnhanced({ companyId, selected, onSelect, voi
 
   const filtered = voices.filter(v => {
     const matchSearch = !search || v.name.toLowerCase().includes(search.toLowerCase());
-    if (category === "Tutti") return matchSearch;
-    const labelsStr = Object.values(v.labels).join(" ").toLowerCase();
-    return matchSearch && labelsStr.includes(category.toLowerCase());
+    const matchGender = genderFilter === "all" || (v.gender || v.labels?.gender || "").toLowerCase() === genderFilter;
+    const matchCategory = categoryFilter === "all" || (v.category || "").toLowerCase() === categoryFilter;
+    return matchSearch && matchGender && matchCategory;
   });
+
+  const categoryColor = (cat?: string) => {
+    if (cat === "premade") return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
+    if (cat === "generated" || cat === "cloned") return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
+    return "bg-muted text-muted-foreground";
+  };
 
   return (
     <div className="space-y-6">
-      {/* Search + Categories */}
+      {/* Search + Filters */}
       <div className="space-y-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-300" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca voce..." className="pl-9 border border-ink-200 bg-ink-50 text-ink-900" />
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setCategory(cat)}
-              className={cn(
-                "px-3 py-1 rounded-pill text-xs font-medium transition-all border",
-                category === cat ? "bg-brand-light border-brand-border text-brand-text" : "bg-ink-50 border-ink-200 text-ink-500 hover:border-ink-300"
-              )}
-            >
-              {cat}
-            </button>
-          ))}
+        <div className="flex flex-wrap gap-2">
+          <Select value={genderFilter} onValueChange={setGenderFilter}>
+            <SelectTrigger className="w-[120px] h-8 text-xs border-ink-200"><SelectValue placeholder="Genere" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tutti</SelectItem>
+              <SelectItem value="male">Maschile</SelectItem>
+              <SelectItem value="female">Femminile</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="w-[130px] h-8 text-xs border-ink-200"><SelectValue placeholder="Categoria" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tutte</SelectItem>
+              <SelectItem value="premade">Premade</SelectItem>
+              <SelectItem value="generated">Generate</SelectItem>
+              <SelectItem value="cloned">Clonate</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -93,8 +110,9 @@ export default function VoicePickerEnhanced({ companyId, selected, onSelect, voi
           {filtered.map(voice => {
             const isSelected = selected === voice.voice_id;
             const isPlaying = playing === voice.voice_id;
-            const accent = voice.labels?.accent || "";
-            const gender = voice.labels?.gender || "";
+            const gender = voice.gender || voice.labels?.gender || "";
+            const accent = voice.accent || voice.labels?.accent || "";
+            const useCase = voice.use_case || voice.labels?.use_case || "";
 
             return (
               <button
@@ -113,7 +131,12 @@ export default function VoicePickerEnhanced({ companyId, selected, onSelect, voi
                 </button>
                 <div className="min-w-0 flex-1">
                   <p className={cn("text-sm font-medium truncate", isSelected ? "text-brand-text" : "text-ink-900")}>{voice.name}</p>
-                  <p className="text-[10px] text-ink-400 truncate">{[gender, accent].filter(Boolean).join(" · ")}</p>
+                  <div className="flex flex-wrap gap-1 mt-0.5">
+                    {voice.category && <Badge variant="secondary" className={`text-[9px] px-1 py-0 ${categoryColor(voice.category)}`}>{voice.category}</Badge>}
+                    {gender && <Badge variant="outline" className="text-[9px] px-1 py-0">{gender}</Badge>}
+                    {accent && <Badge variant="outline" className="text-[9px] px-1 py-0">{accent}</Badge>}
+                    {useCase && <Badge variant="outline" className="text-[9px] px-1 py-0">{useCase}</Badge>}
+                  </div>
                 </div>
                 {isSelected && <div className="w-2 h-2 rounded-full bg-brand shrink-0" />}
               </button>
