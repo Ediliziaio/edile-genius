@@ -46,6 +46,7 @@ const TABS_VOCAL: TabDef[] = [
   { id: "agente", label: "Agente", icon: Bot },
   { id: "voce", label: "Voce & Test", icon: Mic },
   { id: "conversazioni", label: "Conversazioni", icon: MessageSquare },
+  { id: "outbound", label: "Chiamate Uscenti", icon: PhoneOutgoing },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "knowledge", label: "Knowledge Base", icon: BookOpen },
   { id: "integrazioni", label: "Integrazioni", icon: Plug },
