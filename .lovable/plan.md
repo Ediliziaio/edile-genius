@@ -1,64 +1,54 @@
 
 
-## Bot Reportistica Cantieri — Piano di Implementazione
+## Piano: Sistema Reportistica Cantieri via Telegram
 
-Questa funzionalità NON esiste nel codebase attuale. Le tabelle `cantieri`, `cantiere_operai`, `telegram_sessions`, `telegram_config` non esistono. Le pagine `/app/cantieri` non esistono. Le Edge Functions `telegram-cantiere-webhook`, `send-cantiere-report-email`, `setup-telegram-webhook` non esistono. Il `generate-report` usa parsing regex basico, non AI.
+L'utente conferma che aggiungerà le API key (OPENAI_API_KEY, RESEND_API_KEY) in seguito tramite l'interfaccia SuperAdmin. Procediamo con l'implementazione completa, leggendo le chiavi da `Deno.env.get()` nelle Edge Functions (come già fatto per ELEVENLABS_API_KEY).
 
-### Pre-requisiti: Secrets mancanti
+Per la gestione delle API key da SuperAdmin, aggiungeremo una tab "Integrazioni" nelle PlatformSettings dove il SuperAdmin può salvare OPENAI_API_KEY e RESEND_API_KEY come Supabase secrets tramite la Edge Function `platform-config` (stesso pattern di `manage-n8n-config`).
 
-Il progetto necessita di 2 nuovi secrets:
-- **OPENAI_API_KEY** — per Whisper (trascrizione audio) e GPT-4o-mini (strutturazione report)
-- **RESEND_API_KEY** — per invio email report (o in alternativa usare il sistema transactional email di Lovable)
+### 1. Database Migration
 
-Il `TELEGRAM_BOT_TOKEN` viene salvato nel DB (`telegram_config.bot_token`) e letto dalla Edge Function, quindi non serve come secret globale.
+Crea 4 nuove tabelle + estendi `agent_reports` + storage bucket:
+- **`cantieri`** — siti costruzione (nome, indirizzo, committente, stato, email_report[], telegram_chat_ids[])
+- **`cantiere_operai`** — operai (nome, ruolo, telefono, telegram_user_id/username, cantiere_id)
+- **`telegram_sessions`** — stato conversazione Telegram per chat (pending_report_data, pending_foto_urls)
+- **`telegram_config`** — config bot per company (bot_token, webhook_secret, attivo)
+- **Estensione `agent_reports`** — +15 colonne (cantiere_id, operaio_id, trascrizione, audio_url, foto_urls[], lavori_eseguiti[], materiali_usati[], problemi[], avanzamento_percentuale, etc.)
+- **Storage bucket** `cantiere-media` (privato)
 
-### Parte 1 — Database Migration
+RLS: company-scoped per cantieri/operai/config, superadmin per tutto.
 
-Crea 4 nuove tabelle e estendi `agent_reports`:
+### 2. Edge Functions (4 funzioni)
 
-- **`cantieri`** — siti di costruzione con nome, indirizzo, committente, stato, email_report[], telegram_chat_ids[]
-- **`cantiere_operai`** — operai associati con nome, ruolo, telefono, telegram_user_id/username
-- **`telegram_sessions`** — stato conversazione per ogni chat Telegram (pending report, foto)
-- **`telegram_config`** — configurazione bot Telegram per company (token, webhook_secret, orario invio)
-- **Estensione `agent_reports`** — aggiunge 15+ colonne per cantiere_id, operaio_id, trascrizione, audio_url, foto_urls[], dati strutturati (operai_presenti, lavori, materiali, problemi, avanzamento), email tracking
-- **Storage bucket** `cantiere-media` (privato) per audio e foto
+1. **`telegram-cantiere-webhook`** — Riceve messaggi Telegram, gestisce comandi (/start, /conferma, /annulla), scarica audio, trascrive con Whisper (OPENAI_API_KEY), struttura con GPT-4o-mini, salva foto in Storage, salva report. Legge bot_token dal DB `telegram_config`.
 
-RLS policies: company-scoped per cantieri/operai/config, superadmin-only per telegram_sessions.
+2. **`send-cantiere-report-email`** — Invia report HTML via Resend (RESEND_API_KEY).
 
-### Parte 2 — Edge Functions (4 funzioni)
+3. **`setup-telegram-webhook`** — Registra webhook URL su Telegram API per il bot.
 
-1. **`telegram-cantiere-webhook`** (~300 righe) — Cuore del sistema. Riceve messaggi Telegram, gestisce comandi (/start, /status, /conferma, /annulla), scarica audio, trascrive con Whisper, struttura con GPT-4o-mini, salva foto in Storage, conferma con operaio, salva report. Legge il bot token dal DB (non da secret globale).
+4. **Riscrittura `generate-report`** — Usa GPT-4o-mini invece del parsing regex attuale.
 
-2. **`send-cantiere-report-email`** — Invia report HTML via Resend ai destinatari configurati nel cantiere.
+Config toml: tutte con `verify_jwt = false`.
 
-3. **`generate-report` (riscrittura)** — Sostituisce il parsing regex con GPT-4o-mini per strutturare report da trascrizioni.
+### 3. SuperAdmin: Tab "Integrazioni" in PlatformSettings
 
-4. **`setup-telegram-webhook`** — Registra il webhook URL su Telegram API per il bot della company.
+Aggiungere una 7a tab "Integrazioni" con campi per salvare OPENAI_API_KEY e RESEND_API_KEY come Supabase secrets. Estendere la Edge Function `platform-config` con action `save_secret` (usa il Supabase Management API o semplicemente salva in `platform_config` come indicatore, dato che i secrets veri vanno impostati manualmente).
 
-Config toml: tutte con `verify_jwt = false` (Telegram non invia JWT).
+In pratica: mostrare campi con istruzioni chiare su dove andare per impostare i secrets in Supabase Dashboard, con link diretto.
 
-### Parte 3 — Frontend (4 pagine + 1 componente)
+### 4. Frontend (4 pagine + 1 componente + routing + sidebar)
 
-1. **`Cantieri.tsx`** (`/app/cantieri`) — Lista cantieri con badge stato, mini KPI (operai, report, ultimo report), dialog creazione nuovo cantiere (nome, indirizzo, committente, date, email destinatari multi-tag).
-
-2. **`CantiereDetail.tsx`** (`/app/cantieri/:id`) — 3 tab:
-   - Report: timeline verticale con filtro data, click per dettaglio
-   - Operai: lista con stato Telegram, form aggiunta, link invito
-   - Statistiche: grafici recharts (report/giorno, avanzamento, ore per operaio)
-
-3. **`CantiereConfig.tsx`** (`/app/cantieri/configurazione`) — Setup bot Telegram (istruzioni BotFather, campo token, pulsante attiva), associazione operai, email default.
-
-4. **`ReportDetailModal.tsx`** — Dialog con trascrizione, dati strutturati, galleria foto, player audio, status email.
-
-### Parte 4 — Navigazione
-
-- Aggiungere sezione "CANTIERI" nella sidebar con icona HardHat: I Cantieri, Configura Bot
-- 3 nuove route in App.tsx sotto le company routes
+1. **`Cantieri.tsx`** (`/app/cantieri`) — Lista cantieri con badge stato, KPI, dialog creazione
+2. **`CantiereDetail.tsx`** (`/app/cantieri/:id`) — 3 tab: Report (timeline), Operai (lista + form), Statistiche (recharts)
+3. **`CantiereConfig.tsx`** (`/app/cantieri/configurazione`) — Setup bot Telegram (istruzioni BotFather, campo token, pulsante attiva)
+4. **`ReportDetailModal.tsx`** — Dialog con trascrizione, dati strutturati, galleria foto, player audio
+5. **Sidebar** — Sezione "CANTIERI" con voci: I Cantieri, Configura Bot
+6. **App.tsx** — 3 nuove route
 
 ### Ordine di implementazione
 
-1. Richiedere secrets (OPENAI_API_KEY, RESEND_API_KEY)
-2. Migration DB
-3. Edge Functions (telegram-cantiere-webhook, send-cantiere-report-email, setup-telegram-webhook, riscrittura generate-report)
-4. Frontend (pagine + componenti + routing + sidebar)
+1. Migration DB
+2. Edge Functions
+3. Frontend (pagine + componenti + routing + sidebar)
+4. Tab Integrazioni in SuperAdmin PlatformSettings
 
