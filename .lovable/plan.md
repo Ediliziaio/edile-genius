@@ -1,5 +1,5 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI
+# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro
 
 ## ✅ Completato in questo blocco
 
@@ -56,11 +56,7 @@
 ## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
 
 ### Database (5 tabelle)
-- render_provider_config: configurazione provider AI (OpenAI GPT-Image, Gemini Flash)
-- render_infissi_presets: 24 preset globali (materiali, colori, stili, vetri, oscuranti) con prompt_fragment
-- render_sessions: sessioni render con status, config, result_urls, costi
-- render_gallery: render salvati con share_token, favoriti
-- render_credits: crediti render separati (5 gratis per azienda)
+- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
 - RLS PERMISSIVE per tutte le tabelle
 - Trigger set_updated_at + init_render_credits su companies
 - Funzione deduct_render_credit
@@ -71,25 +67,56 @@
 - analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
 
 ### Frontend
-- RenderHub (/app/render): hero, come funziona, ultimi render, widget crediti
-- RenderNew (/app/render/new): wizard 4 step mobile-first (foto, config, elaborazione, risultati)
-- RenderGallery (/app/render/gallery): grid con ricerca, download, elimina
-- RenderGalleryDetail (/app/render/gallery/:id): BeforeAfterSlider, config, favoriti
-- RenderConfig (/superadmin/render-config): config provider con costi e markup
+- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
+- RenderConfig (/superadmin/render-config)
+- BeforeAfterSlider, promptBuilder.ts
 
-### Componenti
-- BeforeAfterSlider: slider interattivo prima/dopo con drag handle
-- promptBuilder.ts: costruttore prompt, validazione foto, check dimensioni
+## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
 
-### Sidebar
-- Nuova sezione "STRUMENTI VENDITA" con "Render AI"
-- SuperAdmin: sezione "RENDER AI" con "Config Provider"
+### Database
+- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
+- Estensione `preventivi` con +26 colonne (template_id, versione, titolo, foto_sopralluogo_urls, foto_copertina_url, sconto_globale, imponibile, iva_importo, totale_finale, condizioni, clausole, intro, firma_testo, tempi_esecuzione, validita_giorni, data_scadenza, tracking_aperto_at/count, link_accettazione, firma_cliente_url, accettato_at, rifiutato_at, rifiuto_motivo, parent_id, inviato_at, inviato_via, cliente_piva, cliente_codice_fiscale)
+- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
+- Storage buckets: preventivi-media (privato), template-assets (pubblico)
+- RLS company-scoped + superadmin
+
+### Edge Functions
+- `process-preventivo-audio` RISCRITTO: prompt GPT esperto (prezzario DEI, categorie edilizie, sconti), nuovo formato voci con id/ordine/categoria/titolo_voce/sconto_percentuale/foto_urls/note_voce/evidenziata, calcolo totali con sconto e IVA, data_scadenza automatica
+
+### PDF Client-side (@react-pdf/renderer)
+- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4 con:
+  - Header azienda + logo
+  - Band titolo colorata (colore_primario)
+  - Grid cliente/riferimenti
+  - Testo intro
+  - Foto copertina
+  - Tabella voci per categoria con subtotali
+  - Totali con sconto globale + IVA
+  - Note, condizioni, clausole
+  - Sezione firma doppia (azienda + cliente)
+  - Footer pagina
+
+### Frontend
+- **NuovoPreventivo.tsx** → Wizard 3 step:
+  - Step 1: dati cliente (nome, indirizzo, telefono, email, P.IVA, CF) + titolo/oggetto + cantiere
+  - Step 2: registrazione/upload audio + upload foto multiplo con grid preview e badge copertina
+  - Step 3: editor visuale voci per categoria (card editabili con titolo, descrizione, U.M., quantità, prezzo, sconto, totale) + totali live + scarica PDF anteprima
+- **PreventivoDetail.tsx** → 3 tabs:
+  - Dettaglio: voci per categoria con badge sconto, trascrizione collapsible, note/stato/tempi
+  - Cronologia: timeline eventi (creato, inviato, accettato/rifiutato)
+  - Tracking: KPI aperture, ultima apertura, ultimo invio
+  - Azioni: scarica PDF, modifica, elimina
+- **PreventiviList.tsx** → KPI cards (totale, bozze, in attesa, valore accettati) + filtri tab per stato + ricerca + lista con badge versione e scadenza
+- **TemplatePreventivo.tsx** (`/app/impostazioni/template-preventivo`): 3 tabs:
+  - Branding: logo upload, color picker primario/secondario con preview gradient, intestazione/piè di pagina
+  - Testi Standard: intro, condizioni, clausole, firma, validità giorni, IVA default
+  - Layout: 5 toggle (foto copertina, foto voci, subtotali categoria, firma, condizioni)
+
+### Navigazione
+- Sidebar: aggiunto "Template PDF" nella sezione AUTOMAZIONI
+- Route: `/app/impostazioni/template-preventivo`
 
 ## 🔜 Prossimi Blocchi
-- Pagine: /app/phone-numbers, /app/knowledge-base
-- Editor Agente 8 tab
-- Wizard 4 step (CreateAgent)
 - SuperAdmin Dashboard economics
-- Edge functions: add-knowledge-doc
 - Integrazioni CRM native
 - Configurazione N8N_BASE_URL e N8N_API_KEY come secrets
