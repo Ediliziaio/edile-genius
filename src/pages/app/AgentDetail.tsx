@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useCallback } from "react";
-import { ArrowLeft, Save, Loader2, Power, Phone, Clock, Bot, Mic, MessageSquare, BarChart3, BookOpen, Settings2, Plug, PhoneCall } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Power, Phone, Clock, Bot, Mic, MessageSquare, BarChart3, BookOpen, Settings2, Plug, PhoneCall, PhoneOutgoing } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,6 +21,7 @@ import AgentIntegrationTab from "@/components/agents/AgentIntegrationTab";
 import AgentAnalyticsTab from "@/components/agents/AgentAnalyticsTab";
 import AgentKnowledgeTab from "@/components/agents/AgentKnowledgeTab";
 import AgentPhoneTab from "@/components/agents/AgentPhoneTab";
+import AgentOutboundTab from "@/components/agents/AgentOutboundTab";
 import { SECTORS, LANGUAGES } from "@/components/agents/PromptTemplates";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
@@ -45,6 +46,7 @@ const TABS_VOCAL: TabDef[] = [
   { id: "agente", label: "Agente", icon: Bot },
   { id: "voce", label: "Voce & Test", icon: Mic },
   { id: "conversazioni", label: "Conversazioni", icon: MessageSquare },
+  { id: "outbound", label: "Chiamate Uscenti", icon: PhoneOutgoing },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "knowledge", label: "Knowledge Base", icon: BookOpen },
   { id: "integrazioni", label: "Integrazioni", icon: Plug },
@@ -358,6 +360,7 @@ export default function AgentDetail() {
                     <TableHead>Numero</TableHead>
                     <TableHead>Direzione</TableHead>
                     <TableHead>Durata</TableHead>
+                    <TableHead>Score</TableHead>
                     <TableHead>Esito</TableHead>
                     <TableHead>Sentiment</TableHead>
                   </TableRow>
@@ -374,6 +377,13 @@ export default function AgentDetail() {
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{conv.duration_sec ? `${Math.floor(conv.duration_sec / 60)}:${String(conv.duration_sec % 60).padStart(2, "0")}` : "—"}</TableCell>
                       <TableCell>
+                        {conv.eval_score !== null && conv.eval_score !== undefined ? (
+                          <Badge className={`text-xs ${Number(conv.eval_score) >= 70 ? "bg-green-100 text-green-700" : Number(conv.eval_score) >= 40 ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>
+                            {conv.eval_score}
+                          </Badge>
+                        ) : "—"}
+                      </TableCell>
+                      <TableCell>
                         <Badge variant="outline" className={`text-xs ${conv.outcome === "appointment" ? "border-status-success text-status-success" : conv.outcome === "qualified" ? "border-brand text-brand" : ""}`}>
                           {conv.outcome || "—"}
                         </Badge>
@@ -387,6 +397,11 @@ export default function AgentDetail() {
               </Table>
             </div>
           )}
+        </TabsContent>
+
+        {/* ═══ TAB: Outbound ═══ */}
+        <TabsContent value="outbound">
+          <AgentOutboundTab agentId={agent.id} companyId={companyId} outboundEnabled={(agent as any).outbound_enabled ?? false} elAgentId={agent.el_agent_id} />
         </TabsContent>
 
         {/* ═══ TAB: Analytics ═══ */}
@@ -508,7 +523,7 @@ export default function AgentDetail() {
         </div>
       )}
 
-      <TranscriptViewer open={!!viewTranscript} onOpenChange={() => setViewTranscript(null)} transcript={viewTranscript?.transcript ?? null} agentName={agent.name} />
+      <TranscriptViewer open={!!viewTranscript} onOpenChange={() => setViewTranscript(null)} transcript={viewTranscript?.transcript ?? null} agentName={agent.name} evalScore={viewTranscript?.eval_score ?? null} evalNotes={viewTranscript?.eval_notes ?? null} collectedData={viewTranscript?.collected_data ?? null} />
     </div>
   );
 }

@@ -1,21 +1,29 @@
 import { useState } from "react";
-import { Copy, Check, Code, Globe } from "lucide-react";
+import { Copy, Check, Code, Globe, Webhook } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface Props {
   agentId: string;
   elAgentId: string | null;
   agentName: string;
+  webhookUrl?: string;
+  onSaveWebhook?: (url: string) => void;
 }
 
-export default function AgentIntegrationTab({ agentId, elAgentId, agentName }: Props) {
+export default function AgentIntegrationTab({ agentId, elAgentId, agentName, webhookUrl, onSaveWebhook }: Props) {
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [customWebhook, setCustomWebhook] = useState(webhookUrl || "");
 
   const copy = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
     setCopiedField(field);
     setTimeout(() => setCopiedField(null), 2000);
   };
+
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
+  const elWebhookUrl = `${supabaseUrl}/functions/v1/elevenlabs-webhook`;
 
   const widgetCode = `<script src="https://elevenlabs.io/convai-widget/index.js" async></script>
 <elevenlabs-convai agent-id="${elAgentId || "YOUR_AGENT_ID"}"></elevenlabs-convai>`;
@@ -61,6 +69,34 @@ function VoiceWidget() {
             )}
           </div>
         ))}
+      </div>
+
+      {/* Webhook Post-Chiamata */}
+      <div className="rounded-card border border-ink-200 bg-white p-5 shadow-card space-y-3">
+        <div className="flex items-center gap-2">
+          <Webhook className="w-4 h-4 text-ink-400" />
+          <h3 className="text-sm font-semibold text-ink-900">Webhook Post-Chiamata</h3>
+        </div>
+        <p className="text-xs text-ink-500">Ricevi i dati di ogni chiamata nel tuo sistema esterno.</p>
+
+        <div className="space-y-1">
+          <p className="text-xs text-ink-400">URL webhook (registrato su ElevenLabs)</p>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 p-2 rounded bg-ink-50 text-xs text-ink-800 font-mono truncate border border-ink-200">{elWebhookUrl}</code>
+            <Button variant="ghost" size="sm" onClick={() => copy(elWebhookUrl, "webhook")}>
+              {copiedField === "webhook" ? <Check className="w-4 h-4 text-status-success" /> : <Copy className="w-4 h-4" />}
+            </Button>
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <Label className="text-xs text-ink-500">Webhook aziendale (opzionale)</Label>
+          <div className="flex gap-2">
+            <Input placeholder="https://tuosito.com/webhook" value={customWebhook} onChange={e => setCustomWebhook(e.target.value)} className="font-mono text-sm" />
+            <Button variant="outline" size="sm" onClick={() => onSaveWebhook?.(customWebhook)}>Salva</Button>
+          </div>
+          <p className="text-[10px] text-ink-400">Riceverai un POST con i dati completi di ogni conversazione</p>
+        </div>
       </div>
 
       {/* HTML Embed */}

@@ -1,107 +1,95 @@
 
+# Stato Implementazione — Blocco 1-5 + Render AI
 
-## Piano: Integrazione ElevenLabs Completa al 100%
+## ✅ Completato in questo blocco
 
-Questo è un intervento molto ampio che tocca DB, 6+ Edge Functions e 8+ componenti frontend. Lo suddivido in fasi ordinate per dipendenza.
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
----
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
-### FASE 1 — Migrazione Database
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-Una singola migration SQL che:
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
-- **agents**: aggiunge `el_phone_number_id`, `asr_quality`, `asr_keywords`, `vad_enabled`, `silence_end_call_timeout`, `speculative_turn`, `evaluation_prompt`, `post_call_webhook_url`, `dynamic_variables`, `built_in_tools`, `transfer_number`, `monitoring_enabled`, `outbound_enabled`, `el_webhook_secret`. I campi `tts_model`, `llm_model`, `llm_backup_model`, `evaluation_criteria`, `pii_redaction`, `blocked_topics` esistono già.
-- **conversations**: aggiunge `cost_billed_eur`. I campi `el_conv_id`, `collected_data`, `eval_score`, `eval_notes`, `minutes_billed`, `caller_number`, `call_direction` esistono già (verificato dallo schema).
-- **ai_phone_numbers**: aggiunge `el_phone_number_id`, `twilio_sid`, `provider_type`, `inbound_enabled`, `outbound_enabled`.
-- **ai_knowledge_docs**: aggiunge `el_sync_status`, `el_sync_at`. Il campo `el_doc_id` esiste già.
-- **Nuova tabella `outbound_call_log`** con RLS company + superadmin.
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
----
+## ✅ Blocco 3-5 — Agent Templates System
 
-### FASE 2 — Edge Functions (6 funzioni)
+### Database
+- agent_templates + agent_template_instances + agent_reports + company_channels
+- RLS policies PERMISSIVE (fix da RESTRICTIVE)
+- Funzione DB `increment_installs_count(tpl_id UUID)`
+- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
 
-**2A. Riscrittura `create-elevenlabs-agent`**
-- Invio configurazione completa a ElevenLabs: agent prompt con built-in tools (end_call, transfer, voicemail), TTS model/settings, turn detection (timeout, eagerness, silence_end_call_timeout, speculative_turn), ASR (quality, keywords), conversation (max_duration, monitoring), safety (PII, blocked_topics), evaluation criteria, dynamic variables.
-- Salvataggio in DB di tutti i nuovi campi diretti (non solo in `config` JSONB).
+### Edge Functions (CORS headers completi)
+- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
+- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
+- save-report: salva report in DB + aggiorna contatori istanza
 
-**2B. Aggiornamento `update-agent`**
-- Estendere `allowedFields` con tutti i nuovi campi DB diretti.
-- Sync a ElevenLabs: aggiungere sezioni ASR, turn (silence_end_call_timeout, speculative_turn), safety, evaluation, built_in_tools nel body PATCH.
+### Frontend — Wizard 5 Step (TemplateSetup.tsx)
+- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
+- Step 2 Operai: lista card + importa CSV con template scaricabile
+- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
+- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
 
-**2C. Aggiornamento `elevenlabs-webhook`**
-- Aggiungere verifica HMAC-SHA256 della firma ElevenLabs.
-- Estrarre `collected_data`, `eval_score`, `eval_notes`, `cost_billed_eur` dall'evento.
-- Gestire evento `conversation.started` con upsert in `conversations`.
+### SuperAdmin
+- /superadmin/templates: CRUD completo con JSON editor per config_schema
 
-**2D. Nuova `elevenlabs-outbound-call`**
-- Verifica crediti, verifica `outbound_enabled` e `el_phone_number_id`.
-- Chiama `POST /v1/convai/twilio/outbound-call`.
-- Log in `outbound_call_log`.
+## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
 
-**2E. Nuova `elevenlabs-import-phone-number`**
-- Riceve credenziali Twilio + numero, chiama `POST /v1/convai/phone-numbers` su ElevenLabs.
-- Salva in `ai_phone_numbers` con `el_phone_number_id`.
-- Aggiorna `agents.el_phone_number_id` se associato.
+### Database (5 tabelle)
+- render_provider_config: configurazione provider AI (OpenAI GPT-Image, Gemini Flash)
+- render_infissi_presets: 24 preset globali (materiali, colori, stili, vetri, oscuranti) con prompt_fragment
+- render_sessions: sessioni render con status, config, result_urls, costi
+- render_gallery: render salvati con share_token, favoriti
+- render_credits: crediti render separati (5 gratis per azienda)
+- RLS PERMISSIVE per tutte le tabelle
+- Trigger set_updated_at + init_render_credits su companies
+- Funzione deduct_render_credit
+- Storage buckets: render-originals (privato), render-results (pubblico)
 
-**2F. Aggiornamento `add-knowledge-doc`**
-- Download file da storage e upload come multipart a ElevenLabs.
-- Aggiornare `el_sync_status` e `el_sync_at`.
+### Edge Functions
+- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
+- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
 
-**2G. Aggiornamento `get-elevenlabs-voices`**
-- Arricchire risposta con `category`, `description`, `gender`, `accent`, `age`, `use_case`, `supported_languages`.
+### Frontend
+- RenderHub (/app/render): hero, come funziona, ultimi render, widget crediti
+- RenderNew (/app/render/new): wizard 4 step mobile-first (foto, config, elaborazione, risultati)
+- RenderGallery (/app/render/gallery): grid con ricerca, download, elimina
+- RenderGalleryDetail (/app/render/gallery/:id): BeforeAfterSlider, config, favoriti
+- RenderConfig (/superadmin/render-config): config provider con costi e markup
 
-Registrare le nuove funzioni in `supabase/config.toml`.
+### Componenti
+- BeforeAfterSlider: slider interattivo prima/dopo con drag handle
+- promptBuilder.ts: costruttore prompt, validazione foto, check dimensioni
 
----
+### Sidebar
+- Nuova sezione "STRUMENTI VENDITA" con "Render AI"
+- SuperAdmin: sezione "RENDER AI" con "Config Provider"
 
-### FASE 3 — Frontend
-
-**3A. BuyPhoneNumber — Flusso Twilio reale (4 step)**
-- Step 1: "Hai già un numero Twilio?" con CTA per creare account Twilio.
-- Step 2: Form credenziali (phone_number E.164, label, Twilio SID, Auth Token con toggle visibilità). Info box "dati non salvati".
-- Step 3: Configurazione post-importazione (associa agente, inbound/outbound toggle, orari, giorni).
-- Step 4: Conferma con riepilogo e CTA.
-
-**3B. AgentConfigForm — Nuovi campi avanzati**
-- Estendere `AgentConfigData` con: `tts_model`, `llm_backup_model`, `asr_quality`, `asr_keywords`, `silence_end_call_timeout`, `speculative_turn`, `evaluation_prompt`, `dynamic_variables`, `built_in_tools`, `transfer_number`, `monitoring_enabled`, `pii_redaction`, `blocked_topics`.
-- Aggiungere selettore TTS Model accanto a LLM Model.
-- 3 nuove sezioni collapsible in "Avanzate": ASR, Strumenti Integrati, Sicurezza & Valutazione.
-
-**3C. AgentDetail — Aggiornamenti**
-- Estendere `ConfigState` e `buildConfigState` con tutti i nuovi campi.
-- Aggiungere tab "Chiamate Uscenti" (se `outbound_enabled`).
-- Nella tab Conversazioni: colonna eval_score con badge colorato; nel dettaglio mostrare collected_data e eval_notes.
-
-**3D. Nuovo componente `AgentOutboundTab`**
-- Toggle abilitazione outbound.
-- Form chiamata singola (numero + variabili dinamiche) → chiama `elevenlabs-outbound-call`.
-- Lista ultime chiamate da `outbound_call_log`.
-
-**3E. AgentIntegrationTab — Webhook info**
-- Sezione "Webhook Post-Chiamata" con URL del nostro webhook copiabile.
-- Campo webhook aziendale custom con salvataggio.
-
-**3F. VoicePickerEnhanced — Filtri avanzati**
-- Dropdown genere, lingua, categoria oltre alla ricerca testo.
-- Badge categoria/genere/lingua/use_case per ogni voce.
-
-**3G. CreateAgent.types.ts — Nuovi campi**
-- Aggiungere `tts_model`, `llm_backup_model`, `asr_quality`, `asr_keywords`, `silence_end_call_timeout`, `speculative_turn`, `evaluation_prompt`, `dynamic_variables`, `built_in_tools`, `transfer_number`, `monitoring_enabled`, `outbound_enabled`.
-
-**3H. PlatformSettings — Tab ElevenLabs potenziato**
-- La tab ElevenLabs esistente è già funzionale. Aggiungere sezione "Webhook Secret" con campo per `ELEVENLABS_WEBHOOK_SECRET` e istruzioni di registrazione.
-
----
-
-### Secret da aggiungere
-
-- `ELEVENLABS_WEBHOOK_SECRET` — da richiedere all'utente dopo il deploy del webhook.
-
----
-
-### Note
-
-- L'ordine di implementazione sarà: Migration → Edge Functions → Frontend.
-- I campi già esistenti nello schema DB verranno saltati nella migration (`ADD COLUMN IF NOT EXISTS`).
-- Il `config` JSONB resta come backup, ma i campi importanti vengono ora salvati come colonne dirette per query e filtraggio.
-
+## 🔜 Prossimi Blocchi
+- Pagine: /app/phone-numbers, /app/knowledge-base
+- Editor Agente 8 tab
+- Wizard 4 step (CreateAgent)
+- SuperAdmin Dashboard economics
+- Edge functions: add-knowledge-doc
+- Integrazioni CRM native
+- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets
