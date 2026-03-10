@@ -32,7 +32,7 @@ export default function CantiereDetail() {
   }, [id]);
 
   const fetchCantiere = async () => {
-    const { data } = await supabase.from("cantieri").select("*").eq("id", id!).single();
+    const { data } = await (supabase.from("cantieri") as any).select("*").eq("id", id!).single();
     setCantiere(data);
   };
 
