@@ -1,66 +1,95 @@
 
+# Stato Implementazione — Blocco 1-5 + Render AI
 
-## Analysis: What's Already Implemented vs What's Missing
+## ✅ Completato in questo blocco
 
-After reviewing the entire codebase, **most of the 12 prompts are already fully implemented**:
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
-- **Prompt 1** (KB file upload): Already working — `uploadFileToStorage()` uploads to `knowledge-docs`, inserts in DB, invokes `add-knowledge-doc`
-- **Prompt 2** (Dashboard): Already has agent name joins, appointment rate, credits widget, next actions
-- **Prompt 3** (Create Agent wizard): Already has multi-step wizard with StepAgent, StepVoice, StepConversation, StepReview
-- **Prompt 4** (SuperAdmin Dashboard): Already has full economics dashboard with KPIs, charts, credit health table
-- **Prompt 5** (BuyPhoneNumber): Already has 4-step Twilio import flow
-- **Prompt 6** (AgentKnowledgeTab): Already has file upload + sync functionality
-- **Prompt 7** (Campaigns): Already has 4-step wizard with scheduling
-- **Prompt 8** (RenderHub): Already has hero section, steps, gallery, credits widget
-- **Prompt 9** (Settings): Already has Profile, API, CRM, Webhooks, Notifications, Billing tabs
-- **Prompt 11** (CRM Integration): Already implemented with HubSpot, Salesforce, Pipedrive
-- **Prompt 12** (Templates): Static templates already exist in CreateAgent
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
-### What's genuinely missing:
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-**Prompt 10 — Mobile responsive Shell + Global Search (Cmd+K)**
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
-This is the only significant gap. Currently:
-- Shell has no mobile responsiveness — sidebar is fixed at 240px with no hamburger menu
-- Topbar has no hamburger trigger or mobile handling
-- No Cmd+K global search dialog
-- No breadcrumbs
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
----
+## ✅ Blocco 3-5 — Agent Templates System
 
-## Implementation Plan
+### Database
+- agent_templates + agent_template_instances + agent_reports + company_channels
+- RLS policies PERMISSIVE (fix da RESTRICTIVE)
+- Funzione DB `increment_installs_count(tpl_id UUID)`
+- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
 
-### 1. Mobile-responsive Shell + Sidebar drawer
+### Edge Functions (CORS headers completi)
+- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
+- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
+- save-report: salva report in DB + aggiorna contatori istanza
 
-**Shell.tsx**: Detect mobile via `useMobile()` hook. On mobile, hide sidebar, show it via `Sheet` (left side drawer).
+### Frontend — Wizard 5 Step (TemplateSetup.tsx)
+- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
+- Step 2 Operai: lista card + importa CSV con template scaricabile
+- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
+- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
 
-**Topbar.tsx**: Add hamburger `Menu` icon on mobile (left side), pass `onMenuOpen` callback to trigger the Sheet. Add Cmd+K search trigger button.
+### SuperAdmin
+- /superadmin/templates: CRUD completo con JSON editor per config_schema
 
-**Sidebar.tsx**: Extract nav content into a shared component. On desktop: render as-is. On mobile: render inside Sheet.
+## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
 
-### 2. Global Search (Cmd+K)
+### Database (5 tabelle)
+- render_provider_config: configurazione provider AI (OpenAI GPT-Image, Gemini Flash)
+- render_infissi_presets: 24 preset globali (materiali, colori, stili, vetri, oscuranti) con prompt_fragment
+- render_sessions: sessioni render con status, config, result_urls, costi
+- render_gallery: render salvati con share_token, favoriti
+- render_credits: crediti render separati (5 gratis per azienda)
+- RLS PERMISSIVE per tutte le tabelle
+- Trigger set_updated_at + init_render_credits su companies
+- Funzione deduct_render_credit
+- Storage buckets: render-originals (privato), render-results (pubblico)
 
-Create `src/components/layout/GlobalSearch.tsx` using the already-installed `cmdk` package:
-- `Cmd+K` / `Ctrl+K` keyboard shortcut opens a `CommandDialog`
-- Search across agents, contacts, campaigns, conversations using Supabase queries
-- Results grouped by category with icons
-- Navigate to selected result on Enter/click
+### Edge Functions
+- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
+- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
 
-### 3. Breadcrumbs
+### Frontend
+- RenderHub (/app/render): hero, come funziona, ultimi render, widget crediti
+- RenderNew (/app/render/new): wizard 4 step mobile-first (foto, config, elaborazione, risultati)
+- RenderGallery (/app/render/gallery): grid con ricerca, download, elimina
+- RenderGalleryDetail (/app/render/gallery/:id): BeforeAfterSlider, config, favoriti
+- RenderConfig (/superadmin/render-config): config provider con costi e markup
 
-Add breadcrumb generation in Shell based on current route path, using shadcn `Breadcrumb` component. Map route segments to Italian labels.
+### Componenti
+- BeforeAfterSlider: slider interattivo prima/dopo con drag handle
+- promptBuilder.ts: costruttore prompt, validazione foto, check dimensioni
 
----
+### Sidebar
+- Nuova sezione "STRUMENTI VENDITA" con "Render AI"
+- SuperAdmin: sezione "RENDER AI" con "Config Provider"
 
-### File Changes
-
-| File | Change |
-|------|--------|
-| `src/components/layout/Shell.tsx` | Add mobile detection, Sheet for sidebar drawer, breadcrumb |
-| `src/components/layout/Topbar.tsx` | Add hamburger button on mobile, Cmd+K trigger, low-credit badge |
-| `src/components/layout/Sidebar.tsx` | Extract nav into reusable component, accept `onClose` prop for mobile |
-| `src/components/layout/GlobalSearch.tsx` | New — CommandDialog with multi-entity search |
-| `src/components/layout/AppBreadcrumb.tsx` | New — Route-based breadcrumb component |
-
-No database changes needed. No edge functions needed.
-
+## 🔜 Prossimi Blocchi
+- Pagine: /app/phone-numbers, /app/knowledge-base
+- Editor Agente 8 tab
+- Wizard 4 step (CreateAgent)
+- SuperAdmin Dashboard economics
+- Edge functions: add-knowledge-doc
+- Integrazioni CRM native
+- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets
