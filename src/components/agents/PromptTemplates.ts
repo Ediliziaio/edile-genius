@@ -5,6 +5,9 @@ export const USE_CASES = [
   { id: "support", label: "Assistenza clienti", icon: "🛠️", description: "Supporto tecnico e assistenza" },
   { id: "qualification", label: "Qualifica lead", icon: "🎯", description: "Qualifica prospect e lead" },
   { id: "survey", label: "Sondaggi telefonici", icon: "📊", description: "Conduci sondaggi e raccogli feedback" },
+  { id: "reactivation", label: "Riattivazione preventivi", icon: "🔄", description: "Riattiva preventivi scaduti e clienti inattivi" },
+  { id: "appointment_confirmation", label: "Conferma appuntamento", icon: "✅", description: "Conferma e gestisci appuntamenti in cantiere" },
+  { id: "review_collection", label: "Raccolta recensioni", icon: "⭐", description: "Raccogli feedback e recensioni post-lavoro" },
 ] as const;
 
 export type UseCaseId = typeof USE_CASES[number]["id"];
