@@ -144,9 +144,26 @@ export default function PlatformSettings() {
     }
   }, []);
 
+  const fetchN8nStatus = useCallback(async () => {
+    try {
+      const { data } = await supabase.functions.invoke("manage-n8n-config", {
+        body: { action: "get_status" },
+      });
+      if (data?.config) {
+        setN8nStatus({
+          configured: data.config.n8n_configured,
+          apiKeySet: data.config.n8n_api_key_set,
+          testedAt: data.config.n8n_tested_at,
+          workflowsCount: data.config.n8n_workflows_count,
+        });
+        if (data.config.n8n_base_url) setN8nBaseUrl(data.config.n8n_base_url);
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
-    Promise.all([fetchConfig(), fetchPricing(), fetchPackages(), fetchEconomics(), fetchWaConfig()]).finally(() => setLoading(false));
-  }, [fetchConfig, fetchPricing, fetchPackages, fetchEconomics, fetchWaConfig]);
+    Promise.all([fetchConfig(), fetchPricing(), fetchPackages(), fetchEconomics(), fetchWaConfig(), fetchN8nStatus()]).finally(() => setLoading(false));
+  }, [fetchConfig, fetchPricing, fetchPackages, fetchEconomics, fetchWaConfig, fetchN8nStatus]);
 
   const testApiKey = async () => {
     setTesting(true);
