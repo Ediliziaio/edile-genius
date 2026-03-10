@@ -87,12 +87,14 @@ export default function PreventivoDetail() {
   const updateMutation = useMutation({
     mutationFn: async () => {
       const subtotale = voci.reduce((s, v) => s + v.totale, 0);
+      const scontoPerc = prev?.sconto_globale_percentuale || 0;
+      const scontoImporto = subtotale * (scontoPerc / 100);
+      const imponibile = subtotale - scontoImporto;
       const ivaPerc = prev?.iva_percentuale || 22;
-      const imponibile = subtotale;
       const ivaImporto = imponibile * (ivaPerc / 100);
       const totaleFinale = imponibile + ivaImporto;
       const { error } = await (supabase.from("preventivi") as any)
-        .update({ voci, note, stato, subtotale, imponibile, iva_importo: ivaImporto, totale: totaleFinale, totale_finale: totaleFinale })
+        .update({ voci, note, stato, subtotale, sconto_globale_importo: scontoImporto, imponibile, iva_importo: ivaImporto, totale: totaleFinale, totale_finale: totaleFinale })
         .eq("id", id);
       if (error) throw error;
     },
