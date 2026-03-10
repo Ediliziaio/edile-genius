@@ -126,6 +126,29 @@ export default function StepAgent({ form, update, selectUseCase }: StepAgentProp
         </div>
       </div>
 
+      {/* Quick Templates Edilizia */}
+      <div className="space-y-2">
+        <Label className="text-ink-600 flex items-center gap-1.5">
+          <Zap className="w-3.5 h-3.5" /> Template Rapidi Edilizia
+        </Label>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          {Object.entries(EDILIZIA_PROMPT_TEMPLATES).map(([key, tmpl]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => {
+                update("system_prompt", tmpl.system_prompt);
+                update("first_message", tmpl.first_message);
+              }}
+              className="text-left p-3 rounded-btn border border-ink-200 bg-ink-50 hover:border-brand hover:bg-brand-light transition-colors"
+            >
+              <span className="text-sm font-medium text-ink-700">{tmpl.label}</span>
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-ink-400">Clicca per pre-compilare System Prompt e Primo Messaggio.</p>
+      </div>
+
       {/* System Prompt */}
       <div className="space-y-2">
         <Label className="text-ink-600">System Prompt * <Tip text="Le istruzioni principali che definiscono il comportamento dell'agente." /></Label>

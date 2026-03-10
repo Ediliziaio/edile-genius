@@ -191,7 +191,8 @@ export default function AgentTemplateWizard() {
       }
 
       toast({ title: "Agente creato!", description: `${form.name} è stato creato con successo.` });
-      navigate("/app/agents");
+      const newAgentId = data?.agent?.id;
+      navigate(newAgentId ? `/app/agents/${newAgentId}` : "/app/agents");
     } catch (e: any) {
       toast({ title: "Errore", description: e.message, variant: "destructive" });
     } finally {
