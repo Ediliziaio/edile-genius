@@ -69,6 +69,7 @@ import NuovoPreventivo from "./pages/app/NuovoPreventivo";
 import PreventivoDetail from "./pages/app/PreventivoDetail";
 import DocumentiScadenze from "./pages/app/DocumentiScadenze";
 import FoglioPresenze from "./pages/app/FoglioPresenze";
+import TemplatePreventivo from "./pages/app/TemplatePreventivo";
 
 const queryClient = new QueryClient();
 const App = () => (
