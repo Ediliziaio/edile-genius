@@ -1,54 +1,95 @@
 
+# Stato Implementazione — Blocco 1-5 + Render AI
 
-## Piano: Sistema Reportistica Cantieri via Telegram
+## ✅ Completato in questo blocco
 
-L'utente conferma che aggiungerà le API key (OPENAI_API_KEY, RESEND_API_KEY) in seguito tramite l'interfaccia SuperAdmin. Procediamo con l'implementazione completa, leggendo le chiavi da `Deno.env.get()` nelle Edge Functions (come già fatto per ELEVENLABS_API_KEY).
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
-Per la gestione delle API key da SuperAdmin, aggiungeremo una tab "Integrazioni" nelle PlatformSettings dove il SuperAdmin può salvare OPENAI_API_KEY e RESEND_API_KEY come Supabase secrets tramite la Edge Function `platform-config` (stesso pattern di `manage-n8n-config`).
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
-### 1. Database Migration
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-Crea 4 nuove tabelle + estendi `agent_reports` + storage bucket:
-- **`cantieri`** — siti costruzione (nome, indirizzo, committente, stato, email_report[], telegram_chat_ids[])
-- **`cantiere_operai`** — operai (nome, ruolo, telefono, telegram_user_id/username, cantiere_id)
-- **`telegram_sessions`** — stato conversazione Telegram per chat (pending_report_data, pending_foto_urls)
-- **`telegram_config`** — config bot per company (bot_token, webhook_secret, attivo)
-- **Estensione `agent_reports`** — +15 colonne (cantiere_id, operaio_id, trascrizione, audio_url, foto_urls[], lavori_eseguiti[], materiali_usati[], problemi[], avanzamento_percentuale, etc.)
-- **Storage bucket** `cantiere-media` (privato)
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
-RLS: company-scoped per cantieri/operai/config, superadmin per tutto.
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
-### 2. Edge Functions (4 funzioni)
+## ✅ Blocco 3-5 — Agent Templates System
 
-1. **`telegram-cantiere-webhook`** — Riceve messaggi Telegram, gestisce comandi (/start, /conferma, /annulla), scarica audio, trascrive con Whisper (OPENAI_API_KEY), struttura con GPT-4o-mini, salva foto in Storage, salva report. Legge bot_token dal DB `telegram_config`.
+### Database
+- agent_templates + agent_template_instances + agent_reports + company_channels
+- RLS policies PERMISSIVE (fix da RESTRICTIVE)
+- Funzione DB `increment_installs_count(tpl_id UUID)`
+- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
 
-2. **`send-cantiere-report-email`** — Invia report HTML via Resend (RESEND_API_KEY).
+### Edge Functions (CORS headers completi)
+- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
+- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
+- save-report: salva report in DB + aggiorna contatori istanza
 
-3. **`setup-telegram-webhook`** — Registra webhook URL su Telegram API per il bot.
+### Frontend — Wizard 5 Step (TemplateSetup.tsx)
+- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
+- Step 2 Operai: lista card + importa CSV con template scaricabile
+- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
+- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
 
-4. **Riscrittura `generate-report`** — Usa GPT-4o-mini invece del parsing regex attuale.
+### SuperAdmin
+- /superadmin/templates: CRUD completo con JSON editor per config_schema
 
-Config toml: tutte con `verify_jwt = false`.
+## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
 
-### 3. SuperAdmin: Tab "Integrazioni" in PlatformSettings
+### Database (5 tabelle)
+- render_provider_config: configurazione provider AI (OpenAI GPT-Image, Gemini Flash)
+- render_infissi_presets: 24 preset globali (materiali, colori, stili, vetri, oscuranti) con prompt_fragment
+- render_sessions: sessioni render con status, config, result_urls, costi
+- render_gallery: render salvati con share_token, favoriti
+- render_credits: crediti render separati (5 gratis per azienda)
+- RLS PERMISSIVE per tutte le tabelle
+- Trigger set_updated_at + init_render_credits su companies
+- Funzione deduct_render_credit
+- Storage buckets: render-originals (privato), render-results (pubblico)
 
-Aggiungere una 7a tab "Integrazioni" con campi per salvare OPENAI_API_KEY e RESEND_API_KEY come Supabase secrets. Estendere la Edge Function `platform-config` con action `save_secret` (usa il Supabase Management API o semplicemente salva in `platform_config` come indicatore, dato che i secrets veri vanno impostati manualmente).
+### Edge Functions
+- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
+- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
 
-In pratica: mostrare campi con istruzioni chiare su dove andare per impostare i secrets in Supabase Dashboard, con link diretto.
+### Frontend
+- RenderHub (/app/render): hero, come funziona, ultimi render, widget crediti
+- RenderNew (/app/render/new): wizard 4 step mobile-first (foto, config, elaborazione, risultati)
+- RenderGallery (/app/render/gallery): grid con ricerca, download, elimina
+- RenderGalleryDetail (/app/render/gallery/:id): BeforeAfterSlider, config, favoriti
+- RenderConfig (/superadmin/render-config): config provider con costi e markup
 
-### 4. Frontend (4 pagine + 1 componente + routing + sidebar)
+### Componenti
+- BeforeAfterSlider: slider interattivo prima/dopo con drag handle
+- promptBuilder.ts: costruttore prompt, validazione foto, check dimensioni
 
-1. **`Cantieri.tsx`** (`/app/cantieri`) — Lista cantieri con badge stato, KPI, dialog creazione
-2. **`CantiereDetail.tsx`** (`/app/cantieri/:id`) — 3 tab: Report (timeline), Operai (lista + form), Statistiche (recharts)
-3. **`CantiereConfig.tsx`** (`/app/cantieri/configurazione`) — Setup bot Telegram (istruzioni BotFather, campo token, pulsante attiva)
-4. **`ReportDetailModal.tsx`** — Dialog con trascrizione, dati strutturati, galleria foto, player audio
-5. **Sidebar** — Sezione "CANTIERI" con voci: I Cantieri, Configura Bot
-6. **App.tsx** — 3 nuove route
+### Sidebar
+- Nuova sezione "STRUMENTI VENDITA" con "Render AI"
+- SuperAdmin: sezione "RENDER AI" con "Config Provider"
 
-### Ordine di implementazione
-
-1. Migration DB
-2. Edge Functions
-3. Frontend (pagine + componenti + routing + sidebar)
-4. Tab Integrazioni in SuperAdmin PlatformSettings
-
+## 🔜 Prossimi Blocchi
+- Pagine: /app/phone-numbers, /app/knowledge-base
+- Editor Agente 8 tab
+- Wizard 4 step (CreateAgent)
+- SuperAdmin Dashboard economics
+- Edge functions: add-knowledge-doc
+- Integrazioni CRM native
+- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets

@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Bot, MessageSquare, BarChart3, Settings,
   HelpCircle, Building2, UserPlus, Users, FileText,
   BookUser, ListChecks, Megaphone, Phone, BookOpen, Coins, type LucideIcon,
-  AlertTriangle, MessageCircle, Puzzle, Palette
+  AlertTriangle, MessageCircle, Puzzle, Palette, HardHat, Wrench
 } from "lucide-react";
 
 interface NavItem { label: string; icon: LucideIcon; href: string; }
@@ -31,6 +31,10 @@ const companyNav: NavSection[] = [
     { label: "Rubrica", icon: BookUser, href: "/app/contacts" },
     { label: "Liste & Gruppi", icon: ListChecks, href: "/app/lists" },
     { label: "Campagne", icon: Megaphone, href: "/app/campaigns" },
+  ]},
+  { header: "CANTIERI", items: [
+    { label: "I Cantieri", icon: HardHat, href: "/app/cantieri" },
+    { label: "Configura Bot", icon: Wrench, href: "/app/cantieri/configurazione" },
   ]},
   { header: "REPORT", items: [
     { label: "Analytics", icon: BarChart3, href: "/app/analytics" },

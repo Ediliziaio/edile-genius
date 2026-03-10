@@ -61,6 +61,9 @@ import PerChiE from "./pages/PerChiE";
 import PerChiEDetail from "./pages/PerChiEDetail";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import CantierePage from "./pages/app/Cantieri";
+import CantiereDetail from "./pages/app/CantiereDetail";
+import CantiereConfig from "./pages/app/CantiereConfig";
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -123,6 +126,9 @@ const App = () => (
                 <Route path="/app/templates/:slug" element={<TemplateDetailPage />} />
                 <Route path="/app/templates/:slug/setup" element={<TemplateSetupPage />} />
                 <Route path="/app/whatsapp" element={<WhatsAppPage />} />
+                <Route path="/app/cantieri" element={<CantierePage />} />
+                <Route path="/app/cantieri/configurazione" element={<CantiereConfig />} />
+                <Route path="/app/cantieri/:id" element={<CantiereDetail />} />
                 <Route path="/app/render" element={<RenderHub />} />
                 <Route path="/app/render/new" element={<RenderNew />} />
                 <Route path="/app/render/gallery" element={<RenderGallery />} />

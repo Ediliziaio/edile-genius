@@ -16,48 +16,109 @@ export type Database = {
     Tables: {
       agent_reports: {
         Row: {
+          audio_url: string | null
+          avanzamento_percentuale: number | null
+          cantiere_id: string | null
           company_id: string
+          condizioni_meteo: string | null
           conversation_id: string | null
           date: string
+          email_inviata: boolean | null
+          email_inviata_at: string | null
+          fonte: string | null
+          foto_urls: string[] | null
           generated_at: string | null
           id: string
           instance_id: string
+          lavori_eseguiti: string[] | null
+          materiali_da_ordinare: string[] | null
+          materiali_usati: string[] | null
+          operai_presenti: Json | null
+          operaio_id: string | null
           pdf_url: string | null
+          previsione_domani: string | null
+          problemi: string[] | null
           raw_data: Json
           report_html: string | null
           report_summary: string | null
           sent_to: Json | null
           status: string | null
+          telegram_chat_id: string | null
+          telegram_message_id: string | null
+          trascrizione: string | null
         }
         Insert: {
+          audio_url?: string | null
+          avanzamento_percentuale?: number | null
+          cantiere_id?: string | null
           company_id: string
+          condizioni_meteo?: string | null
           conversation_id?: string | null
           date: string
+          email_inviata?: boolean | null
+          email_inviata_at?: string | null
+          fonte?: string | null
+          foto_urls?: string[] | null
           generated_at?: string | null
           id?: string
           instance_id: string
+          lavori_eseguiti?: string[] | null
+          materiali_da_ordinare?: string[] | null
+          materiali_usati?: string[] | null
+          operai_presenti?: Json | null
+          operaio_id?: string | null
           pdf_url?: string | null
+          previsione_domani?: string | null
+          problemi?: string[] | null
           raw_data?: Json
           report_html?: string | null
           report_summary?: string | null
           sent_to?: Json | null
           status?: string | null
+          telegram_chat_id?: string | null
+          telegram_message_id?: string | null
+          trascrizione?: string | null
         }
         Update: {
+          audio_url?: string | null
+          avanzamento_percentuale?: number | null
+          cantiere_id?: string | null
           company_id?: string
+          condizioni_meteo?: string | null
           conversation_id?: string | null
           date?: string
+          email_inviata?: boolean | null
+          email_inviata_at?: string | null
+          fonte?: string | null
+          foto_urls?: string[] | null
           generated_at?: string | null
           id?: string
           instance_id?: string
+          lavori_eseguiti?: string[] | null
+          materiali_da_ordinare?: string[] | null
+          materiali_usati?: string[] | null
+          operai_presenti?: Json | null
+          operaio_id?: string | null
           pdf_url?: string | null
+          previsione_domani?: string | null
+          problemi?: string[] | null
           raw_data?: Json
           report_html?: string | null
           report_summary?: string | null
           sent_to?: Json | null
           status?: string | null
+          telegram_chat_id?: string | null
+          telegram_message_id?: string | null
+          trascrizione?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "agent_reports_cantiere_id_fkey"
+            columns: ["cantiere_id"]
+            isOneToOne: false
+            referencedRelation: "cantieri"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "agent_reports_company_id_fkey"
             columns: ["company_id"]
@@ -77,6 +138,13 @@ export type Database = {
             columns: ["instance_id"]
             isOneToOne: false
             referencedRelation: "agent_template_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_reports_operaio_id_fkey"
+            columns: ["operaio_id"]
+            isOneToOne: false
+            referencedRelation: "cantiere_operai"
             referencedColumns: ["id"]
           },
         ]
@@ -1167,6 +1235,122 @@ export type Database = {
             columns: ["contact_list_id"]
             isOneToOne: false
             referencedRelation: "contact_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cantiere_operai: {
+        Row: {
+          attivo: boolean | null
+          cantiere_id: string | null
+          cognome: string | null
+          company_id: string
+          created_at: string | null
+          id: string
+          nome: string
+          ruolo: string | null
+          telefono: string | null
+          telegram_user_id: string | null
+          telegram_username: string | null
+        }
+        Insert: {
+          attivo?: boolean | null
+          cantiere_id?: string | null
+          cognome?: string | null
+          company_id: string
+          created_at?: string | null
+          id?: string
+          nome: string
+          ruolo?: string | null
+          telefono?: string | null
+          telegram_user_id?: string | null
+          telegram_username?: string | null
+        }
+        Update: {
+          attivo?: boolean | null
+          cantiere_id?: string | null
+          cognome?: string | null
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          nome?: string
+          ruolo?: string | null
+          telefono?: string | null
+          telegram_user_id?: string | null
+          telegram_username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cantiere_operai_cantiere_id_fkey"
+            columns: ["cantiere_id"]
+            isOneToOne: false
+            referencedRelation: "cantieri"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cantiere_operai_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cantieri: {
+        Row: {
+          committente: string | null
+          company_id: string
+          created_at: string | null
+          data_fine_prevista: string | null
+          data_inizio: string | null
+          email_report: string[] | null
+          foto_url: string | null
+          id: string
+          indirizzo: string | null
+          nome: string
+          note: string | null
+          responsabile: string | null
+          stato: string | null
+          telegram_chat_ids: string[] | null
+        }
+        Insert: {
+          committente?: string | null
+          company_id: string
+          created_at?: string | null
+          data_fine_prevista?: string | null
+          data_inizio?: string | null
+          email_report?: string[] | null
+          foto_url?: string | null
+          id?: string
+          indirizzo?: string | null
+          nome: string
+          note?: string | null
+          responsabile?: string | null
+          stato?: string | null
+          telegram_chat_ids?: string[] | null
+        }
+        Update: {
+          committente?: string | null
+          company_id?: string
+          created_at?: string | null
+          data_fine_prevista?: string | null
+          data_inizio?: string | null
+          email_report?: string[] | null
+          foto_url?: string | null
+          id?: string
+          indirizzo?: string | null
+          nome?: string
+          note?: string | null
+          responsabile?: string | null
+          stato?: string | null
+          telegram_chat_ids?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cantieri_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -2347,6 +2531,111 @@ export type Database = {
           webhook_verify_token?: string
         }
         Relationships: []
+      }
+      telegram_config: {
+        Row: {
+          attivo: boolean | null
+          bot_token: string | null
+          bot_username: string | null
+          company_id: string
+          created_at: string | null
+          email_report_default: string[] | null
+          id: string
+          report_ora_invio: string | null
+          webhook_secret: string | null
+        }
+        Insert: {
+          attivo?: boolean | null
+          bot_token?: string | null
+          bot_username?: string | null
+          company_id: string
+          created_at?: string | null
+          email_report_default?: string[] | null
+          id?: string
+          report_ora_invio?: string | null
+          webhook_secret?: string | null
+        }
+        Update: {
+          attivo?: boolean | null
+          bot_token?: string | null
+          bot_username?: string | null
+          company_id?: string
+          created_at?: string | null
+          email_report_default?: string[] | null
+          id?: string
+          report_ora_invio?: string | null
+          webhook_secret?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      telegram_sessions: {
+        Row: {
+          cantiere_id: string | null
+          chat_id: string
+          company_id: string | null
+          created_at: string | null
+          id: string
+          operaio_id: string | null
+          pending_foto_urls: string[] | null
+          pending_report_data: Json | null
+          stato: string | null
+          ultimo_messaggio_at: string | null
+        }
+        Insert: {
+          cantiere_id?: string | null
+          chat_id: string
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          operaio_id?: string | null
+          pending_foto_urls?: string[] | null
+          pending_report_data?: Json | null
+          stato?: string | null
+          ultimo_messaggio_at?: string | null
+        }
+        Update: {
+          cantiere_id?: string | null
+          chat_id?: string
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          operaio_id?: string | null
+          pending_foto_urls?: string[] | null
+          pending_report_data?: Json | null
+          stato?: string | null
+          ultimo_messaggio_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_sessions_cantiere_id_fkey"
+            columns: ["cantiere_id"]
+            isOneToOne: false
+            referencedRelation: "cantieri"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "telegram_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "telegram_sessions_operaio_id_fkey"
+            columns: ["operaio_id"]
+            isOneToOne: false
+            referencedRelation: "cantiere_operai"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
