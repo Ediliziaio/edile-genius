@@ -32,7 +32,7 @@ export default function CantiereConfig() {
   };
 
   const fetchOperai = async () => {
-    const { data } = await supabase.from("cantiere_operai").select("*").eq("company_id", companyId!).eq("attivo", true);
+    const { data } = await (supabase.from("cantiere_operai") as any).select("*").eq("company_id", companyId!).eq("attivo", true);
     setOperai(data || []);
   };
 

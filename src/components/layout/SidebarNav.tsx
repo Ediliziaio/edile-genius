@@ -32,6 +32,10 @@ const companyNav: NavSection[] = [
     { label: "Liste & Gruppi", icon: ListChecks, href: "/app/lists" },
     { label: "Campagne", icon: Megaphone, href: "/app/campaigns" },
   ]},
+  { header: "CANTIERI", items: [
+    { label: "I Cantieri", icon: HardHat, href: "/app/cantieri" },
+    { label: "Configura Bot", icon: Wrench, href: "/app/cantieri/configurazione" },
+  ]},
   { header: "REPORT", items: [
     { label: "Analytics", icon: BarChart3, href: "/app/analytics" },
     { label: "Crediti & Utilizzo", icon: Coins, href: "/app/credits" },

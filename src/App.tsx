@@ -126,6 +126,9 @@ const App = () => (
                 <Route path="/app/templates/:slug" element={<TemplateDetailPage />} />
                 <Route path="/app/templates/:slug/setup" element={<TemplateSetupPage />} />
                 <Route path="/app/whatsapp" element={<WhatsAppPage />} />
+                <Route path="/app/cantieri" element={<CantierePage />} />
+                <Route path="/app/cantieri/configurazione" element={<CantiereConfig />} />
+                <Route path="/app/cantieri/:id" element={<CantiereDetail />} />
                 <Route path="/app/render" element={<RenderHub />} />
                 <Route path="/app/render/new" element={<RenderNew />} />
                 <Route path="/app/render/gallery" element={<RenderGallery />} />
