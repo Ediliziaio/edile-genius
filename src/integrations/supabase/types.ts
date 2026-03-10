@@ -1642,6 +1642,11 @@ export type Database = {
           el_default_voice_id: string | null
           el_voices_count: number | null
           id: string
+          n8n_api_key_set: boolean
+          n8n_base_url: string | null
+          n8n_configured: boolean
+          n8n_tested_at: string | null
+          n8n_workflows_count: number
           updated_at: string | null
           updated_by: string | null
         }
@@ -1655,6 +1660,11 @@ export type Database = {
           el_default_voice_id?: string | null
           el_voices_count?: number | null
           id?: string
+          n8n_api_key_set?: boolean
+          n8n_base_url?: string | null
+          n8n_configured?: boolean
+          n8n_tested_at?: string | null
+          n8n_workflows_count?: number
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -1668,6 +1678,11 @@ export type Database = {
           el_default_voice_id?: string | null
           el_voices_count?: number | null
           id?: string
+          n8n_api_key_set?: boolean
+          n8n_base_url?: string | null
+          n8n_configured?: boolean
+          n8n_tested_at?: string | null
+          n8n_workflows_count?: number
           updated_at?: string | null
           updated_by?: string | null
         }

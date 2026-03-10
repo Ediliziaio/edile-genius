@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import {
   CheckCircle, XCircle, RefreshCw, Cpu, DollarSign, Package,
   Loader2, Plus, Pencil, Trash2, Zap, Clock, Brain, Save,
-  MessageSquare, Eye, EyeOff
+  MessageSquare, Eye, EyeOff, Workflow
 } from "lucide-react";
 
 interface PlatformConfig {
@@ -90,6 +90,14 @@ export default function PlatformSettings() {
   const [waTesting, setWaTesting] = useState(false);
   const [waTestResult, setWaTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
+  // N8N state
+  const [n8nBaseUrl, setN8nBaseUrl] = useState("");
+  const [n8nApiKey, setN8nApiKey] = useState("");
+  const [n8nShowKey, setN8nShowKey] = useState(false);
+  const [n8nSaving, setN8nSaving] = useState(false);
+  const [n8nTesting, setN8nTesting] = useState(false);
+  const [n8nStatus, setN8nStatus] = useState<{ configured: boolean; apiKeySet: boolean; testedAt: string | null; workflowsCount: number } | null>(null);
+
   const fetchConfig = useCallback(async () => {
     const { data } = await supabase.functions.invoke("platform-config", { method: "GET" });
     if (data?.config) {
@@ -136,9 +144,26 @@ export default function PlatformSettings() {
     }
   }, []);
 
+  const fetchN8nStatus = useCallback(async () => {
+    try {
+      const { data } = await supabase.functions.invoke("manage-n8n-config", {
+        body: { action: "get_status" },
+      });
+      if (data?.config) {
+        setN8nStatus({
+          configured: data.config.n8n_configured,
+          apiKeySet: data.config.n8n_api_key_set,
+          testedAt: data.config.n8n_tested_at,
+          workflowsCount: data.config.n8n_workflows_count,
+        });
+        if (data.config.n8n_base_url) setN8nBaseUrl(data.config.n8n_base_url);
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
-    Promise.all([fetchConfig(), fetchPricing(), fetchPackages(), fetchEconomics(), fetchWaConfig()]).finally(() => setLoading(false));
-  }, [fetchConfig, fetchPricing, fetchPackages, fetchEconomics, fetchWaConfig]);
+    Promise.all([fetchConfig(), fetchPricing(), fetchPackages(), fetchEconomics(), fetchWaConfig(), fetchN8nStatus()]).finally(() => setLoading(false));
+  }, [fetchConfig, fetchPricing, fetchPackages, fetchEconomics, fetchWaConfig, fetchN8nStatus]);
 
   const testApiKey = async () => {
     setTesting(true);
@@ -289,6 +314,38 @@ export default function PlatformSettings() {
   };
 
   const waFieldsValid = waAppId.trim().length > 0 && waAppSecret.trim().length > 0;
+  const n8nFieldsValid = n8nBaseUrl.trim().length > 0;
+
+  const saveN8nConfig = async () => {
+    setN8nSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("manage-n8n-config", {
+        body: { action: "save_config", base_url: n8nBaseUrl, api_key: n8nApiKey || undefined },
+      });
+      if (error || data?.error) {
+        toast({ variant: "destructive", title: "Errore", description: data?.error || error?.message });
+      } else {
+        toast({ title: "Configurazione N8N salvata" });
+        await fetchN8nStatus();
+      }
+    } finally { setN8nSaving(false); }
+  };
+
+  const testN8nConnection = async () => {
+    setN8nTesting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("manage-n8n-config", {
+        body: { action: "test_connection", base_url: n8nBaseUrl, api_key: n8nApiKey || undefined },
+      });
+      if (error || data?.error) {
+        toast({ variant: "destructive", title: "Test N8N fallito", description: data?.error || data?.details || error?.message });
+      } else {
+        toast({ title: "Connessione N8N OK", description: `${data.workflows_count} workflow trovati` });
+        await fetchN8nStatus();
+      }
+    } finally { setN8nTesting(false); }
+  };
+
 
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
 
@@ -306,12 +363,13 @@ export default function PlatformSettings() {
       </div>
 
       <Tabs defaultValue="api" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="api" className="gap-2"><Zap className="h-4 w-4" /> ElevenLabs API</TabsTrigger>
-          <TabsTrigger value="llm" className="gap-2"><Brain className="h-4 w-4" /> LLM & Modelli</TabsTrigger>
-          <TabsTrigger value="pricing" className="gap-2"><DollarSign className="h-4 w-4" /> Prezzi & Markup</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="api" className="gap-2"><Zap className="h-4 w-4" /> ElevenLabs</TabsTrigger>
+          <TabsTrigger value="llm" className="gap-2"><Brain className="h-4 w-4" /> LLM</TabsTrigger>
+          <TabsTrigger value="pricing" className="gap-2"><DollarSign className="h-4 w-4" /> Prezzi</TabsTrigger>
           <TabsTrigger value="packages" className="gap-2"><Package className="h-4 w-4" /> Pacchetti</TabsTrigger>
-          <TabsTrigger value="whatsapp" className="gap-2"><MessageSquare className="h-4 w-4" /> WhatsApp API</TabsTrigger>
+          <TabsTrigger value="whatsapp" className="gap-2"><MessageSquare className="h-4 w-4" /> WhatsApp</TabsTrigger>
+          <TabsTrigger value="n8n" className="gap-2"><Workflow className="h-4 w-4" /> N8N</TabsTrigger>
         </TabsList>
 
         {/* TAB: ElevenLabs API */}
@@ -643,6 +701,106 @@ export default function PlatformSettings() {
                 {waSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
                 Salva Configurazione WhatsApp
               </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* TAB: N8N Automation */}
+        <TabsContent value="n8n" className="space-y-4">
+          {/* Connection Status */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                {n8nStatus?.configured ? <CheckCircle className="h-5 w-5 text-primary" /> : <XCircle className="h-5 w-5 text-destructive" />}
+                Stato Connessione N8N
+              </CardTitle>
+              <CardDescription>Automazione workflow per template agenti e scheduling</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {n8nStatus?.configured ? (
+                <div className="flex items-center gap-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
+                  <CheckCircle className="h-8 w-8 text-primary shrink-0" />
+                  <div>
+                    <p className="font-medium text-foreground">N8N Connesso</p>
+                    <p className="text-sm text-muted-foreground">
+                      Ultimo test: {n8nStatus.testedAt ? new Date(n8nStatus.testedAt).toLocaleString("it-IT") : "Mai testato"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Workflow trovati: <strong>{n8nStatus.workflowsCount}</strong>
+                    </p>
+                    {n8nStatus.apiKeySet && <Badge variant="secondary" className="mt-1">API Key configurata</Badge>}
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 rounded-lg bg-destructive/5 border border-destructive/20">
+                  <p className="font-medium text-destructive">N8N Non Configurato</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Inserisci l'URL base del tuo server N8N e la API key per abilitare l'automazione dei workflow.
+                  </p>
+                </div>
+              )}
+              <Button onClick={testN8nConnection} disabled={n8nTesting || !n8nFieldsValid} variant="outline">
+                {n8nTesting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+                {n8nTesting ? "Test in corso..." : "Testa Connessione"}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Config Form */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Workflow className="h-5 w-5 text-muted-foreground" />
+                Configurazione N8N
+                {n8nStatus?.configured ? (
+                  <Badge className="ml-2" variant="default">Configurato</Badge>
+                ) : (
+                  <Badge variant="secondary" className="ml-2">Non configurato</Badge>
+                )}
+              </CardTitle>
+              <CardDescription>
+                URL base e API key del tuo server N8N — la API key viene passata alla edge function per il test, 
+                per l'uso in produzione configura il secret <code className="bg-muted px-1 rounded">N8N_API_KEY</code> nelle impostazioni Supabase.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>N8N Base URL <span className="text-destructive">*</span></Label>
+                  <Input
+                    value={n8nBaseUrl}
+                    onChange={e => setN8nBaseUrl(e.target.value)}
+                    placeholder="https://n8n.tuodominio.com"
+                  />
+                  <p className="text-xs text-muted-foreground">L'URL del tuo server N8N (senza slash finale)</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>N8N API Key</Label>
+                  <div className="relative">
+                    <Input
+                      type={n8nShowKey ? "text" : "password"}
+                      value={n8nApiKey}
+                      onChange={e => setN8nApiKey(e.target.value)}
+                      placeholder={n8nStatus?.apiKeySet ? "••••••••• (già configurata)" : "Inserisci API key"}
+                    />
+                    <Button variant="ghost" size="sm" className="absolute right-1 top-0.5 h-8 w-8 p-0" onClick={() => setN8nShowKey(!n8nShowKey)}>
+                      {n8nShowKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Generata da N8N → Settings → API → Create API Key</p>
+                </div>
+              </div>
+              <Separator />
+              <div className="flex gap-3">
+                <Button onClick={saveN8nConfig} disabled={n8nSaving || !n8nFieldsValid}>
+                  {n8nSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                  Salva Configurazione
+                </Button>
+                <Button onClick={testN8nConnection} disabled={n8nTesting || !n8nFieldsValid} variant="outline">
+                  {n8nTesting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+                  Testa e Salva
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
