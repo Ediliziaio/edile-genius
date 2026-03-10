@@ -1,95 +1,47 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI
 
-## ✅ Completato in questo blocco
+## Piano: Aggiungere tab N8N in PlatformSettings
 
-### Database Migration
-- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
-- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
-- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
-- RLS policies per tutte le nuove tabelle
+### Obiettivo
+Aggiungere un nuovo tab "N8N Automation" nella pagina PlatformSettings del SuperAdmin per configurare `N8N_BASE_URL` e `N8N_API_KEY`, salvandoli come Supabase Edge Function secrets tramite una nuova edge function dedicata.
 
-## ✅ Blocco 2 — Sistema Crediti Euro-based
+### Approccio
 
-### Database
-- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
-- ai_credit_topups (ricariche manual/auto/promo/adjustment)
-- ai_credit_usage (consumo per conversazione con margini)
-- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
-- monthly_billing_summary view (security_invoker)
+I valori N8N sono secrets sensibili e devono essere salvati come Supabase secrets (accessibili dalle edge functions), non in tabelle DB. Serve una edge function che, autenticata come superadmin, salvi i secrets usando il service role.
 
-### Edge Functions
-- check-credits-before-call: verifica saldo pre-chiamata
-- topup-credits: ricarica manuale con fattura
-- elevenlabs-webhook: post-call billing, auto-recharge, blocco
-- platform-config: +apply_global_markup action
+### Modifiche
 
-### Frontend
-- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
-- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
-- Sidebar: footer saldo crediti con barra e alert
-- VoiceTestPanel: check crediti pre-chiamata con blocco UI
+**1. Nuova Edge Function `manage-n8n-config/index.ts`**
+- Verifica ruolo superadmin (stesso pattern di `platform-config`)
+- Azioni:
+  - `test_connection`: testa la connessione n8n chiamando `GET {base_url}/api/v1/workflows` con l'API key
+  - `save_config`: salva `N8N_BASE_URL` e `N8N_API_KEY` nella tabella `platform_config` (campi nuovi) — i valori effettivi dei secrets sono già configurati in Supabase, quindi salviamo solo lo stato (configurato/testato) nel DB
+  - `get_status`: ritorna se i secrets sono configurati e l'ultimo test
 
-## ✅ Blocco 3-5 — Agent Templates System
+**2. Migrazione DB: aggiungere colonne a `platform_config`**
+- `n8n_configured boolean DEFAULT false`
+- `n8n_base_url text` (non è un secret, è un URL)
+- `n8n_api_key_set boolean DEFAULT false` (flag, il valore reale resta nei secrets)
+- `n8n_tested_at timestamptz`
+- `n8n_workflows_count integer DEFAULT 0`
 
-### Database
-- agent_templates + agent_template_instances + agent_reports + company_channels
-- RLS policies PERMISSIVE (fix da RESTRICTIVE)
-- Funzione DB `increment_installs_count(tpl_id UUID)`
-- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+**3. Modifica `src/pages/superadmin/PlatformSettings.tsx`**
+- Aggiungere tab "N8N" (6 tab totali, `grid-cols-6`)
+- Stato: `n8nBaseUrl`, `n8nApiKey`, `n8nSaving`, `n8nTesting`, `n8nStatus`
+- Card "Stato Connessione" con badge configurato/non configurato
+- Form: campo `N8N_BASE_URL` (input text) + `N8N_API_KEY` (input password con toggle visibilità)
+- Pulsante "Testa Connessione" che chiama la edge function
+- Pulsante "Salva" che:
+  1. Salva `N8N_BASE_URL` nella tabella `platform_config`
+  2. Salva `N8N_API_KEY` come Supabase secret tramite la edge function (usando il management API)
+- Mostra ultimo test e numero workflow trovati
 
-### Edge Functions (CORS headers completi)
-- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
-- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
-- save-report: salva report in DB + aggiorna contatori istanza
+**4. Aggiungere il secret `N8N_API_KEY` tramite tool**
+- Richiedere all'utente di fornire il valore tramite il tool `secrets`
 
-### Frontend — Wizard 5 Step (TemplateSetup.tsx)
-- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + importa CSV con template scaricabile
-- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
-- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
+### Note tecniche
+- Il `N8N_BASE_URL` può essere salvato in DB (non è un secret) per renderlo leggibile dal frontend
+- Il `N8N_API_KEY` deve restare come Supabase secret, accessibile solo dalle edge functions
+- La edge function `manage-n8n-config` usa il service client per leggere/scrivere `platform_config`
+- Il test di connessione chiama l'API n8n per verificare che URL + key funzionino
 
-### SuperAdmin
-- /superadmin/templates: CRUD completo con JSON editor per config_schema
-
-## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
-
-### Database (5 tabelle)
-- render_provider_config: configurazione provider AI (OpenAI GPT-Image, Gemini Flash)
-- render_infissi_presets: 24 preset globali (materiali, colori, stili, vetri, oscuranti) con prompt_fragment
-- render_sessions: sessioni render con status, config, result_urls, costi
-- render_gallery: render salvati con share_token, favoriti
-- render_credits: crediti render separati (5 gratis per azienda)
-- RLS PERMISSIVE per tutte le tabelle
-- Trigger set_updated_at + init_render_credits su companies
-- Funzione deduct_render_credit
-- Storage buckets: render-originals (privato), render-results (pubblico)
-
-### Edge Functions
-- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
-- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
-
-### Frontend
-- RenderHub (/app/render): hero, come funziona, ultimi render, widget crediti
-- RenderNew (/app/render/new): wizard 4 step mobile-first (foto, config, elaborazione, risultati)
-- RenderGallery (/app/render/gallery): grid con ricerca, download, elimina
-- RenderGalleryDetail (/app/render/gallery/:id): BeforeAfterSlider, config, favoriti
-- RenderConfig (/superadmin/render-config): config provider con costi e markup
-
-### Componenti
-- BeforeAfterSlider: slider interattivo prima/dopo con drag handle
-- promptBuilder.ts: costruttore prompt, validazione foto, check dimensioni
-
-### Sidebar
-- Nuova sezione "STRUMENTI VENDITA" con "Render AI"
-- SuperAdmin: sezione "RENDER AI" con "Config Provider"
-
-## 🔜 Prossimi Blocchi
-- Pagine: /app/phone-numbers, /app/knowledge-base
-- Editor Agente 8 tab
-- Wizard 4 step (CreateAgent)
-- SuperAdmin Dashboard economics
-- Edge functions: add-knowledge-doc
-- Integrazioni CRM native
-- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets
