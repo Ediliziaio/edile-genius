@@ -60,7 +60,7 @@ export default function CantiereDetail() {
 
   const handleAddOperaio = async () => {
     if (!cantiere || !operaioForm.nome.trim()) return;
-    const { error } = await supabase.from("cantiere_operai").insert({
+    const { error } = await (supabase.from("cantiere_operai") as any).insert({
       company_id: cantiere.company_id,
       cantiere_id: id,
       nome: operaioForm.nome,
@@ -69,7 +69,7 @@ export default function CantiereDetail() {
       telefono: operaioForm.telefono || null,
       telegram_username: operaioForm.telegram_username || null,
       telegram_user_id: operaioForm.telegram_user_id || null,
-    } as any);
+    });
     if (error) { toast.error("Errore"); return; }
     toast.success("Operaio aggiunto!");
     setAddOperaioOpen(false);

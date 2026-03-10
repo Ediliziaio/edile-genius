@@ -61,7 +61,7 @@ export default function CantierePage() {
   const handleCreate = async () => {
     if (!companyId || !form.nome.trim()) return;
     const emails = form.email_report.split(",").map(e => e.trim()).filter(Boolean);
-    const { error } = await supabase.from("cantieri").insert({
+    const { error } = await (supabase.from("cantieri") as any).insert({
       company_id: companyId,
       nome: form.nome,
       indirizzo: form.indirizzo || null,
@@ -70,7 +70,7 @@ export default function CantierePage() {
       data_inizio: form.data_inizio || null,
       data_fine_prevista: form.data_fine_prevista || null,
       email_report: emails.length > 0 ? emails : null,
-    } as any);
+    });
     if (error) { toast.error("Errore nella creazione"); return; }
     toast.success("Cantiere creato!");
     setDialogOpen(false);
