@@ -259,3 +259,130 @@ export default function CantiereDetail() {
     </div>
   );
 }
+
+// SAL Tab Component
+function SalTab({ cantiereId, companyId }: { cantiereId: string; companyId?: string }) {
+  const [milestones, setMilestones] = useState<any[]>([]);
+  const [addOpen, setAddOpen] = useState(false);
+  const [form, setForm] = useState({ nome: "", descrizione: "", target_percentuale: 100, data_prevista: "" });
+
+  useEffect(() => { fetchMilestones(); }, [cantiereId]);
+
+  const fetchMilestones = async () => {
+    const { data } = await (supabase.from("sal_milestones") as any)
+      .select("*")
+      .eq("cantiere_id", cantiereId)
+      .order("ordine", { ascending: true });
+    setMilestones(data || []);
+  };
+
+  const addMilestone = async () => {
+    if (!companyId || !form.nome) return;
+    const { error } = await (supabase.from("sal_milestones") as any).insert({
+      company_id: companyId,
+      cantiere_id: cantiereId,
+      ...form,
+      ordine: milestones.length,
+    });
+    if (error) { toast.error(error.message); return; }
+    toast.success("Milestone aggiunta");
+    setAddOpen(false);
+    setForm({ nome: "", descrizione: "", target_percentuale: 100, data_prevista: "" });
+    fetchMilestones();
+  };
+
+  const updatePercentuale = async (msId: string, pct: number) => {
+    const stato = pct >= 100 ? "completato" : "in_corso";
+    await (supabase.from("sal_milestones") as any).update({
+      percentuale_attuale: pct,
+      stato,
+      data_completamento: pct >= 100 ? new Date().toISOString().split("T")[0] : null,
+    }).eq("id", msId);
+    fetchMilestones();
+  };
+
+  const deleteMilestone = async (msId: string) => {
+    await (supabase.from("sal_milestones") as any).delete().eq("id", msId);
+    toast.success("Eliminata");
+    fetchMilestones();
+  };
+
+  const overallPct = milestones.length > 0
+    ? Math.round(milestones.reduce((s, m) => s + (m.percentuale_attuale || 0), 0) / milestones.length)
+    : 0;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold flex items-center gap-2"><Target className="h-5 w-5 text-primary" /> Stato Avanzamento Lavori</h3>
+          <p className="text-sm text-muted-foreground">Avanzamento complessivo: {overallPct}%</p>
+        </div>
+        <Dialog open={addOpen} onOpenChange={setAddOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-1"><Plus className="h-3 w-3" /> Milestone</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Nuova Milestone SAL</DialogTitle></DialogHeader>
+            <div className="space-y-4 pt-2">
+              <div className="space-y-2"><Label>Nome</Label><Input value={form.nome} onChange={e => setForm(f => ({ ...f, nome: e.target.value }))} placeholder="es. Fondazioni" /></div>
+              <div className="space-y-2"><Label>Descrizione</Label><Input value={form.descrizione} onChange={e => setForm(f => ({ ...f, descrizione: e.target.value }))} /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2"><Label>Target %</Label><Input type="number" min={0} max={100} value={form.target_percentuale} onChange={e => setForm(f => ({ ...f, target_percentuale: Number(e.target.value) }))} /></div>
+                <div className="space-y-2"><Label>Scadenza prevista</Label><Input type="date" value={form.data_prevista} onChange={e => setForm(f => ({ ...f, data_prevista: e.target.value }))} /></div>
+              </div>
+              <Button onClick={addMilestone} disabled={!form.nome} className="w-full">Aggiungi</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <Progress value={overallPct} className="h-3" />
+
+      {milestones.length === 0 ? (
+        <Card className="p-8 text-center"><p className="text-muted-foreground">Nessuna milestone SAL definita</p></Card>
+      ) : (
+        <div className="space-y-3">
+          {milestones.map((ms) => {
+            const isOverdue = ms.data_prevista && new Date(ms.data_prevista) < new Date() && ms.stato !== "completato";
+            return (
+              <Card key={ms.id} className={`p-4 ${isOverdue ? "border-destructive/50" : ""}`}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-sm">{ms.nome}</span>
+                    <Badge variant={ms.stato === "completato" ? "default" : "outline"} className={ms.stato === "completato" ? "bg-green-100 text-green-800" : isOverdue ? "bg-red-100 text-red-800" : ""}>
+                      {ms.stato === "completato" ? "✅ Completato" : isOverdue ? "⚠️ In ritardo" : "In corso"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold">{ms.percentuale_attuale}%</span>
+                    <span className="text-xs text-muted-foreground">/ {ms.target_percentuale}%</span>
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { if (confirm("Eliminare?")) deleteMilestone(ms.id); }}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+                {ms.descrizione && <p className="text-xs text-muted-foreground mb-2">{ms.descrizione}</p>}
+                <div className="flex items-center gap-3">
+                  <Progress value={(ms.percentuale_attuale / ms.target_percentuale) * 100} className="h-2 flex-1" />
+                  <Input
+                    type="number" min={0} max={ms.target_percentuale}
+                    className="w-20 h-8 text-sm"
+                    value={ms.percentuale_attuale}
+                    onChange={e => updatePercentuale(ms.id, Math.min(Number(e.target.value), ms.target_percentuale))}
+                  />
+                </div>
+                {ms.data_prevista && (
+                  <p className={`text-xs mt-1 ${isOverdue ? "text-destructive" : "text-muted-foreground"}`}>
+                    📅 Scadenza: {new Date(ms.data_prevista).toLocaleDateString("it-IT")}
+                    {ms.data_completamento && ` · Completato: ${new Date(ms.data_completamento).toLocaleDateString("it-IT")}`}
+                  </p>
+                )}
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
