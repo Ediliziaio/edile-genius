@@ -629,16 +629,22 @@ export default function NuovoPreventivo() {
             </CardContent>
           </Card>
 
-          {/* Notes & Tempi */}
+          {/* Notes, Tempi & Sconto */}
           <Card>
             <CardContent className="p-4 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Tempi di esecuzione</Label>
+                  <Input value={tempiEsecuzione} onChange={e => setTempiEsecuzione(e.target.value)} placeholder="es. 15-20 giorni lavorativi" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Sconto globale (%)</Label>
+                  <Input type="number" min={0} max={100} value={scontoGlobalePerc || ""} onChange={e => setScontoGlobalePerc(parseFloat(e.target.value) || 0)} placeholder="0" />
+                </div>
+              </div>
               <div className="space-y-2">
                 <Label>Note generali</Label>
                 <Textarea value={noteGenerali} onChange={e => setNoteGenerali(e.target.value)} rows={2} />
-              </div>
-              <div className="space-y-2">
-                <Label>Tempi di esecuzione</Label>
-                <Input value={tempiEsecuzione} onChange={e => setTempiEsecuzione(e.target.value)} placeholder="es. 15-20 giorni lavorativi" />
               </div>
             </CardContent>
           </Card>
