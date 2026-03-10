@@ -1,29 +1,64 @@
 
 
-## Audit Result: Everything Is Already Implemented
+## Bot Reportistica Cantieri — Piano di Implementazione
 
-After cross-referencing every part of this 10-part prompt against the live database schema and codebase:
+Questa funzionalità NON esiste nel codebase attuale. Le tabelle `cantieri`, `cantiere_operai`, `telegram_sessions`, `telegram_config` non esistono. Le pagine `/app/cantieri` non esistono. Le Edge Functions `telegram-cantiere-webhook`, `send-cantiere-report-email`, `setup-telegram-webhook` non esistono. Il `generate-report` usa parsing regex basico, non AI.
 
-### Database (Part 1) — All columns exist
-Every column requested in the migration already exists in the live schema: `agents` has all 20+ EL-specific columns, `conversations` has `el_conv_id`/`collected_data`/`eval_score`/`eval_notes`/`minutes_billed`/`cost_billed_eur`/`caller_number`, `ai_phone_numbers` has `el_phone_number_id`/`twilio_sid`/`provider_type`/`inbound_enabled`/`outbound_enabled`, `outbound_call_log` table exists with RLS, and `ai_knowledge_docs` has `el_doc_id`/`el_sync_status`/`el_sync_at`.
+### Pre-requisiti: Secrets mancanti
 
-### Edge Functions (Part 2) — All exist with requested logic
-- `create-elevenlabs-agent` — full EL conversation config sync (TTS, ASR, turn, safety, evaluation, built-in tools, dynamic variables)
-- `update-agent` — extended allowedFields list, EL PATCH sync with all fields
-- `elevenlabs-webhook` — HMAC signature verification, collected_data/eval extraction, conversation.started handling
-- `elevenlabs-outbound-call` — credit check, EL API call, outbound_call_log insert
-- `elevenlabs-import-phone-number` — Twilio import to EL, DB save, agent linking
-- `add-knowledge-doc` — file download from storage, EL sync, global KB sync to all agents
-- `get-elevenlabs-voices` — enriched metadata (gender, accent, age, use_case, category, supported_languages)
+Il progetto necessita di 2 nuovi secrets:
+- **OPENAI_API_KEY** — per Whisper (trascrizione audio) e GPT-4o-mini (strutturazione report)
+- **RESEND_API_KEY** — per invio email report (o in alternativa usare il sistema transactional email di Lovable)
 
-### Frontend (Parts 3-10) — All implemented
-- `BuyPhoneNumber.tsx` — 4-step wizard (Twilio check → credentials → config → confirmation), 306 lines
-- `AgentConfigForm.tsx` — `AgentConfigData` interface includes all fields (tts_model, asr_quality, asr_keywords, silence_end_call_timeout, speculative_turn, built_in_tools, transfer_number, monitoring_enabled, pii_redaction, blocked_topics, evaluation_criteria, llm_backup_model); TTS_MODELS selector present; 3 collapsible sections (ASR, Tools, Security)
-- `AgentOutboundTab.tsx` — outbound toggle, call form, call log table
-- `VoicePickerEnhanced.tsx` — search, gender, category filters with badges
-- `TranscriptViewer.tsx` — eval_score badge, eval_notes, collected_data display
-- `AgentIntegrationTab.tsx` — webhook URL section with copy, custom webhook input
-- `PlatformSettings.tsx` — ElevenLabs tab with API test, voices count, default LLM config
+Il `TELEGRAM_BOT_TOKEN` viene salvato nel DB (`telegram_config.bot_token`) e letto dalla Edge Function, quindi non serve come secret globale.
 
-**No changes are needed. The entire 10-part ElevenLabs integration is already complete.**
+### Parte 1 — Database Migration
+
+Crea 4 nuove tabelle e estendi `agent_reports`:
+
+- **`cantieri`** — siti di costruzione con nome, indirizzo, committente, stato, email_report[], telegram_chat_ids[]
+- **`cantiere_operai`** — operai associati con nome, ruolo, telefono, telegram_user_id/username
+- **`telegram_sessions`** — stato conversazione per ogni chat Telegram (pending report, foto)
+- **`telegram_config`** — configurazione bot Telegram per company (token, webhook_secret, orario invio)
+- **Estensione `agent_reports`** — aggiunge 15+ colonne per cantiere_id, operaio_id, trascrizione, audio_url, foto_urls[], dati strutturati (operai_presenti, lavori, materiali, problemi, avanzamento), email tracking
+- **Storage bucket** `cantiere-media` (privato) per audio e foto
+
+RLS policies: company-scoped per cantieri/operai/config, superadmin-only per telegram_sessions.
+
+### Parte 2 — Edge Functions (4 funzioni)
+
+1. **`telegram-cantiere-webhook`** (~300 righe) — Cuore del sistema. Riceve messaggi Telegram, gestisce comandi (/start, /status, /conferma, /annulla), scarica audio, trascrive con Whisper, struttura con GPT-4o-mini, salva foto in Storage, conferma con operaio, salva report. Legge il bot token dal DB (non da secret globale).
+
+2. **`send-cantiere-report-email`** — Invia report HTML via Resend ai destinatari configurati nel cantiere.
+
+3. **`generate-report` (riscrittura)** — Sostituisce il parsing regex con GPT-4o-mini per strutturare report da trascrizioni.
+
+4. **`setup-telegram-webhook`** — Registra il webhook URL su Telegram API per il bot della company.
+
+Config toml: tutte con `verify_jwt = false` (Telegram non invia JWT).
+
+### Parte 3 — Frontend (4 pagine + 1 componente)
+
+1. **`Cantieri.tsx`** (`/app/cantieri`) — Lista cantieri con badge stato, mini KPI (operai, report, ultimo report), dialog creazione nuovo cantiere (nome, indirizzo, committente, date, email destinatari multi-tag).
+
+2. **`CantiereDetail.tsx`** (`/app/cantieri/:id`) — 3 tab:
+   - Report: timeline verticale con filtro data, click per dettaglio
+   - Operai: lista con stato Telegram, form aggiunta, link invito
+   - Statistiche: grafici recharts (report/giorno, avanzamento, ore per operaio)
+
+3. **`CantiereConfig.tsx`** (`/app/cantieri/configurazione`) — Setup bot Telegram (istruzioni BotFather, campo token, pulsante attiva), associazione operai, email default.
+
+4. **`ReportDetailModal.tsx`** — Dialog con trascrizione, dati strutturati, galleria foto, player audio, status email.
+
+### Parte 4 — Navigazione
+
+- Aggiungere sezione "CANTIERI" nella sidebar con icona HardHat: I Cantieri, Configura Bot
+- 3 nuove route in App.tsx sotto le company routes
+
+### Ordine di implementazione
+
+1. Richiedere secrets (OPENAI_API_KEY, RESEND_API_KEY)
+2. Migration DB
+3. Edge Functions (telegram-cantiere-webhook, send-cantiere-report-email, setup-telegram-webhook, riscrittura generate-report)
+4. Frontend (pagine + componenti + routing + sidebar)
 
