@@ -351,7 +351,11 @@ export default function PreventivoDetail() {
 
               {/* Totals */}
               <div className="mt-6 border-t pt-4 space-y-2 text-right">
-                <div className="flex justify-end gap-8 text-sm"><span className="text-muted-foreground">Subtotale</span><span>€{subtotale.toFixed(2)}</span></div>
+                <div className="flex justify-end gap-8 text-sm"><span className="text-muted-foreground">Subtotale lordo</span><span>€{subtotaleBruto.toFixed(2)}</span></div>
+                {scontoPerc > 0 && (
+                  <div className="flex justify-end gap-8 text-sm text-green-600"><span>Sconto {scontoPerc}%</span><span>-€{scontoImporto.toFixed(2)}</span></div>
+                )}
+                <div className="flex justify-end gap-8 text-sm"><span className="text-muted-foreground">Imponibile</span><span>€{subtotale.toFixed(2)}</span></div>
                 <div className="flex justify-end gap-8 text-sm"><span className="text-muted-foreground">IVA ({prev.iva_percentuale || 22}%)</span><span>€{iva.toFixed(2)}</span></div>
                 <div className="flex justify-end gap-8 text-lg font-bold"><span>Totale</span><span className="flex items-center gap-1"><Euro className="h-4 w-4" />{totale.toFixed(2)}</span></div>
               </div>
