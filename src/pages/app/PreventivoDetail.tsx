@@ -87,12 +87,14 @@ export default function PreventivoDetail() {
   const updateMutation = useMutation({
     mutationFn: async () => {
       const subtotale = voci.reduce((s, v) => s + v.totale, 0);
+      const scontoPerc = prev?.sconto_globale_percentuale || 0;
+      const scontoImporto = subtotale * (scontoPerc / 100);
+      const imponibile = subtotale - scontoImporto;
       const ivaPerc = prev?.iva_percentuale || 22;
-      const imponibile = subtotale;
       const ivaImporto = imponibile * (ivaPerc / 100);
       const totaleFinale = imponibile + ivaImporto;
       const { error } = await (supabase.from("preventivi") as any)
-        .update({ voci, note, stato, subtotale, imponibile, iva_importo: ivaImporto, totale: totaleFinale, totale_finale: totaleFinale })
+        .update({ voci, note, stato, subtotale, sconto_globale_importo: scontoImporto, imponibile, iva_importo: ivaImporto, totale: totaleFinale, totale_finale: totaleFinale })
         .eq("id", id);
       if (error) throw error;
     },
@@ -134,7 +136,10 @@ export default function PreventivoDetail() {
   if (isLoading) return <div className="text-center py-12 text-muted-foreground">Caricamento...</div>;
   if (!prev) return <div className="text-center py-12 text-muted-foreground">Preventivo non trovato</div>;
 
-  const subtotale = voci.reduce((s, v) => s + v.totale, 0);
+  const subtotaleBruto = voci.reduce((s, v) => s + v.totale, 0);
+  const scontoPerc = prev.sconto_globale_percentuale || 0;
+  const scontoImporto = subtotaleBruto * (scontoPerc / 100);
+  const subtotale = subtotaleBruto - scontoImporto;
   const iva = subtotale * ((prev.iva_percentuale || 22) / 100);
   const totale = subtotale + iva;
   const categories = [...new Set(voci.map(v => v.categoria || "Generale"))];
@@ -222,6 +227,21 @@ export default function PreventivoDetail() {
               </Button>
             )}
           </PDFDownloadLink>
+          {prev.stato === "bozza" && prev.cliente_email && (
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={async () => {
+                await (supabase.from("preventivi") as any)
+                  .update({ stato: "inviato", data_invio: new Date().toISOString(), invio_email: prev.cliente_email })
+                  .eq("id", id);
+                toast.success(`Preventivo segnato come inviato a ${prev.cliente_email}`);
+                qc.invalidateQueries({ queryKey: ["preventivo", id] });
+              }}
+            >
+              <Send className="h-4 w-4" /> Invia al cliente
+            </Button>
+          )}
           {editing ? (
             <Button onClick={() => updateMutation.mutate()} className="gap-2">
               <Save className="h-4 w-4" /> Salva
@@ -331,7 +351,11 @@ export default function PreventivoDetail() {
 
               {/* Totals */}
               <div className="mt-6 border-t pt-4 space-y-2 text-right">
-                <div className="flex justify-end gap-8 text-sm"><span className="text-muted-foreground">Subtotale</span><span>€{subtotale.toFixed(2)}</span></div>
+                <div className="flex justify-end gap-8 text-sm"><span className="text-muted-foreground">Subtotale lordo</span><span>€{subtotaleBruto.toFixed(2)}</span></div>
+                {scontoPerc > 0 && (
+                  <div className="flex justify-end gap-8 text-sm text-green-600"><span>Sconto {scontoPerc}%</span><span>-€{scontoImporto.toFixed(2)}</span></div>
+                )}
+                <div className="flex justify-end gap-8 text-sm"><span className="text-muted-foreground">Imponibile</span><span>€{subtotale.toFixed(2)}</span></div>
                 <div className="flex justify-end gap-8 text-sm"><span className="text-muted-foreground">IVA ({prev.iva_percentuale || 22}%)</span><span>€{iva.toFixed(2)}</span></div>
                 <div className="flex justify-end gap-8 text-lg font-bold"><span>Totale</span><span className="flex items-center gap-1"><Euro className="h-4 w-4" />{totale.toFixed(2)}</span></div>
               </div>
@@ -417,23 +441,23 @@ export default function PreventivoDetail() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center p-4 bg-muted rounded-lg">
                   <Eye className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-2xl font-bold">{prev.tracking_aperto_count || 0}</p>
+                  <p className="text-2xl font-bold">{prev.link_aperto_count || 0}</p>
                   <p className="text-xs text-muted-foreground">Aperture</p>
                 </div>
                 <div className="text-center p-4 bg-muted rounded-lg">
                   <Clock className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
                   <p className="text-sm font-medium">
-                    {prev.tracking_aperto_at
-                      ? new Date(prev.tracking_aperto_at).toLocaleString("it-IT")
-                      : "Mai aperto"}
+                    {prev.email_aperta_at
+                      ? new Date(prev.email_aperta_at).toLocaleString("it-IT")
+                      : "Mai aperta"}
                   </p>
-                  <p className="text-xs text-muted-foreground">Ultima apertura</p>
+                  <p className="text-xs text-muted-foreground">Email aperta</p>
                 </div>
                 <div className="text-center p-4 bg-muted rounded-lg">
                   <Mail className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
                   <p className="text-sm font-medium">
-                    {prev.inviato_at
-                      ? new Date(prev.inviato_at).toLocaleString("it-IT")
+                    {prev.data_invio
+                      ? new Date(prev.data_invio).toLocaleString("it-IT")
                       : "Non inviato"}
                   </p>
                   <p className="text-xs text-muted-foreground">Ultimo invio</p>

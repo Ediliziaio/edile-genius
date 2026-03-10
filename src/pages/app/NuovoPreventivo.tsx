@@ -33,6 +33,8 @@ export default function NuovoPreventivo() {
   const [cantiereId, setCantiereId] = useState("");
   const [oggetto, setOggetto] = useState("");
   const [titolo, setTitolo] = useState("");
+  const [luogoLavori, setLuogoLavori] = useState("");
+  const [scontoGlobalePerc, setScontoGlobalePerc] = useState(0);
 
   // Step 2 — Audio + Photos
   const [recording, setRecording] = useState(false);
@@ -224,14 +226,17 @@ export default function NuovoPreventivo() {
     const { error } = await (supabase.from("preventivi") as any)
       .update({
         voci,
-        subtotale,
+        subtotale: imponibile,
         imponibile,
         iva_importo: ivaImporto,
         totale: totaleFinale,
         totale_finale: totaleFinale,
+        sconto_globale_percentuale: scontoGlobalePerc,
+        sconto_globale_importo: scontoGlobaleImporto,
         note: noteGenerali,
         oggetto,
         titolo,
+        luogo_lavori: luogoLavori,
         tempi_esecuzione: tempiEsecuzione,
       })
       .eq("id", preventivoId);
@@ -245,7 +250,9 @@ export default function NuovoPreventivo() {
   };
 
   // Computed totals
-  const subtotale = voci.reduce((s, v) => s + v.totale, 0);
+  const subtotaleBruto = voci.reduce((s, v) => s + v.totale, 0);
+  const scontoGlobaleImporto = subtotaleBruto * (scontoGlobalePerc / 100);
+  const subtotale = subtotaleBruto - scontoGlobaleImporto;
   const ivaImporto = subtotale * 0.22;
   const totaleFinale = subtotale + ivaImporto;
 
@@ -286,9 +293,12 @@ export default function NuovoPreventivo() {
     cliente_email: clienteEmail,
     cliente_piva: clientePiva,
     voci,
-    subtotale,
+    subtotale: subtotaleBruto,
+    sconto_globale_percentuale: scontoGlobalePerc,
+    sconto_globale_importo: scontoGlobaleImporto,
     imponibile: subtotale,
     iva_percentuale: 22,
+    luogo_lavori: luogoLavori,
     iva_importo: ivaImporto,
     totale_finale: totaleFinale,
     intro: templateConfig?.intro_default,
@@ -365,16 +375,22 @@ export default function NuovoPreventivo() {
                 <Label>Oggetto lavori</Label>
                 <Textarea placeholder="Descrizione sintetica dei lavori..." value={oggetto} onChange={e => setOggetto(e.target.value)} rows={2} />
               </div>
-              <div className="space-y-2">
-                <Label>Cantiere (opzionale)</Label>
-                <Select value={cantiereId} onValueChange={setCantiereId}>
-                  <SelectTrigger><SelectValue placeholder="Seleziona cantiere" /></SelectTrigger>
-                  <SelectContent>
-                    {(cantieri || []).map((c: any) => (
-                      <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Luogo lavori</Label>
+                  <Input placeholder="Via Roma 15, Milano" value={luogoLavori} onChange={e => setLuogoLavori(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Cantiere (opzionale)</Label>
+                  <Select value={cantiereId} onValueChange={setCantiereId}>
+                    <SelectTrigger><SelectValue placeholder="Seleziona cantiere" /></SelectTrigger>
+                    <SelectContent>
+                      {(cantieri || []).map((c: any) => (
+                        <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -592,7 +608,17 @@ export default function NuovoPreventivo() {
             <CardContent className="p-4">
               <div className="space-y-2 text-right">
                 <div className="flex justify-end gap-8 text-sm">
-                  <span className="text-muted-foreground">Subtotale</span>
+                  <span className="text-muted-foreground">Subtotale lordo</span>
+                  <span className="w-24">€{subtotaleBruto.toFixed(2)}</span>
+                </div>
+                {scontoGlobalePerc > 0 && (
+                  <div className="flex justify-end gap-8 text-sm text-green-600">
+                    <span>Sconto {scontoGlobalePerc}%</span>
+                    <span className="w-24">-€{scontoGlobaleImporto.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-end gap-8 text-sm">
+                  <span className="text-muted-foreground">Imponibile</span>
                   <span className="w-24">€{subtotale.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-end gap-8 text-sm">
@@ -609,16 +635,22 @@ export default function NuovoPreventivo() {
             </CardContent>
           </Card>
 
-          {/* Notes & Tempi */}
+          {/* Notes, Tempi & Sconto */}
           <Card>
             <CardContent className="p-4 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Tempi di esecuzione</Label>
+                  <Input value={tempiEsecuzione} onChange={e => setTempiEsecuzione(e.target.value)} placeholder="es. 15-20 giorni lavorativi" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Sconto globale (%)</Label>
+                  <Input type="number" min={0} max={100} value={scontoGlobalePerc || ""} onChange={e => setScontoGlobalePerc(parseFloat(e.target.value) || 0)} placeholder="0" />
+                </div>
+              </div>
               <div className="space-y-2">
                 <Label>Note generali</Label>
                 <Textarea value={noteGenerali} onChange={e => setNoteGenerali(e.target.value)} rows={2} />
-              </div>
-              <div className="space-y-2">
-                <Label>Tempi di esecuzione</Label>
-                <Input value={tempiEsecuzione} onChange={e => setTempiEsecuzione(e.target.value)} placeholder="es. 15-20 giorni lavorativi" />
               </div>
             </CardContent>
           </Card>
