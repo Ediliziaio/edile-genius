@@ -456,8 +456,8 @@ export default function PreventivoDetail() {
                 <div className="text-center p-4 bg-muted rounded-lg">
                   <Mail className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
                   <p className="text-sm font-medium">
-                    {prev.inviato_at
-                      ? new Date(prev.inviato_at).toLocaleString("it-IT")
+                    {prev.data_invio
+                      ? new Date(prev.data_invio).toLocaleString("it-IT")
                       : "Non inviato"}
                   </p>
                   <p className="text-xs text-muted-foreground">Ultimo invio</p>
