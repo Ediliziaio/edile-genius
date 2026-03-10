@@ -363,12 +363,13 @@ export default function PlatformSettings() {
       </div>
 
       <Tabs defaultValue="api" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="api" className="gap-2"><Zap className="h-4 w-4" /> ElevenLabs API</TabsTrigger>
-          <TabsTrigger value="llm" className="gap-2"><Brain className="h-4 w-4" /> LLM & Modelli</TabsTrigger>
-          <TabsTrigger value="pricing" className="gap-2"><DollarSign className="h-4 w-4" /> Prezzi & Markup</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="api" className="gap-2"><Zap className="h-4 w-4" /> ElevenLabs</TabsTrigger>
+          <TabsTrigger value="llm" className="gap-2"><Brain className="h-4 w-4" /> LLM</TabsTrigger>
+          <TabsTrigger value="pricing" className="gap-2"><DollarSign className="h-4 w-4" /> Prezzi</TabsTrigger>
           <TabsTrigger value="packages" className="gap-2"><Package className="h-4 w-4" /> Pacchetti</TabsTrigger>
-          <TabsTrigger value="whatsapp" className="gap-2"><MessageSquare className="h-4 w-4" /> WhatsApp API</TabsTrigger>
+          <TabsTrigger value="whatsapp" className="gap-2"><MessageSquare className="h-4 w-4" /> WhatsApp</TabsTrigger>
+          <TabsTrigger value="n8n" className="gap-2"><Workflow className="h-4 w-4" /> N8N</TabsTrigger>
         </TabsList>
 
         {/* TAB: ElevenLabs API */}
