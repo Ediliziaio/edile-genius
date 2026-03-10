@@ -313,6 +313,7 @@ export default function PlatformSettings() {
     } finally { setWaTesting(false); }
   };
 
+  const waFieldsValid = waAppId.trim().length > 0 && waAppSecret.trim().length > 0;
   const n8nFieldsValid = n8nBaseUrl.trim().length > 0;
 
   const saveN8nConfig = async () => {
