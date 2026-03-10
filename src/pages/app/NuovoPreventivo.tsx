@@ -602,7 +602,17 @@ export default function NuovoPreventivo() {
             <CardContent className="p-4">
               <div className="space-y-2 text-right">
                 <div className="flex justify-end gap-8 text-sm">
-                  <span className="text-muted-foreground">Subtotale</span>
+                  <span className="text-muted-foreground">Subtotale lordo</span>
+                  <span className="w-24">€{subtotaleBruto.toFixed(2)}</span>
+                </div>
+                {scontoGlobalePerc > 0 && (
+                  <div className="flex justify-end gap-8 text-sm text-green-600">
+                    <span>Sconto {scontoGlobalePerc}%</span>
+                    <span className="w-24">-€{scontoGlobaleImporto.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-end gap-8 text-sm">
+                  <span className="text-muted-foreground">Imponibile</span>
                   <span className="w-24">€{subtotale.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-end gap-8 text-sm">
