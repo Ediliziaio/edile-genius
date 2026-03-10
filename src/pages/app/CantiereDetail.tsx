@@ -54,7 +54,7 @@ export default function CantiereDetail() {
   useEffect(() => { if (id) fetchReports(); }, [dateFilter]);
 
   const fetchOperai = async () => {
-    const { data } = await supabase.from("cantiere_operai").select("*").eq("cantiere_id", id!).order("created_at", { ascending: false });
+    const { data } = await (supabase.from("cantiere_operai") as any).select("*").eq("cantiere_id", id!).order("created_at", { ascending: false });
     setOperai(data || []);
   };
 
