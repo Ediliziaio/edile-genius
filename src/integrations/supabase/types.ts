@@ -256,7 +256,11 @@ export type Database = {
       agents: {
         Row: {
           additional_languages: string[] | null
+          asr_keywords: string[] | null
+          asr_quality: string | null
           avg_duration_sec: number | null
+          blocked_topics: string | null
+          built_in_tools: Json | null
           calls_month: number | null
           calls_qualified: number | null
           calls_total: number | null
@@ -265,9 +269,13 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           description: string | null
+          dynamic_variables: Json | null
           el_agent_id: string | null
+          el_phone_number_id: string | null
           el_voice_id: string | null
+          el_webhook_secret: string | null
           evaluation_criteria: string | null
+          evaluation_prompt: string | null
           first_message: string | null
           id: string
           interrupt_enabled: boolean | null
@@ -279,19 +287,27 @@ export type Database = {
           llm_model: string | null
           llm_temperature: number | null
           max_duration_sec: number | null
+          monitoring_enabled: boolean | null
           name: string
+          outbound_enabled: boolean | null
           phone_number_id: string | null
+          pii_redaction: boolean | null
           post_call_prompt: string | null
           post_call_summary: boolean | null
+          post_call_webhook_url: string | null
           sector: string | null
+          silence_end_call_timeout: number | null
           silence_sec: number | null
+          speculative_turn: boolean | null
           status: string | null
           system_prompt: string | null
           temperature: number | null
+          transfer_number: string | null
           tts_model: string | null
           type: string | null
           updated_at: string | null
           use_case: string | null
+          vad_enabled: boolean | null
           voice_name: string | null
           voice_similarity: number | null
           voice_speed: number | null
@@ -302,7 +318,11 @@ export type Database = {
         }
         Insert: {
           additional_languages?: string[] | null
+          asr_keywords?: string[] | null
+          asr_quality?: string | null
           avg_duration_sec?: number | null
+          blocked_topics?: string | null
+          built_in_tools?: Json | null
           calls_month?: number | null
           calls_qualified?: number | null
           calls_total?: number | null
@@ -311,9 +331,13 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          dynamic_variables?: Json | null
           el_agent_id?: string | null
+          el_phone_number_id?: string | null
           el_voice_id?: string | null
+          el_webhook_secret?: string | null
           evaluation_criteria?: string | null
+          evaluation_prompt?: string | null
           first_message?: string | null
           id?: string
           interrupt_enabled?: boolean | null
@@ -325,19 +349,27 @@ export type Database = {
           llm_model?: string | null
           llm_temperature?: number | null
           max_duration_sec?: number | null
+          monitoring_enabled?: boolean | null
           name: string
+          outbound_enabled?: boolean | null
           phone_number_id?: string | null
+          pii_redaction?: boolean | null
           post_call_prompt?: string | null
           post_call_summary?: boolean | null
+          post_call_webhook_url?: string | null
           sector?: string | null
+          silence_end_call_timeout?: number | null
           silence_sec?: number | null
+          speculative_turn?: boolean | null
           status?: string | null
           system_prompt?: string | null
           temperature?: number | null
+          transfer_number?: string | null
           tts_model?: string | null
           type?: string | null
           updated_at?: string | null
           use_case?: string | null
+          vad_enabled?: boolean | null
           voice_name?: string | null
           voice_similarity?: number | null
           voice_speed?: number | null
@@ -348,7 +380,11 @@ export type Database = {
         }
         Update: {
           additional_languages?: string[] | null
+          asr_keywords?: string[] | null
+          asr_quality?: string | null
           avg_duration_sec?: number | null
+          blocked_topics?: string | null
+          built_in_tools?: Json | null
           calls_month?: number | null
           calls_qualified?: number | null
           calls_total?: number | null
@@ -357,9 +393,13 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          dynamic_variables?: Json | null
           el_agent_id?: string | null
+          el_phone_number_id?: string | null
           el_voice_id?: string | null
+          el_webhook_secret?: string | null
           evaluation_criteria?: string | null
+          evaluation_prompt?: string | null
           first_message?: string | null
           id?: string
           interrupt_enabled?: boolean | null
@@ -371,19 +411,27 @@ export type Database = {
           llm_model?: string | null
           llm_temperature?: number | null
           max_duration_sec?: number | null
+          monitoring_enabled?: boolean | null
           name?: string
+          outbound_enabled?: boolean | null
           phone_number_id?: string | null
+          pii_redaction?: boolean | null
           post_call_prompt?: string | null
           post_call_summary?: boolean | null
+          post_call_webhook_url?: string | null
           sector?: string | null
+          silence_end_call_timeout?: number | null
           silence_sec?: number | null
+          speculative_turn?: boolean | null
           status?: string | null
           system_prompt?: string | null
           temperature?: number | null
+          transfer_number?: string | null
           tts_model?: string | null
           type?: string | null
           updated_at?: string | null
           use_case?: string | null
+          vad_enabled?: boolean | null
           voice_name?: string | null
           voice_similarity?: number | null
           voice_speed?: number | null
@@ -851,6 +899,8 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           el_doc_id: string | null
+          el_sync_at: string | null
+          el_sync_status: string | null
           file_path: string | null
           id: string
           name: string
@@ -866,6 +916,8 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           el_doc_id?: string | null
+          el_sync_at?: string | null
+          el_sync_status?: string | null
           file_path?: string | null
           id?: string
           name: string
@@ -881,6 +933,8 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           el_doc_id?: string | null
+          el_sync_at?: string | null
+          el_sync_status?: string | null
           file_path?: string | null
           id?: string
           name?: string
@@ -916,13 +970,18 @@ export type Database = {
           country_code: string | null
           created_at: string | null
           el_phone_id: string | null
+          el_phone_number_id: string | null
           id: string
+          inbound_enabled: boolean | null
           label: string | null
           monthly_cost: number | null
           out_of_hours_msg: string | null
+          outbound_enabled: boolean | null
           phone_number: string
           provider: string | null
+          provider_type: string | null
           status: string | null
+          twilio_sid: string | null
           updated_at: string | null
           voicemail_enabled: boolean | null
         }
@@ -935,13 +994,18 @@ export type Database = {
           country_code?: string | null
           created_at?: string | null
           el_phone_id?: string | null
+          el_phone_number_id?: string | null
           id?: string
+          inbound_enabled?: boolean | null
           label?: string | null
           monthly_cost?: number | null
           out_of_hours_msg?: string | null
+          outbound_enabled?: boolean | null
           phone_number: string
           provider?: string | null
+          provider_type?: string | null
           status?: string | null
+          twilio_sid?: string | null
           updated_at?: string | null
           voicemail_enabled?: boolean | null
         }
@@ -954,13 +1018,18 @@ export type Database = {
           country_code?: string | null
           created_at?: string | null
           el_phone_id?: string | null
+          el_phone_number_id?: string | null
           id?: string
+          inbound_enabled?: boolean | null
           label?: string | null
           monthly_cost?: number | null
           out_of_hours_msg?: string | null
+          outbound_enabled?: boolean | null
           phone_number?: string
           provider?: string | null
+          provider_type?: string | null
           status?: string | null
+          twilio_sid?: string | null
           updated_at?: string | null
           voicemail_enabled?: boolean | null
         }
@@ -1486,6 +1555,7 @@ export type Database = {
           collected_data: Json | null
           company_id: string
           contact_id: string | null
+          cost_billed_eur: number | null
           direction: string | null
           duration_sec: number | null
           el_conv_id: string | null
@@ -1512,6 +1582,7 @@ export type Database = {
           collected_data?: Json | null
           company_id: string
           contact_id?: string | null
+          cost_billed_eur?: number | null
           direction?: string | null
           duration_sec?: number | null
           el_conv_id?: string | null
@@ -1538,6 +1609,7 @@ export type Database = {
           collected_data?: Json | null
           company_id?: string
           contact_id?: string | null
+          cost_billed_eur?: number | null
           direction?: string | null
           duration_sec?: number | null
           el_conv_id?: string | null
@@ -1686,6 +1758,73 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outbound_call_log: {
+        Row: {
+          agent_id: string | null
+          company_id: string
+          duration_sec: number | null
+          el_call_id: string | null
+          ended_at: string | null
+          error_message: string | null
+          from_number: string | null
+          id: string
+          phone_number_id: string | null
+          started_at: string | null
+          status: string | null
+          to_number: string
+        }
+        Insert: {
+          agent_id?: string | null
+          company_id: string
+          duration_sec?: number | null
+          el_call_id?: string | null
+          ended_at?: string | null
+          error_message?: string | null
+          from_number?: string | null
+          id?: string
+          phone_number_id?: string | null
+          started_at?: string | null
+          status?: string | null
+          to_number: string
+        }
+        Update: {
+          agent_id?: string | null
+          company_id?: string
+          duration_sec?: number | null
+          el_call_id?: string | null
+          ended_at?: string | null
+          error_message?: string | null
+          from_number?: string | null
+          id?: string
+          phone_number_id?: string | null
+          started_at?: string | null
+          status?: string | null
+          to_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outbound_call_log_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outbound_call_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outbound_call_log_phone_number_id_fkey"
+            columns: ["phone_number_id"]
+            isOneToOne: false
+            referencedRelation: "ai_phone_numbers"
             referencedColumns: ["id"]
           },
         ]
