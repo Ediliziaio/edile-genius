@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Save, Upload, Palette, FileText, Type, ToggleLeft } from "lucide-react";
+import { Save, Upload, Palette, Type, ToggleLeft, Building2 } from "lucide-react";
 
 export default function TemplatePreventivo() {
   const companyId = useCompanyId();
@@ -19,14 +19,27 @@ export default function TemplatePreventivo() {
   const [form, setForm] = useState({
     nome: "Template Standard",
     logo_url: "",
-    colore_primario: "#1a1a2e",
-    colore_secondario: "#e94560",
+    colore_primario: "#f4a100",
+    colore_secondario: "#1e293b",
+    // Dati azienda
+    azienda_nome: "",
+    azienda_indirizzo: "",
+    azienda_telefono: "",
+    azienda_email: "",
+    azienda_piva: "",
+    azienda_cf: "",
+    azienda_rea: "",
+    azienda_sito: "",
+    // Legacy
     intestazione_azienda: "",
     piede_pagina: "",
-    intro_default: "A seguito del sopralluogo effettuato, Vi sottoponiamo la nostra migliore offerta per i lavori di seguito descritti.",
+    // Testi
+    intro_default: "In riferimento al sopralluogo effettuato, siamo lieti di sottoporvi il seguente preventivo per i lavori da eseguire.",
     condizioni_default: "Pagamento: 30% alla conferma, 40% in corso d'opera, 30% a fine lavori.",
     clausole_default: "I prezzi si intendono IVA esclusa. La presente offerta ha validità 30 giorni dalla data di emissione.",
-    firma_testo: "Il Responsabile",
+    note_finali: "",
+    firma_testo: "Per accettazione del preventivo, restituire copia firmata.",
+    // Layout
     show_foto_copertina: true,
     show_foto_voci: true,
     show_subtotali_categoria: true,
@@ -53,13 +66,22 @@ export default function TemplatePreventivo() {
       setForm({
         nome: existing.nome || "Template Standard",
         logo_url: existing.logo_url || "",
-        colore_primario: existing.colore_primario || "#1a1a2e",
-        colore_secondario: existing.colore_secondario || "#e94560",
+        colore_primario: existing.colore_primario || "#f4a100",
+        colore_secondario: existing.colore_secondario || "#1e293b",
+        azienda_nome: existing.azienda_nome || "",
+        azienda_indirizzo: existing.azienda_indirizzo || "",
+        azienda_telefono: existing.azienda_telefono || "",
+        azienda_email: existing.azienda_email || "",
+        azienda_piva: existing.azienda_piva || "",
+        azienda_cf: existing.azienda_cf || "",
+        azienda_rea: existing.azienda_rea || "",
+        azienda_sito: existing.azienda_sito || "",
         intestazione_azienda: existing.intestazione_azienda || "",
         piede_pagina: existing.piede_pagina || "",
         intro_default: existing.intro_default || "",
         condizioni_default: existing.condizioni_default || "",
         clausole_default: existing.clausole_default || "",
+        note_finali: existing.note_finali || "",
         firma_testo: existing.firma_testo || "Il Responsabile",
         show_foto_copertina: existing.show_foto_copertina ?? true,
         show_foto_voci: existing.show_foto_voci ?? true,
@@ -119,12 +141,59 @@ export default function TemplatePreventivo() {
         </Button>
       </div>
 
-      <Tabs defaultValue="branding">
+      <Tabs defaultValue="azienda">
         <TabsList className="w-full justify-start">
+          <TabsTrigger value="azienda" className="gap-1"><Building2 className="h-3.5 w-3.5" /> Azienda</TabsTrigger>
           <TabsTrigger value="branding" className="gap-1"><Palette className="h-3.5 w-3.5" /> Branding</TabsTrigger>
           <TabsTrigger value="testi" className="gap-1"><Type className="h-3.5 w-3.5" /> Testi Standard</TabsTrigger>
           <TabsTrigger value="layout" className="gap-1"><ToggleLeft className="h-3.5 w-3.5" /> Layout</TabsTrigger>
         </TabsList>
+
+        {/* DATI AZIENDA */}
+        <TabsContent value="azienda" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Dati Azienda</CardTitle>
+              <CardDescription>Questi dati appariranno nell'intestazione del PDF preventivo</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Nome Azienda</Label>
+                  <Input value={form.azienda_nome} onChange={e => update("azienda_nome", e.target.value)} placeholder="Impresa Edile Rossi S.r.l." />
+                </div>
+                <div className="space-y-2">
+                  <Label>Telefono</Label>
+                  <Input value={form.azienda_telefono} onChange={e => update("azienda_telefono", e.target.value)} placeholder="+39 02 1234567" />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Indirizzo</Label>
+                  <Input value={form.azienda_indirizzo} onChange={e => update("azienda_indirizzo", e.target.value)} placeholder="Via Roma 15, 20100 Milano (MI)" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Email</Label>
+                  <Input value={form.azienda_email} onChange={e => update("azienda_email", e.target.value)} placeholder="info@impresarossi.it" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Sito Web</Label>
+                  <Input value={form.azienda_sito} onChange={e => update("azienda_sito", e.target.value)} placeholder="www.impresarossi.it" />
+                </div>
+                <div className="space-y-2">
+                  <Label>P.IVA</Label>
+                  <Input value={form.azienda_piva} onChange={e => update("azienda_piva", e.target.value)} placeholder="IT12345678901" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Codice Fiscale</Label>
+                  <Input value={form.azienda_cf} onChange={e => update("azienda_cf", e.target.value)} placeholder="12345678901" />
+                </div>
+                <div className="space-y-2">
+                  <Label>REA</Label>
+                  <Input value={form.azienda_rea} onChange={e => update("azienda_rea", e.target.value)} placeholder="MI-1234567" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* BRANDING */}
         <TabsContent value="branding" className="space-y-4">
@@ -176,18 +245,10 @@ export default function TemplatePreventivo() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Dati Azienda</CardTitle>
-              <CardDescription>Intestazione e piè di pagina del preventivo</CardDescription>
+              <CardTitle className="text-base">Piè di pagina</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Intestazione (sotto il logo)</Label>
-                <Textarea value={form.intestazione_azienda} onChange={e => update("intestazione_azienda", e.target.value)} placeholder="Impresa Edile Rossi S.r.l. — Via Roma 15, 20100 Milano — P.IVA 12345678901" rows={2} />
-              </div>
-              <div className="space-y-2">
-                <Label>Piè di pagina</Label>
-                <Input value={form.piede_pagina} onChange={e => update("piede_pagina", e.target.value)} placeholder="Impresa Edile Rossi — Preventivo generato automaticamente" />
-              </div>
+            <CardContent>
+              <Input value={form.piede_pagina} onChange={e => update("piede_pagina", e.target.value)} placeholder="Impresa Edile Rossi — Preventivo generato automaticamente" />
             </CardContent>
           </Card>
         </TabsContent>
@@ -211,6 +272,10 @@ export default function TemplatePreventivo() {
               <div className="space-y-2">
                 <Label>Clausole</Label>
                 <Textarea value={form.clausole_default} onChange={e => update("clausole_default", e.target.value)} rows={3} />
+              </div>
+              <div className="space-y-2">
+                <Label>Note finali</Label>
+                <Textarea value={form.note_finali} onChange={e => update("note_finali", e.target.value)} rows={2} />
               </div>
               <div className="space-y-2">
                 <Label>Testo firma</Label>
@@ -247,7 +312,7 @@ export default function TemplatePreventivo() {
             </CardHeader>
             <CardContent className="space-y-4">
               {[
-                { key: "show_foto_copertina", label: "Foto copertina", desc: "Mostra la prima foto del sopralluogo come copertina" },
+                { key: "show_foto_copertina", label: "Foto copertina", desc: "Mostra le foto del sopralluogo come copertina" },
                 { key: "show_foto_voci", label: "Foto per voce", desc: "Mostra le foto associate a ciascuna voce del preventivo" },
                 { key: "show_subtotali_categoria", label: "Subtotali per categoria", desc: "Mostra il subtotale alla fine di ogni categoria" },
                 { key: "show_firma", label: "Sezione firma", desc: "Mostra lo spazio per la firma del responsabile e del cliente" },

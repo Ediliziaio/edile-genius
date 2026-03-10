@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
     whisperForm.append("file", new File([audioBytes], "audio.webm", { type: "audio/webm" }));
     whisperForm.append("model", "whisper-1");
     whisperForm.append("language", "it");
-    whisperForm.append("prompt", "Trascrizione di un sopralluogo edile. Termini: intonaco, ponteggio, calcestruzzo, serramenti, infissi, massetto, cartongesso, impermeabilizzazione, cappotto termico, fotovoltaico.");
+    whisperForm.append("prompt", "Trascrizione di un sopralluogo edile. Termini: intonaco, ponteggio, calcestruzzo, serramenti, infissi, massetto, cartongesso, impermeabilizzazione, cappotto termico, fotovoltaico, demolizione, massetto, piastrelle, tubazioni.");
 
     const whisperRes = await fetch("https://api.openai.com/v1/audio/transcriptions", {
       method: "POST",
@@ -73,7 +73,48 @@ Deno.serve(async (req) => {
     if (!whisperRes.ok) throw new Error(`Whisper error: ${await whisperRes.text()}`);
     const { text: trascrizione } = await whisperRes.json();
 
-    // 3. Extract quote items with GPT-4o expert prompt
+    // 3. GPT-4o — expert surveyor prompt (DEI 2025)
+    const systemPrompt = `Sei un geometra esperto e preventivista in edilizia italiana con 20 anni di esperienza. Analizza la trascrizione di un sopralluogo e produci le voci di un preventivo professionale.
+
+ISTRUZIONI:
+- Identifica TUTTE le lavorazioni menzionate, anche implicitamente
+- Suddividi in categorie logiche: Demolizioni, Muratura, Strutture, Impianto Idraulico, Impianto Elettrico, Pavimenti e Rivestimenti, Intonaci e Pitture, Serramenti e Infissi, Opere Esterne, Finiture, Materiali, Manodopera
+- Per le quantità: usa le misure menzionate nell'audio; se non specificate, stima ragionevolmente
+- Per i prezzi: usa prezzari DEI 2025 per l'Italia (prezzi medi nazionali)
+- Sii MOLTO preciso nelle descrizioni: un cliente deve capire esattamente cosa viene fatto
+- Ordina le voci in sequenza logica di esecuzione lavori
+- Includi voci spesso dimenticate: smaltimento macerie, ponteggio, pulizia finale
+
+FORMATO OUTPUT (JSON puro, niente altro):
+{
+  "titolo": "Titolo sintetico e professionale dei lavori",
+  "oggetto": "Frase formale tipo 'Lavori di ristrutturazione appartamento sito in...'",
+  "luogo_lavori": "indirizzo o descrizione luogo se menzionato",
+  "tempi_esecuzione": "stima realistica in settimane/mesi",
+  "intro_suggerita": "breve introduzione professionale per questo specifico preventivo",
+  "voci": [
+    {
+      "id": "v1",
+      "ordine": 1,
+      "categoria": "Demolizioni",
+      "titolo_voce": "Rimozione pavimento esistente",
+      "descrizione": "Demolizione e rimozione di pavimento in ceramica esistente, comprensivo di smaltimento macerie a discarica autorizzata",
+      "unita_misura": "mq",
+      "quantita": 45,
+      "prezzo_unitario": 18.00,
+      "sconto_percentuale": 0,
+      "totale": 810.00,
+      "note_voce": "",
+      "evidenziata": false
+    }
+  ],
+  "avvertenze": "Note importanti emerse dal sopralluogo",
+  "categorie_trovate": ["Demolizioni", "Muratura", "Finiture"]
+}
+
+UNITÀ DI MISURA: mq (metri quadri), ml (metri lineari), mc (metri cubi), nr (numero), ore, forfait, kg, cad (cadauno)
+Se non riesci a determinare quantità o prezzi, fornisci la migliore stima e metti note_voce con "da verificare".`;
+
     const gptRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -81,51 +122,12 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
-        temperature: 0.1,
+        model: "gpt-4o",
+        temperature: 0.2,
         response_format: { type: "json_object" },
         messages: [
-          {
-            role: "system",
-            content: `Sei un esperto computo-metrista per imprese edili italiane. Dalla trascrizione di un sopralluogo, estrai le voci del preventivo organizzandole per categoria.
-
-REGOLE IMPORTANTI:
-- Usa il Prezzario DEI come riferimento per prezzi unitari quando non specificati
-- Organizza le voci per CATEGORIA (es: "Demolizioni", "Muratura", "Impianti", "Finiture", "Serramenti")
-- Ogni voce deve avere un titolo breve e una descrizione dettagliata
-- Stima le quantità in base a ciò che viene descritto (dimensioni stanza, metrature menzionate)
-- Se il prezzo non è menzionato, stima un prezzo di mercato realistico per l'Italia
-- Includi voci spesso dimenticate: smaltimento macerie, ponteggio, pulizia finale
-
-Rispondi SOLO in JSON con questo formato:
-{
-  "voci": [
-    {
-      "id": "uuid-style string",
-      "ordine": 1,
-      "categoria": "Demolizioni",
-      "titolo_voce": "Demolizione pavimento esistente",
-      "descrizione": "Rimozione completa del pavimento esistente incluso massetto, con trasporto a discarica autorizzata",
-      "unita_misura": "mq",
-      "quantita": 25.0,
-      "prezzo_unitario": 18.50,
-      "sconto_percentuale": 0,
-      "totale": 462.50,
-      "foto_urls": [],
-      "note_voce": "",
-      "evidenziata": false
-    }
-  ],
-  "note_generali": "note dal sopralluogo",
-  "oggetto_suggerito": "breve titolo dei lavori",
-  "tempi_esecuzione_stimati": "es: 15-20 giorni lavorativi",
-  "categorie_trovate": ["Demolizioni", "Muratura", "Finiture"]
-}
-
-UNITÀ DI MISURA: mq (metri quadri), ml (metri lineari), mc (metri cubi), nr (numero), ore, forfait, kg, cad (cadauno)
-Se non riesci a determinare quantità o prezzi, fornisci la migliore stima e metti note_voce con "da verificare".`,
-          },
-          { role: "user", content: trascrizione },
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Trascrizione sopralluogo:\n\n${trascrizione}` },
         ],
       }),
     });
@@ -135,7 +137,7 @@ Se non riesci a determinare quantità o prezzi, fornisci la migliore stima e met
 
     // 4. Process voci with proper calculations
     const voci = (extracted.voci || []).map((v: any, i: number) => ({
-      id: v.id || crypto.randomUUID(),
+      id: crypto.randomUUID(),
       ordine: v.ordine || i + 1,
       categoria: v.categoria || "Generale",
       titolo_voce: v.titolo_voce || v.descrizione?.substring(0, 50) || "",
@@ -144,17 +146,17 @@ Se non riesci a determinare quantità o prezzi, fornisci la migliore stima e met
       quantita: v.quantita || 0,
       prezzo_unitario: v.prezzo_unitario || 0,
       sconto_percentuale: v.sconto_percentuale || 0,
-      totale: ((v.quantita || 0) * (v.prezzo_unitario || 0)) * (1 - (v.sconto_percentuale || 0) / 100),
-      foto_urls: v.foto_urls || [],
+      totale: Number(((v.quantita || 0) * (v.prezzo_unitario || 0) * (1 - (v.sconto_percentuale || 0) / 100)).toFixed(2)),
+      foto_urls: [],
       note_voce: v.note_voce || "",
       evidenziata: v.evidenziata || false,
     }));
 
-    const subtotale = voci.reduce((s: number, v: any) => s + (v.totale || 0), 0);
+    const subtotale = Number(voci.reduce((s: number, v: any) => s + (v.totale || 0), 0).toFixed(2));
     const ivaPerc = 22;
     const imponibile = subtotale;
-    const ivaImporto = imponibile * (ivaPerc / 100);
-    const totaleFinale = imponibile + ivaImporto;
+    const ivaImporto = Number((imponibile * (ivaPerc / 100)).toFixed(2));
+    const totaleFinale = Number((imponibile + ivaImporto).toFixed(2));
 
     // 5. Generate numero_preventivo
     const year = new Date().getFullYear();
@@ -179,14 +181,17 @@ Se non riesci a determinare quantità o prezzi, fornisci la migliore stima e met
         company_id: companyId,
         cantiere_id: cantiereId || null,
         numero_preventivo: numeroPreventivo,
-        titolo: titolo || extracted.oggetto_suggerito || null,
+        titolo: titolo || extracted.titolo || null,
         cliente_nome: clienteNome,
         cliente_indirizzo: clienteIndirizzo,
         cliente_telefono: clienteTelefono,
         cliente_email: clienteEmail,
         cliente_piva: clientePiva,
         cliente_codice_fiscale: clienteCF,
-        oggetto: oggetto || extracted.oggetto_suggerito || "Preventivo lavori",
+        oggetto: oggetto || extracted.oggetto || "Preventivo lavori",
+        luogo_lavori: extracted.luogo_lavori || null,
+        intro_testo: extracted.intro_suggerita || null,
+        note_finali: extracted.avvertenze || null,
         voci,
         subtotale,
         imponibile,
@@ -194,14 +199,15 @@ Se non riesci a determinare quantità o prezzi, fornisci la migliore stima e met
         iva_importo: ivaImporto,
         totale: totaleFinale,
         totale_finale: totaleFinale,
-        note: extracted.note_generali,
-        tempi_esecuzione: extracted.tempi_esecuzione_stimati,
+        note: extracted.avvertenze,
+        tempi_esecuzione: extracted.tempi_esecuzione,
         validita_giorni: validitaGiorni,
         data_scadenza: dataScadenza.toISOString().split("T")[0],
         audio_url: audioPath,
         trascrizione,
         stato: "bozza",
         versione: 1,
+        ai_elaborato: true,
         created_by: userId,
       })
       .select()
