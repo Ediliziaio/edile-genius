@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useCompanyId } from "@/hooks/useCompanyId";
@@ -9,7 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Eye, EyeOff, Save, Loader2, CheckCircle2, Plus, Trash2, Send, Globe, History } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import {
+  Eye, EyeOff, Save, Loader2, CheckCircle2, Plus, Trash2, Send, Globe, History,
+  RefreshCw, Link2, Unlink, Download, XCircle, CheckCircle
+} from "lucide-react";
 import type { Json } from "@/integrations/supabase/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
