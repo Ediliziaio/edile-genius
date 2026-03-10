@@ -69,6 +69,7 @@ import NuovoPreventivo from "./pages/app/NuovoPreventivo";
 import PreventivoDetail from "./pages/app/PreventivoDetail";
 import DocumentiScadenze from "./pages/app/DocumentiScadenze";
 import FoglioPresenze from "./pages/app/FoglioPresenze";
+import TemplatePreventivo from "./pages/app/TemplatePreventivo";
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -139,6 +140,7 @@ const App = () => (
                 <Route path="/app/preventivi/:id" element={<PreventivoDetail />} />
                 <Route path="/app/documenti" element={<DocumentiScadenze />} />
                 <Route path="/app/presenze" element={<FoglioPresenze />} />
+                <Route path="/app/impostazioni/template-preventivo" element={<TemplatePreventivo />} />
                 <Route path="/app/render" element={<RenderHub />} />
                 <Route path="/app/render/new" element={<RenderNew />} />
                 <Route path="/app/render/gallery" element={<RenderGallery />} />
