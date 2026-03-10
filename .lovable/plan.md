@@ -1,55 +1,122 @@
 
+# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro
 
-## Piano: Upgrade PDF Template e Allineamento allo Spec v2
+## ✅ Completato in questo blocco
 
-### Problema principale
-Il template PDF attuale (`preventivo-pdf.tsx`) usa proprietà CSS **non supportate** da `@react-pdf/renderer` che causano errori silenziosi o crash:
-- `gap`, `objectFit`, `textTransform`, `fontStyle: "italic"`, shorthand `padding`/`margin`, `paddingVertical`, flex decimali
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
-Lo spec v2 fornisce un template corretto e professionale che rispetta tutte le limitazioni di react-pdf.
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
-### Cosa cambia
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-| Area | Problema | Azione |
-|------|----------|--------|
-| `preventivo-pdf.tsx` | Usa CSS vietati (gap, objectFit, textTransform, shorthand) | **Riscrittura completa** con stili spec v2 (createStyles dinamico, padding espliciti, flex interi, .toUpperCase() in JS) |
-| DB `preventivo_templates` | Mancano colonne azienda (nome, indirizzo, P.IVA, telefono, email, CF, REA, sito), font, attivo, oggetto_default, note_finali, valuta, iva_inclusa_default | **Migration** per aggiungere ~12 colonne |
-| DB `preventivi` | Mancano `luogo_lavori`, `ai_elaborato`, `pdf_generato_at`, `pdf_versione`, `invio_email`, `data_invio`, `email_aperta_at`, `link_aperto_at`, `link_aperto_count`, `accettato_online_at`, `sconto_globale_percentuale`, `sconto_globale_importo`, `condizioni_pagamento`, `note_finali` | **Migration** per aggiungere colonne mancanti |
-| Edge function `process-preventivo-audio` | Flusso attuale funziona (FormData), ma prompt GPT usa `gpt-4o-mini` | **Upgrade prompt** a quello dello spec (geometra esperto 20 anni, prezzari DEI 2025, categorie ordinate) |
-| `NuovoPreventivo.tsx` | Funzionale ma non sfrutta nuovi campi (luogo_lavori, sconto globale %) | **Aggiornare** per usare i nuovi campi |
-| `PreventivoDetail.tsx` | Non usa campi tracking/invio | **Aggiornare** per mostrare tracking e azioni invio |
-| `TemplatePreventivo.tsx` | Non ha sezione dati azienda | **Aggiungere** form dati azienda (nome, indirizzo, P.IVA, etc.) |
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
-### Blocchi di implementazione
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
-**Blocco 1 — DB Migration**
-- Aggiungere colonne mancanti a `preventivo_templates` (dati azienda, font, attivo, oggetto_default, note_finali, valuta, iva_inclusa_default)
-- Aggiungere colonne mancanti a `preventivi` (~14 colonne per tracking, invio, sconto globale split)
+## ✅ Blocco 3-5 — Agent Templates System
 
-**Blocco 2 — PDF Template rewrite**
-- Riscrivere `src/lib/preventivo-pdf.tsx` con il template dello spec:
-  - `createStyles()` dinamico con colori dal template
-  - Header con logo + dati azienda dal template (non più da companies)
-  - Band titolo colorata con data/scadenza/tempi
-  - Grid cliente/riferimenti con padding espliciti
-  - Intro con bordo sinistro colorato
-  - Foto copertina row (max 3)
-  - Voci per categoria con header colorato + tabella + foto per voce
-  - Subtotali categoria
-  - Totali con sconto globale % e importo separati
-  - Validità box giallo
-  - Condizioni/clausole/note separate
-  - Firma doppia
-  - Footer fisso con paginazione
-  - Funzioni export `downloadPreventivoAsPdf()` e `getPreventivoBlob()`
-- Aggiornare le interfacce `PreventivoData` e `TemplateConfig` per i nuovi campi
+### Database
+- agent_templates + agent_template_instances + agent_reports + company_channels
+- RLS policies PERMISSIVE (fix da RESTRICTIVE)
+- Funzione DB `increment_installs_count(tpl_id UUID)`
+- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
 
-**Blocco 3 — Edge Function upgrade**
-- Aggiornare il prompt GPT in `process-preventivo-audio` con quello dello spec (geometra esperto, prezzari DEI 2025, output con titolo/oggetto/luogo/tempi/intro/avvertenze)
-- Salvare i nuovi campi (luogo_lavori, intro, note_finali, ai_elaborato)
+### Edge Functions (CORS headers completi)
+- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
+- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
+- save-report: salva report in DB + aggiorna contatori istanza
 
-**Blocco 4 — Frontend updates**
-- `TemplatePreventivo.tsx`: aggiungere sezione "Dati Azienda" (nome, indirizzo, telefono, email, P.IVA, CF, REA, sito web)
-- `NuovoPreventivo.tsx`: aggiungere campo sconto globale %, luogo lavori; passare dati azienda dal template al PDF
-- `PreventivoDetail.tsx`: mostrare tracking (email aperta, link aperto N volte), pulsante "Invia al cliente"
+### Frontend — Wizard 5 Step (TemplateSetup.tsx)
+- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
+- Step 2 Operai: lista card + importa CSV con template scaricabile
+- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
+- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
 
+### SuperAdmin
+- /superadmin/templates: CRUD completo con JSON editor per config_schema
+
+## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+
+### Database (5 tabelle)
+- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
+- RLS PERMISSIVE per tutte le tabelle
+- Trigger set_updated_at + init_render_credits su companies
+- Funzione deduct_render_credit
+- Storage buckets: render-originals (privato), render-results (pubblico)
+
+### Edge Functions
+- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
+- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+
+### Frontend
+- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
+- RenderConfig (/superadmin/render-config)
+- BeforeAfterSlider, promptBuilder.ts
+
+## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
+
+### Database
+- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
+- Estensione `preventivi` con +26 colonne (template_id, versione, titolo, foto_sopralluogo_urls, foto_copertina_url, sconto_globale, imponibile, iva_importo, totale_finale, condizioni, clausole, intro, firma_testo, tempi_esecuzione, validita_giorni, data_scadenza, tracking_aperto_at/count, link_accettazione, firma_cliente_url, accettato_at, rifiutato_at, rifiuto_motivo, parent_id, inviato_at, inviato_via, cliente_piva, cliente_codice_fiscale)
+- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
+- Storage buckets: preventivi-media (privato), template-assets (pubblico)
+- RLS company-scoped + superadmin
+
+### Edge Functions
+- `process-preventivo-audio` RISCRITTO: prompt GPT esperto (prezzario DEI, categorie edilizie, sconti), nuovo formato voci con id/ordine/categoria/titolo_voce/sconto_percentuale/foto_urls/note_voce/evidenziata, calcolo totali con sconto e IVA, data_scadenza automatica
+
+### PDF Client-side (@react-pdf/renderer)
+- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4 con:
+  - Header azienda + logo
+  - Band titolo colorata (colore_primario)
+  - Grid cliente/riferimenti
+  - Testo intro
+  - Foto copertina
+  - Tabella voci per categoria con subtotali
+  - Totali con sconto globale + IVA
+  - Note, condizioni, clausole
+  - Sezione firma doppia (azienda + cliente)
+  - Footer pagina
+
+### Frontend
+- **NuovoPreventivo.tsx** → Wizard 3 step:
+  - Step 1: dati cliente (nome, indirizzo, telefono, email, P.IVA, CF) + titolo/oggetto + cantiere
+  - Step 2: registrazione/upload audio + upload foto multiplo con grid preview e badge copertina
+  - Step 3: editor visuale voci per categoria (card editabili con titolo, descrizione, U.M., quantità, prezzo, sconto, totale) + totali live + scarica PDF anteprima
+- **PreventivoDetail.tsx** → 3 tabs:
+  - Dettaglio: voci per categoria con badge sconto, trascrizione collapsible, note/stato/tempi
+  - Cronologia: timeline eventi (creato, inviato, accettato/rifiutato)
+  - Tracking: KPI aperture, ultima apertura, ultimo invio
+  - Azioni: scarica PDF, modifica, elimina
+- **PreventiviList.tsx** → KPI cards (totale, bozze, in attesa, valore accettati) + filtri tab per stato + ricerca + lista con badge versione e scadenza
+- **TemplatePreventivo.tsx** (`/app/impostazioni/template-preventivo`): 3 tabs:
+  - Branding: logo upload, color picker primario/secondario con preview gradient, intestazione/piè di pagina
+  - Testi Standard: intro, condizioni, clausole, firma, validità giorni, IVA default
+  - Layout: 5 toggle (foto copertina, foto voci, subtotali categoria, firma, condizioni)
+
+### Navigazione
+- Sidebar: aggiunto "Template PDF" nella sezione AUTOMAZIONI
+- Route: `/app/impostazioni/template-preventivo`
+
+## 🔜 Prossimi Blocchi
+- SuperAdmin Dashboard economics
+- Integrazioni CRM native
+- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets

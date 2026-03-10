@@ -156,6 +156,11 @@ export default function PreventivoDetail() {
     company_phone: company?.phone || undefined,
     company_vat: company?.vat_number || undefined,
     piede_pagina: templateConfig?.piede_pagina,
+    azienda_nome: templateConfig?.azienda_nome,
+    azienda_indirizzo: templateConfig?.azienda_indirizzo,
+    azienda_telefono: templateConfig?.azienda_telefono,
+    azienda_email: templateConfig?.azienda_email,
+    azienda_piva: templateConfig?.azienda_piva,
   };
 
   const pdfData: PreventivoData = {
@@ -171,7 +176,8 @@ export default function PreventivoDetail() {
     cliente_piva: prev.cliente_piva,
     voci,
     subtotale,
-    sconto_globale: prev.sconto_globale,
+    sconto_globale_percentuale: prev.sconto_globale_percentuale || prev.sconto_globale || 0,
+    sconto_globale_importo: prev.sconto_globale_importo || 0,
     imponibile: subtotale,
     iva_percentuale: prev.iva_percentuale || 22,
     iva_importo: iva,

@@ -5,8 +5,8 @@ import {
   Text,
   View,
   StyleSheet,
-  Font,
   Image,
+  pdf,
 } from "@react-pdf/renderer";
 
 // Types
@@ -32,6 +32,7 @@ export interface PreventivoData {
   oggetto?: string;
   created_at: string;
   data_scadenza?: string;
+  luogo_lavori?: string;
   cliente_nome?: string;
   cliente_indirizzo?: string;
   cliente_telefono?: string;
@@ -40,18 +41,23 @@ export interface PreventivoData {
   cliente_codice_fiscale?: string;
   voci: PreventivoVoce[];
   subtotale: number;
-  sconto_globale?: number;
+  sconto_globale_percentuale?: number;
+  sconto_globale_importo?: number;
   imponibile: number;
   iva_percentuale: number;
   iva_importo: number;
   totale_finale: number;
   intro?: string;
   condizioni?: string;
+  condizioni_pagamento?: string;
   clausole?: string;
+  note_finali?: string;
   firma_testo?: string;
   tempi_esecuzione?: string;
   note?: string;
   foto_copertina_url?: string;
+  foto_sopralluogo_urls?: string[];
+  validita_giorni?: number;
 }
 
 export interface TemplateConfig {
@@ -65,91 +71,274 @@ export interface TemplateConfig {
   show_subtotali_categoria: boolean;
   show_firma: boolean;
   show_condizioni: boolean;
+  azienda_nome?: string;
+  azienda_indirizzo?: string;
+  azienda_telefono?: string;
+  azienda_email?: string;
+  azienda_piva?: string;
+  azienda_cf?: string;
+  azienda_rea?: string;
+  azienda_sito?: string;
+  // legacy compat
   company_name?: string;
   company_address?: string;
   company_phone?: string;
   company_vat?: string;
 }
 
-const styles = StyleSheet.create({
-  page: { padding: 40, fontSize: 9, fontFamily: "Helvetica", color: "#333" },
-  // Header
-  header: { flexDirection: "row", justifyContent: "space-between", marginBottom: 24 },
-  companyName: { fontSize: 16, fontFamily: "Helvetica-Bold", color: "#1a1a2e" },
-  companyDetails: { fontSize: 8, color: "#666", marginTop: 3 },
-  prevNumber: { fontSize: 14, fontFamily: "Helvetica-Bold", color: "#1a1a2e", textAlign: "right" },
-  prevDate: { fontSize: 8, color: "#888", textAlign: "right", marginTop: 2 },
-  // Title band
-  titleBand: { padding: "10 16", borderRadius: 4, marginBottom: 16 },
-  titleText: { fontSize: 13, fontFamily: "Helvetica-Bold", color: "#fff" },
-  // Info grid
-  infoGrid: { flexDirection: "row", gap: 16, marginBottom: 20 },
-  infoBox: { flex: 1, backgroundColor: "#f8f9fa", padding: 12, borderRadius: 4 },
-  infoLabel: { fontSize: 7, color: "#888", textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 },
-  infoValue: { fontSize: 9 },
-  // Intro
-  intro: { fontSize: 9, color: "#555", marginBottom: 16, lineHeight: 1.5 },
-  // Category header
-  categoryHeader: { backgroundColor: "#f1f3f5", padding: "6 10", borderRadius: 3, marginTop: 12, marginBottom: 6 },
-  categoryText: { fontSize: 9, fontFamily: "Helvetica-Bold", color: "#1a1a2e" },
-  // Table
-  tableHeader: { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: "#ddd", paddingBottom: 4, marginBottom: 4 },
-  tableRow: { flexDirection: "row", paddingVertical: 4, borderBottomWidth: 0.5, borderBottomColor: "#eee" },
-  tableRowHighlight: { backgroundColor: "#fffce6" },
-  colNum: { width: "5%" },
-  colDesc: { width: "38%" },
-  colUM: { width: "7%", textAlign: "center" },
-  colQty: { width: "10%", textAlign: "right" },
-  colPrice: { width: "13%", textAlign: "right" },
-  colDiscount: { width: "10%", textAlign: "right" },
-  colTotal: { width: "17%", textAlign: "right" },
-  headerText: { fontSize: 7, fontFamily: "Helvetica-Bold", color: "#888", textTransform: "uppercase" },
-  cellText: { fontSize: 8 },
-  cellDescTitle: { fontSize: 8, fontFamily: "Helvetica-Bold" },
-  cellDescBody: { fontSize: 7, color: "#666", marginTop: 1 },
-  // Subtotals
-  subtotalRow: { flexDirection: "row", justifyContent: "flex-end", paddingVertical: 4, borderTopWidth: 0.5, borderTopColor: "#ddd" },
-  subtotalLabel: { fontSize: 8, color: "#666", marginRight: 16 },
-  subtotalValue: { fontSize: 8, fontFamily: "Helvetica-Bold", width: "17%", textAlign: "right" },
-  // Totals
-  totalsBox: { marginTop: 16, alignItems: "flex-end" },
-  totalRow: { flexDirection: "row", justifyContent: "flex-end", gap: 32, paddingVertical: 3 },
-  totalLabel: { fontSize: 9, color: "#666" },
-  totalValue: { fontSize: 9, width: 80, textAlign: "right" },
-  totalFinalRow: { flexDirection: "row", justifyContent: "flex-end", gap: 32, paddingTop: 8, borderTopWidth: 2, borderTopColor: "#1a1a2e", marginTop: 4 },
-  totalFinalLabel: { fontSize: 12, fontFamily: "Helvetica-Bold", color: "#1a1a2e" },
-  totalFinalValue: { fontSize: 12, fontFamily: "Helvetica-Bold", color: "#1a1a2e", width: 80, textAlign: "right" },
-  // Conditions
-  conditionsBox: { marginTop: 24, padding: 12, backgroundColor: "#f8f9fa", borderRadius: 4 },
-  conditionsTitle: { fontSize: 9, fontFamily: "Helvetica-Bold", marginBottom: 4 },
-  conditionsText: { fontSize: 8, color: "#555", lineHeight: 1.5 },
-  // Signature
-  signatureBox: { marginTop: 32, flexDirection: "row", justifyContent: "space-between" },
-  signatureCol: { width: "45%", textAlign: "center" },
-  signatureLine: { borderTopWidth: 1, borderTopColor: "#ccc", marginTop: 40, paddingTop: 4 },
-  signatureLabel: { fontSize: 8, color: "#888" },
-  // Footer
-  footer: { position: "absolute", bottom: 20, left: 40, right: 40, textAlign: "center", fontSize: 7, color: "#bbb" },
-  // Notes
-  notesBox: { marginTop: 16, padding: 10, backgroundColor: "#fff9e6", borderRadius: 4, borderLeftWidth: 3, borderLeftColor: "#f0c040" },
-  notesText: { fontSize: 8, color: "#666" },
-  // Photo
-  photo: { width: "100%", maxHeight: 200, objectFit: "cover", borderRadius: 4, marginBottom: 12 },
-  vociPhoto: { width: 60, height: 45, objectFit: "cover", borderRadius: 2, marginTop: 2 },
-});
+// ✅ createStyles — dynamic colors, NO gap/objectFit/textTransform/shorthand
+const createStyles = (primario: string, secondario: string) =>
+  StyleSheet.create({
+    page: {
+      fontFamily: "Helvetica",
+      fontSize: 9,
+      color: "#1a1a1a",
+      paddingBottom: 50,
+    },
+    // HEADER
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      paddingTop: 20,
+      paddingRight: 30,
+      paddingBottom: 16,
+      paddingLeft: 30,
+      borderBottomWidth: 3,
+      borderBottomColor: primario,
+    },
+    logo: { width: 120, height: 50 },
+    headerCompany: { fontSize: 11, fontFamily: "Helvetica-Bold", color: secondario },
+    headerInfo: { fontSize: 8, color: "#6b7280", marginBottom: 2 },
+    headerRight: { alignItems: "flex-end" },
+    headerRightItem: { marginBottom: 2 },
+    prevLabel: { fontSize: 7, color: "#9ca3af", marginBottom: 1 },
+    prevNumber: { fontSize: 14, fontFamily: "Helvetica-Bold", color: secondario, textAlign: "right" },
+    prevDate: { fontSize: 8, color: "#6b7280", textAlign: "right", marginTop: 2 },
+    // TITLE BAND
+    titleBand: {
+      backgroundColor: primario,
+      paddingTop: 14,
+      paddingRight: 30,
+      paddingBottom: 14,
+      paddingLeft: 30,
+      marginBottom: 16,
+    },
+    titleText: { fontSize: 18, fontFamily: "Helvetica-Bold", color: "white" },
+    titleSub: { fontSize: 9, color: "#ffffff", opacity: 0.9, marginTop: 3 },
+    // INFO GRID — no gap, use marginRight
+    infoGrid: {
+      flexDirection: "row",
+      marginLeft: 30,
+      marginRight: 30,
+      marginBottom: 20,
+    },
+    infoBox: {
+      flex: 1,
+      backgroundColor: "#f8f9fa",
+      paddingTop: 10,
+      paddingRight: 12,
+      paddingBottom: 10,
+      paddingLeft: 12,
+      borderRadius: 4,
+      marginRight: 12,
+    },
+    infoBoxLast: {
+      flex: 1,
+      backgroundColor: "#f8f9fa",
+      paddingTop: 10,
+      paddingRight: 12,
+      paddingBottom: 10,
+      paddingLeft: 12,
+      borderRadius: 4,
+    },
+    infoLabel: { fontSize: 7, color: "#9ca3af", letterSpacing: 1, marginBottom: 4 },
+    infoValue: { fontSize: 9, marginBottom: 1 },
+    infoValueBold: { fontSize: 9, fontFamily: "Helvetica-Bold", marginBottom: 2 },
+    // INTRO
+    introBox: {
+      marginLeft: 30,
+      marginRight: 30,
+      marginBottom: 16,
+      paddingLeft: 10,
+      borderLeftWidth: 3,
+      borderLeftColor: primario,
+    },
+    introText: { fontSize: 9, color: "#555555", lineHeight: 1.5 },
+    // COVER PHOTOS
+    coverPhotoRow: {
+      flexDirection: "row",
+      marginLeft: 30,
+      marginRight: 30,
+      marginBottom: 16,
+    },
+    coverPhoto: { width: 170, height: 120, borderRadius: 4, marginRight: 8 },
+    // CATEGORY
+    categoryHeader: {
+      backgroundColor: primario,
+      paddingTop: 6,
+      paddingRight: 12,
+      paddingBottom: 6,
+      paddingLeft: 12,
+      borderRadius: 3,
+      marginTop: 14,
+      marginBottom: 6,
+      marginLeft: 30,
+      marginRight: 30,
+    },
+    categoryText: { fontSize: 9, fontFamily: "Helvetica-Bold", color: "white" },
+    // TABLE
+    tableArea: { marginLeft: 30, marginRight: 30 },
+    tableHeader: {
+      flexDirection: "row",
+      borderBottomWidth: 1,
+      borderBottomColor: "#d1d5db",
+      paddingBottom: 4,
+      marginBottom: 4,
+    },
+    tableRow: {
+      flexDirection: "row",
+      paddingTop: 4,
+      paddingBottom: 4,
+      borderBottomWidth: 0.5,
+      borderBottomColor: "#e5e7eb",
+    },
+    tableRowHighlight: { backgroundColor: "#fffce6" },
+    colNum: { width: "5%" },
+    colDesc: { width: "38%" },
+    colUM: { width: "7%", textAlign: "center" },
+    colQty: { width: "10%", textAlign: "right" },
+    colPrice: { width: "13%", textAlign: "right" },
+    colDiscount: { width: "10%", textAlign: "right" },
+    colTotal: { width: "17%", textAlign: "right" },
+    headerText: { fontSize: 7, fontFamily: "Helvetica-Bold", color: "#9ca3af" },
+    cellText: { fontSize: 8 },
+    cellDescTitle: { fontSize: 8, fontFamily: "Helvetica-Bold" },
+    cellDescBody: { fontSize: 7, color: "#6b7280", marginTop: 1 },
+    cellNote: { fontSize: 7, color: "#b45309", marginTop: 1 },
+    // VOCE PHOTOS
+    vocePhotoRow: { flexDirection: "row", marginTop: 3 },
+    vocePhoto: { width: 60, height: 45, borderRadius: 2, marginRight: 4 },
+    // SUBTOTAL ROW
+    subtotalRow: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      paddingTop: 4,
+      paddingBottom: 4,
+      borderTopWidth: 0.5,
+      borderTopColor: "#d1d5db",
+      marginLeft: 30,
+      marginRight: 30,
+    },
+    subtotalLabel: { fontSize: 8, color: "#6b7280", marginRight: 16 },
+    subtotalValue: { fontSize: 8, fontFamily: "Helvetica-Bold", width: "17%", textAlign: "right" },
+    // TOTALS
+    totalsBox: { marginTop: 16, marginLeft: 30, marginRight: 30, alignItems: "flex-end" },
+    totalRow: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      paddingTop: 3,
+      paddingBottom: 3,
+    },
+    totalLabel: { fontSize: 9, color: "#6b7280", marginRight: 32 },
+    totalValue: { fontSize: 9, width: 80, textAlign: "right" },
+    totalFinalRow: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      paddingTop: 8,
+      borderTopWidth: 2,
+      borderTopColor: secondario,
+      marginTop: 4,
+    },
+    totalFinalLabel: { fontSize: 12, fontFamily: "Helvetica-Bold", color: secondario, marginRight: 32 },
+    totalFinalValue: { fontSize: 12, fontFamily: "Helvetica-Bold", color: secondario, width: 80, textAlign: "right" },
+    // VALIDITY
+    validityBox: {
+      marginTop: 12,
+      marginLeft: 30,
+      marginRight: 30,
+      paddingTop: 8,
+      paddingBottom: 8,
+      paddingLeft: 12,
+      paddingRight: 12,
+      backgroundColor: "#fffbeb",
+      borderRadius: 4,
+      borderLeftWidth: 3,
+      borderLeftColor: "#f59e0b",
+    },
+    validityText: { fontSize: 8, color: "#92400e" },
+    // CONDITIONS
+    conditionsBox: {
+      marginTop: 16,
+      marginLeft: 30,
+      marginRight: 30,
+      paddingTop: 12,
+      paddingRight: 12,
+      paddingBottom: 12,
+      paddingLeft: 12,
+      backgroundColor: "#f8f9fa",
+      borderRadius: 4,
+    },
+    conditionsTitle: { fontSize: 9, fontFamily: "Helvetica-Bold", marginBottom: 4 },
+    conditionsText: { fontSize: 8, color: "#555555", lineHeight: 1.5 },
+    // NOTES
+    notesBox: {
+      marginTop: 12,
+      marginLeft: 30,
+      marginRight: 30,
+      paddingTop: 10,
+      paddingRight: 10,
+      paddingBottom: 10,
+      paddingLeft: 10,
+      backgroundColor: "#fff9e6",
+      borderRadius: 4,
+      borderLeftWidth: 3,
+      borderLeftColor: "#f0c040",
+    },
+    notesText: { fontSize: 8, color: "#6b7280" },
+    // SIGNATURE
+    signatureBox: {
+      marginTop: 32,
+      marginLeft: 30,
+      marginRight: 30,
+      flexDirection: "row",
+      justifyContent: "space-between",
+    },
+    signatureCol: { width: "45%", textAlign: "center" },
+    signatureLine: { borderTopWidth: 1, borderTopColor: "#cccccc", marginTop: 40, paddingTop: 4 },
+    signatureLabel: { fontSize: 8, color: "#9ca3af" },
+    // FOOTER
+    footer: {
+      position: "absolute",
+      bottom: 20,
+      left: 30,
+      right: 30,
+      flexDirection: "row",
+      justifyContent: "space-between",
+    },
+    footerText: { fontSize: 7, color: "#bbbbbb" },
+  });
 
 function formatEuro(n: number): string {
-  return `€${n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
+  return `€ ${n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
 }
 
-function groupByCategory(voci: PreventivoVoce[]): Record<string, PreventivoVoce[]> {
-  const groups: Record<string, PreventivoVoce[]> = {};
+function formatDate(d: string): string {
+  try {
+    return new Date(d).toLocaleDateString("it-IT");
+  } catch {
+    return d;
+  }
+}
+
+function groupByCategory(voci: PreventivoVoce[]): Map<string, PreventivoVoce[]> {
+  const map = new Map<string, PreventivoVoce[]>();
   voci.sort((a, b) => a.ordine - b.ordine).forEach((v) => {
     const cat = v.categoria || "Generale";
-    if (!groups[cat]) groups[cat] = [];
-    groups[cat].push(v);
+    if (!map.has(cat)) map.set(cat, []);
+    map.get(cat)!.push(v);
   });
-  return groups;
+  return map;
 }
 
 interface Props {
@@ -158,210 +347,261 @@ interface Props {
 }
 
 export const PreventivoPDF: React.FC<Props> = ({ data, template }) => {
-  const primario = template.colore_primario || "#1a1a2e";
-  const groups = groupByCategory(data.voci || []);
-  let globalRowIndex = 0;
+  const primario = template.colore_primario || "#f4a100";
+  const secondario = template.colore_secondario || "#1e293b";
+  const S = createStyles(primario, secondario);
+  const categorieMap = groupByCategory(data.voci || []);
+
+  const companyName = template.azienda_nome || template.company_name || "Azienda";
+  const companyAddress = template.azienda_indirizzo || template.company_address;
+  const companyPhone = template.azienda_telefono || template.company_phone;
+  const companyEmail = template.azienda_email;
+  const companyPiva = template.azienda_piva || template.company_vat;
+
+  // Cover photos (max 3)
+  const fotoCopertina: string[] = [];
+  if (data.foto_copertina_url) fotoCopertina.push(data.foto_copertina_url);
+  if (data.foto_sopralluogo_urls) {
+    for (const u of data.foto_sopralluogo_urls) {
+      if (fotoCopertina.length >= 3) break;
+      if (!fotoCopertina.includes(u)) fotoCopertina.push(u);
+    }
+  }
+
+  let globalRow = 0;
 
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        {/* Header */}
-        <View style={styles.header}>
+      <Page size="A4" style={S.page}>
+        {/* HEADER */}
+        <View style={S.header}>
           <View>
-            {template.logo_url && (
-              <Image src={template.logo_url} style={{ width: 120, marginBottom: 6 }} />
-            )}
-            <Text style={styles.companyName}>{template.company_name || "Azienda"}</Text>
-            <Text style={styles.companyDetails}>
-              {[template.company_address, template.company_phone, template.company_vat ? `P.IVA: ${template.company_vat}` : ""].filter(Boolean).join("\n")}
-            </Text>
+            {template.logo_url && <Image src={template.logo_url} style={S.logo} />}
+            <Text style={S.headerCompany}>{companyName}</Text>
+            {companyAddress && <Text style={S.headerInfo}>{companyAddress}</Text>}
+            {companyPhone && <Text style={S.headerInfo}>{"Tel: " + companyPhone}</Text>}
+            {companyEmail && <Text style={S.headerInfo}>{companyEmail}</Text>}
+            {companyPiva && <Text style={S.headerInfo}>{"P.IVA: " + companyPiva}</Text>}
           </View>
-          <View>
-            <Text style={{ fontSize: 8, color: "#888", textAlign: "right" }}>PREVENTIVO N.</Text>
-            <Text style={styles.prevNumber}>{data.numero_preventivo}</Text>
-            <Text style={styles.prevDate}>
-              Data: {new Date(data.created_at).toLocaleDateString("it-IT")}
-            </Text>
+          <View style={S.headerRight}>
+            <Text style={S.prevLabel}>{"PREVENTIVO"}</Text>
+            <Text style={S.prevNumber}>{data.numero_preventivo}</Text>
+            <Text style={S.prevDate}>{"Data: " + formatDate(data.created_at)}</Text>
             {data.data_scadenza && (
-              <Text style={styles.prevDate}>
-                Validità: {new Date(data.data_scadenza).toLocaleDateString("it-IT")}
-              </Text>
+              <Text style={S.prevDate}>{"Valido fino al: " + formatDate(data.data_scadenza)}</Text>
             )}
           </View>
         </View>
 
-        {/* Title Band */}
-        <View style={[styles.titleBand, { backgroundColor: primario }]}>
-          <Text style={styles.titleText}>
-            {data.titolo || data.oggetto || "Preventivo Lavori"}
-          </Text>
+        {/* TITLE BAND */}
+        <View style={S.titleBand}>
+          <Text style={S.titleText}>{data.titolo || data.oggetto || "Preventivo Lavori"}</Text>
+          {data.tempi_esecuzione && (
+            <Text style={S.titleSub}>{"Tempi: " + data.tempi_esecuzione}</Text>
+          )}
         </View>
 
-        {/* Client / Ref Grid */}
-        <View style={styles.infoGrid}>
-          <View style={styles.infoBox}>
-            <Text style={styles.infoLabel}>Cliente</Text>
-            <Text style={[styles.infoValue, { fontFamily: "Helvetica-Bold" }]}>{data.cliente_nome || "—"}</Text>
-            {data.cliente_indirizzo && <Text style={[styles.infoValue, { fontSize: 8, color: "#666" }]}>{data.cliente_indirizzo}</Text>}
-            {data.cliente_telefono && <Text style={[styles.infoValue, { fontSize: 8, color: "#666" }]}>{data.cliente_telefono}</Text>}
-            {data.cliente_email && <Text style={[styles.infoValue, { fontSize: 8, color: "#666" }]}>{data.cliente_email}</Text>}
-            {data.cliente_piva && <Text style={[styles.infoValue, { fontSize: 8, color: "#666" }]}>P.IVA: {data.cliente_piva}</Text>}
+        {/* INFO GRID: Cliente + Riferimenti */}
+        <View style={S.infoGrid}>
+          <View style={S.infoBox}>
+            <Text style={S.infoLabel}>{"DESTINATARIO"}</Text>
+            <Text style={S.infoValueBold}>{data.cliente_nome || "—"}</Text>
+            {data.cliente_indirizzo && <Text style={S.infoValue}>{data.cliente_indirizzo}</Text>}
+            {data.cliente_email && <Text style={S.infoValue}>{data.cliente_email}</Text>}
+            {data.cliente_telefono && <Text style={S.infoValue}>{"Tel: " + data.cliente_telefono}</Text>}
+            {data.cliente_piva && <Text style={S.infoValue}>{"P.IVA: " + data.cliente_piva}</Text>}
           </View>
-          <View style={styles.infoBox}>
-            <Text style={styles.infoLabel}>Riferimenti</Text>
-            <Text style={styles.infoValue}>{data.oggetto || "—"}</Text>
-            {data.tempi_esecuzione && <Text style={[styles.infoValue, { fontSize: 8, color: "#666", marginTop: 4 }]}>⏱ {data.tempi_esecuzione}</Text>}
+          <View style={S.infoBoxLast}>
+            <Text style={S.infoLabel}>{"RIFERIMENTI"}</Text>
+            <Text style={S.infoValue}>{"N. " + data.numero_preventivo}</Text>
+            {data.luogo_lavori && <Text style={S.infoValue}>{"Luogo: " + data.luogo_lavori}</Text>}
+            {data.oggetto && <Text style={S.infoValue}>{"Oggetto: " + data.oggetto}</Text>}
           </View>
         </View>
 
-        {/* Intro */}
-        {data.intro && <Text style={styles.intro}>{data.intro}</Text>}
-
-        {/* Cover Photo */}
-        {template.show_foto_copertina && data.foto_copertina_url && (
-          <Image src={data.foto_copertina_url} style={styles.photo} />
+        {/* INTRO */}
+        {data.intro && (
+          <View style={S.introBox}>
+            <Text style={S.introText}>{data.intro}</Text>
+          </View>
         )}
 
-        {/* Voci Table by Category */}
-        {Object.entries(groups).map(([categoria, voci]) => {
-          const catSubtotal = voci.reduce((s, v) => s + (v.totale || 0), 0);
+        {/* COVER PHOTOS */}
+        {template.show_foto_copertina && fotoCopertina.length > 0 && (
+          <View style={S.coverPhotoRow}>
+            {fotoCopertina.map((url, i) => (
+              <Image key={i} src={url} style={S.coverPhoto} />
+            ))}
+          </View>
+        )}
+
+        {/* VOCI PER CATEGORIA */}
+        {Array.from(categorieMap.entries()).map(([categoria, voci]) => {
+          const totaleCat = voci.reduce((s, v) => s + (v.totale || 0), 0);
           return (
             <View key={categoria} wrap={false}>
-              {/* Category Header */}
-              <View style={styles.categoryHeader}>
-                <Text style={styles.categoryText}>{categoria}</Text>
+              <View style={S.categoryHeader}>
+                <Text style={S.categoryText}>{categoria.toUpperCase()}</Text>
               </View>
-
-              {/* Table Header */}
-              <View style={styles.tableHeader}>
-                <Text style={[styles.colNum, styles.headerText]}>#</Text>
-                <Text style={[styles.colDesc, styles.headerText]}>Descrizione</Text>
-                <Text style={[styles.colUM, styles.headerText]}>U.M.</Text>
-                <Text style={[styles.colQty, styles.headerText]}>Q.tà</Text>
-                <Text style={[styles.colPrice, styles.headerText]}>Prezzo</Text>
-                <Text style={[styles.colDiscount, styles.headerText]}>Sconto</Text>
-                <Text style={[styles.colTotal, styles.headerText]}>Totale</Text>
-              </View>
-
-              {/* Rows */}
-              {voci.map((v) => {
-                globalRowIndex++;
-                return (
-                  <View key={v.id} style={[styles.tableRow, v.evidenziata ? styles.tableRowHighlight : {}]}>
-                    <Text style={[styles.colNum, styles.cellText]}>{globalRowIndex}</Text>
-                    <View style={styles.colDesc}>
-                      <Text style={styles.cellDescTitle}>{v.titolo_voce}</Text>
-                      {v.descrizione && v.descrizione !== v.titolo_voce && (
-                        <Text style={styles.cellDescBody}>{v.descrizione}</Text>
-                      )}
-                      {v.note_voce && (
-                        <Text style={[styles.cellDescBody, { fontStyle: "italic" }]}>💡 {v.note_voce}</Text>
-                      )}
-                      {template.show_foto_voci && v.foto_urls?.length > 0 && (
-                        <View style={{ flexDirection: "row", gap: 4, marginTop: 3 }}>
-                          {v.foto_urls.slice(0, 3).map((url, fi) => (
-                            <Image key={fi} src={url} style={styles.vociPhoto} />
-                          ))}
-                        </View>
-                      )}
+              <View style={S.tableArea}>
+                <View style={S.tableHeader}>
+                  <Text style={[S.colNum, S.headerText]}>{"#"}</Text>
+                  <Text style={[S.colDesc, S.headerText]}>{"DESCRIZIONE"}</Text>
+                  <Text style={[S.colUM, S.headerText]}>{"U.M."}</Text>
+                  <Text style={[S.colQty, S.headerText]}>{"QTA"}</Text>
+                  <Text style={[S.colPrice, S.headerText]}>{"PREZZO"}</Text>
+                  <Text style={[S.colDiscount, S.headerText]}>{"SC."}</Text>
+                  <Text style={[S.colTotal, S.headerText]}>{"TOTALE"}</Text>
+                </View>
+                {voci.map((v) => {
+                  globalRow++;
+                  return (
+                    <View key={v.id} style={[S.tableRow, v.evidenziata ? S.tableRowHighlight : {}]}>
+                      <Text style={[S.colNum, S.cellText]}>{String(globalRow)}</Text>
+                      <View style={S.colDesc}>
+                        <Text style={S.cellDescTitle}>{v.titolo_voce}</Text>
+                        {v.descrizione && v.descrizione !== v.titolo_voce && (
+                          <Text style={S.cellDescBody}>{v.descrizione}</Text>
+                        )}
+                        {v.note_voce ? <Text style={S.cellNote}>{v.note_voce}</Text> : null}
+                        {template.show_foto_voci && v.foto_urls?.length > 0 && (
+                          <View style={S.vocePhotoRow}>
+                            {v.foto_urls.slice(0, 3).map((url, fi) => (
+                              <Image key={fi} src={url} style={S.vocePhoto} />
+                            ))}
+                          </View>
+                        )}
+                      </View>
+                      <Text style={[S.colUM, S.cellText]}>{v.unita_misura}</Text>
+                      <Text style={[S.colQty, S.cellText]}>{v.quantita.toFixed(2)}</Text>
+                      <Text style={[S.colPrice, S.cellText]}>{formatEuro(v.prezzo_unitario)}</Text>
+                      <Text style={[S.colDiscount, S.cellText]}>
+                        {v.sconto_percentuale > 0 ? v.sconto_percentuale + "%" : "—"}
+                      </Text>
+                      <Text style={[S.colTotal, S.cellText, { fontFamily: "Helvetica-Bold" }]}>
+                        {formatEuro(v.totale)}
+                      </Text>
                     </View>
-                    <Text style={[styles.colUM, styles.cellText]}>{v.unita_misura}</Text>
-                    <Text style={[styles.colQty, styles.cellText]}>{v.quantita.toFixed(2)}</Text>
-                    <Text style={[styles.colPrice, styles.cellText]}>{formatEuro(v.prezzo_unitario)}</Text>
-                    <Text style={[styles.colDiscount, styles.cellText]}>
-                      {v.sconto_percentuale > 0 ? `${v.sconto_percentuale}%` : "—"}
-                    </Text>
-                    <Text style={[styles.colTotal, styles.cellText, { fontFamily: "Helvetica-Bold" }]}>
-                      {formatEuro(v.totale)}
-                    </Text>
-                  </View>
-                );
-              })}
-
-              {/* Category Subtotal */}
+                  );
+                })}
+              </View>
               {template.show_subtotali_categoria && (
-                <View style={styles.subtotalRow}>
-                  <Text style={styles.subtotalLabel}>Subtotale {categoria}:</Text>
-                  <Text style={styles.subtotalValue}>{formatEuro(catSubtotal)}</Text>
+                <View style={S.subtotalRow}>
+                  <Text style={S.subtotalLabel}>{"Subtotale " + categoria + ":"}</Text>
+                  <Text style={S.subtotalValue}>{formatEuro(totaleCat)}</Text>
                 </View>
               )}
             </View>
           );
         })}
 
-        {/* Totals */}
-        <View style={styles.totalsBox}>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Subtotale</Text>
-            <Text style={styles.totalValue}>{formatEuro(data.subtotale)}</Text>
+        {/* TOTALS */}
+        <View style={S.totalsBox}>
+          <View style={S.totalRow}>
+            <Text style={S.totalLabel}>{"Subtotale"}</Text>
+            <Text style={S.totalValue}>{formatEuro(data.subtotale)}</Text>
           </View>
-          {(data.sconto_globale || 0) > 0 && (
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Sconto {data.sconto_globale}%</Text>
-              <Text style={styles.totalValue}>-{formatEuro(data.subtotale * (data.sconto_globale! / 100))}</Text>
+          {(data.sconto_globale_percentuale || 0) > 0 && (
+            <View style={S.totalRow}>
+              <Text style={S.totalLabel}>{"Sconto " + data.sconto_globale_percentuale + "%"}</Text>
+              <Text style={S.totalValue}>{"-" + formatEuro(data.sconto_globale_importo || 0)}</Text>
             </View>
           )}
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Imponibile</Text>
-            <Text style={styles.totalValue}>{formatEuro(data.imponibile)}</Text>
+          <View style={S.totalRow}>
+            <Text style={S.totalLabel}>{"Imponibile"}</Text>
+            <Text style={S.totalValue}>{formatEuro(data.imponibile)}</Text>
           </View>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>IVA ({data.iva_percentuale}%)</Text>
-            <Text style={styles.totalValue}>{formatEuro(data.iva_importo)}</Text>
+          <View style={S.totalRow}>
+            <Text style={S.totalLabel}>{"IVA " + data.iva_percentuale + "%"}</Text>
+            <Text style={S.totalValue}>{formatEuro(data.iva_importo)}</Text>
           </View>
-          <View style={styles.totalFinalRow}>
-            <Text style={styles.totalFinalLabel}>TOTALE</Text>
-            <Text style={styles.totalFinalValue}>{formatEuro(data.totale_finale)}</Text>
+          <View style={S.totalFinalRow}>
+            <Text style={S.totalFinalLabel}>{"TOTALE"}</Text>
+            <Text style={S.totalFinalValue}>{formatEuro(data.totale_finale)}</Text>
           </View>
         </View>
 
-        {/* Notes */}
-        {data.note && (
-          <View style={styles.notesBox}>
-            <Text style={[styles.conditionsTitle, { color: "#b08000" }]}>📝 Note</Text>
-            <Text style={styles.notesText}>{data.note}</Text>
+        {/* VALIDITY */}
+        {data.validita_giorni && (
+          <View style={S.validityBox}>
+            <Text style={S.validityText}>
+              {"Il presente preventivo ha validita " + data.validita_giorni + " giorni dalla data di emissione" +
+                (data.data_scadenza ? " (scade il " + formatDate(data.data_scadenza) + ")" : "") + "."}
+            </Text>
           </View>
         )}
 
-        {/* Conditions & Clausole */}
-        {template.show_condizioni && (data.condizioni || data.clausole) && (
-          <View style={styles.conditionsBox}>
-            {data.condizioni && (
-              <>
-                <Text style={styles.conditionsTitle}>Condizioni di Pagamento</Text>
-                <Text style={styles.conditionsText}>{data.condizioni}</Text>
-              </>
+        {/* CONDITIONS */}
+        {template.show_condizioni && (data.condizioni || data.condizioni_pagamento || data.clausole) && (
+          <View style={S.conditionsBox}>
+            {(data.condizioni_pagamento || data.condizioni) && (
+              <View>
+                <Text style={S.conditionsTitle}>{"CONDIZIONI DI PAGAMENTO"}</Text>
+                <Text style={S.conditionsText}>{data.condizioni_pagamento || data.condizioni}</Text>
+              </View>
             )}
             {data.clausole && (
-              <>
-                <Text style={[styles.conditionsTitle, { marginTop: 8 }]}>Clausole</Text>
-                <Text style={styles.conditionsText}>{data.clausole}</Text>
-              </>
+              <View style={{ marginTop: 8 }}>
+                <Text style={S.conditionsTitle}>{"CLAUSOLE E CONDIZIONI"}</Text>
+                <Text style={S.conditionsText}>{data.clausole}</Text>
+              </View>
             )}
           </View>
         )}
 
-        {/* Signature */}
+        {/* NOTES */}
+        {(data.note || data.note_finali) && (
+          <View style={S.notesBox}>
+            <Text style={[S.conditionsTitle, { color: "#b08000" }]}>{"NOTE"}</Text>
+            <Text style={S.notesText}>{data.note_finali || data.note}</Text>
+          </View>
+        )}
+
+        {/* SIGNATURE */}
         {template.show_firma && (
-          <View style={styles.signatureBox}>
-            <View style={styles.signatureCol}>
-              <View style={styles.signatureLine}>
-                <Text style={styles.signatureLabel}>{data.firma_testo || "Il Responsabile"}</Text>
+          <View style={S.signatureBox}>
+            <View style={S.signatureCol}>
+              <View style={S.signatureLine}>
+                <Text style={S.signatureLabel}>{"Firma e timbro"}</Text>
+                <Text style={[S.signatureLabel, { color: "#555" }]}>{companyName}</Text>
               </View>
             </View>
-            <View style={styles.signatureCol}>
-              <View style={styles.signatureLine}>
-                <Text style={styles.signatureLabel}>Il Cliente (per accettazione)</Text>
+            <View style={S.signatureCol}>
+              <View style={S.signatureLine}>
+                <Text style={S.signatureLabel}>{"Per accettazione"}</Text>
+                <Text style={[S.signatureLabel, { color: "#555" }]}>{data.cliente_nome || ""}</Text>
               </View>
             </View>
           </View>
         )}
 
-        {/* Footer */}
-        <Text style={styles.footer}>
-          {template.piede_pagina || `${template.company_name || "Edile Genius"} — Preventivo ${data.numero_preventivo}`}
-        </Text>
+        {/* FOOTER */}
+        <View style={S.footer} fixed>
+          <Text style={S.footerText}>
+            {template.piede_pagina || companyName + " — " + data.numero_preventivo}
+          </Text>
+          <Text style={S.footerText} render={({ pageNumber, totalPages }) =>
+            "Pagina " + pageNumber + " di " + totalPages
+          } />
+        </View>
       </Page>
     </Document>
   );
 };
+
+// Export utility functions
+export async function getPreventivoBlob(data: PreventivoData, template: TemplateConfig): Promise<Blob> {
+  return await pdf(<PreventivoPDF data={data} template={template} />).toBlob();
+}
+
+export async function downloadPreventivoAsPdf(data: PreventivoData, template: TemplateConfig, filename?: string): Promise<void> {
+  const blob = await getPreventivoBlob(data, template);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename || `${data.numero_preventivo}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
