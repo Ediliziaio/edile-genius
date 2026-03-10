@@ -90,6 +90,14 @@ export default function PlatformSettings() {
   const [waTesting, setWaTesting] = useState(false);
   const [waTestResult, setWaTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
+  // N8N state
+  const [n8nBaseUrl, setN8nBaseUrl] = useState("");
+  const [n8nApiKey, setN8nApiKey] = useState("");
+  const [n8nShowKey, setN8nShowKey] = useState(false);
+  const [n8nSaving, setN8nSaving] = useState(false);
+  const [n8nTesting, setN8nTesting] = useState(false);
+  const [n8nStatus, setN8nStatus] = useState<{ configured: boolean; apiKeySet: boolean; testedAt: string | null; workflowsCount: number } | null>(null);
+
   const fetchConfig = useCallback(async () => {
     const { data } = await supabase.functions.invoke("platform-config", { method: "GET" });
     if (data?.config) {
