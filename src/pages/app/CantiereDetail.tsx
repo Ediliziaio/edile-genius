@@ -246,6 +246,11 @@ export default function CantiereDetail() {
             </Card>
           </div>
         </TabsContent>
+
+        {/* SAL TAB */}
+        <TabsContent value="sal">
+          <SalTab cantiereId={id!} companyId={cantiere?.company_id} />
+        </TabsContent>
       </Tabs>
 
       {selectedReport && (
