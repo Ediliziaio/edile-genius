@@ -5,9 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import {
   Bot, Phone, CalendarCheck, TrendingUp, Plus, ArrowRight,
-  Upload, Users, Megaphone, PhoneCall, Clock
+  Upload, Users, Megaphone, Clock, Target, Wallet, AlertTriangle, PhoneOff, CreditCard
 } from "lucide-react";
-import { format, isAfter, subDays } from "date-fns";
+import { format, isAfter } from "date-fns";
 import { it } from "date-fns/locale";
 
 export default function AppDashboard() {
@@ -23,11 +23,34 @@ export default function AppDashboard() {
     },
   });
 
+  // Conversations with agent name join
   const { data: conversations } = useQuery({
     queryKey: ["company-conversations", companyId],
     enabled: !!companyId,
     queryFn: async () => {
-      const { data } = await supabase.from("conversations").select("*").eq("company_id", companyId!).order("started_at", { ascending: false }).limit(5);
+      const { data } = await supabase
+        .from("conversations")
+        .select("*, agents(name)")
+        .eq("company_id", companyId!)
+        .order("started_at", { ascending: false })
+        .limit(5);
+      return data || [];
+    },
+  });
+
+  // All conversations this month for appointment rate
+  const { data: monthConversations } = useQuery({
+    queryKey: ["month-conversations", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+      const { data } = await supabase
+        .from("conversations")
+        .select("outcome")
+        .eq("company_id", companyId!)
+        .gte("started_at", startOfMonth.toISOString());
       return data || [];
     },
   });
@@ -37,6 +60,19 @@ export default function AppDashboard() {
     enabled: !!companyId,
     queryFn: async () => {
       const { data } = await supabase.from("companies").select("*").eq("id", companyId!).single();
+      return data;
+    },
+  });
+
+  const { data: credits } = useQuery({
+    queryKey: ["company-credits", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("ai_credits")
+        .select("balance_eur, calls_blocked")
+        .eq("company_id", companyId!)
+        .single();
       return data;
     },
   });
@@ -65,11 +101,25 @@ export default function AppDashboard() {
   const totalCalls = agents?.reduce((s, a) => s + (a.calls_month ?? 0), 0) ?? 0;
   const appointments = conversations?.filter((c) => c.outcome === "appointment").length ?? 0;
 
+  // Appointment rate
+  const monthTotal = monthConversations?.length ?? 0;
+  const monthAppointments = monthConversations?.filter((c) => c.outcome === "appointment").length ?? 0;
+  const appointmentRate = monthTotal > 0 ? Math.round((monthAppointments / monthTotal) * 100) : 0;
+
+  // Credits
+  const balanceEur = Number(credits?.balance_eur ?? 0);
+  const callsBlocked = credits?.calls_blocked ?? false;
+  const balanceColor = balanceEur > 5 ? "text-status-success" : balanceEur >= 1 ? "text-status-warning" : "text-status-error";
+
+  // Agents without phone
+  const agentsWithoutPhone = agents?.filter((a) => !a.phone_number_id) || [];
+
   const stats = [
     { label: "Agenti Attivi", value: activeAgents, icon: Bot, colorClass: "text-status-success bg-status-success-light" },
     { label: "Chiamate / Mese", value: totalCalls, icon: Phone, colorClass: "text-brand bg-brand-light" },
     { label: "Appuntamenti", value: appointments, icon: CalendarCheck, colorClass: "text-status-info bg-status-info-light" },
     { label: "Lead Qualificati", value: conversations?.filter((c) => c.outcome === "qualified").length ?? 0, icon: TrendingUp, colorClass: "text-status-warning bg-status-warning-light" },
+    { label: "Tasso Appuntamenti", value: `${appointmentRate}%`, icon: Target, colorClass: "text-accent-blue bg-accent-blue-light" },
   ];
 
   const quickActions = [
@@ -86,6 +136,24 @@ export default function AppDashboard() {
   const trialActive = trialEndsAt && isAfter(trialEndsAt, new Date());
   const callsUsed = company?.calls_used_month ?? 0;
   const callsLimit = company?.monthly_calls_limit ?? 500;
+
+  // Next actions
+  const nextActions: { type: "cta" | "warning" | "danger"; label: string; href: string; icon: React.ElementType }[] = [];
+  if (!agents || agents.length === 0) {
+    nextActions.push({ type: "cta", label: "Crea il tuo primo agente AI", href: "/app/agents/new", icon: Bot });
+  }
+  if (agentsWithoutPhone.length > 0 && agents && agents.length > 0) {
+    nextActions.push({ type: "warning", label: "Assegna un numero ai tuoi agenti", href: "/app/phone-numbers", icon: PhoneOff });
+  }
+  if (balanceEur < 2) {
+    nextActions.push({ type: "danger", label: "Crediti in esaurimento", href: "/app/credits", icon: CreditCard });
+  }
+
+  const actionStyles = {
+    cta: "border-brand bg-brand-light text-brand-text",
+    warning: "border-status-warning bg-status-warning-light text-status-warning",
+    danger: "border-status-error bg-status-error-light text-status-error",
+  };
 
   return (
     <div className="space-y-8">
@@ -113,8 +181,8 @@ export default function AppDashboard() {
         ))}
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Stats — 5 cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {stats.map((s) => (
           <div key={s.label} className="rounded-card p-5 border border-ink-200 bg-white shadow-card">
             <div className="flex items-center gap-3 mb-3">
@@ -128,9 +196,10 @@ export default function AppDashboard() {
         ))}
       </div>
 
-      {/* Trial / Usage Info */}
+      {/* Usage + Trial + Credits */}
       {company && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Utilizzo Chiamate */}
           <div className="rounded-card p-5 border border-ink-200 bg-white shadow-card">
             <p className="text-xs font-medium text-ink-400 mb-2">Utilizzo Chiamate</p>
             <div className="flex items-end gap-2 mb-2">
@@ -142,6 +211,8 @@ export default function AppDashboard() {
             </div>
             <p className="text-xs text-ink-400 mt-2">Piano: <span className="font-medium text-ink-700 capitalize">{company.plan}</span></p>
           </div>
+
+          {/* Trial */}
           <div className="rounded-card p-5 border border-ink-200 bg-white shadow-card">
             <p className="text-xs font-medium text-ink-400 mb-2">Trial</p>
             {trialActive ? (
@@ -158,12 +229,47 @@ export default function AppDashboard() {
               <p className="text-lg font-bold text-ink-700">Nessun trial</p>
             )}
           </div>
+
+          {/* Crediti EUR */}
+          <div className="rounded-card p-5 border border-ink-200 bg-white shadow-card">
+            <div className="flex items-center gap-2 mb-2">
+              <Wallet className="w-4 h-4 text-ink-400" />
+              <p className="text-xs font-medium text-ink-400">Crediti Disponibili</p>
+            </div>
+            <p className={`text-2xl font-bold ${balanceColor}`}>€{balanceEur.toFixed(2)}</p>
+            {callsBlocked && (
+              <div className="mt-2 flex items-center gap-2 rounded-btn bg-status-error-light px-3 py-1.5">
+                <AlertTriangle className="w-3.5 h-3.5 text-status-error" />
+                <span className="text-xs font-medium text-status-error">Chiamate bloccate — Ricarica i crediti</span>
+              </div>
+            )}
+            <Link to="/app/credits" className="text-xs text-brand hover:text-brand-hover mt-2 inline-block">Gestisci crediti →</Link>
+          </div>
+        </div>
+      )}
+
+      {/* Next Actions */}
+      {nextActions.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-ink-900">Prossime Azioni</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {nextActions.map((action) => (
+              <Link
+                key={action.label}
+                to={action.href}
+                className={`rounded-card p-4 border flex items-center gap-3 transition-shadow hover:shadow-card ${actionStyles[action.type]}`}
+              >
+                <action.icon className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-medium">{action.label}</span>
+                <ArrowRight className="w-4 h-4 ml-auto" />
+              </Link>
+            ))}
+          </div>
         </div>
       )}
 
       {/* Contacts by Status + Upcoming Calls */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Contacts by Status */}
         <div className="rounded-card p-5 border border-ink-200 bg-white shadow-card">
           <h3 className="text-sm font-semibold text-ink-900 mb-4">Contatti per Status</h3>
           {contactsByStatus && Object.keys(contactsByStatus).length > 0 ? (
@@ -181,7 +287,6 @@ export default function AppDashboard() {
           )}
         </div>
 
-        {/* Upcoming Calls */}
         <div className="rounded-card p-5 border border-ink-200 bg-white shadow-card">
           <h3 className="text-sm font-semibold text-ink-900 mb-4">Prossime Chiamate</h3>
           {upcomingCalls && upcomingCalls.length > 0 ? (
@@ -234,7 +339,7 @@ export default function AppDashboard() {
         )}
       </div>
 
-      {/* Recent Conversations */}
+      {/* Recent Conversations — with agent name */}
       {conversations && conversations.length > 0 && (
         <div>
           <h2 className="text-lg font-semibold mb-4 text-ink-900">Conversazioni Recenti</h2>
@@ -249,9 +354,9 @@ export default function AppDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {conversations.map((c) => (
+                {conversations.map((c: any) => (
                   <tr key={c.id} className="border-t border-ink-100">
-                    <td className="px-4 py-3 text-ink-900">{c.agent_id.slice(0, 8)}…</td>
+                    <td className="px-4 py-3 text-ink-900">{c.agents?.name || c.agent_id.slice(0, 8) + "…"}</td>
                     <td className="px-4 py-3 text-ink-500">{c.status || "—"}</td>
                     <td className="px-4 py-3 text-ink-500">{c.duration_sec ? `${c.duration_sec}s` : "—"}</td>
                     <td className="px-4 py-3 text-ink-500">{c.outcome || "—"}</td>
