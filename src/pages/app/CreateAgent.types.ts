@@ -20,6 +20,8 @@ export interface AgentForm {
   temperature: number;
   status: "active" | "draft";
   llm_model: string;
+  tts_model: string;
+  llm_backup_model: string;
   turn_timeout_sec: number;
   soft_timeout_sec: number;
   soft_timeout_message: string;
@@ -33,10 +35,20 @@ export interface AgentForm {
   voice_similarity: number;
   voice_speed: number;
   evaluation_criteria: string;
+  evaluation_prompt: string;
   data_retention: boolean;
   webhook_url: string;
   custom_tools: CustomTool[];
   pii_redaction: boolean;
   blocked_topics: string;
+  asr_quality: string;
+  asr_keywords: string[];
+  silence_end_call_timeout: number;
+  speculative_turn: boolean;
+  dynamic_variables: Array<{ name: string; type: string; description?: string }>;
+  built_in_tools: { voicemail?: boolean; transfer?: boolean };
+  transfer_number: string;
+  monitoring_enabled: boolean;
+  outbound_enabled: boolean;
   _pendingKBFiles?: File[];
 }
