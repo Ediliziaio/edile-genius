@@ -367,16 +367,22 @@ export default function NuovoPreventivo() {
                 <Label>Oggetto lavori</Label>
                 <Textarea placeholder="Descrizione sintetica dei lavori..." value={oggetto} onChange={e => setOggetto(e.target.value)} rows={2} />
               </div>
-              <div className="space-y-2">
-                <Label>Cantiere (opzionale)</Label>
-                <Select value={cantiereId} onValueChange={setCantiereId}>
-                  <SelectTrigger><SelectValue placeholder="Seleziona cantiere" /></SelectTrigger>
-                  <SelectContent>
-                    {(cantieri || []).map((c: any) => (
-                      <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Luogo lavori</Label>
+                  <Input placeholder="Via Roma 15, Milano" value={luogoLavori} onChange={e => setLuogoLavori(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Cantiere (opzionale)</Label>
+                  <Select value={cantiereId} onValueChange={setCantiereId}>
+                    <SelectTrigger><SelectValue placeholder="Seleziona cantiere" /></SelectTrigger>
+                    <SelectContent>
+                      {(cantieri || []).map((c: any) => (
+                        <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>
