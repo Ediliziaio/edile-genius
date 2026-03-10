@@ -447,11 +447,11 @@ export default function PreventivoDetail() {
                 <div className="text-center p-4 bg-muted rounded-lg">
                   <Clock className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
                   <p className="text-sm font-medium">
-                    {prev.tracking_aperto_at
-                      ? new Date(prev.tracking_aperto_at).toLocaleString("it-IT")
-                      : "Mai aperto"}
+                    {prev.email_aperta_at
+                      ? new Date(prev.email_aperta_at).toLocaleString("it-IT")
+                      : "Mai aperta"}
                   </p>
-                  <p className="text-xs text-muted-foreground">Ultima apertura</p>
+                  <p className="text-xs text-muted-foreground">Email aperta</p>
                 </div>
                 <div className="text-center p-4 bg-muted rounded-lg">
                   <Mail className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
