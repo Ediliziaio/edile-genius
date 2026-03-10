@@ -441,7 +441,7 @@ export default function PreventivoDetail() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center p-4 bg-muted rounded-lg">
                   <Eye className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-2xl font-bold">{prev.tracking_aperto_count || 0}</p>
+                  <p className="text-2xl font-bold">{prev.link_aperto_count || 0}</p>
                   <p className="text-xs text-muted-foreground">Aperture</p>
                 </div>
                 <div className="text-center p-4 bg-muted rounded-lg">
