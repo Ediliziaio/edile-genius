@@ -1,19 +1,66 @@
 
 
-## Nessuna modifica necessaria
+## Analysis: What's Already Implemented vs What's Missing
 
-Questa integrazione ElevenLabs completa è **già stata implementata** nel messaggio precedente. Tutti i 10 parti del prompt sono già presenti nel codebase:
+After reviewing the entire codebase, **most of the 12 prompts are already fully implemented**:
 
-1. **Migrazione DB** — Tutti i campi su `agents`, `conversations`, `ai_phone_numbers`, `ai_knowledge_docs` + tabella `outbound_call_log` con RLS
-2. **Edge Functions** — `create-elevenlabs-agent` (riscritta), `update-agent` (aggiornata), `elevenlabs-webhook` (HMAC + collected_data), `elevenlabs-outbound-call` (nuova), `elevenlabs-import-phone-number` (nuova), `add-knowledge-doc` (file upload), `get-elevenlabs-voices` (filtri avanzati)
-3. **BuyPhoneNumber** — Flusso 4 step Twilio reale
-4. **AgentConfigForm** — Sezioni ASR, Strumenti Integrati, Sicurezza & Valutazione + TTS Model selector
-5. **AgentDetail** — Tab "Chiamate Uscenti", colonna eval_score nelle conversazioni
-6. **TranscriptViewer** — Mostra eval_score, eval_notes, collected_data
-7. **VoicePickerEnhanced** — Filtri genere, lingua, categoria
-8. **AgentIntegrationTab** — Sezione webhook post-chiamata
-9. **AgentOutboundTab** — Form chiamata singola + log
-10. **CreateAgent.types.ts** — Tutti i nuovi campi
+- **Prompt 1** (KB file upload): Already working — `uploadFileToStorage()` uploads to `knowledge-docs`, inserts in DB, invokes `add-knowledge-doc`
+- **Prompt 2** (Dashboard): Already has agent name joins, appointment rate, credits widget, next actions
+- **Prompt 3** (Create Agent wizard): Already has multi-step wizard with StepAgent, StepVoice, StepConversation, StepReview
+- **Prompt 4** (SuperAdmin Dashboard): Already has full economics dashboard with KPIs, charts, credit health table
+- **Prompt 5** (BuyPhoneNumber): Already has 4-step Twilio import flow
+- **Prompt 6** (AgentKnowledgeTab): Already has file upload + sync functionality
+- **Prompt 7** (Campaigns): Already has 4-step wizard with scheduling
+- **Prompt 8** (RenderHub): Already has hero section, steps, gallery, credits widget
+- **Prompt 9** (Settings): Already has Profile, API, CRM, Webhooks, Notifications, Billing tabs
+- **Prompt 11** (CRM Integration): Already implemented with HubSpot, Salesforce, Pipedrive
+- **Prompt 12** (Templates): Static templates already exist in CreateAgent
 
-Non ci sono gap da colmare. Il codice è completo e funzionante.
+### What's genuinely missing:
+
+**Prompt 10 — Mobile responsive Shell + Global Search (Cmd+K)**
+
+This is the only significant gap. Currently:
+- Shell has no mobile responsiveness — sidebar is fixed at 240px with no hamburger menu
+- Topbar has no hamburger trigger or mobile handling
+- No Cmd+K global search dialog
+- No breadcrumbs
+
+---
+
+## Implementation Plan
+
+### 1. Mobile-responsive Shell + Sidebar drawer
+
+**Shell.tsx**: Detect mobile via `useMobile()` hook. On mobile, hide sidebar, show it via `Sheet` (left side drawer).
+
+**Topbar.tsx**: Add hamburger `Menu` icon on mobile (left side), pass `onMenuOpen` callback to trigger the Sheet. Add Cmd+K search trigger button.
+
+**Sidebar.tsx**: Extract nav content into a shared component. On desktop: render as-is. On mobile: render inside Sheet.
+
+### 2. Global Search (Cmd+K)
+
+Create `src/components/layout/GlobalSearch.tsx` using the already-installed `cmdk` package:
+- `Cmd+K` / `Ctrl+K` keyboard shortcut opens a `CommandDialog`
+- Search across agents, contacts, campaigns, conversations using Supabase queries
+- Results grouped by category with icons
+- Navigate to selected result on Enter/click
+
+### 3. Breadcrumbs
+
+Add breadcrumb generation in Shell based on current route path, using shadcn `Breadcrumb` component. Map route segments to Italian labels.
+
+---
+
+### File Changes
+
+| File | Change |
+|------|--------|
+| `src/components/layout/Shell.tsx` | Add mobile detection, Sheet for sidebar drawer, breadcrumb |
+| `src/components/layout/Topbar.tsx` | Add hamburger button on mobile, Cmd+K trigger, low-credit badge |
+| `src/components/layout/Sidebar.tsx` | Extract nav into reusable component, accept `onClose` prop for mobile |
+| `src/components/layout/GlobalSearch.tsx` | New — CommandDialog with multi-entity search |
+| `src/components/layout/AppBreadcrumb.tsx` | New — Route-based breadcrumb component |
+
+No database changes needed. No edge functions needed.
 
