@@ -33,6 +33,8 @@ export default function NuovoPreventivo() {
   const [cantiereId, setCantiereId] = useState("");
   const [oggetto, setOggetto] = useState("");
   const [titolo, setTitolo] = useState("");
+  const [luogoLavori, setLuogoLavori] = useState("");
+  const [scontoGlobalePerc, setScontoGlobalePerc] = useState(0);
 
   // Step 2 — Audio + Photos
   const [recording, setRecording] = useState(false);
