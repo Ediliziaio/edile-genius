@@ -111,6 +111,7 @@ export default function CantiereDetail() {
           <TabsTrigger value="report">📋 Report ({reports.length})</TabsTrigger>
           <TabsTrigger value="operai">👷 Operai ({operai.length})</TabsTrigger>
           <TabsTrigger value="statistiche">📊 Statistiche</TabsTrigger>
+          <TabsTrigger value="sal">📊 SAL</TabsTrigger>
         </TabsList>
 
         {/* REPORT TAB */}
