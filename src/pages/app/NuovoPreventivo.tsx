@@ -268,6 +268,11 @@ export default function NuovoPreventivo() {
     company_address: company?.address || undefined,
     company_phone: company?.phone || undefined,
     company_vat: company?.vat_number || undefined,
+    azienda_nome: templateConfig?.azienda_nome,
+    azienda_indirizzo: templateConfig?.azienda_indirizzo,
+    azienda_telefono: templateConfig?.azienda_telefono,
+    azienda_email: templateConfig?.azienda_email,
+    azienda_piva: templateConfig?.azienda_piva,
   };
 
   const pdfData: PreventivoData = {
