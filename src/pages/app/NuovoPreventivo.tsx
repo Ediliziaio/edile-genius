@@ -220,19 +220,23 @@ export default function NuovoPreventivo() {
   const removeVoce = (i: number) => setVoci(voci.filter((_, idx) => idx !== i));
 
   // Save updated voci
+  // Computed totals (with proper rounding for monetary precision)
+  const subtotaleBruto = Number(voci.reduce((s, v) => s + v.totale, 0).toFixed(2));
+  const scontoGlobaleImporto = Number((subtotaleBruto * (scontoGlobalePerc / 100)).toFixed(2));
+  const subtotale = Number((subtotaleBruto - scontoGlobaleImporto).toFixed(2));
+  const ivaPercentuale = templateConfig?.iva_percentuale_default || 22;
+  const ivaImporto = Number((subtotale * (ivaPercentuale / 100)).toFixed(2));
+  const totaleFinale = Number((subtotale + ivaImporto).toFixed(2));
+
   const saveVoci = async () => {
     if (!preventivoId) return;
-    const subtotale = voci.reduce((s, v) => s + v.totale, 0);
-    const ivaPerc = 22;
-    const imponibile = subtotale;
-    const ivaImporto = imponibile * (ivaPerc / 100);
-    const totaleFinale = imponibile + ivaImporto;
 
     const { error } = await (supabase.from("preventivi") as any)
       .update({
         voci,
-        subtotale: imponibile,
-        imponibile,
+        subtotale,
+        imponibile: subtotale,
+        iva_percentuale: ivaPercentuale,
         iva_importo: ivaImporto,
         totale: totaleFinale,
         totale_finale: totaleFinale,
@@ -253,13 +257,6 @@ export default function NuovoPreventivo() {
       navigate(`/app/preventivi/${preventivoId}`);
     }
   };
-
-  // Computed totals
-  const subtotaleBruto = voci.reduce((s, v) => s + v.totale, 0);
-  const scontoGlobaleImporto = subtotaleBruto * (scontoGlobalePerc / 100);
-  const subtotale = subtotaleBruto - scontoGlobaleImporto;
-  const ivaImporto = subtotale * 0.22;
-  const totaleFinale = subtotale + ivaImporto;
 
   // Group voci for display
   const categories = [...new Set(voci.map(v => v.categoria || "Generale"))];
