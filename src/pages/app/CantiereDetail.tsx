@@ -109,6 +109,9 @@ export default function CantiereDetail() {
             {cantiere.committente && <span>Committente: {cantiere.committente}</span>}
           </div>
         </div>
+        <Button variant="outline" className="gap-2" onClick={() => navigate(`/app/preventivi/nuovo?cantiere_id=${id}`)}>
+          <Receipt className="h-4 w-4" /> Nuovo preventivo
+        </Button>
       </div>
 
       <Tabs defaultValue="report">

@@ -383,7 +383,8 @@ export default function NuovoPreventivo() {
                 </div>
                 <div className="space-y-2">
                   <Label>Email</Label>
-                  <Input placeholder="mario@email.it" value={clienteEmail} onChange={e => setClienteEmail(e.target.value)} />
+                  <Input placeholder="mario@email.it" value={clienteEmail} onChange={e => setClienteEmail(e.target.value)} className={step1Errors.clienteEmail ? "border-destructive" : ""} />
+                  {step1Errors.clienteEmail && <p className="text-xs text-destructive">{step1Errors.clienteEmail}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label>Indirizzo</Label>

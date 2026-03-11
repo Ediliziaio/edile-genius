@@ -196,8 +196,9 @@ export default function TemplatePreventivo() {
                   <Input value={form.azienda_sito} onChange={e => update("azienda_sito", e.target.value)} placeholder="www.impresarossi.it" />
                 </div>
                 <div className="space-y-2">
-                  <Label>P.IVA</Label>
-                  <Input value={form.azienda_piva} onChange={e => update("azienda_piva", e.target.value)} placeholder="IT12345678901" />
+                  <Label>P.IVA *</Label>
+                  <Input value={form.azienda_piva} onChange={e => update("azienda_piva", e.target.value)} placeholder="IT12345678901" className={validationErrors.azienda_piva ? "border-destructive" : ""} />
+                  {validationErrors.azienda_piva && <p className="text-xs text-destructive">{validationErrors.azienda_piva}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label>Codice Fiscale</Label>

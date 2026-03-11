@@ -155,6 +155,7 @@ export default function Integrations() {
     crm: crmActive ?? false,
     webhooks: webhookCount ?? false,
     telegram: telegramActive ?? false,
+    render: renderActive ?? false,
   };
 
   const connectedCount = Object.values(statusMap).filter(Boolean).length;

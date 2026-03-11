@@ -247,6 +247,52 @@ export default function PreventivoDetail() {
               <Send className="h-4 w-4" /> {prev.stato === "inviato" ? "Rinvia al cliente" : "Invia al cliente"}
             </Button>
           )}
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={async () => {
+              try {
+                const { data: newPrev, error } = await (supabase.from("preventivi") as any)
+                  .insert({
+                    company_id: prev.company_id,
+                    cantiere_id: prev.cantiere_id,
+                    cliente_nome: prev.cliente_nome,
+                    cliente_indirizzo: prev.cliente_indirizzo,
+                    cliente_telefono: prev.cliente_telefono,
+                    cliente_email: prev.cliente_email,
+                    cliente_piva: prev.cliente_piva,
+                    oggetto: prev.oggetto,
+                    titolo: prev.titolo,
+                    luogo_lavori: prev.luogo_lavori,
+                    voci: prev.voci,
+                    subtotale: prev.subtotale,
+                    imponibile: prev.imponibile,
+                    iva_percentuale: prev.iva_percentuale,
+                    iva_importo: prev.iva_importo,
+                    totale: prev.totale,
+                    totale_finale: prev.totale_finale,
+                    sconto_globale_percentuale: prev.sconto_globale_percentuale,
+                    sconto_globale_importo: prev.sconto_globale_importo,
+                    note: prev.note,
+                    tempi_esecuzione: prev.tempi_esecuzione,
+                    intro: prev.intro,
+                    condizioni: prev.condizioni,
+                    clausole: prev.clausole,
+                    versione: (prev.versione || 1) + 1,
+                    stato: "bozza",
+                  })
+                  .select("id")
+                  .single();
+                if (error) throw error;
+                toast.success(`Revisione v${(prev.versione || 1) + 1} creata`);
+                navigate(`/app/preventivi/${newPrev.id}`);
+              } catch (err: any) {
+                toast.error(err.message);
+              }
+            }}
+          >
+            <RotateCcw className="h-4 w-4" /> Crea revisione
+          </Button>
           {editing ? (
             <Button onClick={() => updateMutation.mutate()} className="gap-2">
               <Save className="h-4 w-4" /> Salva
