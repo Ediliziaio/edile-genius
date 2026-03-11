@@ -283,6 +283,8 @@ export default function AnalyticsPage() {
           )}
           <p className="text-[11px] text-ink-400 mt-2">I punti con ⟶ sono previsioni basate su regressione lineare</p>
         </div>
+
+        <div className="rounded-card p-5 lg:col-span-2 bg-white border border-ink-200 shadow-card">
           <h3 className="text-sm font-semibold mb-4 text-ink-900">Chiamate per agente</h3>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={agentData} layout="vertical">
