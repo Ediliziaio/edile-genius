@@ -52,6 +52,13 @@ const integrationDefs: IntegrationDef[] = [
     icon: Bot,
     href: "/app/cantieri",
   },
+  {
+    id: "render",
+    title: "Render AI",
+    description: "Genera render fotorealistici con AI per infissi, facciate e coperture",
+    icon: Image,
+    href: "/app/render",
+  },
 ];
 
 export default function Integrations() {
