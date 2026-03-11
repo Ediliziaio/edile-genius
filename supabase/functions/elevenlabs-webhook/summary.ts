@@ -1,32 +1,35 @@
 import { log } from "../_shared/utils.ts";
 
+interface CallAnalysis {
+  summary: string | null;
+  main_reason: string | null;
+}
+
 /**
- * Generate a 2-3 sentence Italian summary of a conversation transcript
- * using OpenAI gpt-4o-mini. Returns null if OPENAI_API_KEY is not set
- * or if generation fails (non-blocking).
+ * Generate a 2-3 sentence Italian summary + main_reason extraction
+ * using OpenAI gpt-4o-mini. Returns nulls if OPENAI_API_KEY is not set.
  */
-export async function generateCallSummary(
+export async function generateCallAnalysis(
   transcript: any[],
   requestId: string,
-): Promise<string | null> {
+): Promise<CallAnalysis> {
   const apiKey = Deno.env.get("OPENAI_API_KEY");
   if (!apiKey) {
-    log("info", "OPENAI_API_KEY not set — skipping summary", { request_id: requestId });
-    return null;
+    log("info", "OPENAI_API_KEY not set — skipping analysis", { request_id: requestId });
+    return { summary: null, main_reason: null };
   }
 
   if (!transcript || transcript.length === 0) {
-    return null;
+    return { summary: null, main_reason: null };
   }
 
-  // Build a simple text from transcript entries
   const text = transcript
     .map((t: any) => {
       const role = t.role === "agent" ? "Agente" : "Cliente";
       return `${role}: ${t.message || t.text || ""}`;
     })
     .join("\n")
-    .slice(0, 6000); // cap to ~6k chars to keep cost low
+    .slice(0, 6000);
 
   try {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -38,38 +41,51 @@ export async function generateCallSummary(
       body: JSON.stringify({
         model: "gpt-4o-mini",
         temperature: 0.3,
-        max_tokens: 200,
+        max_tokens: 300,
+        response_format: { type: "json_object" },
         messages: [
           {
             role: "system",
-            content:
-              "Sei un assistente che riassume conversazioni telefoniche commerciali per aziende edili italiane. Rispondi SOLO con il riassunto, senza premesse.",
+            content: `Sei un assistente che analizza conversazioni telefoniche commerciali per aziende edili italiane. Rispondi SOLO con un JSON valido con due campi:
+- "summary": riassunto in 2-3 frasi (argomento, esito, prossimo passo)
+- "main_reason": il motivo principale di interesse O di rifiuto del cliente, in una frase breve e chiara (es. "Interessato a ristrutturazione bagno", "Non interessato: ha già un fornitore", "Vuole preventivo per cappotto termico"). Se non è chiaro, scrivi null.`,
           },
           {
             role: "user",
-            content: `Riassumi questa conversazione telefonica in 2-3 frasi in italiano.\nIndica: argomento principale, esito, e prossimo passo se menzionato.\n\n${text}`,
+            content: `Analizza questa conversazione:\n\n${text}`,
           },
         ],
       }),
     });
 
     if (!res.ok) {
-      log("warn", "OpenAI API error for summary", {
-        request_id: requestId,
-        status: res.status,
-      });
-      return null;
+      log("warn", "OpenAI API error for analysis", { request_id: requestId, status: res.status });
+      return { summary: null, main_reason: null };
     }
 
     const json = await res.json();
-    const summary = json.choices?.[0]?.message?.content?.trim() || null;
-    log("info", "Summary generated", { request_id: requestId, length: summary?.length });
-    return summary;
+    const content = json.choices?.[0]?.message?.content?.trim();
+    if (!content) return { summary: null, main_reason: null };
+
+    try {
+      const parsed = JSON.parse(content);
+      const summary = parsed.summary || null;
+      const main_reason = parsed.main_reason || null;
+      log("info", "Analysis generated", { request_id: requestId, has_summary: !!summary, has_reason: !!main_reason });
+      return { summary, main_reason };
+    } catch {
+      // Fallback: treat entire content as summary
+      log("warn", "Failed to parse analysis JSON, using as summary", { request_id: requestId });
+      return { summary: content, main_reason: null };
+    }
   } catch (err) {
-    log("warn", "Summary generation failed", {
-      request_id: requestId,
-      error: (err as Error).message,
-    });
-    return null;
+    log("warn", "Analysis generation failed", { request_id: requestId, error: (err as Error).message });
+    return { summary: null, main_reason: null };
   }
+}
+
+// Backward compat alias
+export async function generateCallSummary(transcript: any[], requestId: string): Promise<string | null> {
+  const result = await generateCallAnalysis(transcript, requestId);
+  return result.summary;
 }
