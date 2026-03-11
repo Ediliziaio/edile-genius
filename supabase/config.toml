@@ -131,3 +131,6 @@ verify_jwt = false
 
 [functions.auto-followup-agent]
 verify_jwt = false
+
+[functions.recalculate-lead-weights]
+verify_jwt = false

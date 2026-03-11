@@ -43,42 +43,48 @@ export interface LeadScoreResult {
 }
 
 export function calculateLeadScore(input: LeadScoreInput): LeadScoreResult {
+  const w = input.customWeights;
   let score = 30; // base score
   const factors: string[] = [];
 
-  // +30 qualified or appointment outcome
+  // +N qualified or appointment outcome (default 30)
   if (input.hasQualifiedOrAppointment) {
-    score += 30;
+    const pts = w?.qualified_outcome ?? 30;
+    score += pts;
     factors.push("Esito qualificato o appuntamento");
   }
 
-  // +20 positive sentiment
+  // +N positive sentiment (default 20)
   if (input.hasPositiveSentiment) {
-    score += 20;
+    const pts = w?.positive_sentiment ?? 20;
+    score += pts;
     factors.push("Sentiment positivo");
   }
 
-  // +15 ha un preventivo
+  // +15 ha un preventivo (fixed — not weight-adjustable)
   if (input.hasPreventivo) {
     score += 15;
     factors.push("Preventivo associato");
   }
 
-  // +10 contatto completo (telefono + email)
+  // +N contatto completo (default 10)
   if (input.phone && input.email) {
-    score += 10;
+    const pts = w?.complete_contact ?? 10;
+    score += pts;
     factors.push("Contatto completo");
   }
 
-  // +10 richiamato almeno una volta
+  // +N richiamato almeno una volta (default 10)
   if ((input.call_attempts ?? 0) > 0) {
-    score += 10;
+    const pts = w?.has_calls ?? 10;
+    score += pts;
     factors.push(`${input.call_attempts} tentativo/i di chiamata`);
   }
 
-  // +5 fonte inbound
+  // +N fonte inbound (default 5)
   if (input.source === "web_form" || input.source === "referral") {
-    score += 5;
+    const pts = w?.inbound_source ?? 5;
+    score += pts;
     factors.push("Lead inbound");
   }
 
