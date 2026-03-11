@@ -90,16 +90,19 @@ export default function DocumentiScadenze() {
     return d.stato === tab;
   });
 
-  const counts = {
+  const counts = useMemo(() => ({
     tutti: (documenti || []).length,
     valido: (documenti || []).filter((d: any) => d.stato === "valido").length,
     in_scadenza: (documenti || []).filter((d: any) => d.stato === "in_scadenza").length,
     scaduto: (documenti || []).filter((d: any) => d.stato === "scaduto").length,
-  };
+  }), [documenti]);
 
   const getDaysLeft = (date: string) => {
-    const diff = Math.ceil((new Date(date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-    return diff;
+    try {
+      return differenceInDays(new Date(date), startOfDay(new Date()));
+    } catch {
+      return 0;
+    }
   };
 
   return (
