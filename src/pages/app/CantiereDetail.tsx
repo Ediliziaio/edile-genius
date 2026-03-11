@@ -18,6 +18,7 @@ import ReportDetailModal from "@/components/cantieri/ReportDetailModal";
 
 export default function CantiereDetail() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [cantiere, setCantiere] = useState<any>(null);
   const [reports, setReports] = useState<any[]>([]);
   const [operai, setOperai] = useState<any[]>([]);
