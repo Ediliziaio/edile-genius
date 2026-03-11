@@ -456,7 +456,7 @@ function TemplateHubCard({ template: t }: { template: HubTemplate }) {
               : "bg-brand text-white hover:bg-brand-hover"
           }`}
         >
-          {t.disabled ? "In arrivo" : "Configura →"}
+          {t.disabled ? "In arrivo" : "Inizia →"}
         </button>
         {!t.disabled && (
           <Tooltip>
