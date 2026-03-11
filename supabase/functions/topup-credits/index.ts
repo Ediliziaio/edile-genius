@@ -49,43 +49,17 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: corsHeaders });
     }
 
-    // Get current balance
-    const { data: credits } = await sb
-      .from("ai_credits")
-      .select("balance_eur, calls_blocked, blocked_reason")
-      .eq("company_id", companyId)
-      .single();
+    // Atomic topup via RPC — prevents race conditions
+    const { data: newBalanceRows, error: rpcError } = await sb.rpc("topup_credits", {
+      _company_id: companyId,
+      _amount_eur: amountEur,
+    });
 
-    const currentBalance = Number(credits?.balance_eur || 0);
-    const newBalance = Number((currentBalance + amountEur).toFixed(4));
-
-    // Update balance
-    const updateData: Record<string, unknown> = {
-      balance_eur: newBalance,
-      total_recharged_eur: sb.rpc ? undefined : newBalance, // fallback
-      updated_at: new Date().toISOString(),
-    };
-
-    // Unblock if was blocked due to zero balance
-    if (credits?.calls_blocked && credits?.blocked_reason === "balance_zero") {
-      updateData.calls_blocked = false;
-      updateData.blocked_at = null;
-      updateData.blocked_reason = null;
+    if (rpcError) {
+      return new Response(JSON.stringify({ error: rpcError.message }), { status: 500, headers: corsHeaders });
     }
 
-    await sb.from("ai_credits").update(updateData).eq("company_id", companyId);
-
-    // We also need to increment total_recharged_eur separately
-    // Since we can't use raw SQL, read and set
-    const { data: freshCredits } = await sb
-      .from("ai_credits")
-      .select("total_recharged_eur")
-      .eq("company_id", companyId)
-      .single();
-
-    await sb.from("ai_credits").update({
-      total_recharged_eur: Number(((freshCredits?.total_recharged_eur || 0) as number) + amountEur).toFixed(4),
-    }).eq("company_id", companyId);
+    const newBalance = Number(newBalanceRows);
 
     // Generate invoice number
     const invoiceNum = `EIO-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
