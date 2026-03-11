@@ -335,6 +335,30 @@ export default function AppDashboard() {
     });
   }
 
+  // Dormant qualified leads — opportunity recovery
+  if (dormantLeads && dormantLeads.length > 0) {
+    const lead = dormantLeads[0];
+    const daysSince = lead.last_contact_at
+      ? differenceInDays(new Date(), new Date(lead.last_contact_at))
+      : null;
+    smartActions.push({
+      type: "warning",
+      label: `Proponi appuntamento a ${lead.full_name}`,
+      description: `Lead qualificato senza contatto da ${daysSince ?? "diversi"} giorni.`,
+      href: `/app/contacts`,
+      icon: CalendarCheck,
+    });
+    if (dormantLeads.length > 1) {
+      smartActions.push({
+        type: "info",
+        label: `${dormantLeads.length - 1} altri lead qualificati dormienti`,
+        description: "Nessun follow-up da oltre 5 giorni. Azione consigliata.",
+        href: "/app/contacts",
+        icon: TrendingDown,
+      });
+    }
+  }
+
   // ── Onboarding checklist (only when 0 agents) ──
   const checklistSteps = [
     { label: "Scegli cosa automatizzare", description: "Esplora i template e scegli il tuo primo agente AI", href: "/app/agents/new", done: hasAgents },
