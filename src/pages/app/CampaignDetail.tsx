@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import {
   ArrowLeft, Play, Pause, Square, Loader2, Bot, ListChecks, Clock,
-  Phone, Users, CalendarCheck, BarChart3, Settings2,
+  Phone, Users, CalendarCheck, BarChart3, Settings2, PhoneForwarded,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   draft: { label: "Bozza", color: "bg-ink-100 text-ink-600" },
@@ -41,6 +42,7 @@ export default function CampaignDetailPage() {
 
   const [confirmAction, setConfirmAction] = useState<"start" | "pause" | "cancel" | null>(null);
   const [acting, setActing] = useState(false);
+  const [runningBatch, setRunningBatch] = useState(false);
 
   const { data: campaign, isLoading } = useQuery({
     queryKey: ["campaign-detail", id],
@@ -80,19 +82,40 @@ export default function CampaignDetailPage() {
   const handleAction = async (action: "start" | "pause" | "cancel") => {
     setActing(true);
     try {
-      const updates: Record<string, any> = {};
       if (action === "start") {
-        updates.status = "active";
-        if (!campaign?.started_at) updates.started_at = new Date().toISOString();
+        // 1. Populate contacts from list
+        const { data: popResult, error: popErr } = await supabase.functions.invoke("run-campaign-batch", {
+          body: { campaign_id: id, action: "populate" },
+        });
+        if (popErr) throw new Error(popErr.message || "Populate failed");
+        if (popResult?.error) throw new Error(popResult.error);
+
+        // 2. Update status to active
+        await supabase.from("campaigns").update({
+          status: "active",
+          started_at: campaign?.started_at || new Date().toISOString(),
+        }).eq("id", id!);
+
+        // 3. Run first batch
+        const { data: batchResult, error: batchErr } = await supabase.functions.invoke("run-campaign-batch", {
+          body: { campaign_id: id, action: "run_batch" },
+        });
+        if (batchErr) console.warn("Batch error (non-blocking):", batchErr);
+
+        toast({
+          title: "Campagna avviata",
+          description: `${popResult?.populated || 0} contatti caricati, ${batchResult?.calls_initiated || 0} chiamate iniziate`,
+        });
       } else if (action === "pause") {
-        updates.status = "paused";
+        await supabase.from("campaigns").update({ status: "paused" }).eq("id", id!);
+        toast({ title: "Campagna in pausa" });
       } else if (action === "cancel") {
-        updates.status = "cancelled";
-        updates.completed_at = new Date().toISOString();
+        await supabase.from("campaigns").update({
+          status: "cancelled",
+          completed_at: new Date().toISOString(),
+        }).eq("id", id!);
+        toast({ title: "Campagna annullata" });
       }
-      const { error } = await supabase.from("campaigns").update(updates).eq("id", id!);
-      if (error) throw error;
-      toast({ title: action === "start" ? "Campagna avviata" : action === "pause" ? "Campagna in pausa" : "Campagna annullata" });
       setConfirmAction(null);
       invalidate();
     } catch (err: any) {
@@ -154,6 +177,35 @@ export default function CampaignDetailPage() {
           </div>
         </div>
         <div className="flex gap-2">
+          {campaign.status === "active" && (
+            <Button
+              onClick={async () => {
+                setRunningBatch(true);
+                try {
+                  const { data, error } = await supabase.functions.invoke("run-campaign-batch", {
+                    body: { campaign_id: id, action: "run_batch" },
+                  });
+                  if (error) throw error;
+                  if (data?.error) throw new Error(data.error);
+                  toast({
+                    title: "Batch eseguito",
+                    description: `${data?.calls_initiated || 0} chiamate iniziate${data?.campaign_completed ? " — Campagna completata!" : ""}`,
+                  });
+                  invalidate();
+                } catch (err: any) {
+                  toast({ title: "Errore batch", description: err.message, variant: "destructive" });
+                } finally {
+                  setRunningBatch(false);
+                }
+              }}
+              disabled={runningBatch}
+              variant="outline"
+              className="border-brand text-brand hover:bg-brand hover:text-white"
+            >
+              {runningBatch ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <PhoneForwarded className="w-4 h-4 mr-2" />}
+              Lancia batch
+            </Button>
+          )}
           {canStart && (
             <Button onClick={() => setConfirmAction("start")} className="bg-status-success hover:bg-status-success/90 text-white">
               <Play className="w-4 h-4 mr-2" /> {campaign.status === "paused" ? "Riprendi" : "Avvia"}
