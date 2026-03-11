@@ -373,8 +373,9 @@ export default function NuovoPreventivo() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Nome / Ragione Sociale</Label>
-                  <Input placeholder="Mario Rossi" value={clienteNome} onChange={e => setClienteNome(e.target.value)} />
+                  <Label>Nome / Ragione Sociale *</Label>
+                  <Input placeholder="Mario Rossi" value={clienteNome} onChange={e => setClienteNome(e.target.value)} className={step1Errors.clienteNome ? "border-destructive" : ""} />
+                  {step1Errors.clienteNome && <p className="text-xs text-destructive">{step1Errors.clienteNome}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label>Telefono</Label>
