@@ -205,7 +205,7 @@ Deno.serve(async (req) => {
     // 8. Audit log
     await serviceClient.from("ai_audit_log").insert({
       company_id: instance.company_id,
-      user_id: user.id,
+      user_id: userId,
       action: "template_deployed",
       entity_type: "agent",
       entity_id: agent.id,
