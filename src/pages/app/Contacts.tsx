@@ -127,7 +127,8 @@ export default function ContactsPage() {
         .from("contacts")
         .select("*")
         .eq("company_id", companyId!)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(1000);
       if (error) throw error;
       return data;
     },

@@ -64,7 +64,15 @@ Deno.serve(async (req) => {
       .eq("is_active", true)
       .single();
 
-    const minCostPerCall = pricing?.cost_billed_per_min || 0.04;
+    if (!pricing) {
+      return new Response(JSON.stringify({
+        allowed: false,
+        reason: "pricing_unavailable",
+        message: "Impossibile determinare il costo per questa configurazione agente. Contatta il supporto.",
+      }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    const minCostPerCall = pricing.cost_billed_per_min;
 
     // Get credits
     const { data: credits } = await sb

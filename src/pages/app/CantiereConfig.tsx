@@ -123,6 +123,9 @@ export default function CantiereConfig() {
               {loading ? "Attivazione..." : "Attiva Bot"}
             </Button>
           </div>
+          {tokenError && (
+            <p className="text-sm text-destructive">{tokenError}</p>
+          )}
           {config?.bot_username && (
             <p className="text-sm text-primary flex items-center gap-1">
               <CheckCircle2 className="h-4 w-4" /> Bot attivo: @{config.bot_username}

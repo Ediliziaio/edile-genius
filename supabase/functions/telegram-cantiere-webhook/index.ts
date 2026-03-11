@@ -1,15 +1,30 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { status: 200 });
-  if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: corsHeaders });
 
   try {
+    // Verify Telegram secret token header if configured
+    const telegramSecret = Deno.env.get("TELEGRAM_WEBHOOK_SECRET");
+    if (telegramSecret) {
+      const headerSecret = req.headers.get("X-Telegram-Bot-Api-Secret-Token");
+      if (headerSecret !== telegramSecret) {
+        console.error("Invalid Telegram webhook secret token");
+        return new Response("Forbidden", { status: 403, headers: corsHeaders });
+      }
+    }
+
     const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     const update = await req.json();
 
     const message = update.message || update.channel_post;
-    if (!message) return new Response("ok", { status: 200 });
+    if (!message) return new Response("ok", { status: 200, headers: corsHeaders });
 
     const chatId = String(message.chat.id);
     const fromUserId = String(message.from?.id || "");
@@ -17,7 +32,7 @@ Deno.serve(async (req) => {
 
     const url = new URL(req.url);
     const companyId = url.searchParams.get("company");
-    if (!companyId) return new Response("Missing company", { status: 400 });
+    if (!companyId) return new Response("Missing company", { status: 400, headers: corsHeaders });
 
     // Get bot token from telegram_config
     const { data: tgConfig } = await sb
@@ -30,7 +45,7 @@ Deno.serve(async (req) => {
     const botToken = tgConfig?.bot_token;
     if (!botToken) {
       console.error("No bot token configured for company", companyId);
-      return new Response("ok", { status: 200 });
+      return new Response("ok", { status: 200, headers: corsHeaders });
     }
 
     // Find operaio by telegram_user_id
@@ -87,7 +102,7 @@ Deno.serve(async (req) => {
         `/report — Invia il report di oggi\n/cantiere — Cambia cantiere attivo\n/status — Vedi il tuo cantiere attivo\n\n` +
         (operaio?.cantieri ? `🏗️ Cantiere attivo: ${(operaio.cantieri as any).nome}` : `⚠️ Nessun cantiere assegnato. Contatta il tuo responsabile.`)
       );
-      return new Response("ok", { status: 200 });
+      return new Response("ok", { status: 200, headers: corsHeaders });
     }
 
     if (message.text === "/status") {
@@ -96,7 +111,7 @@ Deno.serve(async (req) => {
       } else {
         await sendMessage("⚠️ Nessun cantiere assegnato. Contatta il tuo responsabile.");
       }
-      return new Response("ok", { status: 200 });
+      return new Response("ok", { status: 200, headers: corsHeaders });
     }
 
     // ── VOICE MESSAGES ──
@@ -144,7 +159,7 @@ Deno.serve(async (req) => {
 
       if (!trascrizione) {
         await sendMessage("❌ Errore nella trascrizione. Riprova o scrivi il report come testo.");
-        return new Response("ok", { status: 200 });
+        return new Response("ok", { status: 200, headers: corsHeaders });
       }
 
       // Structure report with AI
@@ -165,7 +180,7 @@ Deno.serve(async (req) => {
         `✏️ /modifica [testo] — Aggiungi note\n` +
         `❌ /annulla — Annulla`
       );
-      return new Response("ok", { status: 200 });
+      return new Response("ok", { status: 200, headers: corsHeaders });
     }
 
     // ── PHOTOS ──
@@ -193,7 +208,7 @@ Deno.serve(async (req) => {
 
       await sendReaction("📸");
       await sendMessage(`📸 Foto aggiunta! (${currentFotos.length + 1} totali)\nMandane altre o /conferma per salvare.`);
-      return new Response("ok", { status: 200 });
+      return new Response("ok", { status: 200, headers: corsHeaders });
     }
 
     // ── /conferma ──
@@ -202,7 +217,7 @@ Deno.serve(async (req) => {
       const sess = session as any;
       if (!sess?.pending_report_data) {
         await sendMessage("⚠️ Nessun report in attesa. Manda prima un messaggio vocale.");
-        return new Response("ok", { status: 200 });
+        return new Response("ok", { status: 200, headers: corsHeaders });
       }
 
       const reportData = sess.pending_report_data;
@@ -239,7 +254,7 @@ Deno.serve(async (req) => {
       if (reportErr) {
         await sendMessage("❌ Errore nel salvataggio. Riprova.");
         console.error(reportErr);
-        return new Response("ok", { status: 200 });
+        return new Response("ok", { status: 200, headers: corsHeaders });
       }
 
       // Send email
@@ -266,7 +281,7 @@ Deno.serve(async (req) => {
         (emailDestinatari.length > 0 ? `📧 Email inviata a ${emailDestinatari.join(", ")}\n` : "") +
         `\n📊 Vedi il report nella dashboard`
       );
-      return new Response("ok", { status: 200 });
+      return new Response("ok", { status: 200, headers: corsHeaders });
     }
 
     // ── /annulla ──
@@ -277,7 +292,7 @@ Deno.serve(async (req) => {
         pending_foto_urls: [],
       }).eq("chat_id", chatId);
       await sendMessage("❌ Report annullato.");
-      return new Response("ok", { status: 200 });
+      return new Response("ok", { status: 200, headers: corsHeaders });
     }
 
     // ── Generic text ──
@@ -288,10 +303,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    return new Response("ok", { status: 200 });
+    return new Response("ok", { status: 200, headers: corsHeaders });
   } catch (err) {
     console.error("Telegram webhook error:", err);
-    return new Response("ok", { status: 200 });
+    return new Response("ok", { status: 200, headers: corsHeaders });
   }
 });
 

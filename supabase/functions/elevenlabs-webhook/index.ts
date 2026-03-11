@@ -183,7 +183,10 @@ Deno.serve(async (req) => {
     const { data: agentStats } = await sb.from("agents").select("calls_total, calls_month, avg_duration_sec").eq("id", agent.id).single();
     const prevTotal = agentStats?.calls_total || 0;
     const prevAvg = agentStats?.avg_duration_sec || 0;
-    const newAvg = prevTotal > 0 ? Math.round((prevAvg * prevTotal + duration_seconds) / (prevTotal + 1)) : duration_seconds;
+    // Guard against division by zero and invalid duration
+    const newAvg = (duration_seconds > 0 && prevTotal >= 0)
+      ? (prevTotal > 0 ? Math.round((prevAvg * prevTotal + duration_seconds) / (prevTotal + 1)) : Math.round(duration_seconds))
+      : prevAvg;
 
     await sb.from("agents").update({
       calls_total: prevTotal + 1,
