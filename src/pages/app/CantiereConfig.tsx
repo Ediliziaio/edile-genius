@@ -108,8 +108,9 @@ export default function CantiereConfig() {
               <Input
                 type={showToken ? "text" : "password"}
                 value={botToken}
-                onChange={e => setBotToken(e.target.value)}
+                onChange={e => { setBotToken(e.target.value); setTokenError(""); }}
                 placeholder="123456789:ABCDefGhIJKlMnOpQrStUvWxYz"
+                autoComplete="off"
               />
               <button
                 onClick={() => setShowToken(!showToken)}
