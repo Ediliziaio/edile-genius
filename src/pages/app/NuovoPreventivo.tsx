@@ -299,7 +299,7 @@ export default function NuovoPreventivo() {
     sconto_globale_percentuale: scontoGlobalePerc,
     sconto_globale_importo: scontoGlobaleImporto,
     imponibile: subtotale,
-    iva_percentuale: 22,
+    iva_percentuale: ivaPercentuale,
     luogo_lavori: luogoLavori,
     iva_importo: ivaImporto,
     totale_finale: totaleFinale,
