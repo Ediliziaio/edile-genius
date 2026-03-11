@@ -399,11 +399,11 @@ export default function AppDashboard() {
     smartActions.push({
       type: "warning",
       label: p.stato === "inviato"
-        ? `Follow-up preventivo ${p.numero || ""}`
+        ? `Follow-up preventivo ${p.numero_preventivo || ""}`
         : `Preventivo in bozza da ${daysSince}g`,
       description: p.stato === "inviato"
         ? `Inviato ${daysSince} giorni fa a ${p.cliente_nome || "cliente"} senza risposta.`
-        : `"${p.titolo || p.numero || "Senza titolo"}" per ${p.cliente_nome || "cliente"}. Invia o archivia.`,
+        : `"${p.oggetto || p.numero_preventivo || "Senza titolo"}" per ${p.cliente_nome || "cliente"}. Invia o archivia.`,
       href: `/app/preventivi/${p.id}`,
       icon: FileText,
     });
