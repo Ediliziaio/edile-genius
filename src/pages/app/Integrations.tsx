@@ -1,4 +1,4 @@
-import { Phone, MessageCircle, RefreshCw, Webhook, ArrowRight, Bot, CheckCircle2 } from "lucide-react";
+import { Phone, MessageCircle, RefreshCw, Webhook, ArrowRight, Bot, CheckCircle2, Image } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
