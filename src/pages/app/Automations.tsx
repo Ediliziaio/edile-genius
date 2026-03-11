@@ -5,7 +5,8 @@ import { toast } from "@/hooks/use-toast";
 import {
   Bot, Zap, Brain, Megaphone, CreditCard, BarChart3, UserCheck,
   RefreshCw, Settings2, Clock, ArrowRight, CheckCircle2,
-  PhoneCall, FileText, AlertTriangle, TrendingDown,
+  PhoneCall, FileText, AlertTriangle, TrendingDown, Sparkles,
+  ShieldCheck, CalendarCheck, HardHat,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -16,12 +17,13 @@ import { it } from "date-fns/locale";
 import { useState } from "react";
 import type { LucideIcon } from "lucide-react";
 
+// ── Agent Definitions ──
 interface AgentDef {
   key: string;
   label: string;
   description: string;
   icon: LucideIcon;
-  automationType: string | null; // null = always active
+  automationType: string | null;
   configFields?: { key: string; label: string; type: "number" }[];
   alwaysActive?: boolean;
   manualAction?: "recalculate";
@@ -83,6 +85,74 @@ const AGENTS: AgentDef[] = [
   },
 ];
 
+// ── Smart Actions Rule Definitions ──
+interface SmartActionRule {
+  key: string;
+  label: string;
+  description: string;
+  icon: LucideIcon;
+  thresholds?: { key: string; label: string; unit: string; default: number; min: number; max: number }[];
+}
+
+const SMART_ACTION_RULES: SmartActionRule[] = [
+  {
+    key: "credits_low",
+    label: "Crediti in esaurimento",
+    description: "Avvisa quando il saldo scende sotto la soglia.",
+    icon: CreditCard,
+    thresholds: [{ key: "credits_low_eur", label: "Soglia", unit: "€", default: 2, min: 1, max: 50 }],
+  },
+  {
+    key: "burn_rate_warning",
+    label: "Burn rate critico",
+    description: "Avvisa quando i crediti bastano per pochi giorni.",
+    icon: AlertTriangle,
+    thresholds: [{ key: "burn_rate_days", label: "Giorni minimi", unit: "gg", default: 3, min: 1, max: 14 }],
+  },
+  {
+    key: "agent_inactive",
+    label: "Agente inattivo",
+    description: "Segnala agenti senza chiamate da troppo tempo.",
+    icon: Bot,
+    thresholds: [{ key: "agent_inactive_days", label: "Giorni", unit: "gg", default: 7, min: 3, max: 30 }],
+  },
+  {
+    key: "callback_overdue",
+    label: "Callback scaduti",
+    description: "Mostra contatti con richiamata programmata non effettuata.",
+    icon: PhoneCall,
+  },
+  {
+    key: "preventivi_stale",
+    label: "Preventivi senza risposta",
+    description: "Evidenzia preventivi fermi da troppi giorni.",
+    icon: FileText,
+    thresholds: [{ key: "preventivi_stale_days", label: "Giorni", unit: "gg", default: 7, min: 3, max: 30 }],
+  },
+  {
+    key: "docs_expiring",
+    label: "Documenti in scadenza",
+    description: "Avvisa per documenti prossimi alla scadenza.",
+    icon: ShieldCheck,
+    thresholds: [{ key: "docs_expiry_days", label: "Anticipo", unit: "gg", default: 15, min: 7, max: 60 }],
+  },
+  {
+    key: "campaign_low_perf",
+    label: "Campagne sotto soglia",
+    description: "Segnala campagne con tasso appuntamenti basso.",
+    icon: Megaphone,
+    thresholds: [{ key: "campaign_min_pct", label: "% minima", unit: "%", default: 5, min: 1, max: 20 }],
+  },
+  {
+    key: "dormant_leads",
+    label: "Lead qualificati dormienti",
+    description: "Opportunità da recuperare: lead senza contatto recente.",
+    icon: CalendarCheck,
+    thresholds: [{ key: "dormant_lead_days", label: "Giorni", unit: "gg", default: 5, min: 2, max: 30 }],
+  },
+];
+
+// ── Orchestrator Log Metadata ──
 const EVENT_ICONS: Record<string, { icon: LucideIcon; color: string }> = {
   credits_critical: { icon: CreditCard, color: "text-destructive" },
   callback_overdue: { icon: PhoneCall, color: "text-yellow-600" },
@@ -107,11 +177,30 @@ const ACTION_LABELS: Record<string, string> = {
   outbound_call_failed: "Chiamata fallita",
 };
 
+// ── Defaults for smart_actions config ──
+export const SMART_ACTIONS_DEFAULTS: Record<string, boolean | number> = {
+  credits_low_enabled: true,
+  credits_low_eur: 2,
+  burn_rate_warning_enabled: true,
+  burn_rate_days: 3,
+  agent_inactive_enabled: true,
+  agent_inactive_days: 7,
+  callback_overdue_enabled: true,
+  preventivi_stale_enabled: true,
+  preventivi_stale_days: 7,
+  docs_expiring_enabled: true,
+  docs_expiry_days: 15,
+  campaign_low_perf_enabled: true,
+  campaign_min_pct: 5,
+  dormant_leads_enabled: true,
+  dormant_lead_days: 5,
+};
+
 export default function Automations() {
   const companyId = useCompanyId();
   const qc = useQueryClient();
 
-  // Fetch automations config
+  // ── Fetch automations config ──
   const { data: automations } = useQuery({
     queryKey: ["automations", companyId],
     enabled: !!companyId,
@@ -124,7 +213,28 @@ export default function Automations() {
     },
   });
 
-  // Fetch orchestrator log
+  // ── Fetch company settings (for smart_actions) ──
+  const { data: companySettings } = useQuery({
+    queryKey: ["company-settings", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("companies")
+        .select("settings")
+        .eq("id", companyId!)
+        .single();
+      return (data?.settings as Record<string, any>) || {};
+    },
+  });
+
+  const smartActionsConfig = (companySettings?.smart_actions || {}) as Record<string, any>;
+
+  const getSmartVal = (key: string): any => {
+    if (key in smartActionsConfig) return smartActionsConfig[key];
+    return SMART_ACTIONS_DEFAULTS[key];
+  };
+
+  // ── Fetch orchestrator log ──
   const { data: logEntries } = useQuery({
     queryKey: ["orchestrator-log", companyId],
     enabled: !!companyId,
@@ -139,21 +249,15 @@ export default function Automations() {
     },
   });
 
-  // Toggle automation
+  // ── Toggle automation ──
   const toggleMutation = useMutation({
     mutationFn: async ({ type, enabled }: { type: string; enabled: boolean }) => {
       const existing = automations?.find((a: any) => a.automation_type === type);
       if (existing) {
-        await supabase
-          .from("agent_automations")
-          .update({ is_enabled: enabled })
-          .eq("id", existing.id);
+        await supabase.from("agent_automations").update({ is_enabled: enabled }).eq("id", existing.id);
       } else {
         await supabase.from("agent_automations").insert({
-          company_id: companyId!,
-          automation_type: type,
-          is_enabled: enabled,
-          config: {} as any,
+          company_id: companyId!, automation_type: type, is_enabled: enabled, config: {} as any,
         } as any);
       }
     },
@@ -163,33 +267,43 @@ export default function Automations() {
     },
   });
 
-  // Update config field
+  // ── Update agent config field ──
   const updateConfig = useMutation({
     mutationFn: async ({ type, key, value }: { type: string; key: string; value: number }) => {
       const existing = automations?.find((a: any) => a.automation_type === type);
       const currentConfig = (existing?.config as Record<string, unknown>) || {};
       const newConfig = { ...currentConfig, [key]: value };
-
       if (existing) {
-        await supabase
-          .from("agent_automations")
-          .update({ config: newConfig as any })
-          .eq("id", existing.id);
+        await supabase.from("agent_automations").update({ config: newConfig as any }).eq("id", existing.id);
       } else {
         await supabase.from("agent_automations").insert({
-          company_id: companyId!,
-          automation_type: type,
-          is_enabled: false,
-          config: newConfig as any,
+          company_id: companyId!, automation_type: type, is_enabled: false, config: newConfig as any,
         } as any);
       }
     },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["automations", companyId] }),
+  });
+
+  // ── Update smart_actions in company settings ──
+  const updateSmartActions = useMutation({
+    mutationFn: async (patch: Record<string, any>) => {
+      const currentSettings = companySettings || {};
+      const currentSA = (currentSettings.smart_actions || {}) as Record<string, any>;
+      const newSA = { ...currentSA, ...patch };
+      const newSettings = { ...currentSettings, smart_actions: newSA };
+      const { error } = await supabase
+        .from("companies")
+        .update({ settings: newSettings as any })
+        .eq("id", companyId!);
+      if (error) throw error;
+    },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["automations", companyId] });
+      qc.invalidateQueries({ queryKey: ["company-settings", companyId] });
+      toast({ title: "Regola aggiornata" });
     },
   });
 
-  // Recalculate lead weights
+  // ── Recalculate lead weights ──
   const [recalculating, setRecalculating] = useState(false);
   const handleRecalculate = async () => {
     setRecalculating(true);
@@ -204,7 +318,7 @@ export default function Automations() {
     }
   };
 
-  // Run orchestrator manually
+  // ── Run orchestrator ──
   const [orchestrating, setOrchestrating] = useState(false);
   const handleRunOrchestrator = async () => {
     setOrchestrating(true);
@@ -223,9 +337,8 @@ export default function Automations() {
   };
 
   const getAutomation = (type: string) => automations?.find((a: any) => a.automation_type === type);
-  const getConfigValue = (type: string, key: string, fallback: number) => {
-    const auto = getAutomation(type);
-    const config = (auto?.config as Record<string, unknown>) || {};
+  const getAgentConfigValue = (type: string, key: string, fallback: number) => {
+    const config = (getAutomation(type)?.config as Record<string, unknown>) || {};
     return Number(config[key]) || fallback;
   };
 
@@ -236,14 +349,12 @@ export default function Automations() {
   }).length;
 
   const todayActions = logEntries?.filter((l: any) => {
-    const d = new Date(l.created_at);
-    const today = new Date();
-    return d.toDateString() === today.toDateString();
+    return new Date(l.created_at).toDateString() === new Date().toDateString();
   }).length ?? 0;
 
   return (
     <div className="space-y-8 max-w-5xl">
-      {/* Header */}
+      {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -254,38 +365,24 @@ export default function Automations() {
             {activeCount} agent{activeCount !== 1 ? "i" : "e"} attiv{activeCount !== 1 ? "i" : "o"} · {todayActions} azion{todayActions !== 1 ? "i" : "e"} oggi
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleRunOrchestrator}
-          disabled={orchestrating}
-          className="gap-2"
-        >
+        <Button variant="outline" size="sm" onClick={handleRunOrchestrator} disabled={orchestrating} className="gap-2">
           <RefreshCw className={`w-4 h-4 ${orchestrating ? "animate-spin" : ""}`} />
           Esegui ora
         </Button>
       </div>
 
-      {/* Agent Cards */}
+      {/* ── Agent Cards ── */}
       <div>
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">I tuoi agenti autonomi</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {AGENTS.map((agent) => {
             const automation = agent.automationType ? getAutomation(agent.automationType) : null;
             const isActive = agent.alwaysActive || (automation?.is_enabled ?? false);
-
             return (
-              <div
-                key={agent.key}
-                className={`rounded-xl border p-5 transition-colors ${
-                  isActive ? "border-primary/30 bg-primary/5" : "border-border bg-card"
-                }`}
-              >
+              <div key={agent.key} className={`rounded-xl border p-5 transition-colors ${isActive ? "border-primary/30 bg-primary/5" : "border-border bg-card"}`}>
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                      isActive ? "bg-primary/10" : "bg-muted"
-                    }`}>
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isActive ? "bg-primary/10" : "bg-muted"}`}>
                       <agent.icon className={`w-5 h-5 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
                     </div>
                     <div>
@@ -293,22 +390,12 @@ export default function Automations() {
                       <p className="text-xs text-muted-foreground mt-0.5">{agent.description}</p>
                     </div>
                   </div>
-
                   {agent.alwaysActive ? (
-                    <span className="text-[10px] font-semibold bg-primary/10 text-primary px-2 py-1 rounded-full whitespace-nowrap">
-                      Sempre attivo
-                    </span>
+                    <span className="text-[10px] font-semibold bg-primary/10 text-primary px-2 py-1 rounded-full whitespace-nowrap">Sempre attivo</span>
                   ) : agent.automationType ? (
-                    <Switch
-                      checked={isActive}
-                      onCheckedChange={(checked) =>
-                        toggleMutation.mutate({ type: agent.automationType!, enabled: checked })
-                      }
-                    />
+                    <Switch checked={isActive} onCheckedChange={(checked) => toggleMutation.mutate({ type: agent.automationType!, enabled: checked })} />
                   ) : null}
                 </div>
-
-                {/* Status line */}
                 {automation && (
                   <div className="flex items-center gap-3 text-[11px] text-muted-foreground mb-3">
                     {automation.last_run_at && (
@@ -320,48 +407,25 @@ export default function Automations() {
                     <span>{automation.total_actions ?? 0} azioni totali</span>
                   </div>
                 )}
-
-                {/* Config fields */}
                 {agent.configFields && agent.automationType && (
                   <div className="flex flex-wrap gap-3 mt-2">
                     {agent.configFields.map((field) => {
-                      const defaults: Record<string, number> = {
-                        dormant_days: 5, max_per_run: 10, min_conversion_rate: 3,
-                      };
-                      const val = getConfigValue(agent.automationType!, field.key, defaults[field.key] ?? 5);
+                      const defaults: Record<string, number> = { dormant_days: 5, max_per_run: 10, min_conversion_rate: 3 };
+                      const val = getAgentConfigValue(agent.automationType!, field.key, defaults[field.key] ?? 5);
                       return (
                         <div key={field.key} className="flex items-center gap-2">
                           <Settings2 className="w-3 h-3 text-muted-foreground" />
                           <span className="text-xs text-muted-foreground">{field.label}:</span>
-                          <Input
-                            type="number"
-                            className="w-16 h-7 text-xs"
-                            value={val}
-                            onChange={(e) =>
-                              updateConfig.mutate({
-                                type: agent.automationType!,
-                                key: field.key,
-                                value: Number(e.target.value),
-                              })
-                            }
-                          />
+                          <Input type="number" className="w-16 h-7 text-xs" value={val}
+                            onChange={(e) => updateConfig.mutate({ type: agent.automationType!, key: field.key, value: Number(e.target.value) })} />
                         </div>
                       );
                     })}
                   </div>
                 )}
-
-                {/* Manual action */}
                 {agent.manualAction === "recalculate" && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="mt-3 gap-2 text-xs"
-                    onClick={handleRecalculate}
-                    disabled={recalculating}
-                  >
-                    <RefreshCw className={`w-3 h-3 ${recalculating ? "animate-spin" : ""}`} />
-                    Ricalcola pesi
+                  <Button size="sm" variant="outline" className="mt-3 gap-2 text-xs" onClick={handleRecalculate} disabled={recalculating}>
+                    <RefreshCw className={`w-3 h-3 ${recalculating ? "animate-spin" : ""}`} /> Ricalcola pesi
                   </Button>
                 )}
               </div>
@@ -370,7 +434,62 @@ export default function Automations() {
         </div>
       </div>
 
-      {/* Activity log */}
+      {/* ── Smart Actions Rules ── */}
+      <div>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-primary" />
+          Regole Smart Actions
+        </h2>
+        <p className="text-xs text-muted-foreground mb-4">
+          Personalizza quali suggerimenti appaiono nella dashboard e le soglie di attivazione.
+        </p>
+        <div className="rounded-xl border border-border bg-card divide-y divide-border">
+          {SMART_ACTION_RULES.map((rule) => {
+            const enabledKey = `${rule.key}_enabled`;
+            const isEnabled = getSmartVal(enabledKey) ?? true;
+            const RuleIcon = rule.icon;
+
+            return (
+              <div key={rule.key} className="flex items-center gap-4 px-5 py-4">
+                <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                  <RuleIcon className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground">{rule.label}</p>
+                  <p className="text-xs text-muted-foreground">{rule.description}</p>
+                </div>
+                {rule.thresholds && (
+                  <div className="flex items-center gap-2 shrink-0">
+                    {rule.thresholds.map((t) => (
+                      <div key={t.key} className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          className="w-16 h-7 text-xs"
+                          min={t.min}
+                          max={t.max}
+                          value={getSmartVal(t.key) ?? t.default}
+                          disabled={!isEnabled}
+                          onChange={(e) => {
+                            const v = Math.min(t.max, Math.max(t.min, Number(e.target.value) || t.default));
+                            updateSmartActions.mutate({ [t.key]: v });
+                          }}
+                        />
+                        <span className="text-[10px] text-muted-foreground">{t.unit}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <Switch
+                  checked={isEnabled}
+                  onCheckedChange={(checked) => updateSmartActions.mutate({ [enabledKey]: checked })}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Activity log ── */}
       <div>
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Attività recente</h2>
         {logEntries && logEntries.length > 0 ? (
@@ -380,10 +499,9 @@ export default function Automations() {
                 const evtMeta = EVENT_ICONS[entry.event_type] || { icon: Zap, color: "text-muted-foreground" };
                 const EvtIcon = evtMeta.icon;
                 const details = entry.action_details || {};
-
                 return (
                   <div key={entry.id} className="flex items-center gap-4 px-4 py-3">
-                    <div className={`w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0`}>
+                    <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
                       <EvtIcon className={`w-4 h-4 ${evtMeta.color}`} />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -392,9 +510,7 @@ export default function Automations() {
                         {details.name && <span className="text-muted-foreground font-normal"> — {details.name}</span>}
                         {details.numero && <span className="text-muted-foreground font-normal"> #{details.numero}</span>}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        {ACTION_LABELS[entry.action_taken] || entry.action_taken}
-                      </p>
+                      <p className="text-xs text-muted-foreground">{ACTION_LABELS[entry.action_taken] || entry.action_taken}</p>
                     </div>
                     <span className="text-[11px] text-muted-foreground whitespace-nowrap">
                       {format(new Date(entry.created_at), "d MMM HH:mm", { locale: it })}
