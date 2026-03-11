@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,75 +6,91 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { ImpersonationProvider } from "@/context/ImpersonationContext";
+import ScrollToTop from "./components/ScrollToTop";
+import { Loader2 } from "lucide-react";
+
+// Eagerly loaded (landing + auth)
 import Index from "./pages/Index";
-import Solutions from "./pages/Solutions";
-import ChiSiamo from "./pages/ChiSiamo";
-import ComeFunziona from "./pages/ComeFunziona";
-import Garanzia from "./pages/Garanzia";
-import Tariffe from "./pages/Tariffe";
-import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import NotFound from "./pages/NotFound";
 import AuthGuard from "./components/auth/AuthGuard";
-import ScrollToTop from "./components/ScrollToTop";
 import Shell from "./components/layout/Shell";
-import SuperAdminDashboard from "./pages/superadmin/Dashboard";
-import Companies from "./pages/superadmin/Companies";
-import CreateCompany from "./pages/superadmin/CreateCompany";
-import AppDashboard from "./pages/app/Dashboard";
-import AgentsPage from "./pages/app/Agents";
-import AgentTemplateWizard from "./pages/app/AgentTemplateWizard";
-import CreateAgent from "./pages/app/CreateAgent";
-import AgentDetail from "./pages/app/AgentDetail";
-import ConversationsPage from "./pages/app/Conversations";
-import AnalyticsPage from "./pages/app/Analytics";
-import CompanyDetail from "./pages/superadmin/CompanyDetail";
-import SettingsPage from "./pages/app/Settings";
-import ContactsPage from "./pages/app/Contacts";
-import ContactDetailPage from "./pages/app/ContactDetail";
-import ContactListsPage from "./pages/app/ContactLists";
-import CampaignsPage from "./pages/app/Campaigns";
-import ImportContactsPage from "./pages/app/ImportContacts";
-import CreateCampaignPage from "./pages/app/CreateCampaign";
-import CampaignDetailPage from "./pages/app/CampaignDetail";
-import ContactListDetailPage from "./pages/app/ContactListDetail";
-import CreditsPage from "./pages/app/Credits";
-import PhoneNumbersPage from "./pages/app/PhoneNumbers";
-import BuyPhoneNumberPage from "./pages/app/BuyPhoneNumber";
-import KnowledgeBasePage from "./pages/app/KnowledgeBase";
-import TemplatesPage from "./pages/app/Templates";
-import TemplateDetailPage from "./pages/app/TemplateDetail";
-import TemplateSetupPage from "./pages/app/TemplateSetup";
-import TeamPage from "./pages/superadmin/Team";
-import SASettingsPage from "./pages/superadmin/SASettings";
-import GlobalAnalyticsPage from "./pages/superadmin/GlobalAnalytics";
-import ApiKeysPage from "./pages/superadmin/ApiKeys";
-import SystemLogsPage from "./pages/superadmin/SystemLogs";
-import PlatformSettingsPage from "./pages/superadmin/PlatformSettings";
-import SATemplatesPage from "./pages/superadmin/Templates";
-import WhatsAppPage from "./pages/app/WhatsApp";
-import WhatsAppAdminPage from "./pages/superadmin/WhatsAppAdmin";
-import RenderHub from "./pages/app/RenderHub";
-import RenderNew from "./pages/app/RenderNew";
-import RenderGallery from "./pages/app/RenderGallery";
-import RenderGalleryDetail from "./pages/app/RenderGalleryDetail";
-import RenderConfig from "./pages/superadmin/RenderConfig";
-import PerChiE from "./pages/PerChiE";
-import PerChiEDetail from "./pages/PerChiEDetail";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
-import CantierePage from "./pages/app/Cantieri";
-import CantiereDetail from "./pages/app/CantiereDetail";
-import CantiereConfig from "./pages/app/CantiereConfig";
-import PreventiviList from "./pages/app/PreventiviList";
-import NuovoPreventivo from "./pages/app/NuovoPreventivo";
-import PreventivoDetail from "./pages/app/PreventivoDetail";
-import DocumentiScadenze from "./pages/app/DocumentiScadenze";
-import FoglioPresenze from "./pages/app/FoglioPresenze";
-import TemplatePreventivo from "./pages/app/TemplatePreventivo";
-import Integrations from "./pages/app/Integrations";
+
+// Lazy-loaded marketing pages
+const Solutions = lazy(() => import("./pages/Solutions"));
+const ChiSiamo = lazy(() => import("./pages/ChiSiamo"));
+const ComeFunziona = lazy(() => import("./pages/ComeFunziona"));
+const Garanzia = lazy(() => import("./pages/Garanzia"));
+const Tariffe = lazy(() => import("./pages/Tariffe"));
+const PerChiE = lazy(() => import("./pages/PerChiE"));
+const PerChiEDetail = lazy(() => import("./pages/PerChiEDetail"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
+
+// Lazy-loaded SuperAdmin pages
+const SuperAdminDashboard = lazy(() => import("./pages/superadmin/Dashboard"));
+const Companies = lazy(() => import("./pages/superadmin/Companies"));
+const CreateCompany = lazy(() => import("./pages/superadmin/CreateCompany"));
+const CompanyDetail = lazy(() => import("./pages/superadmin/CompanyDetail"));
+const WhatsAppAdminPage = lazy(() => import("./pages/superadmin/WhatsAppAdmin"));
+const SATemplatesPage = lazy(() => import("./pages/superadmin/Templates"));
+const TeamPage = lazy(() => import("./pages/superadmin/Team"));
+const SASettingsPage = lazy(() => import("./pages/superadmin/SASettings"));
+const GlobalAnalyticsPage = lazy(() => import("./pages/superadmin/GlobalAnalytics"));
+const ApiKeysPage = lazy(() => import("./pages/superadmin/ApiKeys"));
+const SystemLogsPage = lazy(() => import("./pages/superadmin/SystemLogs"));
+const PlatformSettingsPage = lazy(() => import("./pages/superadmin/PlatformSettings"));
+const RenderConfig = lazy(() => import("./pages/superadmin/RenderConfig"));
+
+// Lazy-loaded Company pages
+const AppDashboard = lazy(() => import("./pages/app/Dashboard"));
+const AgentsPage = lazy(() => import("./pages/app/Agents"));
+const AgentTemplateWizard = lazy(() => import("./pages/app/AgentTemplateWizard"));
+const CreateAgent = lazy(() => import("./pages/app/CreateAgent"));
+const AgentDetail = lazy(() => import("./pages/app/AgentDetail"));
+const ConversationsPage = lazy(() => import("./pages/app/Conversations"));
+const AnalyticsPage = lazy(() => import("./pages/app/Analytics"));
+const SettingsPage = lazy(() => import("./pages/app/Settings"));
+const ContactsPage = lazy(() => import("./pages/app/Contacts"));
+const ContactDetailPage = lazy(() => import("./pages/app/ContactDetail"));
+const ContactListsPage = lazy(() => import("./pages/app/ContactLists"));
+const CampaignsPage = lazy(() => import("./pages/app/Campaigns"));
+const ImportContactsPage = lazy(() => import("./pages/app/ImportContacts"));
+const CreateCampaignPage = lazy(() => import("./pages/app/CreateCampaign"));
+const CampaignDetailPage = lazy(() => import("./pages/app/CampaignDetail"));
+const ContactListDetailPage = lazy(() => import("./pages/app/ContactListDetail"));
+const CreditsPage = lazy(() => import("./pages/app/Credits"));
+const PhoneNumbersPage = lazy(() => import("./pages/app/PhoneNumbers"));
+const BuyPhoneNumberPage = lazy(() => import("./pages/app/BuyPhoneNumber"));
+const KnowledgeBasePage = lazy(() => import("./pages/app/KnowledgeBase"));
+const TemplatesPage = lazy(() => import("./pages/app/Templates"));
+const TemplateDetailPage = lazy(() => import("./pages/app/TemplateDetail"));
+const TemplateSetupPage = lazy(() => import("./pages/app/TemplateSetup"));
+const WhatsAppPage = lazy(() => import("./pages/app/WhatsApp"));
+const RenderHub = lazy(() => import("./pages/app/RenderHub"));
+const RenderNew = lazy(() => import("./pages/app/RenderNew"));
+const RenderGallery = lazy(() => import("./pages/app/RenderGallery"));
+const RenderGalleryDetail = lazy(() => import("./pages/app/RenderGalleryDetail"));
+const CantierePage = lazy(() => import("./pages/app/Cantieri"));
+const CantiereDetail = lazy(() => import("./pages/app/CantiereDetail"));
+const CantiereConfig = lazy(() => import("./pages/app/CantiereConfig"));
+const PreventiviList = lazy(() => import("./pages/app/PreventiviList"));
+const NuovoPreventivo = lazy(() => import("./pages/app/NuovoPreventivo"));
+const PreventivoDetail = lazy(() => import("./pages/app/PreventivoDetail"));
+const DocumentiScadenze = lazy(() => import("./pages/app/DocumentiScadenze"));
+const FoglioPresenze = lazy(() => import("./pages/app/FoglioPresenze"));
+const TemplatePreventivo = lazy(() => import("./pages/app/TemplatePreventivo"));
+const Integrations = lazy(() => import("./pages/app/Integrations"));
+
+const PageLoader = () => (
+  <div className="flex items-center justify-center h-screen">
+    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+  </div>
+);
 
 const queryClient = new QueryClient();
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -83,6 +100,7 @@ const App = () => (
         <ScrollToTop />
         <AuthProvider>
           <ImpersonationProvider>
+          <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/soluzioni" element={<Solutions />} />
@@ -162,6 +180,7 @@ const App = () => (
 
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
           </ImpersonationProvider>
         </AuthProvider>
       </BrowserRouter>
