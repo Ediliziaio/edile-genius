@@ -238,7 +238,9 @@ export default function AppDashboard() {
     enabled: !!companyId,
     staleTime: 1000 * 60 * 30, // cache 30 min
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("ai-morning-briefing");
+      const { data, error } = await supabase.functions.invoke("ai-morning-briefing", {
+        body: { company_id: companyId },
+      });
       if (error) throw error;
       return data as BriefingData;
     },
