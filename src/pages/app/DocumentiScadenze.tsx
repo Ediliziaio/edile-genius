@@ -211,7 +211,7 @@ export default function DocumentiScadenze() {
                         <Badge className={sb.class}>{doc.stato}</Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {doc.cantiere_operai ? `${doc.cantiere_operai.nome} ${doc.cantiere_operai.cognome || ""}` : "Azienda"} · 
+                        {doc.cantiere_operai ? `${doc.cantiere_operai?.nome || ""} ${doc.cantiere_operai?.cognome || ""}`.trim() : "Azienda"} · 
                         Scade: {new Date(doc.data_scadenza).toLocaleDateString("it-IT")}
                         {days > 0 ? ` (${days}gg)` : days === 0 ? " (OGGI)" : ` (${Math.abs(days)}gg fa)`}
                       </p>

@@ -153,11 +153,11 @@ async function processCompany(sb: any, companyId: string, rid: string) {
   // Credits critical
   const balance = Number(creditsRes.data?.balance_eur ?? 0);
   const usageData = usageRes.data || [];
-  if (usageData.length > 0) {
+  if (usageData.length >= 2) {
     const totalUsage = usageData.reduce((s: number, u: any) => s + Number(u.cost_billed_total || 0), 0);
     const dates = usageData.map((u: any) => new Date(u.created_at).getTime());
-    const daySpan = Math.max(1, (Math.max(...dates) - Math.min(...dates)) / (24 * 60 * 60 * 1000));
-    const burnRate = totalUsage / daySpan;
+    const daySpan = (Math.max(...dates) - Math.min(...dates)) / (24 * 60 * 60 * 1000);
+    const burnRate = daySpan > 0 ? totalUsage / daySpan : 0;
     const daysLeft = burnRate > 0 ? Math.floor(balance / burnRate) : 999;
 
     if (creditsRes.data?.calls_blocked || daysLeft <= 3) {
