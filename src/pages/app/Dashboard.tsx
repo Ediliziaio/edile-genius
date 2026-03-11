@@ -200,7 +200,7 @@ export default function AppDashboard() {
       </div>
 
       {/* ═══ ZONA B — 4 KPI Cards (only when has agents) ═══ */}
-      {hasAgents && (
+      {(
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Agenti Attivi */}
           <KpiCard
@@ -341,7 +341,7 @@ export default function AppDashboard() {
       ) : null}
 
       {/* ═══ ZONA D — Risultati del Mese ═══ */}
-      {hasAgents && monthTotal > 0 && (
+      {(
         <div>
           <h2 className="text-lg font-semibold text-foreground mb-4">Risultati del mese</h2>
           <div className="flex flex-wrap gap-3">
@@ -354,16 +354,6 @@ export default function AppDashboard() {
         </div>
       )}
 
-      {hasAgents && monthTotal === 0 && (
-        <div className="rounded-xl border border-border bg-card p-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            I tuoi agenti non hanno ancora gestito interazioni questo mese. Verifica che siano attivi.
-          </p>
-          <Link to="/app/agents" className="text-xs text-primary hover:underline mt-2 inline-block">
-            Vedi agenti →
-          </Link>
-        </div>
-      )}
 
       {/* ═══ ZONA E — Attività Recente ═══ */}
       {conversations && conversations.length > 0 && (
