@@ -102,14 +102,29 @@ export default function AnalyticsPage() {
           <BarChart3 className="w-6 h-6 text-brand" />
           <h1 className="text-2xl font-bold text-ink-900">Analytics</h1>
         </div>
-        <div className="flex gap-1 rounded-btn p-1 bg-ink-100">
-          {RANGES.map(r => (
-            <button key={r.days} onClick={() => setRangeDays(r.days)} className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${rangeDays === r.days ? "bg-brand-light text-brand-text" : "text-ink-500 hover:text-ink-700"}`}>
-              {r.label}
-            </button>
-          ))}
+        <div className="flex gap-3 items-center">
+          <Select value={agentFilter} onValueChange={setAgentFilter}>
+            <SelectTrigger className="w-[200px] bg-white border-ink-200 text-ink-900 text-xs"><SelectValue placeholder="Tutti gli agenti" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tutti gli agenti</SelectItem>
+              {agents.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <div className="flex gap-1 rounded-btn p-1 bg-ink-100">
+            {RANGES.map(r => (
+              <button key={r.days} onClick={() => setRangeDays(r.days)} className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${rangeDays === r.days ? "bg-brand-light text-brand-text" : "text-ink-500 hover:text-ink-700"}`}>
+                {r.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
+
+      {isTruncated && (
+        <div className="flex items-center gap-2 px-4 py-2 rounded-card bg-status-warning-light border border-status-warning/20 text-sm text-status-warning">
+          <AlertTriangle className="w-4 h-4 shrink-0" /> Mostrando solo gli ultimi 1.000 record.
+        </div>
+      )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statCards.map(s => (
