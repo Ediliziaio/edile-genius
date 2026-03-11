@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
 import { useQuery } from "@tanstack/react-query";
@@ -20,8 +20,10 @@ const UNITS = ["mq", "ml", "mc", "nr", "ore", "forfait", "kg", "cad"];
 export default function NuovoPreventivo() {
   const companyId = useCompanyId();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [step, setStep] = useState(1);
   const [processing, setProcessing] = useState(false);
+  const [step1Errors, setStep1Errors] = useState<Record<string, string>>({});
 
   // Step 1 — Client data
   const [clienteNome, setClienteNome] = useState("");
@@ -50,6 +52,20 @@ export default function NuovoPreventivo() {
   const [noteGenerali, setNoteGenerali] = useState("");
   const [tempiEsecuzione, setTempiEsecuzione] = useState("");
   const [preventivoId, setPreventivoId] = useState<string | null>(null);
+  const dirtyRef = useRef(false);
+
+  // Pre-populate cantiere from URL params
+  useEffect(() => {
+    const paramCantiereId = searchParams.get("cantiere_id");
+    if (paramCantiereId) setCantiereId(paramCantiereId);
+  }, [searchParams]);
+
+  // Mark dirty when voci change (after initial load)
+  useEffect(() => {
+    if (voci.length > 0) dirtyRef.current = true;
+  }, [voci]);
+
+  // Auto-save effect is placed after templateConfig query below
 
   const { data: cantieri } = useQuery({
     queryKey: ["cantieri-select", companyId],
@@ -83,6 +99,26 @@ export default function NuovoPreventivo() {
       return data;
     },
   });
+
+  // Auto-save every 30s if dirty and has an ID
+  useEffect(() => {
+    if (!preventivoId) return;
+    const interval = setInterval(async () => {
+      if (!dirtyRef.current) return;
+      dirtyRef.current = false;
+      const sub = Number(voci.reduce((s, v) => s + v.totale, 0).toFixed(2));
+      const sGlob = Number((sub * (scontoGlobalePerc / 100)).toFixed(2));
+      const imp = Number((sub - sGlob).toFixed(2));
+      const ivaP = templateConfig?.iva_percentuale_default || 22;
+      const ivaI = Number((imp * (ivaP / 100)).toFixed(2));
+      const tot = Number((imp + ivaI).toFixed(2));
+      const { error } = await (supabase.from("preventivi") as any)
+        .update({ voci, subtotale: sub, imponibile: imp, iva_importo: ivaI, totale: tot, totale_finale: tot, note: noteGenerali, oggetto, titolo })
+        .eq("id", preventivoId);
+      if (!error) toast.success("Bozza salvata automaticamente", { duration: 2000 });
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, [preventivoId, voci, scontoGlobalePerc, noteGenerali, oggetto, titolo, templateConfig]);
 
   // Audio recording
   const startRecording = async () => {
@@ -339,8 +375,9 @@ export default function NuovoPreventivo() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Nome / Ragione Sociale</Label>
-                  <Input placeholder="Mario Rossi" value={clienteNome} onChange={e => setClienteNome(e.target.value)} />
+                  <Label>Nome / Ragione Sociale *</Label>
+                  <Input placeholder="Mario Rossi" value={clienteNome} onChange={e => setClienteNome(e.target.value)} className={step1Errors.clienteNome ? "border-destructive" : ""} />
+                  {step1Errors.clienteNome && <p className="text-xs text-destructive">{step1Errors.clienteNome}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label>Telefono</Label>
@@ -348,7 +385,8 @@ export default function NuovoPreventivo() {
                 </div>
                 <div className="space-y-2">
                   <Label>Email</Label>
-                  <Input placeholder="mario@email.it" value={clienteEmail} onChange={e => setClienteEmail(e.target.value)} />
+                  <Input placeholder="mario@email.it" value={clienteEmail} onChange={e => setClienteEmail(e.target.value)} className={step1Errors.clienteEmail ? "border-destructive" : ""} />
+                  {step1Errors.clienteEmail && <p className="text-xs text-destructive">{step1Errors.clienteEmail}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label>Indirizzo</Label>
@@ -397,7 +435,17 @@ export default function NuovoPreventivo() {
             </CardContent>
           </Card>
 
-          <Button onClick={() => setStep(2)} className="w-full gap-2" size="lg">
+          <Button
+            onClick={() => {
+              const errors: Record<string, string> = {};
+              if (!clienteNome.trim()) errors.clienteNome = "Il nome cliente è obbligatorio";
+              if (clienteEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clienteEmail)) errors.clienteEmail = "Formato email non valido";
+              setStep1Errors(errors);
+              if (Object.keys(errors).length === 0) setStep(2);
+            }}
+            className="w-full gap-2"
+            size="lg"
+          >
             Avanti <ArrowRight className="h-4 w-4" />
           </Button>
         </div>

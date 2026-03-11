@@ -94,8 +94,19 @@ export default function TemplatePreventivo() {
     }
   }, [existing]);
 
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
   const saveMutation = useMutation({
     mutationFn: async () => {
+      // Validate required fields
+      const errors: Record<string, string> = {};
+      if (!form.azienda_nome.trim()) errors.azienda_nome = "Il nome azienda è obbligatorio";
+      if (!form.azienda_piva.trim()) errors.azienda_piva = "La P.IVA è obbligatoria";
+      if (Object.keys(errors).length > 0) {
+        setValidationErrors(errors);
+        throw new Error("Compila i campi obbligatori");
+      }
+      setValidationErrors({});
       if (existing) {
         const { error } = await (supabase.from("preventivo_templates") as any)
           .update({ ...form, updated_at: new Date().toISOString() })
@@ -117,7 +128,12 @@ export default function TemplatePreventivo() {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !companyId) return;
-    const path = `${companyId}/logo-${Date.now()}.${file.name.split(".").pop()}`;
+    const allowedTypes = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Tipo file non supportato. Usa PNG, JPEG, WebP o SVG.");
+      return;
+    }
+    const path = `${companyId}/logo-${crypto.randomUUID()}.${file.name.split(".").pop()}`;
     const { error } = await supabase.storage.from("template-assets").upload(path, file, { upsert: true });
     if (error) { toast.error(error.message); return; }
     const { data: urlData } = supabase.storage.from("template-assets").getPublicUrl(path);
@@ -159,8 +175,9 @@ export default function TemplatePreventivo() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Nome Azienda</Label>
-                  <Input value={form.azienda_nome} onChange={e => update("azienda_nome", e.target.value)} placeholder="Impresa Edile Rossi S.r.l." />
+                  <Label>Nome Azienda *</Label>
+                  <Input value={form.azienda_nome} onChange={e => update("azienda_nome", e.target.value)} placeholder="Impresa Edile Rossi S.r.l." className={validationErrors.azienda_nome ? "border-destructive" : ""} />
+                  {validationErrors.azienda_nome && <p className="text-xs text-destructive">{validationErrors.azienda_nome}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label>Telefono</Label>
@@ -179,8 +196,9 @@ export default function TemplatePreventivo() {
                   <Input value={form.azienda_sito} onChange={e => update("azienda_sito", e.target.value)} placeholder="www.impresarossi.it" />
                 </div>
                 <div className="space-y-2">
-                  <Label>P.IVA</Label>
-                  <Input value={form.azienda_piva} onChange={e => update("azienda_piva", e.target.value)} placeholder="IT12345678901" />
+                  <Label>P.IVA *</Label>
+                  <Input value={form.azienda_piva} onChange={e => update("azienda_piva", e.target.value)} placeholder="IT12345678901" className={validationErrors.azienda_piva ? "border-destructive" : ""} />
+                  {validationErrors.azienda_piva && <p className="text-xs text-destructive">{validationErrors.azienda_piva}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label>Codice Fiscale</Label>
@@ -210,7 +228,7 @@ export default function TemplatePreventivo() {
                 </div>
               )}
               <div className="relative">
-                <input type="file" accept="image/*" onChange={handleLogoUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={handleLogoUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
                 <Button variant="outline" className="gap-2 w-full">
                   <Upload className="h-4 w-4" /> {form.logo_url ? "Cambia Logo" : "Carica Logo"}
                 </Button>

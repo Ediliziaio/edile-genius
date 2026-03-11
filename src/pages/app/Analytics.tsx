@@ -2,7 +2,8 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
-import { BarChart3, Phone, Clock, TrendingUp, Target, AlertTriangle, LineChart as LineChartIcon } from "lucide-react";
+import { BarChart3, Phone, Clock, TrendingUp, Target, AlertTriangle, LineChart as LineChartIcon, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { subDays, format, startOfDay, isAfter, parseISO } from "date-fns";
 import { it } from "date-fns/locale";
@@ -103,6 +104,25 @@ export default function AnalyticsPage() {
           <h1 className="text-2xl font-bold text-ink-900">Analytics</h1>
         </div>
         <div className="flex gap-3 items-center">
+          <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={() => {
+            const rows = filtered.map(c => ({
+              data: c.started_at ? format(parseISO(c.started_at), "dd/MM/yyyy HH:mm") : "",
+              agente: agentMap[c.agent_id] || c.agent_id?.slice(0, 8) || "",
+              durata_sec: c.duration_sec || 0,
+              esito: c.outcome || "",
+              sentiment: c.sentiment || "",
+            }));
+            const header = "Data,Agente,Durata (s),Esito,Sentiment";
+            const escape = (v: any) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+            const csv = [header, ...rows.map(r => [escape(r.data), escape(r.agente), r.durata_sec, escape(r.esito), escape(r.sentiment)].join(","))].join("\n");
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url; a.download = `analytics-${rangeDays}gg.csv`;
+            a.click(); URL.revokeObjectURL(url);
+          }}>
+            <Download className="w-3.5 h-3.5" /> Esporta CSV
+          </Button>
           <Select value={agentFilter} onValueChange={setAgentFilter}>
             <SelectTrigger className="w-[200px] bg-white border-ink-200 text-ink-900 text-xs"><SelectValue placeholder="Tutti gli agenti" /></SelectTrigger>
             <SelectContent>

@@ -10,13 +10,15 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { HardHat, MapPin, Calendar, UserPlus, Send, FileText, AlertTriangle, Image, Target, Plus, Trash2 } from "lucide-react";
+import { HardHat, MapPin, Calendar, UserPlus, Send, FileText, AlertTriangle, Image, Target, Plus, Trash2, Receipt } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import ReportDetailModal from "@/components/cantieri/ReportDetailModal";
 
 export default function CantiereDetail() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [cantiere, setCantiere] = useState<any>(null);
   const [reports, setReports] = useState<any[]>([]);
   const [operai, setOperai] = useState<any[]>([]);
@@ -93,7 +95,7 @@ export default function CantiereDetail() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-3 mb-1">
             <HardHat className="h-6 w-6 text-primary" />
@@ -107,6 +109,9 @@ export default function CantiereDetail() {
             {cantiere.committente && <span>Committente: {cantiere.committente}</span>}
           </div>
         </div>
+        <Button variant="outline" className="gap-2" onClick={() => navigate(`/app/preventivi/nuovo?cantiere_id=${id}`)}>
+          <Receipt className="h-4 w-4" /> Nuovo preventivo
+        </Button>
       </div>
 
       <Tabs defaultValue="report">

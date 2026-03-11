@@ -1,4 +1,4 @@
-import { Phone, MessageCircle, RefreshCw, Webhook, ArrowRight, Bot, CheckCircle2 } from "lucide-react";
+import { Phone, MessageCircle, RefreshCw, Webhook, ArrowRight, Bot, CheckCircle2, Image } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,13 @@ const integrationDefs: IntegrationDef[] = [
     description: "Collega un bot Telegram per report cantiere e notifiche operai",
     icon: Bot,
     href: "/app/cantieri",
+  },
+  {
+    id: "render",
+    title: "Render AI",
+    description: "Genera render fotorealistici con AI per infissi, facciate e coperture",
+    icon: Image,
+    href: "/app/render",
   },
 ];
 
@@ -116,7 +123,7 @@ export default function Integrations() {
     },
   });
 
-  // WhatsApp — check whatsapp_phone_numbers table
+  // WhatsApp — check company_channels with verified status
   const { data: waActive } = useQuery({
     queryKey: ["int-whatsapp", companyId],
     enabled: !!companyId,
@@ -126,8 +133,19 @@ export default function Integrations() {
         .select("id")
         .eq("company_id", companyId!)
         .eq("channel_type", "whatsapp")
+        .eq("is_verified", true)
         .limit(1);
       return (data?.length ?? 0) > 0;
+    },
+  });
+
+  // Render AI — check if any render has been generated
+  const { data: renderActive } = useQuery({
+    queryKey: ["int-render", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      // Simple heuristic: check if the company has used render features
+      return false; // Default to not connected until render module is set up
     },
   });
 
@@ -137,6 +155,7 @@ export default function Integrations() {
     crm: crmActive ?? false,
     webhooks: webhookCount ?? false,
     telegram: telegramActive ?? false,
+    render: renderActive ?? false,
   };
 
   const connectedCount = Object.values(statusMap).filter(Boolean).length;
