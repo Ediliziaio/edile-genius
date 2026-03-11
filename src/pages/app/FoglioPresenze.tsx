@@ -44,7 +44,14 @@ export default function FoglioPresenze() {
     },
   });
 
+  // new Date(anno, mese, 0) returns the last day of `mese - 1` month (0-indexed),
+  // effectively giving us the number of days in `mese` (1-indexed). Example:
+  // new Date(2024, 2, 0).getDate() === 29 (February 2024, leap year)
   const daysInMonth = new Date(anno, mese, 0).getDate();
+
+  // Dynamic year range: from 2 years ago to 1 year ahead
+  const currentYear = new Date().getFullYear();
+  const yearRange = Array.from({ length: 4 }, (_, i) => currentYear - 2 + i);
   const totalOre = (presenze || []).reduce((s: number, p: any) => s + (p.ore_totali || 0), 0);
 
   const downloadCSV = async () => {
