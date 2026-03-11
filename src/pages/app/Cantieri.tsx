@@ -148,6 +148,22 @@ export default function CantierePage() {
     fetchCantieri();
   };
 
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const { error } = await (supabase.from("cantieri") as any).delete().eq("id", deleteTarget.id);
+      if (error) throw error;
+      toast.success("Cantiere eliminato");
+      setDeleteTarget(null);
+      fetchCantieri();
+    } catch (err: any) {
+      toast.error(`Errore: ${err.message}`);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
