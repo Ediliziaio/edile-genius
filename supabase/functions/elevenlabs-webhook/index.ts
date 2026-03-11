@@ -196,18 +196,16 @@ Deno.serve(async (req) => {
       last_call_at: new Date().toISOString(),
     }).eq("id", agent.id);
 
-    // 10. Handle low/zero balance
-    if (balanceAfter <= 0) {
-      await sb.from("ai_credits").update({
-        calls_blocked: true, blocked_at: new Date().toISOString(), blocked_reason: "balance_zero",
-      }).eq("company_id", agent.company_id);
+    // 10. Handle low/zero balance (blocking already handled atomically in RPC)
+    if (wasBlocked) {
       log("warn", "Balance zero — calls blocked", { request_id: rid, company_id: agent.company_id });
-    } else if (credits?.auto_recharge_enabled && balanceAfter <= Number(credits?.auto_recharge_threshold || 5)) {
+    }
+    
+    // Auto-recharge if enabled and balance is low
+    if (!wasBlocked && credits?.auto_recharge_enabled && balanceAfter <= Number(credits?.auto_recharge_threshold || 5)) {
       const rechargeAmount = Number(credits?.auto_recharge_amount || 20);
-      await sb.from("ai_credits").update({
-        balance_eur: Number((balanceAfter + rechargeAmount).toFixed(4)),
-        total_recharged_eur: Number((Number(credits?.total_recharged_eur || 0) + rechargeAmount).toFixed(4)),
-      }).eq("company_id", agent.company_id);
+      // Use topup_credits RPC for atomic recharge
+      await sb.rpc("topup_credits", { _company_id: agent.company_id, _amount_eur: rechargeAmount });
       await sb.from("ai_credit_topups").insert({
         company_id: agent.company_id, amount_eur: rechargeAmount, type: "auto", status: "completed",
         payment_method: credits?.auto_recharge_method || "card",
@@ -215,7 +213,7 @@ Deno.serve(async (req) => {
         processed_at: new Date().toISOString(),
       });
       log("info", "Auto-recharge triggered", { request_id: rid, company_id: agent.company_id, amount: rechargeAmount });
-    } else if (balanceAfter <= Number(credits?.alert_threshold_eur || 5)) {
+    } else if (!wasBlocked && balanceAfter <= Number(credits?.alert_threshold_eur || 5)) {
       await sb.from("ai_credits").update({ alert_email_sent_at: new Date().toISOString() }).eq("company_id", agent.company_id);
     }
 
