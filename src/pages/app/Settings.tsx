@@ -385,6 +385,9 @@ export default function Settings() {
               {savingProfile ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
               Salva profilo
             </Button>
+
+            <Separator className="my-4" />
+            <PasswordChangeForm />
           </div>
         </TabsContent>
 
