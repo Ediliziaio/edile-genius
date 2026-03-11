@@ -80,19 +80,40 @@ export default function CampaignDetailPage() {
   const handleAction = async (action: "start" | "pause" | "cancel") => {
     setActing(true);
     try {
-      const updates: Record<string, any> = {};
       if (action === "start") {
-        updates.status = "active";
-        if (!campaign?.started_at) updates.started_at = new Date().toISOString();
+        // 1. Populate contacts from list
+        const { data: popResult, error: popErr } = await supabase.functions.invoke("run-campaign-batch", {
+          body: { campaign_id: id, action: "populate" },
+        });
+        if (popErr) throw new Error(popErr.message || "Populate failed");
+        if (popResult?.error) throw new Error(popResult.error);
+
+        // 2. Update status to active
+        await supabase.from("campaigns").update({
+          status: "active",
+          started_at: campaign?.started_at || new Date().toISOString(),
+        }).eq("id", id!);
+
+        // 3. Run first batch
+        const { data: batchResult, error: batchErr } = await supabase.functions.invoke("run-campaign-batch", {
+          body: { campaign_id: id, action: "run_batch" },
+        });
+        if (batchErr) console.warn("Batch error (non-blocking):", batchErr);
+
+        toast({
+          title: "Campagna avviata",
+          description: `${popResult?.populated || 0} contatti caricati, ${batchResult?.calls_initiated || 0} chiamate iniziate`,
+        });
       } else if (action === "pause") {
-        updates.status = "paused";
+        await supabase.from("campaigns").update({ status: "paused" }).eq("id", id!);
+        toast({ title: "Campagna in pausa" });
       } else if (action === "cancel") {
-        updates.status = "cancelled";
-        updates.completed_at = new Date().toISOString();
+        await supabase.from("campaigns").update({
+          status: "cancelled",
+          completed_at: new Date().toISOString(),
+        }).eq("id", id!);
+        toast({ title: "Campagna annullata" });
       }
-      const { error } = await supabase.from("campaigns").update(updates).eq("id", id!);
-      if (error) throw error;
-      toast({ title: action === "start" ? "Campagna avviata" : action === "pause" ? "Campagna in pausa" : "Campagna annullata" });
       setConfirmAction(null);
       invalidate();
     } catch (err: any) {
