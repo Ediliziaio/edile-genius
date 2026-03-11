@@ -56,8 +56,24 @@ export default function AnalyticsPage() {
   const callsOverTime = useMemo(() => {
     const buckets: Record<string, number> = {};
     for (let i = rangeDays - 1; i >= 0; i--) buckets[format(subDays(new Date(), i), "yyyy-MM-dd")] = 0;
-    filtered.forEach(c => { if (c.started_at) { const day = format(new Date(c.started_at), "yyyy-MM-dd"); if (day in buckets) buckets[day]++; } });
+    filtered.forEach(c => { if (c.started_at) { const day = format(parseISO(c.started_at), "yyyy-MM-dd"); if (day in buckets) buckets[day]++; } });
     return Object.entries(buckets).map(([date, count]) => ({ date: format(new Date(date), "dd/MM", { locale: it }), chiamate: count }));
+  }, [filtered, rangeDays]);
+
+  // Average duration over time chart
+  const durationOverTime = useMemo(() => {
+    const buckets: Record<string, { total: number; count: number }> = {};
+    for (let i = rangeDays - 1; i >= 0; i--) buckets[format(subDays(new Date(), i), "yyyy-MM-dd")] = { total: 0, count: 0 };
+    filtered.forEach(c => {
+      if (c.started_at && c.duration_sec) {
+        const day = format(parseISO(c.started_at), "yyyy-MM-dd");
+        if (day in buckets) { buckets[day].total += c.duration_sec; buckets[day].count++; }
+      }
+    });
+    return Object.entries(buckets).map(([date, v]) => ({
+      date: format(new Date(date), "dd/MM", { locale: it }),
+      durata_media: v.count > 0 ? Math.round(v.total / v.count) : 0,
+    }));
   }, [filtered, rangeDays]);
 
   const outcomeData = useMemo(() => {
