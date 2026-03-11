@@ -51,20 +51,39 @@ export default function AgentOutboundTab({ agentId, companyId, outboundEnabled, 
     finally { setToggling(false); }
   };
 
+  const validateE164 = (num: string): boolean => /^\+[1-9]\d{6,14}$/.test(num.replace(/\s/g, ""));
+
+  const handleNumberChange = (val: string) => {
+    setToNumber(val);
+    const clean = val.replace(/\s/g, "");
+    if (clean && !validateE164(clean)) {
+      setPhoneError("Formato E.164 richiesto (es. +39XXXXXXXXXX)");
+    } else {
+      setPhoneError("");
+    }
+  };
+
   const startCall = async () => {
-    if (!toNumber) return;
+    const cleanNumber = toNumber.replace(/\s/g, "");
+    if (!cleanNumber) return;
+    if (!validateE164(cleanNumber)) {
+      setPhoneError("Formato E.164 richiesto (es. +39XXXXXXXXXX)");
+      return;
+    }
     setCalling(true);
     try {
       const { data, error } = await supabase.functions.invoke("elevenlabs-outbound-call", {
-        body: { agent_id: agentId, to_number: toNumber },
+        body: { agent_id: agentId, to_number: cleanNumber },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast({ title: "Chiamata avviata!", description: `Chiamata a ${toNumber} in corso...` });
+      toast({ title: "Chiamata avviata!", description: `Chiamata a ${cleanNumber} in corso...` });
       setToNumber("");
-      // Refresh calls
-      const { data: newCalls } = await supabase.from("outbound_call_log").select("*").eq("agent_id", agentId).order("started_at", { ascending: false }).limit(10);
-      setCalls(newCalls || []);
+      setPhoneError("");
+      // Refresh calls after short delay for DB propagation
+      await new Promise(r => setTimeout(r, 1000));
+      loadCalls(0);
+      setCallPage(0);
     } catch (err: any) {
       toast({ variant: "destructive", title: "Errore", description: err.message });
     } finally { setCalling(false); }
