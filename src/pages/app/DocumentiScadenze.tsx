@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Plus, FileWarning, Shield, Upload, Trash2, AlertTriangle, CheckCircle } from "lucide-react";
+import { differenceInDays, startOfDay } from "date-fns";
 
 const TIPI_DOC = ["DURC", "Patentino", "Certificato Sicurezza", "Visura Camerale", "Polizza RC", "Patente", "Attestato Formazione", "Altro"];
 
