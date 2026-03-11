@@ -4,42 +4,47 @@ import { useImpersonation } from "@/context/ImpersonationContext";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  LayoutDashboard, Bot, MessageSquare, BarChart3, Settings,
+  LayoutDashboard, Bot, BarChart3, Settings,
   Building2, UserPlus, Users, FileText,
-  BookUser, Megaphone, Phone, Coins, type LucideIcon,
+  BookUser, Megaphone, type LucideIcon,
   AlertTriangle, MessageCircle, Puzzle, Palette, HardHat,
-  FileSignature, ShieldCheck, ClipboardList, PlusCircle,
-  Archive, PhoneCall
+  FileSignature, ShieldCheck, ClipboardList,
+  Archive, Coins, Link2, ChevronDown,
 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface NavItem { label: string; icon: LucideIcon; href: string; }
-interface NavSection { header?: string; items: NavItem[]; }
+interface NavSection {
+  header?: string;
+  items: NavItem[];
+  collapsible?: boolean;
+  defaultOpen?: boolean;
+}
 
 const companyNav: NavSection[] = [
-  { header: "PANORAMICA", items: [
-    { label: "Pannello di Controllo", icon: LayoutDashboard, href: "/app" },
+  { header: "PANNELLO DI CONTROLLO", items: [
+    { label: "Dashboard", icon: LayoutDashboard, href: "/app" },
   ]},
   { header: "I MIEI AGENTI", items: [
     { label: "Tutti gli Agenti", icon: Bot, href: "/app/agents" },
-    { label: "Crea Nuovo", icon: PlusCircle, href: "/app/agents/new" },
-    { label: "Conversazioni", icon: MessageSquare, href: "/app/conversations" },
+    { label: "Archivio Conoscenze", icon: Archive, href: "/app/knowledge-base" },
+    { label: "Risultati", icon: BarChart3, href: "/app/analytics" },
   ]},
-  { header: "CONTATTI & VENDITE", items: [
-    { label: "Rubrica", icon: BookUser, href: "/app/contacts" },
+  { header: "VENDITE", items: [
+    { label: "Contatti", icon: BookUser, href: "/app/contacts" },
     { label: "Campagne", icon: Megaphone, href: "/app/campaigns" },
     { label: "Preventivi", icon: FileSignature, href: "/app/preventivi" },
   ]},
-  { header: "CANTIERI", items: [
-    { label: "Gestione Cantieri", icon: HardHat, href: "/app/cantieri" },
-    { label: "Documenti e Scadenze", icon: ShieldCheck, href: "/app/documenti" },
+  { header: "OPERATIVITÀ", collapsible: true, defaultOpen: false, items: [
+    { label: "Cantieri", icon: HardHat, href: "/app/cantieri" },
+    { label: "Documenti", icon: ShieldCheck, href: "/app/documenti" },
     { label: "Presenze", icon: ClipboardList, href: "/app/presenze" },
   ]},
-  { header: "RISULTATI", items: [
-    { label: "Report e Statistiche", icon: BarChart3, href: "/app/analytics" },
+  { header: "STRUMENTI AI", items: [
+    { label: "Render", icon: Palette, href: "/app/render" },
   ]},
   { header: "IMPOSTAZIONI", items: [
-    { label: "Telefono e WhatsApp", icon: PhoneCall, href: "/app/phone-numbers" },
-    { label: "Archivio Conoscenze", icon: Archive, href: "/app/knowledge-base" },
+    { label: "Integrazioni", icon: Link2, href: "/app/integrations" },
     { label: "Crediti e Piano", icon: Coins, href: "/app/credits" },
     { label: "Account", icon: Settings, href: "/app/settings" },
   ]},
@@ -112,6 +117,37 @@ export default function SidebarNav({ onNavigate }: SidebarNavProps) {
     ? (creditInfo.total_spent_eur / creditInfo.total_recharged_eur) * 100 : 0;
   const barColor = usagePct > 80 ? "bg-destructive" : usagePct > 60 ? "bg-yellow-500" : "bg-primary";
 
+  const isItemActive = (href: string) =>
+    location.pathname === href ||
+    (href !== "/app" && href !== "/superadmin" && location.pathname.startsWith(href));
+
+  const isSectionActive = (section: NavSection) =>
+    section.items.some(item => isItemActive(item.href));
+
+  const renderItems = (items: NavItem[]) => (
+    <div className="space-y-0.5">
+      {items.map((item) => {
+        const Icon = item.icon;
+        const isActive = isItemActive(item.href);
+        return (
+          <Link
+            key={item.href}
+            to={item.href}
+            onClick={onNavigate}
+            className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              isActive
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
+          >
+            <Icon size={18} />
+            {item.label}
+          </Link>
+        );
+      })}
+    </div>
+  );
+
   return (
     <div className="flex flex-col h-full">
       <div className="p-5">
@@ -121,37 +157,35 @@ export default function SidebarNav({ onNavigate }: SidebarNavProps) {
       </div>
 
       <nav className="flex-1 px-3 py-2 overflow-auto space-y-5">
-        {sections.map((section, si) => (
-          <div key={si}>
-            {section.header && (
-              <p className="px-3 mb-2 text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">
-                {section.header}
-              </p>
-            )}
-            <div className="space-y-0.5">
-              {section.items.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.href ||
-                  (item.href !== "/app" && item.href !== "/superadmin" && location.pathname.startsWith(item.href));
-                return (
-                  <Link
-                    key={item.href}
-                    to={item.href}
-                    onClick={onNavigate}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      isActive
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    }`}
-                  >
-                    <Icon size={18} />
-                    {item.label}
-                  </Link>
-                );
-              })}
+        {sections.map((section, si) => {
+          if (section.collapsible) {
+            const active = isSectionActive(section);
+            return (
+              <Collapsible key={si} defaultOpen={active || section.defaultOpen}>
+                <CollapsibleTrigger className="flex items-center justify-between w-full px-3 mb-2 group">
+                  <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">
+                    {section.header}
+                  </p>
+                  <ChevronDown size={14} className="text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  {renderItems(section.items)}
+                </CollapsibleContent>
+              </Collapsible>
+            );
+          }
+
+          return (
+            <div key={si}>
+              {section.header && (
+                <p className="px-3 mb-2 text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">
+                  {section.header}
+                </p>
+              )}
+              {renderItems(section.items)}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </nav>
 
       {isCompanyView && creditInfo && (
