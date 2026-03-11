@@ -205,6 +205,13 @@ export default function Settings() {
   // Webhook CRUD
   const createWebhook = async () => {
     if (!companyId || !whForm.url || whForm.events.length === 0) return;
+    // Validate URL format
+    try {
+      new URL(whForm.url);
+    } catch {
+      toast({ title: "URL non valido", description: "Inserisci un URL valido (es. https://example.com/webhook)", variant: "destructive" });
+      return;
+    }
     setSavingWh(true);
     const { error } = await supabase.from("webhooks").insert({
       company_id: companyId,
