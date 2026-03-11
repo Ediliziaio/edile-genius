@@ -1,203 +1,212 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro + AI Avanzata
 
-## ✅ Completato in questo blocco
+# AUDIT FINALE COMPLETO — Edile Genius (edilizia.io)
 
-### Database Migration
-- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
-- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
-- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
-- RLS policies per tutte le nuove tabelle
+---
 
-## ✅ Blocco 2 — Sistema Crediti Euro-based
+## 1. VALUTAZIONE GENERALE DELLA PIATTAFORMA
 
-### Database
-- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
-- ai_credit_topups (ricariche manual/auto/promo/adjustment)
-- ai_credit_usage (consumo per conversazione con margini)
-- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
-- monthly_billing_summary view (security_invoker)
+**Giudizio complessivo: 7/10 — Solido MVP con gap critici prima della vendita.**
 
-### Edge Functions
-- check-credits-before-call: verifica saldo pre-chiamata
-- topup-credits: ricarica manuale con fattura
-- elevenlabs-webhook: post-call billing, auto-recharge, blocco
-- platform-config: +apply_global_markup action
+| Dimensione | Voto | Note |
+|---|---|---|
+| Maturità prodotto | 7/10 | Architettura completa, molti moduli funzionanti, ma troppi moduli esposti |
+| Vendibilità | 5/10 | Troppa complessità visibile; un imprenditore edile si perde |
+| Robustezza tecnica | 6/10 | Flussi principali solidi, ma sicurezza edge functions critica |
+| UX/Onboarding | 6/10 | Buon wizard template, ma sidebar troppo densa e troppe schermate |
+| Sicurezza | 4/10 | **TUTTI** i 40+ edge functions hanno `verify_jwt = false` — bloccante** |
+| Controllo costi | 8/10 | Billing euro-based ben fatto, margini tracciati, auto-recharge |
 
-### Frontend
-- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
-- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
-- Sidebar: footer saldo crediti con barra e alert
-- VoiceTestPanel: check crediti pre-chiamata con blocco UI
+**Punti forti:**
+- Galleria template orientata al risultato (best-in-class per il target)
+- Sistema crediti/billing euro-based maturo con margini tracciati
+- Dashboard SuperAdmin con economics reali (ricavi/costi/margini)
+- Smart Actions engine che guida l'utente all'azione
+- Lead scoring automatico senza LLM
+- Summary + main_reason AI post-chiamata
 
-## ✅ Blocco 3-5 — Agent Templates System
+**Punti deboli:**
+- Sicurezza edge functions: tutto aperto, nessun `verify_jwt = true`
+- Troppi moduli esposti nella sidebar (15+ voci visibili)
+- WhatsApp.tsx = 1549 righe, non refactorato
+- Moduli "Cantieri", "Documenti", "Presenze", "Render" esposti a tutti per default
+- Nessun password reset / forgot password
+- Nessuna conferma email obbligatoria al signup
+- CRM e Webhooks marcati "prossimamente" ma presenti nella pagina Settings con form attivi
 
-### Database
-- agent_templates + agent_template_instances + agent_reports + company_channels
-- RLS policies PERMISSIVE (fix da RESTRICTIVE)
-- Funzione DB `increment_installs_count(tpl_id UUID)`
-- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+---
 
-### Edge Functions (CORS headers completi)
-- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
-- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
-- save-report: salva report in DB + aggiorna contatori istanza
+## 2. COSA È DAVVERO PRONTO
 
-### Frontend — Wizard 5 Step (TemplateSetup.tsx)
-- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + importa CSV con template scaricabile
-- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
-- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
+| Modulo | Stato | Vendibile? |
+|---|---|---|
+| **Agenti Vocali AI** (crea, configura, testa, attiva) | Completo | **SI** |
+| **Galleria Template** (18 template, goal-oriented) | Completo | **SI** |
+| **Dashboard azienda** (KPI + Smart Actions) | Completo | **SI** |
+| **Conversazioni** (lista, filtri, trascrizione, summary, main_reason) | Completo | **SI** |
+| **Contatti** (CRUD, import, lead score, timeline, follow-up AI) | Completo | **SI** |
+| **Campagne Outbound** (batch calling E2E) | Completo | **SI** |
+| **Crediti Euro** (ricarica, auto-recharge, blocco, usage tracking) | Completo | **SI** |
+| **Preventivi** (audio→PDF, template branding) | Completo | **SI** |
+| **Analytics** (grafici, range, breakdown per agente) | Completo | **SI** |
+| **SuperAdmin Dashboard** (economics, margini, CSV export) | Completo | **SI** |
+| **Signup self-service** (trial 14gg) | Completo | **SI** |
+| **Login/Auth** (email+password, RBAC) | Funzionale | Parziale* |
 
-### SuperAdmin
-- /superadmin/templates: CRUD completo con JSON editor per config_schema
+*Manca forgot password e conferma email.
 
-## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+---
 
-### Database (5 tabelle)
-- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
-- RLS PERMISSIVE per tutte le tabelle
-- Trigger set_updated_at + init_render_credits su companies
-- Funzione deduct_render_credit
-- Storage buckets: render-originals (privato), render-results (pubblico)
+## 3. COSA NON È ANCORA PRONTO
 
-### Edge Functions
-- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
-- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+| Area | Problema | Impatto |
+|---|---|---|
+| **Sicurezza Edge Functions** | Tutti `verify_jwt = false` — qualsiasi utente anonimo può chiamare `topup-credits`, `create-company`, `run-campaign-batch` | **BLOCCANTE** |
+| **WhatsApp** | 1549 righe, integrazione Meta complessa, richiede WABA attivo | Non vendibile senza partner Meta |
+| **CRM Sync** | UI presente in Settings ma marcato "prossimamente" in Integrazioni — incoerente | Confonde |
+| **Render AI** | Dipende da Gemini Flash Image (sperimentale), crediti separati da quelli voce | Fragile |
+| **Cantieri/Documenti/Presenze** | Moduli completi ma molto specifici, esposti a tutti | Dispersivo |
+| **Forgot Password** | Non implementato | L'utente resta bloccato fuori |
+| **Email confirmation** | Signup non richiede conferma email | Rischio spam/abuse |
+| **Stripe** | Non collegato — ricariche solo "manuali" (nessun pagamento reale) | Non monetizzabile |
 
-### Frontend
-- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
-- RenderConfig (/superadmin/render-config)
-- BeforeAfterSlider, promptBuilder.ts
+---
 
-## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
+## 4. COSA VA NASCOSTO O RIDOTTO
 
-### Database
-- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
-- Estensione `preventivi` con +26 colonne
-- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
-- Storage buckets: preventivi-media (privato), template-assets (pubblico)
-- RLS company-scoped + superadmin
+**Azione immediata: semplificare la sidebar.**
 
-### Edge Functions
-- `process-preventivo-audio` RISCRITTO
+Oggi l'utente vede potenzialmente 15+ voci di menu. Un imprenditore edile ha bisogno di 6 max.
 
-### PDF Client-side (@react-pdf/renderer)
-- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4
+**Sidebar consigliata per l'utente base:**
+```text
+PANNELLO DI CONTROLLO
+  Dashboard
 
-### Frontend
-- NuovoPreventivo.tsx, PreventivoDetail.tsx, PreventiviList.tsx, TemplatePreventivo.tsx
+I MIEI AGENTI
+  Agenti
+  Risultati
 
-## ✅ Blocco 8 — AI Avanzata P1 (Smart Actions + Lead Score + Timeline)
+VENDITE
+  Contatti
+  Campagne
 
-### Smart Actions Engine (Dashboard)
-- Espanso da 3 regole hardcoded a 10+ regole basate su dati reali:
-  - Crediti in esaurimento (danger)
-  - Agenti in bozza (warning)
-  - Agenti senza numero telefono (warning)
-  - Agenti inattivi >7 giorni (info)
-  - Contatti da richiamare con next_call_at scaduto (warning)
-  - Preventivi in bozza da >7 giorni (warning)
-  - Preventivi inviati senza risposta da >10 giorni (warning)
-  - Documenti in scadenza entro 15 giorni (warning)
-  - Campagne con tasso appuntamenti <5% (info)
-- Query Supabase dedicate per ogni regola
-- Stato "Tutto in ordine" quando nessuna azione è necessaria
-- Mostra summary delle conversazioni recenti nella tabella attività
+IMPOSTAZIONI
+  Crediti
+  Account
+```
 
-### Lead Score Automatico
-- `src/lib/lead-score.ts`: motore di scoring 0-100 senza LLM
-  - +30 outcome qualified/appointment
-  - +20 sentiment positivo
-  - +15 preventivo associato
-  - +10 contatto completo (tel+email)
-  - +10 callback attempts
-  - +5 fonte inbound
-  - -10 inattivo >30 giorni
-  - -20 not_interested
-  - -30 do_not_call/invalid
-- `src/components/contacts/LeadScoreBadge.tsx`: badge con tooltip fattori
-  - Compact mode per tabella (emoji + score numerico)
-  - Full mode per scheda contatto (con lista fattori)
-  - Colori: 🔴 Caldo (>60), 🟠 Tiepido (30-60), 🔵 Freddo (<30)
-- Badge integrato nella tabella contatti (nuova colonna "Score")
-- Badge integrato nell'header della scheda contatto
+**Da nascondere (mostrare solo se attivati o in sezione "Avanzato"):**
+- Archivio Conoscenze → dentro Dettaglio Agente
+- Preventivi → solo se settore edile/serramenti
+- Cantieri / Documenti / Presenze → solo se settore edile (già parzialmente fatto, ma troppo visibile)
+- Render → solo se serramenti (già parzialmente fatto)
+- Integrazioni → dentro Account/Settings
+- Liste contatti → dentro Contatti
 
-### Timeline Unificata del Contatto
-- `ContactDetailPanel.tsx` completamente refactorato:
-  - Tab "Timeline" come default (al posto di "Info")
-  - Cronologia verticale con linea e pallini colorati per tipo:
-    - 🔵 Conversazioni (con summary, outcome, sentiment, durata)
-    - 🟡 Note manuali
-    - 🟢 Preventivi collegati (stato, importo, numero)
-    - ⚪ Eventi (contatto creato)
-  - Query preventivi per nome/telefono contatto
-  - Lead Score full display nell'header della scheda
+**Da nascondere completamente per ora:**
+- WhatsApp come modulo standalone (troppo complesso, non pronto)
+- CRM sync (prossimamente reale)
+- Template Preventivo (nicchia estrema)
 
-## ✅ Blocco 8 — P1-C: Call Summary Automatico
+---
 
-### Backend
-- `supabase/functions/elevenlabs-webhook/summary.ts`: modulo separato per generazione summary
-  - Chiama OpenAI gpt-4o-mini con prompt minimale in italiano
-  - Non-blocking: se OPENAI_API_KEY non è configurata, salta silenziosamente
-  - Cap transcript a 6000 chars per contenere i costi (~$0.001/call)
-- `elevenlabs-webhook/index.ts`: importa e chiama `generateCallSummary()` dopo step 7
-  - Popola `conversations.summary` solo se la generazione ha successo
+## 5. TOP PRIORITÀ DI CORREZIONE
 
-### Frontend (già predisposto)
-- Dashboard "Attività recente": mostra `c.summary` sotto il nome agente
-- Conversazioni: mostra summary nella tabella e nel dialog dettaglio
-- Timeline contatto: mostra summary nelle conversazioni
+### P0 — BLOCCANTI (prima di qualsiasi vendita)
 
-### Requisito SuperAdmin
-- Aggiungere OPENAI_API_KEY come Supabase Secret (da configurare via SuperAdmin)
+1. **Attivare `verify_jwt = true` su TUTTE le edge functions interne** (topup-credits, create-elevenlabs-agent, run-campaign-batch, generate-render, crm-sync, etc.). Lasciare `false` SOLO per webhook esterni (elevenlabs-webhook, whatsapp-webhook, telegram-cantiere-webhook, self-service-signup).
+   - Impatto: senza questo, chiunque può creare agenti, ricariche, chiamate outbound senza autenticazione.
 
-## ✅ Blocco 9 — Audit Finale & Hardening
+2. **Forgot password** — Aggiungere pagina `/forgot-password` con `supabase.auth.resetPasswordForEmail()`.
+   - Impatto: utente bloccato = utente perso.
 
-### Sicurezza Edge Functions
-- Validazione JWT (getClaims) aggiunta a: generate-render, crm-sync, deploy-template-instance, process-preventivo-audio, generate-preventivo-pdf
-- Verifica tenant (company_id cross-check) aggiunta a tutte le funzioni interne
-- Funzioni webhook esterne (elevenlabs-webhook, whatsapp-webhook, telegram-cantiere-webhook) lasciate senza JWT (corretto)
+3. **Stripe / pagamento reale** — Senza pagamento reale, la ricarica manuale è solo un segnaposto.
+   - Impatto: nessun ricavo effettivo.
 
-### Atomicità Crediti
-- Creata RPC `topup_credits(_company_id, _amount_eur)` con UPDATE atomico
-- topup-credits edge function refactorato per usare RPC
+### P1 — ALTA PRIORITÀ (prima settimana di vendita)
 
-### UX — Progressive Disclosure Sidebar
-- Sezioni OPERATIVITÀ e STRUMENTI AI visibili solo se il settore è rilevante o se esistono dati
-- Campi vuoti nelle conversazioni nascosti (eval_score, minutes_billed, cost_billed_eur)
+4. **Semplificare sidebar** — Implementare il progressive disclosure aggressivo descritto sopra.
 
-### UX — Dead-End Fix
-- Card CRM e Webhooks in Integrazioni: badge "Prossimamente" + bottoni disabilitati
+5. **Refactor WhatsApp.tsx** — 1549 righe. Spezzare in componenti o nascondere il modulo finché non è davvero pronto con un partner WABA.
 
-### Signup Self-Service
-- Pagina /signup con form registrazione
-- Edge function self-service-signup: crea company (trial 14gg) + profilo + ruolo company_admin
+6. **Coerenza CRM** — Rimuovere la sezione CRM da Settings.tsx se è "prossimamente" in Integrazioni. Un posto solo.
 
-### AI Avanzata P2
-- Follow-up Generator: edge function generate-followup (GPT-4o-mini) + bottone in ContactDetailPanel
-- Opportunity Recovery: Smart Actions per lead qualificati dormenti >5 giorni
-- Campi conversazione vuoti nascosti per UX più pulita
+7. **Email di benvenuto post-signup** — Anche una semplice email di conferma attivazione. Oggi l'utente si registra e basta.
 
-## 🔜 Prossimi Step
+### P2 — MEDIA PRIORITÀ
 
-### ✅ Completato — Campagne Outbound E2E
-- Tabella `campaign_contacts` per tracking stato per-contatto (pending/calling/retry/completed/failed)
-- Edge function `run-campaign-batch`: populate contatti da lista + esecuzione batch con chiamate EL outbound
-- Retry automatico con delay configurabile e max tentativi
-- Bottone "Avvia" popola + lancia primo batch
-- Bottone "Lancia batch" per batch successivi su campagne attive
-- Aggiornamento stats campagna in tempo reale
+8. **Trial countdown** — Mostrare i giorni rimanenti del trial (14gg) nella dashboard e sidebar.
 
-### ✅ Completato — Motivo Principale
-- Colonna `main_reason` aggiunta a `conversations`
-- summary.ts riscritto: genera JSON con `summary` + `main_reason` in una sola chiamata GPT-4o-mini
-- Mostrato nella tabella conversazioni (💡 badge) e nel dettaglio (card evidenziata)
-- Esempi: "Interessato a ristrutturazione bagno", "Non interessato: ha già un fornitore"
+9. **Onboarding guidato** — Dopo signup, un wizard di 3 step (non la checklist attuale che appare solo senza agenti). Un vero flow che porta alla creazione del primo agente.
 
-### P3 — Avanzato / successivo
-- Personalizzazione regole Smart Actions per admin
-- Report settimanale automatico via email al titolare
-- Trend predittivo su tasso conversione
-- Integrazione Stripe per pagamenti reali
+10. **Error boundary globale** — Se un componente crasha, l'app non deve diventare bianca.
+
+---
+
+## 6. RISCHI PRINCIPALI
+
+### Sicurezza (CRITICO)
+- **40+ edge functions con `verify_jwt = false`**: chiunque può chiamare `POST /functions/v1/topup-credits` con un body arbitrario e aggiungere crediti. Le funzioni fanno auth interna via `getClaims`, ma Supabase non applica nemmeno il check del token a livello gateway.
+- **self-service-signup** accetta un `user_id` arbitrario nel body — un attaccante potrebbe associare il proprio account a una company di un altro.
+
+### Costi
+- Il sistema billing è solido, ma senza Stripe i crediti sono "monopoly money". Nessun ricavo reale.
+- Auto-recharge è implementato nel webhook ma senza gateway di pagamento reale dietro.
+
+### UX
+- Un imprenditore che apre la sidebar vede: Dashboard, Agenti, Archivio Conoscenze, Risultati, Contatti, Campagne, Preventivi, Cantieri, Documenti, Presenze, Render, Integrazioni, Crediti, Account. **Troppo.** Sembra un gestionale aziendale, non un prodotto AI semplice.
+
+### Vendibilità
+- Il nome del prodotto è incoerente: "Edile Genius" nel plan, "edilizia.io" nel logo sidebar, "Edilizia.io" nella landing. Serve un nome unico.
+
+---
+
+## 7. COSA SI PUÒ VENDERE SUBITO
+
+### Pacchetto 1: "Agente Vocale AI" (vendita principale)
+- **Template**: Richiama Lead Ads, Qualifica Lead Serramenti/Fotovoltaico/Ristrutturazione
+- **Include**: Agente vocale, numero telefono, dashboard risultati, contatti, crediti
+- **Prezzo consigliato**: €149-299/mese + consumo voce
+- **Stato**: PRONTO (con fix sicurezza)
+
+### Pacchetto 2: "Campagne Outbound"
+- **Template**: Recupera Preventivi, Conferma Appuntamenti, Recupera No-Show
+- **Include**: Campagne batch, contatti, liste, analytics
+- **Stato**: PRONTO
+
+### Pacchetto 3: "Preventivi AI" (add-on edilizia)
+- **Include**: Preventivi da audio, PDF branded, template personalizzabili
+- **Stato**: PRONTO (nicchia)
+
+### NON vendere ancora:
+- WhatsApp (troppo complesso, dipende da WABA)
+- Render AI (sperimentale, Gemini Flash Image instabile)
+- Cantieri/Report (nicchia troppo stretta, richiede Telegram setup)
+
+---
+
+## 8. RACCOMANDAZIONE FINALE
+
+### Prima di andare sul mercato (1-2 settimane):
+
+1. **Fix sicurezza edge functions** — `verify_jwt = true` su tutte le funzioni interne. Questo è il singolo fix con il più alto rapporto impatto/rischio del progetto.
+
+2. **Forgot password** — 30 minuti di lavoro, essenziale.
+
+3. **Sidebar semplificata** — Nascondere tutto ciò che non è core. La piattaforma deve sembrare: Dashboard → Agenti → Contatti → Campagne → Crediti. Stop.
+
+4. **Stripe** — Collegare Stripe per ricariche reali. Senza questo, non c'è business.
+
+5. **Nome prodotto uniforme** — Decidere: "edilizia.io" o "Edile Genius". Un nome solo, ovunque.
+
+### Per rafforzare il prodotto (mese 1):
+
+6. **Trial countdown visibile** nella dashboard e sidebar.
+7. **Email transazionali** (benvenuto, ricarica, agente attivato) via Resend.
+8. **Report settimanale automatico** al titolare (KPI email).
+9. **Refactor WhatsApp.tsx** o nascondere completamente il modulo.
+
+### Principio guida:
+**Meno è meglio.** Questo prodotto ha 30 feature quando ne servono 8 ben fatte. Nascondi tutto il resto, vendilo come "semplice", e attiva i moduli avanzati solo quando il cliente li chiede. La complessità è il nemico della vendita.
+
