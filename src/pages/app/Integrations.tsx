@@ -13,6 +13,7 @@ interface IntegrationDef {
   description: string;
   icon: React.ElementType;
   href: string;
+  comingSoon?: boolean;
 }
 
 const integrationDefs: IntegrationDef[] = [
@@ -35,14 +36,16 @@ const integrationDefs: IntegrationDef[] = [
     title: "CRM",
     description: "Sincronizza contatti e lead con HubSpot, Salesforce o Pipedrive",
     icon: RefreshCw,
-    href: "/app/settings",
+    href: "",
+    comingSoon: true,
   },
   {
     id: "webhooks",
     title: "Webhooks",
     description: "Ricevi notifiche in tempo reale su eventi degli agenti",
     icon: Webhook,
-    href: "/app/settings",
+    href: "",
+    comingSoon: true,
   },
   {
     id: "telegram",
@@ -154,10 +157,11 @@ export default function Integrations() {
         {integrationDefs.map((integration) => {
           const Icon = integration.icon;
           const connected = statusMap[integration.id];
+          const isComingSoon = integration.comingSoon;
           return (
             <Card
               key={integration.id}
-              className={`hover:shadow-md transition-shadow ${connected ? "border-primary/40" : ""}`}
+              className={`hover:shadow-md transition-shadow ${connected ? "border-primary/40" : ""} ${isComingSoon ? "opacity-70" : ""}`}
             >
               <CardHeader className="flex flex-row items-start gap-4 space-y-0">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${connected ? "bg-primary/10" : "bg-muted"}`}>
@@ -166,7 +170,11 @@ export default function Integrations() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <CardTitle className="text-base">{integration.title}</CardTitle>
-                    {connected ? (
+                    {isComingSoon ? (
+                      <Badge variant="outline" className="text-[10px] text-muted-foreground border-muted-foreground/30">
+                        Prossimamente
+                      </Badge>
+                    ) : connected ? (
                       <Badge variant="default" className="text-[10px] gap-1">
                         <CheckCircle2 size={10} /> Connesso
                       </Badge>
@@ -180,14 +188,20 @@ export default function Integrations() {
                 </div>
               </CardHeader>
               <CardContent>
-                <Button
-                  variant={connected ? "outline" : "default"}
-                  size="sm"
-                  className="gap-2"
-                  onClick={() => navigate(integration.href)}
-                >
-                  {connected ? "Gestisci" : "Configura"} <ArrowRight size={14} />
-                </Button>
+                {isComingSoon ? (
+                  <Button variant="outline" size="sm" className="gap-2" disabled>
+                    Prossimamente
+                  </Button>
+                ) : (
+                  <Button
+                    variant={connected ? "outline" : "default"}
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => navigate(integration.href)}
+                  >
+                    {connected ? "Gestisci" : "Configura"} <ArrowRight size={14} />
+                  </Button>
+                )}
               </CardContent>
             </Card>
           );
