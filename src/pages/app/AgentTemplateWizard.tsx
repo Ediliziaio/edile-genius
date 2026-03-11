@@ -17,7 +17,11 @@ import type { AgentForm, CustomTool } from "./CreateAgent.types";
 
 /* ── Slug → type mapping ───────────────────────────── */
 
-const VOCAL_SLUGS = ["vocale-custom", "qualifica-inbound", "richiamo-outbound", "prenotazione-appuntamenti", "assistenza-post-vendita"];
+const VOCAL_SLUGS = [
+  "vocale-custom", "qualifica-infissi", "qualifica-ristrutturazione", "qualifica-fotovoltaico",
+  "inbound-campagne", "conferma-sopralluogo", "recupero-preventivi", "recupero-noshow",
+  "recensioni-post-lavoro",
+];
 const RENDER_SLUGS = ["render-infissi"];
 
 function getAgentType(slug: string): string {
@@ -30,12 +34,17 @@ function getAgentType(slug: string): string {
 function getTemplateLabel(slug: string): string {
   const labels: Record<string, string> = {
     "vocale-custom": "Agente Vocale Personalizzato",
-    "qualifica-inbound": "Qualifica Lead Inbound",
-    "richiamo-outbound": "Richiamo Clienti (Outbound)",
-    "prenotazione-appuntamenti": "Prenotazione Appuntamenti",
-    "assistenza-post-vendita": "Assistenza Post-Vendita",
+    "qualifica-infissi": "Qualificatore Lead Infissi",
+    "qualifica-ristrutturazione": "Qualificatore Ristrutturazione",
+    "qualifica-fotovoltaico": "Qualificatore Fotovoltaico",
+    "inbound-campagne": "Risponditore Campagne Ads",
+    "conferma-sopralluogo": "Conferma Sopralluogo",
+    "recupero-preventivi": "Recupero Preventivi Scaduti",
+    "recupero-noshow": "Recupero No-Show",
+    "recensioni-post-lavoro": "Raccolta Recensioni Google",
     "render-infissi": "Render Infissi AI",
-    "assistente-whatsapp": "Assistente WhatsApp",
+    "assistente-whatsapp": "Assistente WhatsApp Commerciale",
+    "whatsapp-preventivi": "Follow-up Preventivi WhatsApp",
   };
   return labels[slug] || slug;
 }
@@ -48,6 +57,21 @@ function getTypeBadge(type: string) {
     default: return { emoji: "⚙️", label: "AGENTE", cls: "bg-ink-100 text-ink-500" };
   }
 }
+
+/* ── Slug → default use case mapping ───────────────── */
+
+const SLUG_TO_USE_CASE: Record<string, UseCaseId> = {
+  "qualifica-infissi": "qualifica_infissi",
+  "qualifica-ristrutturazione": "qualifica_ristrutturazione",
+  "qualifica-fotovoltaico": "qualifica_fotovoltaico",
+  "inbound-campagne": "inbound_campagne",
+  "conferma-sopralluogo": "conferma_sopralluogo",
+  "recupero-preventivi": "recupero_preventivi",
+  "recupero-noshow": "recupero_noshow",
+  "recensioni-post-lavoro": "recensioni",
+  "assistente-whatsapp": "assistente_whatsapp",
+  "whatsapp-preventivi": "assistente_whatsapp",
+};
 
 /* ── Default form ──────────────────────────────────── */
 
@@ -100,7 +124,21 @@ export default function AgentTemplateWizard() {
 
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState<AgentForm>(defaultForm);
+  const [form, setForm] = useState<AgentForm>(() => {
+    // Pre-fill form from slug mapping
+    const useCaseId = SLUG_TO_USE_CASE[slug || ""];
+    if (useCaseId && PROMPT_TEMPLATES[useCaseId]) {
+      const tpl = PROMPT_TEMPLATES[useCaseId];
+      return {
+        ...defaultForm,
+        use_case: useCaseId,
+        name: getTemplateLabel(slug || ""),
+        system_prompt: tpl.system_prompt,
+        first_message: tpl.first_message,
+      };
+    }
+    return defaultForm;
+  });
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [direction, setDirection] = useState(1);
 
