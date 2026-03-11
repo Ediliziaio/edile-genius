@@ -1,26 +1,21 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { corsHeaders, generateRequestId, log, fetchWithTimeout, jsonOk, jsonError, errorResponse } from "../_shared/utils.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
-
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const rid = generateRequestId();
+  const FN = "analyze-window-photo";
 
   try {
     const { image_url } = await req.json();
-    if (!image_url) throw new Error("image_url required");
+    if (!image_url) return jsonError("image_url required", "validation_error", 400, rid);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    if (!LOVABLE_API_KEY) return jsonError("LOVABLE_API_KEY not configured", "system_error", 500, rid);
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // 60s timeout — no retry (expensive AI call)
+    const response = await fetchWithTimeout("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
@@ -31,22 +26,22 @@ serve(async (req) => {
 Required JSON fields:
 - tipo_apertura: one of "battente_1_anta", "battente_2_ante", "battente_3_ante", "scorrevole", "scorrevole_alzante", "vasistas", "anta_ribalta", "bilico", "fisso", "portafinestra", "cassonetto_integrato"
 - materiale_attuale: one of "legno_vecchio", "legno_verniciato", "alluminio_anodizzato", "alluminio_verniciato", "pvc_bianco", "pvc_colorato", "ferro", "acciaio", "sconosciuto"
-- colore_attuale: string describing the current frame color (e.g., "bianco ingiallito", "marrone scuro", "grigio argento")
+- colore_attuale: string describing the current frame color
 - condizioni: one of "buone", "usurato", "danneggiato", "fatiscente"
-- num_ante_attuale: integer (number of window panels/leaves visible)
-- spessore_telaio: string estimate (e.g., "circa 60mm", "circa 80mm")
-- presenza_cassonetto: boolean (is there a roller shutter box above the window?)
-- tipo_cassonetto: string (e.g., "esterno sporgente", "a filo muro", "integrato", "assente")
-- tipo_vetro_attuale: string (e.g., "vetro singolo", "doppio vetro", "triplo vetro", "vetro con piombature")
+- num_ante_attuale: integer
+- spessore_telaio: string estimate
+- presenza_cassonetto: boolean
+- tipo_cassonetto: string
+- tipo_vetro_attuale: string
 - stile_edificio: one of "moderno", "classico", "industriale", "rurale", "liberty", "anni_60_70", "contemporaneo", "storico"
-- materiale_muro: string (e.g., "intonaco", "mattone faccia vista", "pietra naturale", "cemento grezzo")
-- colore_muro: string (e.g., "bianco sporco", "giallo ocra", "grigio chiaro")
+- materiale_muro: string
+- colore_muro: string
 - presenza_davanzale: boolean
 - presenza_inferriata: boolean
-- piano: string (e.g., "piano terra", "primo piano", "secondo piano")
-- luce: string (e.g., "luce diretta mattutina", "luce diffusa nuvoloso", "controluce", "ombra parziale")
-- angolo_ripresa: string (e.g., "frontale", "angolo 30° da sinistra", "dal basso verso alto")
-- note_aggiuntive: string (any additional relevant observations about the window, surroundings, or special features)
+- piano: string
+- luce: string
+- angolo_ripresa: string
+- note_aggiuntive: string
 
 Return ONLY valid JSON, no markdown code blocks, no additional text.`,
           },
@@ -59,38 +54,30 @@ Return ONLY valid JSON, no markdown code blocks, no additional text.`,
           },
         ],
       }),
-    });
+    }, 60_000);
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded" }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return jsonError("Rate limit exceeded", "rate_limited", 429, rid);
       }
+      log("error", "AI Gateway error", { request_id: rid, fn: FN, status: response.status });
       throw new Error(`AI error: ${response.status}`);
     }
 
     const data = await response.json();
     const text = data.choices?.[0]?.message?.content || "{}";
 
-    // Parse JSON from response
     let analysis;
     try {
       analysis = JSON.parse(text);
     } catch {
-      // Try extracting JSON from markdown code block
       const match = text.match(/```(?:json)?\s*([\s\S]*?)```/);
       analysis = match ? JSON.parse(match[1]) : { raw: text };
     }
 
-    return new Response(JSON.stringify({ analysis }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-
+    log("info", "Window photo analyzed", { request_id: rid, fn: FN });
+    return jsonOk({ analysis }, rid);
   } catch (err) {
-    console.error("analyze-window-photo error:", err);
-    return new Response(JSON.stringify({ error: err instanceof Error ? err.message : "Unknown error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponse(err, rid, FN);
   }
 });
