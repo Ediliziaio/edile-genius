@@ -219,9 +219,10 @@ export default function Automations() {
     return SMART_ACTIONS_DEFAULTS[key];
   };
 
-  // ── Fetch orchestrator log ──
+  // ── Fetch orchestrator log (paginated) ──
+  const [logLimit, setLogLimit] = useState(50);
   const { data: logEntries } = useQuery({
-    queryKey: ["orchestrator-log", companyId],
+    queryKey: ["orchestrator-log", companyId, logLimit],
     enabled: !!companyId,
     queryFn: async () => {
       const { data } = await supabase
@@ -229,7 +230,7 @@ export default function Automations() {
         .select("*")
         .eq("company_id", companyId!)
         .order("created_at", { ascending: false })
-        .limit(20);
+        .limit(logLimit);
       return (data as any[]) || [];
     },
   });
