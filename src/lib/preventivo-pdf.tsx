@@ -375,6 +375,24 @@ export const PreventivoPDF: React.FC<Props> = ({ data, template }) => {
   return (
     <Document>
       <Page size="A4" style={S.page}>
+        {/* WATERMARK BOZZA */}
+        {isDraft && (
+          <View style={{
+            position: "absolute",
+            top: "35%",
+            left: "15%",
+            width: "70%",
+            transform: "rotate(-45deg)",
+            opacity: 0.08,
+          }} fixed>
+            <Text style={{
+              fontSize: 72,
+              fontFamily: "Helvetica-Bold",
+              color: "#000000",
+              textAlign: "center",
+            }}>BOZZA</Text>
+          </View>
+        )}
         {/* HEADER */}
         <View style={S.header}>
           <View>

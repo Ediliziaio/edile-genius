@@ -165,6 +165,21 @@ export default function AnalyticsPage() {
           </ResponsiveContainer>
         </div>
 
+        <div className="rounded-card p-5 bg-white border border-ink-200 shadow-card">
+          <h3 className="text-sm font-semibold mb-4 text-ink-900 flex items-center gap-2">
+            <LineChartIcon className="w-4 h-4 text-status-info" /> Durata media nel tempo
+          </h3>
+          <ResponsiveContainer width="100%" height={250}>
+            <LineChart data={durationOverTime}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#D9E2EA" />
+              <XAxis dataKey="date" tick={{ fill: "#637485", fontSize: 10 }} />
+              <YAxis tick={{ fill: "#637485", fontSize: 10 }} unit="s" />
+              <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #D9E2EA", borderRadius: 10, color: "#0D1117" }} formatter={(v: number) => [`${v}s`, "Durata media"]} />
+              <Line type="monotone" dataKey="durata_media" stroke="#3B82F6" strokeWidth={2} dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
         <div className="rounded-card p-5 lg:col-span-2 bg-white border border-ink-200 shadow-card">
           <h3 className="text-sm font-semibold mb-4 text-ink-900">Chiamate per agente</h3>
           <ResponsiveContainer width="100%" height={200}>

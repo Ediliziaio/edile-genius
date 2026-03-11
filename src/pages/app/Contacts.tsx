@@ -347,7 +347,8 @@ export default function ContactsPage() {
 
   // Kanban View
   const KanbanView = () => {
-    const kanbanStatuses = STATUS_OPTIONS.filter(s => ["new", "to_call", "called", "qualified", "appointment"].includes(s.value));
+    // Show all statuses in kanban, use horizontal scroll for overflow
+    const kanbanStatuses = STATUS_OPTIONS;
     return (
       <div className="flex gap-4 overflow-x-auto pb-4">
         {kanbanStatuses.map(status => {

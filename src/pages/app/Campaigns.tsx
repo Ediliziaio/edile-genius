@@ -63,7 +63,7 @@ export default function CampaignsPage() {
     queryKey: ["company-agents-list", companyId],
     enabled: !!companyId,
     queryFn: async () => {
-      const { data } = await supabase.from("agents").select("id, name").eq("company_id", companyId!);
+      const { data } = await supabase.from("agents").select("id, name").eq("company_id", companyId!).eq("status", "active");
       return data || [];
     },
   });

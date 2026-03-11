@@ -159,6 +159,13 @@ export default function AgentOutboundTab({ agentId, companyId, outboundEnabled, 
                   </TableBody>
                 </Table>
               )}
+              {calls.length >= (callPage + 1) * CALLS_PER_PAGE && (
+                <div className="flex justify-center py-3">
+                  <Button variant="outline" size="sm" onClick={() => { const next = callPage + 1; setCallPage(next); loadCalls(next); }}>
+                    Carica altri
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </>

@@ -117,7 +117,7 @@ export default function FoglioPresenze() {
         <Select value={String(anno)} onValueChange={v => setAnno(Number(v))}>
           <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
           <SelectContent>
-            {[2024, 2025, 2026].map(y => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
+            {yearRange.map(y => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={cantiereId} onValueChange={setCantiereId}>

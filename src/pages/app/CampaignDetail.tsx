@@ -177,7 +177,7 @@ export default function CampaignDetailPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          {campaign.status === "active" && (
+          {(campaign.status === "active" || campaign.status === "paused") && (
             <Button
               onClick={async () => {
                 setRunningBatch(true);
