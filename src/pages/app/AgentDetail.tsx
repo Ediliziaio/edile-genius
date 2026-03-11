@@ -206,6 +206,7 @@ export default function AgentDetail() {
                   {agent.type === "vocal" ? "🎙️ Vocale" : agent.type === "whatsapp" ? "💬 WhatsApp" : agent.type === "render" ? "🎨 Render" : agent.type}
                 </Badge>
               )}
+              <AgentScoreBadge result={computeAgentScore(agent)} size="md" />
             </div>
             {agent.description && <p className="text-sm text-muted-foreground">{agent.description}</p>}
           </div>
