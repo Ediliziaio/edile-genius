@@ -61,6 +61,15 @@ function getTemplateLabel(slug: string): string {
   return labels[slug] || slug;
 }
 
+function getTypeBadge(type: string) {
+  switch (type) {
+    case "vocal": return { emoji: "🎙️", label: "AGENTE VOCALE", cls: "bg-brand-light text-brand-text" };
+    case "render": return { emoji: "🎨", label: "AGENTE RENDER", cls: "bg-settore-ristr-bg text-settore-ristr" };
+    case "whatsapp": return { emoji: "💬", label: "AGENTE WHATSAPP", cls: "bg-[hsl(142,60%,94%)] text-[hsl(142,70%,30%)]" };
+    default: return { emoji: "⚙️", label: "AGENTE", cls: "bg-ink-100 text-ink-500" };
+  }
+}
+
 const SLUG_TO_USE_CASE: Record<string, UseCaseId> = {
   "richiama-lead-ads": "inbound_campagne",
   "qualifica-serramenti": "qualifica_infissi",
