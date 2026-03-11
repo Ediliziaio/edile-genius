@@ -237,29 +237,25 @@ export default function AgentDetail() {
             <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
               {/* Main column */}
               <div className="space-y-6">
-                {/* Identity card */}
-                <section className="rounded-card p-5 bg-card border border-border shadow-card space-y-4">
-                  <h3 className="text-sm font-semibold text-foreground">Il tuo agente</h3>
-                  <div className="space-y-2">
-                    <Label>Nome</Label>
-                    <Input value={cfg.name} onChange={e => update("name", e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Descrizione</Label>
-                    <Textarea value={cfg.description} onChange={e => update("description", e.target.value)} className="min-h-[60px]" placeholder="Cosa fa questo agente?" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Settore</Label>
+                {/* Inline-editable identity */}
+                <section className="space-y-3">
+                  {/* Inline name */}
+                  <InlineEditName value={cfg.name} onSave={(v) => update("name", v)} />
+                  {/* Inline description */}
+                  <InlineEditDescription value={cfg.description} onSave={(v) => update("description", v)} />
+                  {/* Compact sector/language badges */}
+                  <div className="flex flex-wrap items-center gap-3 pt-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-muted-foreground">Settore:</span>
                       <Select value={cfg.sector} onValueChange={v => update("sector", v)}>
-                        <SelectTrigger><SelectValue placeholder="Seleziona" /></SelectTrigger>
+                        <SelectTrigger className="h-7 text-xs border-dashed w-auto min-w-[100px]"><SelectValue placeholder="Seleziona" /></SelectTrigger>
                         <SelectContent>{SECTORS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Lingua</Label>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-muted-foreground">Lingua:</span>
                       <Select value={cfg.language} onValueChange={v => update("language", v)}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="h-7 text-xs border-dashed w-auto min-w-[80px]"><SelectValue /></SelectTrigger>
                         <SelectContent>{LANGUAGES.map(l => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
