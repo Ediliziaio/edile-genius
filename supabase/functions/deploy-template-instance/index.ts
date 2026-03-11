@@ -22,10 +22,12 @@ Deno.serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsErr } = await supabase.auth.getClaims(token);
+    if (claimsErr || !claimsData?.claims) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
     }
+    const userId = claimsData.claims.sub as string;
 
     const { instanceId } = await req.json();
     if (!instanceId) {
@@ -46,6 +48,14 @@ Deno.serve(async (req) => {
 
     if (instErr || !instance) {
       return new Response(JSON.stringify({ error: "Instance not found" }), { status: 404, headers: corsHeaders });
+    }
+
+    // Tenant verification
+    const { data: profile } = await serviceClient.from("profiles").select("company_id").eq("id", userId).single();
+    const { data: roles } = await serviceClient.from("user_roles").select("role").eq("user_id", userId);
+    const isSA = (roles || []).some((r: any) => r.role === "superadmin" || r.role === "superadmin_user");
+    if (!isSA && profile?.company_id !== instance.company_id) {
+      return new Response(JSON.stringify({ error: "Forbidden: cross-tenant access" }), { status: 403, headers: corsHeaders });
     }
 
     const { data: template, error: tplErr } = await serviceClient
@@ -127,7 +137,7 @@ Deno.serve(async (req) => {
         llm_model: "gemini-2.0-flash",
         use_case: template.slug,
         type: agentType,
-        created_by: user.id,
+        created_by: userId,
       })
       .select()
       .single();
@@ -195,7 +205,7 @@ Deno.serve(async (req) => {
     // 8. Audit log
     await serviceClient.from("ai_audit_log").insert({
       company_id: instance.company_id,
-      user_id: user.id,
+      user_id: userId,
       action: "template_deployed",
       entity_type: "agent",
       entity_id: agent.id,

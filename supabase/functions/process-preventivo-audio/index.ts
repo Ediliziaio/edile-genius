@@ -8,11 +8,13 @@ Deno.serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) return jsonError("Unauthorized", "auth_error", 401, rid);
+    if (!authHeader?.startsWith("Bearer ")) return jsonError("Unauthorized", "auth_error", 401, rid);
 
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: authHeader } } });
-    const { data: { user }, error: userErr } = await supabase.auth.getUser();
-    if (userErr || !user) return jsonError("Unauthorized", "auth_error", 401, rid);
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsErr } = await supabase.auth.getClaims(token);
+    if (claimsErr || !claimsData?.claims) return jsonError("Unauthorized", "auth_error", 401, rid);
+    const user = { id: claimsData.claims.sub as string };
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     if (!OPENAI_API_KEY) return jsonError("OPENAI_API_KEY non configurata", "system_error", 500, rid);
@@ -33,6 +35,12 @@ Deno.serve(async (req) => {
     if (!audioFile || !companyId) return jsonError("audio e company_id richiesti", "validation_error", 400, rid);
 
     const adminClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+
+    // Tenant verification
+    const { data: profile } = await adminClient.from("profiles").select("company_id").eq("id", user.id).single();
+    const { data: roles } = await adminClient.from("user_roles").select("role").eq("user_id", user.id);
+    const isSA = (roles || []).some((r: any) => r.role === "superadmin" || r.role === "superadmin_user");
+    if (!isSA && profile?.company_id !== companyId) return jsonError("Forbidden: cross-tenant access", "auth_error", 403, rid);
 
     // 1. Upload audio
     const audioPath = `${companyId}/${crypto.randomUUID()}.webm`;
