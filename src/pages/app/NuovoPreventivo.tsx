@@ -111,7 +111,12 @@ export default function NuovoPreventivo() {
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setAudioBlob(file);
+    if (!file) return;
+    if (!file.type.startsWith('audio/')) {
+      toast.error('File non valido: seleziona un file audio');
+      return;
+    }
+    setAudioBlob(file);
   };
 
   // Photo handling
