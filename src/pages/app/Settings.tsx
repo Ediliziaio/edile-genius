@@ -150,7 +150,6 @@ export default function Settings() {
         loadCrmIntegrations(),
       ]).then(([compRes]) => {
         if (compRes.data) {
-          setApiKey(compRes.data.el_api_key || "");
           const s = (compRes.data.settings as Record<string, unknown>) || {};
           setNotif({ new_conversation: s.new_conversation !== false, daily_report: !!s.daily_report, weekly_report: s.weekly_report !== false });
         }
