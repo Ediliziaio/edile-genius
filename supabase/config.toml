@@ -116,3 +116,12 @@ verify_jwt = false
 
 [functions.check-sal-ritardi]
 verify_jwt = false
+
+[functions.run-campaign-batch]
+verify_jwt = false
+
+[functions.generate-followup]
+verify_jwt = false
+
+[functions.self-service-signup]
+verify_jwt = false
