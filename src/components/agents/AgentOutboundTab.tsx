@@ -122,12 +122,13 @@ export default function AgentOutboundTab({ agentId, companyId, outboundEnabled, 
               <div className="space-y-2">
                 <Label className="text-xs text-muted-foreground">Numero da chiamare</Label>
                 <div className="flex gap-2">
-                  <Input value={toNumber} onChange={e => setToNumber(e.target.value)} placeholder="+39 02 XXXX XXXX" className="font-mono flex-1" />
-                  <Button onClick={startCall} disabled={calling || !toNumber || !elAgentId} className="bg-brand hover:bg-brand/90 text-white">
+                  <Input value={toNumber} onChange={e => handleNumberChange(e.target.value)} placeholder="+39XXXXXXXXXX" className="font-mono flex-1" />
+                  <Button onClick={startCall} disabled={calling || !toNumber || !elAgentId || !!phoneError} className="bg-brand hover:bg-brand/90 text-white">
                     {calling ? <Loader2 className="h-4 w-4 animate-spin" /> : <Phone className="h-4 w-4 mr-1" />}
                     Chiama
                   </Button>
                 </div>
+                {phoneError && <p className="text-[10px] text-destructive">{phoneError}</p>}
                 {!elAgentId && <p className="text-[10px] text-destructive">L'agente non ha un ID ElevenLabs associato.</p>}
               </div>
             </CardContent>
