@@ -350,13 +350,19 @@ export default function AgentTemplateWizard() {
             </AnimatePresence>
           </div>
 
+          {/* Voice validation hint */}
+          {step === 1 && !form.voice_id && completedSteps.has(1) && (
+            <div className="flex items-center gap-2 mt-2 px-3 py-2 rounded-lg bg-status-warning-light text-status-warning text-sm">
+              <AlertCircle className="w-4 h-4 shrink-0" /> Seleziona una voce per continuare
+            </div>
+          )}
+
           <div className="flex justify-between mt-4">
             <button
-              onClick={() => step > 0 && goToStep(step - 1)}
-              disabled={step === 0}
-              className="px-4 py-2.5 rounded-btn text-sm font-medium disabled:opacity-30 bg-ink-100 text-ink-600 hover:bg-ink-200"
+              onClick={() => step > 0 ? goToStep(step - 1) : isDirty ? setShowAbandonDialog(true) : navigate("/app/agents/new")}
+              className="px-4 py-2.5 rounded-btn text-sm font-medium bg-ink-100 text-ink-600 hover:bg-ink-200"
             >
-              Indietro
+              {step === 0 ? "Annulla" : "Indietro"}
             </button>
             {step < lastStep ? (
               <button
