@@ -35,14 +35,16 @@ const integrationDefs: IntegrationDef[] = [
     title: "CRM",
     description: "Sincronizza contatti e lead con HubSpot, Salesforce o Pipedrive",
     icon: RefreshCw,
-    href: "/app/settings",
+    href: "",
+    comingSoon: true,
   },
   {
     id: "webhooks",
     title: "Webhooks",
     description: "Ricevi notifiche in tempo reale su eventi degli agenti",
     icon: Webhook,
-    href: "/app/settings",
+    href: "",
+    comingSoon: true,
   },
   {
     id: "telegram",
