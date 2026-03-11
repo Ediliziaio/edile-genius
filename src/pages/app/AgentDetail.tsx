@@ -297,6 +297,7 @@ export default function AgentDetail() {
 
               {/* Sidebar stats */}
               <div className="space-y-4">
+                <AgentScoreDetail agent={agent} />
                 {[
                   { label: "Chiamate totali", value: agent.calls_total ?? 0, icon: Phone },
                   { label: "Questo mese", value: (agent as any).calls_month ?? 0, icon: Phone },
