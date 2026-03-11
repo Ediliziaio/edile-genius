@@ -123,10 +123,14 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="text-center text-sm mt-6 text-ink-400">
-            Non hai un account?{" "}
-            <Link to="/signup" className="text-brand font-medium hover:underline">Registrati gratis</Link>
-          </p>
+          <div className="flex items-center justify-between mt-6">
+            <Link to="/forgot-password" className="text-sm text-ink-400 hover:text-brand transition-colors">
+              Password dimenticata?
+            </Link>
+            <p className="text-sm text-ink-400">
+              <Link to="/signup" className="text-brand font-medium hover:underline">Registrati gratis</Link>
+            </p>
+          </div>
 
           <p className="text-center text-xs mt-3 text-ink-400">
             Accedendo, accetti i Termini di Servizio e la Privacy Policy.
