@@ -1,130 +1,122 @@
 
+# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro
 
-## Agents List & Detail UX Overhaul
+## ✅ Completato in questo blocco
 
-### Current Problems
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
-**Agent List (`Agents.tsx` + `AgentCard.tsx`):**
-1. Cards show too many competing signals on one line: status dot + type badge (uppercase mono) + name — all crammed horizontally
-2. `MoreVertical` icon suggests a menu but does nothing — dead UI element
-3. "Da: qualifica_infissi" shows raw slug, not a human label
-4. Metrics row shows "0 chiamate · 0/mese" for new agents — zero-value noise
-5. Filter labels are decent but "Tutti i tipi" / "Tutti gli stati" dropdowns feel hidden; no quick-filter pills for the most common action: "show me what needs attention"
-6. Empty filter state is too minimal: "Nessun risultato. Prova a cambiare i filtri." — no reset button
-7. Score badge is tiny and cryptic — the circular ring + number means nothing to a non-technical user
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
-**Agent Detail (`AgentDetail.tsx`):**
-1. **9 tabs for vocal agents** — massive tab bar that wraps on mobile, overwhelming
-2. Tab labels use jargon: "Knowledge Base", "Analytics", "Integrazioni", "Avanzate"
-3. "Agente" tab is an editing form — but the header already shows name/status, creating redundancy
-4. Sidebar shows raw technical details: "EL Agent ID", "Use Case" slug, "Tipo" raw value
-5. "System Prompt" and "Modello LLM" exposed on the main tab — intimidating for business users
-6. Score detail shows "BLOCKER" and "pt" weights — developer language
-7. Conversations table has 7 columns including "Score", "Sentiment", "Direzione" — too data-dense
-8. No summary/overview visible before diving into tabs — user must click around to understand agent state
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-### Plan
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
-#### 1. Agent Card — Clearer hierarchy, status-first design
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
-- **Status becomes the primary signal**: Replace tiny dot with a readable status pill ("Attivo", "Bozza", "Da completare") positioned top-right
-- **Remove MoreVertical** — it's non-functional dead UI
-- **Replace raw use_case slug** with human-readable description or remove if description exists
-- **Hide zero metrics** — if calls_total is 0, show "Nessuna attività" instead of "0 chiamate"
-- **Replace score ring with text label** — show "Pronto", "Da completare" as a simple colored text badge instead of cryptic circular progress
-- **Add "needs attention" indicator** — if hasBlockers, show a yellow/red banner strip at bottom: "Configurazione incompleta"
+## ✅ Blocco 3-5 — Agent Templates System
 
-**File:** `src/components/agents/AgentCard.tsx`
+### Database
+- agent_templates + agent_template_instances + agent_reports + company_channels
+- RLS policies PERMISSIVE (fix da RESTRICTIVE)
+- Funzione DB `increment_installs_count(tpl_id UUID)`
+- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
 
-#### 2. Agent List — Quick filters + better empty states
+### Edge Functions (CORS headers completi)
+- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
+- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
+- save-report: salva report in DB + aggiorna contatori istanza
 
-- **Add status pill filters** above the search bar: `Tutti | Attivi | Da completare | Bozza` as clickable pills (replace the status Select dropdown)
-- **Keep type filter** as a Select but rename items: remove emoji prefix redundancy, use cleaner labels
-- **Improve empty filter state**: add a "Reimposta filtri" button
-- **Improve page subtitle**: "X agenti attivi · Y in bozza" → also show "Z da completare" count
+### Frontend — Wizard 5 Step (TemplateSetup.tsx)
+- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
+- Step 2 Operai: lista card + importa CSV con template scaricabile
+- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
+- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
 
-**File:** `src/pages/app/Agents.tsx`
+### SuperAdmin
+- /superadmin/templates: CRUD completo con JSON editor per config_schema
 
-#### 3. Agent Detail — Reduced tabs, business-first layout
+## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
 
-**Reduce tabs from 9 to 5 for vocal agents:**
+### Database (5 tabelle)
+- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
+- RLS PERMISSIVE per tutte le tabelle
+- Trigger set_updated_at + init_render_credits su companies
+- Funzione deduct_render_credit
+- Storage buckets: render-originals (privato), render-results (pubblico)
 
-| New Tab | Contains | Old Tabs Merged |
-|---------|----------|-----------------|
-| Panoramica | Name, description, sector, status, score checklist, recent stats, quick actions | Header + sidebar stats + score detail |
-| Prompt e Voce | System prompt, first message, temperature, voice picker, voice test | Agente (prompt part) + Voce & Test |
-| Conversazioni | Simplified conversation table | Conversazioni |
-| Risultati | Analytics charts | Analytics |
-| Impostazioni | Outbound, phone, integrations, KB, advanced settings — all in collapsible sections | Outbound + Telefono + Integrazioni + Knowledge Base + Avanzate |
+### Edge Functions
+- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
+- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
 
-**Tab labels updated:**
-- "Knowledge Base" → merged into Impostazioni
-- "Analytics" → "Risultati"
-- "Avanzate" → merged into Impostazioni
-- "Integrazioni" → merged into Impostazioni
+### Frontend
+- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
+- RenderConfig (/superadmin/render-config)
+- BeforeAfterSlider, promptBuilder.ts
 
-**For render agents:** 2 tabs (Panoramica, Risultati)
-**For WhatsApp agents:** 4 tabs (Panoramica, Prompt e Voce, Conversazioni, Risultati)
+## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
 
-#### 4. Agent Detail — New "Panoramica" tab
+### Database
+- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
+- Estensione `preventivi` con +26 colonne (template_id, versione, titolo, foto_sopralluogo_urls, foto_copertina_url, sconto_globale, imponibile, iva_importo, totale_finale, condizioni, clausole, intro, firma_testo, tempi_esecuzione, validita_giorni, data_scadenza, tracking_aperto_at/count, link_accettazione, firma_cliente_url, accettato_at, rifiutato_at, rifiuto_motivo, parent_id, inviato_at, inviato_via, cliente_piva, cliente_codice_fiscale)
+- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
+- Storage buckets: preventivi-media (privato), template-assets (pubblico)
+- RLS company-scoped + superadmin
 
-The first tab becomes a dashboard-style overview:
-- **Identity card**: Name (editable inline), description, sector, language — compact
-- **Status + Score section**: Large status badge + score checklist (AgentScoreDetail) with improved labels
-- **Quick stats**: 3 metric cards (total calls, this month, avg duration) — only shown if > 0
-- **Quick actions**: Contextual buttons like "Configura la voce", "Aggiungi documenti" based on incomplete score factors
+### Edge Functions
+- `process-preventivo-audio` RISCRITTO: prompt GPT esperto (prezzario DEI, categorie edilizie, sconti), nuovo formato voci con id/ordine/categoria/titolo_voce/sconto_percentuale/foto_urls/note_voce/evidenziata, calcolo totali con sconto e IVA, data_scadenza automatica
 
-#### 5. Agent Detail — Simplified sidebar info
+### PDF Client-side (@react-pdf/renderer)
+- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4 con:
+  - Header azienda + logo
+  - Band titolo colorata (colore_primario)
+  - Grid cliente/riferimenti
+  - Testo intro
+  - Foto copertina
+  - Tabella voci per categoria con subtotali
+  - Totali con sconto globale + IVA
+  - Note, condizioni, clausole
+  - Sezione firma doppia (azienda + cliente)
+  - Footer pagina
 
-- Remove "EL Agent ID" from visible details (move to Impostazioni)
-- Remove "Use Case" raw slug
-- Replace "Tipo" with the existing type badge already in header
-- Keep only business-relevant info visible
+### Frontend
+- **NuovoPreventivo.tsx** → Wizard 3 step:
+  - Step 1: dati cliente (nome, indirizzo, telefono, email, P.IVA, CF) + titolo/oggetto + cantiere
+  - Step 2: registrazione/upload audio + upload foto multiplo con grid preview e badge copertina
+  - Step 3: editor visuale voci per categoria (card editabili con titolo, descrizione, U.M., quantità, prezzo, sconto, totale) + totali live + scarica PDF anteprima
+- **PreventivoDetail.tsx** → 3 tabs:
+  - Dettaglio: voci per categoria con badge sconto, trascrizione collapsible, note/stato/tempi
+  - Cronologia: timeline eventi (creato, inviato, accettato/rifiutato)
+  - Tracking: KPI aperture, ultima apertura, ultimo invio
+  - Azioni: scarica PDF, modifica, elimina
+- **PreventiviList.tsx** → KPI cards (totale, bozze, in attesa, valore accettati) + filtri tab per stato + ricerca + lista con badge versione e scadenza
+- **TemplatePreventivo.tsx** (`/app/impostazioni/template-preventivo`): 3 tabs:
+  - Branding: logo upload, color picker primario/secondario con preview gradient, intestazione/piè di pagina
+  - Testi Standard: intro, condizioni, clausole, firma, validità giorni, IVA default
+  - Layout: 5 toggle (foto copertina, foto voci, subtotali categoria, firma, condizioni)
 
-#### 6. Conversations table — Simplified
+### Navigazione
+- Sidebar: aggiunto "Template PDF" nella sezione AUTOMAZIONI
+- Route: `/app/impostazioni/template-preventivo`
 
-- Remove "Score" and "Sentiment" columns from default view (keep Date, Number, Direction, Duration, Outcome)
-- Rename "Direzione" → show just icon (📥/📤) without text
-- Rename column headers to simpler Italian
-
-#### 7. Microcopy improvements
-
-| Location | Before | After |
-|----------|--------|-------|
-| Tab label | "Agente" | "Panoramica" |
-| Tab label | "Voce & Test" | "Prompt e Voce" |
-| Tab label | "Analytics" | "Risultati" |
-| Tab label | "Knowledge Base" | (merged into Impostazioni) |
-| Tab label | "Avanzate" | (merged into Impostazioni) |
-| Tab label | "Integrazioni" | (merged into Impostazioni) |
-| Tab label | "Chiamate Uscenti" | (merged into Impostazioni) |
-| Section heading | "Identità" | "Il tuo agente" |
-| Section heading | "Prompt & Conversazione" | "Comportamento" |
-| Label | "System Prompt" | "Istruzioni" |
-| Label | "Primo messaggio" | "Messaggio di apertura" |
-| Label | "Temperatura" | "Stile risposte" |
-| Label | "Modello LLM" | "Modello AI" |
-| Score label | "BLOCKER" | "Obbligatorio" |
-| Score label | "fattori completati" | "passaggi completati" |
-| Score weight | "20pt" | (remove — not useful to business users) |
-| Detail label | "EL Agent ID" | (hidden) |
-| Agent status | "draft" | "Bozza" |
-| Agent status | "inactive" | "Inattivo" |
-| Card metric | "0 chiamate" | "Nessuna attività" |
-| Filter | "Tutti gli stati" | replaced by pills |
-
-#### 8. Score Detail — Business-friendly language
-
-- Remove "pt" weight display
-- Replace "BLOCKER" with "Obbligatorio" in a softer style
-- Replace "fattori completati" with "passaggi completati"
-- Replace "blocker" count badge with "X passaggi obbligatori mancanti"
-
-### Files Modified
-
-1. **`src/components/agents/AgentCard.tsx`** — Status-first design, remove dead UI, hide zero metrics, readable score label
-2. **`src/pages/app/Agents.tsx`** — Status pill filters, improved empty states, better subtitle
-3. **`src/pages/app/AgentDetail.tsx`** — Reduce to 5 tabs, new Panoramica tab, merge settings tabs, simplified conversations table, business-oriented microcopy
-4. **`src/components/agents/AgentScoreDetail.tsx`** — Remove "pt", replace "BLOCKER" with "Obbligatorio", friendlier language
-5. **`src/components/agents/AgentScoreBadge.tsx`** — Show text label instead of just number in card context
-
+## 🔜 Prossimi Blocchi
+- SuperAdmin Dashboard economics
+- Integrazioni CRM native
+- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets

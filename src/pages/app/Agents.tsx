@@ -2,18 +2,28 @@ import { useState, useMemo } from "react";
 import { useCompanyId } from "@/hooks/useCompanyId";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Link, useNavigate } from "react-router-dom";
-import { Plus, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Plus, Search, RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AgentCard from "@/components/agents/AgentCard";
+import { computeAgentScore } from "@/lib/agent-score";
+
+type StatusFilter = "all" | "active" | "incomplete" | "draft";
+
+const STATUS_PILLS: { value: StatusFilter; label: string }[] = [
+  { value: "all", label: "Tutti" },
+  { value: "active", label: "Attivi" },
+  { value: "incomplete", label: "Da completare" },
+  { value: "draft", label: "Bozza" },
+];
 
 export default function AgentsPage() {
   const companyId = useCompanyId();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
   const { data: agents, isLoading } = useQuery({
     queryKey: ["company-agents", companyId],
@@ -28,13 +38,22 @@ export default function AgentsPage() {
     return (agents || []).filter((a) => {
       if (search && !a.name.toLowerCase().includes(search.toLowerCase())) return false;
       if (typeFilter !== "all" && (a.type || "vocal") !== typeFilter) return false;
-      if (statusFilter !== "all" && a.status !== statusFilter) return false;
+      if (statusFilter === "active" && a.status !== "active") return false;
+      if (statusFilter === "draft" && a.status !== "draft" && a.status !== "inactive") return false;
+      if (statusFilter === "incomplete") {
+        const score = computeAgentScore(a);
+        if (!score.hasBlockers) return false;
+      }
       return true;
     });
   }, [agents, search, typeFilter, statusFilter]);
 
   const activeCount = (agents || []).filter((a) => a.status === "active").length;
   const draftCount = (agents || []).filter((a) => a.status === "draft" || a.status === "inactive").length;
+  const incompleteCount = (agents || []).filter((a) => computeAgentScore(a).hasBlockers).length;
+
+  const hasFilters = search || typeFilter !== "all" || statusFilter !== "all";
+  const resetFilters = () => { setSearch(""); setTypeFilter("all"); setStatusFilter("all"); };
 
   return (
     <div className="space-y-6">
@@ -44,7 +63,8 @@ export default function AgentsPage() {
           <h1 className="text-[26px] font-extrabold text-foreground">Agenti AI</h1>
           {(agents?.length || 0) > 0 && (
             <p className="text-sm text-muted-foreground mt-0.5">
-              {activeCount} agenti attivi · {draftCount} in bozza
+              {activeCount} attiv{activeCount === 1 ? "o" : "i"} · {draftCount} in bozza
+              {incompleteCount > 0 && <> · <span className="text-status-warning">{incompleteCount} da completare</span></>}
             </p>
           )}
         </div>
@@ -56,40 +76,52 @@ export default function AgentsPage() {
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Cerca agente..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 text-sm"
-          />
+      {/* Status pills + Type filter + Search */}
+      <div className="space-y-3">
+        {/* Status pills */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {STATUS_PILLS.map((pill) => (
+            <button
+              key={pill.value}
+              onClick={() => setStatusFilter(pill.value)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                statusFilter === pill.value
+                  ? "bg-brand text-white"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              {pill.label}
+              {pill.value === "incomplete" && incompleteCount > 0 && (
+                <span className="ml-1 text-[10px] opacity-80">({incompleteCount})</span>
+              )}
+            </button>
+          ))}
         </div>
-        <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-[160px] text-sm">
-            <SelectValue placeholder="Tutti i tipi" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tutti i tipi</SelectItem>
-            <SelectItem value="vocal">🎙️ Vocale</SelectItem>
-            <SelectItem value="whatsapp">💬 WhatsApp</SelectItem>
-            <SelectItem value="render">🎨 Render</SelectItem>
-            <SelectItem value="operative">🔧 Operativo</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[160px] text-sm">
-            <SelectValue placeholder="Tutti gli stati" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tutti gli stati</SelectItem>
-            <SelectItem value="active">Attivi</SelectItem>
-            <SelectItem value="draft">Bozza</SelectItem>
-            <SelectItem value="inactive">Inattivi</SelectItem>
-          </SelectContent>
-        </Select>
+
+        {/* Search + Type */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Cerca agente..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 text-sm"
+            />
+          </div>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-[160px] text-sm">
+              <SelectValue placeholder="Tutti i tipi" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tutti i tipi</SelectItem>
+              <SelectItem value="vocal">Vocale</SelectItem>
+              <SelectItem value="whatsapp">WhatsApp</SelectItem>
+              <SelectItem value="render">Render</SelectItem>
+              <SelectItem value="operative">Operativo</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Grid */}
@@ -99,7 +131,6 @@ export default function AgentsPage() {
         <div className="rounded-card p-12 text-center border border-border bg-card shadow-card">
           {(agents?.length || 0) === 0 ? (
             <>
-              {/* Empty state with 3 type icons */}
               <div className="flex gap-4 justify-center mb-8">
                 <div className="w-16 h-16 rounded-full bg-brand-light flex items-center justify-center text-2xl">🎙️</div>
                 <div className="w-16 h-16 rounded-full bg-[hsl(142,60%,94%)] flex items-center justify-center text-2xl">💬</div>
@@ -116,19 +147,17 @@ export default function AgentsPage() {
               >
                 <Plus className="w-4 h-4" /> Scegli un Template
               </button>
-              <p className="text-sm text-muted-foreground mt-3">
-                <button
-                  onClick={() => navigate("/app/agents/new?category=vocali")}
-                  className="text-brand hover:underline"
-                >
-                  Più usato: Qualifica Lead Inbound →
-                </button>
-              </p>
             </>
           ) : (
             <>
               <p className="text-base font-medium text-foreground mb-2">Nessun risultato</p>
-              <p className="text-sm text-muted-foreground">Prova a cambiare i filtri.</p>
+              <p className="text-sm text-muted-foreground mb-4">Prova a cambiare i filtri di ricerca.</p>
+              <button
+                onClick={resetFilters}
+                className="inline-flex items-center gap-1.5 text-sm text-brand hover:underline font-medium"
+              >
+                <RotateCcw className="w-3.5 h-3.5" /> Reimposta filtri
+              </button>
             </>
           )}
         </div>
