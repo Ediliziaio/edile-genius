@@ -1,122 +1,193 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro
 
-## ✅ Completato in questo blocco
+# Riprogettazione Dashboard KPI — Edile Genius
 
-### Database Migration
-- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
-- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
-- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
-- RLS policies per tutte le nuove tabelle
+## 1. ANALISI DELLA DASHBOARD ATTUALE
 
-## ✅ Blocco 2 — Sistema Crediti Euro-based
+### Problemi trovati
 
-### Database
-- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
-- ai_credit_topups (ricariche manual/auto/promo/adjustment)
-- ai_credit_usage (consumo per conversazione con margini)
-- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
-- monthly_billing_summary view (security_invoker)
+**La dashboard attuale non è una dashboard KPI.** E' una schermata di stato/onboarding con 4 zone:
+- Hero con greeting + 3 status pills (agenti attivi, conversazioni mese, crediti)
+- Onboarding checklist OR smart actions (bozze, numeri mancanti, crediti bassi)
+- Griglia completa di tutte le AgentCard
+- Tabella ultime 5 conversazioni
 
-### Edge Functions
-- check-credits-before-call: verifica saldo pre-chiamata
-- topup-credits: ricarica manuale con fattura
-- elevenlabs-webhook: post-call billing, auto-recharge, blocco
-- platform-config: +apply_global_markup action
+**KPI deboli o assenti:**
+- "Conversazioni questo mese" è un numero grezzo senza contesto (0 su cosa? meglio o peggio del mese scorso?)
+- Zero KPI sui risultati commerciali (appuntamenti fissati, lead qualificati, preventivi recuperati)
+- Zero KPI sulla performance (tasso successo, durata media)
+- Il saldo crediti è mostrato come pill + nel sidebar — duplicato e senza contesto di consumo
+- Nessun trend o confronto temporale
+- Nessun alert proattivo oltre ai crediti
 
-### Frontend
-- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
-- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
-- Sidebar: footer saldo crediti con barra e alert
-- VoiceTestPanel: check crediti pre-chiamata con blocco UI
+**Problemi di gerarchia:**
+- Le AgentCard occupano il 60% dello spazio ma non mostrano KPI aggregati — sono solo una lista navigazione
+- La tabella "Attività Recente" mostra dati grezzi (durata in secondi, outcome tecnici) senza valore decisionale
+- L'onboarding checklist è utile solo al primo accesso, poi diventa rumore
 
-## ✅ Blocco 3-5 — Agent Templates System
+**Dati disponibili in Supabase che oggi non vengono usati in dashboard:**
+- `conversations.outcome` → appuntamenti (`appointment`), qualificati (`qualified`)
+- `conversations.duration_sec` → durata media
+- `conversations.direction` → inbound vs outbound
+- `agents.calls_month`, `agents.calls_total`, `agents.avg_duration_sec`
+- `ai_credits.balance_eur`, `ai_credits.total_spent_eur`
+- `ai_credit_usage` → costo per agente (già disponibile)
 
-### Database
-- agent_templates + agent_template_instances + agent_reports + company_channels
-- RLS policies PERMISSIVE (fix da RESTRICTIVE)
-- Funzione DB `increment_installs_count(tpl_id UUID)`
-- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+---
 
-### Edge Functions (CORS headers completi)
-- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
-- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
-- save-report: salva report in DB + aggiorna contatori istanza
+## 2. NUOVA STRUTTURA DELLA DASHBOARD
 
-### Frontend — Wizard 5 Step (TemplateSetup.tsx)
-- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + importa CSV con template scaricabile
-- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
-- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
+```text
+┌──────────────────────────────────────────────────────┐
+│  ZONA A — Hero sintetico (greeting + stato generale) │
+│  1 riga: nome utente + 3 status pills               │
+│  + banner alert se crediti bloccati                   │
+├──────────────────────────────────────────────────────┤
+│  ZONA B — KPI Principali (4 card grandi)             │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐│
+│  │Agenti    │ │Interaz.  │ │Appunt.   │ │Crediti   ││
+│  │Attivi    │ │Questo    │ │Fissati   │ │Rimasti   ││
+│  │          │ │Mese      │ │          │ │          ││
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘│
+├──────────────────────────────────────────────────────┤
+│  ZONA C — Da Fare Adesso (smart actions, max 3)      │
+│  Solo se ci sono azioni. Nascosto se tutto ok.       │
+├──────────────────────────────────────────────────────┤
+│  ZONA D — Risultati del Mese (breakdown outcomes)    │
+│  Mini chart orizzontale: appuntamenti, qualificati,  │
+│  non interessati, segreteria — con numeri             │
+├──────────────────────────────────────────────────────┤
+│  ZONA E — Attività Recente (5 righe, semplificata)   │
+│  Agente | Risultato | Quando                         │
+└──────────────────────────────────────────────────────┘
+```
 
-### SuperAdmin
-- /superadmin/templates: CRUD completo con JSON editor per config_schema
+**Cosa viene RIMOSSO dalla dashboard:**
+- La griglia completa AgentCard → spostata nella pagina `/app/agents` (dove già esiste). In dashboard mostrare solo un riassunto numerico.
+- L'onboarding checklist → mostrata SOLO se `agents.length === 0`. Una volta che l'utente ha almeno 1 agente, sparisce per sempre.
+- Colonna "Durata" dalla tabella recenti → dato tecnico, non utile all'imprenditore
+- Status pill "conversazioni questo mese" → diventa KPI card con più contesto
 
-## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+---
 
-### Database (5 tabelle)
-- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
-- RLS PERMISSIVE per tutte le tabelle
-- Trigger set_updated_at + init_render_credits su companies
-- Funzione deduct_render_credit
-- Storage buckets: render-originals (privato), render-results (pubblico)
+## 3. KPI CONSIGLIATI
 
-### Edge Functions
-- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
-- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+### KPI Card 1: Agenti Attivi
+- **Cosa misura:** Agenti con status "active" / totale agenti
+- **Perché è utile:** L'imprenditore capisce se i suoi agenti stanno lavorando
+- **Priorità:** P1
+- **Dove:** Zona B, prima card
+- **Formato:** "3 / 5 attivi" con icona verde se tutti attivi, giallo se alcuni inattivi
+- **Decisione:** "Devo completare/attivare qualcosa?"
 
-### Frontend
-- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
-- RenderConfig (/superadmin/render-config)
-- BeforeAfterSlider, promptBuilder.ts
+### KPI Card 2: Interazioni Questo Mese
+- **Cosa misura:** Count di `conversations` del mese corrente
+- **Perché è utile:** Volume di lavoro degli agenti
+- **Priorità:** P1
+- **Dove:** Zona B, seconda card
+- **Formato:** Numero grande + delta vs mese precedente (se disponibile, fetch mese-1)
+- **Decisione:** "I miei agenti stanno lavorando abbastanza?"
 
-## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
+### KPI Card 3: Appuntamenti Fissati
+- **Cosa misura:** Count di `conversations` con `outcome = 'appointment'` nel mese
+- **Perché è utile:** IL KPI più importante per un imprenditore edile. Appuntamenti = soldi.
+- **Priorità:** P1
+- **Dove:** Zona B, terza card
+- **Formato:** Numero grande con icona calendario, colore primario
+- **Decisione:** "L'AI sta portando risultati concreti?"
 
-### Database
-- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
-- Estensione `preventivi` con +26 colonne (template_id, versione, titolo, foto_sopralluogo_urls, foto_copertina_url, sconto_globale, imponibile, iva_importo, totale_finale, condizioni, clausole, intro, firma_testo, tempi_esecuzione, validita_giorni, data_scadenza, tracking_aperto_at/count, link_accettazione, firma_cliente_url, accettato_at, rifiutato_at, rifiuto_motivo, parent_id, inviato_at, inviato_via, cliente_piva, cliente_codice_fiscale)
-- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
-- Storage buckets: preventivi-media (privato), template-assets (pubblico)
-- RLS company-scoped + superadmin
+### KPI Card 4: Crediti Disponibili
+- **Cosa misura:** `ai_credits.balance_eur`
+- **Perché è utile:** Evitare blocchi, pianificare ricariche
+- **Priorità:** P1
+- **Dove:** Zona B, quarta card
+- **Formato:** €XX.XX con barra usage e colore condizionale (verde > €5, giallo €1-5, rosso < €1)
+- **Decisione:** "Devo ricaricare?"
 
-### Edge Functions
-- `process-preventivo-audio` RISCRITTO: prompt GPT esperto (prezzario DEI, categorie edilizie, sconti), nuovo formato voci con id/ordine/categoria/titolo_voce/sconto_percentuale/foto_urls/note_voce/evidenziata, calcolo totali con sconto e IVA, data_scadenza automatica
+### Sezione Risultati del Mese (Zona D)
+- **Cosa misura:** Breakdown degli outcome delle conversazioni del mese
+- **Priorità:** P1
+- **Formato:** 4-5 mini-pill orizzontali con conteggio: Appuntamenti (X), Qualificati (X), Richiamata (X), Non interessati (X), Segreteria (X)
+- **Decisione:** "Come sta andando la conversione?"
 
-### PDF Client-side (@react-pdf/renderer)
-- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4 con:
-  - Header azienda + logo
-  - Band titolo colorata (colore_primario)
-  - Grid cliente/riferimenti
-  - Testo intro
-  - Foto copertina
-  - Tabella voci per categoria con subtotali
-  - Totali con sconto globale + IVA
-  - Note, condizioni, clausole
-  - Sezione firma doppia (azienda + cliente)
-  - Footer pagina
+---
 
-### Frontend
-- **NuovoPreventivo.tsx** → Wizard 3 step:
-  - Step 1: dati cliente (nome, indirizzo, telefono, email, P.IVA, CF) + titolo/oggetto + cantiere
-  - Step 2: registrazione/upload audio + upload foto multiplo con grid preview e badge copertina
-  - Step 3: editor visuale voci per categoria (card editabili con titolo, descrizione, U.M., quantità, prezzo, sconto, totale) + totali live + scarica PDF anteprima
-- **PreventivoDetail.tsx** → 3 tabs:
-  - Dettaglio: voci per categoria con badge sconto, trascrizione collapsible, note/stato/tempi
-  - Cronologia: timeline eventi (creato, inviato, accettato/rifiutato)
-  - Tracking: KPI aperture, ultima apertura, ultimo invio
-  - Azioni: scarica PDF, modifica, elimina
-- **PreventiviList.tsx** → KPI cards (totale, bozze, in attesa, valore accettati) + filtri tab per stato + ricerca + lista con badge versione e scadenza
-- **TemplatePreventivo.tsx** (`/app/impostazioni/template-preventivo`): 3 tabs:
-  - Branding: logo upload, color picker primario/secondario con preview gradient, intestazione/piè di pagina
-  - Testi Standard: intro, condizioni, clausole, firma, validità giorni, IVA default
-  - Layout: 5 toggle (foto copertina, foto voci, subtotali categoria, firma, condizioni)
+## 4. KPI DA RIMUOVERE / NASCONDERE
 
-### Navigazione
-- Sidebar: aggiunto "Template PDF" nella sezione AUTOMAZIONI
-- Route: `/app/impostazioni/template-preventivo`
+| Elemento attuale | Azione | Motivo |
+|---|---|---|
+| Griglia completa AgentCard | **Rimuovere** dalla dashboard | Appartiene a `/app/agents`. Dashboard deve mostrare KPI, non navigazione. Un link "Vedi tutti gli agenti →" basta. |
+| Colonna "Durata" nella tabella recenti | **Rimuovere** | Dato tecnico irrilevante per l'imprenditore |
+| Onboarding checklist (quando hasAgents) | **Nascondere** | Dopo il primo agente, l'onboarding è completato. Le smart actions bastano. |
+| Status pill "conversazioni questo mese" | **Promuovere** a KPI card | La pill è troppo piccola per un dato così importante |
+| Status pill "agenti attivi" | **Promuovere** a KPI card | Idem |
+| Status pill "crediti" | **Promuovere** a KPI card | Il dato è già nel sidebar, ma in dashboard serve con più contesto |
 
-## 🔜 Prossimi Blocchi
-- SuperAdmin Dashboard economics
-- Integrazioni CRM native
-- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets
+---
+
+## 5. MIGLIORAMENTI UX
+
+### Lettura in 10 secondi
+L'imprenditore apre la dashboard e vede:
+1. **Greeting** → contesto personale (1 sec)
+2. **4 KPI card** → stato immediato del business (5 sec)
+3. **Alert/azioni** → solo se serve intervenire (2 sec)
+4. **Risultati** → breakdown performance (2 sec)
+
+### Microcopy migliorato
+- "Conversazioni" → "Interazioni gestite" (più business)
+- "Outcome: appointment" → "Appuntamento fissato"
+- "Outcome: qualified" → "Lead qualificato"
+- "Outcome: not_interested" → "Non interessato"
+- "Outcome: voicemail" → "Segreteria"
+- "Outcome: callback" → "Da richiamare"
+- Tabella recenti header: "Agente | Risultato | Quando" (rimuovere Durata)
+
+### Empty states
+- 0 interazioni: "I tuoi agenti non hanno ancora gestito interazioni questo mese. Verifica che siano attivi."
+- 0 appuntamenti: "Nessun appuntamento fissato questo mese."
+- 0 agenti: Onboarding checklist (mantenerlo solo in questo caso)
+
+---
+
+## 6. IMPLEMENTAZIONE TECNICA
+
+### File: `src/pages/app/Dashboard.tsx` — Riscrittura completa
+
+**Query da aggiungere:**
+- Conversazioni mese precedente (per delta %)
+- Breakdown outcome del mese corrente (count per outcome)
+
+**Struttura nuova del componente:**
+1. Hero greeting (semplificato, senza status pills)
+2. 4 KPI card grid (agenti attivi con ratio, interazioni mese con delta, appuntamenti fissati, crediti con barra)
+3. Smart actions (condizionale, max 3)
+4. Sezione "Risultati del Mese" — pill orizzontali per outcome
+5. Tabella "Attività Recente" — 3 colonne: Agente, Risultato, Quando
+6. Onboarding checklist — solo se 0 agenti (come oggi, nessun cambiamento)
+
+**Rimozione:**
+- Griglia AgentCard completa → solo un link "Vedi tutti gli agenti"
+- Status pills → sostituiti da KPI card
+
+Nessun altro file da modificare. La dashboard è contenuta interamente in `Dashboard.tsx`.
+
+---
+
+## 7. PRIORITÀ
+
+**P1 — Implementare ora:**
+- 4 KPI card (agenti attivi, interazioni mese, appuntamenti fissati, crediti)
+- Rimuovere griglia AgentCard dalla dashboard
+- Sezione "Risultati del Mese" con breakdown outcome
+- Tabella recenti semplificata (3 colonne)
+- Microcopy business-oriented
+
+**P2 — Dopo:**
+- Delta % vs mese precedente sulle KPI card
+- Mini sparkline nelle card (richiede dati giornalieri)
+
+**P3 — Successivo:**
+- KPI "Costo per appuntamento" (richiede join credits + outcomes)
+- KPI per agente nella dashboard (breakdown)
+
