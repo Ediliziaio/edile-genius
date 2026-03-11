@@ -190,6 +190,20 @@ export default function AppDashboard() {
     },
   });
 
+  // ── AI Morning Briefing ──
+  const { data: briefingData, isLoading: briefingLoading, refetch: refetchBriefing } = useQuery({
+    queryKey: ["ai-briefing", companyId],
+    enabled: !!companyId,
+    staleTime: 1000 * 60 * 30, // cache 30 min
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke("ai-morning-briefing");
+      if (error) throw error;
+      return data as { briefing: string };
+    },
+  });
+
+  const [briefingExpanded, setBriefingExpanded] = useState(true);
+
   // ── Derived data ──
   const totalAgents = agents?.length ?? 0;
   const activeAgents = agents?.filter((a) => a.status === "active").length ?? 0;
