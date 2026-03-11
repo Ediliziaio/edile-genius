@@ -171,6 +171,24 @@ export default function AppDashboard() {
     },
   });
 
+  // Dormant qualified leads (qualified but no contact in 5+ days)
+  const { data: dormantLeads } = useQuery({
+    queryKey: ["smart-dormant-leads", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
+      const { data } = await supabase
+        .from("contacts")
+        .select("id, full_name, status, last_contact_at")
+        .eq("company_id", companyId!)
+        .eq("status", "qualified")
+        .lt("last_contact_at", fiveDaysAgo)
+        .order("last_contact_at", { ascending: true })
+        .limit(5);
+      return data || [];
+    },
+  });
+
   // ── Derived data ──
   const totalAgents = agents?.length ?? 0;
   const activeAgents = agents?.filter((a) => a.status === "active").length ?? 0;
