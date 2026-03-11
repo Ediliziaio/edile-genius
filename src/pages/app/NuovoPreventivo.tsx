@@ -100,6 +100,26 @@ export default function NuovoPreventivo() {
     },
   });
 
+  // Auto-save every 30s if dirty and has an ID
+  useEffect(() => {
+    if (!preventivoId) return;
+    const interval = setInterval(async () => {
+      if (!dirtyRef.current) return;
+      dirtyRef.current = false;
+      const sub = Number(voci.reduce((s, v) => s + v.totale, 0).toFixed(2));
+      const sGlob = Number((sub * (scontoGlobalePerc / 100)).toFixed(2));
+      const imp = Number((sub - sGlob).toFixed(2));
+      const ivaP = templateConfig?.iva_percentuale_default || 22;
+      const ivaI = Number((imp * (ivaP / 100)).toFixed(2));
+      const tot = Number((imp + ivaI).toFixed(2));
+      const { error } = await (supabase.from("preventivi") as any)
+        .update({ voci, subtotale: sub, imponibile: imp, iva_importo: ivaI, totale: tot, totale_finale: tot, note: noteGenerali, oggetto, titolo })
+        .eq("id", preventivoId);
+      if (!error) toast.success("Bozza salvata automaticamente", { duration: 2000 });
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, [preventivoId, voci, scontoGlobalePerc, noteGenerali, oggetto, titolo, templateConfig]);
+
   // Audio recording
   const startRecording = async () => {
     try {
