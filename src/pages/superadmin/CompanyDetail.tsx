@@ -40,8 +40,8 @@ export default function CompanyDetail() {
   const [editSector, setEditSector] = useState("");
   const [editPlan, setEditPlan] = useState("");
   const [editStatus, setEditStatus] = useState("");
-  const [editApiKey, setEditApiKey] = useState("");
-  const [showApiKey, setShowApiKey] = useState(false);
+
+
 
   useEffect(() => {
     if (!id) return;
