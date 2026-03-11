@@ -274,7 +274,7 @@ export default function CreateAgent() {
           <div className="relative w-80 hidden md:block shrink-0 mt-6">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-400" />
             <Input
-              placeholder="Cerca template..."
+              placeholder="Cerca per obiettivo..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 bg-ink-50 border-ink-200 text-sm"
