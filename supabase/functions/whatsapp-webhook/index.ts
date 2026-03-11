@@ -1,20 +1,12 @@
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { corsHeaders, generateRequestId, log } from "../_shared/utils.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const rid = generateRequestId();
+  const FN = "whatsapp-webhook";
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-  );
+  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
   try {
     const url = new URL(req.url);
@@ -25,72 +17,55 @@ serve(async (req) => {
       const token = url.searchParams.get("hub.verify_token");
       const challenge = url.searchParams.get("hub.challenge");
 
-      const { data: config } = await supabase
-        .from("superadmin_whatsapp_config")
-        .select("webhook_verify_token")
-        .limit(1)
-        .single();
+      const { data: config } = await supabase.from("superadmin_whatsapp_config").select("webhook_verify_token").limit(1).single();
 
       if (mode === "subscribe" && token === config?.webhook_verify_token) {
+        log("info", "Webhook verified", { request_id: rid, fn: FN });
         return new Response(challenge, { status: 200, headers: corsHeaders });
       }
+      log("warn", "Webhook verification failed", { request_id: rid, fn: FN });
       return new Response("Forbidden", { status: 403, headers: corsHeaders });
     }
 
     // POST — Process Meta webhook events
     if (req.method === "POST") {
       const payload = await req.json();
+      let messagesProcessed = 0;
+      let statusesProcessed = 0;
 
       for (const entry of payload.entry ?? []) {
         for (const change of entry.changes ?? []) {
           const value = change.value;
 
-          // Inbound messages
           if (value?.messages) {
             for (const msg of value.messages) {
               const phoneNumberId = value.metadata?.phone_number_id;
               if (!phoneNumberId) continue;
 
-              // Find the company that owns this phone number
-              const { data: phoneNum } = await supabase
-                .from("whatsapp_phone_numbers")
-                .select("company_id")
-                .eq("phone_number_id", phoneNumberId)
-                .single();
+              const { data: phoneNum } = await supabase.from("whatsapp_phone_numbers").select("company_id").eq("phone_number_id", phoneNumberId).single();
+              if (!phoneNum) {
+                log("warn", "Unknown phone number in webhook", { request_id: rid, fn: FN, phone_number_id: phoneNumberId });
+                continue;
+              }
 
-              if (!phoneNum) continue;
-
-              // Upsert conversation
               const contactPhone = msg.from;
-              const { data: conv } = await supabase
-                .from("whatsapp_conversations")
-                .upsert({
-                  company_id: phoneNum.company_id,
-                  phone_number_id: phoneNumberId,
-                  contact_phone: contactPhone,
-                  status: "open",
-                  last_message_at: new Date().toISOString(),
-                  unread_count: 1,
-                }, { onConflict: "company_id,phone_number_id,contact_phone", ignoreDuplicates: false })
-                .select("id")
-                .single();
+              const { data: conv } = await supabase.from("whatsapp_conversations").upsert({
+                company_id: phoneNum.company_id, phone_number_id: phoneNumberId,
+                contact_phone: contactPhone, status: "open",
+                last_message_at: new Date().toISOString(), unread_count: 1,
+              }, { onConflict: "company_id,phone_number_id,contact_phone", ignoreDuplicates: false }).select("id").single();
 
-              // Save message
               await supabase.from("whatsapp_messages").insert({
-                company_id: phoneNum.company_id,
-                phone_number_id: phoneNumberId,
-                conversation_id: conv?.id,
-                meta_message_id: msg.id,
-                direction: "inbound",
-                type: msg.type || "text",
+                company_id: phoneNum.company_id, phone_number_id: phoneNumberId,
+                conversation_id: conv?.id, meta_message_id: msg.id,
+                direction: "inbound", type: msg.type || "text",
                 content: msg.text ? { body: msg.text.body } : msg,
-                status: "delivered",
-                sent_at: new Date(parseInt(msg.timestamp) * 1000).toISOString(),
+                status: "delivered", sent_at: new Date(parseInt(msg.timestamp) * 1000).toISOString(),
               });
+              messagesProcessed++;
             }
           }
 
-          // Status updates (sent/delivered/read/failed)
           if (value?.statuses) {
             for (const status of value.statuses) {
               const updateData: Record<string, any> = { status: status.status };
@@ -100,23 +75,20 @@ serve(async (req) => {
                 updateData.error_code = status.errors[0].code;
                 updateData.error_message = status.errors[0].title;
               }
-
-              await supabase
-                .from("whatsapp_messages")
-                .update(updateData)
-                .eq("meta_message_id", status.id);
+              await supabase.from("whatsapp_messages").update(updateData).eq("meta_message_id", status.id);
+              statusesProcessed++;
             }
           }
         }
       }
 
-      // Always return 200 to Meta
+      log("info", "Webhook processed", { request_id: rid, fn: FN, messages: messagesProcessed, statuses: statusesProcessed });
       return new Response("OK", { status: 200, headers: corsHeaders });
     }
 
     return new Response("Method not allowed", { status: 405, headers: corsHeaders });
   } catch (err) {
-    console.error("Webhook error:", err);
+    log("error", "Webhook error", { request_id: rid, fn: FN, error: err instanceof Error ? err.message : "unknown" });
     // Always 200 to Meta to avoid retries
     return new Response("OK", { status: 200, headers: corsHeaders });
   }
