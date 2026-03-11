@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { ArrowLeft, Save, Loader2, Power, Phone, Clock, Bot, Mic, MessageSquare, BarChart3, BookOpen, Settings2, Plug, PhoneCall, PhoneOutgoing } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -117,6 +117,7 @@ export default function AgentDetail() {
   const [cfg, setCfg] = useState<ConfigState | null>(null);
   const [viewTranscript, setViewTranscript] = useState<Tables<"conversations"> | null>(null);
   const [dirty, setDirty] = useState(false);
+  const [initializedForId, setInitializedForId] = useState<string | null>(null);
 
   const update = useCallback(<K extends keyof ConfigState>(key: K, value: ConfigState[K]) => {
     setCfg(prev => prev ? { ...prev, [key]: value } : prev);
@@ -133,7 +134,14 @@ export default function AgentDetail() {
     queryFn: async () => { const { data, error } = await supabase.from("conversations").select("*").eq("agent_id", id!).order("started_at", { ascending: false }).limit(50); if (error) throw error; return data; },
   });
 
-  if (agent && !cfg) setCfg(buildConfigState(agent));
+  // Initialize config from agent data via useEffect (not during render)
+  useEffect(() => {
+    if (agent && agent.id !== initializedForId) {
+      setCfg(buildConfigState(agent));
+      setDirty(false);
+      setInitializedForId(agent.id);
+    }
+  }, [agent, initializedForId]);
 
   const handleSave = async () => {
     if (!cfg || !id) return;
