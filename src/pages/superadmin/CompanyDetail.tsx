@@ -51,7 +51,7 @@ export default function CompanyDetail() {
         supabase.from("agents").select("*").eq("company_id", id),
         supabase.from("conversations").select("id", { count: "exact", head: true }).eq("company_id", id),
       ]);
-      if (compRes.data) { setCompany(compRes.data); setEditName(compRes.data.name); setEditSector(compRes.data.sector || ""); setEditPlan(compRes.data.plan || "starter"); setEditStatus(compRes.data.status || "active"); setEditApiKey((compRes.data as any).el_api_key || ""); }
+      if (compRes.data) { setCompany(compRes.data); setEditName(compRes.data.name); setEditSector(compRes.data.sector || ""); setEditPlan(compRes.data.plan || "starter"); setEditStatus(compRes.data.status || "active"); }
       setAgents(agentsRes.data || []);
       setConversationsCount(convsRes.count || 0);
       setLoading(false);
