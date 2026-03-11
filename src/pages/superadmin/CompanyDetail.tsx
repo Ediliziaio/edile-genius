@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import StatsCard from "@/components/superadmin/StatsCard";
-import { ArrowLeft, Bot, Phone, MessageSquare, Eye, EyeOff, Save, Loader2, UserCheck } from "lucide-react";
+import { ArrowLeft, Bot, Phone, MessageSquare, Save, Loader2, UserCheck } from "lucide-react";
 import { useImpersonation } from "@/context/ImpersonationContext";
 import type { Tables } from "@/integrations/supabase/types";
 
