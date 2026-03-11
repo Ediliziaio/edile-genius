@@ -3,12 +3,12 @@ import { useAuth } from "@/context/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { it } from "date-fns/locale";
 import {
   Phone, Mail, Loader2, MessageSquare, StickyNote, Activity,
   User, Building2, MapPin, Calendar, Clock, Tag, Trash2, Edit3,
-  FileText
+  FileText, Sparkles, Copy
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
