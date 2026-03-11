@@ -570,9 +570,9 @@ export default function ContactsPage() {
                   <TableHead className="text-ink-500">Azienda</TableHead>
                   <TableHead className="text-ink-500">Telefono</TableHead>
                   <TableHead className="text-ink-500">Email</TableHead>
+                  <TableHead className="text-ink-500">Score</TableHead>
                   <TableHead className="text-ink-500">Stato</TableHead>
                   <TableHead className="text-ink-500">Priorità</TableHead>
-                  <TableHead className="text-ink-500">Fonte</TableHead>
                   <TableHead className="text-ink-500">Creato</TableHead>
                   <TableHead className="w-[40px]" />
                 </TableRow>
