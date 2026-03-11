@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
-  Eye, EyeOff, Save, Loader2, CheckCircle2, Plus, Trash2, Send, Globe, History,
+  Save, Loader2, CheckCircle2, Plus, Trash2, Send, Globe, History,
   RefreshCw, Link2, Unlink, Download, XCircle, CheckCircle
 } from "lucide-react";
 import type { Json } from "@/integrations/supabase/types";
