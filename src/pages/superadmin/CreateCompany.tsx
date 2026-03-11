@@ -167,10 +167,11 @@ export default function CreateCompany() {
 
         {step === 2 && (
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-ink-900">ElevenLabs API Key</Label>
-              <Input type="password" value={form.el_api_key} onChange={(e) => updateField("el_api_key", e.target.value)} placeholder="xi-..." className="bg-ink-50 border-ink-200 text-ink-900" />
-              <p className="text-xs text-ink-400">Opzionale. Puoi configurarla anche in seguito.</p>
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-status-success-light border border-status-success/20">
+              <div>
+                <p className="text-sm font-medium text-ink-900">ElevenLabs API — Gestita centralmente</p>
+                <p className="text-sm text-ink-500 mt-1">La chiave API ElevenLabs è configurata come secret di piattaforma. Non è necessario inserirla per singola azienda.</p>
+              </div>
             </div>
           </div>
         )}
