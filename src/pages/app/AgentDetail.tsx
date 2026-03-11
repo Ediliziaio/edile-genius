@@ -22,6 +22,9 @@ import AgentAnalyticsTab from "@/components/agents/AgentAnalyticsTab";
 import AgentKnowledgeTab from "@/components/agents/AgentKnowledgeTab";
 import AgentPhoneTab from "@/components/agents/AgentPhoneTab";
 import AgentOutboundTab from "@/components/agents/AgentOutboundTab";
+import AgentScoreBadge from "@/components/agents/AgentScoreBadge";
+import AgentScoreDetail from "@/components/agents/AgentScoreDetail";
+import { computeAgentScore } from "@/lib/agent-score";
 import { SECTORS, LANGUAGES } from "@/components/agents/PromptTemplates";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
@@ -203,6 +206,7 @@ export default function AgentDetail() {
                   {agent.type === "vocal" ? "🎙️ Vocale" : agent.type === "whatsapp" ? "💬 WhatsApp" : agent.type === "render" ? "🎨 Render" : agent.type}
                 </Badge>
               )}
+              <AgentScoreBadge result={computeAgentScore(agent)} size="md" />
             </div>
             {agent.description && <p className="text-sm text-muted-foreground">{agent.description}</p>}
           </div>
@@ -293,6 +297,7 @@ export default function AgentDetail() {
 
               {/* Sidebar stats */}
               <div className="space-y-4">
+                <AgentScoreDetail agent={agent} />
                 {[
                   { label: "Chiamate totali", value: agent.calls_total ?? 0, icon: Phone },
                   { label: "Questo mese", value: (agent as any).calls_month ?? 0, icon: Phone },

@@ -2,6 +2,8 @@ import { Phone, MoreVertical, Activity, Paintbrush, MessageSquare } from "lucide
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
+import { computeAgentScore } from "@/lib/agent-score";
+import AgentScoreBadge from "@/components/agents/AgentScoreBadge";
 
 interface AgentCardProps {
   agent: Tables<"agents">;
@@ -84,22 +86,21 @@ export default function AgentCard({ agent, onClick }: AgentCardProps) {
             <p className="text-xs mb-3 line-clamp-2 text-muted-foreground">{agent.description}</p>
           )}
 
-          {/* Contextual metrics per type */}
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            {(agent.type === "render") ? (
-              <>
+          {/* Contextual metrics per type + score */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              {(agent.type === "render") ? (
                 <span className="flex items-center gap-1"><Paintbrush className="w-3 h-3" /> {agent.calls_total ?? 0} render</span>
-              </>
-            ) : (agent.type === "whatsapp") ? (
-              <>
+              ) : (agent.type === "whatsapp") ? (
                 <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" /> {agent.calls_total ?? 0} conversazioni</span>
-              </>
-            ) : (
-              <>
-                <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {agent.calls_total ?? 0} chiamate</span>
-                <span className="flex items-center gap-1"><Activity className="w-3 h-3" /> {(agent as any).calls_month ?? 0}/mese</span>
-              </>
-            )}
+              ) : (
+                <>
+                  <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {agent.calls_total ?? 0} chiamate</span>
+                  <span className="flex items-center gap-1"><Activity className="w-3 h-3" /> {(agent as any).calls_month ?? 0}/mese</span>
+                </>
+              )}
+            </div>
+            <AgentScoreBadge result={computeAgentScore(agent)} />
           </div>
         </div>
       </div>

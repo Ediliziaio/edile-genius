@@ -1,9 +1,11 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { LANGUAGES } from "@/components/agents/PromptTemplates";
 import { MessageSquare, Play, Square, Loader2, Mic, Volume2, Wrench, Shield, FileText, Globe } from "lucide-react";
 import VoiceTestPanel from "@/components/agents/VoiceTestPanel";
+import AgentScoreDetail from "@/components/agents/AgentScoreDetail";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { Tables } from "@/integrations/supabase/types";
 
 interface StepReviewProps {
   form: any;
@@ -143,12 +145,35 @@ export default function StepReview({ form, update, companyId, onCreateDraft }: S
     },
   ];
 
+  // Build a pseudo-agent row for scoring from the wizard form
+  const pseudoAgent = useMemo(() => ({
+    id: "",
+    company_id: companyId || "",
+    name: form.name || "",
+    description: form.description || null,
+    system_prompt: form.system_prompt || null,
+    first_message: form.first_message || null,
+    el_voice_id: form.voice_id || null,
+    el_agent_id: null,
+    sector: form.sector || null,
+    calls_total: 0,
+    el_phone_number_id: null,
+    phone_number_id: null,
+    webhook_url: form.webhook_url || null,
+    evaluation_criteria: form.evaluation_criteria || null,
+    type: "vocal",
+    status: form.status || "draft",
+  } as unknown as Tables<"agents">), [form, companyId]);
+
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold text-ink-900">Revisione & Test</h2>
         <p className="text-sm text-ink-400 mt-1">Controlla le impostazioni, ascolta l'anteprima e testa l'agente.</p>
       </div>
+
+      {/* Scorecard */}
+      <AgentScoreDetail agent={pseudoAgent} defaultOpen />
 
       {/* First Message Preview + TTS */}
       {form.first_message && (
