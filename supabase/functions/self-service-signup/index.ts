@@ -6,6 +6,8 @@ import { corsHeaders, generateRequestId, log, jsonOk, jsonError, errorResponse }
  * Called right after signUp() creates the auth.users row.
  * Creates the company + links the profile to it.
  * The handle_new_user trigger already creates the profile + company_user role.
+ *
+ * SECURITY: user_id is derived from JWT, not from request body.
  */
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -13,15 +15,41 @@ Deno.serve(async (req) => {
   const FN = "self-service-signup";
 
   try {
-    const { company_name, user_id, full_name } = await req.json();
-    if (!company_name || !user_id) {
-      return jsonError("company_name and user_id required", "validation_error", 400, rid);
+    const { company_name, full_name } = await req.json();
+    if (!company_name) {
+      return jsonError("company_name required", "validation_error", 400, rid);
     }
+
+    // Derive user_id from JWT (secure)
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return jsonError("Unauthorized", "auth_error", 401, rid);
+    }
+
+    const supabaseAuth = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return jsonError("Unauthorized", "auth_error", 401, rid);
+    }
+
+    const user_id = claimsData.claims.sub as string;
 
     const sb = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
+    // Check if user already has a company (prevent duplicate provisioning)
+    const { data: existingProfile } = await sb.from("profiles").select("company_id").eq("id", user_id).single();
+    if (existingProfile?.company_id) {
+      return jsonOk({ company_id: existingProfile.company_id, slug: "existing" }, rid);
+    }
 
     // Generate slug from company name
     const slug = company_name

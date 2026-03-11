@@ -48,7 +48,7 @@ export default function Signup() {
 
       // 2. Auto-provision company via edge function
       const { error: provError } = await supabase.functions.invoke("self-service-signup", {
-        body: { company_name: companyName, user_id: authData.user.id, full_name: fullName },
+        body: { company_name: companyName, full_name: fullName },
       });
 
       if (provError) {
