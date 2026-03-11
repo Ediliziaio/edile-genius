@@ -232,7 +232,7 @@ export default function PreventivoDetail() {
               </Button>
             )}
           </PDFDownloadLink>
-          {prev.stato === "bozza" && prev.cliente_email && (
+          {(prev.stato === "bozza" || prev.stato === "inviato") && prev.cliente_email && (
             <Button
               variant="outline"
               className="gap-2"
@@ -240,11 +240,11 @@ export default function PreventivoDetail() {
                 await (supabase.from("preventivi") as any)
                   .update({ stato: "inviato", data_invio: new Date().toISOString(), invio_email: prev.cliente_email })
                   .eq("id", id);
-                toast.success(`Preventivo segnato come inviato a ${prev.cliente_email}`);
+                toast.success(`Preventivo ${prev.stato === "inviato" ? "rinviato" : "inviato"} a ${prev.cliente_email}`);
                 qc.invalidateQueries({ queryKey: ["preventivo", id] });
               }}
             >
-              <Send className="h-4 w-4" /> Invia al cliente
+              <Send className="h-4 w-4" /> {prev.stato === "inviato" ? "Rinvia al cliente" : "Invia al cliente"}
             </Button>
           )}
           {editing ? (

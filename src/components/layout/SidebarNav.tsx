@@ -247,7 +247,7 @@ export default function SidebarNav({ onNavigate }: SidebarNavProps) {
         <div className="mt-auto border-t border-border px-4 py-4 space-y-2">
           <p className="text-[10px] font-mono font-semibold tracking-wide text-muted-foreground uppercase">Saldo Crediti</p>
           <p className={`text-base font-extrabold ${balanceColor}`}>
-            €{creditInfo.balance_eur.toFixed(2)}
+            €{Number(creditInfo?.balance_eur ?? 0).toFixed(2)}
           </p>
           <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
             <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${Math.min(usagePct, 100)}%` }} />
