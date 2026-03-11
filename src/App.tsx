@@ -8,6 +8,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ImpersonationProvider } from "@/context/ImpersonationContext";
 import ScrollToTop from "./components/ScrollToTop";
 import { Loader2 } from "lucide-react";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 // Eagerly loaded (landing + auth)
 import Index from "./pages/Index";
@@ -16,6 +17,10 @@ import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import AuthGuard from "./components/auth/AuthGuard";
 import Shell from "./components/layout/Shell";
+
+// Auth pages (lazy)
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 // Lazy-loaded marketing pages
 const Solutions = lazy(() => import("./pages/Solutions"));
