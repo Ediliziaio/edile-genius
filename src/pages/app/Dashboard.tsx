@@ -156,7 +156,7 @@ export default function AppDashboard() {
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
       const { data } = await supabase
         .from("preventivi" as any)
-        .select("id, numero, titolo, stato, cliente_nome, created_at, inviato_at")
+        .select("id, numero_preventivo, oggetto, stato, cliente_nome, created_at, inviato_at")
         .eq("company_id", companyId!)
         .in("stato", ["bozza", "inviato"])
         .lt("created_at", sevenDaysAgo)
