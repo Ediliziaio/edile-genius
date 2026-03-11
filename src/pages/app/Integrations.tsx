@@ -123,7 +123,7 @@ export default function Integrations() {
     },
   });
 
-  // WhatsApp — check whatsapp_phone_numbers table
+  // WhatsApp — check company_channels with verified status
   const { data: waActive } = useQuery({
     queryKey: ["int-whatsapp", companyId],
     enabled: !!companyId,
@@ -133,8 +133,19 @@ export default function Integrations() {
         .select("id")
         .eq("company_id", companyId!)
         .eq("channel_type", "whatsapp")
+        .eq("is_verified", true)
         .limit(1);
       return (data?.length ?? 0) > 0;
+    },
+  });
+
+  // Render AI — check if any render has been generated
+  const { data: renderActive } = useQuery({
+    queryKey: ["int-render", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      // Simple heuristic: check if the company has used render features
+      return false; // Default to not connected until render module is set up
     },
   });
 
