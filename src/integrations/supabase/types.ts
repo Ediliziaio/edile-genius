@@ -3913,6 +3913,14 @@ export type Database = {
       }
     }
     Functions: {
+      deduct_call_credits: {
+        Args: { _company_id: string; _cost_billed: number; _cost_real: number }
+        Returns: {
+          balance_after: number
+          balance_before: number
+          was_blocked: boolean
+        }[]
+      }
       deduct_render_credit: {
         Args: { _company_id: string }
         Returns: undefined
