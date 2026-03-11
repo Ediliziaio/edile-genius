@@ -3,8 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useCallback, useEffect } from "react";
-import { ArrowLeft, Save, Loader2, Power, Phone, Clock, Bot, Mic, MessageSquare, BarChart3, Settings2 } from "lucide-react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { ArrowLeft, Save, Loader2, Power, Phone, Clock, Bot, Mic, MessageSquare, BarChart3, Settings2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -104,6 +104,88 @@ function buildConfigState(agent: any): ConfigState {
     evaluation_criteria: (cfg.evaluation_criteria as string) || "",
     webhook_url: (cfg.webhook_url as string) || agent.webhook_url || "",
   };
+}
+
+/* ── Inline Edit Components ─────────────────────────── */
+
+function InlineEditName({ value, onSave }: { value: string; onSave: (v: string) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setDraft(value); }, [value]);
+  useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
+
+  const commit = () => {
+    setEditing(false);
+    if (draft.trim() && draft !== value) onSave(draft.trim());
+    else setDraft(value);
+  };
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={e => { if (e.key === "Enter") commit(); if (e.key === "Escape") { setDraft(value); setEditing(false); } }}
+        className="text-xl font-bold text-foreground bg-transparent border-b-2 border-primary outline-none w-full py-1"
+      />
+    );
+  }
+
+  return (
+    <h2
+      onClick={() => setEditing(true)}
+      className="group text-xl font-bold text-foreground cursor-pointer flex items-center gap-2 py-1 rounded-md hover:bg-muted/50 transition-colors px-1 -mx-1"
+    >
+      {value || "Senza nome"}
+      <Pencil className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+    </h2>
+  );
+}
+
+function InlineEditDescription({ value, onSave }: { value: string; onSave: (v: string) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => { setDraft(value); }, [value]);
+  useEffect(() => { if (editing) textareaRef.current?.focus(); }, [editing]);
+
+  const commit = () => {
+    setEditing(false);
+    if (draft !== value) onSave(draft);
+  };
+
+  if (editing) {
+    return (
+      <textarea
+        ref={textareaRef}
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={e => { if (e.key === "Escape") { setDraft(value); setEditing(false); } }}
+        className="text-sm text-muted-foreground bg-transparent border border-border rounded-md outline-none focus:ring-1 focus:ring-ring w-full py-2 px-2 min-h-[60px] resize-none"
+        placeholder="Aggiungi una descrizione..."
+      />
+    );
+  }
+
+  return (
+    <p
+      onClick={() => setEditing(true)}
+      className="group text-sm text-muted-foreground cursor-pointer flex items-start gap-2 rounded-md hover:bg-muted/50 transition-colors py-1 px-1 -mx-1"
+    >
+      {value ? (
+        <span>{value}</span>
+      ) : (
+        <span className="italic text-muted-foreground/60">Clicca per aggiungere una descrizione...</span>
+      )}
+      <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mt-0.5 shrink-0" />
+    </p>
+  );
 }
 
 /* ── Component ─────────────────────────────────────── */
@@ -237,29 +319,25 @@ export default function AgentDetail() {
             <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
               {/* Main column */}
               <div className="space-y-6">
-                {/* Identity card */}
-                <section className="rounded-card p-5 bg-card border border-border shadow-card space-y-4">
-                  <h3 className="text-sm font-semibold text-foreground">Il tuo agente</h3>
-                  <div className="space-y-2">
-                    <Label>Nome</Label>
-                    <Input value={cfg.name} onChange={e => update("name", e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Descrizione</Label>
-                    <Textarea value={cfg.description} onChange={e => update("description", e.target.value)} className="min-h-[60px]" placeholder="Cosa fa questo agente?" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Settore</Label>
+                {/* Inline-editable identity */}
+                <section className="space-y-3">
+                  {/* Inline name */}
+                  <InlineEditName value={cfg.name} onSave={(v) => update("name", v)} />
+                  {/* Inline description */}
+                  <InlineEditDescription value={cfg.description} onSave={(v) => update("description", v)} />
+                  {/* Compact sector/language badges */}
+                  <div className="flex flex-wrap items-center gap-3 pt-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-muted-foreground">Settore:</span>
                       <Select value={cfg.sector} onValueChange={v => update("sector", v)}>
-                        <SelectTrigger><SelectValue placeholder="Seleziona" /></SelectTrigger>
+                        <SelectTrigger className="h-7 text-xs border-dashed w-auto min-w-[100px]"><SelectValue placeholder="Seleziona" /></SelectTrigger>
                         <SelectContent>{SECTORS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Lingua</Label>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-muted-foreground">Lingua:</span>
                       <Select value={cfg.language} onValueChange={v => update("language", v)}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="h-7 text-xs border-dashed w-auto min-w-[80px]"><SelectValue /></SelectTrigger>
                         <SelectContent>{LANGUAGES.map(l => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
