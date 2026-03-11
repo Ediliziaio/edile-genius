@@ -95,7 +95,7 @@ export default function CantiereDetail() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-3 mb-1">
             <HardHat className="h-6 w-6 text-primary" />
