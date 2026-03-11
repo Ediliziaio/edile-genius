@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Send, Check, AlertTriangle, Image } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Check, AlertTriangle, Image, Download, X } from "lucide-react";
 import { useState } from "react";
 
 interface Props {
@@ -11,11 +11,21 @@ interface Props {
   onOpenChange: (open: boolean) => void;
 }
 
+function safeDateFormat(dateStr: string | null | undefined): string {
+  if (!dateStr) return "";
+  try {
+    return new Date(dateStr).toLocaleDateString("it-IT");
+  } catch {
+    return "";
+  }
+}
+
 export default function ReportDetailModal({ report, open, onOpenChange }: Props) {
   const [transcriptOpen, setTranscriptOpen] = useState(false);
-  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const r = report as any;
+  const photos: string[] = r.foto_urls || [];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -127,19 +137,19 @@ export default function ReportDetailModal({ report, open, onOpenChange }: Props)
           )}
 
           {/* Photos */}
-          {r.foto_urls?.length > 0 && (
+          {photos.length > 0 && (
             <div>
               <p className="text-sm font-medium mb-2 flex items-center gap-1">
-                <Image className="h-4 w-4" /> Foto ({r.foto_urls.length})
+                <Image className="h-4 w-4" /> Foto ({photos.length})
               </p>
               <div className="grid grid-cols-3 gap-2">
-                {r.foto_urls.map((url: string, i: number) => (
+                {photos.map((url: string, i: number) => (
                   <img
                     key={i}
                     src={url}
                     alt={`Foto ${i + 1}`}
                     className="rounded-lg object-cover aspect-square cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={() => setSelectedPhoto(url)}
+                    onClick={() => setLightboxIndex(i)}
                   />
                 ))}
               </div>
@@ -149,22 +159,73 @@ export default function ReportDetailModal({ report, open, onOpenChange }: Props)
           {/* Email status */}
           <div className="border-t pt-3 flex items-center justify-between text-sm">
             {r.email_inviata ? (
-              <span className="flex items-center gap-1 text-primary"><Check className="h-4 w-4" /> Email inviata {r.email_inviata_at ? `il ${new Date(r.email_inviata_at).toLocaleDateString("it-IT")}` : ""}</span>
+              <span className="flex items-center gap-1 text-primary">
+                <Check className="h-4 w-4" /> Email inviata {safeDateFormat(r.email_inviata_at) ? `il ${safeDateFormat(r.email_inviata_at)}` : ""}
+              </span>
             ) : (
               <span className="text-muted-foreground">Email non inviata</span>
             )}
           </div>
         </div>
-
-        {/* Full photo viewer */}
-        {selectedPhoto && (
-          <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
-            <DialogContent className="max-w-4xl">
-              <img src={selectedPhoto} alt="Foto cantiere" className="w-full rounded-lg" />
-            </DialogContent>
-          </Dialog>
-        )}
       </DialogContent>
+
+      {/* Lightbox with prev/next navigation */}
+      {lightboxIndex !== null && photos.length > 0 && (
+        <Dialog open={lightboxIndex !== null} onOpenChange={() => setLightboxIndex(null)}>
+          <DialogContent className="max-w-4xl p-2 bg-black/95 border-none">
+            <div className="relative flex items-center justify-center min-h-[60vh]">
+              {/* Close */}
+              <button
+                onClick={() => setLightboxIndex(null)}
+                className="absolute top-2 right-2 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              {/* Previous */}
+              {photos.length > 1 && (
+                <button
+                  onClick={() => setLightboxIndex((lightboxIndex - 1 + photos.length) % photos.length)}
+                  className="absolute left-2 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+              )}
+
+              {/* Image */}
+              <img
+                src={photos[lightboxIndex]}
+                alt={`Foto ${lightboxIndex + 1}`}
+                className="max-h-[80vh] max-w-full rounded-lg object-contain"
+              />
+
+              {/* Next */}
+              {photos.length > 1 && (
+                <button
+                  onClick={() => setLightboxIndex((lightboxIndex + 1) % photos.length)}
+                  className="absolute right-2 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </button>
+              )}
+
+              {/* Counter + Download */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-3">
+                <span className="text-white/80 text-sm">{lightboxIndex + 1} / {photos.length}</span>
+                <a
+                  href={photos[lightboxIndex]}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                >
+                  <Download className="h-4 w-4" />
+                </a>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </Dialog>
   );
 }

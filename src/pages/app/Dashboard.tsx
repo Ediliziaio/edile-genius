@@ -569,7 +569,12 @@ export default function AppDashboard() {
                   )}
                 </>
               ) : (
-                <p className="text-sm text-muted-foreground italic">Briefing non disponibile.</p>
+                <div className="flex items-center gap-3">
+                  <p className="text-sm text-muted-foreground italic">Briefing non disponibile.</p>
+                  <Button size="sm" variant="outline" className="text-xs h-7 gap-1" onClick={() => refetchBriefing()}>
+                    <RefreshCw className="w-3 h-3" /> Riprova
+                  </Button>
+                </div>
               )}
             </div>
           </div>

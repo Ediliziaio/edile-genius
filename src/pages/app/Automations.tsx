@@ -219,9 +219,10 @@ export default function Automations() {
     return SMART_ACTIONS_DEFAULTS[key];
   };
 
-  // ── Fetch orchestrator log ──
+  // ── Fetch orchestrator log (paginated) ──
+  const [logLimit, setLogLimit] = useState(50);
   const { data: logEntries } = useQuery({
-    queryKey: ["orchestrator-log", companyId],
+    queryKey: ["orchestrator-log", companyId, logLimit],
     enabled: !!companyId,
     queryFn: async () => {
       const { data } = await supabase
@@ -229,7 +230,7 @@ export default function Automations() {
         .select("*")
         .eq("company_id", companyId!)
         .order("created_at", { ascending: false })
-        .limit(20);
+        .limit(logLimit);
       return (data as any[]) || [];
     },
   });
@@ -378,7 +379,7 @@ export default function Automations() {
                   {agent.alwaysActive ? (
                     <span className="text-[10px] font-semibold bg-primary/10 text-primary px-2 py-1 rounded-full whitespace-nowrap">Sempre attivo</span>
                   ) : agent.automationType ? (
-                    <Switch checked={isActive} onCheckedChange={(checked) => toggleMutation.mutate({ type: agent.automationType!, enabled: checked })} />
+                    <Switch checked={isActive} disabled={toggleMutation.isPending} onCheckedChange={(checked) => toggleMutation.mutate({ type: agent.automationType!, enabled: checked })} />
                   ) : null}
                 </div>
                 {automation && (
@@ -478,37 +479,46 @@ export default function Automations() {
       <div>
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Attività recente</h2>
         {logEntries && logEntries.length > 0 ? (
-          <div className="rounded-xl border border-border bg-card overflow-hidden">
-            <div className="divide-y divide-border">
-              {logEntries.map((entry: any) => {
-                const evtMeta = EVENT_ICONS[entry.event_type] || { icon: Zap, color: "text-muted-foreground" };
-                const EvtIcon = evtMeta.icon;
-                const details = entry.action_details || {};
-                return (
-                  <div key={entry.id} className="flex items-center gap-4 px-4 py-3">
-                    <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                      <EvtIcon className={`w-4 h-4 ${evtMeta.color}`} />
+          <div className="space-y-3">
+            <div className="rounded-xl border border-border bg-card overflow-hidden">
+              <div className="divide-y divide-border">
+                {logEntries.map((entry: any) => {
+                  const evtMeta = EVENT_ICONS[entry.event_type] || { icon: Zap, color: "text-muted-foreground" };
+                  const EvtIcon = evtMeta.icon;
+                  const details = entry.action_details || {};
+                  return (
+                    <div key={entry.id} className="flex items-center gap-4 px-4 py-3">
+                      <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                        <EvtIcon className={`w-4 h-4 ${evtMeta.color}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground">
+                          {EVENT_LABELS[entry.event_type] || entry.event_type}
+                          {details.name && <span className="text-muted-foreground font-normal"> — {details.name}</span>}
+                          {details.numero && <span className="text-muted-foreground font-normal"> #{details.numero}</span>}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{ACTION_LABELS[entry.action_taken] || entry.action_taken}</p>
+                      </div>
+                      <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+                        {format(new Date(entry.created_at), "d MMM HH:mm", { locale: it })}
+                      </span>
+                      {entry.entity_type === "contact" && entry.entity_id && (
+                        <Link to={`/app/contacts/${entry.entity_id}`}>
+                          <ArrowRight className="w-4 h-4 text-muted-foreground hover:text-primary" />
+                        </Link>
+                      )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground">
-                        {EVENT_LABELS[entry.event_type] || entry.event_type}
-                        {details.name && <span className="text-muted-foreground font-normal"> — {details.name}</span>}
-                        {details.numero && <span className="text-muted-foreground font-normal"> #{details.numero}</span>}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{ACTION_LABELS[entry.action_taken] || entry.action_taken}</p>
-                    </div>
-                    <span className="text-[11px] text-muted-foreground whitespace-nowrap">
-                      {format(new Date(entry.created_at), "d MMM HH:mm", { locale: it })}
-                    </span>
-                    {entry.entity_type === "contact" && entry.entity_id && (
-                      <Link to={`/app/contacts/${entry.entity_id}`}>
-                        <ArrowRight className="w-4 h-4 text-muted-foreground hover:text-primary" />
-                      </Link>
-                    )}
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
+            {logEntries.length >= logLimit && (
+              <div className="text-center">
+                <Button variant="outline" size="sm" onClick={() => setLogLimit(prev => prev + 50)}>
+                  Carica altri
+                </Button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="rounded-xl border border-border bg-card p-8 text-center">
