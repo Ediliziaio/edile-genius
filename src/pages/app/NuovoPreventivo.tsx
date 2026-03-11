@@ -20,8 +20,10 @@ const UNITS = ["mq", "ml", "mc", "nr", "ore", "forfait", "kg", "cad"];
 export default function NuovoPreventivo() {
   const companyId = useCompanyId();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [step, setStep] = useState(1);
   const [processing, setProcessing] = useState(false);
+  const [step1Errors, setStep1Errors] = useState<Record<string, string>>({});
 
   // Step 1 — Client data
   const [clienteNome, setClienteNome] = useState("");
