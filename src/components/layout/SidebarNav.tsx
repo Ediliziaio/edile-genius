@@ -38,6 +38,7 @@ const companyNav: NavSection[] = [
   ]},
   { header: "VENDITE AVANZATE", collapsible: true, defaultOpen: false, visibilityKey: "preventivi", items: [
     { label: "Preventivi", icon: FileSignature, href: "/app/preventivi" },
+    { label: "Template Preventivo", icon: FileText, href: "/app/impostazioni/template-preventivo" },
   ]},
   { header: "OPERATIVITÀ", collapsible: true, defaultOpen: false, visibilityKey: "cantieri", items: [
     { label: "Cantieri", icon: HardHat, href: "/app/cantieri" },
@@ -49,6 +50,7 @@ const companyNav: NavSection[] = [
   ]},
   { header: "IMPOSTAZIONI", items: [
     { label: "Crediti", icon: Coins, href: "/app/credits" },
+    { label: "Integrazioni", icon: Puzzle, href: "/app/integrations" },
     { label: "Account", icon: Settings, href: "/app/settings" },
   ]},
 ];
