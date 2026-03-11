@@ -117,6 +117,7 @@ export default function AgentDetail() {
   const [cfg, setCfg] = useState<ConfigState | null>(null);
   const [viewTranscript, setViewTranscript] = useState<Tables<"conversations"> | null>(null);
   const [dirty, setDirty] = useState(false);
+  const [initializedForId, setInitializedForId] = useState<string | null>(null);
 
   const update = useCallback(<K extends keyof ConfigState>(key: K, value: ConfigState[K]) => {
     setCfg(prev => prev ? { ...prev, [key]: value } : prev);
