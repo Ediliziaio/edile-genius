@@ -37,7 +37,11 @@ export default function AnalyticsPage() {
 
   const agentMap = Object.fromEntries(agents.map(a => [a.id, a.name]));
   const cutoff = startOfDay(subDays(new Date(), rangeDays));
-  const filtered = conversations.filter(c => c.started_at && isAfter(new Date(c.started_at), cutoff));
+  const filtered = rawConversations.filter(c => {
+    if (!c.started_at || !isAfter(new Date(c.started_at), cutoff)) return false;
+    if (agentFilter !== "all" && c.agent_id !== agentFilter) return false;
+    return true;
+  });
 
   const stats = useMemo(() => {
     const total = filtered.length;
