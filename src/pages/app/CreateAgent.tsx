@@ -2,11 +2,11 @@ import { useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Search, Info } from "lucide-react";
+import { ArrowLeft, Search, Info, CheckCircle, Zap } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
-/* ── Category config ───────────────────────────────── */
+/* ── Category config (per risultato, non per canale) ── */
 
 interface Category {
   key: string;
@@ -18,8 +18,10 @@ interface Category {
 
 const CATEGORIES: Category[] = [
   { key: "all", label: "Tutti", emoji: "", stripColor: "", iconBg: "" },
-  { key: "vocali", label: "Vocali", emoji: "🎙️", stripColor: "bg-brand", iconBg: "bg-brand-light" },
-  { key: "whatsapp", label: "WhatsApp", emoji: "💬", stripColor: "bg-[hsl(142,70%,49%)]", iconBg: "bg-[hsl(142,60%,94%)]" },
+  { key: "lead", label: "Lead e Appuntamenti", emoji: "📞", stripColor: "bg-brand", iconBg: "bg-brand-light" },
+  { key: "preventivi", label: "Preventivi e Trattative", emoji: "💰", stripColor: "bg-[hsl(45,90%,50%)]", iconBg: "bg-[hsl(45,90%,94%)]" },
+  { key: "whatsapp", label: "WhatsApp e Assistenza", emoji: "💬", stripColor: "bg-[hsl(142,70%,49%)]", iconBg: "bg-[hsl(142,60%,94%)]" },
+  { key: "postvendita", label: "Post-vendita", emoji: "⭐", stripColor: "bg-[hsl(280,70%,55%)]", iconBg: "bg-[hsl(280,60%,94%)]" },
   { key: "vendita", label: "Vendita Visiva", emoji: "🎨", stripColor: "bg-settore-ristr", iconBg: "bg-settore-ristr-bg" },
   { key: "prossimamente", label: "Prossimamente", emoji: "🕐", stripColor: "bg-ink-200", iconBg: "bg-ink-100" },
 ];
@@ -52,99 +54,133 @@ interface HubTemplate {
   fromDb?: boolean;
   settore: string;
   kpi?: string;
+  result?: string;
 }
 
 const STATIC_TEMPLATES: HubTemplate[] = [
-  // ── Vocali ──
+  // ── 📞 Lead e Appuntamenti ──
   {
-    slug: "vocale-custom", name: "Agente Vocale Personalizzato",
-    description: "Crea un agente vocale da zero con il tuo prompt, voce e logica. Per chi vuole il controllo totale.",
-    icon: "🤖", category: "vocali", channel: ["vocale"], difficulty: "avanzato",
-    estimated_setup_min: 15, installs_count: 0, is_featured: false, settore: "tutti",
-  },
-  {
-    slug: "qualifica-infissi", name: "Qualificatore Lead Infissi",
-    description: "Qualifica chi chiede preventivi per finestre e serramenti. Raccoglie tipo infisso, materiale, quantità e fissa il sopralluogo in automatico.",
-    icon: "🪟", category: "vocali", channel: ["vocale"], difficulty: "facile",
-    estimated_setup_min: 10, installs_count: 47, is_featured: true, badge: "TOP SETTORE",
-    settore: "serramenti", kpi: "Tasso qualifica ~35%",
-  },
-  {
-    slug: "qualifica-ristrutturazione", name: "Qualificatore Ristrutturazione",
-    description: "Filtra i lead per ristrutturazioni: tipo intervento, metratura, budget e tempistica. Propone il sopralluogo gratuito ai qualificati.",
-    icon: "🏗️", category: "vocali", channel: ["vocale"], difficulty: "facile",
-    estimated_setup_min: 10, installs_count: 31, is_featured: true, badge: "POPOLARE",
-    settore: "ristrutturazioni", kpi: "Tasso qualifica ~30%",
-  },
-  {
-    slug: "qualifica-fotovoltaico", name: "Qualificatore Fotovoltaico",
-    description: "Qualifica richieste per impianti fotovoltaici: tipo immobile, consumo, copertura, interesse accumulo. Gestisce obiezioni sul prezzo con dati di risparmio.",
-    icon: "☀️", category: "vocali", channel: ["vocale"], difficulty: "facile",
-    estimated_setup_min: 10, installs_count: 28, is_featured: false,
-    settore: "fotovoltaico", kpi: "Tasso qualifica ~40%",
-  },
-  {
-    slug: "inbound-campagne", name: "Risponditore Campagne Ads",
-    description: "Risponde H24 ai lead da Meta e Google Ads. Qualifica velocemente e fissa il sopralluogo. Pensato per lead \"caldi\" che non aspettano.",
-    icon: "📱", category: "vocali", channel: ["vocale"], difficulty: "facile",
+    slug: "richiama-lead-ads", name: "Richiama Lead da Campagne",
+    description: "Risponde in automatico ai lead da Meta e Google Ads. Qualifica velocemente e fissa il sopralluogo prima che il cliente chiami un concorrente.",
+    icon: "📱", category: "lead", channel: ["vocale"], difficulty: "facile",
     estimated_setup_min: 8, installs_count: 38, is_featured: true, badge: "🔥 ALTO ROI",
     settore: "tutti", kpi: "Risposta in <10 sec",
+    result: "→ Non perdi più lead dalle tue campagne",
   },
   {
-    slug: "conferma-sopralluogo", name: "Conferma Sopralluogo",
+    slug: "qualifica-serramenti", name: "Qualifica Lead Serramenti",
+    description: "Raccoglie tipo infisso, materiale, quantità e fissa il sopralluogo in automatico. Solo lead pronti arrivano al tuo commerciale.",
+    icon: "🪟", category: "lead", channel: ["vocale"], difficulty: "facile",
+    estimated_setup_min: 10, installs_count: 47, is_featured: true, badge: "TOP SERRAMENTI",
+    settore: "serramenti", kpi: "Tasso qualifica ~35%",
+    result: "→ Il commerciale riceve solo lead qualificati",
+  },
+  {
+    slug: "qualifica-fotovoltaico", name: "Qualifica Lead Fotovoltaico",
+    description: "Verifica tipo immobile, consumo, copertura e interesse accumulo. Gestisce obiezioni sul prezzo con dati di risparmio reali.",
+    icon: "☀️", category: "lead", channel: ["vocale"], difficulty: "facile",
+    estimated_setup_min: 10, installs_count: 28, is_featured: false,
+    settore: "fotovoltaico", kpi: "Tasso qualifica ~40%",
+    result: "→ Solo sopralluoghi con clienti realmente interessati",
+  },
+  {
+    slug: "qualifica-ristrutturazione", name: "Qualifica Lead Ristrutturazione",
+    description: "Filtra i lead per tipo intervento, metratura, budget e tempistica. Propone il sopralluogo gratuito ai qualificati.",
+    icon: "🏗️", category: "lead", channel: ["vocale"], difficulty: "facile",
+    estimated_setup_min: 10, installs_count: 31, is_featured: true, badge: "POPOLARE",
+    settore: "ristrutturazioni", kpi: "Tasso qualifica ~30%",
+    result: "→ Meno tempo perso con richieste non in target",
+  },
+  {
+    slug: "conferma-appuntamenti", name: "Conferma Appuntamenti",
     description: "Chiama il giorno prima per confermare l'appuntamento. Gestisce riprogrammazioni e raccoglie info logistiche (citofono, parcheggio).",
-    icon: "📋", category: "vocali", channel: ["vocale"], difficulty: "facile",
+    icon: "📋", category: "lead", channel: ["vocale"], difficulty: "facile",
     estimated_setup_min: 8, installs_count: 24, is_featured: false,
-    settore: "tutti", kpi: "No-show ridotti del 40%",
+    settore: "tutti", kpi: "No-show -40%",
+    result: "→ Meno sopralluoghi saltati, più giornate produttive",
   },
   {
-    slug: "recupero-preventivi", name: "Recupero Preventivi Scaduti",
-    description: "Richiama i preventivi non chiusi dopo 7-14 giorni. Scopre il motivo, rilancia con un'offerta e recupera fino al 25% dei lead persi.",
-    icon: "🔄", category: "vocali", channel: ["vocale"], difficulty: "facile",
-    estimated_setup_min: 10, installs_count: 22, is_featured: false,
-    settore: "tutti", kpi: "Recupero ~25% preventivi",
-  },
-  {
-    slug: "recupero-noshow", name: "Recupero No-Show",
+    slug: "recupera-noshow", name: "Recupera No-Show",
     description: "Ricontatta chi ha saltato il sopralluogo senza accusare. Capisce cosa è successo e riprogramma l'appuntamento.",
-    icon: "📞", category: "vocali", channel: ["vocale"], difficulty: "facile",
+    icon: "📞", category: "lead", channel: ["vocale"], difficulty: "facile",
     estimated_setup_min: 8, installs_count: 15, is_featured: false,
-    settore: "tutti", kpi: "Recupero ~50% no-show",
-  },
-  {
-    slug: "recensioni-post-lavoro", name: "Raccolta Recensioni Google",
-    description: "Chiama dopo i lavori, raccoglie un voto 1-5. Se soddisfatto, guida alla recensione Google. Se insoddisfatto, attiva il supporto.",
-    icon: "⭐", category: "vocali", channel: ["vocale"], difficulty: "facile",
-    estimated_setup_min: 8, installs_count: 19, is_featured: false,
-    settore: "tutti", kpi: "+3 recensioni/mese",
+    settore: "tutti", kpi: "Recupero ~50%",
+    result: "→ Recuperi metà degli appuntamenti persi",
   },
 
-  // ── WhatsApp ──
+  // ── 💰 Preventivi e Trattative ──
+  {
+    slug: "recupera-preventivi", name: "Recupera Preventivi Fermi",
+    description: "Richiama i preventivi non chiusi dopo 7-14 giorni. Scopre il motivo del blocco, rilancia e recupera fino al 25% dei lead persi.",
+    icon: "🔄", category: "preventivi", channel: ["vocale"], difficulty: "facile",
+    estimated_setup_min: 10, installs_count: 22, is_featured: true, badge: "ESSENZIALE",
+    settore: "tutti", kpi: "Recupero ~25%",
+    result: "→ Recupera 1 preventivo su 4 che stavi perdendo",
+  },
+  {
+    slug: "followup-sopralluogo", name: "Follow-up Dopo Sopralluogo",
+    description: "Chiama 2-3 giorni dopo il sopralluogo per rispondere a dubbi e accelerare la decisione del cliente. Il venditore non deve ricordarsi di richiamare.",
+    icon: "🤝", category: "preventivi", channel: ["vocale"], difficulty: "facile",
+    estimated_setup_min: 10, installs_count: 0, is_featured: false,
+    settore: "tutti", kpi: "Decisione +15% più veloce",
+    result: "→ Il cliente decide prima, meno trattative che si spengono",
+  },
+  {
+    slug: "followup-preventivi-wa", name: "Follow-up Preventivi WhatsApp",
+    description: "Invia follow-up automatici via WhatsApp ai preventivi in scadenza. Meno invasivo della telefonata, più efficace dell'email.",
+    icon: "📩", category: "preventivi", channel: ["whatsapp"], difficulty: "facile",
+    estimated_setup_min: 10, installs_count: 16, is_featured: false,
+    settore: "tutti", kpi: "Tasso apertura ~85%",
+    result: "→ I tuoi preventivi non restano più senza risposta",
+  },
+
+  // ── 💬 WhatsApp e Assistenza ──
   {
     slug: "assistente-whatsapp", name: "Assistente WhatsApp Commerciale",
     description: "Risponde ai clienti su WhatsApp H24. Fornisce info, raccoglie richieste di preventivo e fissa appuntamenti. Come un commerciale che non dorme mai.",
     icon: "💬", category: "whatsapp", channel: ["whatsapp"], difficulty: "medio",
     estimated_setup_min: 15, installs_count: 34, is_featured: true, badge: "ESSENZIALE",
-    settore: "tutti", kpi: "Tempo risposta <30 sec",
+    settore: "tutti", kpi: "Risposta <30 sec",
+    result: "→ Non perdi più messaggi, neanche di notte o nel weekend",
   },
   {
-    slug: "whatsapp-preventivi", name: "Follow-up Preventivi WhatsApp",
-    description: "Invia follow-up automatici via WhatsApp ai preventivi in scadenza. Meno invasivo della telefonata, più efficace dell'email.",
-    icon: "📩", category: "whatsapp", channel: ["whatsapp"], difficulty: "facile",
-    estimated_setup_min: 10, installs_count: 16, is_featured: false,
-    settore: "tutti", kpi: "Tasso apertura ~85%",
+    slug: "primo-contatto-wa", name: "Primo Contatto Lead WhatsApp",
+    description: "Messaggio automatico di benvenuto e qualifica rapida quando un lead scrive per la prima volta. Il lead si sente accolto subito.",
+    icon: "👋", category: "whatsapp", channel: ["whatsapp"], difficulty: "facile",
+    estimated_setup_min: 8, installs_count: 0, is_featured: false,
+    settore: "tutti", kpi: "Tempo risposta <1 min",
+    result: "→ Ogni nuovo contatto riceve subito attenzione",
   },
 
-  // ── Vendita Visiva ──
+  // ── ⭐ Post-vendita ──
+  {
+    slug: "raccolta-recensioni", name: "Raccolta Recensioni Google",
+    description: "Chiama dopo i lavori, raccoglie un voto 1-5. Se soddisfatto, guida alla recensione Google. Se insoddisfatto, attiva il supporto.",
+    icon: "⭐", category: "postvendita", channel: ["vocale"], difficulty: "facile",
+    estimated_setup_min: 8, installs_count: 19, is_featured: false,
+    settore: "tutti", kpi: "+3 recensioni/mese",
+    result: "→ Più recensioni positive senza chiederle manualmente",
+  },
+  {
+    slug: "verifica-soddisfazione", name: "Verifica Soddisfazione Post-Lavoro",
+    description: "Contatta il cliente 1 settimana dopo per verificare che tutto funzioni. Previene reclami e mostra attenzione professionale.",
+    icon: "✅", category: "postvendita", channel: ["vocale"], difficulty: "facile",
+    estimated_setup_min: 8, installs_count: 0, is_featured: false,
+    settore: "tutti", kpi: "Reclami -30%",
+    result: "→ Meno reclami, clienti più fidelizzati",
+  },
+
+  // ── 🎨 Vendita Visiva ──
   {
     slug: "render-infissi", name: "Render Infissi AI",
     description: "Trasforma una foto della facciata in un render professionale con i nuovi infissi. Il cliente vede il risultato prima di comprare.",
     icon: "🪟", category: "vendita", channel: ["visuale"], difficulty: "facile",
     estimated_setup_min: 5, installs_count: 52, is_featured: true, badge: "BEST SELLER",
     settore: "serramenti", kpi: "Conversione +30%",
+    result: "→ Il cliente si convince vedendo il risultato finale",
   },
 
-  // ── Prossimamente ──
+  // ── 🕐 Prossimamente ──
   {
     slug: "render-coperture", name: "Render Coperture AI",
     description: "Genera render realistici di coperture e tetti con diversi materiali e colori.",
@@ -189,6 +225,13 @@ const difficultyStyles: Record<string, string> = {
   avanzato: "bg-settore-ristr-bg text-settore-ristr",
 };
 
+const settoreBadgeStyles: Record<string, string> = {
+  serramenti: "bg-[hsl(200,70%,92%)] text-[hsl(200,70%,35%)]",
+  fotovoltaico: "bg-[hsl(45,90%,90%)] text-[hsl(45,80%,30%)]",
+  ristrutturazioni: "bg-[hsl(20,70%,92%)] text-[hsl(20,70%,35%)]",
+  edilizia: "bg-[hsl(160,50%,92%)] text-[hsl(160,50%,30%)]",
+};
+
 /* ── Component ─────────────────────────────────────── */
 
 export default function CreateAgent() {
@@ -221,7 +264,15 @@ export default function CreateAgent() {
   const allTemplates = useMemo(() => {
     const dbSlugs = new Set((dbTemplates || []).map((t) => t.slug));
     const statics = STATIC_TEMPLATES.filter((t) => !dbSlugs.has(t.slug));
-    return [...(dbTemplates || []), ...statics];
+    const merged = [...(dbTemplates || []), ...statics];
+    // Sort: featured first, then by installs_count desc
+    return merged.sort((a, b) => {
+      if (a.disabled && !b.disabled) return 1;
+      if (!a.disabled && b.disabled) return -1;
+      if (a.is_featured && !b.is_featured) return -1;
+      if (!a.is_featured && b.is_featured) return 1;
+      return (b.installs_count || 0) - (a.installs_count || 0);
+    });
   }, [dbTemplates]);
 
   // Filter
@@ -268,7 +319,7 @@ export default function CreateAgent() {
             </button>
             <h1 className="text-[26px] font-extrabold text-ink-900">Cosa vuoi automatizzare?</h1>
             <p className="text-sm text-ink-500 mt-1">
-              Scegli un obiettivo e attiva il tuo agente in pochi minuti.
+              Scegli un obiettivo e attiva il tuo agente in pochi minuti. Tutto già pronto, basta personalizzare.
             </p>
           </div>
           <div className="relative w-80 hidden md:block shrink-0 mt-6">
@@ -346,6 +397,17 @@ export default function CreateAgent() {
             ))}
           </div>
         )}
+
+        {/* Crea da zero link */}
+        <div className="mt-10 text-center">
+          <button
+            onClick={() => navigate("/app/agents/new/vocale-custom")}
+            className="inline-flex items-center gap-2 text-sm text-ink-400 hover:text-brand transition-colors font-medium"
+          >
+            <Zap className="w-4 h-4" />
+            Non trovi quello che cerchi? Crea un agente da zero →
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -397,12 +459,17 @@ function TemplateHubCard({ template: t }: { template: HubTemplate }) {
                   </span>
                 );
               })}
-              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-pill ${difficultyStyles[t.difficulty] || "bg-ink-100 text-ink-500"}`}>
-                {t.difficulty.charAt(0).toUpperCase() + t.difficulty.slice(1)}
-              </span>
+              {t.estimated_setup_min <= 10 && !t.disabled && (
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-pill bg-brand-light text-brand-text flex items-center gap-0.5">
+                  <CheckCircle className="w-2.5 h-2.5" /> Facile
+                </span>
+              )}
               {t.settore && t.settore !== "tutti" && (
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-pill bg-ink-100 text-ink-600">
-                  {t.settore.charAt(0).toUpperCase() + t.settore.slice(1)}
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-pill ${settoreBadgeStyles[t.settore] || "bg-ink-100 text-ink-600"}`}>
+                  {t.settore === "serramenti" ? "Ideale per Serramentisti" :
+                   t.settore === "fotovoltaico" ? "Ideale per Fotovoltaico" :
+                   t.settore === "ristrutturazioni" ? "Ideale per Ristrutturazioni" :
+                   t.settore.charAt(0).toUpperCase() + t.settore.slice(1)}
                 </span>
               )}
             </div>
@@ -424,20 +491,28 @@ function TemplateHubCard({ template: t }: { template: HubTemplate }) {
       <div className="px-5 pb-4">
         <p className="text-[13px] text-muted-foreground leading-relaxed line-clamp-2">{t.description}</p>
 
-        {!t.disabled && (
-          <div className="grid grid-cols-2 gap-2 mt-3">
-            <div className="bg-ink-50 rounded-lg px-3 py-2">
-              <span className="text-xs text-ink-500">⏱ {t.estimated_setup_min} min setup</span>
-            </div>
-            <div className="bg-ink-50 rounded-lg px-3 py-2">
-              <span className="text-xs text-ink-500">🏢 {t.installs_count} aziende</span>
-            </div>
+        {/* Risultato atteso — la riga più importante */}
+        {t.result && !t.disabled && (
+          <div className="mt-2.5 bg-brand-light rounded-lg px-3 py-2">
+            <span className="text-[12px] font-semibold text-brand-text">{t.result}</span>
           </div>
         )}
 
-        {t.kpi && !t.disabled && (
-          <div className="mt-2 bg-brand-light rounded-lg px-3 py-1.5">
-            <span className="text-[11px] font-medium text-brand-text">📊 {t.kpi}</span>
+        {!t.disabled && (
+          <div className="flex items-center gap-3 mt-3 text-xs text-ink-500">
+            <span>⏱ {t.estimated_setup_min} min setup</span>
+            {t.installs_count > 5 && (
+              <>
+                <span>·</span>
+                <span>🏢 {t.installs_count} aziende</span>
+              </>
+            )}
+            {t.kpi && (
+              <>
+                <span>·</span>
+                <span className="font-medium text-ink-600">📊 {t.kpi}</span>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -456,7 +531,7 @@ function TemplateHubCard({ template: t }: { template: HubTemplate }) {
               : "bg-brand text-white hover:bg-brand-hover"
           }`}
         >
-          {t.disabled ? "In arrivo" : "Inizia →"}
+          {t.disabled ? "In arrivo" : "Attiva →"}
         </button>
         {!t.disabled && (
           <Tooltip>
@@ -481,13 +556,14 @@ function mapDbCategory(category: string | null, channel: string[] | null): strin
   if (!category) {
     const ch = channel?.[0] || "";
     if (ch === "whatsapp") return "whatsapp";
-    if (ch === "vocale" || ch === "voice") return "vocali";
-    return "vocali";
+    return "lead";
   }
   const cat = category.toLowerCase();
-  if (cat.includes("vocal") || cat.includes("voice")) return "vocali";
-  if (cat.includes("whatsapp") || cat.includes("chat")) return "whatsapp";
-  if (cat.includes("report")) return "vocali";
-  if (cat.includes("vendita") || cat.includes("render")) return "vendita";
-  return "vocali";
+  if (cat.includes("lead") || cat.includes("appuntament") || cat.includes("qualifica")) return "lead";
+  if (cat.includes("preventiv") || cat.includes("trattativ")) return "preventivi";
+  if (cat.includes("whatsapp") || cat.includes("chat") || cat.includes("assistenza")) return "whatsapp";
+  if (cat.includes("post") || cat.includes("recension") || cat.includes("soddisfaz")) return "postvendita";
+  if (cat.includes("vendita") || cat.includes("render") || cat.includes("visual")) return "vendita";
+  if (cat.includes("report")) return "lead";
+  return "lead";
 }
