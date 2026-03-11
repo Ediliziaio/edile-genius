@@ -175,8 +175,9 @@ export default function TemplatePreventivo() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Nome Azienda</Label>
-                  <Input value={form.azienda_nome} onChange={e => update("azienda_nome", e.target.value)} placeholder="Impresa Edile Rossi S.r.l." />
+                  <Label>Nome Azienda *</Label>
+                  <Input value={form.azienda_nome} onChange={e => update("azienda_nome", e.target.value)} placeholder="Impresa Edile Rossi S.r.l." className={validationErrors.azienda_nome ? "border-destructive" : ""} />
+                  {validationErrors.azienda_nome && <p className="text-xs text-destructive">{validationErrors.azienda_nome}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label>Telefono</Label>
