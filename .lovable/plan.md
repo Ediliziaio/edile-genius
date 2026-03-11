@@ -1,122 +1,93 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro
 
-## ✅ Completato in questo blocco
+## Template Library Overhaul — Vertical, Commercial, Market-Ready
 
-### Database Migration
-- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
-- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
-- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
-- RLS policies per tutte le nuove tabelle
+### Audit of Current State
 
-## ✅ Blocco 2 — Sistema Crediti Euro-based
+**Problems found:**
 
-### Database
-- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
-- ai_credit_topups (ricariche manual/auto/promo/adjustment)
-- ai_credit_usage (consumo per conversazione con margini)
-- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
-- monthly_billing_summary view (security_invoker)
+1. **USE_CASES are generic** — "Chiamate in entrata", "Assistenza clienti", "Sondaggi telefonici" could be for any industry. Zero differentiation.
+2. **Descriptions are technical** — "Rispondi alle chiamate dei clienti" says nothing about value. An imprenditore edile won't feel urgency.
+3. **Missing high-value use cases** — No template for: lead da campagne Meta/Google, recupero no-show sopralluogo, assistente showroom, supporto pratiche ENEA, agente WhatsApp commerciale per preventivi.
+4. **EDILIZIA_PROMPT_TEMPLATES has only 3 entries** — The "quick templates" section is underpowered.
+5. **Prompts are shallow** — The system prompts lack the detail that makes an agent actually work (no objection handling, no data collection schema, no escalation rules).
+6. **Two template systems with overlap** — `Templates.tsx` (DB-backed) and `CreateAgent.tsx` (static hub) show different templates. The hub is the real entry point.
+7. **"Sondaggi telefonici" is dead weight** — No edilizia company runs phone surveys. Replace with something monetizable.
 
-### Edge Functions
-- check-credits-before-call: verifica saldo pre-chiamata
-- topup-credits: ricarica manuale con fattura
-- elevenlabs-webhook: post-call billing, auto-recharge, blocco
-- platform-config: +apply_global_markup action
+### New Template Library (15 templates, replacing current 9 static)
 
-### Frontend
-- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
-- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
-- Sidebar: footer saldo crediti con barra e alert
-- VoiceTestPanel: check crediti pre-chiamata con blocco UI
+Organized by **commercial intent** rather than channel:
 
-## ✅ Blocco 3-5 — Agent Templates System
+| # | Slug | Name | Category | Channel | Sector | Prompt Quality |
+|---|------|------|----------|---------|--------|---------------|
+| 1 | `vocale-custom` | Agente Vocale Personalizzato | vocali | vocale | Tutti | Existing (keep) |
+| 2 | `qualifica-infissi` | Qualificatore Lead Infissi | vocali | vocale | Serramenti | New detailed prompt |
+| 3 | `qualifica-ristrutturazione` | Qualificatore Ristrutturazione | vocali | vocale | Ristrutturazioni | New |
+| 4 | `qualifica-fotovoltaico` | Qualificatore Fotovoltaico | vocali | vocale | Fotovoltaico | New |
+| 5 | `inbound-campagne` | Risponditore Campagne Ads | vocali | vocale | Tutti | New — handles Meta/Google ad leads |
+| 6 | `conferma-sopralluogo` | Conferma Sopralluogo | vocali | vocale | Tutti | Improved from existing |
+| 7 | `recupero-preventivi` | Recupero Preventivi Scaduti | vocali | vocale | Tutti | Improved from existing |
+| 8 | `recupero-noshow` | Recupero No-Show | vocali | vocale | Tutti | New |
+| 9 | `recensioni-post-lavoro` | Raccolta Recensioni Google | vocali | vocale | Tutti | Improved |
+| 10 | `assistente-whatsapp` | Assistente WhatsApp Commerciale | whatsapp | whatsapp | Tutti | New detailed prompt |
+| 11 | `whatsapp-preventivi` | Follow-up Preventivi WhatsApp | whatsapp | whatsapp | Tutti | New |
+| 12 | `render-infissi` | Render Infissi AI | vendita | visuale | Serramenti | Existing (keep) |
+| 13 | `render-coperture` | Render Coperture AI | prossimamente | visuale | Edilizia | Existing disabled |
+| 14 | `render-facciate` | Render Facciate AI | prossimamente | visuale | Edilizia | Existing disabled |
+| 15 | `assistente-showroom` | Assistente Showroom | prossimamente | vocale | Serramenti | New disabled |
 
-### Database
-- agent_templates + agent_template_instances + agent_reports + company_channels
-- RLS policies PERMISSIVE (fix da RESTRICTIVE)
-- Funzione DB `increment_installs_count(tpl_id UUID)`
-- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+### What Gets Removed
 
-### Edge Functions (CORS headers completi)
-- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
-- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
-- save-report: salva report in DB + aggiorna contatori istanza
+- `richiamo-outbound` — merged into `recupero-preventivi` (same concept, better name)
+- `prenotazione-appuntamenti` — merged into `conferma-sopralluogo` (edilizia-specific)
+- `assistenza-post-vendita` — moved to "prossimamente" (less monetizable, lower priority)
+- Generic USE_CASES: `survey` removed, `inbound`/`outbound`/`support` rewritten as vertical
 
-### Frontend — Wizard 5 Step (TemplateSetup.tsx)
-- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + importa CSV con template scaricabile
-- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
-- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
+### Key Copy Changes
 
-### SuperAdmin
-- /superadmin/templates: CRUD completo con JSON editor per config_schema
+**Before:** "Risponde alle chiamate in entrata e qualifica i lead con domande intelligenti."
+**After:** "Risponde H24 ai lead da Meta e Google Ads. Qualifica budget, tipo lavoro e tempistica. Fissa il sopralluogo in automatico."
 
-## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+**Before:** "Ricontatta prospect e clienti inattivi con chiamate outbound automatiche."
+**After:** "Richiama i preventivi non chiusi dopo 7-14 giorni. Scopre il motivo, rilancia con un'offerta e recupera fino al 25% dei lead persi."
 
-### Database (5 tabelle)
-- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
-- RLS PERMISSIVE per tutte le tabelle
-- Trigger set_updated_at + init_render_credits su companies
-- Funzione deduct_render_credit
-- Storage buckets: render-originals (privato), render-results (pubblico)
+### Prompt Quality Upgrade
 
-### Edge Functions
-- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
-- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+Each new prompt will include:
+- Specific data fields to collect (structured)
+- Objection handling rules
+- Escalation criteria
+- Tone guidance (professional but warm, construction jargon)
+- Call outcome classification
 
-### Frontend
-- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
-- RenderConfig (/superadmin/render-config)
-- BeforeAfterSlider, promptBuilder.ts
+### Categories Update
 
-## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
+Replace current categories with sector-oriented ones:
 
-### Database
-- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
-- Estensione `preventivi` con +26 colonne (template_id, versione, titolo, foto_sopralluogo_urls, foto_copertina_url, sconto_globale, imponibile, iva_importo, totale_finale, condizioni, clausole, intro, firma_testo, tempi_esecuzione, validita_giorni, data_scadenza, tracking_aperto_at/count, link_accettazione, firma_cliente_url, accettato_at, rifiutato_at, rifiuto_motivo, parent_id, inviato_at, inviato_via, cliente_piva, cliente_codice_fiscale)
-- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
-- Storage buckets: preventivi-media (privato), template-assets (pubblico)
-- RLS company-scoped + superadmin
+```
+Tutti | Vocali | WhatsApp | Vendita Visiva | Per Settore ▾ | Prossimamente
+```
 
-### Edge Functions
-- `process-preventivo-audio` RISCRITTO: prompt GPT esperto (prezzario DEI, categorie edilizie, sconti), nuovo formato voci con id/ordine/categoria/titolo_voce/sconto_percentuale/foto_urls/note_voce/evidenziata, calcolo totali con sconto e IVA, data_scadenza automatica
+Add a new `settore` field to each template for filtering: `serramenti`, `fotovoltaico`, `ristrutturazioni`, `tutti`.
 
-### PDF Client-side (@react-pdf/renderer)
-- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4 con:
-  - Header azienda + logo
-  - Band titolo colorata (colore_primario)
-  - Grid cliente/riferimenti
-  - Testo intro
-  - Foto copertina
-  - Tabella voci per categoria con subtotali
-  - Totali con sconto globale + IVA
-  - Note, condizioni, clausole
-  - Sezione firma doppia (azienda + cliente)
-  - Footer pagina
+### EDILIZIA_PROMPT_TEMPLATES Expansion
 
-### Frontend
-- **NuovoPreventivo.tsx** → Wizard 3 step:
-  - Step 1: dati cliente (nome, indirizzo, telefono, email, P.IVA, CF) + titolo/oggetto + cantiere
-  - Step 2: registrazione/upload audio + upload foto multiplo con grid preview e badge copertina
-  - Step 3: editor visuale voci per categoria (card editabili con titolo, descrizione, U.M., quantità, prezzo, sconto, totale) + totali live + scarica PDF anteprima
-- **PreventivoDetail.tsx** → 3 tabs:
-  - Dettaglio: voci per categoria con badge sconto, trascrizione collapsible, note/stato/tempi
-  - Cronologia: timeline eventi (creato, inviato, accettato/rifiutato)
-  - Tracking: KPI aperture, ultima apertura, ultimo invio
-  - Azioni: scarica PDF, modifica, elimina
-- **PreventiviList.tsx** → KPI cards (totale, bozze, in attesa, valore accettati) + filtri tab per stato + ricerca + lista con badge versione e scadenza
-- **TemplatePreventivo.tsx** (`/app/impostazioni/template-preventivo`): 3 tabs:
-  - Branding: logo upload, color picker primario/secondario con preview gradient, intestazione/piè di pagina
-  - Testi Standard: intro, condizioni, clausole, firma, validità giorni, IVA default
-  - Layout: 5 toggle (foto copertina, foto voci, subtotali categoria, firma, condizioni)
+Expand from 3 to 6 quick templates:
+1. Acquisizione Lead Cantiere (existing)
+2. Qualifica Serramentista (existing)
+3. Presa Appuntamento Sopralluogo (existing)
+4. Recupero Preventivo Scaduto (new)
+5. Risponditore Campagne Ads (new)
+6. Post-Installazione e Recensioni (new)
 
-### Navigazione
-- Sidebar: aggiunto "Template PDF" nella sezione AUTOMAZIONI
-- Route: `/app/impostazioni/template-preventivo`
+### Files Modified
 
-## 🔜 Prossimi Blocchi
-- SuperAdmin Dashboard economics
-- Integrazioni CRM native
-- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets
+1. **`src/components/agents/PromptTemplates.ts`** — Rewrite USE_CASES (vertical, commercial descriptions), expand EDILIZIA_PROMPT_TEMPLATES to 6, improve all PROMPT_TEMPLATES with deeper prompts
+2. **`src/pages/app/CreateAgent.tsx`** — Replace STATIC_TEMPLATES with new 15-template library, add `settore` field to HubTemplate, update category pills, improve card descriptions
+3. **`src/pages/app/AgentTemplateWizard.tsx`** — Update VOCAL_SLUGS and label mappings for new slugs
+4. **`src/pages/app/Templates.tsx`** — Update upcomingTemplates to match new library, remove duplicates with hub
+
+### No DB Changes Needed
+
+All changes are in static code. DB-backed templates (from `agent_templates` table) continue to merge via the existing `useMemo` logic.
+
