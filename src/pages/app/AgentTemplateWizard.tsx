@@ -302,7 +302,7 @@ export default function AgentTemplateWizard() {
       {/* Header */}
       <div>
         <button
-          onClick={() => navigate("/app/agents/new")}
+          onClick={() => isDirty ? setShowAbandonDialog(true) : navigate("/app/agents/new")}
           className="flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-700 transition-colors mb-3"
         >
           <ArrowLeft className="w-4 h-4" /> Torna ai template
