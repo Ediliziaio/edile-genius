@@ -97,6 +97,7 @@ const PageLoader = () => (
 const queryClient = new QueryClient();
 
 const App = () => (
+  <ErrorBoundary>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
