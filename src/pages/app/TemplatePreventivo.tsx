@@ -128,7 +128,12 @@ export default function TemplatePreventivo() {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !companyId) return;
-    const path = `${companyId}/logo-${Date.now()}.${file.name.split(".").pop()}`;
+    const allowedTypes = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Tipo file non supportato. Usa PNG, JPEG, WebP o SVG.");
+      return;
+    }
+    const path = `${companyId}/logo-${crypto.randomUUID()}.${file.name.split(".").pop()}`;
     const { error } = await supabase.storage.from("template-assets").upload(path, file, { upsert: true });
     if (error) { toast.error(error.message); return; }
     const { data: urlData } = supabase.storage.from("template-assets").getPublicUrl(path);
