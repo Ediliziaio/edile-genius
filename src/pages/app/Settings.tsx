@@ -348,7 +348,7 @@ export default function Settings() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-ink-900">Impostazioni</h1>
 
-      <Tabs defaultValue="profile" className="space-y-4">
+      <Tabs defaultValue={defaultTab} className="space-y-4">
         <TabsList className="bg-ink-100 border-none">
           <TabsTrigger value="profile">Profilo</TabsTrigger>
           <TabsTrigger value="api">API</TabsTrigger>
