@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
                       data.analysis?.evaluation_criteria_results?.[0]?.result === "failure" ? 0 : null;
     const evalNotes = data.analysis?.transcript_summary || null;
 
-    // 7b. Generate AI analysis (summary + main_reason, non-blocking)
+    // 7b. Generate AI analysis (summary + main_reason + outcome_ai + next_step, non-blocking)
     const analysis = await generateCallAnalysis(transcript || [], rid);
 
     // 8. Update conversation
@@ -160,8 +160,20 @@ Deno.serve(async (req) => {
       };
       if (analysis.summary) convUpdate.summary = analysis.summary;
       if (analysis.main_reason) convUpdate.main_reason = analysis.main_reason;
+      // Use AI-classified outcome if ElevenLabs didn't provide one
+      if (analysis.outcome_ai) convUpdate.outcome = analysis.outcome_ai;
       await sb.from("conversations").update(convUpdate).eq("el_conv_id", conversation_id);
     }
+
+    // 8b. Post-Call Actions: auto-update contact status (non-blocking)
+    await runPostCallActions(sb, {
+      companyId: agent.company_id,
+      conversationId: conversation_id,
+      callerNumber: data.caller_number || null,
+      outcomeAi: analysis.outcome_ai,
+      nextStep: analysis.next_step,
+      requestId: rid,
+    });
 
     // 9. Update agent stats
     const { data: agentStats } = await sb.from("agents").select("calls_total, calls_month, avg_duration_sec").eq("id", agent.id).single();
