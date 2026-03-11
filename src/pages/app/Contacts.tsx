@@ -28,6 +28,7 @@ import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import ContactDetailPanel from "@/components/contacts/ContactDetailPanel";
+import LeadScoreBadge from "@/components/contacts/LeadScoreBadge";
 
 const STATUS_OPTIONS = [
   { value: "new", label: "Nuovo", color: "bg-ink-100 text-ink-600" },
