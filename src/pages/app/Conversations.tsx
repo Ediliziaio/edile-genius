@@ -265,7 +265,10 @@ export default function ConversationsPage() {
                     <TableCell>
                       <div>
                         <p className="text-sm font-medium text-ink-900">{agentMap[conv.agent_id] || "—"}</p>
-                        {conv.summary && (
+                        {(conv as any).main_reason && (
+                          <p className="text-[11px] text-brand truncate max-w-[220px]">💡 {(conv as any).main_reason}</p>
+                        )}
+                        {conv.summary && !(conv as any).main_reason && (
                           <p className="text-[11px] text-ink-400 truncate max-w-[200px]">{conv.summary}</p>
                         )}
                       </div>
@@ -329,6 +332,14 @@ export default function ConversationsPage() {
               </TabsList>
 
               <TabsContent value="info" className="flex-1 overflow-y-auto space-y-4 mt-4">
+                {/* Main Reason */}
+                {(selectedConv as any).main_reason && (
+                  <div className="bg-brand-light rounded-btn p-4 border border-brand-border">
+                    <p className="text-xs font-medium text-brand mb-1">💡 Motivo principale</p>
+                    <p className="text-sm font-medium text-ink-900">{(selectedConv as any).main_reason}</p>
+                  </div>
+                )}
+
                 {/* Summary */}
                 {selectedConv.summary && (
                   <div className="bg-ink-50 rounded-btn p-4">

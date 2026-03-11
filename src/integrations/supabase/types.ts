@@ -1802,6 +1802,7 @@ export type Database = {
           eval_score: number | null
           id: string
           lead_created: boolean | null
+          main_reason: string | null
           metadata: Json | null
           minutes_billed: number | null
           outcome: string | null
@@ -1829,6 +1830,7 @@ export type Database = {
           eval_score?: number | null
           id?: string
           lead_created?: boolean | null
+          main_reason?: string | null
           metadata?: Json | null
           minutes_billed?: number | null
           outcome?: string | null
@@ -1856,6 +1858,7 @@ export type Database = {
           eval_score?: number | null
           id?: string
           lead_created?: boolean | null
+          main_reason?: string | null
           metadata?: Json | null
           minutes_billed?: number | null
           outcome?: string | null
