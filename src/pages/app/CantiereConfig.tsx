@@ -36,8 +36,16 @@ export default function CantiereConfig() {
     setOperai(data || []);
   };
 
+  const [tokenError, setTokenError] = useState("");
+
   const handleActivateBot = async () => {
     if (!companyId || !botToken.trim()) return;
+    // Validate Telegram bot token format
+    if (!/^\d+:[\w-]{35,}$/.test(botToken.trim())) {
+      setTokenError("Formato token non valido. Il token deve essere nel formato 123456789:ABCDefGhIJKlMnOpQrStUvWxYz");
+      return;
+    }
+    setTokenError("");
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("setup-telegram-webhook", {
