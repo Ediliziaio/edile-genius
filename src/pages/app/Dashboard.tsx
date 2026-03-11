@@ -156,7 +156,7 @@ export default function AppDashboard() {
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
       const { data } = await supabase
         .from("preventivi" as any)
-        .select("id, numero, titolo, stato, cliente_nome, created_at, inviato_at")
+        .select("id, numero_preventivo, oggetto, stato, cliente_nome, created_at, inviato_at")
         .eq("company_id", companyId!)
         .in("stato", ["bozza", "inviato"])
         .lt("created_at", sevenDaysAgo)
@@ -399,11 +399,11 @@ export default function AppDashboard() {
     smartActions.push({
       type: "warning",
       label: p.stato === "inviato"
-        ? `Follow-up preventivo ${p.numero || ""}`
+        ? `Follow-up preventivo ${p.numero_preventivo || ""}`
         : `Preventivo in bozza da ${daysSince}g`,
       description: p.stato === "inviato"
         ? `Inviato ${daysSince} giorni fa a ${p.cliente_nome || "cliente"} senza risposta.`
-        : `"${p.titolo || p.numero || "Senza titolo"}" per ${p.cliente_nome || "cliente"}. Invia o archivia.`,
+        : `"${p.oggetto || p.numero_preventivo || "Senza titolo"}" per ${p.cliente_nome || "cliente"}. Invia o archivia.`,
       href: `/app/preventivi/${p.id}`,
       icon: FileText,
     });
