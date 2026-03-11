@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -123,7 +123,12 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="text-center text-xs mt-6 text-ink-400">
+          <p className="text-center text-sm mt-6 text-ink-400">
+            Non hai un account?{" "}
+            <Link to="/signup" className="text-brand font-medium hover:underline">Registrati gratis</Link>
+          </p>
+
+          <p className="text-center text-xs mt-3 text-ink-400">
             Accedendo, accetti i Termini di Servizio e la Privacy Policy.
           </p>
         </div>

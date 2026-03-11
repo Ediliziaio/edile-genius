@@ -337,18 +337,25 @@ export default function ConversationsPage() {
                   </div>
                 )}
 
-                {/* Grid info */}
+                {/* Grid info — only show fields that have values */}
                 <div className="grid grid-cols-2 gap-3">
                   <InfoItem label="Agente" value={agentMap[selectedConv.agent_id] || "—"} />
                   <InfoItem label="Direzione" value={selectedConv.direction === "inbound" ? "In entrata" : "In uscita"} />
                   <InfoItem label="Numero" value={selectedConv.caller_number || selectedConv.phone_number || "—"} />
                   <InfoItem label="Durata" value={formatDuration(selectedConv.duration_sec)} />
-                  <InfoItem label="Esito" value={selectedConv.outcome || "—"} />
-                  <InfoItem label="Sentiment" value={sentimentConfig[selectedConv.sentiment || ""]?.label || "—"} />
+                  {selectedConv.outcome && <InfoItem label="Esito" value={outcomeConfig[selectedConv.outcome]?.label || selectedConv.outcome} />}
+                  {selectedConv.sentiment && <InfoItem label="Sentiment" value={sentimentConfig[selectedConv.sentiment]?.label || selectedConv.sentiment} />}
                   <InfoItem label="Inizio" value={selectedConv.started_at ? format(new Date(selectedConv.started_at), "dd MMM yyyy HH:mm:ss", { locale: it }) : "—"} />
-                  <InfoItem label="Fine" value={selectedConv.ended_at ? format(new Date(selectedConv.ended_at), "HH:mm:ss", { locale: it }) : "—"} />
-                  <InfoItem label="Minuti fatturati" value={selectedConv.minutes_billed ? `${Number(selectedConv.minutes_billed).toFixed(2)} min` : "—"} />
-                  <InfoItem label="Punteggio eval" value={selectedConv.eval_score != null ? `${Number(selectedConv.eval_score)}/10` : "—"} />
+                  {selectedConv.ended_at && <InfoItem label="Fine" value={format(new Date(selectedConv.ended_at), "HH:mm:ss", { locale: it })} />}
+                  {selectedConv.minutes_billed && Number(selectedConv.minutes_billed) > 0 && (
+                    <InfoItem label="Minuti fatturati" value={`${Number(selectedConv.minutes_billed).toFixed(2)} min`} />
+                  )}
+                  {selectedConv.eval_score != null && Number(selectedConv.eval_score) > 0 && (
+                    <InfoItem label="Punteggio eval" value={`${Number(selectedConv.eval_score)}/10`} />
+                  )}
+                  {selectedConv.cost_billed_eur != null && Number(selectedConv.cost_billed_eur) > 0 && (
+                    <InfoItem label="Costo" value={`€${Number(selectedConv.cost_billed_eur).toFixed(4)}`} />
+                  )}
                 </div>
 
                 {/* Eval notes */}

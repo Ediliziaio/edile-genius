@@ -13,6 +13,7 @@ import Garanzia from "./pages/Garanzia";
 import Tariffe from "./pages/Tariffe";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import AuthGuard from "./components/auth/AuthGuard";
 import ScrollToTop from "./components/ScrollToTop";
 import Shell from "./components/layout/Shell";
@@ -94,6 +95,7 @@ const App = () => (
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
 
             {/* SuperAdmin routes */}
             <Route element={<AuthGuard requiredRole="superadmin" />}>
