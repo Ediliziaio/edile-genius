@@ -354,16 +354,6 @@ export default function AppDashboard() {
         </div>
       )}
 
-      {hasAgents && monthTotal === 0 && (
-        <div className="rounded-xl border border-border bg-card p-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            I tuoi agenti non hanno ancora gestito interazioni questo mese. Verifica che siano attivi.
-          </p>
-          <Link to="/app/agents" className="text-xs text-primary hover:underline mt-2 inline-block">
-            Vedi agenti →
-          </Link>
-        </div>
-      )}
 
       {/* ═══ ZONA E — Attività Recente ═══ */}
       {conversations && conversations.length > 0 && (
