@@ -9,22 +9,22 @@ import {
 } from "@/components/ui/breadcrumb";
 
 const labelMap: Record<string, string> = {
-  app: "Dashboard",
+  app: "Pannello di Controllo",
   superadmin: "SuperAdmin",
-  agents: "Agenti AI",
-  new: "Nuovo",
+  agents: "Tutti gli Agenti",
+  new: "Crea Nuovo",
   templates: "Template",
-  "phone-numbers": "Numeri Telefono",
+  "phone-numbers": "Telefono e WhatsApp",
   buy: "Acquista",
   whatsapp: "WhatsApp",
-  "knowledge-base": "Knowledge Base",
+  "knowledge-base": "Archivio Conoscenze",
   conversations: "Conversazioni",
   contacts: "Rubrica",
   lists: "Liste",
   campaigns: "Campagne",
-  analytics: "Analytics",
-  credits: "Crediti",
-  settings: "Impostazioni",
+  analytics: "Report e Statistiche",
+  credits: "Crediti e Piano",
+  settings: "Account",
   companies: "Aziende",
   team: "Team",
   logs: "Log Sistema",
@@ -32,16 +32,20 @@ const labelMap: Record<string, string> = {
   "render-config": "Config Render",
   render: "Render AI",
   gallery: "Gallery",
+  cantieri: "Gestione Cantieri",
+  configurazione: "Configurazione",
+  preventivi: "Preventivi",
+  documenti: "Documenti e Scadenze",
+  presenze: "Presenze",
+  import: "Importa",
 };
 
 export default function AppBreadcrumb() {
   const { pathname } = useLocation();
   const segments = pathname.split("/").filter(Boolean);
 
-  // Only show for nested pages (more than 1 segment)
   if (segments.length <= 1) return null;
 
-  // Check if a segment looks like a UUID
   const isUuid = (s: string) => /^[0-9a-f]{8}-/.test(s);
 
   const crumbs = segments.map((seg, i) => {

@@ -4,11 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import {
-  Bot, Phone, CalendarCheck, TrendingUp, Plus, ArrowRight,
-  Upload, Users, Megaphone, Clock, Target, Wallet, AlertTriangle, PhoneOff, CreditCard
+  Bot, ArrowRight, PhoneOff, CreditCard, Sparkles,
+  MessageSquare, Zap
 } from "lucide-react";
-import { format, isAfter } from "date-fns";
+import { format } from "date-fns";
 import { it } from "date-fns/locale";
+import AgentCard from "@/components/agents/AgentCard";
 
 export default function AppDashboard() {
   const { profile } = useAuth();
@@ -23,7 +24,6 @@ export default function AppDashboard() {
     },
   });
 
-  // Conversations with agent name join
   const { data: conversations } = useQuery({
     queryKey: ["company-conversations", companyId],
     enabled: !!companyId,
@@ -38,7 +38,6 @@ export default function AppDashboard() {
     },
   });
 
-  // All conversations this month for appointment rate
   const { data: monthConversations } = useQuery({
     queryKey: ["month-conversations", companyId],
     enabled: !!companyId,
@@ -77,289 +76,215 @@ export default function AppDashboard() {
     },
   });
 
-  const { data: contactsByStatus } = useQuery({
-    queryKey: ["contacts-by-status", companyId],
-    enabled: !!companyId,
-    queryFn: async () => {
-      const { data } = await supabase.from("contacts").select("status").eq("company_id", companyId!);
-      const counts: Record<string, number> = {};
-      (data || []).forEach((c) => { counts[c.status] = (counts[c.status] || 0) + 1; });
-      return counts;
-    },
-  });
-
-  const { data: upcomingCalls } = useQuery({
-    queryKey: ["upcoming-calls", companyId],
-    enabled: !!companyId,
-    queryFn: async () => {
-      const { data } = await supabase.from("contacts").select("id, full_name, phone, next_call_at").eq("company_id", companyId!).not("next_call_at", "is", null).order("next_call_at", { ascending: true }).limit(5);
-      return data || [];
-    },
-  });
-
   const activeAgents = agents?.filter((a) => a.status === "active").length ?? 0;
-  const totalCalls = agents?.reduce((s, a) => s + (a.calls_month ?? 0), 0) ?? 0;
-  const appointments = conversations?.filter((c) => c.outcome === "appointment").length ?? 0;
-
-  // Appointment rate
   const monthTotal = monthConversations?.length ?? 0;
-  const monthAppointments = monthConversations?.filter((c) => c.outcome === "appointment").length ?? 0;
-  const appointmentRate = monthTotal > 0 ? Math.round((monthAppointments / monthTotal) * 100) : 0;
-
-  // Credits
   const balanceEur = Number(credits?.balance_eur ?? 0);
   const callsBlocked = credits?.calls_blocked ?? false;
-  const balanceColor = balanceEur > 5 ? "text-status-success" : balanceEur >= 1 ? "text-status-warning" : "text-status-error";
-
-  // Agents without phone
   const agentsWithoutPhone = agents?.filter((a) => !a.phone_number_id) || [];
 
-  const stats = [
-    { label: "Agenti Attivi", value: activeAgents, icon: Bot, colorClass: "text-status-success bg-status-success-light" },
-    { label: "Chiamate / Mese", value: totalCalls, icon: Phone, colorClass: "text-brand bg-brand-light" },
-    { label: "Appuntamenti", value: appointments, icon: CalendarCheck, colorClass: "text-status-info bg-status-info-light" },
-    { label: "Lead Qualificati", value: conversations?.filter((c) => c.outcome === "qualified").length ?? 0, icon: TrendingUp, colorClass: "text-status-warning bg-status-warning-light" },
-    { label: "Tasso Appuntamenti", value: `${appointmentRate}%`, icon: Target, colorClass: "text-accent-blue bg-accent-blue-light" },
-  ];
+  const balanceColor = balanceEur > 5
+    ? "text-primary"
+    : balanceEur >= 1
+      ? "text-yellow-600"
+      : "text-destructive";
 
-  const quickActions = [
-    { label: "Nuovo Agente", icon: Plus, href: "/app/agents/new", color: "bg-brand text-white" },
-    { label: "Importa Contatti", icon: Upload, href: "/app/contacts/import", color: "bg-status-info text-white" },
-    { label: "Nuova Campagna", icon: Megaphone, href: "/app/campaigns/new", color: "bg-status-warning text-white" },
-    { label: "Rubrica", icon: Users, href: "/app/contacts", color: "bg-ink-700 text-white" },
-  ];
+  // --- Smart Actions ---
+  const smartActions: { type: "cta" | "warning" | "danger"; label: string; description: string; href: string; icon: React.ElementType }[] = [];
 
-  const statusLabels: Record<string, string> = { new: "Nuovo", contacted: "Contattato", qualified: "Qualificato", appointment: "Appuntamento", converted: "Convertito", lost: "Perso" };
-  const statusColors: Record<string, string> = { new: "bg-status-info", contacted: "bg-status-warning", qualified: "bg-brand", appointment: "bg-accent-blue", converted: "bg-status-success", lost: "bg-status-error" };
-
-  const trialEndsAt = company?.trial_ends_at ? new Date(company.trial_ends_at) : null;
-  const trialActive = trialEndsAt && isAfter(trialEndsAt, new Date());
-  const callsUsed = company?.calls_used_month ?? 0;
-  const callsLimit = company?.monthly_calls_limit ?? 500;
-
-  // Next actions
-  const nextActions: { type: "cta" | "warning" | "danger"; label: string; href: string; icon: React.ElementType }[] = [];
-  if (!agents || agents.length === 0) {
-    nextActions.push({ type: "cta", label: "Crea il tuo primo agente AI", href: "/app/agents/new", icon: Bot });
-  }
-  if (agentsWithoutPhone.length > 0 && agents && agents.length > 0) {
-    nextActions.push({ type: "warning", label: "Assegna un numero ai tuoi agenti", href: "/app/phone-numbers", icon: PhoneOff });
+  if (agents && agents.length > 0) {
+    const drafts = agents.filter(a => a.status === "draft");
+    if (drafts.length > 0) {
+      smartActions.push({
+        type: "warning",
+        label: `Completa "${drafts[0].name}"`,
+        description: "Questo agente è in bozza. Completa la configurazione per attivarlo.",
+        href: `/app/agents/${drafts[0].id}`,
+        icon: Bot,
+      });
+    }
+    if (agentsWithoutPhone.length > 0) {
+      smartActions.push({
+        type: "warning",
+        label: "Assegna un numero di telefono",
+        description: `${agentsWithoutPhone.length} agente/i senza numero. Assegna un numero per ricevere chiamate.`,
+        href: "/app/phone-numbers",
+        icon: PhoneOff,
+      });
+    }
   }
   if (balanceEur < 2) {
-    nextActions.push({ type: "danger", label: "Crediti in esaurimento", href: "/app/credits", icon: CreditCard });
+    smartActions.push({
+      type: "danger",
+      label: "Crediti in esaurimento",
+      description: "Ricarica per evitare il blocco degli agenti.",
+      href: "/app/credits",
+      icon: CreditCard,
+    });
   }
 
   const actionStyles = {
-    cta: "border-brand bg-brand-light text-brand-text",
-    warning: "border-status-warning bg-status-warning-light text-status-warning",
-    danger: "border-status-error bg-status-error-light text-status-error",
+    cta: "border-primary/30 bg-primary/5 hover:bg-primary/10",
+    warning: "border-yellow-300 bg-yellow-50 hover:bg-yellow-100",
+    danger: "border-destructive/30 bg-destructive/5 hover:bg-destructive/10",
   };
 
+  const hasAgents = agents && agents.length > 0;
+
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-ink-900">
-            Buongiorno{profile?.full_name ? `, ${profile.full_name}` : ""}! 👋
-          </h1>
-          <p className="mt-1 text-sm text-ink-500">
-            {company?.name && <span className="font-medium text-ink-700">{company.name}</span>}
-            {company?.plan && <span> · Piano <span className="capitalize">{company.plan}</span></span>}
-            {trialActive && trialEndsAt && <span> · Trial fino al {format(trialEndsAt, "d MMM yyyy", { locale: it })}</span>}
-            {!company?.name && "Ecco un riepilogo della tua attività."}
-          </p>
-        </div>
-      </div>
+    <div className="space-y-8 max-w-6xl">
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {quickActions.map((a) => (
-          <Link key={a.label} to={a.href} className={`${a.color} rounded-card p-4 flex items-center gap-3 shadow-card hover:shadow-card-hover transition-shadow`}>
-            <a.icon className="w-5 h-5 flex-shrink-0" />
-            <span className="text-sm font-medium">{a.label}</span>
-          </Link>
-        ))}
-      </div>
-
-      {/* Stats — 5 cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        {stats.map((s) => (
-          <div key={s.label} className="rounded-card p-5 border border-ink-200 bg-white shadow-card">
-            <div className="flex items-center gap-3 mb-3">
-              <div className={`w-9 h-9 rounded-btn flex items-center justify-center ${s.colorClass}`}>
-                <s.icon className="w-4 h-4" />
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-ink-900">{s.value}</p>
-            <p className="text-xs mt-1 text-ink-400">{s.label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Usage + Trial + Credits */}
-      {company && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Utilizzo Chiamate */}
-          <div className="rounded-card p-5 border border-ink-200 bg-white shadow-card">
-            <p className="text-xs font-medium text-ink-400 mb-2">Utilizzo Chiamate</p>
-            <div className="flex items-end gap-2 mb-2">
-              <span className="text-2xl font-bold text-ink-900">{callsUsed}</span>
-              <span className="text-sm text-ink-400">/ {callsLimit}</span>
-            </div>
-            <div className="w-full h-2 rounded-full bg-ink-100">
-              <div className="h-2 rounded-full bg-brand transition-all" style={{ width: `${Math.min((callsUsed / callsLimit) * 100, 100)}%` }} />
-            </div>
-            <p className="text-xs text-ink-400 mt-2">Piano: <span className="font-medium text-ink-700 capitalize">{company.plan}</span></p>
-          </div>
-
-          {/* Trial */}
-          <div className="rounded-card p-5 border border-ink-200 bg-white shadow-card">
-            <p className="text-xs font-medium text-ink-400 mb-2">Trial</p>
-            {trialActive ? (
-              <>
-                <p className="text-lg font-bold text-status-warning">Trial Attivo</p>
-                <p className="text-sm text-ink-500 mt-1">Scade il {format(trialEndsAt!, "d MMMM yyyy", { locale: it })}</p>
-              </>
-            ) : trialEndsAt ? (
-              <>
-                <p className="text-lg font-bold text-status-success">Piano Attivo</p>
-                <p className="text-sm text-ink-500 mt-1">Trial scaduto il {format(trialEndsAt, "d MMMM yyyy", { locale: it })}</p>
-              </>
-            ) : (
-              <p className="text-lg font-bold text-ink-700">Nessun trial</p>
-            )}
-          </div>
-
-          {/* Crediti EUR */}
-          <div className="rounded-card p-5 border border-ink-200 bg-white shadow-card">
-            <div className="flex items-center gap-2 mb-2">
-              <Wallet className="w-4 h-4 text-ink-400" />
-              <p className="text-xs font-medium text-ink-400">Crediti Disponibili</p>
-            </div>
-            <p className={`text-2xl font-bold ${balanceColor}`}>€{balanceEur.toFixed(2)}</p>
-            {callsBlocked && (
-              <div className="mt-2 flex items-center gap-2 rounded-btn bg-status-error-light px-3 py-1.5">
-                <AlertTriangle className="w-3.5 h-3.5 text-status-error" />
-                <span className="text-xs font-medium text-status-error">Chiamate bloccate — Ricarica i crediti</span>
-              </div>
-            )}
-            <Link to="/app/credits" className="text-xs text-brand hover:text-brand-hover mt-2 inline-block">Gestisci crediti →</Link>
-          </div>
-        </div>
-      )}
-
-      {/* Next Actions */}
-      {nextActions.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-ink-900">Prossime Azioni</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {nextActions.map((action) => (
-              <Link
-                key={action.label}
-                to={action.href}
-                className={`rounded-card p-4 border flex items-center gap-3 transition-shadow hover:shadow-card ${actionStyles[action.type]}`}
-              >
-                <action.icon className="w-5 h-5 flex-shrink-0" />
-                <span className="text-sm font-medium">{action.label}</span>
-                <ArrowRight className="w-4 h-4 ml-auto" />
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Contacts by Status + Upcoming Calls */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="rounded-card p-5 border border-ink-200 bg-white shadow-card">
-          <h3 className="text-sm font-semibold text-ink-900 mb-4">Contatti per Status</h3>
-          {contactsByStatus && Object.keys(contactsByStatus).length > 0 ? (
-            <div className="space-y-2">
-              {Object.entries(contactsByStatus).sort(([, a], [, b]) => b - a).map(([status, count]) => (
-                <div key={status} className="flex items-center gap-3">
-                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${statusColors[status] || "bg-ink-300"}`} />
-                  <span className="text-sm text-ink-600 flex-1">{statusLabels[status] || status}</span>
-                  <span className="text-sm font-semibold text-ink-900">{count}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-ink-400">Nessun contatto</p>
-          )}
-        </div>
-
-        <div className="rounded-card p-5 border border-ink-200 bg-white shadow-card">
-          <h3 className="text-sm font-semibold text-ink-900 mb-4">Prossime Chiamate</h3>
-          {upcomingCalls && upcomingCalls.length > 0 ? (
-            <div className="space-y-3">
-              {upcomingCalls.map((c) => (
-                <div key={c.id} className="flex items-center gap-3">
-                  <Clock className="w-4 h-4 text-ink-400 flex-shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-ink-900 truncate">{c.full_name}</p>
-                    <p className="text-xs text-ink-400">{c.phone}</p>
-                  </div>
-                  <span className="text-xs text-ink-500 whitespace-nowrap">
-                    {c.next_call_at ? format(new Date(c.next_call_at), "d MMM HH:mm", { locale: it }) : "—"}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-ink-400">Nessuna chiamata programmata</p>
-          )}
-        </div>
-      </div>
-
-      {/* Recent Agents */}
+      {/* ═══ ZONE A — Hero Welcome + Status Pills ═══ */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-ink-900">Agenti Recenti</h2>
-          <Link to="/app/agents" className="text-xs flex items-center gap-1 text-brand hover:text-brand-hover">
-            Vedi tutti <ArrowRight className="w-3 h-3" />
-          </Link>
+        <h1 className="text-2xl font-bold text-foreground">
+          Buongiorno{profile?.full_name ? `, ${profile.full_name}` : ""}! 👋
+        </h1>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <StatusPill
+            label={`${activeAgents} agenti attivi`}
+            variant={activeAgents > 0 ? "success" : "muted"}
+          />
+          <StatusPill
+            label={`${monthTotal} conversazioni questo mese`}
+            variant={monthTotal > 0 ? "info" : "muted"}
+          />
+          <StatusPill
+            label={`€${balanceEur.toFixed(2)} crediti`}
+            variant={callsBlocked ? "danger" : balanceEur < 2 ? "warning" : "success"}
+          />
         </div>
-        {(!agents || agents.length === 0) ? (
-          <div className="rounded-card p-8 text-center border border-ink-200 bg-white shadow-card">
-            <Bot className="w-10 h-10 mx-auto mb-3 text-ink-300" />
-            <p className="text-sm mb-1 text-ink-500">Nessun agente creato</p>
-            <Link to="/app/agents/new" className="text-sm font-medium text-brand">Crea il tuo primo agente →</Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {agents.slice(0, 3).map((a) => (
-              <div key={a.id} className="rounded-card p-4 border border-ink-200 bg-white flex items-center gap-3 shadow-card">
-                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${a.status === "active" ? "bg-status-success" : "bg-ink-300"}`} />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium truncate text-ink-900">{a.name}</p>
-                  <p className="text-xs text-ink-400">{a.calls_month ?? 0} chiamate/mese</p>
-                </div>
-              </div>
-            ))}
+
+        {callsBlocked && (
+          <div className="mt-3 flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3">
+            <CreditCard className="w-4 h-4 text-destructive shrink-0" />
+            <p className="text-sm text-destructive font-medium">
+              Agenti bloccati — crediti esauriti.{" "}
+              <Link to="/app/credits" className="underline">Ricarica ora</Link>
+            </p>
           </div>
         )}
       </div>
 
-      {/* Recent Conversations — with agent name */}
+      {/* ═══ ZONE B — Onboarding or Smart Actions ═══ */}
+      {!hasAgents ? (
+        /* Empty state — Onboarding */
+        <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 p-8 md:p-12 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
+            <Sparkles className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Benvenuto in Edile Genius</h2>
+          <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+            Crea il tuo primo agente AI in 3 minuti. Scegli un template, configura la voce e attivalo.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8">
+            {[
+              { step: "1", label: "Scegli un template" },
+              { step: "2", label: "Configura la voce" },
+              { step: "3", label: "Attiva e ricevi chiamate" },
+            ].map((s, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
+                  {s.step}
+                </span>
+                <span className="text-sm font-medium text-foreground">{s.label}</span>
+                {i < 2 && <ArrowRight className="w-4 h-4 text-muted-foreground hidden sm:block" />}
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              to="/app/agents/new"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors"
+            >
+              <Zap className="w-4 h-4" />
+              Crea il Primo Agente
+            </Link>
+            <Link
+              to="/app/agents/new"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              Scopri i Template →
+            </Link>
+          </div>
+        </div>
+      ) : smartActions.length > 0 ? (
+        /* Smart action cards */
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-foreground">Da Fare Adesso</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {smartActions.map((action) => (
+              <Link
+                key={action.label}
+                to={action.href}
+                className={`rounded-xl p-4 border flex items-start gap-4 transition-colors ${actionStyles[action.type]}`}
+              >
+                <div className="w-9 h-9 rounded-lg bg-card flex items-center justify-center shrink-0 border border-border">
+                  <action.icon className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-foreground">{action.label}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{action.description}</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {/* ═══ ZONE C — I Tuoi Agenti ═══ */}
+      {hasAgents && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-foreground">I Tuoi Agenti</h2>
+            <Link to="/app/agents" className="text-xs flex items-center gap-1 text-primary hover:underline">
+              Vedi tutti <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {agents!.map((a) => (
+              <AgentCard key={a.id} agent={a} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ═══ ZONE D — Attività Recente ═══ */}
       {conversations && conversations.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold mb-4 text-ink-900">Conversazioni Recenti</h2>
-          <div className="rounded-card border border-ink-200 overflow-hidden bg-white shadow-card">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-foreground">Attività Recente</h2>
+            <Link to="/app/conversations" className="text-xs flex items-center gap-1 text-primary hover:underline">
+              Tutte le conversazioni <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+          <div className="rounded-xl border border-border overflow-hidden bg-card">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-ink-50">
-                  <th className="text-left px-4 py-3 text-xs font-medium text-ink-400">Agente</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-ink-400">Stato</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-ink-400">Durata</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-ink-400">Esito</th>
+                <tr className="bg-muted/50">
+                  <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">Agente</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">Durata</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">Esito</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground hidden sm:table-cell">Quando</th>
                 </tr>
               </thead>
               <tbody>
                 {conversations.map((c: any) => (
-                  <tr key={c.id} className="border-t border-ink-100">
-                    <td className="px-4 py-3 text-ink-900">{c.agents?.name || c.agent_id.slice(0, 8) + "…"}</td>
-                    <td className="px-4 py-3 text-ink-500">{c.status || "—"}</td>
-                    <td className="px-4 py-3 text-ink-500">{c.duration_sec ? `${c.duration_sec}s` : "—"}</td>
-                    <td className="px-4 py-3 text-ink-500">{c.outcome || "—"}</td>
+                  <tr key={c.id} className="border-t border-border">
+                    <td className="px-4 py-3 font-medium text-foreground">
+                      <div className="flex items-center gap-2">
+                        <MessageSquare className="w-3.5 h-3.5 text-muted-foreground" />
+                        {c.agents?.name || "—"}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">{c.duration_sec ? `${c.duration_sec}s` : "—"}</td>
+                    <td className="px-4 py-3">
+                      <OutcomeBadge outcome={c.outcome} />
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">
+                      {c.started_at ? format(new Date(c.started_at), "d MMM, HH:mm", { locale: it }) : "—"}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -369,4 +294,34 @@ export default function AppDashboard() {
       )}
     </div>
   );
+}
+
+/* ── Helper components ── */
+
+function StatusPill({ label, variant }: { label: string; variant: "success" | "info" | "warning" | "danger" | "muted" }) {
+  const styles: Record<string, string> = {
+    success: "bg-primary/10 text-primary",
+    info: "bg-accent text-accent-foreground",
+    warning: "bg-yellow-100 text-yellow-700",
+    danger: "bg-destructive/10 text-destructive",
+    muted: "bg-muted text-muted-foreground",
+  };
+  return (
+    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${styles[variant]}`}>
+      {label}
+    </span>
+  );
+}
+
+function OutcomeBadge({ outcome }: { outcome: string | null }) {
+  if (!outcome) return <span className="text-muted-foreground">—</span>;
+  const map: Record<string, { label: string; cls: string }> = {
+    appointment: { label: "Appuntamento", cls: "bg-primary/10 text-primary" },
+    qualified: { label: "Qualificato", cls: "bg-accent text-accent-foreground" },
+    not_interested: { label: "Non interessato", cls: "bg-muted text-muted-foreground" },
+    voicemail: { label: "Segreteria", cls: "bg-muted text-muted-foreground" },
+    callback: { label: "Richiamata", cls: "bg-yellow-100 text-yellow-700" },
+  };
+  const m = map[outcome] || { label: outcome, cls: "bg-muted text-muted-foreground" };
+  return <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium ${m.cls}`}>{m.label}</span>;
 }

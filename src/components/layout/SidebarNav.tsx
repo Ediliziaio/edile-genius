@@ -5,49 +5,43 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard, Bot, MessageSquare, BarChart3, Settings,
-  HelpCircle, Building2, UserPlus, Users, FileText,
-  BookUser, ListChecks, Megaphone, Phone, BookOpen, Coins, type LucideIcon,
-  AlertTriangle, MessageCircle, Puzzle, Palette, HardHat, Wrench,
-  FileSignature, ShieldCheck, ClipboardList
+  Building2, UserPlus, Users, FileText,
+  BookUser, Megaphone, Phone, Coins, type LucideIcon,
+  AlertTriangle, MessageCircle, Puzzle, Palette, HardHat,
+  FileSignature, ShieldCheck, ClipboardList, PlusCircle,
+  Archive, PhoneCall
 } from "lucide-react";
 
 interface NavItem { label: string; icon: LucideIcon; href: string; }
 interface NavSection { header?: string; items: NavItem[]; }
 
 const companyNav: NavSection[] = [
-  { header: "PRINCIPALE", items: [
-    { label: "Dashboard", icon: LayoutDashboard, href: "/app" },
-    { label: "Agenti AI", icon: Bot, href: "/app/agents" },
+  { header: "PANORAMICA", items: [
+    { label: "Pannello di Controllo", icon: LayoutDashboard, href: "/app" },
   ]},
-  { header: "AUTOMAZIONI", items: [
-    { label: "Template Agenti", icon: Puzzle, href: "/app/templates" },
-    { label: "Preventivi", icon: FileSignature, href: "/app/preventivi" },
-    { label: "Template PDF", icon: FileText, href: "/app/impostazioni/template-preventivo" },
-    { label: "Documenti", icon: ShieldCheck, href: "/app/documenti" },
-    { label: "Presenze", icon: ClipboardList, href: "/app/presenze" },
-  ]},
-  { header: "COMUNICAZIONE", items: [
-    { label: "Numeri di Telefono", icon: Phone, href: "/app/phone-numbers" },
-    { label: "WhatsApp", icon: MessageCircle, href: "/app/whatsapp" },
-    { label: "Knowledge Base", icon: BookOpen, href: "/app/knowledge-base" },
+  { header: "I MIEI AGENTI", items: [
+    { label: "Tutti gli Agenti", icon: Bot, href: "/app/agents" },
+    { label: "Crea Nuovo", icon: PlusCircle, href: "/app/agents/new" },
     { label: "Conversazioni", icon: MessageSquare, href: "/app/conversations" },
   ]},
-  { header: "CONTATTI", items: [
+  { header: "CONTATTI & VENDITE", items: [
     { label: "Rubrica", icon: BookUser, href: "/app/contacts" },
-    { label: "Liste & Gruppi", icon: ListChecks, href: "/app/lists" },
     { label: "Campagne", icon: Megaphone, href: "/app/campaigns" },
+    { label: "Preventivi", icon: FileSignature, href: "/app/preventivi" },
   ]},
   { header: "CANTIERI", items: [
-    { label: "I Cantieri", icon: HardHat, href: "/app/cantieri" },
-    { label: "Configura Bot", icon: Wrench, href: "/app/cantieri/configurazione" },
+    { label: "Gestione Cantieri", icon: HardHat, href: "/app/cantieri" },
+    { label: "Documenti e Scadenze", icon: ShieldCheck, href: "/app/documenti" },
+    { label: "Presenze", icon: ClipboardList, href: "/app/presenze" },
   ]},
-  { header: "REPORT", items: [
-    { label: "Analytics", icon: BarChart3, href: "/app/analytics" },
-    { label: "Crediti & Utilizzo", icon: Coins, href: "/app/credits" },
+  { header: "RISULTATI", items: [
+    { label: "Report e Statistiche", icon: BarChart3, href: "/app/analytics" },
   ]},
-  { header: "ACCOUNT", items: [
-    { label: "Impostazioni", icon: Settings, href: "/app/settings" },
-    { label: "Supporto", icon: HelpCircle, href: "#" },
+  { header: "IMPOSTAZIONI", items: [
+    { label: "Telefono e WhatsApp", icon: PhoneCall, href: "/app/phone-numbers" },
+    { label: "Archivio Conoscenze", icon: Archive, href: "/app/knowledge-base" },
+    { label: "Crediti e Piano", icon: Coins, href: "/app/credits" },
+    { label: "Account", icon: Settings, href: "/app/settings" },
   ]},
 ];
 
