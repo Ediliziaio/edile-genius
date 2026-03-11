@@ -29,6 +29,7 @@ const companyNav: NavSection[] = [
   ]},
   { header: "I MIEI AGENTI", items: [
     { label: "Agenti", icon: Bot, href: "/app/agents" },
+    { label: "Automazioni AI", icon: Zap, href: "/app/automations" },
     { label: "Risultati", icon: BarChart3, href: "/app/analytics" },
   ]},
   { header: "VENDITE", items: [
