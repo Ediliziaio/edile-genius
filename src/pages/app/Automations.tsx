@@ -153,8 +153,8 @@ export default function Automations() {
           company_id: companyId!,
           automation_type: type,
           is_enabled: enabled,
-          config: {},
-        });
+          config: {} as any,
+        } as any);
       }
     },
     onSuccess: () => {
