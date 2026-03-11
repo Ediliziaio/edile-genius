@@ -12,7 +12,19 @@ import {
 import { format, differenceInDays } from "date-fns";
 import { it } from "date-fns/locale";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
+
+interface BriefingAction {
+  label: string;
+  href: string;
+  priority: "high" | "medium" | "low";
+}
+
+interface BriefingData {
+  briefing: string;
+  actions?: BriefingAction[];
+}
 
 export default function AppDashboard() {
   const { profile } = useAuth();
@@ -90,6 +102,21 @@ export default function AppDashboard() {
         .eq("company_id", companyId!)
         .single();
       return data;
+    },
+  });
+
+  // ── Credit usage history for burn rate ──
+  const { data: creditUsageHistory } = useQuery({
+    queryKey: ["credit-usage-history", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { data } = await supabase
+        .from("ai_credit_usage")
+        .select("cost_billed_total, created_at")
+        .eq("company_id", companyId!)
+        .gte("created_at", sevenDaysAgo);
+      return data || [];
     },
   });
 
@@ -198,7 +225,7 @@ export default function AppDashboard() {
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("ai-morning-briefing");
       if (error) throw error;
-      return data as { briefing: string };
+      return data as BriefingData;
     },
   });
 
@@ -230,11 +257,41 @@ export default function AppDashboard() {
 
   const agentsWithoutPhone = agents?.filter((a) => !a.phone_number_id) || [];
 
+  // ── Sentinella Crediti: Burn Rate ──
+  const burnRateDaily = (() => {
+    if (!creditUsageHistory || creditUsageHistory.length === 0) return 0;
+    const totalUsage = creditUsageHistory.reduce((sum, u) => sum + Number(u.cost_billed_total || 0), 0);
+    // Calculate actual days spanned
+    const dates = creditUsageHistory.map(u => new Date(u.created_at!).getTime());
+    const minDate = Math.min(...dates);
+    const maxDate = Math.max(...dates);
+    const daySpan = Math.max(1, (maxDate - minDate) / (24 * 60 * 60 * 1000));
+    return totalUsage / daySpan;
+  })();
+
+  const daysRemaining = burnRateDaily > 0 ? Math.floor(balanceEur / burnRateDaily) : null;
+
   // ── Smart Actions Engine ──
   const smartActions: { type: "warning" | "danger" | "info"; label: string; description: string; href: string; icon: React.ElementType }[] = [];
 
-  // Credits
-  if (balanceEur < 2) {
+  // Credits — enhanced with burn rate
+  if (callsBlocked) {
+    smartActions.push({
+      type: "danger",
+      label: "Agenti bloccati — crediti esauriti",
+      description: "Ricarica subito per riattivare gli agenti.",
+      href: "/app/credits",
+      icon: CreditCard,
+    });
+  } else if (daysRemaining !== null && daysRemaining <= 3) {
+    smartActions.push({
+      type: "danger",
+      label: `Crediti per ~${daysRemaining} giorn${daysRemaining === 1 ? "o" : "i"}`,
+      description: `Al ritmo attuale (€${burnRateDaily.toFixed(2)}/giorno) i crediti finiranno presto. Ricarica.`,
+      href: "/app/credits",
+      icon: CreditCard,
+    });
+  } else if (balanceEur < 2) {
     smartActions.push({
       type: "danger",
       label: "Crediti in esaurimento",
@@ -409,7 +466,7 @@ export default function AppDashboard() {
         )}
       </div>
 
-      {/* ═══ AI BRIEFING ═══ */}
+      {/* ═══ AI BRIEFING with clickable actions ═══ */}
       {briefingExpanded && (
         <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 via-card to-accent/30 p-5 relative overflow-hidden">
           <div className="absolute top-3 right-3 flex items-center gap-1">
@@ -435,7 +492,7 @@ export default function AppDashboard() {
             </div>
             <div className="min-w-0 flex-1 pr-16">
               <p className="text-xs font-semibold text-primary mb-1.5 flex items-center gap-1.5">
-                <Sparkles className="w-3 h-3" /> Briefing AI
+                <Sparkles className="w-3 h-3" /> Consulente AI
               </p>
               {briefingLoading ? (
                 <div className="space-y-2">
@@ -444,9 +501,28 @@ export default function AppDashboard() {
                   <div className="h-3 bg-muted rounded w-2/3 animate-pulse" />
                 </div>
               ) : briefingData?.briefing ? (
-                <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
-                  {briefingData.briefing}
-                </p>
+                <>
+                  <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
+                    {briefingData.briefing}
+                  </p>
+                  {/* Clickable actions from AI */}
+                  {briefingData.actions && briefingData.actions.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {briefingData.actions.map((action, i) => (
+                        <Link key={i} to={action.href}>
+                          <Button
+                            size="sm"
+                            variant={action.priority === "high" ? "default" : "outline"}
+                            className="text-xs h-7 gap-1"
+                          >
+                            <Zap className="w-3 h-3" />
+                            {action.label}
+                          </Button>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </>
               ) : (
                 <p className="text-sm text-muted-foreground italic">Briefing non disponibile.</p>
               )}
@@ -460,7 +536,7 @@ export default function AppDashboard() {
           onClick={() => setBriefingExpanded(true)}
           className="flex items-center gap-2 text-xs text-primary hover:underline"
         >
-          <Brain className="w-3.5 h-3.5" /> Mostra briefing AI
+          <Brain className="w-3.5 h-3.5" /> Mostra consulente AI
         </button>
       )}
 
@@ -492,6 +568,7 @@ export default function AppDashboard() {
           sub="questo mese"
           accent="primary"
         />
+        {/* Credits Card with burn rate */}
         <div className="rounded-xl border border-border bg-card p-5 flex flex-col gap-3">
           <div className="flex items-center gap-2">
             <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
@@ -515,6 +592,14 @@ export default function AppDashboard() {
                 €{totalSpent.toFixed(2)} spesi su €{totalRecharged.toFixed(2)} ricaricati
               </p>
             </div>
+          )}
+          {/* Burn rate projection */}
+          {daysRemaining !== null && (
+            <p className={`text-[11px] font-medium ${
+              daysRemaining <= 3 ? "text-destructive" : daysRemaining <= 7 ? "text-yellow-600" : "text-muted-foreground"
+            }`}>
+              ⏱ ~{daysRemaining} giorn{daysRemaining === 1 ? "o" : "i"} rimanent{daysRemaining === 1 ? "e" : "i"} al ritmo attuale
+            </p>
           )}
           <Link to="/app/credits" className="text-xs text-primary hover:underline mt-auto">
             Gestisci crediti →

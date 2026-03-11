@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_automations: {
+        Row: {
+          automation_type: string
+          company_id: string
+          config: Json | null
+          created_at: string | null
+          id: string
+          is_enabled: boolean | null
+          last_run_at: string | null
+          total_actions: number | null
+        }
+        Insert: {
+          automation_type: string
+          company_id: string
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          last_run_at?: string | null
+          total_actions?: number | null
+        }
+        Update: {
+          automation_type?: string
+          company_id?: string
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          last_run_at?: string | null
+          total_actions?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_automations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_reports: {
         Row: {
           audio_url: string | null
@@ -1247,6 +1288,7 @@ export type Database = {
         Row: {
           agent_id: string | null
           appointments_set: number | null
+          auto_pilot: boolean | null
           avg_duration: number | null
           call_days: string[] | null
           call_hour_limit: number | null
@@ -1279,6 +1321,7 @@ export type Database = {
         Insert: {
           agent_id?: string | null
           appointments_set?: number | null
+          auto_pilot?: boolean | null
           avg_duration?: number | null
           call_days?: string[] | null
           call_hour_limit?: number | null
@@ -1311,6 +1354,7 @@ export type Database = {
         Update: {
           agent_id?: string | null
           appointments_set?: number | null
+          auto_pilot?: boolean | null
           avg_duration?: number | null
           call_days?: string[] | null
           call_hour_limit?: number | null
@@ -1765,6 +1809,7 @@ export type Database = {
       contacts: {
         Row: {
           address: string | null
+          ai_actions_log: Json | null
           assigned_agent: string | null
           assigned_user: string | null
           call_attempts: number | null
@@ -1793,6 +1838,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          ai_actions_log?: Json | null
           assigned_agent?: string | null
           assigned_user?: string | null
           call_attempts?: number | null
@@ -1821,6 +1867,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          ai_actions_log?: Json | null
           assigned_agent?: string | null
           assigned_user?: string | null
           call_attempts?: number | null
