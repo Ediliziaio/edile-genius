@@ -381,27 +381,18 @@ export default function Settings() {
         {/* API Tab */}
         <TabsContent value="api">
           <div className="rounded-card border border-ink-200 bg-white p-6 space-y-4 max-w-lg shadow-card">
-            <h3 className="text-lg font-semibold text-ink-900">ElevenLabs API Key</h3>
-            <p className="text-sm text-ink-500">Inserisci la tua API key di ElevenLabs per abilitare le funzionalità vocali.</p>
-            <div className="space-y-2">
-              <Label className="text-ink-600">API Key</Label>
-              <div className="relative">
-                <Input type={showApiKey ? "text" : "password"} value={apiKey} onChange={(e) => setApiKey(e.target.value)} className="bg-ink-50 border-ink-200 text-ink-900 pr-10" />
-                <button type="button" onClick={() => setShowApiKey(!showApiKey)} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-700">
-                  {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
+            <h3 className="text-lg font-semibold text-ink-900">Configurazione API</h3>
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-status-success-light border border-status-success/20">
+              <CheckCircle2 className="h-5 w-5 text-status-success mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-ink-900">ElevenLabs API — Gestita centralmente</p>
+                <p className="text-sm text-ink-500 mt-1">La chiave API ElevenLabs è configurata in modo sicuro a livello di piattaforma e non è necessario inserirla manualmente.</p>
               </div>
             </div>
-            <div className="flex gap-3">
-              <Button onClick={saveApiKey} disabled={savingApi} className="bg-brand hover:bg-brand-hover text-white">
-                {savingApi ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-                Salva
-              </Button>
-              <Button variant="outline" onClick={testConnection} disabled={testing} className="border-ink-200 text-ink-700 hover:bg-ink-50">
-                {testing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
-                Testa connessione
-              </Button>
-            </div>
+            <Button variant="outline" onClick={testConnection} disabled={testing} className="border-ink-200 text-ink-700 hover:bg-ink-50">
+              {testing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+              Testa connessione ElevenLabs
+            </Button>
           </div>
         </TabsContent>
 

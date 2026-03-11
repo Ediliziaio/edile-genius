@@ -188,7 +188,7 @@ export default function CreateCompany() {
                 ["Indirizzo", [form.address, form.city].filter(Boolean).join(", ") || "—"],
                 ["Sito Web", form.website || "—"],
                 ["Trial", form.trial_days && parseInt(form.trial_days) > 0 ? `${form.trial_days} giorni` : "Nessuno"],
-                ["ElevenLabs API Key", form.el_api_key ? "••••••••" : "Non configurata"],
+                ["ElevenLabs API Key", "Gestita centralmente"],
               ] as [string, string][]).map(([label, value]) => (
                 <div key={label} className="flex justify-between py-2 border-b border-ink-100">
                   <span className="text-ink-500">{label}</span>

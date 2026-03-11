@@ -156,13 +156,8 @@ export default function CompanyDetail() {
               <div className="space-y-2"><Label className="text-ink-600">Piano</Label><Select value={editPlan} onValueChange={setEditPlan}><SelectTrigger className="bg-ink-50 border-ink-200 text-ink-900"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="starter">Starter</SelectItem><SelectItem value="professional">Professional</SelectItem><SelectItem value="enterprise">Enterprise</SelectItem></SelectContent></Select></div>
               <div className="space-y-2"><Label className="text-ink-600">Stato</Label><Select value={editStatus} onValueChange={setEditStatus}><SelectTrigger className="bg-ink-50 border-ink-200 text-ink-900"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="active">Attivo</SelectItem><SelectItem value="inactive">Inattivo</SelectItem><SelectItem value="trial">Trial</SelectItem></SelectContent></Select></div>
             </div>
-            <div className="space-y-2">
-              <Label className="text-ink-600">ElevenLabs API Key</Label>
-              <div className="relative">
-                <Input type={showApiKey ? "text" : "password"} value={editApiKey} onChange={(e) => setEditApiKey(e.target.value)} className="bg-ink-50 border-ink-200 text-ink-900 pr-10" />
-                <button type="button" onClick={() => setShowApiKey(!showApiKey)} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-700">{showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
-              </div>
-            </div>
+
+
             <Button onClick={handleSave} disabled={saving} className="bg-brand hover:bg-brand-hover text-white">
               {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
               Salva modifiche
