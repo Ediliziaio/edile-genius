@@ -1,203 +1,136 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro + AI Avanzata
 
-## ✅ Completato in questo blocco
+# Piano: AI Orchestrator — Cervello Centrale degli Agenti
 
-### Database Migration
-- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
-- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
-- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
-- RLS policies per tutte le nuove tabelle
+## Analisi dello stato attuale
 
-## ✅ Blocco 2 — Sistema Crediti Euro-based
+La piattaforma ha gia 6 agenti autonomi funzionanti, ma ognuno opera in modo isolato:
+- **auto-followup-agent**: cron per lead dormienti
+- **post-call-actions**: reagisce a fine chiamata
+- **ai-morning-briefing**: genera briefing LLM
+- **Smart Actions Engine**: regole JS nella dashboard
+- **Campaign Auto-Pilot**: logica in run-campaign-batch
+- **recalculate-lead-weights**: lead score dinamico
 
-### Database
-- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
-- ai_credit_topups (ricariche manual/auto/promo/adjustment)
-- ai_credit_usage (consumo per conversazione con margini)
-- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
-- monthly_billing_summary view (security_invoker)
+Mancano: coordinamento, deduplicazione, memoria, prioritizzazione centralizzata, e una UI unificata per il controllo.
 
-### Edge Functions
-- check-credits-before-call: verifica saldo pre-chiamata
-- topup-credits: ricarica manuale con fattura
-- elevenlabs-webhook: post-call billing, auto-recharge, blocco
-- platform-config: +apply_global_markup action
+---
 
-### Frontend
-- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
-- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
-- Sidebar: footer saldo crediti con barra e alert
-- VoiceTestPanel: check crediti pre-chiamata con blocco UI
+## Cosa costruire
 
-## ✅ Blocco 3-5 — Agent Templates System
+### 1. Edge Function `ai-orchestrator` — Il Cervello Centrale
 
-### Database
-- agent_templates + agent_template_instances + agent_reports + company_channels
-- RLS policies PERMISSIVE (fix da RESTRICTIVE)
-- Funzione DB `increment_installs_count(tpl_id UUID)`
-- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+Una singola edge function schedulabile (cron ogni 30min o invocabile manualmente) che per ogni company:
 
-### Edge Functions (CORS headers completi)
-- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
-- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
-- save-report: salva report in DB + aggiorna contatori istanza
+1. **Raccoglie stato** — query parallele su: contacts (callback scaduti, dormienti, nuovi), conversations (ultime 24h), campaigns (attive, performance), credits (saldo, burn rate), preventivi (stale), agent_automations (config)
+2. **Genera eventi** — identifica situazioni che richiedono azione:
+   - `lead_dormant` (qualified, >N giorni senza contatto)
+   - `callback_overdue` (next_call_at passato)
+   - `preventivo_stale` (inviato >10gg senza risposta)
+   - `campaign_low_perf` (conversione <3%)
+   - `credits_critical` (giorni rimanenti <3)
+   - `new_lead_unassigned` (creato <24h, nessun agente assegnato)
+3. **Consulta memoria** — controlla `ai_orchestrator_log` per evitare azioni duplicate (es. non richiamare lo stesso contatto 2 volte in 48h)
+4. **Decide e delega** — per ogni evento:
+   - Se `followup_agent` abilitato e lead ha telefono → invoca `auto-followup-agent` per quel contatto
+   - Se callback scaduto → logga azione suggerita (non chiama, solo notifica)
+   - Se preventivo stale → genera follow-up suggerito via `generate-followup`
+   - Se credits critici → logga alert
+5. **Scrive log** — ogni decisione va in `ai_orchestrator_log` con timestamp, tipo evento, azione presa, contatto coinvolto
 
-### Frontend — Wizard 5 Step (TemplateSetup.tsx)
-- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + importa CSV con template scaricabile
-- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
-- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
+### 2. Nuova tabella `ai_orchestrator_log`
 
-### SuperAdmin
-- /superadmin/templates: CRUD completo con JSON editor per config_schema
+```sql
+CREATE TABLE ai_orchestrator_log (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id uuid NOT NULL,
+  event_type text NOT NULL,        -- 'lead_dormant', 'callback_overdue', etc.
+  entity_type text,                -- 'contact', 'preventivo', 'campaign'
+  entity_id uuid,
+  action_taken text NOT NULL,      -- 'outbound_call', 'followup_suggested', 'alert', 'skipped'
+  action_details jsonb DEFAULT '{}',
+  created_at timestamptz DEFAULT now()
+);
+```
 
-## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+Con indice su `(company_id, entity_id, event_type, created_at)` per query di deduplicazione rapide.
 
-### Database (5 tabelle)
-- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
-- RLS PERMISSIVE per tutte le tabelle
-- Trigger set_updated_at + init_render_credits su companies
-- Funzione deduct_render_credit
-- Storage buckets: render-originals (privato), render-results (pubblico)
+RLS: company-scoped SELECT + superadmin ALL.
 
-### Edge Functions
-- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
-- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+### 3. Pagina `/app/automations` — Centro di Controllo AI
 
-### Frontend
-- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
-- RenderConfig (/superadmin/render-config)
-- BeforeAfterSlider, promptBuilder.ts
+Nuova pagina con 3 sezioni:
 
-## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
+**Sezione 1: I tuoi agenti** — Grid di card per ogni agente autonomo:
+- Toggle on/off (scrive su `agent_automations`)
+- Ultimo run + totale azioni
+- Config inline (soglie modificabili: giorni dormienza, max chiamate/run, soglia conversione)
+- 3 agenti "sempre attivi" (Pipeline Manager, Briefing, Sentinella) con badge fisso
+- Bottone "Ricalcola" per Lead Score Dinamico
 
-### Database
-- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
-- Estensione `preventivi` con +26 colonne
-- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
-- Storage buckets: preventivi-media (privato), template-assets (pubblico)
-- RLS company-scoped + superadmin
+**Sezione 2: Attivita recente** — Lista cronologica da `ai_orchestrator_log` (ultime 20 azioni) con icone per tipo evento, link all'entita coinvolta
 
-### Edge Functions
-- `process-preventivo-audio` RISCRITTO
+**Sezione 3: Impostazioni globali** — Toggle "AI Orchestrator attivo" + frequenza (ogni 30min/1h/2h)
 
-### PDF Client-side (@react-pdf/renderer)
-- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4
+### 4. Route + Sidebar
 
-### Frontend
-- NuovoPreventivo.tsx, PreventivoDetail.tsx, PreventiviList.tsx, TemplatePreventivo.tsx
+- Aggiungere route `/app/automations` in `App.tsx`
+- Aggiungere voce "Automazioni AI" nella sidebar (icona `Zap`) nella sezione "I miei agenti"
 
-## ✅ Blocco 8 — AI Avanzata P1 (Smart Actions + Lead Score + Timeline)
+### 5. Integrazione Dashboard
 
-### Smart Actions Engine (Dashboard)
-- Espanso da 3 regole hardcoded a 10+ regole basate su dati reali:
-  - Crediti in esaurimento (danger)
-  - Agenti in bozza (warning)
-  - Agenti senza numero telefono (warning)
-  - Agenti inattivi >7 giorni (info)
-  - Contatti da richiamare con next_call_at scaduto (warning)
-  - Preventivi in bozza da >7 giorni (warning)
-  - Preventivi inviati senza risposta da >10 giorni (warning)
-  - Documenti in scadenza entro 15 giorni (warning)
-  - Campagne con tasso appuntamenti <5% (info)
-- Query Supabase dedicate per ogni regola
-- Stato "Tutto in ordine" quando nessuna azione è necessaria
-- Mostra summary delle conversazioni recenti nella tabella attività
+- Aggiungere card "Agenti Autonomi" nella dashboard con: N agenti attivi, N azioni oggi, link a `/app/automations`
 
-### Lead Score Automatico
-- `src/lib/lead-score.ts`: motore di scoring 0-100 senza LLM
-  - +30 outcome qualified/appointment
-  - +20 sentiment positivo
-  - +15 preventivo associato
-  - +10 contatto completo (tel+email)
-  - +10 callback attempts
-  - +5 fonte inbound
-  - -10 inattivo >30 giorni
-  - -20 not_interested
-  - -30 do_not_call/invalid
-- `src/components/contacts/LeadScoreBadge.tsx`: badge con tooltip fattori
-  - Compact mode per tabella (emoji + score numerico)
-  - Full mode per scheda contatto (con lista fattori)
-  - Colori: 🔴 Caldo (>60), 🟠 Tiepido (30-60), 🔵 Freddo (<30)
-- Badge integrato nella tabella contatti (nuova colonna "Score")
-- Badge integrato nell'header della scheda contatto
+---
 
-### Timeline Unificata del Contatto
-- `ContactDetailPanel.tsx` completamente refactorato:
-  - Tab "Timeline" come default (al posto di "Info")
-  - Cronologia verticale con linea e pallini colorati per tipo:
-    - 🔵 Conversazioni (con summary, outcome, sentiment, durata)
-    - 🟡 Note manuali
-    - 🟢 Preventivi collegati (stato, importo, numero)
-    - ⚪ Eventi (contatto creato)
-  - Query preventivi per nome/telefono contatto
-  - Lead Score full display nell'header della scheda
+## File da creare/modificare
 
-## ✅ Blocco 8 — P1-C: Call Summary Automatico
+| File | Azione |
+|---|---|
+| `supabase/functions/ai-orchestrator/index.ts` | Creare — cervello centrale |
+| `supabase/migrations/XXXXXX_orchestrator.sql` | Creare — tabella `ai_orchestrator_log` + RLS |
+| `src/pages/app/Automations.tsx` | Creare — pagina centro di controllo |
+| `src/App.tsx` | Aggiungere route `/app/automations` |
+| `src/components/layout/SidebarNav.tsx` | Aggiungere voce menu |
+| `src/integrations/supabase/types.ts` | Aggiornare tipi |
+| `supabase/config.toml` | Aggiungere funzione |
+| `src/pages/app/Dashboard.tsx` | Aggiungere card agenti autonomi |
 
-### Backend
-- `supabase/functions/elevenlabs-webhook/summary.ts`: modulo separato per generazione summary
-  - Chiama OpenAI gpt-4o-mini con prompt minimale in italiano
-  - Non-blocking: se OPENAI_API_KEY non è configurata, salta silenziosamente
-  - Cap transcript a 6000 chars per contenere i costi (~$0.001/call)
-- `elevenlabs-webhook/index.ts`: importa e chiama `generateCallSummary()` dopo step 7
-  - Popola `conversations.summary` solo se la generazione ha successo
+---
 
-### Frontend (già predisposto)
-- Dashboard "Attività recente": mostra `c.summary` sotto il nome agente
-- Conversazioni: mostra summary nella tabella e nel dialog dettaglio
-- Timeline contatto: mostra summary nelle conversazioni
+## Logica di deduplicazione (memoria operativa)
 
-### Requisito SuperAdmin
-- Aggiungere OPENAI_API_KEY come Supabase Secret (da configurare via SuperAdmin)
+Prima di ogni azione, l'orchestrator controlla:
+```sql
+SELECT 1 FROM ai_orchestrator_log
+WHERE company_id = $1
+  AND entity_id = $2
+  AND event_type = $3
+  AND created_at > now() - interval '48 hours'
+  AND action_taken != 'skipped'
+```
+Se esiste → skip. Questo evita spam e azioni duplicate.
 
-## ✅ Blocco 9 — Audit Finale & Hardening
+---
 
-### Sicurezza Edge Functions
-- Validazione JWT (getClaims) aggiunta a: generate-render, crm-sync, deploy-template-instance, process-preventivo-audio, generate-preventivo-pdf
-- Verifica tenant (company_id cross-check) aggiunta a tutte le funzioni interne
-- Funzioni webhook esterne (elevenlabs-webhook, whatsapp-webhook, telegram-cantiere-webhook) lasciate senza JWT (corretto)
+## Prioritizzazione
 
-### Atomicità Crediti
-- Creata RPC `topup_credits(_company_id, _amount_eur)` con UPDATE atomico
-- topup-credits edge function refactorato per usare RPC
+L'orchestrator ordina gli eventi per priorita:
+1. `credits_critical` (danger)
+2. `callback_overdue` (high)
+3. `lead_dormant` (high)
+4. `preventivo_stale` (medium)
+5. `campaign_low_perf` (medium)
+6. `new_lead_unassigned` (low)
 
-### UX — Progressive Disclosure Sidebar
-- Sezioni OPERATIVITÀ e STRUMENTI AI visibili solo se il settore è rilevante o se esistono dati
-- Campi vuoti nelle conversazioni nascosti (eval_score, minutes_billed, cost_billed_eur)
+Processa max 20 eventi per company per run (controllo costi).
 
-### UX — Dead-End Fix
-- Card CRM e Webhooks in Integrazioni: badge "Prossimamente" + bottoni disabilitati
+---
 
-### Signup Self-Service
-- Pagina /signup con form registrazione
-- Edge function self-service-signup: crea company (trial 14gg) + profilo + ruolo company_admin
+## Ordine di implementazione
 
-### AI Avanzata P2
-- Follow-up Generator: edge function generate-followup (GPT-4o-mini) + bottone in ContactDetailPanel
-- Opportunity Recovery: Smart Actions per lead qualificati dormenti >5 giorni
-- Campi conversazione vuoti nascosti per UX più pulita
+1. Migration DB (`ai_orchestrator_log`)
+2. Edge function `ai-orchestrator`
+3. Pagina `Automations.tsx` con card agenti + log attivita
+4. Route + sidebar + dashboard card
 
-## 🔜 Prossimi Step
-
-### ✅ Completato — Campagne Outbound E2E
-- Tabella `campaign_contacts` per tracking stato per-contatto (pending/calling/retry/completed/failed)
-- Edge function `run-campaign-batch`: populate contatti da lista + esecuzione batch con chiamate EL outbound
-- Retry automatico con delay configurabile e max tentativi
-- Bottone "Avvia" popola + lancia primo batch
-- Bottone "Lancia batch" per batch successivi su campagne attive
-- Aggiornamento stats campagna in tempo reale
-
-### ✅ Completato — Motivo Principale
-- Colonna `main_reason` aggiunta a `conversations`
-- summary.ts riscritto: genera JSON con `summary` + `main_reason` in una sola chiamata GPT-4o-mini
-- Mostrato nella tabella conversazioni (💡 badge) e nel dettaglio (card evidenziata)
-- Esempi: "Interessato a ristrutturazione bagno", "Non interessato: ha già un fornitore"
-
-### P3 — Avanzato / successivo
-- Personalizzazione regole Smart Actions per admin
-- Report settimanale automatico via email al titolare
-- Trend predittivo su tasso conversione
-- Integrazione Stripe per pagamenti reali
