@@ -58,6 +58,9 @@ export default function DocumentiScadenze() {
 
   const createMutation = useMutation({
     mutationFn: async () => {
+      if (formData.data_emissione && formData.data_scadenza && formData.data_scadenza <= formData.data_emissione) {
+        throw new Error("La scadenza deve essere successiva alla data di emissione");
+      }
       const { error } = await (supabase.from("documenti_azienda") as any).insert({
         company_id: companyId,
         ...formData,
