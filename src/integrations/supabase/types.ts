@@ -1069,6 +1069,47 @@ export type Database = {
           },
         ]
       }
+      ai_orchestrator_log: {
+        Row: {
+          action_details: Json | null
+          action_taken: string
+          company_id: string
+          created_at: string | null
+          entity_id: string | null
+          entity_type: string | null
+          event_type: string
+          id: string
+        }
+        Insert: {
+          action_details?: Json | null
+          action_taken: string
+          company_id: string
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type: string
+          id?: string
+        }
+        Update: {
+          action_details?: Json | null
+          action_taken?: string
+          company_id?: string
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_orchestrator_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_phone_numbers: {
         Row: {
           active_days: string[] | null

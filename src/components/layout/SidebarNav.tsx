@@ -9,7 +9,7 @@ import {
   BookUser, Megaphone, type LucideIcon,
   AlertTriangle, MessageCircle, Puzzle, Palette, HardHat,
   FileSignature, ShieldCheck, ClipboardList,
-  Coins, ChevronDown, Clock,
+  Coins, ChevronDown, Clock, Zap,
 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { differenceInDays } from "date-fns";
@@ -29,6 +29,7 @@ const companyNav: NavSection[] = [
   ]},
   { header: "I MIEI AGENTI", items: [
     { label: "Agenti", icon: Bot, href: "/app/agents" },
+    { label: "Automazioni AI", icon: Zap, href: "/app/automations" },
     { label: "Risultati", icon: BarChart3, href: "/app/analytics" },
   ]},
   { header: "VENDITE", items: [

@@ -87,6 +87,7 @@ const DocumentiScadenze = lazy(() => import("./pages/app/DocumentiScadenze"));
 const FoglioPresenze = lazy(() => import("./pages/app/FoglioPresenze"));
 const TemplatePreventivo = lazy(() => import("./pages/app/TemplatePreventivo"));
 const Integrations = lazy(() => import("./pages/app/Integrations"));
+const Automations = lazy(() => import("./pages/app/Automations"));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-screen">
@@ -183,6 +184,7 @@ const App = () => (
                 <Route path="/app/credits" element={<CreditsPage />} />
                 <Route path="/app/settings" element={<SettingsPage />} />
                 <Route path="/app/integrations" element={<Integrations />} />
+                <Route path="/app/automations" element={<Automations />} />
               </Route>
             </Route>
 

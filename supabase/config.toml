@@ -134,3 +134,6 @@ verify_jwt = false
 
 [functions.recalculate-lead-weights]
 verify_jwt = false
+
+[functions.ai-orchestrator]
+verify_jwt = false
