@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import {
   Bot, ArrowRight, PhoneOff, CreditCard, Sparkles,
-  MessageSquare, Zap
+  MessageSquare, Zap, CheckCircle2, Circle
 } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
@@ -54,15 +54,6 @@ export default function AppDashboard() {
     },
   });
 
-  const { data: company } = useQuery({
-    queryKey: ["my-company", companyId],
-    enabled: !!companyId,
-    queryFn: async () => {
-      const { data } = await supabase.from("companies").select("*").eq("id", companyId!).single();
-      return data;
-    },
-  });
-
   const { data: credits } = useQuery({
     queryKey: ["company-credits", companyId],
     enabled: !!companyId,
@@ -73,6 +64,19 @@ export default function AppDashboard() {
         .eq("company_id", companyId!)
         .single();
       return data;
+    },
+  });
+
+  // Check if any integration is connected (for checklist step 3)
+  const { data: hasIntegration } = useQuery({
+    queryKey: ["has-integration", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const [phones, integrations] = await Promise.all([
+        supabase.from("ai_phone_numbers").select("id", { count: "exact", head: true }).eq("company_id", companyId!).eq("status", "active"),
+        supabase.from("company_integrations").select("id").eq("company_id", companyId!).eq("is_active", true).limit(1),
+      ]);
+      return (phones.count ?? 0) > 0 || (integrations.data?.length ?? 0) > 0;
     },
   });
 
@@ -130,6 +134,28 @@ export default function AppDashboard() {
 
   const hasAgents = agents && agents.length > 0;
 
+  // Checklist steps for onboarding
+  const checklistSteps = [
+    {
+      label: "Scegli cosa automatizzare",
+      description: "Esplora i template e scegli il tuo primo agente AI",
+      href: "/app/agents/new",
+      done: hasAgents ?? false,
+    },
+    {
+      label: "Attiva il primo agente",
+      description: "Configura la voce, il prompt e attiva l'agente",
+      href: "/app/agents/new",
+      done: activeAgents > 0,
+    },
+    {
+      label: "Collega i tuoi sistemi",
+      description: "Telefonia, CRM, WhatsApp — tutto in un unico hub",
+      href: "/app/integrations",
+      done: hasIntegration ?? false,
+    },
+  ];
+
   return (
     <div className="space-y-8 max-w-6xl">
 
@@ -164,35 +190,43 @@ export default function AppDashboard() {
         )}
       </div>
 
-      {/* ═══ ZONE B — Onboarding or Smart Actions ═══ */}
+      {/* ═══ ZONE B — Onboarding Checklist or Smart Actions ═══ */}
       {!hasAgents ? (
-        /* Empty state — Onboarding */
-        <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 p-8 md:p-12 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
-            <Sparkles className="w-8 h-8 text-primary" />
+        <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 p-8 md:p-12">
+          <div className="flex flex-col items-center text-center mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+              <Sparkles className="w-8 h-8 text-primary" />
+            </div>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Benvenuto in Edile Genius</h2>
+            <p className="text-muted-foreground max-w-md">
+              Completa questi 3 passi per attivare il tuo primo agente AI e iniziare a ricevere risultati.
+            </p>
           </div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">Benvenuto in Edile Genius</h2>
-          <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-            Crea il tuo primo agente AI in 3 minuti. Scegli un template, configura la voce e attivalo.
-          </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8">
-            {[
-              { step: "1", label: "Scegli un template" },
-              { step: "2", label: "Configura la voce" },
-              { step: "3", label: "Attiva e ricevi chiamate" },
-            ].map((s, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
-                  {s.step}
-                </span>
-                <span className="text-sm font-medium text-foreground">{s.label}</span>
-                {i < 2 && <ArrowRight className="w-4 h-4 text-muted-foreground hidden sm:block" />}
-              </div>
+          <div className="max-w-lg mx-auto space-y-3 mb-8">
+            {checklistSteps.map((step, i) => (
+              <Link
+                key={i}
+                to={step.href}
+                className="flex items-start gap-3 rounded-lg border border-border bg-card p-4 hover:bg-accent/50 transition-colors"
+              >
+                {step.done ? (
+                  <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                ) : (
+                  <Circle className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />
+                )}
+                <div className="min-w-0">
+                  <p className={`text-sm font-semibold ${step.done ? "text-primary line-through" : "text-foreground"}`}>
+                    {i + 1}. {step.label}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground mt-0.5 ml-auto shrink-0" />
+              </Link>
             ))}
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="flex justify-center">
             <Link
               to="/app/agents/new"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors"
@@ -200,16 +234,9 @@ export default function AppDashboard() {
               <Zap className="w-4 h-4" />
               Crea il Primo Agente
             </Link>
-            <Link
-              to="/app/agents/new"
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              Scopri i Template →
-            </Link>
           </div>
         </div>
       ) : smartActions.length > 0 ? (
-        /* Smart action cards */
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-foreground">Da Fare Adesso</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
