@@ -31,10 +31,15 @@ export default function AgentOutboundTab({ agentId, companyId, outboundEnabled, 
   const [callPage, setCallPage] = useState(0);
   const CALLS_PER_PAGE = 20;
 
-  useEffect(() => {
-    supabase.from("outbound_call_log").select("*").eq("agent_id", agentId).order("started_at", { ascending: false }).limit(10)
-      .then(({ data }) => { setCalls(data || []); setLoadingCalls(false); });
-  }, [agentId]);
+  const loadCalls = (page = 0) => {
+    setLoadingCalls(true);
+    supabase.from("outbound_call_log").select("*").eq("agent_id", agentId)
+      .order("started_at", { ascending: false })
+      .range(page * CALLS_PER_PAGE, (page + 1) * CALLS_PER_PAGE - 1)
+      .then(({ data }) => { setCalls(prev => page === 0 ? (data || []) : [...prev, ...(data || [])]); setLoadingCalls(false); });
+  };
+
+  useEffect(() => { loadCalls(0); }, [agentId]);
 
   const toggleOutbound = async () => {
     setToggling(true);
