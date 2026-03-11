@@ -3,11 +3,18 @@ import { log } from "../_shared/utils.ts";
 interface CallAnalysis {
   summary: string | null;
   main_reason: string | null;
+  outcome_ai: string | null;
+  next_step: string | null;
 }
 
+const VALID_OUTCOMES = [
+  "appointment", "qualified", "callback", "not_interested",
+  "voicemail", "no_answer", "wrong_number", "do_not_call",
+];
+
 /**
- * Generate a 2-3 sentence Italian summary + main_reason extraction
- * using OpenAI gpt-4o-mini. Returns nulls if OPENAI_API_KEY is not set.
+ * Generate call analysis: summary, main_reason, outcome classification, next_step.
+ * Uses OpenAI gpt-4o-mini. Returns nulls if OPENAI_API_KEY is not set.
  */
 export async function generateCallAnalysis(
   transcript: any[],
@@ -16,11 +23,11 @@ export async function generateCallAnalysis(
   const apiKey = Deno.env.get("OPENAI_API_KEY");
   if (!apiKey) {
     log("info", "OPENAI_API_KEY not set — skipping analysis", { request_id: requestId });
-    return { summary: null, main_reason: null };
+    return { summary: null, main_reason: null, outcome_ai: null, next_step: null };
   }
 
   if (!transcript || transcript.length === 0) {
-    return { summary: null, main_reason: null };
+    return { summary: null, main_reason: null, outcome_ai: null, next_step: null };
   }
 
   const text = transcript
@@ -41,14 +48,16 @@ export async function generateCallAnalysis(
       body: JSON.stringify({
         model: "gpt-4o-mini",
         temperature: 0.3,
-        max_tokens: 300,
+        max_tokens: 400,
         response_format: { type: "json_object" },
         messages: [
           {
             role: "system",
-            content: `Sei un assistente che analizza conversazioni telefoniche commerciali per aziende edili italiane. Rispondi SOLO con un JSON valido con due campi:
+            content: `Sei un assistente che analizza conversazioni telefoniche commerciali per aziende edili italiane. Rispondi SOLO con un JSON valido con quattro campi:
 - "summary": riassunto in 2-3 frasi (argomento, esito, prossimo passo)
-- "main_reason": il motivo principale di interesse O di rifiuto del cliente, in una frase breve e chiara (es. "Interessato a ristrutturazione bagno", "Non interessato: ha già un fornitore", "Vuole preventivo per cappotto termico"). Se non è chiaro, scrivi null.`,
+- "main_reason": il motivo principale di interesse O di rifiuto del cliente, in una frase breve (es. "Interessato a ristrutturazione bagno", "Non interessato: ha già un fornitore"). Se non è chiaro, null.
+- "outcome": classifica la conversazione in UNA di queste categorie ESATTE: "appointment" (appuntamento fissato), "qualified" (interessato, da ricontattare), "callback" (chiede di essere richiamato), "not_interested" (non interessato), "voicemail" (segreteria/nessuna risposta umana), "no_answer" (non ha risposto), "wrong_number" (numero sbagliato), "do_not_call" (chiede di non essere più contattato). Se non riesci a classificare, scrivi null.
+- "next_step": una frase breve con l'azione suggerita per il commerciale (es. "Richiamare lunedì per confermare appuntamento", "Inviare preventivo via email", "Rimuovere dal database"). Se non applicabile, null.`,
           },
           {
             role: "user",
@@ -60,27 +69,34 @@ export async function generateCallAnalysis(
 
     if (!res.ok) {
       log("warn", "OpenAI API error for analysis", { request_id: requestId, status: res.status });
-      return { summary: null, main_reason: null };
+      return { summary: null, main_reason: null, outcome_ai: null, next_step: null };
     }
 
     const json = await res.json();
     const content = json.choices?.[0]?.message?.content?.trim();
-    if (!content) return { summary: null, main_reason: null };
+    if (!content) return { summary: null, main_reason: null, outcome_ai: null, next_step: null };
 
     try {
       const parsed = JSON.parse(content);
       const summary = parsed.summary || null;
       const main_reason = parsed.main_reason || null;
-      log("info", "Analysis generated", { request_id: requestId, has_summary: !!summary, has_reason: !!main_reason });
-      return { summary, main_reason };
+      const outcome_ai = VALID_OUTCOMES.includes(parsed.outcome) ? parsed.outcome : null;
+      const next_step = parsed.next_step || null;
+      log("info", "Analysis generated", {
+        request_id: requestId,
+        has_summary: !!summary,
+        has_reason: !!main_reason,
+        outcome_ai,
+        has_next_step: !!next_step,
+      });
+      return { summary, main_reason, outcome_ai, next_step };
     } catch {
-      // Fallback: treat entire content as summary
       log("warn", "Failed to parse analysis JSON, using as summary", { request_id: requestId });
-      return { summary: content, main_reason: null };
+      return { summary: content, main_reason: null, outcome_ai: null, next_step: null };
     }
   } catch (err) {
     log("warn", "Analysis generation failed", { request_id: requestId, error: (err as Error).message });
-    return { summary: null, main_reason: null };
+    return { summary: null, main_reason: null, outcome_ai: null, next_step: null };
   }
 }
 
