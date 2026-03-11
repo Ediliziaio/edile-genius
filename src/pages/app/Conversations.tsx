@@ -265,7 +265,10 @@ export default function ConversationsPage() {
                     <TableCell>
                       <div>
                         <p className="text-sm font-medium text-ink-900">{agentMap[conv.agent_id] || "—"}</p>
-                        {conv.summary && (
+                        {(conv as any).main_reason && (
+                          <p className="text-[11px] text-brand truncate max-w-[220px]">💡 {(conv as any).main_reason}</p>
+                        )}
+                        {conv.summary && !(conv as any).main_reason && (
                           <p className="text-[11px] text-ink-400 truncate max-w-[200px]">{conv.summary}</p>
                         )}
                       </div>
