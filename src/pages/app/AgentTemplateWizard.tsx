@@ -9,13 +9,10 @@ import { PROMPT_TEMPLATES, type UseCaseId } from "@/components/agents/PromptTemp
 import AgentStepSidebar from "@/components/agents/create/AgentStepSidebar";
 import StepAgent from "@/components/agents/create/StepAgent";
 import StepVoice from "@/components/agents/create/StepVoice";
-import StepConversation from "@/components/agents/create/StepConversation";
-import StepAdvanced from "@/components/agents/create/StepAdvanced";
+import StepSettings from "@/components/agents/create/StepSettings";
 import StepReview from "@/components/agents/create/StepReview";
 import { Progress } from "@/components/ui/progress";
 import type { AgentForm, CustomTool } from "./CreateAgent.types";
-
-/* ── Slug → type mapping ───────────────────────────── */
 
 const VOCAL_SLUGS = [
   "vocale-custom", "qualifica-infissi", "qualifica-ristrutturazione", "qualifica-fotovoltaico",
@@ -58,8 +55,6 @@ function getTypeBadge(type: string) {
   }
 }
 
-/* ── Slug → default use case mapping ───────────────── */
-
 const SLUG_TO_USE_CASE: Record<string, UseCaseId> = {
   "qualifica-infissi": "qualifica_infissi",
   "qualifica-ristrutturazione": "qualifica_ristrutturazione",
@@ -93,6 +88,8 @@ const defaultForm: AgentForm = {
   transfer_number: "", monitoring_enabled: false, outbound_enabled: false,
 };
 
+const TOTAL_STEPS = 4;
+
 function validateStep(step: number, form: AgentForm): boolean {
   switch (step) {
     case 0: return !!form.name.trim() && !!form.system_prompt.trim();
@@ -125,7 +122,6 @@ export default function AgentTemplateWizard() {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<AgentForm>(() => {
-    // Pre-fill form from slug mapping
     const useCaseId = SLUG_TO_USE_CASE[slug || ""];
     if (useCaseId && PROMPT_TEMPLATES[useCaseId]) {
       const tpl = PROMPT_TEMPLATES[useCaseId];
@@ -157,7 +153,6 @@ export default function AgentTemplateWizard() {
   const agentType = getAgentType(slug || "");
   const typeBadge = getTypeBadge(agentType);
 
-  // For render agents, redirect to render wizard
   useEffect(() => {
     if (agentType === "render") {
       navigate("/app/render/new", { replace: true });
@@ -172,8 +167,10 @@ export default function AgentTemplateWizard() {
     );
   }
 
+  const lastStep = TOTAL_STEPS - 1;
+
   const validatedSteps = new Set<number>();
-  for (let i = 0; i <= 4; i++) {
+  for (let i = 0; i <= lastStep; i++) {
     if (validateStep(i, form)) validatedSteps.add(i);
   }
 
@@ -215,7 +212,6 @@ export default function AgentTemplateWizard() {
       const { data, error } = await supabase.functions.invoke("create-elevenlabs-agent", { body });
       if (error || data?.error) throw new Error(data?.error || "Errore creazione agente");
 
-      // Upload KB files
       const files = form._pendingKBFiles;
       if (files?.length && data?.agent?.id) {
         const session = (await supabase.auth.getSession()).data.session;
@@ -231,7 +227,7 @@ export default function AgentTemplateWizard() {
         }
       }
 
-      toast({ title: "Agente creato!", description: `${form.name} è stato creato con successo.` });
+      toast({ title: "Agente creato! 🎉", description: `${form.name} è pronto.` });
       const newAgentId = data?.agent?.id;
       navigate(newAgentId ? `/app/agents/${newAgentId}` : "/app/agents");
     } catch (e: any) {
@@ -276,7 +272,7 @@ export default function AgentTemplateWizard() {
           onClick={() => navigate("/app/agents/new")}
           className="flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-700 transition-colors mb-3"
         >
-          <ArrowLeft className="w-4 h-4" /> Scegli Template
+          <ArrowLeft className="w-4 h-4" /> Torna ai template
         </button>
 
         {/* Template banner */}
@@ -288,8 +284,8 @@ export default function AgentTemplateWizard() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-ink-900">Crea Agente</h1>
-            <p className="text-xs text-ink-400">Configura il tuo agente AI con voce naturale</p>
+            <h1 className="text-xl font-bold text-ink-900">Configura il tuo agente</h1>
+            <p className="text-xs text-ink-400">Completa i dati essenziali per attivarlo</p>
           </div>
           <div className="text-right">
             <p className="text-xs text-ink-400 mb-1">{completionPercent}% completato</p>
@@ -315,9 +311,8 @@ export default function AgentTemplateWizard() {
               >
                 {step === 0 && <StepAgent form={form} update={update} selectUseCase={selectUseCase} />}
                 {step === 1 && companyId && <StepVoice companyId={companyId} form={form} update={update} />}
-                {step === 2 && <StepConversation form={form} update={update} />}
-                {step === 3 && <StepAdvanced form={form} update={update} />}
-                {step === 4 && <StepReview form={form} update={update} companyId={companyId || undefined} onCreateDraft={handleCreateDraft} />}
+                {step === 2 && <StepSettings form={form} update={update} />}
+                {step === 3 && <StepReview form={form} update={update} companyId={companyId || undefined} onCreateDraft={handleCreateDraft} />}
               </motion.div>
             </AnimatePresence>
           </div>
@@ -330,7 +325,7 @@ export default function AgentTemplateWizard() {
             >
               Indietro
             </button>
-            {step < 4 ? (
+            {step < lastStep ? (
               <button
                 onClick={() => goToStep(step + 1)}
                 disabled={!canAdvance}
@@ -345,7 +340,7 @@ export default function AgentTemplateWizard() {
                 className="px-6 py-2.5 rounded-btn text-sm font-medium disabled:opacity-50 bg-brand text-white hover:bg-brand-hover flex items-center gap-2"
               >
                 {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                {submitting ? "Creazione..." : "Crea Agente"}
+                {submitting ? "Creazione..." : form.status === "active" ? "Attiva Agente" : "Crea Agente"}
               </button>
             )}
           </div>

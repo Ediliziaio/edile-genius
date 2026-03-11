@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useMemo } from "react";
 import { LANGUAGES } from "@/components/agents/PromptTemplates";
-import { MessageSquare, Play, Square, Loader2, Mic, Volume2, Wrench, Shield, FileText, Globe } from "lucide-react";
+import { MessageSquare, Play, Square, Loader2, Mic, Volume2, FileText } from "lucide-react";
 import VoiceTestPanel from "@/components/agents/VoiceTestPanel";
 import AgentScoreDetail from "@/components/agents/AgentScoreDetail";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,9 +27,6 @@ const LLM_LABELS: Record<string, string> = {
 export default function StepReview({ form, update, companyId, onCreateDraft }: StepReviewProps) {
   const { toast } = useToast();
   const langLabel = LANGUAGES.find(l => l.value === form.language)?.label || form.language;
-  const additionalLangs = (form.additional_languages || [])
-    .map((v: string) => LANGUAGES.find(l => l.value === v)?.label || v)
-    .join(", ");
 
   // TTS preview state
   const [ttsLoading, setTtsLoading] = useState(false);
@@ -49,7 +46,7 @@ export default function StepReview({ form, update, companyId, onCreateDraft }: S
     }
 
     if (!form.first_message || !form.voice_id) {
-      toast({ variant: "destructive", title: "Mancano dati", description: "Serve un primo messaggio e una voce selezionata." });
+      toast({ variant: "destructive", title: "Mancano dati", description: "Serve un messaggio di apertura e una voce selezionata." });
       return;
     }
 
@@ -108,42 +105,6 @@ export default function StepReview({ form, update, companyId, onCreateDraft }: S
   }, [onCreateDraft, toast]);
 
   const kbFiles = form._pendingKBFiles || [];
-  const customTools = form.custom_tools || [];
-
-  const sections = [
-    {
-      title: "Identità",
-      rows: [
-        ["Nome", form.name || "—"],
-        ["Caso d'uso", form.use_case || "—"],
-        ["Settore", form.sector || "—"],
-        ["Lingua", langLabel],
-        ...(additionalLangs ? [["Lingue aggiuntive", additionalLangs]] : []),
-        ["Modello LLM", LLM_LABELS[form.llm_model] || form.llm_model],
-        ["Temperatura", form.temperature.toFixed(1)],
-      ],
-    },
-    {
-      title: "Voce",
-      rows: [
-        ["Voice ID", form.voice_id ? `${form.voice_id.slice(0, 16)}…` : "Non selezionata"],
-        ["Stabilità", form.voice_stability?.toFixed(2) ?? "0.50"],
-        ["Somiglianza", form.voice_similarity?.toFixed(2) ?? "0.75"],
-        ["Velocità", form.voice_speed?.toFixed(2) ?? "1.00"],
-      ],
-    },
-    {
-      title: "Conversazione",
-      rows: [
-        ["Turn Timeout", `${form.turn_timeout_sec}s`],
-        ["Reattività", form.turn_eagerness],
-        ["Durata max", `${Math.floor(form.max_duration_sec / 60)} min`],
-        ["Interruzioni", form.interruptions_enabled ? "Sì" : "No"],
-        ["End Call auto", form.end_call_enabled ? "Sì" : "No"],
-        ["Language Detection", form.language_detection_enabled ? "Sì" : "No"],
-      ],
-    },
-  ];
 
   // Build a pseudo-agent row for scoring from the wizard form
   const pseudoAgent = useMemo(() => ({
@@ -168,8 +129,24 @@ export default function StepReview({ form, update, companyId, onCreateDraft }: S
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-ink-900">Revisione & Test</h2>
-        <p className="text-sm text-ink-400 mt-1">Controlla le impostazioni, ascolta l'anteprima e testa l'agente.</p>
+        <h2 className="text-lg font-semibold text-ink-900">Rivedi e Attiva</h2>
+        <p className="text-sm text-ink-400 mt-1">Controlla il riepilogo, ascolta l'anteprima e attiva il tuo agente.</p>
+      </div>
+
+      {/* Publish Mode — Prominent at top */}
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-ink-600">Come vuoi procedere?</p>
+        <div className="flex gap-3">
+          {(["draft", "active"] as const).map(s => (
+            <button
+              key={s}
+              onClick={() => update("status", s)}
+              className={`flex-1 py-3 rounded-btn text-sm font-medium border transition-all ${form.status === s ? "border-brand bg-brand-light text-brand-text" : "border-ink-200 text-ink-500 bg-ink-50"}`}
+            >
+              {s === "draft" ? "🔒 Salva come bozza" : "🟢 Attiva subito"}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Scorecard */}
@@ -179,7 +156,7 @@ export default function StepReview({ form, update, companyId, onCreateDraft }: S
       {form.first_message && (
         <div className="rounded-card border border-ink-200 bg-ink-50 p-4">
           <p className="text-[10px] font-semibold text-ink-400 uppercase tracking-wide mb-3 flex items-center gap-1.5">
-            <MessageSquare className="w-3 h-3" /> Anteprima Primo Messaggio
+            <MessageSquare className="w-3 h-3" /> Anteprima messaggio di apertura
           </p>
           <div className="flex justify-start">
             <div className="bg-white border border-ink-200 rounded-btn rounded-bl-none px-4 py-2.5 max-w-[85%] text-sm text-ink-800 shadow-sm">
@@ -205,67 +182,28 @@ export default function StepReview({ form, update, companyId, onCreateDraft }: S
         </div>
       )}
 
-      {/* Summary sections */}
-      {sections.map(section => (
-        <div key={section.title} className="rounded-card border border-ink-200 bg-white overflow-hidden">
-          <div className="px-4 py-2.5 bg-ink-50 border-b border-ink-200">
-            <h3 className="text-xs font-semibold text-ink-500 uppercase tracking-wide">{section.title}</h3>
-          </div>
-          <div className="divide-y divide-ink-100">
-            {section.rows.map(([label, value]) => (
-              <div key={label as string} className="flex justify-between px-4 py-2.5 text-sm">
-                <span className="text-ink-400">{label}</span>
-                <span className="text-ink-900 font-medium">{value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-
-      {/* Advanced summary: KB, Tools, Webhook, Guardrails */}
+      {/* Simplified Summary */}
       <div className="rounded-card border border-ink-200 bg-white overflow-hidden">
         <div className="px-4 py-2.5 bg-ink-50 border-b border-ink-200">
-          <h3 className="text-xs font-semibold text-ink-500 uppercase tracking-wide">Avanzate</h3>
+          <h3 className="text-xs font-semibold text-ink-500 uppercase tracking-wide">Riepilogo</h3>
         </div>
         <div className="divide-y divide-ink-100">
-          <div className="flex justify-between px-4 py-2.5 text-sm">
-            <span className="text-ink-400 flex items-center gap-1"><FileText className="w-3 h-3" /> Knowledge Base</span>
-            <span className="text-ink-900 font-medium">{kbFiles.length > 0 ? `${kbFiles.length} file` : "Nessuno"}</span>
-          </div>
-          <div className="flex justify-between px-4 py-2.5 text-sm">
-            <span className="text-ink-400 flex items-center gap-1"><Wrench className="w-3 h-3" /> Custom Tools</span>
-            <span className="text-ink-900 font-medium">{customTools.length > 0 ? customTools.map((t: any) => t.name || "Senza nome").join(", ") : "Nessuno"}</span>
-          </div>
-          <div className="flex justify-between px-4 py-2.5 text-sm">
-            <span className="text-ink-400 flex items-center gap-1"><Globe className="w-3 h-3" /> Webhook</span>
-            <span className="text-ink-900 font-medium truncate max-w-[200px]">{form.webhook_url || "Non configurato"}</span>
-          </div>
-          <div className="flex justify-between px-4 py-2.5 text-sm">
-            <span className="text-ink-400 flex items-center gap-1"><Shield className="w-3 h-3" /> PII Redaction</span>
-            <span className="text-ink-900 font-medium">{form.pii_redaction ? "Attivo" : "Disattivo"}</span>
-          </div>
-          <div className="flex justify-between px-4 py-2.5 text-sm">
-            <span className="text-ink-400">Data Retention</span>
-            <span className="text-ink-900 font-medium">{form.data_retention ? "Sì" : "No"}</span>
-          </div>
+          <SummaryRow label="Nome" value={form.name || "—"} />
+          <SummaryRow label="Settore" value={form.sector || "—"} />
+          <SummaryRow label="Lingua" value={langLabel} />
+          <SummaryRow label="Modello AI" value={LLM_LABELS[form.llm_model] || form.llm_model} />
+          <SummaryRow label="Voce" value={form.voice_id ? "✓ Selezionata" : "Non selezionata"} />
+          {kbFiles.length > 0 && (
+            <SummaryRow label="Documenti caricati" value={`${kbFiles.length} file`} />
+          )}
         </div>
       </div>
-
-      {/* System Prompt Preview */}
-      {form.system_prompt && (
-        <div className="rounded-card border border-ink-200 bg-white overflow-hidden">
-          <div className="px-4 py-2.5 bg-ink-50 border-b border-ink-200">
-            <h3 className="text-xs font-semibold text-ink-500 uppercase tracking-wide">System Prompt</h3>
-          </div>
-          <pre className="p-4 text-xs text-ink-700 font-mono-brand whitespace-pre-wrap max-h-[200px] overflow-y-auto">{form.system_prompt}</pre>
-        </div>
-      )}
 
       {/* Live Voice Test */}
       <div className="rounded-card border border-ink-200 bg-white overflow-hidden">
         <div className="px-4 py-2.5 bg-ink-50 border-b border-ink-200">
           <h3 className="text-xs font-semibold text-ink-500 uppercase tracking-wide flex items-center gap-1.5">
-            <Mic className="w-3 h-3" /> Test Vocale Live
+            <Mic className="w-3 h-3" /> Prova il tuo agente
           </h3>
         </div>
         <div className="p-4">
@@ -278,7 +216,7 @@ export default function StepReview({ form, update, companyId, onCreateDraft }: S
               </div>
               <div className="text-center">
                 <p className="text-sm text-ink-600 font-medium">Testa il tuo agente in tempo reale</p>
-                <p className="text-xs text-ink-400 mt-1">Verrà creata una bozza su ElevenLabs per effettuare il test.</p>
+                <p className="text-xs text-ink-400 mt-1">Creeremo una bozza per farti provare la conversazione vocale.</p>
               </div>
               <button
                 onClick={handleCreateDraftAndTest}
@@ -286,28 +224,21 @@ export default function StepReview({ form, update, companyId, onCreateDraft }: S
                 className="px-5 py-2.5 rounded-btn text-sm font-medium bg-brand text-white hover:bg-brand-hover transition-colors disabled:opacity-50 flex items-center gap-2"
               >
                 {creatingDraft && <Loader2 className="w-4 h-4 animate-spin" />}
-                {creatingDraft ? "Creazione bozza..." : "Crea Bozza e Testa"}
+                {creatingDraft ? "Creazione bozza..." : "Prova il tuo agente"}
               </button>
             </div>
           )}
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* Publish Mode */}
-      <div className="space-y-2">
-        <p className="text-xs font-medium text-ink-600">Modalità pubblicazione</p>
-        <div className="flex gap-3">
-          {(["draft", "active"] as const).map(s => (
-            <button
-              key={s}
-              onClick={() => update("status", s)}
-              className={`flex-1 py-3 rounded-btn text-sm font-medium border transition-all ${form.status === s ? "border-brand bg-brand-light text-brand-text" : "border-ink-200 text-ink-500 bg-ink-50"}`}
-            >
-              {s === "draft" ? "🔒 Bozza" : "🟢 Attivo"}
-            </button>
-          ))}
-        </div>
-      </div>
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between px-4 py-2.5 text-sm">
+      <span className="text-ink-400">{label}</span>
+      <span className="text-ink-900 font-medium">{value}</span>
     </div>
   );
 }
