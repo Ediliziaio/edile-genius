@@ -19,6 +19,8 @@ interface NavSection {
   items: NavItem[];
   collapsible?: boolean;
   defaultOpen?: boolean;
+  /** Section key for progressive disclosure */
+  visibilityKey?: string;
 }
 
 const companyNav: NavSection[] = [
@@ -35,12 +37,12 @@ const companyNav: NavSection[] = [
     { label: "Campagne", icon: Megaphone, href: "/app/campaigns" },
     { label: "Preventivi", icon: FileSignature, href: "/app/preventivi" },
   ]},
-  { header: "OPERATIVITÀ", collapsible: true, defaultOpen: false, items: [
+  { header: "OPERATIVITÀ", collapsible: true, defaultOpen: false, visibilityKey: "cantieri", items: [
     { label: "Cantieri", icon: HardHat, href: "/app/cantieri" },
     { label: "Documenti", icon: ShieldCheck, href: "/app/documenti" },
     { label: "Presenze", icon: ClipboardList, href: "/app/presenze" },
   ]},
-  { header: "STRUMENTI AI", items: [
+  { header: "STRUMENTI AI", visibilityKey: "render", items: [
     { label: "Render", icon: Palette, href: "/app/render" },
   ]},
   { header: "IMPOSTAZIONI", items: [
@@ -89,23 +91,51 @@ export default function SidebarNav({ onNavigate }: SidebarNavProps) {
   const { isSuperAdmin } = useAuth();
   const { isImpersonating } = useImpersonation();
   const location = useLocation();
-  const sections = (isSuperAdmin && !isImpersonating) ? superadminNav : companyNav;
   const isCompanyView = !(isSuperAdmin && !isImpersonating);
 
   const [creditInfo, setCreditInfo] = useState<CreditInfo | null>(null);
+  const [sectionVisibility, setSectionVisibility] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!isCompanyView) return;
-    const fetchCredits = async () => {
+    const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       const { data: profile } = await supabase.from("profiles").select("company_id").eq("id", user.id).single();
       if (!profile?.company_id) return;
-      const { data } = await supabase.from("ai_credits").select("balance_eur, total_recharged_eur, total_spent_eur, calls_blocked, alert_threshold_eur").eq("company_id", profile.company_id).single();
-      if (data) setCreditInfo(data as unknown as CreditInfo);
+      const companyId = profile.company_id;
+
+      // Fetch credits + progressive disclosure data in parallel
+      const [creditsRes, cantieriRes, renderRes, companyRes] = await Promise.all([
+        supabase.from("ai_credits").select("balance_eur, total_recharged_eur, total_spent_eur, calls_blocked, alert_threshold_eur").eq("company_id", companyId).single(),
+        supabase.from("cantieri").select("id", { count: "exact", head: true }).eq("company_id", companyId),
+        supabase.from("render_credits" as any).select("balance", { count: "exact", head: true }).eq("company_id", companyId),
+        supabase.from("companies").select("sector").eq("id", companyId).single(),
+      ]);
+
+      if (creditsRes.data) setCreditInfo(creditsRes.data as unknown as CreditInfo);
+
+      const hasCantieri = (cantieriRes.count ?? 0) > 0;
+      const sector = companyRes.data?.sector?.toLowerCase() || "";
+      const isEdile = ["edilizia", "costruzioni", "impresa_edile", "ristrutturazione"].some(s => sector.includes(s));
+      const isSerramenti = ["serramenti", "infissi", "finestre", "showroom"].some(s => sector.includes(s));
+      const hasRenderCredits = (renderRes.data as any)?.balance > 0;
+
+      setSectionVisibility({
+        cantieri: hasCantieri || isEdile,
+        render: isSerramenti || hasRenderCredits,
+      });
     };
-    fetchCredits();
+    fetchData();
   }, [isCompanyView]);
+
+  // For company view, filter sections based on visibility
+  const sections = (isSuperAdmin && !isImpersonating) ? superadminNav : companyNav.filter(section => {
+    if (!section.visibilityKey) return true;
+    // Always show if we're on a route within this section
+    if (section.items.some(item => location.pathname.startsWith(item.href))) return true;
+    return sectionVisibility[section.visibilityKey] ?? false;
+  });
 
   const balanceColor = creditInfo?.calls_blocked
     ? "text-destructive"
