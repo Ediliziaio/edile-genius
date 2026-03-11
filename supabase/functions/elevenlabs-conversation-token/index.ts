@@ -1,19 +1,21 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  corsHeaders, generateRequestId, log, jsonOk, jsonError, errorResponse,
+  fetchWithRetry,
+} from "../_shared/utils.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const FN = "elevenlabs-conversation-token";
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const rid = generateRequestId();
 
   try {
+    // Auth
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+      return jsonError("Unauthorized", "auth_error", 401, rid);
     }
 
     const supabase = createClient(
@@ -21,37 +23,46 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } }
     );
-
     const token = authHeader.replace("Bearer ", "");
     const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
     if (claimsError || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+      return jsonError("Unauthorized", "auth_error", 401, rid);
     }
 
     const { agent_id } = await req.json();
     if (!agent_id) {
-      return new Response(JSON.stringify({ error: "agent_id required" }), { status: 400, headers: corsHeaders });
+      return jsonError("agent_id required", "validation_error", 400, rid);
     }
 
-    // Use centralized platform API key
     const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: "No ElevenLabs API key configured" }), { status: 400, headers: corsHeaders });
+      log("error", "ELEVENLABS_API_KEY not configured", { request_id: rid });
+      return jsonError("Configurazione API mancante", "system_error", 500, rid);
     }
 
-    const elResponse = await fetch(
+    log("info", "Requesting conversation token", { request_id: rid, agent_id });
+
+    const elResponse = await fetchWithRetry(
       `https://api.elevenlabs.io/v1/convai/conversation/token?agent_id=${agent_id}`,
-      { headers: { "xi-api-key": apiKey } }
+      { headers: { "xi-api-key": apiKey } },
+      10_000,
+      { maxRetries: 1 }
     );
 
     if (!elResponse.ok) {
       const errText = await elResponse.text();
-      return new Response(JSON.stringify({ error: "ElevenLabs token error", details: errText }), { status: 500, headers: corsHeaders });
+      log("error", "ElevenLabs token error", { request_id: rid, status: elResponse.status, detail: errText.slice(0, 500) });
+      return jsonError("Errore generazione token conversazione", "provider_error", 502, rid);
     }
 
     const { token: convToken } = await elResponse.json();
-    return new Response(JSON.stringify({ token: convToken }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    log("info", "Conversation token generated", { request_id: rid });
+
+    // Return token at top level for backward compatibility
+    return new Response(JSON.stringify({ ok: true, token: convToken, request_id: rid }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: corsHeaders });
+    return errorResponse(err, rid, FN);
   }
 });

@@ -1,30 +1,34 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  corsHeaders, generateRequestId, log, jsonError, errorResponse,
+  fetchWithRetry,
+} from "../_shared/utils.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const FN = "update-agent";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const rid = generateRequestId();
+
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+    if (!authHeader?.startsWith("Bearer ")) return jsonError("Unauthorized", "auth_error", 401, rid);
 
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: authHeader } } });
     const token = authHeader.replace("Bearer ", "");
     const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+    if (claimsError || !claimsData?.claims) return jsonError("Unauthorized", "auth_error", 401, rid);
 
     const { id, ...updates } = await req.json();
-    if (!id) return new Response(JSON.stringify({ error: "Agent id required" }), { status: 400, headers: corsHeaders });
+    if (!id) return jsonError("Agent id required", "validation_error", 400, rid);
+
+    log("info", "Updating agent", { request_id: rid, agent_id: id });
 
     const serviceClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     const { data: currentAgent } = await serviceClient.from("agents").select("el_agent_id, company_id").eq("id", id).single();
 
-    // Extended allowed fields
     const allowedFields = [
       "name", "description", "sector", "language", "system_prompt",
       "first_message", "status", "el_voice_id", "config", "use_case",
@@ -40,7 +44,10 @@ Deno.serve(async (req) => {
     }
 
     const { data: agent, error: dbError } = await serviceClient.from("agents").update(dbUpdates).eq("id", id).select().single();
-    if (dbError) return new Response(JSON.stringify({ error: dbError.message }), { status: 500, headers: corsHeaders });
+    if (dbError) {
+      log("error", "DB update failed", { request_id: rid, error: dbError.message });
+      return jsonError("Errore aggiornamento agente", "system_error", 500, rid);
+    }
 
     // Sync to ElevenLabs
     if (currentAgent?.el_agent_id) {
@@ -115,16 +122,38 @@ Deno.serve(async (req) => {
           };
         }
 
-        await fetch(`https://api.elevenlabs.io/v1/convai/agents/${currentAgent.el_agent_id}`, {
-          method: "PATCH",
-          headers: { "xi-api-key": apiKey, "Content-Type": "application/json" },
-          body: JSON.stringify(elBody),
-        });
+        // 15s timeout, 1 retry (PATCH is idempotent)
+        try {
+          const elRes = await fetchWithRetry(
+            `https://api.elevenlabs.io/v1/convai/agents/${currentAgent.el_agent_id}`,
+            {
+              method: "PATCH",
+              headers: { "xi-api-key": apiKey, "Content-Type": "application/json" },
+              body: JSON.stringify(elBody),
+            },
+            15_000,
+            { maxRetries: 1 }
+          );
+
+          if (!elRes.ok) {
+            const errText = await elRes.text();
+            log("warn", "ElevenLabs sync failed (non-blocking)", { request_id: rid, status: elRes.status, detail: errText.slice(0, 500) });
+          } else {
+            log("info", "ElevenLabs agent synced", { request_id: rid, el_agent_id: currentAgent.el_agent_id });
+          }
+        } catch (syncErr) {
+          log("warn", "ElevenLabs sync exception (non-blocking)", { request_id: rid, error: (syncErr as Error).message });
+        }
       }
     }
 
-    return new Response(JSON.stringify({ agent }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    log("info", "Agent updated", { request_id: rid, agent_id: id });
+
+    return new Response(
+      JSON.stringify({ ok: true, agent, request_id: rid }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   } catch (err) {
-    return new Response(JSON.stringify({ error: (err as Error).message }), { status: 500, headers: corsHeaders });
+    return errorResponse(err, rid, FN);
   }
 });

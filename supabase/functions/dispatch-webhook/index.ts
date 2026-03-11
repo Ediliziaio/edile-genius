@@ -1,12 +1,11 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  corsHeaders, generateRequestId, log, jsonError, errorResponse,
+  fetchWithTimeout,
+} from "../_shared/utils.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+const FN = "dispatch-webhook";
 
-// --- Constants ---
 const VALID_EVENT_TYPES = [
   "conversation.completed",
   "conversation.started",
@@ -18,25 +17,23 @@ const VALID_EVENT_TYPES = [
   "agent.status_changed",
   "report.generated",
 ];
-const MAX_PAYLOAD_SIZE = 100_000; // 100 KB stringified
+const MAX_PAYLOAD_SIZE = 100_000;
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const rid = generateRequestId();
 
   const json = (body: Record<string, unknown>, status = 200) =>
-    new Response(JSON.stringify(body), {
+    new Response(JSON.stringify({ ...body, request_id: rid }), {
       status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
   try {
-    // ── 1. Authentication ──────────────────────────────────────────
+    // ── 1. Authentication
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return json({ error: "Unauthorized" }, 401);
-    }
+    if (!authHeader?.startsWith("Bearer ")) return jsonError("Unauthorized", "auth_error", 401, rid);
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -47,14 +44,12 @@ Deno.serve(async (req) => {
     });
     const token = authHeader.replace("Bearer ", "");
     const { data: claimsData, error: claimsErr } = await anonClient.auth.getClaims(token);
-    if (claimsErr || !claimsData?.claims) {
-      return json({ error: "Unauthorized" }, 401);
-    }
+    if (claimsErr || !claimsData?.claims) return jsonError("Unauthorized", "auth_error", 401, rid);
     const userId = claimsData.claims.sub as string;
 
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // ── 2. Get user's company & roles ─────────────────────────────
+    // ── 2. Get user's company & roles
     const [profileRes, rolesRes] = await Promise.all([
       supabase.from("profiles").select("company_id").eq("id", userId).single(),
       supabase.from("user_roles").select("role").eq("user_id", userId),
@@ -63,35 +58,23 @@ Deno.serve(async (req) => {
     const roles = (rolesRes.data || []).map((r: { role: string }) => r.role);
     const isSuperadmin = roles.includes("superadmin") || roles.includes("superadmin_user");
 
-    // ── 3. Parse & validate body ──────────────────────────────────
+    // ── 3. Parse & validate body
     const { company_id, event_type, payload } = await req.json();
 
-    // Tenant authorization
     const targetCompanyId = company_id || userCompanyId;
-    if (!targetCompanyId) {
-      return json({ error: "company_id required" }, 400);
-    }
-    if (!isSuperadmin && targetCompanyId !== userCompanyId) {
-      return json({ error: "Forbidden: cross-tenant access denied" }, 403);
-    }
+    if (!targetCompanyId) return jsonError("company_id required", "validation_error", 400, rid);
+    if (!isSuperadmin && targetCompanyId !== userCompanyId) return jsonError("Forbidden: cross-tenant access denied", "forbidden", 403, rid);
+    if (!event_type || typeof event_type !== "string") return jsonError("event_type is required", "validation_error", 400, rid);
+    if (!VALID_EVENT_TYPES.includes(event_type)) return jsonError(`Invalid event_type. Allowed: ${VALID_EVENT_TYPES.join(", ")}`, "validation_error", 400, rid);
 
-    // Validate event_type
-    if (!event_type || typeof event_type !== "string") {
-      return json({ error: "event_type is required" }, 400);
-    }
-    if (!VALID_EVENT_TYPES.includes(event_type)) {
-      return json({ error: `Invalid event_type. Allowed: ${VALID_EVENT_TYPES.join(", ")}` }, 400);
-    }
-
-    // Validate payload size
     if (payload) {
       const payloadStr = JSON.stringify(payload);
-      if (payloadStr.length > MAX_PAYLOAD_SIZE) {
-        return json({ error: `Payload too large (max ${MAX_PAYLOAD_SIZE} bytes)` }, 413);
-      }
+      if (payloadStr.length > MAX_PAYLOAD_SIZE) return jsonError(`Payload too large (max ${MAX_PAYLOAD_SIZE} bytes)`, "validation_error", 413, rid);
     }
 
-    // ── 4. Get active webhooks for this company ───────────────────
+    log("info", "Dispatching webhooks", { request_id: rid, event_type, company_id: targetCompanyId });
+
+    // ── 4. Get active webhooks
     const { data: webhooks, error: whError } = await supabase
       .from("webhooks")
       .select("*")
@@ -100,14 +83,15 @@ Deno.serve(async (req) => {
       .contains("events", [event_type]);
 
     if (whError) {
-      return json({ error: "Failed to fetch webhooks" }, 500);
+      log("error", "Failed to fetch webhooks", { request_id: rid, error: whError.message });
+      return jsonError("Failed to fetch webhooks", "system_error", 500, rid);
     }
 
     if (!webhooks || webhooks.length === 0) {
-      return json({ dispatched: 0 });
+      return json({ ok: true, dispatched: 0 });
     }
 
-    // ── 5. Dispatch webhooks ──────────────────────────────────────
+    // ── 5. Dispatch webhooks
     const results = await Promise.allSettled(
       webhooks.map(async (wh) => {
         const body = JSON.stringify({
@@ -119,17 +103,9 @@ Deno.serve(async (req) => {
         const headers: Record<string, string> = { "Content-Type": "application/json" };
         if (wh.secret) {
           const encoder = new TextEncoder();
-          const key = await crypto.subtle.importKey(
-            "raw",
-            encoder.encode(wh.secret),
-            { name: "HMAC", hash: "SHA-256" },
-            false,
-            ["sign"]
-          );
+          const key = await crypto.subtle.importKey("raw", encoder.encode(wh.secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
           const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(body));
-          const hex = Array.from(new Uint8Array(signature))
-            .map((b) => b.toString(16).padStart(2, "0"))
-            .join("");
+          const hex = Array.from(new Uint8Array(signature)).map((b) => b.toString(16).padStart(2, "0")).join("");
           headers["X-Webhook-Signature"] = `sha256=${hex}`;
         }
 
@@ -138,23 +114,16 @@ Deno.serve(async (req) => {
         let success = false;
 
         try {
-          const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 10000);
-          const res = await fetch(wh.url, {
-            method: "POST",
-            headers,
-            body,
-            signal: controller.signal,
-          });
-          clearTimeout(timeout);
+          // 10s timeout, no retry (customer endpoints, not idempotent)
+          const res = await fetchWithTimeout(wh.url, { method: "POST", headers, body }, 10_000);
           statusCode = res.status;
           responseBody = (await res.text()).substring(0, 1000);
           success = res.ok;
         } catch (err: unknown) {
           responseBody = err instanceof Error ? err.message : "Request failed";
+          log("warn", "Webhook delivery failed", { request_id: rid, webhook_id: wh.id, error: responseBody });
         }
 
-        // Log delivery
         await supabase.from("webhook_logs").insert({
           webhook_id: wh.id,
           event_type,
@@ -168,17 +137,16 @@ Deno.serve(async (req) => {
       })
     );
 
+    log("info", "Webhooks dispatched", { request_id: rid, count: results.length });
+
     return json({
+      ok: true,
       dispatched: results.length,
       results: results.map((r) =>
         r.status === "fulfilled" ? r.value : { error: "dispatch failed" }
       ),
     });
   } catch (err) {
-    console.error("dispatch-webhook error:", err);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponse(err, rid, FN);
   }
 });

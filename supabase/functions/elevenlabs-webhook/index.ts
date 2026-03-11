@@ -1,12 +1,17 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { generateRequestId, log } from "../_shared/utils.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const FN = "elevenlabs-webhook";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const rid = generateRequestId();
 
   try {
     const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
@@ -26,12 +31,13 @@ Deno.serve(async (req) => {
       const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(payload));
       const expectedHash = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, "0")).join("");
       if (hash !== expectedHash) {
-        console.error("Invalid webhook signature");
+        log("error", "Invalid webhook signature", { request_id: rid });
         return new Response("Invalid signature", { status: 401 });
       }
     }
 
     const event = JSON.parse(bodyText);
+    log("info", "Webhook received", { request_id: rid, type: event.type });
 
     // Handle conversation.started
     if (event.type === "conversation.started") {
@@ -49,6 +55,9 @@ Deno.serve(async (req) => {
             caller_number: convData.caller_number || null,
             started_at: new Date().toISOString(),
           }, { onConflict: "el_conv_id" });
+          log("info", "Conversation started", { request_id: rid, conversation_id: convData.conversation_id });
+        } else {
+          log("warn", "Agent not found for conversation.started", { request_id: rid, el_agent_id: elAgentId });
         }
       }
       return new Response("ok", { status: 200 });
@@ -56,18 +65,22 @@ Deno.serve(async (req) => {
 
     // Only process post-call events
     if (event.type !== "post_call_transcription" && event.type !== "conversation.ended") {
+      log("info", "Event ignored", { request_id: rid, type: event.type });
       return new Response("ignored", { status: 200 });
     }
 
     const data = event.data || event;
     const { conversation_id, agent_id: elAgentId, duration_seconds, transcript } = data;
 
-    if (!elAgentId || !duration_seconds) return new Response("missing data", { status: 400 });
+    if (!elAgentId || !duration_seconds) {
+      log("warn", "Missing data in webhook", { request_id: rid, has_agent_id: !!elAgentId, has_duration: !!duration_seconds });
+      return new Response("missing data", { status: 400 });
+    }
 
     // 1. Find agent
     const { data: agent } = await sb.from("agents").select("id, company_id, llm_model, tts_model").eq("el_agent_id", elAgentId).single();
     if (!agent) {
-      console.error("Agent not found for el_agent_id:", elAgentId);
+      log("error", "Agent not found", { request_id: rid, el_agent_id: elAgentId });
       return new Response("agent not found", { status: 404 });
     }
 
@@ -160,6 +173,7 @@ Deno.serve(async (req) => {
       await sb.from("ai_credits").update({
         calls_blocked: true, blocked_at: new Date().toISOString(), blocked_reason: "balance_zero",
       }).eq("company_id", agent.company_id);
+      log("warn", "Balance zero — calls blocked", { request_id: rid, company_id: agent.company_id });
     } else if (credits?.auto_recharge_enabled && balanceAfter <= Number(credits?.auto_recharge_threshold || 5)) {
       const rechargeAmount = Number(credits?.auto_recharge_amount || 20);
       await sb.from("ai_credits").update({
@@ -172,13 +186,23 @@ Deno.serve(async (req) => {
         notes: `Ricarica automatica — saldo era €${balanceAfter.toFixed(2)}`,
         processed_at: new Date().toISOString(),
       });
+      log("info", "Auto-recharge triggered", { request_id: rid, company_id: agent.company_id, amount: rechargeAmount });
     } else if (balanceAfter <= Number(credits?.alert_threshold_eur || 5)) {
       await sb.from("ai_credits").update({ alert_email_sent_at: new Date().toISOString() }).eq("company_id", agent.company_id);
     }
 
+    log("info", "Webhook processed", {
+      request_id: rid,
+      conversation_id,
+      agent_id: agent.id,
+      duration_sec: duration_seconds,
+      cost_billed: costBilledTotal,
+      balance_after: balanceAfter,
+    });
+
     return new Response("ok", { status: 200 });
   } catch (err) {
-    console.error("Webhook error:", err);
-    return new Response(JSON.stringify({ error: (err as Error).message }), { status: 500, headers: corsHeaders });
+    log("error", "Webhook unhandled error", { request_id: rid, error: (err as Error).message });
+    return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500, headers: corsHeaders });
   }
 });
