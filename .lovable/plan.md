@@ -1,122 +1,134 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro
 
-## ✅ Completato in questo blocco
+## Resilience & Reliability Hardening Plan
 
-### Database Migration
-- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
-- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
-- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
-- RLS policies per tutte le nuove tabelle
+### Current State Analysis
 
-## ✅ Blocco 2 — Sistema Crediti Euro-based
+All 39 edge functions share these weaknesses:
 
-### Database
-- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
-- ai_credit_topups (ricariche manual/auto/promo/adjustment)
-- ai_credit_usage (consumo per conversazione con margini)
-- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
-- monthly_billing_summary view (security_invoker)
+| Issue | Impact | Affected Functions |
+|-------|--------|-------------------|
+| No timeout on external `fetch()` calls | Hanging requests can exhaust Deno worker limits | All functions calling ElevenLabs, Meta, Telegram, Resend, OpenAI, n8n |
+| No structured logging — raw `console.error` with inconsistent formats | Blind debugging in production | All functions |
+| Inconsistent error response format | Client-side error handling is fragile | All functions |
+| No request ID / correlation | Cannot trace issues across webhook chains | All functions |
+| Raw error messages leaked to client (`err.message`) | Potential info disclosure + bad UX | All functions |
+| No retry on transient failures | Single 502/503 from provider = permanent failure | ElevenLabs, Meta, Resend, Telegram, OpenAI calls |
+| Silent fetch failures (no response body consumed on error) | Lost diagnostic info | Several functions |
 
-### Edge Functions
-- check-credits-before-call: verifica saldo pre-chiamata
-- topup-credits: ricarica manuale con fattura
-- elevenlabs-webhook: post-call billing, auto-recharge, blocco
-- platform-config: +apply_global_markup action
+### Strategy
 
-### Frontend
-- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
-- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
-- Sidebar: footer saldo crediti con barra e alert
-- VoiceTestPanel: check crediti pre-chiamata con blocco UI
+Create a **shared utility module** (`supabase/functions/_shared/utils.ts`) and refactor the most critical functions to use it. This avoids touching all 39 functions at once while establishing a standard that can be adopted incrementally.
 
-## ✅ Blocco 3-5 — Agent Templates System
+### Shared Utilities
 
-### Database
-- agent_templates + agent_template_instances + agent_reports + company_channels
-- RLS policies PERMISSIVE (fix da RESTRICTIVE)
-- Funzione DB `increment_installs_count(tpl_id UUID)`
-- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+**`supabase/functions/_shared/utils.ts`** — new file containing:
 
-### Edge Functions (CORS headers completi)
-- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
-- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
-- save-report: salva report in DB + aggiorna contatori istanza
+1. **`fetchWithTimeout(url, init, timeoutMs = 10000)`** — wraps `fetch` with `AbortController` timeout. Returns the response or throws a typed `TimeoutError`.
 
-### Frontend — Wizard 5 Step (TemplateSetup.tsx)
-- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + importa CSV con template scaricabile
-- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
-- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
+2. **`fetchWithRetry(url, init, opts)`** — wraps `fetchWithTimeout` with configurable retry (max 2 retries, exponential backoff, only on 429/502/503/504 status codes). Does NOT retry on 4xx client errors or non-idempotent operations unless explicitly opted in.
 
-### SuperAdmin
-- /superadmin/templates: CRUD completo con JSON editor per config_schema
+3. **`jsonResponse(body, status, corsHeaders)`** — standardized JSON response with `{ ok, error?, code?, data?, request_id }` structure.
 
-## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+4. **`errorResponse(error, status, corsHeaders, requestId)`** — normalizes errors, redacts sensitive fields, never leaks stack traces. Classifies errors as `provider_error`, `validation_error`, `auth_error`, `system_error`.
 
-### Database (5 tabelle)
-- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
-- RLS PERMISSIVE per tutte le tabelle
-- Trigger set_updated_at + init_render_credits su companies
-- Funzione deduct_render_credit
-- Storage buckets: render-originals (privato), render-results (pubblico)
+5. **`generateRequestId()`** — short crypto-random ID for correlation.
 
-### Edge Functions
-- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
-- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+6. **`log(level, message, context)`** — structured JSON log with `{ level, msg, request_id, timestamp, ...context }`. Never logs secrets (redacts fields matching `token`, `key`, `secret`, `password`).
 
-### Frontend
-- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
-- RenderConfig (/superadmin/render-config)
-- BeforeAfterSlider, promptBuilder.ts
+### Functions to Harden (Priority Order)
 
-## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
+**Tier 1 — External API calls with financial/operational impact:**
 
-### Database
-- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
-- Estensione `preventivi` con +26 colonne (template_id, versione, titolo, foto_sopralluogo_urls, foto_copertina_url, sconto_globale, imponibile, iva_importo, totale_finale, condizioni, clausole, intro, firma_testo, tempi_esecuzione, validita_giorni, data_scadenza, tracking_aperto_at/count, link_accettazione, firma_cliente_url, accettato_at, rifiutato_at, rifiuto_motivo, parent_id, inviato_at, inviato_via, cliente_piva, cliente_codice_fiscale)
-- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
-- Storage buckets: preventivi-media (privato), template-assets (pubblico)
-- RLS company-scoped + superadmin
+| Function | External Call | Timeout | Retry | Notes |
+|----------|--------------|---------|-------|-------|
+| `elevenlabs-webhook` | None (incoming) | N/A | N/A | Add structured logging + request ID |
+| `elevenlabs-outbound-call` | ElevenLabs API | 15s | No | Not idempotent (initiates a real phone call) |
+| `create-elevenlabs-agent` | ElevenLabs API | 20s | 1 retry on 502/503 | Idempotent-ish (can retry safely before DB insert) |
+| `update-agent` | ElevenLabs PATCH | 15s | 1 retry on 502/503 | PATCH is idempotent |
+| `elevenlabs-tts` | ElevenLabs API | 30s | No | Large audio response, timeout only |
+| `elevenlabs-conversation-token` | ElevenLabs API | 10s | 1 retry | Small GET, safe to retry |
+| `get-elevenlabs-voices` | ElevenLabs API | 10s | 1 retry | Read-only GET |
+| `dispatch-webhook` | Customer webhooks | 10s | No | Already has timeout; add structured logging |
 
-### Edge Functions
-- `process-preventivo-audio` RISCRITTO: prompt GPT esperto (prezzario DEI, categorie edilizie, sconti), nuovo formato voci con id/ordine/categoria/titolo_voce/sconto_percentuale/foto_urls/note_voce/evidenziata, calcolo totali con sconto e IVA, data_scadenza automatica
+**Tier 2 — External messaging/notification calls:**
 
-### PDF Client-side (@react-pdf/renderer)
-- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4 con:
-  - Header azienda + logo
-  - Band titolo colorata (colore_primario)
-  - Grid cliente/riferimenti
-  - Testo intro
-  - Foto copertina
-  - Tabella voci per categoria con subtotali
-  - Totali con sconto globale + IVA
-  - Note, condizioni, clausole
-  - Sezione firma doppia (azienda + cliente)
-  - Footer pagina
+| Function | External Call | Timeout | Retry |
+|----------|--------------|---------|-------|
+| `send-cantiere-reminders` | Telegram API | 10s | No (loop, partial success OK) |
+| `check-mancati-report` | Telegram + Resend | 10s | No |
+| `check-sal-ritardi` | Telegram + Resend | 10s | No |
+| `check-documenti-scadenze` | Resend | 10s | No |
+| `send-cantiere-report-email` | Resend | 10s | No |
+| `whatsapp-send` | Meta Graph API | 15s | No (message delivery, not idempotent) |
+| `whatsapp-templates-sync` | Meta Graph API | 15s | 1 retry (read-only) |
+| `whatsapp-connect-number` | Meta Graph API | 15s | No (stateful OAuth flow) |
+| `whatsapp-refresh-tokens` | Meta Graph API | 15s | 1 retry per token |
 
-### Frontend
-- **NuovoPreventivo.tsx** → Wizard 3 step:
-  - Step 1: dati cliente (nome, indirizzo, telefono, email, P.IVA, CF) + titolo/oggetto + cantiere
-  - Step 2: registrazione/upload audio + upload foto multiplo con grid preview e badge copertina
-  - Step 3: editor visuale voci per categoria (card editabili con titolo, descrizione, U.M., quantità, prezzo, sconto, totale) + totali live + scarica PDF anteprima
-- **PreventivoDetail.tsx** → 3 tabs:
-  - Dettaglio: voci per categoria con badge sconto, trascrizione collapsible, note/stato/tempi
-  - Cronologia: timeline eventi (creato, inviato, accettato/rifiutato)
-  - Tracking: KPI aperture, ultima apertura, ultimo invio
-  - Azioni: scarica PDF, modifica, elimina
-- **PreventiviList.tsx** → KPI cards (totale, bozze, in attesa, valore accettati) + filtri tab per stato + ricerca + lista con badge versione e scadenza
-- **TemplatePreventivo.tsx** (`/app/impostazioni/template-preventivo`): 3 tabs:
-  - Branding: logo upload, color picker primario/secondario con preview gradient, intestazione/piè di pagina
-  - Testi Standard: intro, condizioni, clausole, firma, validità giorni, IVA default
-  - Layout: 5 toggle (foto copertina, foto voci, subtotali categoria, firma, condizioni)
+**Tier 3 — AI/generation calls (already long-running):**
 
-### Navigazione
-- Sidebar: aggiunto "Template PDF" nella sezione AUTOMAZIONI
-- Route: `/app/impostazioni/template-preventivo`
+| Function | External Call | Timeout | Retry |
+|----------|--------------|---------|-------|
+| `generate-render` | Lovable AI Gateway | 120s | No (expensive, credits already deducted) |
+| `generate-report` | OpenAI | 60s | No |
+| `process-preventivo-audio` | OpenAI (Whisper + GPT) | 90s | No |
+| `analyze-window-photo` | Lovable AI Gateway | 60s | No |
+| `telegram-cantiere-webhook` | OpenAI + Telegram | 30s per call | No |
 
-## 🔜 Prossimi Blocchi
-- SuperAdmin Dashboard economics
-- Integrazioni CRM native
-- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets
+### Retry vs No-Retry Decision Matrix
+
+| Retry | Condition |
+|-------|-----------|
+| Yes | GET/read-only calls, idempotent PATCHs, token generation |
+| No | POST that creates resources, outbound calls, message sending, payment operations, file uploads |
+
+### Implementation Plan
+
+**Phase 1: Create shared utilities** — `_shared/utils.ts`
+
+**Phase 2: Harden Tier 1 functions** (6 functions) — these handle the most critical external API interactions
+
+**Phase 3: Harden Tier 2 functions** (7 functions) — messaging/notification functions
+
+Given the scope, I will implement Phase 1 (shared utils) and Phase 2 (Tier 1 — the 8 most critical functions) in this iteration. Tier 2 and 3 can follow the same pattern incrementally.
+
+### Files Modified
+
+1. `supabase/functions/_shared/utils.ts` — **new** shared utility module
+2. `supabase/functions/elevenlabs-webhook/index.ts` — structured logging, request ID
+3. `supabase/functions/elevenlabs-outbound-call/index.ts` — timeout, error normalization
+4. `supabase/functions/create-elevenlabs-agent/index.ts` — timeout + retry on EL call
+5. `supabase/functions/update-agent/index.ts` — timeout + retry on EL PATCH
+6. `supabase/functions/elevenlabs-tts/index.ts` — timeout, error normalization
+7. `supabase/functions/elevenlabs-conversation-token/index.ts` — timeout + retry
+8. `supabase/functions/get-elevenlabs-voices/index.ts` — timeout + retry
+9. `supabase/functions/dispatch-webhook/index.ts` — structured logging (already has timeout)
+
+### Standardized Response Format
+
+```json
+{
+  "ok": true,
+  "data": { ... },
+  "request_id": "req_a1b2c3"
+}
+
+{
+  "ok": false,
+  "error": "Human-readable message",
+  "code": "provider_timeout",
+  "request_id": "req_a1b2c3"
+}
+```
+
+### Error Codes
+
+`auth_error`, `validation_error`, `forbidden`, `not_found`, `provider_error`, `provider_timeout`, `rate_limited`, `insufficient_credits`, `system_error`
+
+### Test Strategy
+
+- Deploy each function individually after changes
+- Verify existing client calls still work (response shape is a superset, `error` field preserved)
+- Timeout behavior verifiable via ElevenLabs API logs
+- Retry behavior verifiable via edge function logs (structured JSON makes filtering easy)
+
