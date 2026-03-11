@@ -87,6 +87,7 @@ const DocumentiScadenze = lazy(() => import("./pages/app/DocumentiScadenze"));
 const FoglioPresenze = lazy(() => import("./pages/app/FoglioPresenze"));
 const TemplatePreventivo = lazy(() => import("./pages/app/TemplatePreventivo"));
 const Integrations = lazy(() => import("./pages/app/Integrations"));
+const Automations = lazy(() => import("./pages/app/Automations"));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-screen">
