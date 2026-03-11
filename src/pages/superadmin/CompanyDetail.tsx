@@ -65,7 +65,7 @@ export default function CompanyDetail() {
   const handleSave = async () => {
     if (!id) return;
     setSaving(true);
-    const { error } = await supabase.from("companies").update({ name: editName, sector: editSector || null, plan: editPlan, status: editStatus, el_api_key: editApiKey || null }).eq("id", id);
+    const { error } = await supabase.from("companies").update({ name: editName, sector: editSector || null, plan: editPlan, status: editStatus }).eq("id", id);
     setSaving(false);
     if (error) toast({ title: "Errore", description: error.message, variant: "destructive" });
     else { toast({ title: "Salvato", description: "Azienda aggiornata con successo." }); setCompany((prev) => prev ? { ...prev, name: editName, sector: editSector || null, plan: editPlan, status: editStatus, el_api_key: editApiKey || null } as any : prev); }
