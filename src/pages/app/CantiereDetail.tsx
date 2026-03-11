@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HardHat, MapPin, Calendar, UserPlus, Send, FileText, AlertTriangle, Image, Target, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import ReportDetailModal from "@/components/cantieri/ReportDetailModal";
 
 export default function CantiereDetail() {
@@ -33,7 +33,8 @@ export default function CantiereDetail() {
   }, [id]);
 
   const fetchCantiere = async () => {
-    const { data } = await (supabase.from("cantieri") as any).select("*").eq("id", id!).single();
+    const { data, error } = await (supabase.from("cantieri") as any).select("*").eq("id", id!).single();
+    if (error) { toast.error("Errore caricamento cantiere"); return; }
     setCantiere(data);
   };
 
@@ -48,11 +49,13 @@ export default function CantiereDetail() {
       const monthAgo = new Date(); monthAgo.setMonth(monthAgo.getMonth() - 1);
       query = query.gte("date", monthAgo.toISOString().split("T")[0]);
     }
-    const { data } = await query;
+    const { data, error } = await query;
+    if (error) toast.error("Errore caricamento report");
     setReports(data || []);
   };
 
-  useEffect(() => { if (id) fetchReports(); }, [dateFilter]);
+  // Fixed: added `id` to dependency array
+  useEffect(() => { if (id) fetchReports(); }, [dateFilter, id]);
 
   const fetchOperai = async () => {
     const { data } = await (supabase.from("cantiere_operai") as any).select("*").eq("cantiere_id", id!).order("created_at", { ascending: false });
@@ -71,7 +74,7 @@ export default function CantiereDetail() {
       telegram_username: operaioForm.telegram_username || null,
       telegram_user_id: operaioForm.telegram_user_id || null,
     });
-    if (error) { toast.error("Errore"); return; }
+    if (error) { toast.error(`Errore: ${error.message}`); return; }
     toast.success("Operaio aggiunto!");
     setAddOperaioOpen(false);
     setOperaioForm({ nome: "", cognome: "", ruolo: "", telefono: "", telegram_username: "", telegram_user_id: "" });
@@ -134,14 +137,14 @@ export default function CantiereDetail() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-semibold text-foreground">{r.date}</span>
-                        <Badge variant="outline" className="text-xs">{(r as any).fonte || "telegram"}</Badge>
-                        {(r as any).problemi?.length > 0 && <Badge variant="destructive" className="text-xs"><AlertTriangle className="h-3 w-3 mr-1" /> {(r as any).problemi.length} problemi</Badge>}
-                        {(r as any).foto_urls?.length > 0 && <Badge variant="secondary" className="text-xs"><Image className="h-3 w-3 mr-1" /> {(r as any).foto_urls.length} foto</Badge>}
+                        <Badge variant="outline" className="text-xs">{r.fonte || "telegram"}</Badge>
+                        {r.problemi?.length > 0 && <Badge variant="destructive" className="text-xs"><AlertTriangle className="h-3 w-3 mr-1" /> {r.problemi.length} problemi</Badge>}
+                        {r.foto_urls?.length > 0 && <Badge variant="secondary" className="text-xs"><Image className="h-3 w-3 mr-1" /> {r.foto_urls.length} foto</Badge>}
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2">{r.report_summary || "Report senza sommario"}</p>
                     </div>
-                    {(r as any).avanzamento_percentuale && (
-                      <span className="text-lg font-bold text-primary">{(r as any).avanzamento_percentuale}%</span>
+                    {r.avanzamento_percentuale && (
+                      <span className="text-lg font-bold text-primary">{r.avanzamento_percentuale}%</span>
                     )}
                   </div>
                 </Card>
@@ -193,10 +196,17 @@ export default function CantiereDetail() {
                     </div>
                     <div>
                       <p className="font-medium text-sm">{o.nome} {o.cognome || ""}</p>
-                      <p className="text-xs text-muted-foreground">{o.ruolo || "—"} {o.telefono ? `· ${o.telefono}` : ""}</p>
+                      <p className="text-xs text-muted-foreground">{o.ruolo?.toLowerCase() || "—"} {o.telefono ? `· ${o.telefono}` : ""}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    {/* Colored active/inactive badge */}
+                    <Badge
+                      variant={o.attivo !== false ? "default" : "secondary"}
+                      className={o.attivo !== false ? "bg-green-100 text-green-800 border-green-200" : "bg-muted text-muted-foreground"}
+                    >
+                      {o.attivo !== false ? "Attivo" : "Inattivo"}
+                    </Badge>
                     {o.telegram_user_id ? (
                       <Badge variant="default" className="text-xs">
                         <Send className="h-3 w-3 mr-1" /> Collegato
@@ -237,11 +247,11 @@ export default function CantiereDetail() {
               <p className="text-xs text-muted-foreground">Operai</p>
             </Card>
             <Card className="p-4 text-center">
-              <p className="text-2xl font-bold text-foreground">{reports.filter((r: any) => (r as any).problemi?.length > 0).length}</p>
+              <p className="text-2xl font-bold text-foreground">{reports.filter((r: any) => r.problemi?.length > 0).length}</p>
               <p className="text-xs text-muted-foreground">Con problemi</p>
             </Card>
             <Card className="p-4 text-center">
-              <p className="text-2xl font-bold text-foreground">{reports.filter((r: any) => (r as any).foto_urls?.length > 0).length}</p>
+              <p className="text-2xl font-bold text-foreground">{reports.filter((r: any) => r.foto_urls?.length > 0).length}</p>
               <p className="text-xs text-muted-foreground">Con foto</p>
             </Card>
           </div>
@@ -265,6 +275,7 @@ function SalTab({ cantiereId, companyId }: { cantiereId: string; companyId?: str
   const [milestones, setMilestones] = useState<any[]>([]);
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState({ nome: "", descrizione: "", target_percentuale: 100, data_prevista: "" });
+  const [formError, setFormError] = useState("");
 
   useEffect(() => { fetchMilestones(); }, [cantiereId]);
 
@@ -278,6 +289,18 @@ function SalTab({ cantiereId, companyId }: { cantiereId: string; companyId?: str
 
   const addMilestone = async () => {
     if (!companyId || !form.nome) return;
+    // Validate target_percentuale
+    const pct = form.target_percentuale;
+    if (pct < 0 || pct > 100) {
+      setFormError("La percentuale deve essere tra 0 e 100");
+      return;
+    }
+    // Check duplicate percentuale
+    if (milestones.some(m => m.target_percentuale === pct)) {
+      setFormError(`Esiste già una milestone con target ${pct}%`);
+      return;
+    }
+    setFormError("");
     const { error } = await (supabase.from("sal_milestones") as any).insert({
       company_id: companyId,
       cantiere_id: cantiereId,
@@ -293,16 +316,18 @@ function SalTab({ cantiereId, companyId }: { cantiereId: string; companyId?: str
 
   const updatePercentuale = async (msId: string, pct: number) => {
     const stato = pct >= 100 ? "completato" : "in_corso";
-    await (supabase.from("sal_milestones") as any).update({
+    const { error } = await (supabase.from("sal_milestones") as any).update({
       percentuale_attuale: pct,
       stato,
       data_completamento: pct >= 100 ? new Date().toISOString().split("T")[0] : null,
     }).eq("id", msId);
+    if (error) toast.error(`Errore: ${error.message}`);
     fetchMilestones();
   };
 
   const deleteMilestone = async (msId: string) => {
-    await (supabase.from("sal_milestones") as any).delete().eq("id", msId);
+    const { error } = await (supabase.from("sal_milestones") as any).delete().eq("id", msId);
+    if (error) { toast.error(`Errore: ${error.message}`); return; }
     toast.success("Eliminata");
     fetchMilestones();
   };
@@ -328,9 +353,10 @@ function SalTab({ cantiereId, companyId }: { cantiereId: string; companyId?: str
               <div className="space-y-2"><Label>Nome</Label><Input value={form.nome} onChange={e => setForm(f => ({ ...f, nome: e.target.value }))} placeholder="es. Fondazioni" /></div>
               <div className="space-y-2"><Label>Descrizione</Label><Input value={form.descrizione} onChange={e => setForm(f => ({ ...f, descrizione: e.target.value }))} /></div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>Target %</Label><Input type="number" min={0} max={100} value={form.target_percentuale} onChange={e => setForm(f => ({ ...f, target_percentuale: Number(e.target.value) }))} /></div>
+                <div className="space-y-2"><Label>Target %</Label><Input type="number" min={0} max={100} value={form.target_percentuale} onChange={e => setForm(f => ({ ...f, target_percentuale: Math.min(100, Math.max(0, Number(e.target.value))) }))} /></div>
                 <div className="space-y-2"><Label>Scadenza prevista</Label><Input type="date" value={form.data_prevista} onChange={e => setForm(f => ({ ...f, data_prevista: e.target.value }))} /></div>
               </div>
+              {formError && <p className="text-xs text-destructive">{formError}</p>}
               <Button onClick={addMilestone} disabled={!form.nome} className="w-full">Aggiungi</Button>
             </div>
           </DialogContent>
