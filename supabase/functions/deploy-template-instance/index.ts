@@ -60,6 +60,15 @@ Deno.serve(async (req) => {
 
     const cfg = (instance.config_values || {}) as Record<string, any>;
 
+    // Derive agent type from template channel
+    const VALID_AGENT_TYPES = ["vocal", "render", "whatsapp", "operative"];
+    const channels = (template.channel || []) as string[];
+    const derivedType = channels.includes("whatsapp") ? "whatsapp"
+      : channels.includes("render") ? "render"
+      : channels.includes("operative") ? "operative"
+      : "vocal";
+    const agentType = VALID_AGENT_TYPES.includes(cfg.agent_type) ? cfg.agent_type : derivedType;
+
     // 2. Resolve prompt variables
     let resolvedPrompt = (template.prompt_template || "")
       .replace(/\{\{NOME_AZIENDA\}\}/g, cfg.nome_azienda || "")
@@ -117,7 +126,7 @@ Deno.serve(async (req) => {
         status: "active",
         llm_model: "gemini-2.0-flash",
         use_case: template.slug,
-        type: "vocal",
+        type: agentType,
         created_by: user.id,
       })
       .select()

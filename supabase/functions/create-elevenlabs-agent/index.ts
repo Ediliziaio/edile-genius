@@ -19,10 +19,12 @@ Deno.serve(async (req) => {
     const userId = claimsData.claims.sub;
 
     const body = await req.json();
+    const VALID_AGENT_TYPES = ["vocal", "render", "whatsapp", "operative"] as const;
     const {
       company_id, name, description, use_case, sector, language, voice_id,
-      system_prompt, first_message, status: agentStatus, config = {}
+      system_prompt, first_message, status: agentStatus, type: rawType, config = {}
     } = body;
+    const agentType = VALID_AGENT_TYPES.includes(rawType) ? rawType : "vocal";
 
     if (!company_id || !name) return new Response(JSON.stringify({ error: "company_id and name required" }), { status: 400, headers: corsHeaders });
 
@@ -143,7 +145,7 @@ Deno.serve(async (req) => {
       system_prompt: system_prompt || null,
       first_message: first_message || null,
       status: agentStatus || "draft",
-      type: "vocal",
+      type: agentType,
       llm_model: config.llm_model || "gemini-2.5-flash",
       tts_model: config.tts_model || "eleven_turbo_v2_5",
       llm_backup_model: config.llm_backup_model || null,
