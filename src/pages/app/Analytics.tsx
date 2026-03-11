@@ -17,6 +17,7 @@ const RANGES = [
 export default function AnalyticsPage() {
   const companyId = useCompanyId();
   const [rangeDays, setRangeDays] = useState(30);
+  const [agentFilter, setAgentFilter] = useState("all");
 
   const { data: conversations = [] } = useQuery({
     queryKey: ["analytics-conversations", companyId], enabled: !!companyId,
