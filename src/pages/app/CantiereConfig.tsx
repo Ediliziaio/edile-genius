@@ -36,8 +36,16 @@ export default function CantiereConfig() {
     setOperai(data || []);
   };
 
+  const [tokenError, setTokenError] = useState("");
+
   const handleActivateBot = async () => {
     if (!companyId || !botToken.trim()) return;
+    // Validate Telegram bot token format
+    if (!/^\d+:[\w-]{35,}$/.test(botToken.trim())) {
+      setTokenError("Formato token non valido. Il token deve essere nel formato 123456789:ABCDefGhIJKlMnOpQrStUvWxYz");
+      return;
+    }
+    setTokenError("");
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("setup-telegram-webhook", {
@@ -100,8 +108,9 @@ export default function CantiereConfig() {
               <Input
                 type={showToken ? "text" : "password"}
                 value={botToken}
-                onChange={e => setBotToken(e.target.value)}
+                onChange={e => { setBotToken(e.target.value); setTokenError(""); }}
                 placeholder="123456789:ABCDefGhIJKlMnOpQrStUvWxYz"
+                autoComplete="off"
               />
               <button
                 onClick={() => setShowToken(!showToken)}
@@ -114,6 +123,9 @@ export default function CantiereConfig() {
               {loading ? "Attivazione..." : "Attiva Bot"}
             </Button>
           </div>
+          {tokenError && (
+            <p className="text-sm text-destructive">{tokenError}</p>
+          )}
           {config?.bot_username && (
             <p className="text-sm text-primary flex items-center gap-1">
               <CheckCircle2 className="h-4 w-4" /> Bot attivo: @{config.bot_username}

@@ -107,6 +107,8 @@ Deno.serve(async (req) => {
           const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(body));
           const hex = Array.from(new Uint8Array(signature)).map((b) => b.toString(16).padStart(2, "0")).join("");
           headers["X-Webhook-Signature"] = `sha256=${hex}`;
+          // Note: outbound signature generation — no timing-safe comparison needed here.
+          // Timing-safe comparison is only relevant when *verifying* incoming signatures.
         }
 
         let statusCode = 0;

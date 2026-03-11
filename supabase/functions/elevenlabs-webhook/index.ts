@@ -32,7 +32,11 @@ Deno.serve(async (req) => {
       const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(webhookSecret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
       const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(payload));
       const expectedHash = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, "0")).join("");
-      if (hash !== expectedHash) {
+    // Timing-safe comparison
+    const encoder = new TextEncoder();
+    const a = encoder.encode(hash);
+    const b = encoder.encode(expectedHash);
+    if (a.byteLength !== b.byteLength || !crypto.subtle.timingSafeEqual(a, b)) {
         log("error", "Invalid webhook signature", { request_id: rid });
         return new Response("Invalid signature", { status: 401 });
       }
@@ -101,20 +105,21 @@ Deno.serve(async (req) => {
     const costBilledTotal = Number((durationMin * costBilledPerMin).toFixed(4));
     const marginTotal = Number((costBilledTotal - costRealTotal).toFixed(4));
 
-    // 4. Get current balance
+    // 4. Atomic credit deduction (prevents race conditions)
+    const { data: creditResult } = await sb.rpc("deduct_call_credits", {
+      _company_id: agent.company_id,
+      _cost_billed: costBilledTotal,
+      _cost_real: costRealTotal,
+    });
+    
+    const balanceBefore = Number(creditResult?.[0]?.balance_before || 0);
+    const balanceAfter = Number(creditResult?.[0]?.balance_after || 0);
+    const wasBlocked = creditResult?.[0]?.was_blocked || false;
+
+    // 5. Get credits config for auto-recharge logic
     const { data: credits } = await sb.from("ai_credits")
-      .select("balance_eur, auto_recharge_enabled, auto_recharge_threshold, auto_recharge_amount, alert_threshold_eur, total_spent_eur, total_recharged_eur, auto_recharge_method")
+      .select("auto_recharge_enabled, auto_recharge_threshold, auto_recharge_amount, alert_threshold_eur, total_recharged_eur, auto_recharge_method")
       .eq("company_id", agent.company_id).single();
-
-    const balanceBefore = Number(credits?.balance_eur || 0);
-    const balanceAfter = Number((balanceBefore - costBilledTotal).toFixed(4));
-
-    // 5. Update balance
-    await sb.from("ai_credits").update({
-      balance_eur: balanceAfter,
-      total_spent_eur: Number((Number(credits?.total_spent_eur || 0) + costBilledTotal).toFixed(4)),
-      updated_at: new Date().toISOString(),
-    }).eq("company_id", agent.company_id);
 
     // 6. Record usage
     const { data: convRecord } = await sb.from("conversations").select("id").eq("el_conv_id", conversation_id).maybeSingle();
@@ -179,7 +184,10 @@ Deno.serve(async (req) => {
     const { data: agentStats } = await sb.from("agents").select("calls_total, calls_month, avg_duration_sec").eq("id", agent.id).single();
     const prevTotal = agentStats?.calls_total || 0;
     const prevAvg = agentStats?.avg_duration_sec || 0;
-    const newAvg = prevTotal > 0 ? Math.round((prevAvg * prevTotal + duration_seconds) / (prevTotal + 1)) : duration_seconds;
+    // Guard against division by zero and invalid duration
+    const newAvg = (duration_seconds > 0 && prevTotal >= 0)
+      ? (prevTotal > 0 ? Math.round((prevAvg * prevTotal + duration_seconds) / (prevTotal + 1)) : Math.round(duration_seconds))
+      : prevAvg;
 
     await sb.from("agents").update({
       calls_total: prevTotal + 1,
@@ -188,18 +196,16 @@ Deno.serve(async (req) => {
       last_call_at: new Date().toISOString(),
     }).eq("id", agent.id);
 
-    // 10. Handle low/zero balance
-    if (balanceAfter <= 0) {
-      await sb.from("ai_credits").update({
-        calls_blocked: true, blocked_at: new Date().toISOString(), blocked_reason: "balance_zero",
-      }).eq("company_id", agent.company_id);
+    // 10. Handle low/zero balance (blocking already handled atomically in RPC)
+    if (wasBlocked) {
       log("warn", "Balance zero — calls blocked", { request_id: rid, company_id: agent.company_id });
-    } else if (credits?.auto_recharge_enabled && balanceAfter <= Number(credits?.auto_recharge_threshold || 5)) {
+    }
+    
+    // Auto-recharge if enabled and balance is low
+    if (!wasBlocked && credits?.auto_recharge_enabled && balanceAfter <= Number(credits?.auto_recharge_threshold || 5)) {
       const rechargeAmount = Number(credits?.auto_recharge_amount || 20);
-      await sb.from("ai_credits").update({
-        balance_eur: Number((balanceAfter + rechargeAmount).toFixed(4)),
-        total_recharged_eur: Number((Number(credits?.total_recharged_eur || 0) + rechargeAmount).toFixed(4)),
-      }).eq("company_id", agent.company_id);
+      // Use topup_credits RPC for atomic recharge
+      await sb.rpc("topup_credits", { _company_id: agent.company_id, _amount_eur: rechargeAmount });
       await sb.from("ai_credit_topups").insert({
         company_id: agent.company_id, amount_eur: rechargeAmount, type: "auto", status: "completed",
         payment_method: credits?.auto_recharge_method || "card",
@@ -207,7 +213,7 @@ Deno.serve(async (req) => {
         processed_at: new Date().toISOString(),
       });
       log("info", "Auto-recharge triggered", { request_id: rid, company_id: agent.company_id, amount: rechargeAmount });
-    } else if (balanceAfter <= Number(credits?.alert_threshold_eur || 5)) {
+    } else if (!wasBlocked && balanceAfter <= Number(credits?.alert_threshold_eur || 5)) {
       await sb.from("ai_credits").update({ alert_email_sent_at: new Date().toISOString() }).eq("company_id", agent.company_id);
     }
 
