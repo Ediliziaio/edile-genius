@@ -153,14 +153,41 @@
 ### Requisito SuperAdmin
 - Aggiungere OPENAI_API_KEY come Supabase Secret (da configurare via SuperAdmin)
 
+## ✅ Blocco 9 — Audit Finale & Hardening
+
+### Sicurezza Edge Functions
+- Validazione JWT (getClaims) aggiunta a: generate-render, crm-sync, deploy-template-instance, process-preventivo-audio, generate-preventivo-pdf
+- Verifica tenant (company_id cross-check) aggiunta a tutte le funzioni interne
+- Funzioni webhook esterne (elevenlabs-webhook, whatsapp-webhook, telegram-cantiere-webhook) lasciate senza JWT (corretto)
+
+### Atomicità Crediti
+- Creata RPC `topup_credits(_company_id, _amount_eur)` con UPDATE atomico
+- topup-credits edge function refactorato per usare RPC
+
+### UX — Progressive Disclosure Sidebar
+- Sezioni OPERATIVITÀ e STRUMENTI AI visibili solo se il settore è rilevante o se esistono dati
+- Campi vuoti nelle conversazioni nascosti (eval_score, minutes_billed, cost_billed_eur)
+
+### UX — Dead-End Fix
+- Card CRM e Webhooks in Integrazioni: badge "Prossimamente" + bottoni disabilitati
+
+### Signup Self-Service
+- Pagina /signup con form registrazione
+- Edge function self-service-signup: crea company (trial 14gg) + profilo + ruolo company_admin
+
+### AI Avanzata P2
+- Follow-up Generator: edge function generate-followup (GPT-4o-mini) + bottone in ContactDetailPanel
+- Opportunity Recovery: Smart Actions per lead qualificati dormenti >5 giorni
+- Campi conversazione vuoti nascosti per UX più pulita
+
 ## 🔜 Prossimi Step
 
 ### P2 — Importante dopo
-- Follow-up Generator (bottone "Genera messaggio" con LLM)
-- Opportunity Recovery alerts (preventivi fermi, lead dormenti)
 - Motivo principale (estrarre dal transcript motivo interesse/rifiuto)
+- Campagne outbound end-to-end (schedulazione batch, retry automatico)
 
 ### P3 — Avanzato / successivo
 - Personalizzazione regole Smart Actions per admin
 - Report settimanale automatico via email al titolare
 - Trend predittivo su tasso conversione
+- Integrazione Stripe per pagamenti reali
