@@ -1,9 +1,11 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { LANGUAGES } from "@/components/agents/PromptTemplates";
 import { MessageSquare, Play, Square, Loader2, Mic, Volume2, Wrench, Shield, FileText, Globe } from "lucide-react";
 import VoiceTestPanel from "@/components/agents/VoiceTestPanel";
+import AgentScoreDetail from "@/components/agents/AgentScoreDetail";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { Tables } from "@/integrations/supabase/types";
 
 interface StepReviewProps {
   form: any;
