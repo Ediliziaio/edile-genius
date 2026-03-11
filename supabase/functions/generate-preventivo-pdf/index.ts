@@ -46,6 +46,14 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Preventivo non trovato" }), { status: 404, headers: corsHeaders });
     }
 
+    // Tenant verification
+    const { data: profile } = await adminClient.from("profiles").select("company_id").eq("id", userId).single();
+    const { data: roles } = await adminClient.from("user_roles").select("role").eq("user_id", userId);
+    const isSA = (roles || []).some((r: any) => r.role === "superadmin" || r.role === "superadmin_user");
+    if (!isSA && profile?.company_id !== prev.company_id) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: corsHeaders });
+    }
+
     const voci = (prev.voci as any[]) || [];
     const company = (prev as any).companies;
 

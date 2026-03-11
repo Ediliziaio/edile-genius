@@ -36,6 +36,12 @@ Deno.serve(async (req) => {
 
     const adminClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
+    // Tenant verification
+    const { data: profile } = await adminClient.from("profiles").select("company_id").eq("id", user.id).single();
+    const { data: roles } = await adminClient.from("user_roles").select("role").eq("user_id", user.id);
+    const isSA = (roles || []).some((r: any) => r.role === "superadmin" || r.role === "superadmin_user");
+    if (!isSA && profile?.company_id !== companyId) return jsonError("Forbidden: cross-tenant access", "auth_error", 403, rid);
+
     // 1. Upload audio
     const audioPath = `${companyId}/${crypto.randomUUID()}.webm`;
     const audioBytes = await audioFile.arrayBuffer();
