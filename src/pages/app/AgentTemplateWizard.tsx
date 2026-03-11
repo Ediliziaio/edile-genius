@@ -15,56 +15,73 @@ import { Progress } from "@/components/ui/progress";
 import type { AgentForm, CustomTool } from "./CreateAgent.types";
 
 const VOCAL_SLUGS = [
-  "vocale-custom", "qualifica-infissi", "qualifica-ristrutturazione", "qualifica-fotovoltaico",
-  "inbound-campagne", "conferma-sopralluogo", "recupero-preventivi", "recupero-noshow",
-  "recensioni-post-lavoro",
+  "vocale-custom", "richiama-lead-ads", "qualifica-serramenti", "qualifica-ristrutturazione",
+  "qualifica-fotovoltaico", "conferma-appuntamenti", "recupera-preventivi", "recupera-noshow",
+  "followup-sopralluogo", "raccolta-recensioni", "verifica-soddisfazione",
+  "primo-contatto-wa", "followup-preventivi-wa", "assistente-whatsapp",
+  // legacy slugs
+  "qualifica-infissi", "inbound-campagne", "conferma-sopralluogo",
+  "recupero-preventivi", "recupero-noshow", "recensioni-post-lavoro",
 ];
 const RENDER_SLUGS = ["render-infissi"];
 
 function getAgentType(slug: string): string {
   if (VOCAL_SLUGS.includes(slug)) return "vocal";
   if (RENDER_SLUGS.includes(slug)) return "render";
-  if (slug.startsWith("assistente-whatsapp") || slug.includes("whatsapp")) return "whatsapp";
+  if (slug.startsWith("assistente-whatsapp") || slug.includes("whatsapp")) return "vocal";
   return "vocal";
 }
 
 function getTemplateLabel(slug: string): string {
   const labels: Record<string, string> = {
     "vocale-custom": "Agente Vocale Personalizzato",
-    "qualifica-infissi": "Qualificatore Lead Infissi",
-    "qualifica-ristrutturazione": "Qualificatore Ristrutturazione",
-    "qualifica-fotovoltaico": "Qualificatore Fotovoltaico",
-    "inbound-campagne": "Risponditore Campagne Ads",
-    "conferma-sopralluogo": "Conferma Sopralluogo",
-    "recupero-preventivi": "Recupero Preventivi Scaduti",
-    "recupero-noshow": "Recupero No-Show",
-    "recensioni-post-lavoro": "Raccolta Recensioni Google",
-    "render-infissi": "Render Infissi AI",
+    "richiama-lead-ads": "Richiama Lead da Campagne",
+    "qualifica-serramenti": "Qualifica Lead Serramenti",
+    "qualifica-ristrutturazione": "Qualifica Lead Ristrutturazione",
+    "qualifica-fotovoltaico": "Qualifica Lead Fotovoltaico",
+    "conferma-appuntamenti": "Conferma Appuntamenti",
+    "recupera-preventivi": "Recupera Preventivi Fermi",
+    "recupera-noshow": "Recupera No-Show",
+    "followup-sopralluogo": "Follow-up Dopo Sopralluogo",
+    "followup-preventivi-wa": "Follow-up Preventivi WhatsApp",
     "assistente-whatsapp": "Assistente WhatsApp Commerciale",
+    "primo-contatto-wa": "Primo Contatto Lead WhatsApp",
+    "raccolta-recensioni": "Raccolta Recensioni",
+    "verifica-soddisfazione": "Verifica Soddisfazione Post-Lavoro",
+    "render-infissi": "Render Infissi AI",
+    // legacy
+    "qualifica-infissi": "Qualifica Lead Serramenti",
+    "inbound-campagne": "Richiama Lead da Campagne",
+    "conferma-sopralluogo": "Conferma Appuntamenti",
+    "recupero-preventivi": "Recupera Preventivi Fermi",
+    "recupero-noshow": "Recupera No-Show",
+    "recensioni-post-lavoro": "Raccolta Recensioni",
     "whatsapp-preventivi": "Follow-up Preventivi WhatsApp",
   };
   return labels[slug] || slug;
 }
 
-function getTypeBadge(type: string) {
-  switch (type) {
-    case "vocal": return { emoji: "🎙️", label: "AGENTE VOCALE", cls: "bg-brand-light text-brand-text" };
-    case "render": return { emoji: "🎨", label: "AGENTE RENDER", cls: "bg-settore-ristr-bg text-settore-ristr" };
-    case "whatsapp": return { emoji: "💬", label: "AGENTE WHATSAPP", cls: "bg-[hsl(142,60%,94%)] text-[hsl(142,70%,30%)]" };
-    default: return { emoji: "⚙️", label: "AGENTE", cls: "bg-ink-100 text-ink-500" };
-  }
-}
-
 const SLUG_TO_USE_CASE: Record<string, UseCaseId> = {
-  "qualifica-infissi": "qualifica_infissi",
+  "richiama-lead-ads": "inbound_campagne",
+  "qualifica-serramenti": "qualifica_infissi",
   "qualifica-ristrutturazione": "qualifica_ristrutturazione",
   "qualifica-fotovoltaico": "qualifica_fotovoltaico",
+  "conferma-appuntamenti": "conferma_sopralluogo",
+  "recupera-preventivi": "recupero_preventivi",
+  "recupera-noshow": "recupero_noshow",
+  "followup-sopralluogo": "followup_sopralluogo",
+  "followup-preventivi-wa": "assistente_whatsapp",
+  "assistente-whatsapp": "assistente_whatsapp",
+  "primo-contatto-wa": "primo_contatto_wa",
+  "raccolta-recensioni": "recensioni",
+  "verifica-soddisfazione": "verifica_soddisfazione",
+  // legacy
+  "qualifica-infissi": "qualifica_infissi",
   "inbound-campagne": "inbound_campagne",
   "conferma-sopralluogo": "conferma_sopralluogo",
   "recupero-preventivi": "recupero_preventivi",
   "recupero-noshow": "recupero_noshow",
   "recensioni-post-lavoro": "recensioni",
-  "assistente-whatsapp": "assistente_whatsapp",
   "whatsapp-preventivi": "assistente_whatsapp",
 };
 
