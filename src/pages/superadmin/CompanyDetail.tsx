@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import StatsCard from "@/components/superadmin/StatsCard";
-import { ArrowLeft, Bot, Phone, MessageSquare, Eye, EyeOff, Save, Loader2, UserCheck } from "lucide-react";
+import { ArrowLeft, Bot, Phone, MessageSquare, Save, Loader2, UserCheck } from "lucide-react";
 import { useImpersonation } from "@/context/ImpersonationContext";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -40,8 +40,8 @@ export default function CompanyDetail() {
   const [editSector, setEditSector] = useState("");
   const [editPlan, setEditPlan] = useState("");
   const [editStatus, setEditStatus] = useState("");
-  const [editApiKey, setEditApiKey] = useState("");
-  const [showApiKey, setShowApiKey] = useState(false);
+
+
 
   useEffect(() => {
     if (!id) return;
@@ -51,7 +51,7 @@ export default function CompanyDetail() {
         supabase.from("agents").select("*").eq("company_id", id),
         supabase.from("conversations").select("id", { count: "exact", head: true }).eq("company_id", id),
       ]);
-      if (compRes.data) { setCompany(compRes.data); setEditName(compRes.data.name); setEditSector(compRes.data.sector || ""); setEditPlan(compRes.data.plan || "starter"); setEditStatus(compRes.data.status || "active"); setEditApiKey((compRes.data as any).el_api_key || ""); }
+      if (compRes.data) { setCompany(compRes.data); setEditName(compRes.data.name); setEditSector(compRes.data.sector || ""); setEditPlan(compRes.data.plan || "starter"); setEditStatus(compRes.data.status || "active"); }
       setAgents(agentsRes.data || []);
       setConversationsCount(convsRes.count || 0);
       setLoading(false);
@@ -65,10 +65,10 @@ export default function CompanyDetail() {
   const handleSave = async () => {
     if (!id) return;
     setSaving(true);
-    const { error } = await supabase.from("companies").update({ name: editName, sector: editSector || null, plan: editPlan, status: editStatus, el_api_key: editApiKey || null }).eq("id", id);
+    const { error } = await supabase.from("companies").update({ name: editName, sector: editSector || null, plan: editPlan, status: editStatus }).eq("id", id);
     setSaving(false);
     if (error) toast({ title: "Errore", description: error.message, variant: "destructive" });
-    else { toast({ title: "Salvato", description: "Azienda aggiornata con successo." }); setCompany((prev) => prev ? { ...prev, name: editName, sector: editSector || null, plan: editPlan, status: editStatus, el_api_key: editApiKey || null } as any : prev); }
+    else { toast({ title: "Salvato", description: "Azienda aggiornata con successo." }); setCompany((prev) => prev ? { ...prev, name: editName, sector: editSector || null, plan: editPlan, status: editStatus } : prev); }
   };
 
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-brand" /></div>;
@@ -112,12 +112,8 @@ export default function CompanyDetail() {
               ))}
             </div>
           </div>
-          <div className="rounded-card border border-ink-200 bg-white p-6 shadow-card">
-            <h3 className="text-lg font-semibold text-ink-900 mb-2">ElevenLabs API Key</h3>
-            <Badge className={(company as any).el_api_key ? "bg-status-success-light text-status-success" : "bg-status-error-light text-status-error"}>
-              {(company as any).el_api_key ? "Configurata" : "Non configurata"}
-            </Badge>
-          </div>
+
+
         </TabsContent>
 
         <TabsContent value="agents">
@@ -160,13 +156,8 @@ export default function CompanyDetail() {
               <div className="space-y-2"><Label className="text-ink-600">Piano</Label><Select value={editPlan} onValueChange={setEditPlan}><SelectTrigger className="bg-ink-50 border-ink-200 text-ink-900"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="starter">Starter</SelectItem><SelectItem value="professional">Professional</SelectItem><SelectItem value="enterprise">Enterprise</SelectItem></SelectContent></Select></div>
               <div className="space-y-2"><Label className="text-ink-600">Stato</Label><Select value={editStatus} onValueChange={setEditStatus}><SelectTrigger className="bg-ink-50 border-ink-200 text-ink-900"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="active">Attivo</SelectItem><SelectItem value="inactive">Inattivo</SelectItem><SelectItem value="trial">Trial</SelectItem></SelectContent></Select></div>
             </div>
-            <div className="space-y-2">
-              <Label className="text-ink-600">ElevenLabs API Key</Label>
-              <div className="relative">
-                <Input type={showApiKey ? "text" : "password"} value={editApiKey} onChange={(e) => setEditApiKey(e.target.value)} className="bg-ink-50 border-ink-200 text-ink-900 pr-10" />
-                <button type="button" onClick={() => setShowApiKey(!showApiKey)} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-700">{showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
-              </div>
-            </div>
+
+
             <Button onClick={handleSave} disabled={saving} className="bg-brand hover:bg-brand-hover text-white">
               {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
               Salva modifiche

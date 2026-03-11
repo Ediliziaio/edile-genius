@@ -99,14 +99,14 @@ export default function Settings() {
 
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
-  const [savingApi, setSavingApi] = useState(false);
+  
   const [savingNotif, setSavingNotif] = useState(false);
   const [testing, setTesting] = useState(false);
 
   const [fullName, setFullName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
-  const [apiKey, setApiKey] = useState("");
-  const [showApiKey, setShowApiKey] = useState(false);
+
+
   const [notif, setNotif] = useState<NotifSettings>({ new_conversation: true, daily_report: false, weekly_report: true });
 
   // Webhooks state
@@ -145,12 +145,11 @@ export default function Settings() {
     setAvatarUrl(profile.avatar_url || "");
     if (companyId) {
       Promise.all([
-        supabase.from("companies").select("el_api_key, settings").eq("id", companyId).single(),
+        supabase.from("companies").select("settings").eq("id", companyId).single(),
         loadWebhooks(companyId),
         loadCrmIntegrations(),
       ]).then(([compRes]) => {
         if (compRes.data) {
-          setApiKey(compRes.data.el_api_key || "");
           const s = (compRes.data.settings as Record<string, unknown>) || {};
           setNotif({ new_conversation: s.new_conversation !== false, daily_report: !!s.daily_report, weekly_report: s.weekly_report !== false });
         }
@@ -176,14 +175,6 @@ export default function Settings() {
     const { error } = await supabase.from("profiles").update({ full_name: fullName, avatar_url: avatarUrl || null }).eq("id", user.id);
     setSavingProfile(false);
     toast(error ? { title: "Errore", description: error.message, variant: "destructive" } : { title: "Profilo aggiornato" });
-  };
-
-  const saveApiKey = async () => {
-    if (!companyId) return;
-    setSavingApi(true);
-    const { error } = await supabase.from("companies").update({ el_api_key: apiKey || null }).eq("id", companyId);
-    setSavingApi(false);
-    toast(error ? { title: "Errore", description: error.message, variant: "destructive" } : { title: "API Key aggiornata" });
   };
 
   const testConnection = async () => {
@@ -389,27 +380,18 @@ export default function Settings() {
         {/* API Tab */}
         <TabsContent value="api">
           <div className="rounded-card border border-ink-200 bg-white p-6 space-y-4 max-w-lg shadow-card">
-            <h3 className="text-lg font-semibold text-ink-900">ElevenLabs API Key</h3>
-            <p className="text-sm text-ink-500">Inserisci la tua API key di ElevenLabs per abilitare le funzionalità vocali.</p>
-            <div className="space-y-2">
-              <Label className="text-ink-600">API Key</Label>
-              <div className="relative">
-                <Input type={showApiKey ? "text" : "password"} value={apiKey} onChange={(e) => setApiKey(e.target.value)} className="bg-ink-50 border-ink-200 text-ink-900 pr-10" />
-                <button type="button" onClick={() => setShowApiKey(!showApiKey)} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-700">
-                  {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
+            <h3 className="text-lg font-semibold text-ink-900">Configurazione API</h3>
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-status-success-light border border-status-success/20">
+              <CheckCircle2 className="h-5 w-5 text-status-success mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-ink-900">ElevenLabs API — Gestita centralmente</p>
+                <p className="text-sm text-ink-500 mt-1">La chiave API ElevenLabs è configurata in modo sicuro a livello di piattaforma e non è necessario inserirla manualmente.</p>
               </div>
             </div>
-            <div className="flex gap-3">
-              <Button onClick={saveApiKey} disabled={savingApi} className="bg-brand hover:bg-brand-hover text-white">
-                {savingApi ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-                Salva
-              </Button>
-              <Button variant="outline" onClick={testConnection} disabled={testing} className="border-ink-200 text-ink-700 hover:bg-ink-50">
-                {testing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
-                Testa connessione
-              </Button>
-            </div>
+            <Button variant="outline" onClick={testConnection} disabled={testing} className="border-ink-200 text-ink-700 hover:bg-ink-50">
+              {testing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+              Testa connessione ElevenLabs
+            </Button>
           </div>
         </TabsContent>
 

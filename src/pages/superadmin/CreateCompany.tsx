@@ -28,7 +28,7 @@ export default function CreateCompany() {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
-    name: "", sector: "", admin_email: "", admin_password: "", plan: "starter", el_api_key: "",
+    name: "", sector: "", admin_email: "", admin_password: "", plan: "starter",
     phone: "", vat_number: "", address: "", city: "", website: "", trial_days: "14",
   });
 
@@ -48,7 +48,6 @@ export default function CreateCompany() {
         body: {
           name: form.name, slug, sector: form.sector || null, plan: form.plan,
           admin_email: form.admin_email, admin_password: form.admin_password,
-          el_api_key: form.el_api_key || null,
           phone: form.phone || null, vat_number: form.vat_number || null,
           address: form.address || null, city: form.city || null,
           website: form.website || null, trial_ends_at,
@@ -168,10 +167,11 @@ export default function CreateCompany() {
 
         {step === 2 && (
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-ink-900">ElevenLabs API Key</Label>
-              <Input type="password" value={form.el_api_key} onChange={(e) => updateField("el_api_key", e.target.value)} placeholder="xi-..." className="bg-ink-50 border-ink-200 text-ink-900" />
-              <p className="text-xs text-ink-400">Opzionale. Puoi configurarla anche in seguito.</p>
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-status-success-light border border-status-success/20">
+              <div>
+                <p className="text-sm font-medium text-ink-900">ElevenLabs API — Gestita centralmente</p>
+                <p className="text-sm text-ink-500 mt-1">La chiave API ElevenLabs è configurata come secret di piattaforma. Non è necessario inserirla per singola azienda.</p>
+              </div>
             </div>
           </div>
         )}
@@ -188,7 +188,7 @@ export default function CreateCompany() {
                 ["Indirizzo", [form.address, form.city].filter(Boolean).join(", ") || "—"],
                 ["Sito Web", form.website || "—"],
                 ["Trial", form.trial_days && parseInt(form.trial_days) > 0 ? `${form.trial_days} giorni` : "Nessuno"],
-                ["ElevenLabs API Key", form.el_api_key ? "••••••••" : "Non configurata"],
+                ["ElevenLabs API Key", "Gestita centralmente"],
               ] as [string, string][]).map(([label, value]) => (
                 <div key={label} className="flex justify-between py-2 border-b border-ink-100">
                   <span className="text-ink-500">{label}</span>
