@@ -624,7 +624,7 @@ export default function NuovoPreventivo() {
                   <span className="w-24">€{subtotale.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-end gap-8 text-sm">
-                  <span className="text-muted-foreground">IVA (22%)</span>
+                  <span className="text-muted-foreground">IVA ({ivaPercentuale}%)</span>
                   <span className="w-24">€{ivaImporto.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-end gap-8 text-lg font-bold border-t pt-2">
