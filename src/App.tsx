@@ -70,6 +70,7 @@ import PreventivoDetail from "./pages/app/PreventivoDetail";
 import DocumentiScadenze from "./pages/app/DocumentiScadenze";
 import FoglioPresenze from "./pages/app/FoglioPresenze";
 import TemplatePreventivo from "./pages/app/TemplatePreventivo";
+import Integrations from "./pages/app/Integrations";
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -153,6 +154,7 @@ const App = () => (
                 <Route path="/app/analytics" element={<AnalyticsPage />} />
                 <Route path="/app/credits" element={<CreditsPage />} />
                 <Route path="/app/settings" element={<SettingsPage />} />
+                <Route path="/app/integrations" element={<Integrations />} />
               </Route>
             </Route>
 
