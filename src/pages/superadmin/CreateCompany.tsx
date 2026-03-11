@@ -28,7 +28,7 @@ export default function CreateCompany() {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
-    name: "", sector: "", admin_email: "", admin_password: "", plan: "starter", el_api_key: "",
+    name: "", sector: "", admin_email: "", admin_password: "", plan: "starter",
     phone: "", vat_number: "", address: "", city: "", website: "", trial_days: "14",
   });
 
