@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +7,8 @@ import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import {
   Phone, Mail, Loader2, MessageSquare, StickyNote, Activity,
-  User, Building2, MapPin, Calendar, Clock, Tag, Trash2, Edit3
+  User, Building2, MapPin, Calendar, Clock, Tag, Trash2, Edit3,
+  FileText
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import LeadScoreBadge from "@/components/contacts/LeadScoreBadge";
 
 const STATUS_OPTIONS = [
   { value: "new", label: "Nuovo", color: "bg-ink-100 text-ink-600" },
@@ -100,6 +102,69 @@ export default function ContactDetailPanel({ contact, open, onOpenChange, onUpda
       return data || [];
     },
   });
+
+  // Preventivi linked (by contact phone/name match — simple heuristic)
+  const { data: preventivi = [] } = useQuery({
+    queryKey: ["contact-preventivi", contact?.id, contact?.full_name],
+    enabled: !!contact?.id && open && !!companyId,
+    queryFn: async () => {
+      // Try matching by cliente_nome or phone
+      const { data } = await supabase
+        .from("preventivi" as any)
+        .select("id, numero, titolo, stato, totale_finale, created_at, inviato_at, accettato_at, rifiutato_at, cliente_nome")
+        .eq("company_id", companyId!)
+        .or(`cliente_nome.ilike.%${contact.full_name}%${contact.phone ? `,cliente_telefono.eq.${contact.phone}` : ""}`)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      return (data as any[]) || [];
+    },
+  });
+
+  // ── Unified Timeline ──
+  const timeline = useMemo(() => {
+    const items: { type: "conversation" | "note" | "preventivo" | "event"; date: string; data: any }[] = [];
+
+    conversations.forEach((c: any) => {
+      items.push({ type: "conversation", date: c.started_at || c.ended_at || "", data: c });
+    });
+
+    notes.forEach((n: any) => {
+      items.push({ type: "note", date: n.created_at || "", data: n });
+    });
+
+    preventivi.forEach((p: any) => {
+      items.push({ type: "preventivo", date: p.created_at || "", data: p });
+    });
+
+    // Event: contact created
+    if (contact?.created_at) {
+      items.push({ type: "event", date: contact.created_at, data: { label: "Contatto creato" } });
+    }
+
+    return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [conversations, notes, preventivi, contact]);
+
+  // Lead score signals from conversations
+  const leadScoreInput = useMemo(() => {
+    const hasQualifiedOrAppointment = conversations.some((c: any) => c.outcome === "qualified" || c.outcome === "appointment");
+    const hasPositiveSentiment = conversations.some((c: any) => c.sentiment === "positive");
+    const latestOutcome = conversations.length > 0 ? (conversations[0] as any).outcome : null;
+
+    return {
+      status: contact?.status || "new",
+      priority: contact?.priority,
+      phone: contact?.phone,
+      email: contact?.email,
+      source: contact?.source,
+      call_attempts: contact?.call_attempts,
+      last_contact_at: contact?.last_contact_at,
+      hasQualifiedOrAppointment,
+      hasPositiveSentiment,
+      latestOutcome,
+      conversationCount: conversations.length,
+      hasPreventivo: preventivi.length > 0,
+    };
+  }, [contact, conversations, preventivi]);
 
   const [newNote, setNewNote] = useState("");
   const [addingNote, setAddingNote] = useState(false);
@@ -228,7 +293,7 @@ export default function ContactDetailPanel({ contact, open, onOpenChange, onUpda
                 </div>
               </div>
             </SheetHeader>
-            <div className="flex gap-2 mt-3">
+            <div className="flex gap-2 mt-3 flex-wrap">
               <Badge className={`${statusObj?.color || "bg-ink-100 text-ink-500"} border-none text-xs`}>
                 {statusObj?.label || contact.status}
               </Badge>
@@ -236,6 +301,12 @@ export default function ContactDetailPanel({ contact, open, onOpenChange, onUpda
                 {PRIORITY_OPTIONS.find(p => p.value === contact.priority)?.label || contact.priority || "Media"}
               </Badge>
             </div>
+
+            {/* Lead Score */}
+            <div className="mt-3">
+              <LeadScoreBadge input={leadScoreInput} />
+            </div>
+
             {/* Quick contact actions */}
             <div className="flex gap-2 mt-4">
               {contact.phone && (
@@ -252,21 +323,134 @@ export default function ContactDetailPanel({ contact, open, onOpenChange, onUpda
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue="info" className="flex-1">
+          <Tabs defaultValue="timeline" className="flex-1">
             <TabsList className="w-full justify-start rounded-none border-b border-ink-100 bg-transparent px-6 h-auto py-0">
+              <TabsTrigger value="timeline" className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none text-ink-500 px-3 py-2.5 text-sm">
+                <Activity className="w-3.5 h-3.5 mr-1.5" /> Timeline
+              </TabsTrigger>
               <TabsTrigger value="info" className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none text-ink-500 px-3 py-2.5 text-sm">
                 <User className="w-3.5 h-3.5 mr-1.5" /> Info
-              </TabsTrigger>
-              <TabsTrigger value="calls" className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none text-ink-500 px-3 py-2.5 text-sm">
-                <Phone className="w-3.5 h-3.5 mr-1.5" /> Chiamate
               </TabsTrigger>
               <TabsTrigger value="notes" className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none text-ink-500 px-3 py-2.5 text-sm">
                 <StickyNote className="w-3.5 h-3.5 mr-1.5" /> Note
               </TabsTrigger>
-              <TabsTrigger value="activity" className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none text-ink-500 px-3 py-2.5 text-sm">
-                <Activity className="w-3.5 h-3.5 mr-1.5" /> Attività
-              </TabsTrigger>
             </TabsList>
+
+            {/* Timeline Tab — Unified */}
+            <TabsContent value="timeline" className="px-6 py-4 mt-0">
+              {timeline.length === 0 ? (
+                <div className="text-center py-8">
+                  <Activity className="w-8 h-8 text-ink-200 mx-auto mb-2" />
+                  <p className="text-sm text-ink-400">Nessuna attività registrata</p>
+                </div>
+              ) : (
+                <div className="relative">
+                  {/* Vertical line */}
+                  <div className="absolute left-[7px] top-3 bottom-3 w-px bg-ink-100" />
+
+                  <div className="space-y-4">
+                    {timeline.map((item, idx) => (
+                      <div key={`${item.type}-${idx}`} className="flex items-start gap-3 relative">
+                        {/* Dot */}
+                        <div className={`w-[15px] h-[15px] rounded-full border-2 shrink-0 mt-0.5 z-10 ${
+                          item.type === "conversation"
+                            ? "border-brand bg-brand-light"
+                            : item.type === "note"
+                            ? "border-amber-400 bg-amber-50"
+                            : item.type === "preventivo"
+                            ? "border-emerald-500 bg-emerald-50"
+                            : "border-ink-300 bg-ink-50"
+                        }`} />
+
+                        <div className="flex-1 min-w-0">
+                          {item.type === "conversation" && (
+                            <div className="rounded-lg border border-ink-100 p-3">
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-2">
+                                  <MessageSquare className="w-3.5 h-3.5 text-brand" />
+                                  <span className="text-xs font-semibold text-ink-700">
+                                    Chiamata {item.data.direction === "inbound" ? "in entrata" : "in uscita"}
+                                  </span>
+                                </div>
+                                <span className="text-[10px] text-ink-400">
+                                  {item.date ? format(new Date(item.date), "dd MMM HH:mm", { locale: it }) : ""}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-ink-500 mt-1">
+                                {item.data.duration_sec && (
+                                  <span>{Math.floor(item.data.duration_sec / 60)}:{String(item.data.duration_sec % 60).padStart(2, "0")}</span>
+                                )}
+                                {item.data.outcome && (
+                                  <Badge className="bg-ink-50 text-ink-600 border-none text-[10px]">{item.data.outcome}</Badge>
+                                )}
+                                {item.data.sentiment && (
+                                  <Badge className="bg-ink-50 text-ink-600 border-none text-[10px]">{item.data.sentiment}</Badge>
+                                )}
+                              </div>
+                              {item.data.summary && (
+                                <p className="text-xs text-ink-600 mt-2 bg-ink-50 rounded p-2">{item.data.summary}</p>
+                              )}
+                            </div>
+                          )}
+
+                          {item.type === "note" && (
+                            <div className="rounded-lg border border-amber-100 bg-amber-50/50 p-3">
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-2">
+                                  <StickyNote className="w-3.5 h-3.5 text-amber-600" />
+                                  <span className="text-xs font-semibold text-ink-700">Nota</span>
+                                </div>
+                                <span className="text-[10px] text-ink-400">
+                                  {item.date ? format(new Date(item.date), "dd MMM HH:mm", { locale: it }) : ""}
+                                </span>
+                              </div>
+                              <p className="text-sm text-ink-800 whitespace-pre-wrap mt-1">{item.data.content}</p>
+                            </div>
+                          )}
+
+                          {item.type === "preventivo" && (
+                            <div className="rounded-lg border border-emerald-100 bg-emerald-50/50 p-3">
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span className="text-xs font-semibold text-ink-700">
+                                    Preventivo {item.data.numero || ""}
+                                  </span>
+                                </div>
+                                <span className="text-[10px] text-ink-400">
+                                  {item.date ? format(new Date(item.date), "dd MMM", { locale: it }) : ""}
+                                </span>
+                              </div>
+                              <p className="text-xs text-ink-600 mt-1">
+                                {item.data.titolo || "Senza titolo"}
+                                {item.data.totale_finale ? ` — €${Number(item.data.totale_finale).toFixed(2)}` : ""}
+                              </p>
+                              <Badge className={`mt-1 text-[10px] border-none ${
+                                item.data.stato === "accettato" ? "bg-emerald-100 text-emerald-700"
+                                : item.data.stato === "rifiutato" ? "bg-red-50 text-red-600"
+                                : item.data.stato === "inviato" ? "bg-blue-50 text-blue-600"
+                                : "bg-ink-100 text-ink-500"
+                              }`}>
+                                {item.data.stato || "bozza"}
+                              </Badge>
+                            </div>
+                          )}
+
+                          {item.type === "event" && (
+                            <div className="py-1">
+                              <p className="text-xs text-ink-500">{item.data.label}</p>
+                              <p className="text-[10px] text-ink-400">
+                                {item.date ? format(new Date(item.date), "dd MMM yyyy HH:mm", { locale: it }) : ""}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </TabsContent>
 
             {/* Info Tab */}
             <TabsContent value="info" className="px-6 py-4 space-y-1 mt-0">
@@ -360,35 +544,6 @@ export default function ContactDetailPanel({ contact, open, onOpenChange, onUpda
               )}
             </TabsContent>
 
-            {/* Calls Tab */}
-            <TabsContent value="calls" className="px-6 py-4 mt-0">
-              {conversations.length === 0 ? (
-                <div className="text-center py-8">
-                  <Phone className="w-8 h-8 text-ink-200 mx-auto mb-2" />
-                  <p className="text-sm text-ink-400">Nessuna conversazione registrata</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {conversations.map((conv: any) => (
-                    <div key={conv.id} className="rounded-lg border border-ink-100 p-3">
-                      <div className="flex items-center justify-between mb-1">
-                        <Badge className="bg-ink-100 text-ink-600 border-none text-xs">{conv.direction || "outbound"}</Badge>
-                        <span className="text-xs text-ink-400">
-                          {conv.started_at ? format(new Date(conv.started_at), "dd MMM HH:mm", { locale: it }) : "—"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-ink-500 mt-1">
-                        <span>Durata: {conv.duration_sec ? `${Math.floor(conv.duration_sec / 60)}:${String(conv.duration_sec % 60).padStart(2, "0")}` : "—"}</span>
-                        {conv.outcome && <Badge className="bg-ink-50 text-ink-600 border-none text-xs">{conv.outcome}</Badge>}
-                        {conv.sentiment && <Badge className="bg-ink-50 text-ink-600 border-none text-xs">{conv.sentiment}</Badge>}
-                      </div>
-                      {conv.summary && <p className="text-xs text-ink-500 mt-2">{conv.summary}</p>}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-
             {/* Notes Tab */}
             <TabsContent value="notes" className="px-6 py-4 mt-0">
               <div className="flex gap-2 mb-4">
@@ -420,50 +575,6 @@ export default function ContactDetailPanel({ contact, open, onOpenChange, onUpda
                   ))}
                 </div>
               )}
-            </TabsContent>
-
-            {/* Activity Tab */}
-            <TabsContent value="activity" className="px-6 py-4 mt-0">
-              <div className="space-y-3">
-                {contact.created_at && (
-                  <div className="flex items-start gap-3 py-2">
-                    <div className="w-2 h-2 rounded-full bg-brand mt-1.5 shrink-0" />
-                    <div>
-                      <p className="text-sm text-ink-700">Contatto creato</p>
-                      <p className="text-xs text-ink-400">{format(new Date(contact.created_at), "dd MMM yyyy HH:mm", { locale: it })}</p>
-                    </div>
-                  </div>
-                )}
-                {contact.last_contact_at && (
-                  <div className="flex items-start gap-3 py-2">
-                    <div className="w-2 h-2 rounded-full bg-status-info mt-1.5 shrink-0" />
-                    <div>
-                      <p className="text-sm text-ink-700">Ultimo contatto</p>
-                      <p className="text-xs text-ink-400">{format(new Date(contact.last_contact_at), "dd MMM yyyy HH:mm", { locale: it })}</p>
-                    </div>
-                  </div>
-                )}
-                {conversations.map((conv: any) => (
-                  <div key={conv.id} className="flex items-start gap-3 py-2">
-                    <div className="w-2 h-2 rounded-full bg-ink-300 mt-1.5 shrink-0" />
-                    <div>
-                      <p className="text-sm text-ink-700">
-                        Chiamata {conv.direction === "inbound" ? "in entrata" : "in uscita"}
-                        {conv.outcome ? ` — ${conv.outcome}` : ""}
-                      </p>
-                      <p className="text-xs text-ink-400">
-                        {conv.started_at ? format(new Date(conv.started_at), "dd MMM yyyy HH:mm", { locale: it }) : ""}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                {!contact.last_contact_at && conversations.length === 0 && (
-                  <div className="text-center py-8">
-                    <Activity className="w-8 h-8 text-ink-200 mx-auto mb-2" />
-                    <p className="text-sm text-ink-400">Nessuna attività registrata</p>
-                  </div>
-                )}
-              </div>
             </TabsContent>
           </Tabs>
         </SheetContent>

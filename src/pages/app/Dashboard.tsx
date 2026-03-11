@@ -6,9 +6,10 @@ import { Link } from "react-router-dom";
 import {
   Bot, ArrowRight, PhoneOff, CreditCard, Sparkles,
   MessageSquare, Zap, CheckCircle2, Circle, CalendarCheck,
-  TrendingUp, TrendingDown, AlertTriangle
+  TrendingUp, TrendingDown, AlertTriangle, FileText, PhoneCall,
+  ShieldAlert, Clock, Megaphone
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { it } from "date-fns/locale";
 import { Progress } from "@/components/ui/progress";
 
@@ -104,6 +105,72 @@ export default function AppDashboard() {
     },
   });
 
+  // ── Smart Actions data: preventivi, contacts callback, documenti ──
+  const { data: stalePreventivi } = useQuery({
+    queryKey: ["smart-preventivi", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { data } = await supabase
+        .from("preventivi" as any)
+        .select("id, numero, titolo, stato, cliente_nome, created_at, inviato_at")
+        .eq("company_id", companyId!)
+        .in("stato", ["bozza", "inviato"])
+        .lt("created_at", sevenDaysAgo)
+        .limit(5);
+      return (data as any[]) || [];
+    },
+  });
+
+  const { data: callbackContacts } = useQuery({
+    queryKey: ["smart-callbacks", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const now = new Date().toISOString();
+      const { data } = await supabase
+        .from("contacts")
+        .select("id, full_name, next_call_at, status")
+        .eq("company_id", companyId!)
+        .eq("status", "callback")
+        .lt("next_call_at", now)
+        .order("next_call_at", { ascending: true })
+        .limit(5);
+      return data || [];
+    },
+  });
+
+  const { data: expiringDocs } = useQuery({
+    queryKey: ["smart-docs", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const in15Days = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+      const today = new Date().toISOString().split("T")[0];
+      const { data } = await supabase
+        .from("documenti_azienda")
+        .select("id, nome, tipo, data_scadenza")
+        .eq("company_id", companyId!)
+        .gte("data_scadenza", today)
+        .lte("data_scadenza", in15Days)
+        .order("data_scadenza", { ascending: true })
+        .limit(5);
+      return data || [];
+    },
+  });
+
+  const { data: staleCampaigns } = useQuery({
+    queryKey: ["smart-campaigns", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("campaigns")
+        .select("id, name, contacts_reached, appointments_set, status")
+        .eq("company_id", companyId!)
+        .eq("status", "active")
+        .limit(10);
+      return data || [];
+    },
+  });
+
   // ── Derived data ──
   const totalAgents = agents?.length ?? 0;
   const activeAgents = agents?.filter((a) => a.status === "active").length ?? 0;
@@ -130,9 +197,21 @@ export default function AppDashboard() {
 
   const agentsWithoutPhone = agents?.filter((a) => !a.phone_number_id) || [];
 
-  // ── Smart Actions ──
-  const smartActions: { type: "warning" | "danger"; label: string; description: string; href: string; icon: React.ElementType }[] = [];
+  // ── Smart Actions Engine ──
+  const smartActions: { type: "warning" | "danger" | "info"; label: string; description: string; href: string; icon: React.ElementType }[] = [];
 
+  // Credits
+  if (balanceEur < 2) {
+    smartActions.push({
+      type: "danger",
+      label: "Crediti in esaurimento",
+      description: "Ricarica per evitare il blocco degli agenti.",
+      href: "/app/credits",
+      icon: CreditCard,
+    });
+  }
+
+  // Agents draft
   if (hasAgents) {
     const drafts = agents!.filter(a => a.status === "draft");
     if (drafts.length > 0) {
@@ -153,14 +232,88 @@ export default function AppDashboard() {
         icon: PhoneOff,
       });
     }
+
+    // Agents inactive > 7 days
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const inactiveAgents = agents!.filter(a =>
+      a.status === "active" && (!a.last_call_at || new Date(a.last_call_at) < sevenDaysAgo)
+    );
+    if (inactiveAgents.length > 0) {
+      smartActions.push({
+        type: "info",
+        label: `"${inactiveAgents[0].name}" è inattivo`,
+        description: `Nessuna chiamata negli ultimi 7 giorni. Verifica la configurazione.`,
+        href: `/app/agents/${inactiveAgents[0].id}`,
+        icon: ShieldAlert,
+      });
+    }
   }
-  if (balanceEur < 2) {
+
+  // Callback contacts overdue
+  if (callbackContacts && callbackContacts.length > 0) {
+    const c = callbackContacts[0];
+    const overdueLabel = c.next_call_at
+      ? `era da richiamare ${format(new Date(c.next_call_at), "dd MMM 'alle' HH:mm", { locale: it })}`
+      : "da richiamare";
     smartActions.push({
-      type: "danger",
-      label: "Crediti in esaurimento",
-      description: "Ricarica per evitare il blocco degli agenti.",
-      href: "/app/credits",
-      icon: CreditCard,
+      type: "warning",
+      label: `Richiama ${c.full_name}`,
+      description: overdueLabel,
+      href: `/app/contacts`,
+      icon: PhoneCall,
+    });
+    if (callbackContacts.length > 1) {
+      smartActions.push({
+        type: "info",
+        label: `${callbackContacts.length - 1} altri contatti da richiamare`,
+        description: "Hanno una chiamata pianificata scaduta.",
+        href: "/app/contacts",
+        icon: Clock,
+      });
+    }
+  }
+
+  // Stale preventivi
+  if (stalePreventivi && stalePreventivi.length > 0) {
+    const p = stalePreventivi[0] as any;
+    const daysSince = differenceInDays(new Date(), new Date(p.inviato_at || p.created_at));
+    smartActions.push({
+      type: "warning",
+      label: p.stato === "inviato"
+        ? `Follow-up preventivo ${p.numero || ""}`
+        : `Preventivo in bozza da ${daysSince}g`,
+      description: p.stato === "inviato"
+        ? `Inviato ${daysSince} giorni fa a ${p.cliente_nome || "cliente"} senza risposta.`
+        : `"${p.titolo || p.numero || "Senza titolo"}" per ${p.cliente_nome || "cliente"}. Invia o archivia.`,
+      href: `/app/preventivi/${p.id}`,
+      icon: FileText,
+    });
+  }
+
+  // Expiring documents
+  if (expiringDocs && expiringDocs.length > 0) {
+    smartActions.push({
+      type: "warning",
+      label: `${expiringDocs.length} documento/i in scadenza`,
+      description: `"${expiringDocs[0].nome}" scade il ${format(new Date(expiringDocs[0].data_scadenza), "dd MMM", { locale: it })}`,
+      href: "/app/documenti-scadenze",
+      icon: ShieldAlert,
+    });
+  }
+
+  // Low-performing campaigns
+  const lowPerfCampaigns = staleCampaigns?.filter(c => {
+    const reached = c.contacts_reached ?? 0;
+    const appts = c.appointments_set ?? 0;
+    return reached >= 20 && (appts / reached) < 0.05;
+  }) || [];
+  if (lowPerfCampaigns.length > 0) {
+    smartActions.push({
+      type: "info",
+      label: `Campagna "${lowPerfCampaigns[0].name}" sotto il 5%`,
+      description: "Tasso appuntamenti basso. Rivedi il prompt o il target.",
+      href: `/app/campaigns/${lowPerfCampaigns[0].id}`,
+      icon: Megaphone,
     });
   }
 
@@ -199,72 +352,63 @@ export default function AppDashboard() {
         )}
       </div>
 
-      {/* ═══ ZONA B — 4 KPI Cards (only when has agents) ═══ */}
-      {(
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: Agenti Attivi */}
-          <KpiCard
-            icon={Bot}
-            label="Agenti Attivi"
-            value={`${activeAgents} / ${totalAgents}`}
-            sub={activeAgents === totalAgents ? "Tutti operativi" : `${totalAgents - activeAgents} da attivare`}
-            accent={activeAgents === totalAgents ? "success" : "warning"}
-            href="/app/agents"
-          />
-
-          {/* Card 2: Interazioni Questo Mese */}
-          <KpiCard
-            icon={MessageSquare}
-            label="Interazioni gestite"
-            value={String(monthTotal)}
-            delta={prevMonthTotal > 0 ? monthTotal - prevMonthTotal : undefined}
-            deltaBase={prevMonthTotal}
-            sub="questo mese"
-            accent="info"
-          />
-
-          {/* Card 3: Appuntamenti Fissati */}
-          <KpiCard
-            icon={CalendarCheck}
-            label="Appuntamenti fissati"
-            value={String(appointments)}
-            delta={prevAppointments > 0 ? appointments - prevAppointments : undefined}
-            deltaBase={prevAppointments}
-            sub="questo mese"
-            accent="primary"
-          />
-
-          {/* Card 4: Crediti */}
-          <div className="rounded-xl border border-border bg-card p-5 flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                balanceEur > 5 ? "bg-primary/10" : balanceEur >= 1 ? "bg-yellow-100" : "bg-destructive/10"
-              }`}>
-                <CreditCard className={`w-4 h-4 ${
-                  balanceEur > 5 ? "text-primary" : balanceEur >= 1 ? "text-yellow-600" : "text-destructive"
-                }`} />
-              </div>
-              <span className="text-xs font-medium text-muted-foreground">Crediti disponibili</span>
-            </div>
-            <p className={`text-2xl font-bold ${
-              balanceEur > 5 ? "text-primary" : balanceEur >= 1 ? "text-yellow-600" : "text-destructive"
+      {/* ═══ ZONA B — 4 KPI Cards ═══ */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <KpiCard
+          icon={Bot}
+          label="Agenti Attivi"
+          value={`${activeAgents} / ${totalAgents}`}
+          sub={activeAgents === totalAgents && totalAgents > 0 ? "Tutti operativi" : totalAgents === 0 ? "Crea il primo agente" : `${totalAgents - activeAgents} da attivare`}
+          accent={activeAgents === totalAgents && totalAgents > 0 ? "success" : "warning"}
+          href="/app/agents"
+        />
+        <KpiCard
+          icon={MessageSquare}
+          label="Interazioni gestite"
+          value={String(monthTotal)}
+          delta={prevMonthTotal > 0 ? monthTotal - prevMonthTotal : undefined}
+          deltaBase={prevMonthTotal}
+          sub="questo mese"
+          accent="info"
+        />
+        <KpiCard
+          icon={CalendarCheck}
+          label="Appuntamenti fissati"
+          value={String(appointments)}
+          delta={prevAppointments > 0 ? appointments - prevAppointments : undefined}
+          deltaBase={prevAppointments}
+          sub="questo mese"
+          accent="primary"
+        />
+        <div className="rounded-xl border border-border bg-card p-5 flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+              balanceEur > 5 ? "bg-primary/10" : balanceEur >= 1 ? "bg-yellow-100" : "bg-destructive/10"
             }`}>
-              €{balanceEur.toFixed(2)}
-            </p>
-            {totalRecharged > 0 && (
-              <div className="space-y-1">
-                <Progress value={100 - creditUsagePercent} className="h-1.5" />
-                <p className="text-[11px] text-muted-foreground">
-                  €{totalSpent.toFixed(2)} spesi su €{totalRecharged.toFixed(2)} ricaricati
-                </p>
-              </div>
-            )}
-            <Link to="/app/credits" className="text-xs text-primary hover:underline mt-auto">
-              Gestisci crediti →
-            </Link>
+              <CreditCard className={`w-4 h-4 ${
+                balanceEur > 5 ? "text-primary" : balanceEur >= 1 ? "text-yellow-600" : "text-destructive"
+              }`} />
+            </div>
+            <span className="text-xs font-medium text-muted-foreground">Crediti disponibili</span>
           </div>
+          <p className={`text-2xl font-bold ${
+            balanceEur > 5 ? "text-primary" : balanceEur >= 1 ? "text-yellow-600" : "text-destructive"
+          }`}>
+            €{balanceEur.toFixed(2)}
+          </p>
+          {totalRecharged > 0 && (
+            <div className="space-y-1">
+              <Progress value={100 - creditUsagePercent} className="h-1.5" />
+              <p className="text-[11px] text-muted-foreground">
+                €{totalSpent.toFixed(2)} spesi su €{totalRecharged.toFixed(2)} ricaricati
+              </p>
+            </div>
+          )}
+          <Link to="/app/credits" className="text-xs text-primary hover:underline mt-auto">
+            Gestisci crediti →
+          </Link>
         </div>
-      )}
+      </div>
 
       {/* ═══ ZONA C — Smart Actions OR Onboarding ═══ */}
       {!hasAgents ? (
@@ -314,16 +458,22 @@ export default function AppDashboard() {
         </div>
       ) : smartActions.length > 0 ? (
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-foreground">Da fare adesso</h2>
+          <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-primary" />
+            Da fare adesso
+            <span className="text-xs font-normal text-muted-foreground ml-1">({smartActions.length})</span>
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {smartActions.slice(0, 3).map((action) => (
+            {smartActions.slice(0, 6).map((action, idx) => (
               <Link
-                key={action.label}
+                key={`${action.label}-${idx}`}
                 to={action.href}
                 className={`rounded-xl p-4 border flex items-start gap-4 transition-colors ${
                   action.type === "danger"
                     ? "border-destructive/30 bg-destructive/5 hover:bg-destructive/10"
-                    : "border-yellow-300 bg-yellow-50 hover:bg-yellow-100"
+                    : action.type === "warning"
+                    ? "border-yellow-300 bg-yellow-50 hover:bg-yellow-100"
+                    : "border-border bg-accent/50 hover:bg-accent"
                 }`}
               >
                 <div className="w-9 h-9 rounded-lg bg-card flex items-center justify-center shrink-0 border border-border">
@@ -338,22 +488,25 @@ export default function AppDashboard() {
             ))}
           </div>
         </div>
+      ) : hasAgents ? (
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center">
+          <CheckCircle2 className="w-8 h-8 text-primary mx-auto mb-2" />
+          <p className="text-sm font-medium text-foreground">Tutto in ordine!</p>
+          <p className="text-xs text-muted-foreground mt-1">Nessuna azione urgente al momento.</p>
+        </div>
       ) : null}
 
       {/* ═══ ZONA D — Risultati del Mese ═══ */}
-      {(
-        <div>
-          <h2 className="text-lg font-semibold text-foreground mb-4">Risultati del mese</h2>
-          <div className="flex flex-wrap gap-3">
-            <OutcomePill label="Appuntamenti" count={appointments} accent="primary" />
-            <OutcomePill label="Lead qualificati" count={qualified} accent="info" />
-            <OutcomePill label="Da richiamare" count={callback} accent="warning" />
-            <OutcomePill label="Non interessati" count={notInterested} accent="muted" />
-            <OutcomePill label="Segreteria" count={voicemail} accent="muted" />
-          </div>
+      <div>
+        <h2 className="text-lg font-semibold text-foreground mb-4">Risultati del mese</h2>
+        <div className="flex flex-wrap gap-3">
+          <OutcomePill label="Appuntamenti" count={appointments} accent="primary" />
+          <OutcomePill label="Lead qualificati" count={qualified} accent="info" />
+          <OutcomePill label="Da richiamare" count={callback} accent="warning" />
+          <OutcomePill label="Non interessati" count={notInterested} accent="muted" />
+          <OutcomePill label="Segreteria" count={voicemail} accent="muted" />
         </div>
-      )}
-
+      </div>
 
       {/* ═══ ZONA E — Attività Recente ═══ */}
       {conversations && conversations.length > 0 && (
@@ -379,7 +532,12 @@ export default function AppDashboard() {
                     <td className="px-4 py-3 font-medium text-foreground">
                       <div className="flex items-center gap-2">
                         <MessageSquare className="w-3.5 h-3.5 text-muted-foreground" />
-                        {c.agents?.name || "—"}
+                        <div>
+                          <span>{c.agents?.name || "—"}</span>
+                          {c.summary && (
+                            <p className="text-[11px] text-muted-foreground truncate max-w-[250px]">{c.summary}</p>
+                          )}
+                        </div>
                       </div>
                     </td>
                     <td className="px-4 py-3">
