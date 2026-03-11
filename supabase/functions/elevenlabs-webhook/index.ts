@@ -32,7 +32,11 @@ Deno.serve(async (req) => {
       const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(webhookSecret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
       const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(payload));
       const expectedHash = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, "0")).join("");
-      if (hash !== expectedHash) {
+    // Timing-safe comparison
+    const encoder = new TextEncoder();
+    const a = encoder.encode(hash);
+    const b = encoder.encode(expectedHash);
+    if (a.byteLength !== b.byteLength || !crypto.subtle.timingSafeEqual(a, b)) {
         log("error", "Invalid webhook signature", { request_id: rid });
         return new Response("Invalid signature", { status: 401 });
       }
