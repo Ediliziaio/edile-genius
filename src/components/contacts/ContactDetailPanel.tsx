@@ -168,6 +168,43 @@ export default function ContactDetailPanel({ contact, open, onOpenChange, onUpda
 
   const [newNote, setNewNote] = useState("");
   const [addingNote, setAddingNote] = useState(false);
+  const [followUpMsg, setFollowUpMsg] = useState("");
+  const [generatingFollowUp, setGeneratingFollowUp] = useState(false);
+
+  const handleGenerateFollowUp = async () => {
+    setGeneratingFollowUp(true);
+    setFollowUpMsg("");
+    try {
+      const lastConv = conversations.length > 0 ? conversations[0] : null;
+      const daysSince = contact.last_contact_at
+        ? differenceInDays(new Date(), new Date(contact.last_contact_at))
+        : null;
+
+      const { data, error } = await supabase.functions.invoke("generate-followup", {
+        body: {
+          context_type: "contact",
+          context: {
+            name: contact.full_name,
+            last_conversation_summary: (lastConv as any)?.summary || null,
+            outcome: (lastConv as any)?.outcome || null,
+            days_since: daysSince,
+            notes: contact.notes || null,
+          },
+        },
+      });
+      if (error) throw error;
+      setFollowUpMsg(data?.data?.message || data?.message || "Errore nella generazione.");
+    } catch (err: any) {
+      toast({ title: "Errore", description: err.message || "Impossibile generare il messaggio.", variant: "destructive" });
+    } finally {
+      setGeneratingFollowUp(false);
+    }
+  };
+
+  const copyFollowUp = () => {
+    navigator.clipboard.writeText(followUpMsg);
+    toast({ title: "Copiato negli appunti ✓" });
+  };
 
   if (!contact) return null;
 
