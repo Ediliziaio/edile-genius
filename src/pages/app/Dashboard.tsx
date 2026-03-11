@@ -286,37 +286,47 @@ export default function AppDashboard() {
 
   const daysRemaining = burnRateDaily > 0 ? Math.floor(balanceEur / burnRateDaily) : null;
 
-  // ── Smart Actions Engine ──
+  // ── Smart Actions Engine (using configurable thresholds from company settings) ──
   const smartActions: { type: "warning" | "danger" | "info"; label: string; description: string; href: string; icon: React.ElementType }[] = [];
 
+  const creditsLowThreshold = Number(saVal("credits_low_eur")) || 2;
+  const burnRateDaysThreshold = Number(saVal("burn_rate_days")) || 3;
+  const agentInactiveDays = Number(saVal("agent_inactive_days")) || 7;
+  const preventiviStaleDays = Number(saVal("preventivi_stale_days")) || 7;
+  const docsExpiryDays = Number(saVal("docs_expiry_days")) || 15;
+  const campaignMinPct = Number(saVal("campaign_min_pct")) || 5;
+  const dormantLeadDays = Number(saVal("dormant_lead_days")) || 5;
+
   // Credits — enhanced with burn rate
-  if (callsBlocked) {
-    smartActions.push({
-      type: "danger",
-      label: "Agenti bloccati — crediti esauriti",
-      description: "Ricarica subito per riattivare gli agenti.",
-      href: "/app/credits",
-      icon: CreditCard,
-    });
-  } else if (daysRemaining !== null && daysRemaining <= 3) {
-    smartActions.push({
-      type: "danger",
-      label: `Crediti per ~${daysRemaining} giorn${daysRemaining === 1 ? "o" : "i"}`,
-      description: `Al ritmo attuale (€${burnRateDaily.toFixed(2)}/giorno) i crediti finiranno presto. Ricarica.`,
-      href: "/app/credits",
-      icon: CreditCard,
-    });
-  } else if (balanceEur < 2) {
-    smartActions.push({
-      type: "danger",
-      label: "Crediti in esaurimento",
-      description: "Ricarica per evitare il blocco degli agenti.",
-      href: "/app/credits",
-      icon: CreditCard,
-    });
+  if (saEnabled("credits_low")) {
+    if (callsBlocked) {
+      smartActions.push({
+        type: "danger",
+        label: "Agenti bloccati — crediti esauriti",
+        description: "Ricarica subito per riattivare gli agenti.",
+        href: "/app/credits",
+        icon: CreditCard,
+      });
+    } else if (saEnabled("burn_rate_warning") && daysRemaining !== null && daysRemaining <= burnRateDaysThreshold) {
+      smartActions.push({
+        type: "danger",
+        label: `Crediti per ~${daysRemaining} giorn${daysRemaining === 1 ? "o" : "i"}`,
+        description: `Al ritmo attuale (€${burnRateDaily.toFixed(2)}/giorno) i crediti finiranno presto. Ricarica.`,
+        href: "/app/credits",
+        icon: CreditCard,
+      });
+    } else if (balanceEur < creditsLowThreshold) {
+      smartActions.push({
+        type: "danger",
+        label: "Crediti in esaurimento",
+        description: `Saldo sotto €${creditsLowThreshold}. Ricarica per evitare il blocco.`,
+        href: "/app/credits",
+        icon: CreditCard,
+      });
+    }
   }
 
-  // Agents draft
+  // Agents draft (always on — not configurable)
   if (hasAgents) {
     const drafts = agents!.filter(a => a.status === "draft");
     if (drafts.length > 0) {
@@ -338,24 +348,26 @@ export default function AppDashboard() {
       });
     }
 
-    // Agents inactive > 7 days
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const inactiveAgents = agents!.filter(a =>
-      a.status === "active" && (!a.last_call_at || new Date(a.last_call_at) < sevenDaysAgo)
-    );
-    if (inactiveAgents.length > 0) {
-      smartActions.push({
-        type: "info",
-        label: `"${inactiveAgents[0].name}" è inattivo`,
-        description: `Nessuna chiamata negli ultimi 7 giorni. Verifica la configurazione.`,
-        href: `/app/agents/${inactiveAgents[0].id}`,
-        icon: ShieldAlert,
-      });
+    // Agents inactive
+    if (saEnabled("agent_inactive")) {
+      const inactiveCutoff = new Date(Date.now() - agentInactiveDays * 24 * 60 * 60 * 1000);
+      const inactiveAgents = agents!.filter(a =>
+        a.status === "active" && (!a.last_call_at || new Date(a.last_call_at) < inactiveCutoff)
+      );
+      if (inactiveAgents.length > 0) {
+        smartActions.push({
+          type: "info",
+          label: `"${inactiveAgents[0].name}" è inattivo`,
+          description: `Nessuna chiamata negli ultimi ${agentInactiveDays} giorni. Verifica la configurazione.`,
+          href: `/app/agents/${inactiveAgents[0].id}`,
+          icon: ShieldAlert,
+        });
+      }
     }
   }
 
   // Callback contacts overdue
-  if (callbackContacts && callbackContacts.length > 0) {
+  if (saEnabled("callback_overdue") && callbackContacts && callbackContacts.length > 0) {
     const c = callbackContacts[0];
     const overdueLabel = c.next_call_at
       ? `era da richiamare ${format(new Date(c.next_call_at), "dd MMM 'alle' HH:mm", { locale: it })}`
@@ -379,7 +391,7 @@ export default function AppDashboard() {
   }
 
   // Stale preventivi
-  if (stalePreventivi && stalePreventivi.length > 0) {
+  if (saEnabled("preventivi_stale") && stalePreventivi && stalePreventivi.length > 0) {
     const p = stalePreventivi[0] as any;
     const daysSince = differenceInDays(new Date(), new Date(p.inviato_at || p.created_at));
     smartActions.push({
@@ -396,7 +408,7 @@ export default function AppDashboard() {
   }
 
   // Expiring documents
-  if (expiringDocs && expiringDocs.length > 0) {
+  if (saEnabled("docs_expiring") && expiringDocs && expiringDocs.length > 0) {
     smartActions.push({
       type: "warning",
       label: `${expiringDocs.length} documento/i in scadenza`,
@@ -407,22 +419,24 @@ export default function AppDashboard() {
   }
 
   // Low-performing campaigns
-  const lowPerfCampaigns = staleCampaigns?.filter(c => {
-    const reached = c.contacts_reached ?? 0;
-    const appts = c.appointments_set ?? 0;
-    return reached >= 20 && (appts / reached) < 0.05;
-  }) || [];
-  if (lowPerfCampaigns.length > 0) {
-    smartActions.push({
-      type: "info",
-      label: `Campagna "${lowPerfCampaigns[0].name}" sotto il 5%`,
-      description: "Tasso appuntamenti basso. Rivedi il prompt o il target.",
-      href: `/app/campaigns/${lowPerfCampaigns[0].id}`,
-      icon: Megaphone,
-    });
+  if (saEnabled("campaign_low_perf")) {
+    const lowPerfCampaigns = staleCampaigns?.filter(c => {
+      const reached = c.contacts_reached ?? 0;
+      const appts = c.appointments_set ?? 0;
+      return reached >= 20 && (appts / reached) < (campaignMinPct / 100);
+    }) || [];
+    if (lowPerfCampaigns.length > 0) {
+      smartActions.push({
+        type: "info",
+        label: `Campagna "${lowPerfCampaigns[0].name}" sotto il ${campaignMinPct}%`,
+        description: "Tasso appuntamenti basso. Rivedi il prompt o il target.",
+        href: `/app/campaigns/${lowPerfCampaigns[0].id}`,
+        icon: Megaphone,
+      });
+    }
   }
 
-  // Auto-pilot paused campaigns
+  // Auto-pilot paused campaigns (always on)
   const pausedCampaigns = staleCampaigns?.filter(c => c.status === "paused") || [];
   if (pausedCampaigns.length > 0) {
     smartActions.push({
@@ -435,7 +449,7 @@ export default function AppDashboard() {
   }
 
   // Dormant qualified leads — opportunity recovery
-  if (dormantLeads && dormantLeads.length > 0) {
+  if (saEnabled("dormant_leads") && dormantLeads && dormantLeads.length > 0) {
     const lead = dormantLeads[0];
     const daysSince = lead.last_contact_at
       ? differenceInDays(new Date(), new Date(lead.last_contact_at))
@@ -451,7 +465,7 @@ export default function AppDashboard() {
       smartActions.push({
         type: "info",
         label: `${dormantLeads.length - 1} altri lead qualificati dormienti`,
-        description: "Nessun follow-up da oltre 5 giorni. Azione consigliata.",
+        description: `Nessun follow-up da oltre ${dormantLeadDays} giorni. Azione consigliata.`,
         href: "/app/contacts",
         icon: TrendingDown,
       });
