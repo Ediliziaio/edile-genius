@@ -94,8 +94,19 @@ export default function TemplatePreventivo() {
     }
   }, [existing]);
 
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
   const saveMutation = useMutation({
     mutationFn: async () => {
+      // Validate required fields
+      const errors: Record<string, string> = {};
+      if (!form.azienda_nome.trim()) errors.azienda_nome = "Il nome azienda è obbligatorio";
+      if (!form.azienda_piva.trim()) errors.azienda_piva = "La P.IVA è obbligatoria";
+      if (Object.keys(errors).length > 0) {
+        setValidationErrors(errors);
+        throw new Error("Compila i campi obbligatori");
+      }
+      setValidationErrors({});
       if (existing) {
         const { error } = await (supabase.from("preventivo_templates") as any)
           .update({ ...form, updated_at: new Date().toISOString() })
