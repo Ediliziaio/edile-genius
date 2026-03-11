@@ -44,6 +44,9 @@ export default function CampaignDetailPage() {
   const [confirmAction, setConfirmAction] = useState<"start" | "pause" | "cancel" | null>(null);
   const [acting, setActing] = useState(false);
   const [runningBatch, setRunningBatch] = useState(false);
+  const [editingTime, setEditingTime] = useState(false);
+  const [timeStart, setTimeStart] = useState("");
+  const [timeEnd, setTimeEnd] = useState("");
 
   const { data: campaign, isLoading } = useQuery({
     queryKey: ["campaign-detail", id],
