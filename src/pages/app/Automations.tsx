@@ -173,15 +173,15 @@ export default function Automations() {
       if (existing) {
         await supabase
           .from("agent_automations")
-          .update({ config: newConfig })
+          .update({ config: newConfig as any })
           .eq("id", existing.id);
       } else {
         await supabase.from("agent_automations").insert({
           company_id: companyId!,
           automation_type: type,
           is_enabled: false,
-          config: newConfig,
-        });
+          config: newConfig as any,
+        } as any);
       }
     },
     onSuccess: () => {
