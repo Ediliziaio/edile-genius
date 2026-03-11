@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { generateRequestId, log } from "../_shared/utils.ts";
+import { generateCallSummary } from "./summary.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
