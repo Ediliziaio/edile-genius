@@ -97,6 +97,22 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+    // ── Auth: validate JWT ──
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return jsonError("Unauthorized", "auth_error", 401, rid);
+    }
+    const anonClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsErr } = await anonClient.auth.getClaims(token);
+    if (claimsErr || !claimsData?.claims) {
+      return jsonError("Unauthorized", "auth_error", 401, rid);
+    }
+
     const supabase = createClient(supabaseUrl, serviceKey);
 
     const body = await req.json();
