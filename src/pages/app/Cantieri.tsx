@@ -273,7 +273,6 @@ export default function CantierePage() {
           })}
         </div>
       )}
-    </div>
 
       {/* Delete confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>

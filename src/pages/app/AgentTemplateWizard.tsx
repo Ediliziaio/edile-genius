@@ -385,7 +385,6 @@ export default function AgentTemplateWizard() {
           </div>
         </div>
       </div>
-    </div>
 
       {/* Abandon confirmation */}
       <AlertDialog open={showAbandonDialog} onOpenChange={setShowAbandonDialog}>
