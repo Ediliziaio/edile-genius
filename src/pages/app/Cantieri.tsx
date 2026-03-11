@@ -9,7 +9,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, HardHat, MapPin, Calendar, FileText, Users } from "lucide-react";
+import { Plus, HardHat, MapPin, Calendar, FileText, Users, Trash2 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 interface Cantiere {
@@ -43,6 +47,8 @@ export default function CantierePage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ nome: "", indirizzo: "", committente: "", responsabile: "", data_inizio: "", data_fine_prevista: "", email_report: "" });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [deleteTarget, setDeleteTarget] = useState<Cantiere | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchCantieri = async () => {
     if (!companyId) return;
@@ -142,6 +148,22 @@ export default function CantierePage() {
     fetchCantieri();
   };
 
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const { error } = await (supabase.from("cantieri") as any).delete().eq("id", deleteTarget.id);
+      if (error) throw error;
+      toast.success("Cantiere eliminato");
+      setDeleteTarget(null);
+      fetchCantieri();
+    } catch (err: any) {
+      toast.error(`Errore: ${err.message}`);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -216,8 +238,8 @@ export default function CantierePage() {
           {cantieri.map(c => {
             const sb = statoBadge[c.stato] || statoBadge.attivo;
             return (
-              <Link key={c.id} to={`/app/cantieri/${c.id}`}>
-                <Card className="p-5 hover:shadow-md transition-shadow cursor-pointer">
+              <Card key={c.id} className="p-5 hover:shadow-md transition-shadow">
+                <Link to={`/app/cantieri/${c.id}`} className="block cursor-pointer">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <HardHat className="h-5 w-5 text-primary" />
@@ -235,12 +257,42 @@ export default function CantierePage() {
                     <span className="flex items-center gap-1"><FileText className="h-3 w-3" /> {c.report_count} report</span>
                     {c.last_report_date && <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {c.last_report_date}</span>}
                   </div>
-                </Card>
-              </Link>
+                </Link>
+                <div className="flex justify-end mt-3 pt-3 border-t border-border">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 px-2"
+                    onClick={(e) => { e.preventDefault(); setDeleteTarget(c); }}
+                  >
+                    <Trash2 className="h-3.5 w-3.5 mr-1" /> Elimina
+                  </Button>
+                </div>
+              </Card>
             );
           })}
         </div>
       )}
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminare "{deleteTarget?.nome}"?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget && deleteTarget.report_count > 0
+                ? `Questo cantiere ha ${deleteTarget.report_count} report associati che verranno eliminati. L'azione è irreversibile.`
+                : "L'azione è irreversibile. Confermi l'eliminazione?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {deleting ? "Eliminazione..." : "Elimina"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

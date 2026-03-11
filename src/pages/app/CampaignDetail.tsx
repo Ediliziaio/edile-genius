@@ -18,6 +18,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
@@ -43,6 +44,9 @@ export default function CampaignDetailPage() {
   const [confirmAction, setConfirmAction] = useState<"start" | "pause" | "cancel" | null>(null);
   const [acting, setActing] = useState(false);
   const [runningBatch, setRunningBatch] = useState(false);
+  const [editingTime, setEditingTime] = useState(false);
+  const [timeStart, setTimeStart] = useState("");
+  const [timeEnd, setTimeEnd] = useState("");
 
   const { data: campaign, isLoading } = useQuery({
     queryKey: ["campaign-detail", id],
@@ -287,7 +291,31 @@ export default function CampaignDetailPage() {
           <CardContent className="space-y-3">
             <div>
               <p className="text-xs text-ink-400">Finestra oraria</p>
-              <p className="text-sm font-medium text-ink-900">{campaign.call_window_start || "09:00"} — {campaign.call_window_end || "19:00"}</p>
+              {editingTime ? (
+                <div className="flex items-center gap-2 mt-1">
+                  <Input type="time" value={timeStart} onChange={e => setTimeStart(e.target.value)} className="w-28 h-8 text-sm" />
+                  <span className="text-ink-400">—</span>
+                  <Input type="time" value={timeEnd} onChange={e => setTimeEnd(e.target.value)} className="w-28 h-8 text-sm" />
+                  <Button size="sm" variant="outline" className="h-8" onClick={async () => {
+                    await supabase.from("campaigns").update({ call_window_start: timeStart, call_window_end: timeEnd }).eq("id", id!);
+                    setEditingTime(false);
+                    invalidate();
+                    toast({ title: "Finestra oraria aggiornata" });
+                  }}>Salva</Button>
+                  <Button size="sm" variant="ghost" className="h-8" onClick={() => setEditingTime(false)}>✕</Button>
+                </div>
+              ) : (
+                <p
+                  className="text-sm font-medium text-ink-900 cursor-pointer hover:text-brand transition-colors"
+                  onClick={() => {
+                    setTimeStart(campaign.call_window_start || "09:00");
+                    setTimeEnd(campaign.call_window_end || "19:00");
+                    setEditingTime(true);
+                  }}
+                >
+                  {campaign.call_window_start || "09:00"} — {campaign.call_window_end || "19:00"} ✏️
+                </p>
+              )}
             </div>
             <div>
               <p className="text-xs text-ink-400">Giorni attivi</p>

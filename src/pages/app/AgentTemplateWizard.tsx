@@ -3,7 +3,11 @@ import { useState, useCallback, useEffect } from "react";
 import { useCompanyId } from "@/hooks/useCompanyId";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, AlertCircle } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { PROMPT_TEMPLATES, type UseCaseId } from "@/components/agents/PromptTemplates";
 import AgentStepSidebar from "@/components/agents/create/AgentStepSidebar";
@@ -163,6 +167,9 @@ export default function AgentTemplateWizard() {
   });
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [direction, setDirection] = useState(1);
+  const [showAbandonDialog, setShowAbandonDialog] = useState(false);
+
+  const isDirty = form.name !== defaultForm.name || form.system_prompt !== defaultForm.system_prompt || !!form.voice_id;
 
   const update = useCallback((key: string, value: any) => setForm(f => ({ ...f, [key]: value })), []);
 
@@ -295,7 +302,7 @@ export default function AgentTemplateWizard() {
       {/* Header */}
       <div>
         <button
-          onClick={() => navigate("/app/agents/new")}
+          onClick={() => isDirty ? setShowAbandonDialog(true) : navigate("/app/agents/new")}
           className="flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-700 transition-colors mb-3"
         >
           <ArrowLeft className="w-4 h-4" /> Torna ai template
@@ -343,13 +350,19 @@ export default function AgentTemplateWizard() {
             </AnimatePresence>
           </div>
 
+          {/* Voice validation hint */}
+          {step === 1 && !form.voice_id && completedSteps.has(1) && (
+            <div className="flex items-center gap-2 mt-2 px-3 py-2 rounded-lg bg-status-warning-light text-status-warning text-sm">
+              <AlertCircle className="w-4 h-4 shrink-0" /> Seleziona una voce per continuare
+            </div>
+          )}
+
           <div className="flex justify-between mt-4">
             <button
-              onClick={() => step > 0 && goToStep(step - 1)}
-              disabled={step === 0}
-              className="px-4 py-2.5 rounded-btn text-sm font-medium disabled:opacity-30 bg-ink-100 text-ink-600 hover:bg-ink-200"
+              onClick={() => step > 0 ? goToStep(step - 1) : isDirty ? setShowAbandonDialog(true) : navigate("/app/agents/new")}
+              className="px-4 py-2.5 rounded-btn text-sm font-medium bg-ink-100 text-ink-600 hover:bg-ink-200"
             >
-              Indietro
+              {step === 0 ? "Annulla" : "Indietro"}
             </button>
             {step < lastStep ? (
               <button
@@ -372,6 +385,24 @@ export default function AgentTemplateWizard() {
           </div>
         </div>
       </div>
+
+      {/* Abandon confirmation */}
+      <AlertDialog open={showAbandonDialog} onOpenChange={setShowAbandonDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Abbandonare la configurazione?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Le modifiche non salvate andranno perse. Vuoi davvero uscire?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Continua a configurare</AlertDialogCancel>
+            <AlertDialogAction onClick={() => navigate("/app/agents/new")} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Esci senza salvare
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
