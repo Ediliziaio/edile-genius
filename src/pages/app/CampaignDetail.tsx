@@ -177,6 +177,35 @@ export default function CampaignDetailPage() {
           </div>
         </div>
         <div className="flex gap-2">
+          {campaign.status === "active" && (
+            <Button
+              onClick={async () => {
+                setRunningBatch(true);
+                try {
+                  const { data, error } = await supabase.functions.invoke("run-campaign-batch", {
+                    body: { campaign_id: id, action: "run_batch" },
+                  });
+                  if (error) throw error;
+                  if (data?.error) throw new Error(data.error);
+                  toast({
+                    title: "Batch eseguito",
+                    description: `${data?.calls_initiated || 0} chiamate iniziate${data?.campaign_completed ? " — Campagna completata!" : ""}`,
+                  });
+                  invalidate();
+                } catch (err: any) {
+                  toast({ title: "Errore batch", description: err.message, variant: "destructive" });
+                } finally {
+                  setRunningBatch(false);
+                }
+              }}
+              disabled={runningBatch}
+              variant="outline"
+              className="border-brand text-brand hover:bg-brand hover:text-white"
+            >
+              {runningBatch ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <PhoneForwarded className="w-4 h-4 mr-2" />}
+              Lancia batch
+            </Button>
+          )}
           {canStart && (
             <Button onClick={() => setConfirmAction("start")} className="bg-status-success hover:bg-status-success/90 text-white">
               <Play className="w-4 h-4 mr-2" /> {campaign.status === "paused" ? "Riprendi" : "Avvia"}
