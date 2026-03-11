@@ -341,7 +341,7 @@ export default function AppDashboard() {
       ) : null}
 
       {/* ═══ ZONA D — Risultati del Mese ═══ */}
-      {hasAgents && monthTotal > 0 && (
+      {(
         <div>
           <h2 className="text-lg font-semibold text-foreground mb-4">Risultati del mese</h2>
           <div className="flex flex-wrap gap-3">
