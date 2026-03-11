@@ -257,7 +257,32 @@ export default function AnalyticsPage() {
           </ResponsiveContainer>
         </div>
 
-        <div className="rounded-card p-5 lg:col-span-2 bg-white border border-ink-200 shadow-card">
+        <div className="rounded-card p-5 bg-white border border-ink-200 shadow-card">
+          <h3 className="text-sm font-semibold mb-4 text-ink-900 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-status-success" /> Trend conversione settimanale
+          </h3>
+          {conversionTrend.length > 0 ? (
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={conversionTrend}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#D9E2EA" />
+                <XAxis dataKey="settimana" tick={{ fill: "#637485", fontSize: 10 }} />
+                <YAxis tick={{ fill: "#637485", fontSize: 10 }} unit="%" domain={[0, "auto"]} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: "#fff", border: "1px solid #D9E2EA", borderRadius: 10, color: "#0D1117" }}
+                  formatter={(v: number, name: string) => {
+                    if (name === "tasso") return [`${v}%`, "Tasso conv."];
+                    return [v, name];
+                  }}
+                  labelFormatter={(label) => `Sett. ${label}`}
+                />
+                <Line type="monotone" dataKey="tasso" stroke="#3ECF6E" strokeWidth={2} dot={{ r: 4 }} strokeDasharray={conversionTrend.length > 0 ? undefined : undefined} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-sm text-ink-400 py-10 text-center">Dati insufficienti per il trend</p>
+          )}
+          <p className="text-[11px] text-ink-400 mt-2">I punti con ⟶ sono previsioni basate su regressione lineare</p>
+        </div>
           <h3 className="text-sm font-semibold mb-4 text-ink-900">Chiamate per agente</h3>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={agentData} layout="vertical">
