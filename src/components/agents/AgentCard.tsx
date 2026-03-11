@@ -2,6 +2,8 @@ import { Phone, MoreVertical, Activity, Paintbrush, MessageSquare } from "lucide
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
+import { computeAgentScore } from "@/lib/agent-score";
+import AgentScoreBadge from "@/components/agents/AgentScoreBadge";
 
 interface AgentCardProps {
   agent: Tables<"agents">;
