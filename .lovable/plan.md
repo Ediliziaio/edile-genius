@@ -1,203 +1,222 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro + AI Avanzata
 
-## ✅ Completato in questo blocco
+# Piano: Trasformazione AI Services in Agenti Autonomi
 
-### Database Migration
-- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
-- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
-- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
-- RLS policies per tutte le nuove tabelle
+## FASE 1 — Funzioni AI Esistenti
 
-## ✅ Blocco 2 — Sistema Crediti Euro-based
+| # | Funzione | Modulo | Automazione attuale |
+|---|---|---|---|
+| 1 | Agente Vocale AI | ElevenLabs ConvAI | Livello 4 — autonomo |
+| 2 | Call Summary + Outcome AI | elevenlabs-webhook/summary.ts | Livello 3 — auto post-call |
+| 3 | Post-Call Actions | elevenlabs-webhook/post-call-actions.ts | Livello 3 — auto-update contatti |
+| 4 | Lead Score | lead-score.ts (client JS) | Livello 1 — solo analisi |
+| 5 | Smart Actions Engine | Dashboard.tsx (client JS) | Livello 2 — analisi + suggerimenti |
+| 6 | Follow-up AI | generate-followup edge fn | Livello 1 — genera testo, utente copia |
+| 7 | Morning Briefing AI | ai-morning-briefing edge fn | Livello 2 — analisi + comunicazione |
+| 8 | Preventivo da Audio | process-preventivo-audio | Livello 3 — auto-genera PDF |
+| 9 | Campagne Outbound | run-campaign-batch | Livello 3 — batch calling |
+| 10 | Report Cantiere | telegram-cantiere-webhook | Livello 3 — auto-genera report |
+| 11 | Render AI | generate-render | Livello 2 — on demand |
+| 12 | Analisi Foto | analyze-window-photo | Livello 3 — auto pre-fill |
 
-### Database
-- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
-- ai_credit_topups (ricariche manual/auto/promo/adjustment)
-- ai_credit_usage (consumo per conversazione con margini)
-- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
-- monthly_billing_summary view (security_invoker)
+---
 
-### Edge Functions
-- check-credits-before-call: verifica saldo pre-chiamata
-- topup-credits: ricarica manuale con fattura
-- elevenlabs-webhook: post-call billing, auto-recharge, blocco
-- platform-config: +apply_global_markup action
+## FASE 2 — 6 Agenti Autonomi da Implementare
 
-### Frontend
-- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
-- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
-- Sidebar: footer saldo crediti con barra e alert
-- VoiceTestPanel: check crediti pre-chiamata con blocco UI
+### AGENTE 1: "Recupero Lead Dormienti" (Follow-up Automatico)
+**Problema risolto**: Lead qualificati che nessuno ricontatta dopo 5+ giorni — vendite perse.
 
-## ✅ Blocco 3-5 — Agent Templates System
+**Trasformazione**: Il follow-up oggi genera solo testo da copiare. L'agente deve:
+- **Osservare**: Contatti con status `qualified` e `last_contact_at` > 5 giorni
+- **Decidere**: Quale canale usare (outbound call se ha telefono, altrimenti segna per follow-up manuale)
+- **Agire**: Lanciare automaticamente una chiamata outbound con l'agente vocale assegnato, oppure generare e loggare il messaggio di follow-up
+- **Monitorare**: Aggiornare status contatto post-azione, registrare il tentativo
 
-### Database
-- agent_templates + agent_template_instances + agent_reports + company_channels
-- RLS policies PERMISSIVE (fix da RESTRICTIVE)
-- Funzione DB `increment_installs_count(tpl_id UUID)`
-- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+**Implementazione**:
+1. Nuova edge function `auto-followup-agent` (cron-schedulabile) che:
+   - Query contatti `qualified` con `last_contact_at < now() - 5 days`
+   - Per ogni contatto, se ha un agente vocale assegnato (`assigned_agent`), chiama `elevenlabs-outbound-call`
+   - Aggiorna `call_attempts` e `last_contact_at`
+   - Limita a max 10 contatti per esecuzione (controllo costi)
+2. Nuova tabella `agent_automations` per configurare on/off, soglie, limiti giornalieri per company
+3. Card nella Dashboard che mostra "Agente Recupero Lead: attivo, 3 follow-up oggi"
 
-### Edge Functions (CORS headers completi)
-- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
-- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
-- save-report: salva report in DB + aggiorna contatori istanza
+**Livello autonomia**: 4 (analisi + decisione + azione autonoma)
 
-### Frontend — Wizard 5 Step (TemplateSetup.tsx)
-- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + importa CSV con template scaricabile
-- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
-- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
+---
 
-### SuperAdmin
-- /superadmin/templates: CRUD completo con JSON editor per config_schema
+### AGENTE 2: "Consulente Mattutino" (Briefing Intelligente Potenziato)
+**Problema risolto**: L'imprenditore apre la dashboard e non sa cosa fare prima.
 
-## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+**Trasformazione**: Il briefing attuale è informativo. L'agente deve diventare decisionale:
+- **Osservare**: KPI, trend settimanali, conversioni, lead pipeline, costi
+- **Analizzare**: Confronto settimana corrente vs precedente, anomalie
+- **Decidere**: Le 3 azioni più urgenti della giornata, ordinate per impatto
+- **Output**: Briefing con azioni cliccabili (link diretto all'azione)
 
-### Database (5 tabelle)
-- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
-- RLS PERMISSIVE per tutte le tabelle
-- Trigger set_updated_at + init_render_credits su companies
-- Funzione deduct_render_credit
-- Storage buckets: render-originals (privato), render-results (pubblico)
+**Implementazione**:
+1. Estendere `ai-morning-briefing` per includere:
+   - Confronto settimana corrente vs precedente (trend)
+   - Preventivi in attesa di risposta con importo totale
+   - Tasso di conversione campagne
+2. Aggiungere campo `actions` al JSON response: array di `{ label, href, priority }` 
+3. Nella dashboard, le azioni del briefing diventano bottoni cliccabili
 
-### Edge Functions
-- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
-- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+**Livello autonomia**: 2→3 (aggiunge azioni suggerite cliccabili)
 
-### Frontend
-- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
-- RenderConfig (/superadmin/render-config)
-- BeforeAfterSlider, promptBuilder.ts
+---
 
-## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
+### AGENTE 3: "Gestore Pipeline Automatico" (Post-Call Actions Evoluto)
+**Problema risolto**: Dopo ogni chiamata l'utente deve leggere il summary e agire manualmente.
 
-### Database
-- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
-- Estensione `preventivi` con +26 colonne
-- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
-- Storage buckets: preventivi-media (privato), template-assets (pubblico)
-- RLS company-scoped + superadmin
+**Trasformazione**: Post-call-actions oggi aggiorna solo lo status. L'agente deve:
+- **Osservare**: Outcome AI, collected_data, next_step di ogni chiamata
+- **Decidere**: Azioni specifiche per outcome
+- **Agire**:
+  - `appointment` → creare evento/reminder nel contatto con data raccolta
+  - `qualified` → se non ha preventivo, segnare come "da preventivare" 
+  - `callback` → schedulare richiamata automatica con l'agente vocale
+  - `not_interested` → archiviare con motivo, escludere da campagne attive
+- **Monitorare**: Loggare ogni azione nella timeline del contatto
 
-### Edge Functions
-- `process-preventivo-audio` RISCRITTO
+**Implementazione**:
+1. Estendere `post-call-actions.ts`:
+   - Estrarre dati strutturati da `collected_data` (data appuntamento, tipo intervento, budget)
+   - Per `callback`: inserire il contatto in coda per `auto-followup-agent`
+   - Per `appointment`: aggiornare `next_call_at` con la data raccolta dall'AI
+   - Per `not_interested`: rimuovere da `campaign_contacts` attivi
+2. Nuova colonna `contacts.ai_actions_log` (jsonb array) per tracciare azioni automatiche
+3. Mostrare timeline azioni AI nella scheda contatto
 
-### PDF Client-side (@react-pdf/renderer)
-- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4
+**Livello autonomia**: 4
 
-### Frontend
-- NuovoPreventivo.tsx, PreventivoDetail.tsx, PreventiviList.tsx, TemplatePreventivo.tsx
+---
 
-## ✅ Blocco 8 — AI Avanzata P1 (Smart Actions + Lead Score + Timeline)
+### AGENTE 4: "Campagne Auto-Pilota"
+**Problema risolto**: Le campagne outbound richiedono monitoraggio manuale costante.
 
-### Smart Actions Engine (Dashboard)
-- Espanso da 3 regole hardcoded a 10+ regole basate su dati reali:
-  - Crediti in esaurimento (danger)
-  - Agenti in bozza (warning)
-  - Agenti senza numero telefono (warning)
-  - Agenti inattivi >7 giorni (info)
-  - Contatti da richiamare con next_call_at scaduto (warning)
-  - Preventivi in bozza da >7 giorni (warning)
-  - Preventivi inviati senza risposta da >10 giorni (warning)
-  - Documenti in scadenza entro 15 giorni (warning)
-  - Campagne con tasso appuntamenti <5% (info)
-- Query Supabase dedicate per ogni regola
-- Stato "Tutto in ordine" quando nessuna azione è necessaria
-- Mostra summary delle conversazioni recenti nella tabella attività
+**Trasformazione**:
+- **Osservare**: Tasso conversione per campagna, costo per appuntamento, contatti rimanenti
+- **Decidere**: 
+  - Se conversione < 3% dopo 30+ contatti → pausa automatica + notifica
+  - Se ci sono contatti `pending` e il budget lo consente → suggerire lancio batch
+  - Se tutti i contatti sono stati chiamati → completare campagna automaticamente
+- **Agire**: Auto-pause, auto-complete, suggerimento riavvio con prompt diverso
 
-### Lead Score Automatico
-- `src/lib/lead-score.ts`: motore di scoring 0-100 senza LLM
-  - +30 outcome qualified/appointment
-  - +20 sentiment positivo
-  - +15 preventivo associato
-  - +10 contatto completo (tel+email)
-  - +10 callback attempts
-  - +5 fonte inbound
-  - -10 inattivo >30 giorni
-  - -20 not_interested
-  - -30 do_not_call/invalid
-- `src/components/contacts/LeadScoreBadge.tsx`: badge con tooltip fattori
-  - Compact mode per tabella (emoji + score numerico)
-  - Full mode per scheda contatto (con lista fattori)
-  - Colori: 🔴 Caldo (>60), 🟠 Tiepido (30-60), 🔵 Freddo (<30)
-- Badge integrato nella tabella contatti (nuova colonna "Score")
-- Badge integrato nell'header della scheda contatto
+**Implementazione**:
+1. Aggiungere logica in `run-campaign-batch` per:
+   - Check conversione dopo ogni batch completato
+   - Auto-pause se sotto soglia configurabile
+   - Auto-complete se 0 contatti pending
+2. Smart Action dedicata in Dashboard: "Campagna X sotto il 3% — pausa suggerita"
+3. Campo `campaigns.auto_pilot` (boolean) per abilitare il comportamento
 
-### Timeline Unificata del Contatto
-- `ContactDetailPanel.tsx` completamente refactorato:
-  - Tab "Timeline" come default (al posto di "Info")
-  - Cronologia verticale con linea e pallini colorati per tipo:
-    - 🔵 Conversazioni (con summary, outcome, sentiment, durata)
-    - 🟡 Note manuali
-    - 🟢 Preventivi collegati (stato, importo, numero)
-    - ⚪ Eventi (contatto creato)
-  - Query preventivi per nome/telefono contatto
-  - Lead Score full display nell'header della scheda
+**Livello autonomia**: 3
 
-## ✅ Blocco 8 — P1-C: Call Summary Automatico
+---
 
-### Backend
-- `supabase/functions/elevenlabs-webhook/summary.ts`: modulo separato per generazione summary
-  - Chiama OpenAI gpt-4o-mini con prompt minimale in italiano
-  - Non-blocking: se OPENAI_API_KEY non è configurata, salta silenziosamente
-  - Cap transcript a 6000 chars per contenere i costi (~$0.001/call)
-- `elevenlabs-webhook/index.ts`: importa e chiama `generateCallSummary()` dopo step 7
-  - Popola `conversations.summary` solo se la generazione ha successo
+### AGENTE 5: "Sentinella Crediti e Costi"
+**Problema risolto**: L'imprenditore non monitora i costi e rischia blocchi improvvisi.
 
-### Frontend (già predisposto)
-- Dashboard "Attività recente": mostra `c.summary` sotto il nome agente
-- Conversazioni: mostra summary nella tabella e nel dialog dettaglio
-- Timeline contatto: mostra summary nelle conversazioni
+**Trasformazione**:
+- **Osservare**: Balance, burn rate (consumo medio giornaliero), trend costi
+- **Analizzare**: Calcolare "giorni rimanenti" al ritmo attuale
+- **Decidere**: Se giorni rimanenti < 3 → alert urgente
+- **Agire**: Mostrare proiezione nella Dashboard, suggerire ricarica
 
-### Requisito SuperAdmin
-- Aggiungere OPENAI_API_KEY come Supabase Secret (da configurare via SuperAdmin)
+**Implementazione**:
+1. Calcolare `burn_rate` = `total_spent_eur / giorni_da_prima_ricarica` nella Dashboard
+2. Mostrare "Crediti sufficienti per ~X giorni" nel KPI card crediti
+3. Smart Action se giorni < 3: "Al ritmo attuale, i crediti finiranno tra 2 giorni"
 
-## ✅ Blocco 9 — Audit Finale & Hardening
+**Livello autonomia**: 2 (analisi + alert con suggerimento d'azione)
 
-### Sicurezza Edge Functions
-- Validazione JWT (getClaims) aggiunta a: generate-render, crm-sync, deploy-template-instance, process-preventivo-audio, generate-preventivo-pdf
-- Verifica tenant (company_id cross-check) aggiunta a tutte le funzioni interne
-- Funzioni webhook esterne (elevenlabs-webhook, whatsapp-webhook, telegram-cantiere-webhook) lasciate senza JWT (corretto)
+---
 
-### Atomicità Crediti
-- Creata RPC `topup_credits(_company_id, _amount_eur)` con UPDATE atomico
-- topup-credits edge function refactorato per usare RPC
+### AGENTE 6: "Qualificatore Intelligente" (Lead Score Evoluto)
+**Problema risolto**: Il lead score è uguale per tutti, non impara dai risultati reali dell'azienda.
 
-### UX — Progressive Disclosure Sidebar
-- Sezioni OPERATIVITÀ e STRUMENTI AI visibili solo se il settore è rilevante o se esistono dati
-- Campi vuoti nelle conversazioni nascosti (eval_score, minutes_billed, cost_billed_eur)
+**Trasformazione**:
+- **Osservare**: Storico conversioni dell'azienda (contatti che sono diventati `qualified` o `appointment`)
+- **Analizzare**: Quali fattori hanno più peso nelle conversioni reali di QUESTA azienda
+- **Decidere**: Aggiustare i pesi del lead score per company
+- **Output**: Score personalizzato e più accurato
 
-### UX — Dead-End Fix
-- Card CRM e Webhooks in Integrazioni: badge "Prossimamente" + bottoni disabilitati
+**Implementazione**:
+1. Nuova edge function `recalculate-lead-weights` che:
+   - Analizza i contatti convertiti vs non convertiti
+   - Calcola correlazione per source, sector, call_attempts, tempo di risposta
+   - Salva pesi personalizzati in `companies.settings.lead_score_weights`
+2. `lead-score.ts` legge i pesi custom se disponibili, altrimenti usa i default
+3. Esecuzione mensile o on-demand dal SuperAdmin
 
-### Signup Self-Service
-- Pagina /signup con form registrazione
-- Edge function self-service-signup: crea company (trial 14gg) + profilo + ruolo company_admin
+**Livello autonomia**: 3 (analisi + decisione + auto-aggiornamento pesi)
 
-### AI Avanzata P2
-- Follow-up Generator: edge function generate-followup (GPT-4o-mini) + bottone in ContactDetailPanel
-- Opportunity Recovery: Smart Actions per lead qualificati dormenti >5 giorni
-- Campi conversazione vuoti nascosti per UX più pulita
+---
 
-## 🔜 Prossimi Step
+## FASE 3 — Struttura Tecnica
 
-### ✅ Completato — Campagne Outbound E2E
-- Tabella `campaign_contacts` per tracking stato per-contatto (pending/calling/retry/completed/failed)
-- Edge function `run-campaign-batch`: populate contatti da lista + esecuzione batch con chiamate EL outbound
-- Retry automatico con delay configurabile e max tentativi
-- Bottone "Avvia" popola + lancia primo batch
-- Bottone "Lancia batch" per batch successivi su campagne attive
-- Aggiornamento stats campagna in tempo reale
+### Nuova tabella: `agent_automations`
+```sql
+CREATE TABLE agent_automations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id uuid NOT NULL REFERENCES companies(id),
+  automation_type text NOT NULL, -- 'followup_agent', 'campaign_autopilot', 'pipeline_manager'
+  is_enabled boolean DEFAULT false,
+  config jsonb DEFAULT '{}', -- soglie, limiti, canali
+  last_run_at timestamptz,
+  total_actions integer DEFAULT 0,
+  created_at timestamptz DEFAULT now()
+);
+```
 
-### ✅ Completato — Motivo Principale
-- Colonna `main_reason` aggiunta a `conversations`
-- summary.ts riscritto: genera JSON con `summary` + `main_reason` in una sola chiamata GPT-4o-mini
-- Mostrato nella tabella conversazioni (💡 badge) e nel dettaglio (card evidenziata)
-- Esempi: "Interessato a ristrutturazione bagno", "Non interessato: ha già un fornitore"
+### Nuova colonna su contacts
+```sql
+ALTER TABLE contacts ADD COLUMN ai_actions_log jsonb DEFAULT '[]';
+```
 
-### P3 — Avanzato / successivo
-- Personalizzazione regole Smart Actions per admin
-- Report settimanale automatico via email al titolare
-- Trend predittivo su tasso conversione
-- Integrazione Stripe per pagamenti reali
+### Edge Functions da creare/modificare
+1. **Creare**: `auto-followup-agent` — cron per follow-up autonomo
+2. **Estendere**: `ai-morning-briefing` — aggiungere actions cliccabili + trend
+3. **Estendere**: `post-call-actions.ts` — azioni specifiche per outcome
+4. **Estendere**: `run-campaign-batch` — auto-pilot logic
+5. **Creare**: `recalculate-lead-weights` — lead score dinamico
+
+### UI da modificare
+1. **Dashboard.tsx**: Card "Agenti Autonomi" con stato on/off e contatore azioni
+2. **Dashboard.tsx**: Briefing con bottoni azione cliccabili
+3. **Dashboard.tsx**: KPI crediti con proiezione giorni rimanenti
+4. **ContactDetailPanel**: Timeline azioni AI automatiche
+5. **Settings.tsx** o nuova pagina: Toggle per abilitare/disabilitare ogni agente autonomo
+
+---
+
+## FASE 7-8 — Classifica e Valore Commerciale
+
+### AGENTI CORE
+1. **Recupero Lead Dormienti** — il più vendibile, ROI immediato
+2. **Gestore Pipeline** — elimina il lavoro manuale post-chiamata
+3. **Campagne Auto-Pilota** — scalabilità vendite senza supervisione
+
+### AGENTI DI SUPPORTO
+4. **Consulente Mattutino** — differenziante forte, percezione "AI vera"
+5. **Sentinella Crediti** — protezione business, previene blocchi
+
+### AGENTI AVANZATI
+6. **Qualificatore Intelligente** — valore a medio termine, richiede storico dati
+
+---
+
+## Priorità di Implementazione
+
+| Ordine | Agente | Effort | Impatto |
+|---|---|---|---|
+| 1 | Sentinella Crediti (burn rate) | Basso (solo UI) | Alto — previene blocchi |
+| 2 | Briefing con azioni cliccabili | Medio | Alto — percezione AI |
+| 3 | Pipeline Manager evoluto | Medio | Alto — elimina lavoro manuale |
+| 4 | Recupero Lead Dormienti | Alto | Molto alto — recupera vendite |
+| 5 | Campagne Auto-Pilota | Medio | Alto — scalabilità |
+| 6 | Lead Score Dinamico | Alto | Medio — richiede storico |
+
+Implementerò nell'ordine 1→4 in questa sessione, partendo dalla Sentinella Crediti e dal Briefing potenziato, poi il Pipeline Manager evoluto, e infine l'Agente Follow-up Autonomo con la tabella `agent_automations`.
+
