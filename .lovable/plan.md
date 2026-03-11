@@ -183,8 +183,13 @@
 ## 🔜 Prossimi Step
 
 ### P2 — Importante dopo
-- Motivo principale (estrarre dal transcript motivo interesse/rifiuto)
 - Campagne outbound end-to-end (schedulazione batch, retry automatico)
+
+### ✅ Completato — Motivo Principale
+- Colonna `main_reason` aggiunta a `conversations`
+- summary.ts riscritto: genera JSON con `summary` + `main_reason` in una sola chiamata GPT-4o-mini
+- Mostrato nella tabella conversazioni (💡 badge) e nel dettaglio (card evidenziata)
+- Esempi: "Interessato a ristrutturazione bagno", "Non interessato: ha già un fornitore"
 
 ### P3 — Avanzato / successivo
 - Personalizzazione regole Smart Actions per admin
