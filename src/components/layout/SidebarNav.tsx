@@ -160,7 +160,7 @@ export default function SidebarNav({ onNavigate }: SidebarNavProps) {
 
   const isItemActive = (href: string) =>
     location.pathname === href ||
-    (href !== "/app" && href !== "/superadmin" && location.pathname.startsWith(href));
+    (href !== "/app" && href !== "/superadmin" && location.pathname.startsWith(href + "/"));
 
   const isSectionActive = (section: NavSection) =>
     section.items.some(item => isItemActive(item.href));
