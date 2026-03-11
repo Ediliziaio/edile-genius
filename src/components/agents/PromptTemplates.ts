@@ -8,6 +8,9 @@ export const USE_CASES = [
   { id: "recupero_noshow", label: "Recupero No-Show", icon: "📞", description: "Ricontatta chi ha saltato il sopralluogo" },
   { id: "recensioni", label: "Raccolta Recensioni Google", icon: "⭐", description: "Chiedi feedback post-lavoro e guida alla recensione" },
   { id: "assistente_whatsapp", label: "Assistente WhatsApp Commerciale", icon: "💬", description: "Risponde su WhatsApp con preventivi, orari e info" },
+  { id: "followup_sopralluogo", label: "Follow-up Dopo Sopralluogo", icon: "🔄", description: "Richiama dopo il sopralluogo per accelerare la decisione" },
+  { id: "primo_contatto_wa", label: "Primo Contatto Lead WhatsApp", icon: "👋", description: "Messaggio automatico di benvenuto e qualifica rapida" },
+  { id: "verifica_soddisfazione", label: "Verifica Soddisfazione Post-Lavoro", icon: "✅", description: "Contatta il cliente 1 settimana dopo per prevenire reclami" },
 ] as const;
 
 export type UseCaseId = typeof USE_CASES[number]["id"];
