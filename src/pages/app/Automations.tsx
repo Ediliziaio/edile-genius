@@ -378,7 +378,7 @@ export default function Automations() {
                   {agent.alwaysActive ? (
                     <span className="text-[10px] font-semibold bg-primary/10 text-primary px-2 py-1 rounded-full whitespace-nowrap">Sempre attivo</span>
                   ) : agent.automationType ? (
-                    <Switch checked={isActive} onCheckedChange={(checked) => toggleMutation.mutate({ type: agent.automationType!, enabled: checked })} />
+                    <Switch checked={isActive} disabled={toggleMutation.isPending} onCheckedChange={(checked) => toggleMutation.mutate({ type: agent.automationType!, enabled: checked })} />
                   ) : null}
                 </div>
                 {automation && (
