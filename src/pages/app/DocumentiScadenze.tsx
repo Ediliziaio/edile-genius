@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Plus, FileWarning, Shield, Upload, Trash2, AlertTriangle, CheckCircle } from "lucide-react";
+import { differenceInDays, startOfDay } from "date-fns";
 
 const TIPI_DOC = ["DURC", "Patentino", "Certificato Sicurezza", "Visura Camerale", "Polizza RC", "Patente", "Attestato Formazione", "Altro"];
 
@@ -57,6 +58,9 @@ export default function DocumentiScadenze() {
 
   const createMutation = useMutation({
     mutationFn: async () => {
+      if (formData.data_emissione && formData.data_scadenza && formData.data_scadenza <= formData.data_emissione) {
+        throw new Error("La scadenza deve essere successiva alla data di emissione");
+      }
       const { error } = await (supabase.from("documenti_azienda") as any).insert({
         company_id: companyId,
         ...formData,
@@ -86,16 +90,19 @@ export default function DocumentiScadenze() {
     return d.stato === tab;
   });
 
-  const counts = {
+  const counts = useMemo(() => ({
     tutti: (documenti || []).length,
     valido: (documenti || []).filter((d: any) => d.stato === "valido").length,
     in_scadenza: (documenti || []).filter((d: any) => d.stato === "in_scadenza").length,
     scaduto: (documenti || []).filter((d: any) => d.stato === "scaduto").length,
-  };
+  }), [documenti]);
 
   const getDaysLeft = (date: string) => {
-    const diff = Math.ceil((new Date(date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-    return diff;
+    try {
+      return differenceInDays(new Date(date), startOfDay(new Date()));
+    } catch {
+      return 0;
+    }
   };
 
   return (
@@ -204,7 +211,7 @@ export default function DocumentiScadenze() {
                         <Badge className={sb.class}>{doc.stato}</Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {doc.cantiere_operai ? `${doc.cantiere_operai.nome} ${doc.cantiere_operai.cognome || ""}` : "Azienda"} · 
+                        {doc.cantiere_operai ? `${doc.cantiere_operai?.nome || ""} ${doc.cantiere_operai?.cognome || ""}`.trim() : "Azienda"} · 
                         Scade: {new Date(doc.data_scadenza).toLocaleDateString("it-IT")}
                         {days > 0 ? ` (${days}gg)` : days === 0 ? " (OGGI)" : ` (${Math.abs(days)}gg fa)`}
                       </p>

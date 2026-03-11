@@ -38,6 +38,7 @@ const companyNav: NavSection[] = [
   ]},
   { header: "VENDITE AVANZATE", collapsible: true, defaultOpen: false, visibilityKey: "preventivi", items: [
     { label: "Preventivi", icon: FileSignature, href: "/app/preventivi" },
+    { label: "Template Preventivo", icon: FileText, href: "/app/impostazioni/template-preventivo" },
   ]},
   { header: "OPERATIVITÀ", collapsible: true, defaultOpen: false, visibilityKey: "cantieri", items: [
     { label: "Cantieri", icon: HardHat, href: "/app/cantieri" },
@@ -49,6 +50,7 @@ const companyNav: NavSection[] = [
   ]},
   { header: "IMPOSTAZIONI", items: [
     { label: "Crediti", icon: Coins, href: "/app/credits" },
+    { label: "Integrazioni", icon: Puzzle, href: "/app/integrations" },
     { label: "Account", icon: Settings, href: "/app/settings" },
   ]},
 ];
@@ -158,7 +160,7 @@ export default function SidebarNav({ onNavigate }: SidebarNavProps) {
 
   const isItemActive = (href: string) =>
     location.pathname === href ||
-    (href !== "/app" && href !== "/superadmin" && location.pathname.startsWith(href));
+    (href !== "/app" && href !== "/superadmin" && location.pathname.startsWith(href + "/"));
 
   const isSectionActive = (section: NavSection) =>
     section.items.some(item => isItemActive(item.href));
@@ -245,7 +247,7 @@ export default function SidebarNav({ onNavigate }: SidebarNavProps) {
         <div className="mt-auto border-t border-border px-4 py-4 space-y-2">
           <p className="text-[10px] font-mono font-semibold tracking-wide text-muted-foreground uppercase">Saldo Crediti</p>
           <p className={`text-base font-extrabold ${balanceColor}`}>
-            €{creditInfo.balance_eur.toFixed(2)}
+            €{Number(creditInfo?.balance_eur ?? 0).toFixed(2)}
           </p>
           <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
             <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${Math.min(usagePct, 100)}%` }} />

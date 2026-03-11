@@ -1,6 +1,35 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, generateRequestId, log } from "../_shared/utils.ts";
 
+// ── HMAC SHA-256 verification for Meta webhooks ──
+async function verifySignature(
+  rawBody: string,
+  signatureHeader: string | null,
+  appSecret: string
+): Promise<boolean> {
+  if (!signatureHeader || !signatureHeader.startsWith("sha256=")) return false;
+  const expectedSig = signatureHeader.slice(7); // remove "sha256=" prefix
+
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(appSecret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(rawBody));
+  const computedHex = Array.from(new Uint8Array(sig))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  // Timing-safe comparison
+  if (computedHex.length !== expectedSig.length) return false;
+  const a = encoder.encode(computedHex);
+  const b = encoder.encode(expectedSig);
+  return crypto.subtle.timingSafeEqual(a, b);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   const rid = generateRequestId();
@@ -29,7 +58,23 @@ Deno.serve(async (req) => {
 
     // POST — Process Meta webhook events
     if (req.method === "POST") {
-      const payload = await req.json();
+      // Read raw body for signature verification
+      const rawBody = await req.text();
+
+      // Verify X-Hub-Signature-256
+      const appSecret = Deno.env.get("WHATSAPP_APP_SECRET");
+      if (appSecret) {
+        const sigHeader = req.headers.get("x-hub-signature-256");
+        const valid = await verifySignature(rawBody, sigHeader, appSecret);
+        if (!valid) {
+          log("warn", "HMAC signature verification failed", { request_id: rid, fn: FN });
+          return new Response("Forbidden", { status: 403, headers: corsHeaders });
+        }
+      } else {
+        log("warn", "WHATSAPP_APP_SECRET not set — skipping signature verification", { request_id: rid, fn: FN });
+      }
+
+      const payload = JSON.parse(rawBody);
       let messagesProcessed = 0;
       let statusesProcessed = 0;
 

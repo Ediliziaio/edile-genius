@@ -1,7 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useCompanyId } from "@/hooks/useCompanyId";
 import { useQuery } from "@tanstack/react-query";
-import { SMART_ACTIONS_DEFAULTS } from "./Automations";
+import { SMART_ACTIONS_DEFAULTS } from "@/lib/automation-defaults";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import {
@@ -276,17 +276,19 @@ export default function AppDashboard() {
 
   // ── Sentinella Crediti: Burn Rate ──
   const burnRateDaily = (() => {
-    if (!creditUsageHistory || creditUsageHistory.length === 0) return 0;
+    if (!creditUsageHistory || creditUsageHistory.length < 2) return 0;
     const totalUsage = creditUsageHistory.reduce((sum, u) => sum + Number(u.cost_billed_total || 0), 0);
+    if (totalUsage <= 0) return 0;
     // Calculate actual days spanned
     const dates = creditUsageHistory.map(u => new Date(u.created_at!).getTime());
     const minDate = Math.min(...dates);
     const maxDate = Math.max(...dates);
-    const daySpan = Math.max(1, (maxDate - minDate) / (24 * 60 * 60 * 1000));
+    const daySpan = (maxDate - minDate) / (24 * 60 * 60 * 1000);
+    if (daySpan <= 0) return 0;
     return totalUsage / daySpan;
   })();
 
-  const daysRemaining = burnRateDaily > 0 ? Math.floor(balanceEur / burnRateDaily) : null;
+  const daysRemaining = burnRateDaily > 0 ? Math.min(999, Math.floor(balanceEur / burnRateDaily)) : null;
 
   // ── Smart Actions Engine (using configurable thresholds from company settings) ──
   const smartActions: { type: "warning" | "danger" | "info"; label: string; description: string; href: string; icon: React.ElementType }[] = [];

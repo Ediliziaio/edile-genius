@@ -111,7 +111,12 @@ export default function NuovoPreventivo() {
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setAudioBlob(file);
+    if (!file) return;
+    if (!file.type.startsWith('audio/')) {
+      toast.error('File non valido: seleziona un file audio');
+      return;
+    }
+    setAudioBlob(file);
   };
 
   // Photo handling
@@ -215,19 +220,23 @@ export default function NuovoPreventivo() {
   const removeVoce = (i: number) => setVoci(voci.filter((_, idx) => idx !== i));
 
   // Save updated voci
+  // Computed totals (with proper rounding for monetary precision)
+  const subtotaleBruto = Number(voci.reduce((s, v) => s + v.totale, 0).toFixed(2));
+  const scontoGlobaleImporto = Number((subtotaleBruto * (scontoGlobalePerc / 100)).toFixed(2));
+  const subtotale = Number((subtotaleBruto - scontoGlobaleImporto).toFixed(2));
+  const ivaPercentuale = templateConfig?.iva_percentuale_default || 22;
+  const ivaImporto = Number((subtotale * (ivaPercentuale / 100)).toFixed(2));
+  const totaleFinale = Number((subtotale + ivaImporto).toFixed(2));
+
   const saveVoci = async () => {
     if (!preventivoId) return;
-    const subtotale = voci.reduce((s, v) => s + v.totale, 0);
-    const ivaPerc = 22;
-    const imponibile = subtotale;
-    const ivaImporto = imponibile * (ivaPerc / 100);
-    const totaleFinale = imponibile + ivaImporto;
 
     const { error } = await (supabase.from("preventivi") as any)
       .update({
         voci,
-        subtotale: imponibile,
-        imponibile,
+        subtotale,
+        imponibile: subtotale,
+        iva_percentuale: ivaPercentuale,
         iva_importo: ivaImporto,
         totale: totaleFinale,
         totale_finale: totaleFinale,
@@ -248,13 +257,6 @@ export default function NuovoPreventivo() {
       navigate(`/app/preventivi/${preventivoId}`);
     }
   };
-
-  // Computed totals
-  const subtotaleBruto = voci.reduce((s, v) => s + v.totale, 0);
-  const scontoGlobaleImporto = subtotaleBruto * (scontoGlobalePerc / 100);
-  const subtotale = subtotaleBruto - scontoGlobaleImporto;
-  const ivaImporto = subtotale * 0.22;
-  const totaleFinale = subtotale + ivaImporto;
 
   // Group voci for display
   const categories = [...new Set(voci.map(v => v.categoria || "Generale"))];
@@ -297,7 +299,7 @@ export default function NuovoPreventivo() {
     sconto_globale_percentuale: scontoGlobalePerc,
     sconto_globale_importo: scontoGlobaleImporto,
     imponibile: subtotale,
-    iva_percentuale: 22,
+    iva_percentuale: ivaPercentuale,
     luogo_lavori: luogoLavori,
     iva_importo: ivaImporto,
     totale_finale: totaleFinale,
@@ -622,7 +624,7 @@ export default function NuovoPreventivo() {
                   <span className="w-24">€{subtotale.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-end gap-8 text-sm">
-                  <span className="text-muted-foreground">IVA (22%)</span>
+                  <span className="text-muted-foreground">IVA ({ivaPercentuale}%)</span>
                   <span className="w-24">€{ivaImporto.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-end gap-8 text-lg font-bold border-t pt-2">

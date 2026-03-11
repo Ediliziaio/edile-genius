@@ -1,145 +1,203 @@
 
+# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro + AI Avanzata
 
-# Piano di Fix Completo — Edile Genius
+## ✅ Completato in questo blocco
 
-Questo piano copre tutti gli 11 prompt di fix richiesti, organizzati in 4 batch per priorità. Data la dimensione (100+ fix individuali), ogni batch sarà implementato separatamente.
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
----
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
-## Batch 1 — Fix Critici (Crash + Sicurezza)
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-### 1.1 Fix Preventivi — Crash `scontoGlobaleImporto` (Prompt 2)
-**`src/pages/app/NuovoPreventivo.tsx`**
-- Aggiungere variabile derivata mancante: `const scontoGlobaleImporto = Number((subtotale * scontoGlobalePerc / 100).toFixed(2))` prima di `saveVoci`
-- Usare `Number(...toFixed(2))` in tutti i calcoli monetari
-- Leggere IVA da `templateConfig?.iva_percentuale_default || 22` invece di hardcodare 22%
-- Validare MIME type audio (`file.type.startsWith('audio/')`)
-- Revocare vecchi `URL.createObjectURL` prima di crearne nuovi
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
-**`src/pages/app/PreventivoDetail.tsx`**
-- Usare `.maybeSingle()` con redirect se null
-- Spostare normalizzazione voci in `useMemo`
-- Aggiungere bottone "Rinvia" per stato "inviato"
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
-### 1.2 Fix Navigazione — Route 404 (Prompt 10)
-**`src/components/layout/SidebarNav.tsx`**
-- Il path `/app/automations` è già corretto (verificato nel codice). Nessun mismatch
-- Fix `isItemActive`: cambiare da `startsWith(href)` a match esatto + `startsWith(href + '/')`
-- Fix `creditInfo.balance_eur.toFixed(2)` → `Number(creditInfo?.balance_eur ?? 0).toFixed(2)`
-- Aggiungere voce "Integrazioni" nella sezione IMPOSTAZIONI
-- Aggiungere voce "Template Preventivo" nella sezione VENDITE AVANZATE
+## ✅ Blocco 3-5 — Agent Templates System
 
-### 1.3 Fix Edge Functions — Sicurezza Webhook (Prompt 11)
-**`supabase/functions/whatsapp-webhook/index.ts`**
-- Aggiungere verifica `X-Hub-Signature-256` con HMAC SHA-256 e timing-safe comparison
+### Database
+- agent_templates + agent_template_instances + agent_reports + company_channels
+- RLS policies PERMISSIVE (fix da RESTRICTIVE)
+- Funzione DB `increment_installs_count(tpl_id UUID)`
+- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
 
-**`supabase/functions/ai-orchestrator/index.ts`**
-- Guard divisione per zero nel burn rate
+### Edge Functions (CORS headers completi)
+- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
+- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
+- save-report: salva report in DB + aggiorna contatori istanza
 
-**`src/pages/app/Dashboard.tsx`**
-- Guard `daySpan > 0` nel burn rate (già presente ma rafforzare)
-- Guard `daysRemaining` contro `NaN`/`Infinity`
+### Frontend — Wizard 5 Step (TemplateSetup.tsx)
+- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
+- Step 2 Operai: lista card + importa CSV con template scaricabile
+- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
+- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
 
-### 1.4 Fix Documenti — Crash null reference (Prompt 4)
-**`src/pages/app/DocumentiScadenze.tsx`**
-- Optional chaining su `doc.cantiere_operai?.nome`
-- Validazione `data_scadenza > data_emissione` nel form
-- Usare `differenceInDays` da date-fns per `getDaysLeft`
-- Usare `useMemo` per i contatori
+### SuperAdmin
+- /superadmin/templates: CRUD completo con JSON editor per config_schema
 
----
+## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
 
-## Batch 2 — Fix Alta Priorità (UX Rotta)
+### Database (5 tabelle)
+- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
+- RLS PERMISSIVE per tutte le tabelle
+- Trigger set_updated_at + init_render_credits su companies
+- Funzione deduct_render_credit
+- Storage buckets: render-originals (privato), render-results (pubblico)
 
-### 2.1 Fix Cantieri (Prompt 1)
-**`src/pages/app/Cantieri.tsx`**
-- Calcolo reale `report_count` con una singola query aggregata (eliminare N+1)
-- Error handling con toast sulla fetch
-- Skeleton loading
-- Validazione email e date nel form di creazione
+### Edge Functions
+- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
+- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
 
-**`src/pages/app/CantiereDetail.tsx`**
-- Optional chaining su `ruolo?.toLowerCase()`
-- Aggiungere `id` all'array di dipendenze dell'useEffect per `dateFilter`
-- Badge colorati per stato operaio
+### Frontend
+- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
+- RenderConfig (/superadmin/render-config)
+- BeforeAfterSlider, promptBuilder.ts
 
-**`src/components/cantieri/ReportDetailModal.tsx`**
-- Try-catch su `new Date(r.email_inviata_at)`
-- Lightbox foto con navigazione prev/next
+## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
 
-### 2.2 Fix Dashboard + Automations (Prompt 5)
-**Centralizzare `SMART_ACTIONS_DEFAULTS`**
-- Creare `src/lib/automation-defaults.ts` con export della costante
-- Importare da lì in entrambi Dashboard e Automations
+### Database
+- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
+- Estensione `preventivi` con +26 colonne
+- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
+- Storage buckets: preventivi-media (privato), template-assets (pubblico)
+- RLS company-scoped + superadmin
 
-**`src/pages/app/Dashboard.tsx`**
-- Guard `if (!res.ok) throw new Error(...)` sulla risposta briefing
-- Bottone "Riprova" se briefing fallisce
-- Link navigabili dalle azioni del briefing
+### Edge Functions
+- `process-preventivo-audio` RISCRITTO
 
-**`src/pages/app/Automations.tsx`**
-- Disabilitare toggle durante salvataggio
-- Paginazione log (limit 50 + "Carica altri")
+### PDF Client-side (@react-pdf/renderer)
+- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4
 
----
+### Frontend
+- NuovoPreventivo.tsx, PreventivoDetail.tsx, PreventiviList.tsx, TemplatePreventivo.tsx
 
-## Batch 3 — Fix Media Priorità
+## ✅ Blocco 8 — AI Avanzata P1 (Smart Actions + Lead Score + Timeline)
 
-### 3.1 Fix Template PDF (Prompt 3)
-- `createStyles` fuori dal componente o in `useMemo`
-- Validazione tipo file per upload logo
-- Watermark "BOZZA" nel PDF
+### Smart Actions Engine (Dashboard)
+- Espanso da 3 regole hardcoded a 10+ regole basate su dati reali:
+  - Crediti in esaurimento (danger)
+  - Agenti in bozza (warning)
+  - Agenti senza numero telefono (warning)
+  - Agenti inattivi >7 giorni (info)
+  - Contatti da richiamare con next_call_at scaduto (warning)
+  - Preventivi in bozza da >7 giorni (warning)
+  - Preventivi inviati senza risposta da >10 giorni (warning)
+  - Documenti in scadenza entro 15 giorni (warning)
+  - Campagne con tasso appuntamenti <5% (info)
+- Query Supabase dedicate per ogni regola
+- Stato "Tutto in ordine" quando nessuna azione è necessaria
+- Mostra summary delle conversazioni recenti nella tabella attività
 
-### 3.2 Fix Agenti (Prompt 6)
-- Toggle outbound con stato `saving`
-- Validazione formato E.164 per numeri telefono
-- Filtro `status = 'active'` nelle query agenti
+### Lead Score Automatico
+- `src/lib/lead-score.ts`: motore di scoring 0-100 senza LLM
+  - +30 outcome qualified/appointment
+  - +20 sentiment positivo
+  - +15 preventivo associato
+  - +10 contatto completo (tel+email)
+  - +10 callback attempts
+  - +5 fonte inbound
+  - -10 inattivo >30 giorni
+  - -20 not_interested
+  - -30 do_not_call/invalid
+- `src/components/contacts/LeadScoreBadge.tsx`: badge con tooltip fattori
+  - Compact mode per tabella (emoji + score numerico)
+  - Full mode per scheda contatto (con lista fattori)
+  - Colori: 🔴 Caldo (>60), 🟠 Tiepido (30-60), 🔵 Freddo (<30)
+- Badge integrato nella tabella contatti (nuova colonna "Score")
+- Badge integrato nell'header della scheda contatto
 
-### 3.3 Fix Campagne + Contatti (Prompt 7)
-- Guard divisione per zero nella progress bar campagna
-- Limit + paginazione per contatti
-- CSV escape virgolette
+### Timeline Unificata del Contatto
+- `ContactDetailPanel.tsx` completamente refactorato:
+  - Tab "Timeline" come default (al posto di "Info")
+  - Cronologia verticale con linea e pallini colorati per tipo:
+    - 🔵 Conversazioni (con summary, outcome, sentiment, durata)
+    - 🟡 Note manuali
+    - 🟢 Preventivi collegati (stato, importo, numero)
+    - ⚪ Eventi (contatto creato)
+  - Query preventivi per nome/telefono contatto
+  - Lead Score full display nell'header della scheda
 
-### 3.4 Fix Analytics (Prompt 8)
-- Aggiungere `.limit(1000)` alla query
-- Guard `topOutcome` undefined
-- Filtro per agente
+## ✅ Blocco 8 — P1-C: Call Summary Automatico
 
-### 3.5 Fix Foglio Presenze (Prompt 4 - parte 2)
-- Range anni dinamico
-- Commento esplicativo per calcolo giorni mese
+### Backend
+- `supabase/functions/elevenlabs-webhook/summary.ts`: modulo separato per generazione summary
+  - Chiama OpenAI gpt-4o-mini con prompt minimale in italiano
+  - Non-blocking: se OPENAI_API_KEY non è configurata, salta silenziosamente
+  - Cap transcript a 6000 chars per contenere i costi (~$0.001/call)
+- `elevenlabs-webhook/index.ts`: importa e chiama `generateCallSummary()` dopo step 7
+  - Popola `conversations.summary` solo se la generazione ha successo
 
----
+### Frontend (già predisposto)
+- Dashboard "Attività recente": mostra `c.summary` sotto il nome agente
+- Conversazioni: mostra summary nella tabella e nel dialog dettaglio
+- Timeline contatto: mostra summary nelle conversazioni
 
-## Batch 4 — Fix Bassa Priorità
+### Requisito SuperAdmin
+- Aggiungere OPENAI_API_KEY come Supabase Secret (da configurare via SuperAdmin)
 
-### 4.1 Fix Settings + Integrations (Prompt 9)
-- `useCallback` per `loadCrmIntegrations`
-- Limit su query `webhook_logs`
-- Fix href vuoti nelle integrazioni
-- Tab Billing funzionante
+## ✅ Blocco 9 — Audit Finale & Hardening
 
-### 4.2 Migration DB (Prompt 11 - parte 2)
-- Indice su `campaign_contacts(campaign_id, status)`
-- Fix `topup_credits` per gestire `blocked_reason = 'low_balance'`
+### Sicurezza Edge Functions
+- Validazione JWT (getClaims) aggiunta a: generate-render, crm-sync, deploy-template-instance, process-preventivo-audio, generate-preventivo-pdf
+- Verifica tenant (company_id cross-check) aggiunta a tutte le funzioni interne
+- Funzioni webhook esterne (elevenlabs-webhook, whatsapp-webhook, telegram-cantiere-webhook) lasciate senza JWT (corretto)
 
----
+### Atomicità Crediti
+- Creata RPC `topup_credits(_company_id, _amount_eur)` con UPDATE atomico
+- topup-credits edge function refactorato per usare RPC
 
-## Ordine di implementazione
+### UX — Progressive Disclosure Sidebar
+- Sezioni OPERATIVITÀ e STRUMENTI AI visibili solo se il settore è rilevante o se esistono dati
+- Campi vuoti nelle conversazioni nascosti (eval_score, minutes_billed, cost_billed_eur)
 
-Data la dimensione, implementerò un batch alla volta. **Batch 1** contiene tutti i fix che causano crash runtime o vulnerabilità di sicurezza — è la priorità assoluta.
+### UX — Dead-End Fix
+- Card CRM e Webhooks in Integrazioni: badge "Prossimamente" + bottoni disabilitati
 
-**File principali modificati per Batch 1:**
-| File | Modifiche |
-|---|---|
-| `src/pages/app/NuovoPreventivo.tsx` | Fix calcolo totali, IVA, validazioni |
-| `src/pages/app/PreventivoDetail.tsx` | maybeSingle, useMemo, rinvio |
-| `src/pages/app/DocumentiScadenze.tsx` | Optional chaining, validazione, useMemo |
-| `src/pages/app/Dashboard.tsx` | Guard NaN, retry briefing, import centralizzato |
-| `src/components/layout/SidebarNav.tsx` | Fix active match, null guard, voci mancanti |
-| `src/lib/automation-defaults.ts` | Nuovo file — costanti centralizzate |
-| `supabase/functions/whatsapp-webhook/index.ts` | Verifica HMAC |
-| `supabase/functions/ai-orchestrator/index.ts` | Guard divisione zero |
+### Signup Self-Service
+- Pagina /signup con form registrazione
+- Edge function self-service-signup: crea company (trial 14gg) + profilo + ruolo company_admin
 
-Procederò con il **Batch 1** (fix critici) appena approvato.
+### AI Avanzata P2
+- Follow-up Generator: edge function generate-followup (GPT-4o-mini) + bottone in ContactDetailPanel
+- Opportunity Recovery: Smart Actions per lead qualificati dormenti >5 giorni
+- Campi conversazione vuoti nascosti per UX più pulita
 
+## 🔜 Prossimi Step
+
+### ✅ Completato — Campagne Outbound E2E
+- Tabella `campaign_contacts` per tracking stato per-contatto (pending/calling/retry/completed/failed)
+- Edge function `run-campaign-batch`: populate contatti da lista + esecuzione batch con chiamate EL outbound
+- Retry automatico con delay configurabile e max tentativi
+- Bottone "Avvia" popola + lancia primo batch
+- Bottone "Lancia batch" per batch successivi su campagne attive
+- Aggiornamento stats campagna in tempo reale
+
+### ✅ Completato — Motivo Principale
+- Colonna `main_reason` aggiunta a `conversations`
+- summary.ts riscritto: genera JSON con `summary` + `main_reason` in una sola chiamata GPT-4o-mini
+- Mostrato nella tabella conversazioni (💡 badge) e nel dettaglio (card evidenziata)
+- Esempi: "Interessato a ristrutturazione bagno", "Non interessato: ha già un fornitore"
+
+### P3 — Avanzato / successivo
+- Personalizzazione regole Smart Actions per admin
+- Report settimanale automatico via email al titolare
+- Trend predittivo su tasso conversione
+- Integrazione Stripe per pagamenti reali
