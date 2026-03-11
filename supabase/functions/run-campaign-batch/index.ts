@@ -244,11 +244,79 @@ Deno.serve(async (req) => {
         .eq("campaign_id", campaign_id)
         .not("status", "eq", "pending");
 
+      const { count: reachedCount } = await sb.from("campaign_contacts")
+        .select("id", { count: "exact", head: true })
+        .eq("campaign_id", campaign_id)
+        .in("status", ["completed", "calling"]);
+
+      const { count: appointmentsCount } = await sb.from("campaign_contacts")
+        .select("id", { count: "exact", head: true })
+        .eq("campaign_id", campaign_id)
+        .eq("outcome", "appointment");
+
       await sb.from("campaigns").update({
         contacts_called: called || 0,
+        contacts_reached: reachedCount || 0,
+        appointments_set: appointmentsCount || 0,
         status: "active",
         updated_at: new Date().toISOString(),
       }).eq("id", campaign_id);
+
+      // ── AUTO-PILOT: check conversion rate and auto-pause if needed ──
+      if (campaign.auto_pilot) {
+        const totalReached = reachedCount || 0;
+        const totalAppts = appointmentsCount || 0;
+
+        // Get autopilot config from agent_automations or use defaults
+        const minSampleSize = 30;
+        const minConversionRate = 0.03; // 3%
+
+        if (totalReached >= minSampleSize) {
+          const conversionRate = totalReached > 0 ? totalAppts / totalReached : 0;
+          if (conversionRate < minConversionRate) {
+            await sb.from("campaigns").update({
+              status: "paused",
+              updated_at: new Date().toISOString(),
+            }).eq("id", campaign_id);
+
+            log("warn", "Auto-pilot: campaign paused due to low conversion", {
+              request_id: rid,
+              campaign_id,
+              conversion_rate: conversionRate,
+              reached: totalReached,
+              appointments: totalAppts,
+            });
+
+            return jsonOk({
+              calls_initiated: callsInitiated,
+              batch_size: batch.length,
+              auto_pilot_paused: true,
+              conversion_rate: Number((conversionRate * 100).toFixed(1)),
+              reason: `Tasso conversione ${(conversionRate * 100).toFixed(1)}% sotto la soglia del 3% dopo ${totalReached} contatti raggiunti.`,
+            }, rid);
+          }
+        }
+
+        // Auto-complete if no more pending contacts
+        const { count: pendingCount } = await sb.from("campaign_contacts")
+          .select("id", { count: "exact", head: true })
+          .eq("campaign_id", campaign_id)
+          .in("status", ["pending", "retry"]);
+
+        if (!pendingCount || pendingCount === 0) {
+          await sb.from("campaigns").update({
+            status: "completed",
+            completed_at: new Date().toISOString(),
+          }).eq("id", campaign_id);
+
+          log("info", "Auto-pilot: campaign auto-completed", { request_id: rid, campaign_id });
+          return jsonOk({
+            calls_initiated: callsInitiated,
+            batch_size: batch.length,
+            campaign_completed: true,
+          }, rid);
+        }
+      }
 
       log("info", "Campaign batch executed", { request_id: rid, campaign_id, calls_initiated: callsInitiated });
       return jsonOk({ calls_initiated: callsInitiated, batch_size: batch.length }, rid);

@@ -407,6 +407,18 @@ export default function AppDashboard() {
     });
   }
 
+  // Auto-pilot paused campaigns
+  const pausedCampaigns = staleCampaigns?.filter(c => c.status === "paused") || [];
+  if (pausedCampaigns.length > 0) {
+    smartActions.push({
+      type: "danger",
+      label: `Campagna "${pausedCampaigns[0].name}" in pausa automatica`,
+      description: "L'Auto-Pilota ha fermato la campagna per basso rendimento. Rivedi il prompt o cambia target.",
+      href: `/app/campaigns/${pausedCampaigns[0].id}`,
+      icon: Megaphone,
+    });
+  }
+
   // Dormant qualified leads — opportunity recovery
   if (dormantLeads && dormantLeads.length > 0) {
     const lead = dormantLeads[0];
