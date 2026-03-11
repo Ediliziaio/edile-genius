@@ -200,7 +200,7 @@ export default function AppDashboard() {
       </div>
 
       {/* ═══ ZONA B — 4 KPI Cards (only when has agents) ═══ */}
-      {hasAgents && (
+      {(
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Agenti Attivi */}
           <KpiCard
