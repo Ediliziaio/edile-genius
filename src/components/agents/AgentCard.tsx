@@ -1,13 +1,28 @@
-import { Phone, MoreVertical, Activity, Paintbrush, MessageSquare } from "lucide-react";
+import { Phone, Activity, Paintbrush, MessageSquare, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
 import { computeAgentScore } from "@/lib/agent-score";
-import AgentScoreBadge from "@/components/agents/AgentScoreBadge";
 
 interface AgentCardProps {
   agent: Tables<"agents">;
   onClick?: () => void;
+}
+
+/* ── Status config ────────────────────────────── */
+
+function getStatusConfig(status: string | null, hasBlockers: boolean) {
+  if (hasBlockers && status !== "active") {
+    return { label: "Da completare", cls: "bg-status-warning-light text-status-warning" };
+  }
+  switch (status) {
+    case "active":
+      return { label: "Attivo", cls: "bg-status-success-light text-status-success" };
+    case "inactive":
+      return { label: "Inattivo", cls: "bg-destructive/10 text-destructive" };
+    default:
+      return { label: "Bozza", cls: "bg-muted text-muted-foreground" };
+  }
 }
 
 /* ── Type visual config ────────────────────────────── */
@@ -15,35 +30,21 @@ interface AgentCardProps {
 function getTypeConfig(type: string | null) {
   switch (type) {
     case "render":
-      return {
-        stripe: "bg-settore-ristr",
-        badge: "🎨 RENDER",
-        badgeCls: "bg-settore-ristr-bg text-settore-ristr",
-      };
+      return { stripe: "bg-settore-ristr", label: "Render", icon: "🎨" };
     case "whatsapp":
-      return {
-        stripe: "bg-[hsl(142,70%,49%)]",
-        badge: "💬 WHATSAPP",
-        badgeCls: "bg-[hsl(142,60%,94%)] text-[hsl(142,70%,30%)]",
-      };
+      return { stripe: "bg-[hsl(142,70%,49%)]", label: "WhatsApp", icon: "💬" };
     case "operative":
-      return {
-        stripe: "bg-accent-blue",
-        badge: "⚙️ OPERATIVO",
-        badgeCls: "bg-status-info-light text-accent-blue",
-      };
-    default: // vocal
-      return {
-        stripe: "bg-brand",
-        badge: "🎙️ VOCALE",
-        badgeCls: "bg-brand-light text-brand-text",
-      };
+      return { stripe: "bg-accent-blue", label: "Operativo", icon: "⚙️" };
+    default:
+      return { stripe: "bg-brand", label: "Vocale", icon: "🎙️" };
   }
 }
 
 export default function AgentCard({ agent, onClick }: AgentCardProps) {
-  const isActive = agent.status === "active";
   const typeConfig = getTypeConfig(agent.type);
+  const scoreResult = computeAgentScore(agent);
+  const statusConfig = getStatusConfig(agent.status, scoreResult.hasBlockers);
+  const hasActivity = (agent.calls_total ?? 0) > 0;
 
   return (
     <Link
@@ -57,51 +58,62 @@ export default function AgentCard({ agent, onClick }: AgentCardProps) {
 
         {/* Content */}
         <div className="flex-1 px-5 py-4">
-          <div className="flex items-start justify-between mb-3">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                {/* Status dot */}
-                <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-                  isActive ? "bg-status-success animate-pulse" : agent.status === "draft" ? "bg-ink-300" : "bg-destructive"
-                }`} />
-                {/* Type badge */}
-                <Badge className={`text-[9px] font-mono uppercase px-2 py-0.5 border-none ${typeConfig.badgeCls}`}>
-                  {typeConfig.badge}
-                </Badge>
-                {/* Name */}
-                <h3 className="text-[15px] font-bold text-foreground">{agent.name}</h3>
-              </div>
-
-              {/* Template origin */}
-              {agent.use_case && (
-                <p className="text-[11px] text-muted-foreground font-mono ml-5">
-                  Da: {agent.use_case}
-                </p>
-              )}
+          {/* Row 1: Type + Name + Status pill */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-base shrink-0">{typeConfig.icon}</span>
+              <h3 className="text-[15px] font-bold text-foreground truncate">{agent.name}</h3>
             </div>
-            <MoreVertical className="w-4 h-4 text-ink-300 shrink-0" />
+            <Badge className={`text-[10px] font-semibold px-2.5 py-0.5 border-none shrink-0 ml-2 ${statusConfig.cls}`}>
+              {statusConfig.label}
+            </Badge>
           </div>
 
-          {agent.description && (
+          {/* Row 2: Description or type label */}
+          {agent.description ? (
             <p className="text-xs mb-3 line-clamp-2 text-muted-foreground">{agent.description}</p>
+          ) : (
+            <p className="text-xs mb-3 text-muted-foreground">Agente {typeConfig.label}</p>
           )}
 
-          {/* Contextual metrics per type + score */}
+          {/* Row 3: Metrics + Score text */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              {(agent.type === "render") ? (
-                <span className="flex items-center gap-1"><Paintbrush className="w-3 h-3" /> {agent.calls_total ?? 0} render</span>
-              ) : (agent.type === "whatsapp") ? (
-                <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" /> {agent.calls_total ?? 0} conversazioni</span>
+            <div className="text-xs text-muted-foreground">
+              {hasActivity ? (
+                <div className="flex items-center gap-4">
+                  {(agent.type === "render") ? (
+                    <span className="flex items-center gap-1"><Paintbrush className="w-3 h-3" /> {agent.calls_total} render</span>
+                  ) : (agent.type === "whatsapp") ? (
+                    <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" /> {agent.calls_total} conversazioni</span>
+                  ) : (
+                    <>
+                      <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {agent.calls_total} chiamate</span>
+                      {((agent as any).calls_month ?? 0) > 0 && (
+                        <span className="flex items-center gap-1"><Activity className="w-3 h-3" /> {(agent as any).calls_month}/mese</span>
+                      )}
+                    </>
+                  )}
+                </div>
               ) : (
-                <>
-                  <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {agent.calls_total ?? 0} chiamate</span>
-                  <span className="flex items-center gap-1"><Activity className="w-3 h-3" /> {(agent as any).calls_month ?? 0}/mese</span>
-                </>
+                <span className="text-muted-foreground/60">Nessuna attività</span>
               )}
             </div>
-            <AgentScoreBadge result={computeAgentScore(agent)} />
+
+            {/* Score as readable text */}
+            <span className={`text-[11px] font-semibold ${scoreResult.colorClass}`}>
+              {scoreResult.label}
+            </span>
           </div>
+
+          {/* Blocker banner */}
+          {scoreResult.hasBlockers && agent.status !== "active" && (
+            <div className="mt-3 -mx-5 -mb-4 px-5 py-2 bg-status-warning-light/50 border-t border-status-warning/20 flex items-center gap-1.5">
+              <AlertTriangle className="w-3 h-3 text-status-warning shrink-0" />
+              <span className="text-[11px] text-status-warning font-medium">
+                Configurazione incompleta — {scoreResult.blockers.length} passagg{scoreResult.blockers.length === 1 ? "io obbligatorio" : "i obbligatori"}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </Link>

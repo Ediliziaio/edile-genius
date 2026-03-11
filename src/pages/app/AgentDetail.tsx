@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useCallback, useEffect } from "react";
-import { ArrowLeft, Save, Loader2, Power, Phone, Clock, Bot, Mic, MessageSquare, BarChart3, BookOpen, Settings2, Plug, PhoneCall, PhoneOutgoing } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Power, Phone, Clock, Bot, Mic, MessageSquare, BarChart3, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import VoicePickerEnhanced from "@/components/agents/VoicePickerEnhanced";
 import VoiceTestPanel from "@/components/agents/VoiceTestPanel";
 import TranscriptViewer from "@/components/conversations/TranscriptViewer";
@@ -29,6 +30,8 @@ import { SECTORS, LANGUAGES } from "@/components/agents/PromptTemplates";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { ChevronDown, FileText, Plug, Shield } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 /* ── LLM Models ──────────────────────────────────── */
@@ -46,27 +49,23 @@ const LLM_MODELS = [
 interface TabDef { id: string; label: string; icon: React.ElementType; }
 
 const TABS_VOCAL: TabDef[] = [
-  { id: "agente", label: "Agente", icon: Bot },
-  { id: "voce", label: "Voce & Test", icon: Mic },
+  { id: "panoramica", label: "Panoramica", icon: Bot },
+  { id: "prompt-voce", label: "Prompt e Voce", icon: Mic },
   { id: "conversazioni", label: "Conversazioni", icon: MessageSquare },
-  { id: "outbound", label: "Chiamate Uscenti", icon: PhoneOutgoing },
-  { id: "analytics", label: "Analytics", icon: BarChart3 },
-  { id: "knowledge", label: "Knowledge Base", icon: BookOpen },
-  { id: "integrazioni", label: "Integrazioni", icon: Plug },
-  { id: "telefono", label: "Telefono", icon: PhoneCall },
-  { id: "avanzate", label: "Avanzate", icon: Settings2 },
+  { id: "risultati", label: "Risultati", icon: BarChart3 },
+  { id: "impostazioni", label: "Impostazioni", icon: Settings2 },
 ];
 
 const TABS_RENDER: TabDef[] = [
-  { id: "agente", label: "Agente", icon: Bot },
-  { id: "analytics", label: "Analytics", icon: BarChart3 },
+  { id: "panoramica", label: "Panoramica", icon: Bot },
+  { id: "risultati", label: "Risultati", icon: BarChart3 },
 ];
 
 const TABS_WHATSAPP: TabDef[] = [
-  { id: "agente", label: "Agente", icon: Bot },
+  { id: "panoramica", label: "Panoramica", icon: Bot },
+  { id: "prompt-voce", label: "Prompt e Voce", icon: Mic },
   { id: "conversazioni", label: "Conversazioni", icon: MessageSquare },
-  { id: "analytics", label: "Analytics", icon: BarChart3 },
-  { id: "knowledge", label: "Knowledge Base", icon: BookOpen },
+  { id: "risultati", label: "Risultati", icon: BarChart3 },
 ];
 
 const TABS_MAP: Record<string, TabDef[]> = { vocal: TABS_VOCAL, render: TABS_RENDER, whatsapp: TABS_WHATSAPP };
@@ -137,7 +136,6 @@ export default function AgentDetail() {
     queryFn: async () => { const { data, error } = await supabase.from("conversations").select("*").eq("agent_id", id!).order("started_at", { ascending: false }).limit(50); if (error) throw error; return data; },
   });
 
-  // Initialize config from agent data via useEffect (not during render)
   useEffect(() => {
     if (agent && agent.id !== initializedForId) {
       setCfg(buildConfigState(agent));
@@ -186,6 +184,9 @@ export default function AgentDetail() {
   const isActive = agent.status === "active";
   const agentType = agent.type || "vocal";
   const tabs = TABS_MAP[agentType] || TABS_VOCAL;
+  const scoreResult = computeAgentScore(agent);
+
+  const typeLabel = agentType === "vocal" ? "Vocale" : agentType === "whatsapp" ? "WhatsApp" : agentType === "render" ? "Render" : agentType;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -198,15 +199,10 @@ export default function AgentDetail() {
           <div>
             <div className="flex items-center gap-3 mb-1">
               <h1 className="text-2xl font-bold text-foreground">{agent.name}</h1>
-              <Badge className={isActive ? "bg-status-success-light text-status-success border-none" : "bg-ink-100 text-ink-400 border-none"}>
-                {isActive ? "Attivo" : agent.status}
+              <Badge className={isActive ? "bg-status-success-light text-status-success border-none" : "bg-muted text-muted-foreground border-none"}>
+                {isActive ? "Attivo" : agent.status === "inactive" ? "Inattivo" : "Bozza"}
               </Badge>
-              {agent.type && (
-                <Badge variant="outline" className="text-xs">
-                  {agent.type === "vocal" ? "🎙️ Vocale" : agent.type === "whatsapp" ? "💬 WhatsApp" : agent.type === "render" ? "🎨 Render" : agent.type}
-                </Badge>
-              )}
-              <AgentScoreBadge result={computeAgentScore(agent)} size="md" />
+              <Badge variant="outline" className="text-xs">{typeLabel}</Badge>
             </div>
             {agent.description && <p className="text-sm text-muted-foreground">{agent.description}</p>}
           </div>
@@ -225,7 +221,7 @@ export default function AgentDetail() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="agente" className="space-y-6">
+      <Tabs defaultValue="panoramica" className="space-y-6">
         <TabsList className="bg-muted border-none flex-wrap h-auto gap-1 p-1">
           {tabs.map((tab) => (
             <TabsTrigger key={tab.id} value={tab.id} className="gap-1.5 text-xs sm:text-sm">
@@ -235,21 +231,22 @@ export default function AgentDetail() {
           ))}
         </TabsList>
 
-        {/* ═══ TAB: Agente ═══ */}
-        <TabsContent value="agente">
+        {/* ═══ TAB: Panoramica ═══ */}
+        <TabsContent value="panoramica">
           {cfg && (
             <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
+              {/* Main column */}
               <div className="space-y-6">
-                {/* Identity */}
+                {/* Identity card */}
                 <section className="rounded-card p-5 bg-card border border-border shadow-card space-y-4">
-                  <h3 className="text-sm font-semibold text-foreground">Identità</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Il tuo agente</h3>
                   <div className="space-y-2">
-                    <Label>Nome agente</Label>
+                    <Label>Nome</Label>
                     <Input value={cfg.name} onChange={e => update("name", e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Descrizione</Label>
-                    <Textarea value={cfg.description} onChange={e => update("description", e.target.value)} className="min-h-[80px]" />
+                    <Textarea value={cfg.description} onChange={e => update("description", e.target.value)} className="min-h-[60px]" placeholder="Cosa fa questo agente?" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -267,75 +264,85 @@ export default function AgentDetail() {
                       </Select>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Modello LLM</Label>
-                    <Select value={cfg.llm_model} onValueChange={v => update("llm_model", v)}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>{LLM_MODELS.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
                 </section>
 
-                {/* Prompt */}
-                <section className="rounded-card p-5 bg-card border border-border shadow-card space-y-4">
-                  <h3 className="text-sm font-semibold text-foreground">Prompt & Conversazione</h3>
-                  <div className="space-y-2">
-                    <Label>System Prompt</Label>
-                    <Textarea value={cfg.system_prompt} onChange={e => update("system_prompt", e.target.value)} className="min-h-[200px] font-mono text-xs" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Primo messaggio</Label>
-                    <Textarea value={cfg.first_message} onChange={e => update("first_message", e.target.value)} className="min-h-[80px]" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Temperatura: {cfg.temperature.toFixed(1)}</Label>
-                    <Slider value={[cfg.temperature]} onValueChange={([v]) => update("temperature", v)} min={0} max={1} step={0.1} />
-                    <div className="flex justify-between text-[10px] text-muted-foreground"><span>Preciso</span><span>Creativo</span></div>
-                  </div>
-                </section>
+                {/* Score checklist */}
+                <AgentScoreDetail agent={agent} defaultOpen={scoreResult.hasBlockers} />
               </div>
 
-              {/* Sidebar stats */}
+              {/* Sidebar */}
               <div className="space-y-4">
-                <AgentScoreDetail agent={agent} />
-                {[
-                  { label: "Chiamate totali", value: agent.calls_total ?? 0, icon: Phone },
-                  { label: "Questo mese", value: (agent as any).calls_month ?? 0, icon: Phone },
-                  { label: "Durata media", value: `${agent.avg_duration_sec ?? 0}s`, icon: Clock },
-                ].map(stat => (
-                  <div key={stat.label} className="rounded-card p-4 bg-card border border-border shadow-card">
-                    <div className="flex items-center gap-2 mb-1">
-                      <stat.icon className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">{stat.label}</span>
-                    </div>
-                    <p className="text-xl font-bold text-foreground">{stat.value}</p>
-                  </div>
-                ))}
+                {/* Quick stats — only show if there's activity */}
+                {(agent.calls_total ?? 0) > 0 && (
+                  <>
+                    {[
+                      { label: "Chiamate totali", value: agent.calls_total ?? 0, icon: Phone },
+                      { label: "Questo mese", value: (agent as any).calls_month ?? 0, icon: Phone },
+                      { label: "Durata media", value: `${Math.floor((agent.avg_duration_sec ?? 0) / 60)}:${String((agent.avg_duration_sec ?? 0) % 60).padStart(2, "0")}`, icon: Clock },
+                    ].map(stat => (
+                      <div key={stat.label} className="rounded-card p-4 bg-card border border-border shadow-card">
+                        <div className="flex items-center gap-2 mb-1">
+                          <stat.icon className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">{stat.label}</span>
+                        </div>
+                        <p className="text-xl font-bold text-foreground">{stat.value}</p>
+                      </div>
+                    ))}
+                  </>
+                )}
 
-                <div className="rounded-card p-4 bg-card border border-border shadow-card space-y-2">
-                  <h4 className="text-xs font-semibold text-muted-foreground">DETTAGLI</h4>
-                  {[
-                    ["Use Case", agent.use_case],
-                    ["Tipo", agent.type],
-                    ["EL Agent ID", agent.el_agent_id],
-                  ].map(([label, val]) => (
-                    <div key={label as string} className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">{label}</span>
-                      <span className="text-foreground font-mono truncate max-w-[140px]">{(val as string) || "—"}</span>
-                    </div>
-                  ))}
-                </div>
+                {/* Quick actions based on incomplete factors */}
+                {scoreResult.factors.filter(f => !f.achieved).length > 0 && (
+                  <div className="rounded-card p-4 bg-card border border-border shadow-card space-y-2">
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase">Prossimi passi</h4>
+                    {scoreResult.factors.filter(f => !f.achieved).slice(0, 3).map(f => (
+                      <p key={f.id} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                        <span className="text-brand mt-0.5">→</span>
+                        {f.action || f.label}
+                      </p>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
         </TabsContent>
 
-        {/* ═══ TAB: Voce & Test ═══ */}
-        <TabsContent value="voce">
+        {/* ═══ TAB: Prompt e Voce ═══ */}
+        <TabsContent value="prompt-voce">
           {cfg && (
             <div className="space-y-6">
+              {/* Prompt section */}
               <section className="rounded-card p-5 bg-card border border-border shadow-card space-y-4">
-                <h3 className="text-sm font-semibold text-foreground">Selezione Voce</h3>
+                <h3 className="text-sm font-semibold text-foreground">Comportamento</h3>
+                <div className="space-y-2">
+                  <Label>Istruzioni</Label>
+                  <p className="text-[11px] text-muted-foreground">Definisci come deve comportarsi l'agente durante le conversazioni.</p>
+                  <Textarea value={cfg.system_prompt} onChange={e => update("system_prompt", e.target.value)} className="min-h-[200px] font-mono text-xs" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Messaggio di apertura</Label>
+                  <Textarea value={cfg.first_message} onChange={e => update("first_message", e.target.value)} className="min-h-[80px]" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Stile risposte: {cfg.temperature.toFixed(1)}</Label>
+                    <Slider value={[cfg.temperature]} onValueChange={([v]) => update("temperature", v)} min={0} max={1} step={0.1} />
+                    <div className="flex justify-between text-[10px] text-muted-foreground"><span>Preciso</span><span>Creativo</span></div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Modello AI</Label>
+                    <Select value={cfg.llm_model} onValueChange={v => update("llm_model", v)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>{LLM_MODELS.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </section>
+
+              {/* Voice selection */}
+              <section className="rounded-card p-5 bg-card border border-border shadow-card space-y-4">
+                <h3 className="text-sm font-semibold text-foreground">Voce dell'agente</h3>
                 <VoicePickerEnhanced
                   companyId={companyId}
                   selected={cfg.voice_id}
@@ -349,8 +356,9 @@ export default function AgentDetail() {
                 />
               </section>
 
+              {/* Voice test */}
               <section className="rounded-card p-5 bg-card border border-border shadow-card space-y-4">
-                <h3 className="text-sm font-semibold text-foreground">Test Vocale Live</h3>
+                <h3 className="text-sm font-semibold text-foreground">Test vocale</h3>
                 <VoiceTestPanel elevenlabsAgentId={agent.el_agent_id} companyId={companyId} />
               </section>
             </div>
@@ -362,7 +370,8 @@ export default function AgentDetail() {
           {conversations.length === 0 ? (
             <div className="rounded-card border border-border bg-card p-12 text-center shadow-card">
               <MessageSquare className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">Nessuna conversazione per questo agente.</p>
+              <p className="font-medium text-foreground mb-1">Nessuna conversazione</p>
+              <p className="text-sm text-muted-foreground">Le conversazioni appariranno qui quando l'agente inizierà a ricevere chiamate.</p>
             </div>
           ) : (
             <div className="rounded-card overflow-hidden border border-border bg-card shadow-card">
@@ -371,11 +380,9 @@ export default function AgentDetail() {
                   <TableRow className="bg-muted">
                     <TableHead>Data</TableHead>
                     <TableHead>Numero</TableHead>
-                    <TableHead>Direzione</TableHead>
+                    <TableHead className="w-12"></TableHead>
                     <TableHead>Durata</TableHead>
-                    <TableHead>Score</TableHead>
                     <TableHead>Esito</TableHead>
-                    <TableHead>Sentiment</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -383,26 +390,14 @@ export default function AgentDetail() {
                     <TableRow key={conv.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setViewTranscript(conv)}>
                       <TableCell className="text-sm">{conv.started_at ? format(new Date(conv.started_at), "dd MMM HH:mm", { locale: it }) : "—"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground font-mono">{conv.caller_number || conv.phone_number || "—"}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="text-xs">
-                          {conv.direction === "inbound" ? "📥 Inbound" : "📤 Outbound"}
-                        </Badge>
+                      <TableCell className="text-center">
+                        {conv.direction === "inbound" ? "📥" : "📤"}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{conv.duration_sec ? `${Math.floor(conv.duration_sec / 60)}:${String(conv.duration_sec % 60).padStart(2, "0")}` : "—"}</TableCell>
-                      <TableCell>
-                        {conv.eval_score !== null && conv.eval_score !== undefined ? (
-                          <Badge className={`text-xs ${Number(conv.eval_score) >= 70 ? "bg-green-100 text-green-700" : Number(conv.eval_score) >= 40 ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>
-                            {conv.eval_score}
-                          </Badge>
-                        ) : "—"}
-                      </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={`text-xs ${conv.outcome === "appointment" ? "border-status-success text-status-success" : conv.outcome === "qualified" ? "border-brand text-brand" : ""}`}>
                           {conv.outcome || "—"}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {conv.sentiment === "positive" ? "😊" : conv.sentiment === "negative" ? "😞" : conv.sentiment === "neutral" ? "😐" : "—"}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -412,114 +407,19 @@ export default function AgentDetail() {
           )}
         </TabsContent>
 
-        {/* ═══ TAB: Outbound ═══ */}
-        <TabsContent value="outbound">
-          <AgentOutboundTab agentId={agent.id} companyId={companyId} outboundEnabled={(agent as any).outbound_enabled ?? false} elAgentId={agent.el_agent_id} />
-        </TabsContent>
-
-        {/* ═══ TAB: Analytics ═══ */}
-        <TabsContent value="analytics">
+        {/* ═══ TAB: Risultati ═══ */}
+        <TabsContent value="risultati">
           <AgentAnalyticsTab conversations={conversations} />
         </TabsContent>
 
-        {/* ═══ TAB: Knowledge Base ═══ */}
-        <TabsContent value="knowledge">
-          <AgentKnowledgeTab agentId={agent.id} companyId={companyId} />
-        </TabsContent>
-
-        {/* ═══ TAB: Integrazioni ═══ */}
-        <TabsContent value="integrazioni">
-          <div className="space-y-6">
-            {/* Webhook */}
-            {cfg && (
-              <section className="rounded-card p-5 bg-card border border-border shadow-card space-y-4">
-                <h3 className="text-sm font-semibold text-foreground">Webhook Post-Chiamata</h3>
-                <p className="text-xs text-muted-foreground">Ricevi un payload JSON alla fine di ogni conversazione.</p>
-                <div className="space-y-2">
-                  <Label>URL Webhook</Label>
-                  <Input value={cfg.webhook_url} onChange={e => update("webhook_url", e.target.value)} placeholder="https://tuoserver.com/webhook" className="font-mono text-sm" />
-                </div>
-              </section>
-            )}
-            <AgentIntegrationTab agentId={agent.id} elAgentId={agent.el_agent_id} agentName={agent.name} />
-          </div>
-        </TabsContent>
-
-        {/* ═══ TAB: Telefono ═══ */}
-        <TabsContent value="telefono">
-          <AgentPhoneTab agentId={agent.id} companyId={companyId} />
-        </TabsContent>
-
-        {/* ═══ TAB: Avanzate ═══ */}
-        <TabsContent value="avanzate">
-          {cfg && (
-            <div className="grid gap-6 lg:grid-cols-2">
-              {/* Conversation Flow */}
-              <section className="rounded-card p-5 bg-card border border-border shadow-card space-y-5">
-                <h3 className="text-sm font-semibold text-foreground">Flusso Conversazione</h3>
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Turn Timeout: {cfg.turn_timeout_sec}s</Label>
-                  <Slider value={[cfg.turn_timeout_sec]} onValueChange={([v]) => update("turn_timeout_sec", v)} min={1} max={30} step={1} />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Reattività turno</Label>
-                  <Select value={cfg.turn_eagerness} onValueChange={v => update("turn_eagerness", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="eager">Eager — risponde subito</SelectItem>
-                      <SelectItem value="normal">Normale</SelectItem>
-                      <SelectItem value="patient">Paziente — aspetta di più</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Durata max: {Math.floor(cfg.max_duration_sec / 60)} min</Label>
-                  <Slider value={[cfg.max_duration_sec]} onValueChange={([v]) => update("max_duration_sec", v)} min={60} max={1800} step={60} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs text-muted-foreground">Interruzioni utente</Label>
-                  <Switch checked={cfg.interruptions_enabled} onCheckedChange={v => update("interruptions_enabled", v)} />
-                </div>
-              </section>
-
-              {/* System Tools */}
-              <section className="rounded-card p-5 bg-card border border-border shadow-card space-y-5">
-                <h3 className="text-sm font-semibold text-foreground">Strumenti di Sistema</h3>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-sm">End Call automatico</Label>
-                    <p className="text-xs text-muted-foreground">L'agente può chiudere la chiamata</p>
-                  </div>
-                  <Switch checked={cfg.end_call_enabled} onCheckedChange={v => update("end_call_enabled", v)} />
-                </div>
-                {cfg.end_call_enabled && (
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Prompt End Call</Label>
-                    <Textarea value={cfg.end_call_prompt} onChange={e => update("end_call_prompt", e.target.value)} placeholder="Chiudi la chiamata quando..." className="min-h-[60px] text-sm" />
-                  </div>
-                )}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-sm">Language Detection</Label>
-                    <p className="text-xs text-muted-foreground">Rileva e adatta lingua automaticamente</p>
-                  </div>
-                  <Switch checked={cfg.language_detection_enabled} onCheckedChange={v => update("language_detection_enabled", v)} />
-                </div>
-              </section>
-
-              {/* Evaluation */}
-              <section className="rounded-card p-5 bg-card border border-border shadow-card space-y-4 lg:col-span-2">
-                <h3 className="text-sm font-semibold text-foreground">Valutazione Conversazioni</h3>
-                <p className="text-xs text-muted-foreground">Definisci i criteri per valutare automaticamente le conversazioni.</p>
-                <Textarea
-                  value={cfg.evaluation_criteria}
-                  onChange={e => update("evaluation_criteria", e.target.value)}
-                  placeholder="Es: La conversazione è riuscita se il cliente ha prenotato un appuntamento o ha lasciato i propri dati di contatto..."
-                  className="min-h-[120px] text-sm"
-                />
-              </section>
-            </div>
-          )}
+        {/* ═══ TAB: Impostazioni ═══ */}
+        <TabsContent value="impostazioni">
+          <SettingsTab
+            agent={agent}
+            cfg={cfg}
+            update={update}
+            companyId={companyId}
+          />
         </TabsContent>
       </Tabs>
 
@@ -537,6 +437,149 @@ export default function AgentDetail() {
       )}
 
       <TranscriptViewer open={!!viewTranscript} onOpenChange={() => setViewTranscript(null)} transcript={viewTranscript?.transcript ?? null} agentName={agent.name} evalScore={viewTranscript?.eval_score ?? null} evalNotes={viewTranscript?.eval_notes ?? null} collectedData={viewTranscript?.collected_data ?? null} />
+    </div>
+  );
+}
+
+/* ── Settings Tab (merged Outbound + Phone + Integrations + KB + Advanced) ── */
+
+function SettingsTab({ agent, cfg, update, companyId }: { agent: any; cfg: ConfigState | null; update: (key: string, value: any) => void; companyId: string }) {
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const toggle = (key: string) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
+
+  const sections = [
+    {
+      key: "outbound",
+      icon: Phone,
+      title: "Chiamate in uscita",
+      description: "Configura le chiamate outbound dell'agente",
+      content: <AgentOutboundTab agentId={agent.id} companyId={companyId} outboundEnabled={agent.outbound_enabled ?? false} elAgentId={agent.el_agent_id} />,
+    },
+    {
+      key: "phone",
+      icon: Phone,
+      title: "Numero telefonico",
+      description: "Gestisci il numero assegnato a questo agente",
+      content: <AgentPhoneTab agentId={agent.id} companyId={companyId} />,
+    },
+    {
+      key: "knowledge",
+      icon: FileText,
+      title: "Archivio documenti",
+      description: "Carica documenti e risorse per l'agente",
+      content: <AgentKnowledgeTab agentId={agent.id} companyId={companyId} />,
+    },
+    {
+      key: "integrations",
+      icon: Plug,
+      title: "Integrazioni",
+      description: "Webhook, CRM e connessioni esterne",
+      content: (
+        <div className="space-y-4">
+          {cfg && (
+            <div className="space-y-2">
+              <Label>URL Webhook post-chiamata</Label>
+              <p className="text-[11px] text-muted-foreground">Ricevi un payload JSON alla fine di ogni conversazione.</p>
+              <Input value={cfg.webhook_url} onChange={e => update("webhook_url", e.target.value)} placeholder="https://tuoserver.com/webhook" className="font-mono text-sm" />
+            </div>
+          )}
+          <AgentIntegrationTab agentId={agent.id} elAgentId={agent.el_agent_id} agentName={agent.name} />
+        </div>
+      ),
+    },
+    {
+      key: "advanced",
+      icon: Shield,
+      title: "Impostazioni avanzate",
+      description: "Flusso conversazione, sicurezza e valutazione",
+      content: cfg ? (
+        <div className="space-y-5">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Tempo attesa risposta: {cfg.turn_timeout_sec}s</Label>
+              <Slider value={[cfg.turn_timeout_sec]} onValueChange={([v]) => update("turn_timeout_sec", v)} min={1} max={30} step={1} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Velocità di risposta</Label>
+              <Select value={cfg.turn_eagerness} onValueChange={v => update("turn_eagerness", v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="eager">Veloce — risponde subito</SelectItem>
+                  <SelectItem value="normal">Normale</SelectItem>
+                  <SelectItem value="patient">Paziente — aspetta di più</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">Durata massima: {Math.floor(cfg.max_duration_sec / 60)} min</Label>
+            <Slider value={[cfg.max_duration_sec]} onValueChange={([v]) => update("max_duration_sec", v)} min={60} max={1800} step={60} />
+          </div>
+          <div className="flex items-center justify-between">
+            <Label className="text-xs text-muted-foreground">Interruzioni utente</Label>
+            <Switch checked={cfg.interruptions_enabled} onCheckedChange={v => update("interruptions_enabled", v)} />
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-sm">Chiusura automatica</Label>
+              <p className="text-xs text-muted-foreground">L'agente può chiudere la chiamata</p>
+            </div>
+            <Switch checked={cfg.end_call_enabled} onCheckedChange={v => update("end_call_enabled", v)} />
+          </div>
+          {cfg.end_call_enabled && (
+            <Textarea value={cfg.end_call_prompt} onChange={e => update("end_call_prompt", e.target.value)} placeholder="Chiudi la chiamata quando..." className="min-h-[60px] text-sm" />
+          )}
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-sm">Rilevamento lingua automatico</Label>
+              <p className="text-xs text-muted-foreground">Rileva e adatta lingua automaticamente</p>
+            </div>
+            <Switch checked={cfg.language_detection_enabled} onCheckedChange={v => update("language_detection_enabled", v)} />
+          </div>
+          <div className="space-y-2 pt-2 border-t border-border">
+            <Label>Criteri di valutazione</Label>
+            <p className="text-[11px] text-muted-foreground">Come valutare automaticamente le conversazioni.</p>
+            <Textarea
+              value={cfg.evaluation_criteria}
+              onChange={e => update("evaluation_criteria", e.target.value)}
+              placeholder="Es: La conversazione è riuscita se il cliente ha prenotato un appuntamento..."
+              className="min-h-[100px] text-sm"
+            />
+          </div>
+        </div>
+      ) : null,
+    },
+  ];
+
+  return (
+    <div className="space-y-3">
+      {sections.map(section => {
+        const isOpen = openSections[section.key] ?? false;
+        const Icon = section.icon;
+        return (
+          <Collapsible key={section.key} open={isOpen} onOpenChange={() => toggle(section.key)}>
+            <CollapsibleTrigger asChild>
+              <button className="w-full flex items-center justify-between px-4 py-3.5 rounded-card border border-border bg-card hover:bg-muted/50 transition-colors shadow-card">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                    <Icon className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-medium text-foreground">{section.title}</p>
+                    <p className="text-xs text-muted-foreground">{section.description}</p>
+                  </div>
+                </div>
+                <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform shrink-0", isOpen && "rotate-180")} />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="pt-4 pb-2 px-1">
+                {section.content}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        );
+      })}
     </div>
   );
 }
