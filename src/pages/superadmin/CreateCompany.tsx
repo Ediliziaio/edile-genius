@@ -48,7 +48,6 @@ export default function CreateCompany() {
         body: {
           name: form.name, slug, sector: form.sector || null, plan: form.plan,
           admin_email: form.admin_email, admin_password: form.admin_password,
-          el_api_key: form.el_api_key || null,
           phone: form.phone || null, vat_number: form.vat_number || null,
           address: form.address || null, city: form.city || null,
           website: form.website || null, trial_ends_at,
