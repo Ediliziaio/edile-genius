@@ -154,6 +154,7 @@ const App = () => (
                 <Route path="/app/analytics" element={<AnalyticsPage />} />
                 <Route path="/app/credits" element={<CreditsPage />} />
                 <Route path="/app/settings" element={<SettingsPage />} />
+                <Route path="/app/integrations" element={<Integrations />} />
               </Route>
             </Route>
 
