@@ -257,8 +257,18 @@ export default function CantierePage() {
                     <span className="flex items-center gap-1"><FileText className="h-3 w-3" /> {c.report_count} report</span>
                     {c.last_report_date && <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {c.last_report_date}</span>}
                   </div>
-                </Card>
-              </Link>
+                </Link>
+                <div className="flex justify-end mt-3 pt-3 border-t border-border">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 px-2"
+                    onClick={(e) => { e.preventDefault(); setDeleteTarget(c); }}
+                  >
+                    <Trash2 className="h-3.5 w-3.5 mr-1" /> Elimina
+                  </Button>
+                </div>
+              </Card>
             );
           })}
         </div>
