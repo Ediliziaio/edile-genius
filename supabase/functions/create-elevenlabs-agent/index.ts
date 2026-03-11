@@ -19,10 +19,12 @@ Deno.serve(async (req) => {
     const userId = claimsData.claims.sub;
 
     const body = await req.json();
+    const VALID_AGENT_TYPES = ["vocal", "render", "whatsapp", "operative"] as const;
     const {
       company_id, name, description, use_case, sector, language, voice_id,
-      system_prompt, first_message, status: agentStatus, config = {}
+      system_prompt, first_message, status: agentStatus, type: rawType, config = {}
     } = body;
+    const agentType = VALID_AGENT_TYPES.includes(rawType) ? rawType : "vocal";
 
     if (!company_id || !name) return new Response(JSON.stringify({ error: "company_id and name required" }), { status: 400, headers: corsHeaders });
 
