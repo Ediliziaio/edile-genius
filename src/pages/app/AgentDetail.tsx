@@ -106,6 +106,88 @@ function buildConfigState(agent: any): ConfigState {
   };
 }
 
+/* ── Inline Edit Components ─────────────────────────── */
+
+function InlineEditName({ value, onSave }: { value: string; onSave: (v: string) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setDraft(value); }, [value]);
+  useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
+
+  const commit = () => {
+    setEditing(false);
+    if (draft.trim() && draft !== value) onSave(draft.trim());
+    else setDraft(value);
+  };
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={e => { if (e.key === "Enter") commit(); if (e.key === "Escape") { setDraft(value); setEditing(false); } }}
+        className="text-xl font-bold text-foreground bg-transparent border-b-2 border-primary outline-none w-full py-1"
+      />
+    );
+  }
+
+  return (
+    <h2
+      onClick={() => setEditing(true)}
+      className="group text-xl font-bold text-foreground cursor-pointer flex items-center gap-2 py-1 rounded-md hover:bg-muted/50 transition-colors px-1 -mx-1"
+    >
+      {value || "Senza nome"}
+      <Pencil className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+    </h2>
+  );
+}
+
+function InlineEditDescription({ value, onSave }: { value: string; onSave: (v: string) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => { setDraft(value); }, [value]);
+  useEffect(() => { if (editing) textareaRef.current?.focus(); }, [editing]);
+
+  const commit = () => {
+    setEditing(false);
+    if (draft !== value) onSave(draft);
+  };
+
+  if (editing) {
+    return (
+      <textarea
+        ref={textareaRef}
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={e => { if (e.key === "Escape") { setDraft(value); setEditing(false); } }}
+        className="text-sm text-muted-foreground bg-transparent border border-border rounded-md outline-none focus:ring-1 focus:ring-ring w-full py-2 px-2 min-h-[60px] resize-none"
+        placeholder="Aggiungi una descrizione..."
+      />
+    );
+  }
+
+  return (
+    <p
+      onClick={() => setEditing(true)}
+      className="group text-sm text-muted-foreground cursor-pointer flex items-start gap-2 rounded-md hover:bg-muted/50 transition-colors py-1 px-1 -mx-1"
+    >
+      {value ? (
+        <span>{value}</span>
+      ) : (
+        <span className="italic text-muted-foreground/60">Clicca per aggiungere una descrizione...</span>
+      )}
+      <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mt-0.5 shrink-0" />
+    </p>
+  );
+}
+
 /* ── Component ─────────────────────────────────────── */
 
 export default function AgentDetail() {
