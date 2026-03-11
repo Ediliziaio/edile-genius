@@ -4,6 +4,15 @@
  * Nessun LLM: pura logica JavaScript.
  */
 
+export interface LeadScoreWeights {
+  qualified_outcome?: number;   // default 30
+  positive_sentiment?: number;  // default 20
+  complete_contact?: number;    // default 10
+  has_calls?: number;           // default 10
+  inbound_source?: number;      // default 5
+  recency_bonus?: number;       // default 10
+}
+
 export interface LeadScoreInput {
   // Contact fields
   status: string;
@@ -20,6 +29,8 @@ export interface LeadScoreInput {
   conversationCount?: number;
   // Preventivo signals
   hasPreventivo?: boolean;
+  // Custom weights from company settings (Qualificatore Intelligente)
+  customWeights?: LeadScoreWeights | null;
 }
 
 export interface LeadScoreResult {
