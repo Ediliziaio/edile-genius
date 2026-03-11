@@ -1,122 +1,126 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro
 
-## ✅ Completato in questo blocco
+## Onboarding & Wizard UX Simplification
 
-### Database Migration
-- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
-- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
-- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
-- RLS policies per tutte le nuove tabelle
+### Current Problems
 
-## ✅ Blocco 2 — Sistema Crediti Euro-based
+**Wizard Step 0 (StepAgent) — Critical overload:**
+- 11 distinct form sections crammed into one screen: use case selector grid, name, sector, description, language, LLM model, additional languages, 6 quick templates, system prompt (180px textarea), first message, temperature slider
+- A non-technical user who already chose a template from the hub sees all of this — most of it pre-filled and irrelevant to them
+- System prompt editing exposed by default is intimidating
 
-### Database
-- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
-- ai_credit_topups (ricariche manual/auto/promo/adjustment)
-- ai_credit_usage (consumo per conversazione con margini)
-- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
-- monthly_billing_summary view (security_invoker)
+**5-step wizard is excessive:**
+- StepConversation (turn timeout, eagerness, interruptions) and StepAdvanced (KB, custom tools, PII, webhooks) are developer settings. 90% of users will never touch them.
+- For a user who picked a pre-configured template, the real flow is: Name it → Pick voice → Activate
 
-### Edge Functions
-- check-credits-before-call: verifica saldo pre-chiamata
-- topup-credits: ricarica manuale con fattura
-- elevenlabs-webhook: post-call billing, auto-recharge, blocco
-- platform-config: +apply_global_markup action
+**Technical jargon throughout:**
+- Sidebar: "Flusso e timeout", "KB, Tools e Guardrails"
+- Labels: "System Prompt", "Turn Timeout", "Turn Eagerness", "LLM Model", "PII Redaction"
+- Hub: "Scegli il tipo di agente" (technology-oriented, not goal-oriented)
 
-### Frontend
-- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
-- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
-- Sidebar: footer saldo crediti con barra e alert
-- VoiceTestPanel: check crediti pre-chiamata con blocco UI
+**CreateAgent hub:**
+- Header says "Scegli il tipo di agente" — should say what result they'll get
+- CTA "Configura →" sounds like work, not progress
 
-## ✅ Blocco 3-5 — Agent Templates System
+### Plan
 
-### Database
-- agent_templates + agent_template_instances + agent_reports + company_channels
-- RLS policies PERMISSIVE (fix da RESTRICTIVE)
-- Funzione DB `increment_installs_count(tpl_id UUID)`
-- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+#### 1. Simplify StepAgent — Essential fields only, rest collapsed
 
-### Edge Functions (CORS headers completi)
-- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
-- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
-- save-report: salva report in DB + aggiorna contatori istanza
+Show by default:
+- Name (with better placeholder: "Es. Mario - Qualificatore Lead")
+- Description (optional, shorter)
+- Sector (kept, important for vertical)
 
-### Frontend — Wizard 5 Step (TemplateSetup.tsx)
-- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + importa CSV con template scaricabile
-- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
-- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
+Move to a collapsible "Personalizza il comportamento" section (closed by default when template pre-fills):
+- Use case selector grid
+- System prompt textarea
+- First message textarea
+- Quick templates Edilizia
+- Temperature slider
+- LLM model select
+- Language + additional languages
 
-### SuperAdmin
-- /superadmin/templates: CRUD completo con JSON editor per config_schema
+This way, template users see 3 fields. Power users can expand.
 
-## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+**Files:** `src/components/agents/create/StepAgent.tsx`
 
-### Database (5 tabelle)
-- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
-- RLS PERMISSIVE per tutte le tabelle
-- Trigger set_updated_at + init_render_credits su companies
-- Funzione deduct_render_credit
-- Storage buckets: render-originals (privato), render-results (pubblico)
+#### 2. Reduce wizard from 5 to 4 steps — Merge Conversation + Advanced
 
-### Edge Functions
-- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
-- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+New step structure:
+| # | Label | Sublabel | Content |
+|---|-------|----------|---------|
+| 0 | Il Tuo Agente | Nome e personalità | Simplified StepAgent |
+| 1 | Voce | Come parla il tuo agente | StepVoice (unchanged) |
+| 2 | Impostazioni | Opzioni avanzate | Merged Conversation + Advanced in collapsible sections |
+| 3 | Rivedi e Attiva | Controlla e pubblica | StepReview (simplified) |
 
-### Frontend
-- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
-- RenderConfig (/superadmin/render-config)
-- BeforeAfterSlider, promptBuilder.ts
+The merged step shows 3 collapsible sections: "Comportamento conversazione", "Archivio conoscenze", "Sicurezza e privacy" — all collapsed by default with sensible defaults already set.
 
-## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
+**Files:** `src/components/agents/create/AgentStepSidebar.tsx`, `src/pages/app/AgentTemplateWizard.tsx`, new `src/components/agents/create/StepSettings.tsx`
 
-### Database
-- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
-- Estensione `preventivi` con +26 colonne (template_id, versione, titolo, foto_sopralluogo_urls, foto_copertina_url, sconto_globale, imponibile, iva_importo, totale_finale, condizioni, clausole, intro, firma_testo, tempi_esecuzione, validita_giorni, data_scadenza, tracking_aperto_at/count, link_accettazione, firma_cliente_url, accettato_at, rifiutato_at, rifiuto_motivo, parent_id, inviato_at, inviato_via, cliente_piva, cliente_codice_fiscale)
-- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
-- Storage buckets: preventivi-media (privato), template-assets (pubblico)
-- RLS company-scoped + superadmin
+#### 3. Business-oriented microcopy throughout
 
-### Edge Functions
-- `process-preventivo-audio` RISCRITTO: prompt GPT esperto (prezzario DEI, categorie edilizie, sconti), nuovo formato voci con id/ordine/categoria/titolo_voce/sconto_percentuale/foto_urls/note_voce/evidenziata, calcolo totali con sconto e IVA, data_scadenza automatica
+**Sidebar step labels:**
+- "Agente" → "Il Tuo Agente"
+- "Voce" → "Scegli la Voce"  
+- "Conversazione" + "Avanzate" → "Impostazioni"
+- "Revisione & Test" → "Rivedi e Attiva"
 
-### PDF Client-side (@react-pdf/renderer)
-- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4 con:
-  - Header azienda + logo
-  - Band titolo colorata (colore_primario)
-  - Grid cliente/riferimenti
-  - Testo intro
-  - Foto copertina
-  - Tabella voci per categoria con subtotali
-  - Totali con sconto globale + IVA
-  - Note, condizioni, clausole
-  - Sezione firma doppia (azienda + cliente)
-  - Footer pagina
+**StepAgent:**
+- "Identità Agente" → "Come si chiama il tuo agente?"
+- "System Prompt" → "Istruzioni di comportamento"
+- "Primo Messaggio" → "Messaggio di apertura"
+- "Temperatura" → "Stile risposte"
 
-### Frontend
-- **NuovoPreventivo.tsx** → Wizard 3 step:
-  - Step 1: dati cliente (nome, indirizzo, telefono, email, P.IVA, CF) + titolo/oggetto + cantiere
-  - Step 2: registrazione/upload audio + upload foto multiplo con grid preview e badge copertina
-  - Step 3: editor visuale voci per categoria (card editabili con titolo, descrizione, U.M., quantità, prezzo, sconto, totale) + totali live + scarica PDF anteprima
-- **PreventivoDetail.tsx** → 3 tabs:
-  - Dettaglio: voci per categoria con badge sconto, trascrizione collapsible, note/stato/tempi
-  - Cronologia: timeline eventi (creato, inviato, accettato/rifiutato)
-  - Tracking: KPI aperture, ultima apertura, ultimo invio
-  - Azioni: scarica PDF, modifica, elimina
-- **PreventiviList.tsx** → KPI cards (totale, bozze, in attesa, valore accettati) + filtri tab per stato + ricerca + lista con badge versione e scadenza
-- **TemplatePreventivo.tsx** (`/app/impostazioni/template-preventivo`): 3 tabs:
-  - Branding: logo upload, color picker primario/secondario con preview gradient, intestazione/piè di pagina
-  - Testi Standard: intro, condizioni, clausole, firma, validità giorni, IVA default
-  - Layout: 5 toggle (foto copertina, foto voci, subtotali categoria, firma, condizioni)
+**StepConversation (now inside Settings):**
+- "Turn Timeout" → "Tempo di attesa risposta"
+- "Reattività turno" → "Velocità di risposta"
+- "System Tools" → "Comportamento automatico"
+- "Language Detection" → "Rilevamento lingua automatico"
 
-### Navigazione
-- Sidebar: aggiunto "Template PDF" nella sezione AUTOMAZIONI
-- Route: `/app/impostazioni/template-preventivo`
+**StepAdvanced (now inside Settings):**
+- "Knowledge Base" → "Archivio documenti"
+- "Custom Tools" → "Integrazioni esterne"
+- "Guardrails & Safety" → "Sicurezza e privacy"
+- "PII Redaction" → "Protezione dati sensibili"
+- "Data Retention" → "Salva conversazioni"
 
-## 🔜 Prossimi Blocchi
-- SuperAdmin Dashboard economics
-- Integrazioni CRM native
-- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets
+**Files:** All step components + sidebar
+
+#### 4. CreateAgent hub — Goal-oriented header and CTAs
+
+- "Scegli il tipo di agente" → "Cosa vuoi automatizzare?"
+- Subtitle: "Agenti AI pre-configurati..." → "Scegli un obiettivo e attiva il tuo agente in pochi minuti."
+- "Configura →" → "Inizia →"
+- "Cerca template..." → "Cerca per obiettivo..."
+
+**File:** `src/pages/app/CreateAgent.tsx`
+
+#### 5. Wizard header simplification
+
+- "Crea Agente" → "Configura il tuo agente"
+- "Configura il tuo agente AI con voce naturale" → "Completa i dati essenziali per attivarlo"
+- Back button: "Scegli Template" → "← Torna ai template"
+
+**File:** `src/pages/app/AgentTemplateWizard.tsx`
+
+#### 6. StepReview simplification
+
+- Remove technical summary rows (Voice ID hash, stability/similarity decimals, turn timeout seconds)
+- Keep only: Name, Sector, Language, Model, Voice preview, KB files count
+- Prominently show the publish toggle at the top instead of buried at the bottom
+- Simplify "Crea Bozza e Testa" → "Prova il tuo agente"
+
+**File:** `src/components/agents/create/StepReview.tsx`
+
+### Files Modified Summary
+
+1. `src/components/agents/create/StepAgent.tsx` — Collapse advanced fields, simplify labels
+2. `src/components/agents/create/AgentStepSidebar.tsx` — 4 steps, business labels
+3. `src/pages/app/AgentTemplateWizard.tsx` — Update step count, header copy, step rendering
+4. `src/components/agents/create/StepSettings.tsx` — New: merged Conversation + Advanced
+5. `src/components/agents/create/StepReview.tsx` — Simplified summary, reordered sections
+6. `src/pages/app/CreateAgent.tsx` — Goal-oriented header/CTAs
+7. `src/components/agents/create/StepConversation.tsx` — Kept but used inside StepSettings
+8. `src/components/agents/create/StepAdvanced.tsx` — Kept but used inside StepSettings
+
