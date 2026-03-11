@@ -105,20 +105,21 @@ Deno.serve(async (req) => {
     const costBilledTotal = Number((durationMin * costBilledPerMin).toFixed(4));
     const marginTotal = Number((costBilledTotal - costRealTotal).toFixed(4));
 
-    // 4. Get current balance
+    // 4. Atomic credit deduction (prevents race conditions)
+    const { data: creditResult } = await sb.rpc("deduct_call_credits", {
+      _company_id: agent.company_id,
+      _cost_billed: costBilledTotal,
+      _cost_real: costRealTotal,
+    });
+    
+    const balanceBefore = Number(creditResult?.[0]?.balance_before || 0);
+    const balanceAfter = Number(creditResult?.[0]?.balance_after || 0);
+    const wasBlocked = creditResult?.[0]?.was_blocked || false;
+
+    // 5. Get credits config for auto-recharge logic
     const { data: credits } = await sb.from("ai_credits")
-      .select("balance_eur, auto_recharge_enabled, auto_recharge_threshold, auto_recharge_amount, alert_threshold_eur, total_spent_eur, total_recharged_eur, auto_recharge_method")
+      .select("auto_recharge_enabled, auto_recharge_threshold, auto_recharge_amount, alert_threshold_eur, total_recharged_eur, auto_recharge_method")
       .eq("company_id", agent.company_id).single();
-
-    const balanceBefore = Number(credits?.balance_eur || 0);
-    const balanceAfter = Number((balanceBefore - costBilledTotal).toFixed(4));
-
-    // 5. Update balance
-    await sb.from("ai_credits").update({
-      balance_eur: balanceAfter,
-      total_spent_eur: Number((Number(credits?.total_spent_eur || 0) + costBilledTotal).toFixed(4)),
-      updated_at: new Date().toISOString(),
-    }).eq("company_id", agent.company_id);
 
     // 6. Record usage
     const { data: convRecord } = await sb.from("conversations").select("id").eq("el_conv_id", conversation_id).maybeSingle();
