@@ -274,5 +274,26 @@ export default function CantierePage() {
         </div>
       )}
     </div>
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminare "{deleteTarget?.nome}"?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget && deleteTarget.report_count > 0
+                ? `Questo cantiere ha ${deleteTarget.report_count} report associati che verranno eliminati. L'azione è irreversibile.`
+                : "L'azione è irreversibile. Confermi l'eliminazione?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {deleting ? "Eliminazione..." : "Elimina"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }

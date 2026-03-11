@@ -386,5 +386,24 @@ export default function AgentTemplateWizard() {
         </div>
       </div>
     </div>
+
+      {/* Abandon confirmation */}
+      <AlertDialog open={showAbandonDialog} onOpenChange={setShowAbandonDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Abbandonare la configurazione?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Le modifiche non salvate andranno perse. Vuoi davvero uscire?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Continua a configurare</AlertDialogCancel>
+            <AlertDialogAction onClick={() => navigate("/app/agents/new")} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Esci senza salvare
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }
