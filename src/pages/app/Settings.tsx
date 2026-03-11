@@ -105,8 +105,8 @@ export default function Settings() {
 
   const [fullName, setFullName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
-  const [apiKey, setApiKey] = useState("");
-  const [showApiKey, setShowApiKey] = useState(false);
+
+
   const [notif, setNotif] = useState<NotifSettings>({ new_conversation: true, daily_report: false, weekly_report: true });
 
   // Webhooks state
