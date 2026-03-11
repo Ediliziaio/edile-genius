@@ -238,8 +238,8 @@ export default function CantierePage() {
           {cantieri.map(c => {
             const sb = statoBadge[c.stato] || statoBadge.attivo;
             return (
-              <Link key={c.id} to={`/app/cantieri/${c.id}`}>
-                <Card className="p-5 hover:shadow-md transition-shadow cursor-pointer">
+              <Card key={c.id} className="p-5 hover:shadow-md transition-shadow">
+                <Link to={`/app/cantieri/${c.id}`} className="block cursor-pointer">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <HardHat className="h-5 w-5 text-primary" />
