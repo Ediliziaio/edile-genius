@@ -89,6 +89,63 @@ export default function AnalyticsPage() {
     return Object.entries(map).map(([id, value]) => ({ name: agentMap[id] || id.slice(0, 8), value })).sort((a, b) => b.value - a.value);
   }, [filtered, agentMap]);
 
+  // Conversion trend: weekly qualified/appointment rate + simple linear prediction
+  const conversionTrend = useMemo(() => {
+    // Group by week
+    const weeks: Record<string, { total: number; qualified: number }> = {};
+    filtered.forEach(c => {
+      if (!c.started_at) return;
+      const d = parseISO(c.started_at);
+      // Use Monday of the week as key
+      const dayOfWeek = d.getDay();
+      const monday = new Date(d);
+      monday.setDate(d.getDate() - ((dayOfWeek + 6) % 7));
+      const key = format(monday, "yyyy-MM-dd");
+      if (!weeks[key]) weeks[key] = { total: 0, qualified: 0 };
+      weeks[key].total++;
+      if (c.outcome === "qualified" || c.outcome === "appointment" || c.outcome === "interested") {
+        weeks[key].qualified++;
+      }
+    });
+
+    const points = Object.entries(weeks)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, v]) => ({
+        settimana: format(new Date(date), "dd/MM", { locale: it }),
+        tasso: v.total > 0 ? Math.round((v.qualified / v.total) * 100) : 0,
+        chiamate: v.total,
+        qualificati: v.qualified,
+      }));
+
+    // Simple linear regression for 2-week prediction
+    if (points.length >= 2) {
+      const n = points.length;
+      const xs = points.map((_, i) => i);
+      const ys = points.map(p => p.tasso);
+      const sumX = xs.reduce((a, b) => a + b, 0);
+      const sumY = ys.reduce((a, b) => a + b, 0);
+      const sumXY = xs.reduce((a, x, i) => a + x * ys[i], 0);
+      const sumX2 = xs.reduce((a, x) => a + x * x, 0);
+      const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+      const intercept = (sumY - slope * sumX) / n;
+
+      // Add prediction points
+      for (let i = 1; i <= 2; i++) {
+        const predicted = Math.max(0, Math.min(100, Math.round(intercept + slope * (n - 1 + i))));
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + i * 7);
+        points.push({
+          settimana: format(futureDate, "dd/MM", { locale: it }) + " ⟶",
+          tasso: predicted,
+          chiamate: 0,
+          qualificati: 0,
+        });
+      }
+    }
+
+    return points;
+  }, [filtered]);
+
   const statCards = [
     { label: "Chiamate totali", value: stats.total, icon: Phone, colorClass: "text-brand bg-brand-light" },
     { label: "Durata media", value: `${stats.avgDuration}s`, icon: Clock, colorClass: "text-status-info bg-status-info-light" },
