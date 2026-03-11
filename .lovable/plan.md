@@ -1,166 +1,164 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro + AI Avanzata
 
-## ✅ Completato in questo blocco
+# AUDIT FINALE — Edile Genius
 
-### Database Migration
-- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
-- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
-- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
-- RLS policies per tutte le nuove tabelle
+---
 
-## ✅ Blocco 2 — Sistema Crediti Euro-based
+## 1. VALUTAZIONE GENERALE
 
-### Database
-- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
-- ai_credit_topups (ricariche manual/auto/promo/adjustment)
-- ai_credit_usage (consumo per conversazione con margini)
-- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
-- monthly_billing_summary view (security_invoker)
+| Dimensione | Voto | Nota |
+|---|---|---|
+| **Maturità prodotto** | 7/10 | Struttura solida, moduli principali funzionanti, ma con aree ancora "scheletro" |
+| **Vendibilità** | 6/10 | Il core (agenti vocali + template hub + crediti) è vendibile. Il resto è rumore per il cliente |
+| **Robustezza tecnica** | 6.5/10 | Webhook e billing sono solidi. Edge functions tutte con `verify_jwt = false` — rischio critico |
+| **UX/Chiarezza** | 6/10 | Sidebar ben organizzata, ma troppe voci per un nuovo utente. Dashboard migliorata. Template hub forte |
+| **Sicurezza** | 5/10 | RLS presente ovunque, ma TUTTE le edge functions hanno JWT disabilitato. Alcune non autenticano internamente |
 
-### Edge Functions
-- check-credits-before-call: verifica saldo pre-chiamata
-- topup-credits: ricarica manuale con fattura
-- elevenlabs-webhook: post-call billing, auto-recharge, blocco
-- platform-config: +apply_global_markup action
+**Punti forti principali:**
+- Template Hub goal-oriented ("Cosa vuoi automatizzare?") — eccellente posizionamento commerciale
+- Sistema crediti euro-based con billing reale per chiamata — industriale
+- Webhook ElevenLabs completo: billing + stats + summary AI — funziona end-to-end
+- Dashboard con Smart Actions e KPI persistenti
+- Lead Score e Timeline unificata contatto
 
-### Frontend
-- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
-- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
-- Sidebar: footer saldo crediti con barra e alert
-- VoiceTestPanel: check crediti pre-chiamata con blocco UI
+**Punti deboli principali:**
+- Sicurezza edge functions (verify_jwt = false ovunque)
+- Troppe sezioni sidebar per il primo utente (Cantieri, Documenti, Presenze, Render — sono noise per il 90% dei clienti al day 1)
+- Nessun signup self-service (solo login manuale)
+- Pagine CRM, Webhooks nelle integrazioni puntano a /app/settings — dead end
+- Race condition nel topup crediti (read-then-update non atomico)
 
-## ✅ Blocco 3-5 — Agent Templates System
+---
 
-### Database
-- agent_templates + agent_template_instances + agent_reports + company_channels
-- RLS policies PERMISSIVE (fix da RESTRICTIVE)
-- Funzione DB `increment_installs_count(tpl_id UUID)`
-- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+## 2. COSA È DAVVERO PRONTO
 
-### Edge Functions (CORS headers completi)
-- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
-- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
-- save-report: salva report in DB + aggiorna contatori istanza
+| Modulo | Stato | Vendibile? |
+|---|---|---|
+| **Login + Auth + RBAC** | Funzionante, multi-tenant con RLS | Sì |
+| **Template Hub** (CreateAgent) | Eccellente — 15+ template con KPI, settore, risultato atteso | Sì, punto di forza commerciale |
+| **Gestione Agenti** (lista + dettaglio) | Completo — score, tabs, voce, prompt, analytics, outbound | Sì |
+| **Conversazioni** | Funzionante — filtri, summary, transcript, dettaglio | Sì |
+| **Analytics** | Base ma funzionante — grafici tempo, esiti, per agente | Sì (sufficiente) |
+| **Sistema Crediti** | Completo — billing per chiamata, topup, auto-recharge, blocco | Sì |
+| **Dashboard** | Funzionante — KPI, Smart Actions, onboarding | Sì |
+| **Contatti CRM** | Funzionante — tabella, filtri, lead score, timeline, kanban | Sì |
+| **Campagne Outbound** | Strutturate ma non testate end-to-end | Parziale |
+| **Integrazioni Hub** | Presente ma 2/5 card portano a dead-end | Da correggere |
+| **Preventivi** | Funzionante — creazione, PDF, lista | Sì per edilizia |
+| **Cantieri/Documenti/Presenze** | Funzionanti ma molto di nicchia | Solo per clienti edili avanzati |
+| **Render AI** | Funzionante | Sì per serramentisti |
+| **WhatsApp** | Strutturato ma richiede Meta Business setup complesso | Parziale |
+| **SuperAdmin** | Completo — companies, pricing, templates, analytics, credits | Sì |
 
-### Frontend — Wizard 5 Step (TemplateSetup.tsx)
-- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + importa CSV con template scaricabile
-- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
-- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
+---
 
-### SuperAdmin
-- /superadmin/templates: CRUD completo con JSON editor per config_schema
+## 3. COSA NON È ANCORA PRONTO
 
-## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+**3.1 Sicurezza — CRITICO**
+Tutte le 30+ edge functions hanno `verify_jwt = false` nel `config.toml`. Questo significa che chiunque con l'URL della funzione può chiamarla senza autenticazione. Alcune funzioni (es. `topup-credits`, `create-company`) autenticano internamente via Bearer token, ma altre (es. `generate-render`, `generate-report`, `save-report`, `add-knowledge-doc`) potrebbero non farlo. Questo è il rischio #1 prima di andare in produzione.
 
-### Database (5 tabelle)
-- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
-- RLS PERMISSIVE per tutte le tabelle
-- Trigger set_updated_at + init_render_credits su companies
-- Funzione deduct_render_credit
-- Storage buckets: render-originals (privato), render-results (pubblico)
+**3.2 Integrazioni CRM/Webhooks — Dead End**
+Le card "CRM" e "Webhooks" nell'hub integrazioni puntano a `/app/settings` che non ha una sezione dedicata per configurare CRM sync o webhook endpoints. L'utente clicca e non trova nulla.
 
-### Edge Functions
-- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
-- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+**3.3 Signup Self-Service**
+Non esiste una pagina di registrazione. Ogni azienda deve essere creata manualmente dal SuperAdmin. Per scalare serve almeno un flusso base di signup → trial.
 
-### Frontend
-- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
-- RenderConfig (/superadmin/render-config)
-- BeforeAfterSlider, promptBuilder.ts
+**3.4 Race Condition Crediti**
+Il `topup-credits` fa due update separati (read `total_recharged_eur` + update). Sotto carico, due topup concorrenti possono sovrascriversi. Serve un'operazione atomica (RPC o singolo update con incremento).
 
-## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
+**3.5 Campagne Outbound**
+La pagina esiste ma il flusso reale di esecuzione (schedulazione chiamate, retry, gestione batch) non sembra completamente implementato lato backend.
 
-### Database
-- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
-- Estensione `preventivi` con +26 colonne
-- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
-- Storage buckets: preventivi-media (privato), template-assets (pubblico)
-- RLS company-scoped + superadmin
+---
 
-### Edge Functions
-- `process-preventivo-audio` RISCRITTO
+## 4. COSA VA NASCOSTO O RIDOTTO
 
-### PDF Client-side (@react-pdf/renderer)
-- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4
+| Elemento | Azione | Motivo |
+|---|---|---|
+| **Sezione "OPERATIVITÀ"** (Cantieri, Documenti, Presenze) | Già collapsata — bene. Renderla visibile solo se l'azienda ha almeno 1 cantiere | Riduce noise per il 70% dei clienti |
+| **"STRUMENTI AI" → Render** | Mostrare solo se il settore è serramenti/edilizia o se l'azienda ha crediti render | Irrilevante per chi non vende infissi |
+| **Tab "Impostazioni" nell'agente** — dettagli LLM, TTS model, temperature, ASR quality, speculative turn | Spostare in collapsible "Avanzato" (già parzialmente fatto) | Troppo tecnico per l'imprenditore |
+| **Dettaglio conversazione** — eval_score, minutes_billed, collected_data raw | Mostrare solo se popolati, non come "—" | I campi vuoti sembrano bug |
+| **Card "Webhooks"** nelle integrazioni | Rimuovere o disabilitare finché non c'è una UI dedicata | Dead end oggi |
+| **Card "CRM"** nelle integrazioni | Aggiungere badge "Prossimamente" o collegare a una vera pagina di setup | Dead end oggi |
 
-### Frontend
-- NuovoPreventivo.tsx, PreventivoDetail.tsx, PreventiviList.tsx, TemplatePreventivo.tsx
+---
 
-## ✅ Blocco 8 — AI Avanzata P1 (Smart Actions + Lead Score + Timeline)
+## 5. TOP PRIORITÀ DI CORREZIONE
 
-### Smart Actions Engine (Dashboard)
-- Espanso da 3 regole hardcoded a 10+ regole basate su dati reali:
-  - Crediti in esaurimento (danger)
-  - Agenti in bozza (warning)
-  - Agenti senza numero telefono (warning)
-  - Agenti inattivi >7 giorni (info)
-  - Contatti da richiamare con next_call_at scaduto (warning)
-  - Preventivi in bozza da >7 giorni (warning)
-  - Preventivi inviati senza risposta da >10 giorni (warning)
-  - Documenti in scadenza entro 15 giorni (warning)
-  - Campagne con tasso appuntamenti <5% (info)
-- Query Supabase dedicate per ogni regola
-- Stato "Tutto in ordine" quando nessuna azione è necessaria
-- Mostra summary delle conversazioni recenti nella tabella attività
+**P0 — Blockers pre-lancio:**
 
-### Lead Score Automatico
-- `src/lib/lead-score.ts`: motore di scoring 0-100 senza LLM
-  - +30 outcome qualified/appointment
-  - +20 sentiment positivo
-  - +15 preventivo associato
-  - +10 contatto completo (tel+email)
-  - +10 callback attempts
-  - +5 fonte inbound
-  - -10 inattivo >30 giorni
-  - -20 not_interested
-  - -30 do_not_call/invalid
-- `src/components/contacts/LeadScoreBadge.tsx`: badge con tooltip fattori
-  - Compact mode per tabella (emoji + score numerico)
-  - Full mode per scheda contatto (con lista fattori)
-  - Colori: 🔴 Caldo (>60), 🟠 Tiepido (30-60), 🔵 Freddo (<30)
-- Badge integrato nella tabella contatti (nuova colonna "Score")
-- Badge integrato nell'header della scheda contatto
+1. **Attivare `verify_jwt = true`** per tutte le edge functions che non sono webhook esterni (elevenlabs-webhook, whatsapp-webhook, telegram-cantiere-webhook possono restare false). Tutte le altre devono validare il JWT. Impatto: sicurezza critica.
 
-### Timeline Unificata del Contatto
-- `ContactDetailPanel.tsx` completamente refactorato:
-  - Tab "Timeline" come default (al posto di "Info")
-  - Cronologia verticale con linea e pallini colorati per tipo:
-    - 🔵 Conversazioni (con summary, outcome, sentiment, durata)
-    - 🟡 Note manuali
-    - 🟢 Preventivi collegati (stato, importo, numero)
-    - ⚪ Eventi (contatto creato)
-  - Query preventivi per nome/telefono contatto
-  - Lead Score full display nell'header della scheda
+2. **Rimuovere dead-end integrazioni** — CRM e Webhooks o li colleghi a una pagina reale o li nascondi con badge "Prossimamente".
 
-## ✅ Blocco 8 — P1-C: Call Summary Automatico
+3. **Rendere atomico l'aggiornamento crediti** nel topup — usare un singolo UPDATE con `balance_eur = balance_eur + $amount` via RPC o SQL diretto.
 
-### Backend
-- `supabase/functions/elevenlabs-webhook/summary.ts`: modulo separato per generazione summary
-  - Chiama OpenAI gpt-4o-mini con prompt minimale in italiano
-  - Non-blocking: se OPENAI_API_KEY non è configurata, salta silenziosamente
-  - Cap transcript a 6000 chars per contenere i costi (~$0.001/call)
-- `elevenlabs-webhook/index.ts`: importa e chiama `generateCallSummary()` dopo step 7
-  - Popola `conversations.summary` solo se la generazione ha successo
+**P1 — Prima della vendita attiva:**
 
-### Frontend (già predisposto)
-- Dashboard "Attività recente": mostra `c.summary` sotto il nome agente
-- Conversazioni: mostra summary nella tabella e nel dialog dettaglio
-- Timeline contatto: mostra summary nelle conversazioni
+4. **Nascondere sezioni non rilevanti** per il cliente specifico (Cantieri/Render) in base al settore o all'uso effettivo.
 
-### Requisito SuperAdmin
-- Aggiungere OPENAI_API_KEY come Supabase Secret (da configurare via SuperAdmin)
+5. **Aggiungere signup self-service** con trial automatico (anche minimo: email + password → company creata → redirect a /app).
 
-## 🔜 Prossimi Step
+6. **Testare end-to-end campagne outbound** — verificare che il flusso schedulazione → chiamata → retry funzioni davvero.
 
-### P2 — Importante dopo
-- Follow-up Generator (bottone "Genera messaggio" con LLM)
-- Opportunity Recovery alerts (preventivi fermi, lead dormenti)
-- Motivo principale (estrarre dal transcript motivo interesse/rifiuto)
+---
 
-### P3 — Avanzato / successivo
-- Personalizzazione regole Smart Actions per admin
-- Report settimanale automatico via email al titolare
-- Trend predittivo su tasso conversione
+## 6. RISCHI PRINCIPALI
+
+| Categoria | Rischio | Gravità |
+|---|---|---|
+| **Sicurezza** | Tutte le edge functions con verify_jwt=false. Qualcuno può chiamare `topup-credits` o `create-company` forzando i parametri | **CRITICO** |
+| **Sicurezza** | `topup-credits` accetta `companyId` dal body — anche se verifica l'appartenenza, con JWT disabilitato nel config la prima riga di difesa manca | **ALTO** |
+| **Costi** | Auto-recharge crediti scatta senza pagamento reale (no Stripe). L'azienda accumula saldo fittizio | **MEDIO** — accettabile se si gestisce manualmente |
+| **UX** | Un nuovo utente vede 15+ voci sidebar dal primo login. Overload cognitivo | **MEDIO** |
+| **Vendibilità** | Senza signup self-service, ogni cliente richiede intervento manuale del SuperAdmin | **MEDIO** |
+| **Tecnico** | Race condition su `total_recharged_eur` in topup-credits. Sotto carico si perdono dati | **MEDIO** |
+
+---
+
+## 7. COSA SI PUÒ VENDERE SUBITO
+
+**Pacchetto 1 — "Agente Vocale Qualifica Lead"** (P1 commerciale)
+- Template: Richiama Lead Ads, Qualifica Serramenti, Qualifica Fotovoltaico, Qualifica Ristrutturazione
+- Include: agente configurato + numero telefono + dashboard risultati + crediti
+- Valore: "Non perdi più lead. L'agente risponde in 10 secondi, qualifica e fissa il sopralluogo."
+
+**Pacchetto 2 — "Recupero Trattative"**
+- Template: Recupera Preventivi Fermi, Recupera No-Show, Follow-up Sopralluogo
+- Valore: "Recuperi il 25% dei preventivi che stavi perdendo."
+
+**Pacchetto 3 — "Render Infissi AI"** (serramentisti)
+- Render + template qualifica serramenti
+- Valore: "Il cliente vede i nuovi infissi prima di comprare. Conversione +30%."
+
+**Pacchetto 4 — "Cantiere Digitale"** (imprese edili strutturate)
+- Cantieri + Report Telegram + Documenti scadenze + Presenze
+- Valore: "Sai cosa succede in cantiere senza chiamare nessuno."
+
+I pacchetti 1 e 2 sono vendibili oggi. Il 3 richiede settore specifico. Il 4 è per clienti avanzati.
+
+---
+
+## 8. RACCOMANDAZIONE FINALE
+
+**Prima di andare forte sul mercato:**
+1. Fixare la sicurezza JWT (1-2 ore di lavoro, impatto enorme)
+2. Rimuovere/nascondere i dead-end (CRM, Webhooks)
+3. Rendere atomico il topup crediti
+4. Aggiungere signup self-service base
+
+**Come semplificare:**
+- La sidebar ha 6 sezioni. Per il primo mese di un nuovo cliente, bastano 3: Dashboard, Agenti, Contatti. Il resto può apparire progressivamente (progressive disclosure).
+- Le sezioni Cantieri/Documenti/Presenze/Render dovrebbero essere visibili solo quando pertinenti.
+
+**Come rafforzare il posizionamento:**
+- Il Template Hub è il punto di forza. È già eccellente — goal-oriented, con KPI e risultati attesi. Usarlo come landing page del prodotto.
+- Le Smart Actions nella dashboard sono il differenziante vero. Nessun CRM edile dice "Richiama Mario, il preventivo è fermo da 12 giorni." Questo è ciò che rende Edile Genius più di un chatbot tool.
+- Il Lead Score + Timeline unificata completano il quadro: il commerciale sa chi chiamare e perché.
+
+**Giudizio finale:**
+La piattaforma ha una struttura solida e un posizionamento commerciale forte. Il core (agenti vocali + template hub + crediti + dashboard intelligente) è vendibile. Il rischio principale è la sicurezza delle edge functions — va fixata prima di qualsiasi demo con dati reali. Il secondo rischio è la complessità percepita: troppe sezioni visibili per un utente che deve solo "attivare un agente e vedere i risultati."
+
+Con 3-4 fix mirati (JWT, dead-end, atomicità crediti, progressive disclosure sidebar), la piattaforma è pronta per i primi 10-20 clienti paganti.
+
