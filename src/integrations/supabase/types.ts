@@ -1163,6 +1163,86 @@ export type Database = {
           },
         ]
       }
+      campaign_contacts: {
+        Row: {
+          attempts: number
+          campaign_id: string
+          company_id: string
+          contact_id: string
+          conversation_id: string | null
+          created_at: string | null
+          error: string | null
+          id: string
+          last_call_at: string | null
+          max_attempts: number
+          next_retry_at: string | null
+          outcome: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          attempts?: number
+          campaign_id: string
+          company_id: string
+          contact_id: string
+          conversation_id?: string | null
+          created_at?: string | null
+          error?: string | null
+          id?: string
+          last_call_at?: string | null
+          max_attempts?: number
+          next_retry_at?: string | null
+          outcome?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          attempts?: number
+          campaign_id?: string
+          company_id?: string
+          contact_id?: string
+          conversation_id?: string | null
+          created_at?: string | null
+          error?: string | null
+          id?: string
+          last_call_at?: string | null
+          max_attempts?: number
+          next_retry_at?: string | null
+          outcome?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_contacts_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_contacts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_contacts_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaigns: {
         Row: {
           agent_id: string | null
