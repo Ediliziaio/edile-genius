@@ -99,7 +99,7 @@ export default function Settings() {
 
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
-  const [savingApi, setSavingApi] = useState(false);
+  
   const [savingNotif, setSavingNotif] = useState(false);
   const [testing, setTesting] = useState(false);
 
