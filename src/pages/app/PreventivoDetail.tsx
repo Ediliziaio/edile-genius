@@ -38,8 +38,13 @@ export default function PreventivoDetail() {
       const { data, error } = await (supabase.from("preventivi") as any)
         .select("*, cantieri(nome)")
         .eq("id", id)
-        .single();
+        .maybeSingle();
       if (error) throw error;
+      if (!data) {
+        toast.error("Preventivo non trovato");
+        navigate("/app/preventivi");
+        return null;
+      }
       // Normalize voci format (support old and new)
       const normalizedVoci = (data.voci || []).map((v: any, i: number) => ({
         id: v.id || crypto.randomUUID(),
