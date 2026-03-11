@@ -3,7 +3,11 @@ import { useState, useCallback, useEffect } from "react";
 import { useCompanyId } from "@/hooks/useCompanyId";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, AlertCircle } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { PROMPT_TEMPLATES, type UseCaseId } from "@/components/agents/PromptTemplates";
 import AgentStepSidebar from "@/components/agents/create/AgentStepSidebar";
