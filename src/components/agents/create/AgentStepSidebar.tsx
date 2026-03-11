@@ -1,12 +1,11 @@
-import { Bot, Mic, MessageSquare, Settings2, PlayCircle, Check, AlertCircle } from "lucide-react";
+import { Bot, Mic, Settings2, PlayCircle, Check, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STEPS = [
-  { id: 0, label: "Agente", sublabel: "Identità e prompt", icon: Bot },
-  { id: 1, label: "Voce", sublabel: "Selezione e impostazioni", icon: Mic },
-  { id: 2, label: "Conversazione", sublabel: "Flusso e timeout", icon: MessageSquare },
-  { id: 3, label: "Avanzate", sublabel: "KB, Tools e Guardrails", icon: Settings2 },
-  { id: 4, label: "Revisione & Test", sublabel: "Riepilogo e prova", icon: PlayCircle },
+  { id: 0, label: "Il Tuo Agente", sublabel: "Nome e personalità", icon: Bot },
+  { id: 1, label: "Scegli la Voce", sublabel: "Come parla il tuo agente", icon: Mic },
+  { id: 2, label: "Impostazioni", sublabel: "Opzioni avanzate", icon: Settings2 },
+  { id: 3, label: "Rivedi e Attiva", sublabel: "Controlla e pubblica", icon: PlayCircle },
 ];
 
 interface AgentStepSidebarProps {
