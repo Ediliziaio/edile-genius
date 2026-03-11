@@ -221,7 +221,7 @@ export default function TemplatePreventivo() {
                 </div>
               )}
               <div className="relative">
-                <input type="file" accept="image/*" onChange={handleLogoUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={handleLogoUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
                 <Button variant="outline" className="gap-2 w-full">
                   <Upload className="h-4 w-4" /> {form.logo_url ? "Cambia Logo" : "Carica Logo"}
                 </Button>
