@@ -29,12 +29,9 @@ interface Template {
 }
 
 const upcomingTemplates = [
-  { slug: "richiamo-lead", name: "Richiamo Lead Inattivi", icon: "📞", description: "Ricontatta automaticamente i lead che non hanno risposto.", category: "qualifica_lead", channel: ["whatsapp", "voice"], estimated_setup_min: 25, difficulty: "medio", is_featured: false, installs_count: 0 },
-  { slug: "assistenza-post-vendita", name: "Assistenza Post-Vendita", icon: "🔧", description: "Gestisci richieste di assistenza post-installazione.", category: "post_vendita", channel: ["whatsapp"], estimated_setup_min: 20, difficulty: "facile", is_featured: false, installs_count: 0 },
-  { slug: "prenotazione-appuntamenti", name: "Prenotazione Appuntamenti", icon: "📅", description: "Prenota sopralluoghi e appuntamenti con i clienti.", category: "appuntamenti", channel: ["whatsapp", "voice"], estimated_setup_min: 30, difficulty: "facile", is_featured: false, installs_count: 0 },
-  { slug: "check-sicurezza", name: "Check Sicurezza Cantiere", icon: "🦺", description: "Checklist di sicurezza giornaliera per ogni cantiere.", category: "sicurezza", channel: ["whatsapp"], estimated_setup_min: 15, difficulty: "facile", is_featured: false, installs_count: 0 },
-  { slug: "onboarding-operaio", name: "Onboarding Nuovo Operaio", icon: "💼", description: "Guida i nuovi operai nei primi giorni di lavoro.", category: "hr_operai", channel: ["whatsapp", "telegram"], estimated_setup_min: 35, difficulty: "medio", is_featured: false, installs_count: 0 },
-  { slug: "avanzamento-settimanale", name: "Avanzamento Lavori Settimanale", icon: "📊", description: "Report settimanale aggregato di tutti i cantieri.", category: "reportistica", channel: ["email", "whatsapp"], estimated_setup_min: 20, difficulty: "facile", is_featured: false, installs_count: 0 },
+  { slug: "check-sicurezza", name: "Check Sicurezza Cantiere", icon: "🦺", description: "Checklist di sicurezza giornaliera automatizzata per ogni cantiere.", category: "sicurezza", channel: ["whatsapp"], estimated_setup_min: 15, difficulty: "facile", is_featured: false, installs_count: 0 },
+  { slug: "onboarding-operaio", name: "Onboarding Nuovo Operaio", icon: "💼", description: "Guida i nuovi operai nei primi giorni con procedure e documenti.", category: "hr_operai", channel: ["whatsapp", "telegram"], estimated_setup_min: 35, difficulty: "medio", is_featured: false, installs_count: 0 },
+  { slug: "avanzamento-settimanale", name: "Avanzamento Lavori Settimanale", icon: "📊", description: "Report settimanale aggregato di tutti i cantieri attivi.", category: "reportistica", channel: ["email", "whatsapp"], estimated_setup_min: 20, difficulty: "facile", is_featured: false, installs_count: 0 },
 ];
 
 export default function TemplatesPage() {
