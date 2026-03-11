@@ -47,6 +47,8 @@ export default function CantierePage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ nome: "", indirizzo: "", committente: "", responsabile: "", data_inizio: "", data_fine_prevista: "", email_report: "" });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [deleteTarget, setDeleteTarget] = useState<Cantiere | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchCantieri = async () => {
     if (!companyId) return;
