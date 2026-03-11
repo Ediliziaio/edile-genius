@@ -135,12 +135,25 @@
   - Query preventivi per nome/telefono contatto
   - Lead Score full display nell'header della scheda
 
-## 🔜 Prossimi Step — P1-C: Call Summary Automatico
+## ✅ Blocco 8 — P1-C: Call Summary Automatico
 
-### Requisito
-- Aggiungere OPENAI_API_KEY come Supabase Secret
-- Aggiungere generazione summary via gpt-4o-mini nel webhook `elevenlabs-webhook/index.ts`
-- Popolare il campo `conversations.summary` (già esistente) con riassunto 2-3 frasi in italiano
+### Backend
+- `supabase/functions/elevenlabs-webhook/summary.ts`: modulo separato per generazione summary
+  - Chiama OpenAI gpt-4o-mini con prompt minimale in italiano
+  - Non-blocking: se OPENAI_API_KEY non è configurata, salta silenziosamente
+  - Cap transcript a 6000 chars per contenere i costi (~$0.001/call)
+- `elevenlabs-webhook/index.ts`: importa e chiama `generateCallSummary()` dopo step 7
+  - Popola `conversations.summary` solo se la generazione ha successo
+
+### Frontend (già predisposto)
+- Dashboard "Attività recente": mostra `c.summary` sotto il nome agente
+- Conversazioni: mostra summary nella tabella e nel dialog dettaglio
+- Timeline contatto: mostra summary nelle conversazioni
+
+### Requisito SuperAdmin
+- Aggiungere OPENAI_API_KEY come Supabase Secret (da configurare via SuperAdmin)
+
+## 🔜 Prossimi Step
 
 ### P2 — Importante dopo
 - Follow-up Generator (bottone "Genera messaggio" con LLM)

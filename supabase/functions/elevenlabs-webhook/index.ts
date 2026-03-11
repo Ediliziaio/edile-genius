@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { generateRequestId, log } from "../_shared/utils.ts";
+import { generateCallSummary } from "./summary.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -140,9 +141,12 @@ Deno.serve(async (req) => {
                       data.analysis?.evaluation_criteria_results?.[0]?.result === "failure" ? 0 : null;
     const evalNotes = data.analysis?.transcript_summary || null;
 
+    // 7b. Generate AI summary (non-blocking — returns null if OPENAI_API_KEY not set)
+    const summary = await generateCallSummary(transcript || [], rid);
+
     // 8. Update conversation
     if (conversation_id) {
-      await sb.from("conversations").update({
+      const convUpdate: Record<string, any> = {
         duration_sec: duration_seconds,
         minutes_billed: Number(durationMin.toFixed(4)),
         cost_billed_eur: costBilledTotal,
@@ -152,7 +156,11 @@ Deno.serve(async (req) => {
         eval_score: evalScore,
         eval_notes: evalNotes,
         ended_at: new Date().toISOString(),
-      }).eq("el_conv_id", conversation_id);
+      };
+      if (summary) {
+        convUpdate.summary = summary;
+      }
+      await sb.from("conversations").update(convUpdate).eq("el_conv_id", conversation_id);
     }
 
     // 9. Update agent stats
