@@ -137,7 +137,7 @@ Deno.serve(async (req) => {
         llm_model: "gemini-2.0-flash",
         use_case: template.slug,
         type: agentType,
-        created_by: user.id,
+        created_by: userId,
       })
       .select()
       .single();
