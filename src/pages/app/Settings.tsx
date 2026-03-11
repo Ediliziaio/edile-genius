@@ -178,14 +178,6 @@ export default function Settings() {
     toast(error ? { title: "Errore", description: error.message, variant: "destructive" } : { title: "Profilo aggiornato" });
   };
 
-  const saveApiKey = async () => {
-    if (!companyId) return;
-    setSavingApi(true);
-    const { error } = await supabase.from("companies").update({ el_api_key: apiKey || null }).eq("id", companyId);
-    setSavingApi(false);
-    toast(error ? { title: "Errore", description: error.message, variant: "destructive" } : { title: "API Key aggiornata" });
-  };
-
   const testConnection = async () => {
     if (!companyId) return;
     setTesting(true);
