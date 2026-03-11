@@ -23,10 +23,13 @@ export default function AgentOutboundTab({ agentId, companyId, outboundEnabled, 
   const { toast } = useToast();
   const [enabled, setEnabled] = useState(outboundEnabled);
   const [toNumber, setToNumber] = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const [calling, setCalling] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [calls, setCalls] = useState<any[]>([]);
   const [loadingCalls, setLoadingCalls] = useState(true);
+  const [callPage, setCallPage] = useState(0);
+  const CALLS_PER_PAGE = 20;
 
   useEffect(() => {
     supabase.from("outbound_call_log").select("*").eq("agent_id", agentId).order("started_at", { ascending: false }).limit(10)
