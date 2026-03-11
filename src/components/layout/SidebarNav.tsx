@@ -9,9 +9,10 @@ import {
   BookUser, Megaphone, type LucideIcon,
   AlertTriangle, MessageCircle, Puzzle, Palette, HardHat,
   FileSignature, ShieldCheck, ClipboardList,
-  Archive, Coins, Link2, ChevronDown,
+  Coins, ChevronDown, Clock,
 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { differenceInDays } from "date-fns";
 
 interface NavItem { label: string; icon: LucideIcon; href: string; }
 interface NavSection {
@@ -19,7 +20,6 @@ interface NavSection {
   items: NavItem[];
   collapsible?: boolean;
   defaultOpen?: boolean;
-  /** Section key for progressive disclosure */
   visibilityKey?: string;
 }
 
@@ -28,13 +28,14 @@ const companyNav: NavSection[] = [
     { label: "Dashboard", icon: LayoutDashboard, href: "/app" },
   ]},
   { header: "I MIEI AGENTI", items: [
-    { label: "Tutti gli Agenti", icon: Bot, href: "/app/agents" },
-    { label: "Archivio Conoscenze", icon: Archive, href: "/app/knowledge-base" },
+    { label: "Agenti", icon: Bot, href: "/app/agents" },
     { label: "Risultati", icon: BarChart3, href: "/app/analytics" },
   ]},
   { header: "VENDITE", items: [
     { label: "Contatti", icon: BookUser, href: "/app/contacts" },
     { label: "Campagne", icon: Megaphone, href: "/app/campaigns" },
+  ]},
+  { header: "VENDITE AVANZATE", collapsible: true, defaultOpen: false, visibilityKey: "preventivi", items: [
     { label: "Preventivi", icon: FileSignature, href: "/app/preventivi" },
   ]},
   { header: "OPERATIVITÀ", collapsible: true, defaultOpen: false, visibilityKey: "cantieri", items: [
@@ -42,12 +43,11 @@ const companyNav: NavSection[] = [
     { label: "Documenti", icon: ShieldCheck, href: "/app/documenti" },
     { label: "Presenze", icon: ClipboardList, href: "/app/presenze" },
   ]},
-  { header: "STRUMENTI AI", visibilityKey: "render", items: [
+  { header: "STRUMENTI AI", collapsible: true, defaultOpen: false, visibilityKey: "render", items: [
     { label: "Render", icon: Palette, href: "/app/render" },
   ]},
   { header: "IMPOSTAZIONI", items: [
-    { label: "Integrazioni", icon: Link2, href: "/app/integrations" },
-    { label: "Crediti e Piano", icon: Coins, href: "/app/credits" },
+    { label: "Crediti", icon: Coins, href: "/app/credits" },
     { label: "Account", icon: Settings, href: "/app/settings" },
   ]},
 ];
@@ -95,6 +95,7 @@ export default function SidebarNav({ onNavigate }: SidebarNavProps) {
 
   const [creditInfo, setCreditInfo] = useState<CreditInfo | null>(null);
   const [sectionVisibility, setSectionVisibility] = useState<Record<string, boolean>>({});
+  const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null);
 
   useEffect(() => {
     if (!isCompanyView) return;
@@ -105,18 +106,26 @@ export default function SidebarNav({ onNavigate }: SidebarNavProps) {
       if (!profile?.company_id) return;
       const companyId = profile.company_id;
 
-      // Fetch credits + progressive disclosure data in parallel
-      const [creditsRes, cantieriRes, renderRes, companyRes] = await Promise.all([
+      const [creditsRes, cantieriRes, renderRes, companyRes, preventiviRes] = await Promise.all([
         supabase.from("ai_credits").select("balance_eur, total_recharged_eur, total_spent_eur, calls_blocked, alert_threshold_eur").eq("company_id", companyId).single(),
         supabase.from("cantieri").select("id", { count: "exact", head: true }).eq("company_id", companyId),
         supabase.from("render_credits" as any).select("balance", { count: "exact", head: true }).eq("company_id", companyId),
-        supabase.from("companies").select("sector").eq("id", companyId).single(),
+        supabase.from("companies").select("sector, plan, trial_ends_at").eq("id", companyId).single(),
+        supabase.from("preventivi" as any).select("id", { count: "exact", head: true }).eq("company_id", companyId),
       ]);
 
       if (creditsRes.data) setCreditInfo(creditsRes.data as unknown as CreditInfo);
 
+      // Trial countdown
+      const company = companyRes.data;
+      if (company?.plan === "trial" && company.trial_ends_at) {
+        const days = differenceInDays(new Date(company.trial_ends_at), new Date());
+        setTrialDaysLeft(Math.max(0, days));
+      }
+
       const hasCantieri = (cantieriRes.count ?? 0) > 0;
-      const sector = companyRes.data?.sector?.toLowerCase() || "";
+      const hasPreventivi = (preventiviRes.count ?? 0) > 0;
+      const sector = company?.sector?.toLowerCase() || "";
       const isEdile = ["edilizia", "costruzioni", "impresa_edile", "ristrutturazione"].some(s => sector.includes(s));
       const isSerramenti = ["serramenti", "infissi", "finestre", "showroom"].some(s => sector.includes(s));
       const hasRenderCredits = (renderRes.data as any)?.balance > 0;
@@ -124,15 +133,14 @@ export default function SidebarNav({ onNavigate }: SidebarNavProps) {
       setSectionVisibility({
         cantieri: hasCantieri || isEdile,
         render: isSerramenti || hasRenderCredits,
+        preventivi: hasPreventivi || isEdile || isSerramenti,
       });
     };
     fetchData();
   }, [isCompanyView]);
 
-  // For company view, filter sections based on visibility
   const sections = (isSuperAdmin && !isImpersonating) ? superadminNav : companyNav.filter(section => {
     if (!section.visibilityKey) return true;
-    // Always show if we're on a route within this section
     if (section.items.some(item => location.pathname.startsWith(item.href))) return true;
     return sectionVisibility[section.visibilityKey] ?? false;
   });
@@ -217,6 +225,20 @@ export default function SidebarNav({ onNavigate }: SidebarNavProps) {
           );
         })}
       </nav>
+
+      {/* Trial countdown */}
+      {isCompanyView && trialDaysLeft !== null && (
+        <div className="mx-3 mb-2 rounded-lg border border-yellow-300 bg-yellow-50 px-3 py-2.5">
+          <div className="flex items-center gap-2">
+            <Clock size={14} className="text-yellow-600 shrink-0" />
+            <p className="text-xs font-semibold text-yellow-800">
+              {trialDaysLeft === 0
+                ? "Trial scaduto oggi"
+                : `${trialDaysLeft} giorn${trialDaysLeft === 1 ? "o" : "i"} di prova rimast${trialDaysLeft === 1 ? "o" : "i"}`}
+            </p>
+          </div>
+        </div>
+      )}
 
       {isCompanyView && creditInfo && (
         <div className="mt-auto border-t border-border px-4 py-4 space-y-2">
