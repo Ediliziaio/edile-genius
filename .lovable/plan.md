@@ -1,5 +1,5 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro
+# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro + AI Avanzata
 
 ## ✅ Completato in questo blocco
 
@@ -75,48 +75,79 @@
 
 ### Database
 - Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
-- Estensione `preventivi` con +26 colonne (template_id, versione, titolo, foto_sopralluogo_urls, foto_copertina_url, sconto_globale, imponibile, iva_importo, totale_finale, condizioni, clausole, intro, firma_testo, tempi_esecuzione, validita_giorni, data_scadenza, tracking_aperto_at/count, link_accettazione, firma_cliente_url, accettato_at, rifiutato_at, rifiuto_motivo, parent_id, inviato_at, inviato_via, cliente_piva, cliente_codice_fiscale)
+- Estensione `preventivi` con +26 colonne
 - Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
 - Storage buckets: preventivi-media (privato), template-assets (pubblico)
 - RLS company-scoped + superadmin
 
 ### Edge Functions
-- `process-preventivo-audio` RISCRITTO: prompt GPT esperto (prezzario DEI, categorie edilizie, sconti), nuovo formato voci con id/ordine/categoria/titolo_voce/sconto_percentuale/foto_urls/note_voce/evidenziata, calcolo totali con sconto e IVA, data_scadenza automatica
+- `process-preventivo-audio` RISCRITTO
 
 ### PDF Client-side (@react-pdf/renderer)
-- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4 con:
-  - Header azienda + logo
-  - Band titolo colorata (colore_primario)
-  - Grid cliente/riferimenti
-  - Testo intro
-  - Foto copertina
-  - Tabella voci per categoria con subtotali
-  - Totali con sconto globale + IVA
-  - Note, condizioni, clausole
-  - Sezione firma doppia (azienda + cliente)
-  - Footer pagina
+- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4
 
 ### Frontend
-- **NuovoPreventivo.tsx** → Wizard 3 step:
-  - Step 1: dati cliente (nome, indirizzo, telefono, email, P.IVA, CF) + titolo/oggetto + cantiere
-  - Step 2: registrazione/upload audio + upload foto multiplo con grid preview e badge copertina
-  - Step 3: editor visuale voci per categoria (card editabili con titolo, descrizione, U.M., quantità, prezzo, sconto, totale) + totali live + scarica PDF anteprima
-- **PreventivoDetail.tsx** → 3 tabs:
-  - Dettaglio: voci per categoria con badge sconto, trascrizione collapsible, note/stato/tempi
-  - Cronologia: timeline eventi (creato, inviato, accettato/rifiutato)
-  - Tracking: KPI aperture, ultima apertura, ultimo invio
-  - Azioni: scarica PDF, modifica, elimina
-- **PreventiviList.tsx** → KPI cards (totale, bozze, in attesa, valore accettati) + filtri tab per stato + ricerca + lista con badge versione e scadenza
-- **TemplatePreventivo.tsx** (`/app/impostazioni/template-preventivo`): 3 tabs:
-  - Branding: logo upload, color picker primario/secondario con preview gradient, intestazione/piè di pagina
-  - Testi Standard: intro, condizioni, clausole, firma, validità giorni, IVA default
-  - Layout: 5 toggle (foto copertina, foto voci, subtotali categoria, firma, condizioni)
+- NuovoPreventivo.tsx, PreventivoDetail.tsx, PreventiviList.tsx, TemplatePreventivo.tsx
 
-### Navigazione
-- Sidebar: aggiunto "Template PDF" nella sezione AUTOMAZIONI
-- Route: `/app/impostazioni/template-preventivo`
+## ✅ Blocco 8 — AI Avanzata P1 (Smart Actions + Lead Score + Timeline)
 
-## 🔜 Prossimi Blocchi
-- SuperAdmin Dashboard economics
-- Integrazioni CRM native
-- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets
+### Smart Actions Engine (Dashboard)
+- Espanso da 3 regole hardcoded a 10+ regole basate su dati reali:
+  - Crediti in esaurimento (danger)
+  - Agenti in bozza (warning)
+  - Agenti senza numero telefono (warning)
+  - Agenti inattivi >7 giorni (info)
+  - Contatti da richiamare con next_call_at scaduto (warning)
+  - Preventivi in bozza da >7 giorni (warning)
+  - Preventivi inviati senza risposta da >10 giorni (warning)
+  - Documenti in scadenza entro 15 giorni (warning)
+  - Campagne con tasso appuntamenti <5% (info)
+- Query Supabase dedicate per ogni regola
+- Stato "Tutto in ordine" quando nessuna azione è necessaria
+- Mostra summary delle conversazioni recenti nella tabella attività
+
+### Lead Score Automatico
+- `src/lib/lead-score.ts`: motore di scoring 0-100 senza LLM
+  - +30 outcome qualified/appointment
+  - +20 sentiment positivo
+  - +15 preventivo associato
+  - +10 contatto completo (tel+email)
+  - +10 callback attempts
+  - +5 fonte inbound
+  - -10 inattivo >30 giorni
+  - -20 not_interested
+  - -30 do_not_call/invalid
+- `src/components/contacts/LeadScoreBadge.tsx`: badge con tooltip fattori
+  - Compact mode per tabella (emoji + score numerico)
+  - Full mode per scheda contatto (con lista fattori)
+  - Colori: 🔴 Caldo (>60), 🟠 Tiepido (30-60), 🔵 Freddo (<30)
+- Badge integrato nella tabella contatti (nuova colonna "Score")
+- Badge integrato nell'header della scheda contatto
+
+### Timeline Unificata del Contatto
+- `ContactDetailPanel.tsx` completamente refactorato:
+  - Tab "Timeline" come default (al posto di "Info")
+  - Cronologia verticale con linea e pallini colorati per tipo:
+    - 🔵 Conversazioni (con summary, outcome, sentiment, durata)
+    - 🟡 Note manuali
+    - 🟢 Preventivi collegati (stato, importo, numero)
+    - ⚪ Eventi (contatto creato)
+  - Query preventivi per nome/telefono contatto
+  - Lead Score full display nell'header della scheda
+
+## 🔜 Prossimi Step — P1-C: Call Summary Automatico
+
+### Requisito
+- Aggiungere OPENAI_API_KEY come Supabase Secret
+- Aggiungere generazione summary via gpt-4o-mini nel webhook `elevenlabs-webhook/index.ts`
+- Popolare il campo `conversations.summary` (già esistente) con riassunto 2-3 frasi in italiano
+
+### P2 — Importante dopo
+- Follow-up Generator (bottone "Genera messaggio" con LLM)
+- Opportunity Recovery alerts (preventivi fermi, lead dormenti)
+- Motivo principale (estrarre dal transcript motivo interesse/rifiuto)
+
+### P3 — Avanzato / successivo
+- Personalizzazione regole Smart Actions per admin
+- Report settimanale automatico via email al titolare
+- Trend predittivo su tasso conversione
