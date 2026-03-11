@@ -72,10 +72,10 @@ export default function CreateCampaignPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const { data: agents = [] } = useQuery({
-    queryKey: ["company-agents-list", companyId],
+    queryKey: ["company-agents-active", companyId],
     enabled: !!companyId,
     queryFn: async () => {
-      const { data } = await supabase.from("agents").select("id, name, status").eq("company_id", companyId!).order("name");
+      const { data } = await supabase.from("agents").select("id, name, status").eq("company_id", companyId!).eq("status", "active").order("name");
       return data || [];
     },
   });

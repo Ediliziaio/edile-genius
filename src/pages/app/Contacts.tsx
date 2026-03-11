@@ -220,10 +220,11 @@ export default function ContactsPage() {
   };
 
   const exportCSV = () => {
+    const escape = (v: string) => `"${String(v ?? "").replace(/"/g, '""')}"`;
     const headers = ["Nome", "Telefono", "Email", "Azienda", "Città", "Stato", "Fonte", "Priorità"];
     const rows = filtered.map((c: any) => [c.full_name, c.phone || "", c.email || "", c.company_name || "", c.city || "", c.status, c.source || "", c.priority || ""]);
-    const csv = [headers, ...rows].map(r => r.map((v: string) => `"${v}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
+    const csv = [headers.map(escape), ...rows.map(r => r.map(escape))].map(r => r.join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href = url; a.download = "contatti.csv"; a.click();
     URL.revokeObjectURL(url);
@@ -346,7 +347,8 @@ export default function ContactsPage() {
 
   // Kanban View
   const KanbanView = () => {
-    const kanbanStatuses = STATUS_OPTIONS.filter(s => ["new", "to_call", "called", "qualified", "appointment"].includes(s.value));
+    // Show all statuses in kanban, use horizontal scroll for overflow
+    const kanbanStatuses = STATUS_OPTIONS;
     return (
       <div className="flex gap-4 overflow-x-auto pb-4">
         {kanbanStatuses.map(status => {

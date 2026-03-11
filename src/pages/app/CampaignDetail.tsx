@@ -47,7 +47,7 @@ export default function CampaignDetailPage() {
   const { data: campaign, isLoading } = useQuery({
     queryKey: ["campaign-detail", id],
     enabled: !!id,
-    refetchInterval: 10000, // live refresh
+    refetchInterval: 30000, // live refresh every 30s
     queryFn: async () => {
       const { data, error } = await supabase
         .from("campaigns")
@@ -177,7 +177,7 @@ export default function CampaignDetailPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          {campaign.status === "active" && (
+          {(campaign.status === "active" || campaign.status === "paused") && (
             <Button
               onClick={async () => {
                 setRunningBatch(true);

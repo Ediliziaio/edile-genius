@@ -349,8 +349,10 @@ interface Props {
 export const PreventivoPDF: React.FC<Props> = ({ data, template }) => {
   const primario = template.colore_primario || "#f4a100";
   const secondario = template.colore_secondario || "#1e293b";
-  const S = createStyles(primario, secondario);
+  // Memoize styles to avoid recreating StyleSheet on every render with same colors
+  const S = React.useMemo(() => createStyles(primario, secondario), [primario, secondario]);
   const categorieMap = groupByCategory(data.voci || []);
+  const isDraft = (data as any).stato === "bozza";
 
   const companyName = template.azienda_nome || template.company_name || "Azienda";
   const companyAddress = template.azienda_indirizzo || template.company_address;
@@ -373,6 +375,24 @@ export const PreventivoPDF: React.FC<Props> = ({ data, template }) => {
   return (
     <Document>
       <Page size="A4" style={S.page}>
+        {/* WATERMARK BOZZA */}
+        {isDraft && (
+          <View style={{
+            position: "absolute",
+            top: "35%",
+            left: "15%",
+            width: "70%",
+            transform: "rotate(-45deg)",
+            opacity: 0.08,
+          }} fixed>
+            <Text style={{
+              fontSize: 72,
+              fontFamily: "Helvetica-Bold",
+              color: "#000000",
+              textAlign: "center",
+            }}>BOZZA</Text>
+          </View>
+        )}
         {/* HEADER */}
         <View style={S.header}>
           <View>

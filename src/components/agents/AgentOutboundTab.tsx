@@ -23,15 +23,23 @@ export default function AgentOutboundTab({ agentId, companyId, outboundEnabled, 
   const { toast } = useToast();
   const [enabled, setEnabled] = useState(outboundEnabled);
   const [toNumber, setToNumber] = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const [calling, setCalling] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [calls, setCalls] = useState<any[]>([]);
   const [loadingCalls, setLoadingCalls] = useState(true);
+  const [callPage, setCallPage] = useState(0);
+  const CALLS_PER_PAGE = 20;
 
-  useEffect(() => {
-    supabase.from("outbound_call_log").select("*").eq("agent_id", agentId).order("started_at", { ascending: false }).limit(10)
-      .then(({ data }) => { setCalls(data || []); setLoadingCalls(false); });
-  }, [agentId]);
+  const loadCalls = (page = 0) => {
+    setLoadingCalls(true);
+    supabase.from("outbound_call_log").select("*").eq("agent_id", agentId)
+      .order("started_at", { ascending: false })
+      .range(page * CALLS_PER_PAGE, (page + 1) * CALLS_PER_PAGE - 1)
+      .then(({ data }) => { setCalls(prev => page === 0 ? (data || []) : [...prev, ...(data || [])]); setLoadingCalls(false); });
+  };
+
+  useEffect(() => { loadCalls(0); }, [agentId]);
 
   const toggleOutbound = async () => {
     setToggling(true);
@@ -43,20 +51,39 @@ export default function AgentOutboundTab({ agentId, companyId, outboundEnabled, 
     finally { setToggling(false); }
   };
 
+  const validateE164 = (num: string): boolean => /^\+[1-9]\d{6,14}$/.test(num.replace(/\s/g, ""));
+
+  const handleNumberChange = (val: string) => {
+    setToNumber(val);
+    const clean = val.replace(/\s/g, "");
+    if (clean && !validateE164(clean)) {
+      setPhoneError("Formato E.164 richiesto (es. +39XXXXXXXXXX)");
+    } else {
+      setPhoneError("");
+    }
+  };
+
   const startCall = async () => {
-    if (!toNumber) return;
+    const cleanNumber = toNumber.replace(/\s/g, "");
+    if (!cleanNumber) return;
+    if (!validateE164(cleanNumber)) {
+      setPhoneError("Formato E.164 richiesto (es. +39XXXXXXXXXX)");
+      return;
+    }
     setCalling(true);
     try {
       const { data, error } = await supabase.functions.invoke("elevenlabs-outbound-call", {
-        body: { agent_id: agentId, to_number: toNumber },
+        body: { agent_id: agentId, to_number: cleanNumber },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast({ title: "Chiamata avviata!", description: `Chiamata a ${toNumber} in corso...` });
+      toast({ title: "Chiamata avviata!", description: `Chiamata a ${cleanNumber} in corso...` });
       setToNumber("");
-      // Refresh calls
-      const { data: newCalls } = await supabase.from("outbound_call_log").select("*").eq("agent_id", agentId).order("started_at", { ascending: false }).limit(10);
-      setCalls(newCalls || []);
+      setPhoneError("");
+      // Refresh calls after short delay for DB propagation
+      await new Promise(r => setTimeout(r, 1000));
+      loadCalls(0);
+      setCallPage(0);
     } catch (err: any) {
       toast({ variant: "destructive", title: "Errore", description: err.message });
     } finally { setCalling(false); }
@@ -95,12 +122,13 @@ export default function AgentOutboundTab({ agentId, companyId, outboundEnabled, 
               <div className="space-y-2">
                 <Label className="text-xs text-muted-foreground">Numero da chiamare</Label>
                 <div className="flex gap-2">
-                  <Input value={toNumber} onChange={e => setToNumber(e.target.value)} placeholder="+39 02 XXXX XXXX" className="font-mono flex-1" />
-                  <Button onClick={startCall} disabled={calling || !toNumber || !elAgentId} className="bg-brand hover:bg-brand/90 text-white">
+                  <Input value={toNumber} onChange={e => handleNumberChange(e.target.value)} placeholder="+39XXXXXXXXXX" className="font-mono flex-1" />
+                  <Button onClick={startCall} disabled={calling || !toNumber || !elAgentId || !!phoneError} className="bg-brand hover:bg-brand/90 text-white">
                     {calling ? <Loader2 className="h-4 w-4 animate-spin" /> : <Phone className="h-4 w-4 mr-1" />}
                     Chiama
                   </Button>
                 </div>
+                {phoneError && <p className="text-[10px] text-destructive">{phoneError}</p>}
                 {!elAgentId && <p className="text-[10px] text-destructive">L'agente non ha un ID ElevenLabs associato.</p>}
               </div>
             </CardContent>
@@ -130,6 +158,13 @@ export default function AgentOutboundTab({ agentId, companyId, outboundEnabled, 
                     ))}
                   </TableBody>
                 </Table>
+              )}
+              {calls.length >= (callPage + 1) * CALLS_PER_PAGE && (
+                <div className="flex justify-center py-3">
+                  <Button variant="outline" size="sm" onClick={() => { const next = callPage + 1; setCallPage(next); loadCalls(next); }}>
+                    Carica altri
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>
