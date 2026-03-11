@@ -19,10 +19,16 @@ export default function AnalyticsPage() {
   const [rangeDays, setRangeDays] = useState(30);
   const [agentFilter, setAgentFilter] = useState("all");
 
-  const { data: conversations = [] } = useQuery({
+  const { data: rawConversations = [], isLoading: loadingConvs } = useQuery({
     queryKey: ["analytics-conversations", companyId], enabled: !!companyId,
-    queryFn: async () => { const { data } = await supabase.from("conversations").select("*").eq("company_id", companyId!).order("started_at", { ascending: false }).limit(1000); return data || []; },
+    queryFn: async () => {
+      const { data, error } = await supabase.from("conversations").select("id, agent_id, started_at, ended_at, duration_sec, status, outcome, sentiment, direction")
+        .eq("company_id", companyId!).order("started_at", { ascending: false }).limit(1000);
+      if (error) throw error;
+      return data || [];
+    },
   });
+  const isTruncated = rawConversations.length >= 1000;
 
   const { data: agents = [] } = useQuery({
     queryKey: ["analytics-agents", companyId], enabled: !!companyId,
