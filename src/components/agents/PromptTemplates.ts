@@ -333,6 +333,7 @@ TONO: Premuroso, attento, professionale. Il post-vendita distingue un'azienda se
 ESITO: "soddisfatto", "problema_minore" (intervento programmato), "problema_grave" (escalation)`,
     first_message: "Buongiorno {nome}! Sono l'assistente di {azienda}. Circa una settimana fa abbiamo completato i lavori da lei. Volevamo assicurarci che tutto funzioni perfettamente. Come si trova?",
   },
+};
 
 export const SECTORS = [
   "Serramentista", "Impresa Edile", "Fotovoltaico", "Ristrutturazioni",
