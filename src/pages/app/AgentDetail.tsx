@@ -134,7 +134,14 @@ export default function AgentDetail() {
     queryFn: async () => { const { data, error } = await supabase.from("conversations").select("*").eq("agent_id", id!).order("started_at", { ascending: false }).limit(50); if (error) throw error; return data; },
   });
 
-  if (agent && !cfg) setCfg(buildConfigState(agent));
+  // Initialize config from agent data via useEffect (not during render)
+  useEffect(() => {
+    if (agent && agent.id !== initializedForId) {
+      setCfg(buildConfigState(agent));
+      setDirty(false);
+      setInitializedForId(agent.id);
+    }
+  }, [agent, initializedForId]);
 
   const handleSave = async () => {
     if (!cfg || !id) return;
