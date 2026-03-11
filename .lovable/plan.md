@@ -182,8 +182,13 @@
 
 ## 🔜 Prossimi Step
 
-### P2 — Importante dopo
-- Campagne outbound end-to-end (schedulazione batch, retry automatico)
+### ✅ Completato — Campagne Outbound E2E
+- Tabella `campaign_contacts` per tracking stato per-contatto (pending/calling/retry/completed/failed)
+- Edge function `run-campaign-batch`: populate contatti da lista + esecuzione batch con chiamate EL outbound
+- Retry automatico con delay configurabile e max tentativi
+- Bottone "Avvia" popola + lancia primo batch
+- Bottone "Lancia batch" per batch successivi su campagne attive
+- Aggiornamento stats campagna in tempo reale
 
 ### ✅ Completato — Motivo Principale
 - Colonna `main_reason` aggiunta a `conversations`
