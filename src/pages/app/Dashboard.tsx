@@ -409,6 +409,61 @@ export default function AppDashboard() {
         )}
       </div>
 
+      {/* ═══ AI BRIEFING ═══ */}
+      {briefingExpanded && (
+        <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 via-card to-accent/30 p-5 relative overflow-hidden">
+          <div className="absolute top-3 right-3 flex items-center gap-1">
+            <button
+              onClick={() => refetchBriefing()}
+              disabled={briefingLoading}
+              className="p-1.5 rounded-md hover:bg-accent transition-colors"
+              title="Aggiorna briefing"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-muted-foreground ${briefingLoading ? "animate-spin" : ""}`} />
+            </button>
+            <button
+              onClick={() => setBriefingExpanded(false)}
+              className="p-1.5 rounded-md hover:bg-accent transition-colors text-muted-foreground text-xs"
+              title="Nascondi"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+              <Brain className="w-4.5 h-4.5 text-primary" />
+            </div>
+            <div className="min-w-0 flex-1 pr-16">
+              <p className="text-xs font-semibold text-primary mb-1.5 flex items-center gap-1.5">
+                <Sparkles className="w-3 h-3" /> Briefing AI
+              </p>
+              {briefingLoading ? (
+                <div className="space-y-2">
+                  <div className="h-3 bg-muted rounded w-3/4 animate-pulse" />
+                  <div className="h-3 bg-muted rounded w-full animate-pulse" />
+                  <div className="h-3 bg-muted rounded w-2/3 animate-pulse" />
+                </div>
+              ) : briefingData?.briefing ? (
+                <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
+                  {briefingData.briefing}
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground italic">Briefing non disponibile.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!briefingExpanded && (
+        <button
+          onClick={() => setBriefingExpanded(true)}
+          className="flex items-center gap-2 text-xs text-primary hover:underline"
+        >
+          <Brain className="w-3.5 h-3.5" /> Mostra briefing AI
+        </button>
+      )}
+
       {/* ═══ ZONA B — 4 KPI Cards ═══ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
