@@ -1,7 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useCompanyId } from "@/hooks/useCompanyId";
 import { useQuery } from "@tanstack/react-query";
-import { SMART_ACTIONS_DEFAULTS } from "./Automations";
+import { SMART_ACTIONS_DEFAULTS } from "@/lib/automation-defaults";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import {
