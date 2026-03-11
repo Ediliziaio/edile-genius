@@ -266,9 +266,9 @@ export default function CreateAgent() {
             >
               <ArrowLeft className="w-4 h-4" /> Agenti
             </button>
-            <h1 className="text-[26px] font-extrabold text-ink-900">Scegli il tipo di agente</h1>
+            <h1 className="text-[26px] font-extrabold text-ink-900">Cosa vuoi automatizzare?</h1>
             <p className="text-sm text-ink-500 mt-1">
-              Agenti AI pre-configurati per edilizia, serramenti e fotovoltaico. Pronti in pochi minuti.
+              Scegli un obiettivo e attiva il tuo agente in pochi minuti.
             </p>
           </div>
           <div className="relative w-80 hidden md:block shrink-0 mt-6">
