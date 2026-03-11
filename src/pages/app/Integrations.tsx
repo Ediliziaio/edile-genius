@@ -13,6 +13,7 @@ interface IntegrationDef {
   description: string;
   icon: React.ElementType;
   href: string;
+  comingSoon?: boolean;
 }
 
 const integrationDefs: IntegrationDef[] = [
