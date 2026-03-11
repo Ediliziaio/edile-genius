@@ -1,122 +1,123 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro
 
-## ✅ Completato in questo blocco
+## UX Overhaul — Dashboard & Navigation
 
-### Database Migration
-- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
-- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
-- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
-- RLS policies per tutte le nuove tabelle
+### Current Problems
 
-## ✅ Blocco 2 — Sistema Crediti Euro-based
+**Dashboard:**
+1. **Information overload** — 5 KPI cards + 4 quick actions + 3 usage cards + next actions + contacts by status + upcoming calls + recent agents + conversations table = too many blocks competing for attention
+2. **No clear hierarchy** — Quick actions (colored blocks) visually dominate over KPIs; the user sees "what to click" before understanding "what's happening"
+3. **Redundant sections** — "Contacts by Status" and "Upcoming Calls" are CRM-level detail that doesn't belong on a command center dashboard
+4. **Weak empty state** — Just a Bot icon + "Crea il tuo primo agente →" link. No guidance, no value proposition, no onboarding path
+5. **Technical metrics** — "Lead Qualificati" shows last-5-conversations count (not monthly), "Tasso Appuntamenti" is a % without context
+6. **Trial/Credits block is 3 equal cards** — Credit balance buried alongside trial info with equal visual weight
 
-### Database
-- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
-- ai_credit_topups (ricariche manual/auto/promo/adjustment)
-- ai_credit_usage (consumo per conversazione con margini)
-- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
-- monthly_billing_summary view (security_invoker)
+**Navigation (Sidebar):**
+1. **7 sections, 20 items** — Cognitive overload. "AUTOMAZIONI" has 5 sub-items mixing templates, documents, timesheets
+2. **Technical jargon** — "Knowledge Base", "Template PDF", "Configura Bot", "Analytics"
+3. **Scattered related features** — Phone numbers under "COMUNICAZIONE", campaigns under "CONTATTI", WhatsApp separate from conversations
+4. **"CANTIERI" section** feels disconnected — 2 items that could be grouped differently
+5. **Section headers are developer categories** — "AUTOMAZIONI", "COMUNICAZIONE", "CONTATTI" don't map to user mental models
 
-### Edge Functions
-- check-credits-before-call: verifica saldo pre-chiamata
-- topup-credits: ricarica manuale con fattura
-- elevenlabs-webhook: post-call billing, auto-recharge, blocco
-- platform-config: +apply_global_markup action
+### Plan
 
-### Frontend
-- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
-- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
-- Sidebar: footer saldo crediti con barra e alert
-- VoiceTestPanel: check crediti pre-chiamata con blocco UI
+#### 1. Sidebar Navigation — Simplified to 4 macro-areas
 
-## ✅ Blocco 3-5 — Agent Templates System
+**New structure (13 items, down from 20):**
 
-### Database
-- agent_templates + agent_template_instances + agent_reports + company_channels
-- RLS policies PERMISSIVE (fix da RESTRICTIVE)
-- Funzione DB `increment_installs_count(tpl_id UUID)`
-- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+```text
+PANORAMICA
+  · Pannello di Controllo        (was: Dashboard)
 
-### Edge Functions (CORS headers completi)
-- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
-- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
-- save-report: salva report in DB + aggiorna contatori istanza
+I MIEI AGENTI
+  · Tutti gli Agenti             (was: Agenti AI)
+  · Crea Nuovo                   (was: scattered)
+  · Conversazioni                (was: under COMUNICAZIONE)
 
-### Frontend — Wizard 5 Step (TemplateSetup.tsx)
-- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + importa CSV con template scaricabile
-- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
-- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
+CONTATTI & VENDITE
+  · Rubrica                      (kept)
+  · Campagne                     (kept)
+  · Preventivi                   (kept)
 
-### SuperAdmin
-- /superadmin/templates: CRUD completo con JSON editor per config_schema
+CANTIERI
+  · Gestione Cantieri            (was: I Cantieri)
+  · Documenti e Scadenze         (was: Documenti)
+  · Presenze                     (kept)
 
-## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+RISULTATI
+  · Report e Statistiche         (was: Analytics)
 
-### Database (5 tabelle)
-- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
-- RLS PERMISSIVE per tutte le tabelle
-- Trigger set_updated_at + init_render_credits su companies
-- Funzione deduct_render_credit
-- Storage buckets: render-originals (privato), render-results (pubblico)
+IMPOSTAZIONI
+  · Telefono e WhatsApp          (merge Phone + WhatsApp)
+  · Knowledge Base → renamed "Archivio Conoscenze"
+  · Crediti e Piano              (was: Crediti & Utilizzo)
+  · Account                      (was: Impostazioni)
+```
 
-### Edge Functions
-- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
-- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+Items removed from primary nav (moved to Settings or removed):
+- "Template Agenti" → accessible from "Crea Nuovo" flow
+- "Template PDF" → moved inside Account/Settings
+- "Liste & Gruppi" → merged into Rubrica page as a tab
+- "Configura Bot" (cantieri) → merged into Gestione Cantieri
 
-### Frontend
-- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
-- RenderConfig (/superadmin/render-config)
-- BeforeAfterSlider, promptBuilder.ts
+#### 2. Dashboard — Restructured into 4 clear zones
 
-## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
+**Zone A — Hero Welcome + Status Bar** (top)
+- Greeting + company name
+- 3 inline status pills: `X agenti attivi` · `Y conversazioni questo mese` · `€Z.ZZ crediti`
+- If credits blocked: red alert banner
 
-### Database
-- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
-- Estensione `preventivi` con +26 colonne (template_id, versione, titolo, foto_sopralluogo_urls, foto_copertina_url, sconto_globale, imponibile, iva_importo, totale_finale, condizioni, clausole, intro, firma_testo, tempi_esecuzione, validita_giorni, data_scadenza, tracking_aperto_at/count, link_accettazione, firma_cliente_url, accettato_at, rifiutato_at, rifiuto_motivo, parent_id, inviato_at, inviato_via, cliente_piva, cliente_codice_fiscale)
-- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
-- Storage buckets: preventivi-media (privato), template-assets (pubblico)
-- RLS company-scoped + superadmin
+**Zone B — Azioni Consigliate** (prominent, right after hero)
+- Smart action cards based on account state
+- Empty state: full-width onboarding card with illustration, steps, and primary CTA
+- Existing users: "Completa configurazione agente X", "Ricarica crediti", etc.
 
-### Edge Functions
-- `process-preventivo-audio` RISCRITTO: prompt GPT esperto (prezzario DEI, categorie edilizie, sconti), nuovo formato voci con id/ordine/categoria/titolo_voce/sconto_percentuale/foto_urls/note_voce/evidenziata, calcolo totali con sconto e IVA, data_scadenza automatica
+**Zone C — I Tuoi Agenti** (main content)
+- Grid of agent cards (reuses AgentCard component) with score badge
+- Shows ALL agents (not just 3), with status dots prominent
+- If no agents: onboarding empty state with guided steps
 
-### PDF Client-side (@react-pdf/renderer)
-- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4 con:
-  - Header azienda + logo
-  - Band titolo colorata (colore_primario)
-  - Grid cliente/riferimenti
-  - Testo intro
-  - Foto copertina
-  - Tabella voci per categoria con subtotali
-  - Totali con sconto globale + IVA
-  - Note, condizioni, clausole
-  - Sezione firma doppia (azienda + cliente)
-  - Footer pagina
+**Zone D — Attività Recente** (bottom)
+- Compact list of last 5 conversations (simplified table, no "Stato" column)
+- Link to full conversations page
 
-### Frontend
-- **NuovoPreventivo.tsx** → Wizard 3 step:
-  - Step 1: dati cliente (nome, indirizzo, telefono, email, P.IVA, CF) + titolo/oggetto + cantiere
-  - Step 2: registrazione/upload audio + upload foto multiplo con grid preview e badge copertina
-  - Step 3: editor visuale voci per categoria (card editabili con titolo, descrizione, U.M., quantità, prezzo, sconto, totale) + totali live + scarica PDF anteprima
-- **PreventivoDetail.tsx** → 3 tabs:
-  - Dettaglio: voci per categoria con badge sconto, trascrizione collapsible, note/stato/tempi
-  - Cronologia: timeline eventi (creato, inviato, accettato/rifiutato)
-  - Tracking: KPI aperture, ultima apertura, ultimo invio
-  - Azioni: scarica PDF, modifica, elimina
-- **PreventiviList.tsx** → KPI cards (totale, bozze, in attesa, valore accettati) + filtri tab per stato + ricerca + lista con badge versione e scadenza
-- **TemplatePreventivo.tsx** (`/app/impostazioni/template-preventivo`): 3 tabs:
-  - Branding: logo upload, color picker primario/secondario con preview gradient, intestazione/piè di pagina
-  - Testi Standard: intro, condizioni, clausole, firma, validità giorni, IVA default
-  - Layout: 5 toggle (foto copertina, foto voci, subtotali categoria, firma, condizioni)
+**Removed from dashboard:**
+- Quick Actions bar (4 colored blocks) — replaced by contextual actions in Zone B
+- 5 KPI cards — replaced by 3 inline status pills
+- Usage/Trial/Credits triple card — replaced by status pills + sidebar credit widget
+- Contacts by Status — belongs in Contacts page
+- Upcoming Calls — belongs in Contacts page
 
-### Navigazione
-- Sidebar: aggiunto "Template PDF" nella sezione AUTOMAZIONI
-- Route: `/app/impostazioni/template-preventivo`
+#### 3. Empty State / First-Time Experience
 
-## 🔜 Prossimi Blocchi
-- SuperAdmin Dashboard economics
-- Integrazioni CRM native
-- Configurazione N8N_BASE_URL e N8N_API_KEY come secrets
+When `agents.length === 0`:
+- Dashboard shows a single full-width onboarding card
+- Headline: "Benvenuto in Edile Genius"
+- Subtitle: "Crea il tuo primo agente AI in 3 minuti"
+- 3 visual steps: "Scegli un template → Configura la voce → Attiva"
+- Primary CTA button: "Crea il Primo Agente"
+- Secondary: "Scopri i Template"
+
+#### 4. Microcopy Improvements
+
+| Location | Before | After |
+|----------|--------|-------|
+| Sidebar section | PRINCIPALE | PANORAMICA |
+| Sidebar item | Agenti AI | Tutti gli Agenti |
+| Sidebar section | AUTOMAZIONI | (removed) |
+| Sidebar item | Knowledge Base | Archivio Conoscenze |
+| Sidebar item | Analytics | Report e Statistiche |
+| Sidebar item | Crediti & Utilizzo | Crediti e Piano |
+| Dashboard heading | Agenti Recenti | I Tuoi Agenti |
+| Dashboard heading | Conversazioni Recenti | Attività Recente |
+| Dashboard heading | Prossime Azioni | Da Fare Adesso |
+| Breadcrumb | Analytics | Report |
+| Breadcrumb | Knowledge Base | Archivio |
+
+#### 5. Files Modified
+
+1. **`src/components/layout/SidebarNav.tsx`** — Restructure `companyNav` sections, rename labels
+2. **`src/pages/app/Dashboard.tsx`** — Rewrite layout into 4 zones, add onboarding empty state, simplify KPIs to status pills, remove low-value sections
+3. **`src/components/layout/AppBreadcrumb.tsx`** — Update `labelMap` with new names
+4. **`src/components/layout/Topbar.tsx`** — Minor: add page title display on mobile
+
