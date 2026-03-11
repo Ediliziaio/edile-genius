@@ -24,6 +24,8 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
     }
 
+    const userId = claimsData.claims.sub as string;
+
     const { preventivo_id } = await req.json();
     if (!preventivo_id) {
       return new Response(JSON.stringify({ error: "preventivo_id richiesto" }), { status: 400, headers: corsHeaders });
