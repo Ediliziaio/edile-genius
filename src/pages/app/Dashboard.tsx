@@ -134,6 +134,20 @@ export default function AppDashboard() {
     },
   });
 
+  // ── Company settings (smart_actions config) ──
+  const { data: companySettings } = useQuery({
+    queryKey: ["company-settings", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const { data } = await supabase.from("companies").select("settings").eq("id", companyId!).single();
+      return (data?.settings as Record<string, any>) || {};
+    },
+  });
+
+  const sa = (companySettings?.smart_actions || {}) as Record<string, any>;
+  const saVal = (key: string) => sa[key] ?? SMART_ACTIONS_DEFAULTS[key];
+  const saEnabled = (key: string) => saVal(`${key}_enabled`) !== false;
+
   // ── Smart Actions data: preventivi, contacts callback, documenti ──
   const { data: stalePreventivi } = useQuery({
     queryKey: ["smart-preventivi", companyId],
