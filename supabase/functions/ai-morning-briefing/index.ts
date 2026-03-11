@@ -35,15 +35,27 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Parse optional body for impersonation
+    let bodyCompanyId: string | null = null;
+    try {
+      const body = await req.json();
+      bodyCompanyId = body?.company_id || null;
+    } catch { /* no body */ }
+
     const { data: profile } = await sb.from("profiles").select("company_id, full_name").eq("id", user.id).single();
-    if (!profile?.company_id) {
+
+    // Check if user is superadmin (for impersonation)
+    const { data: userRoles } = await sb.from("user_roles").select("role").eq("user_id", user.id);
+    const isSuperAdmin = userRoles?.some((r: { role: string }) => r.role === "superadmin" || r.role === "superadmin_user");
+
+    const companyId = (isSuperAdmin && bodyCompanyId) ? bodyCompanyId : profile?.company_id;
+    if (!companyId) {
       return new Response(JSON.stringify({ error: "No company" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const companyId = profile.company_id;
-    const userName = profile.full_name || "Titolare";
+    const userName = profile?.full_name || "Titolare";
 
     // Gather data for briefing
     const today = new Date();
