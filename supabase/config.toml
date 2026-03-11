@@ -137,3 +137,6 @@ verify_jwt = false
 
 [functions.ai-orchestrator]
 verify_jwt = false
+
+[functions.weekly-report]
+verify_jwt = false

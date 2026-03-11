@@ -89,6 +89,63 @@ export default function AnalyticsPage() {
     return Object.entries(map).map(([id, value]) => ({ name: agentMap[id] || id.slice(0, 8), value })).sort((a, b) => b.value - a.value);
   }, [filtered, agentMap]);
 
+  // Conversion trend: weekly qualified/appointment rate + simple linear prediction
+  const conversionTrend = useMemo(() => {
+    // Group by week
+    const weeks: Record<string, { total: number; qualified: number }> = {};
+    filtered.forEach(c => {
+      if (!c.started_at) return;
+      const d = parseISO(c.started_at);
+      // Use Monday of the week as key
+      const dayOfWeek = d.getDay();
+      const monday = new Date(d);
+      monday.setDate(d.getDate() - ((dayOfWeek + 6) % 7));
+      const key = format(monday, "yyyy-MM-dd");
+      if (!weeks[key]) weeks[key] = { total: 0, qualified: 0 };
+      weeks[key].total++;
+      if (c.outcome === "qualified" || c.outcome === "appointment" || c.outcome === "interested") {
+        weeks[key].qualified++;
+      }
+    });
+
+    const points = Object.entries(weeks)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, v]) => ({
+        settimana: format(new Date(date), "dd/MM", { locale: it }),
+        tasso: v.total > 0 ? Math.round((v.qualified / v.total) * 100) : 0,
+        chiamate: v.total,
+        qualificati: v.qualified,
+      }));
+
+    // Simple linear regression for 2-week prediction
+    if (points.length >= 2) {
+      const n = points.length;
+      const xs = points.map((_, i) => i);
+      const ys = points.map(p => p.tasso);
+      const sumX = xs.reduce((a, b) => a + b, 0);
+      const sumY = ys.reduce((a, b) => a + b, 0);
+      const sumXY = xs.reduce((a, x, i) => a + x * ys[i], 0);
+      const sumX2 = xs.reduce((a, x) => a + x * x, 0);
+      const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+      const intercept = (sumY - slope * sumX) / n;
+
+      // Add prediction points
+      for (let i = 1; i <= 2; i++) {
+        const predicted = Math.max(0, Math.min(100, Math.round(intercept + slope * (n - 1 + i))));
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + i * 7);
+        points.push({
+          settimana: format(futureDate, "dd/MM", { locale: it }) + " ⟶",
+          tasso: predicted,
+          chiamate: 0,
+          qualificati: 0,
+        });
+      }
+    }
+
+    return points;
+  }, [filtered]);
+
   const statCards = [
     { label: "Chiamate totali", value: stats.total, icon: Phone, colorClass: "text-brand bg-brand-light" },
     { label: "Durata media", value: `${stats.avgDuration}s`, icon: Clock, colorClass: "text-status-info bg-status-info-light" },
@@ -198,6 +255,33 @@ export default function AnalyticsPage() {
               <Line type="monotone" dataKey="durata_media" stroke="#3B82F6" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
+        </div>
+
+        <div className="rounded-card p-5 bg-white border border-ink-200 shadow-card">
+          <h3 className="text-sm font-semibold mb-4 text-ink-900 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-status-success" /> Trend conversione settimanale
+          </h3>
+          {conversionTrend.length > 0 ? (
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={conversionTrend}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#D9E2EA" />
+                <XAxis dataKey="settimana" tick={{ fill: "#637485", fontSize: 10 }} />
+                <YAxis tick={{ fill: "#637485", fontSize: 10 }} unit="%" domain={[0, "auto"]} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: "#fff", border: "1px solid #D9E2EA", borderRadius: 10, color: "#0D1117" }}
+                  formatter={(v: number, name: string) => {
+                    if (name === "tasso") return [`${v}%`, "Tasso conv."];
+                    return [v, name];
+                  }}
+                  labelFormatter={(label) => `Sett. ${label}`}
+                />
+                <Line type="monotone" dataKey="tasso" stroke="#3ECF6E" strokeWidth={2} dot={{ r: 4 }} strokeDasharray={conversionTrend.length > 0 ? undefined : undefined} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-sm text-ink-400 py-10 text-center">Dati insufficienti per il trend</p>
+          )}
+          <p className="text-[11px] text-ink-400 mt-2">I punti con ⟶ sono previsioni basate su regressione lineare</p>
         </div>
 
         <div className="rounded-card p-5 lg:col-span-2 bg-white border border-ink-200 shadow-card">
