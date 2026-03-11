@@ -112,12 +112,8 @@ export default function CompanyDetail() {
               ))}
             </div>
           </div>
-          <div className="rounded-card border border-ink-200 bg-white p-6 shadow-card">
-            <h3 className="text-lg font-semibold text-ink-900 mb-2">ElevenLabs API Key</h3>
-            <Badge className={(company as any).el_api_key ? "bg-status-success-light text-status-success" : "bg-status-error-light text-status-error"}>
-              {(company as any).el_api_key ? "Configurata" : "Non configurata"}
-            </Badge>
-          </div>
+
+
         </TabsContent>
 
         <TabsContent value="agents">
