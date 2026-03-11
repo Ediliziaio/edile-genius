@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import {
   ArrowLeft, Play, Pause, Square, Loader2, Bot, ListChecks, Clock,
-  Phone, Users, CalendarCheck, BarChart3, Settings2,
+  Phone, Users, CalendarCheck, BarChart3, Settings2, PhoneForwarded,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
