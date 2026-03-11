@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
         status: "active",
         llm_model: "gemini-2.0-flash",
         use_case: template.slug,
-        type: "vocal",
+        type: agentType,
         created_by: user.id,
       })
       .select()

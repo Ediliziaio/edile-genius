@@ -145,7 +145,7 @@ Deno.serve(async (req) => {
       system_prompt: system_prompt || null,
       first_message: first_message || null,
       status: agentStatus || "draft",
-      type: "vocal",
+      type: agentType,
       llm_model: config.llm_model || "gemini-2.5-flash",
       tts_model: config.tts_model || "eleven_turbo_v2_5",
       llm_backup_model: config.llm_backup_model || null,
