@@ -145,7 +145,7 @@ export default function Settings() {
     setAvatarUrl(profile.avatar_url || "");
     if (companyId) {
       Promise.all([
-        supabase.from("companies").select("el_api_key, settings").eq("id", companyId).single(),
+        supabase.from("companies").select("settings").eq("id", companyId).single(),
         loadWebhooks(companyId),
         loadCrmIntegrations(),
       ]).then(([compRes]) => {
