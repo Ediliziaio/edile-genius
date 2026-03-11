@@ -431,7 +431,17 @@ export default function NuovoPreventivo() {
             </CardContent>
           </Card>
 
-          <Button onClick={() => setStep(2)} className="w-full gap-2" size="lg">
+          <Button
+            onClick={() => {
+              const errors: Record<string, string> = {};
+              if (!clienteNome.trim()) errors.clienteNome = "Il nome cliente è obbligatorio";
+              if (clienteEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clienteEmail)) errors.clienteEmail = "Formato email non valido";
+              setStep1Errors(errors);
+              if (Object.keys(errors).length === 0) setStep(2);
+            }}
+            className="w-full gap-2"
+            size="lg"
+          >
             Avanti <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
