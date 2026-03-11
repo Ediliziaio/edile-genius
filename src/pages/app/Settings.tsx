@@ -97,6 +97,9 @@ export default function Settings() {
   const { profile, user } = useAuth();
   const companyId = useCompanyId();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const defaultTab = searchParams.get("tab") || "profile";
 
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
