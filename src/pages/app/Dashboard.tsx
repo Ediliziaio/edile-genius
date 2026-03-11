@@ -7,11 +7,12 @@ import {
   Bot, ArrowRight, PhoneOff, CreditCard, Sparkles,
   MessageSquare, Zap, CheckCircle2, Circle, CalendarCheck,
   TrendingUp, TrendingDown, AlertTriangle, FileText, PhoneCall,
-  ShieldAlert, Clock, Megaphone
+  ShieldAlert, Clock, Megaphone, Brain, RefreshCw
 } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { it } from "date-fns/locale";
 import { Progress } from "@/components/ui/progress";
+import { useState } from "react";
 
 export default function AppDashboard() {
   const { profile } = useAuth();
