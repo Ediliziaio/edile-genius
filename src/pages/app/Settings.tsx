@@ -12,8 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   Eye, EyeOff, Save, Loader2, CheckCircle2, Plus, Trash2, Send, Globe, History,
-  RefreshCw, Link2, Unlink, Download, XCircle, CheckCircle
+  RefreshCw, Link2, Unlink, Download, XCircle, CheckCircle, CreditCard
 } from "lucide-react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import type { Json } from "@/integrations/supabase/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
