@@ -591,9 +591,19 @@ export default function ContactsPage() {
                     <TableCell className="text-ink-500">
                       {c.email ? <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{c.email}</span> : "—"}
                     </TableCell>
+                    <TableCell>
+                      <LeadScoreBadge compact input={{
+                        status: c.status,
+                        priority: c.priority,
+                        phone: c.phone,
+                        email: c.email,
+                        source: c.source,
+                        call_attempts: c.call_attempts,
+                        last_contact_at: c.last_contact_at,
+                      }} />
+                    </TableCell>
                     <TableCell>{statusBadge(c.status)}</TableCell>
                     <TableCell>{priorityBadge(c.priority)}</TableCell>
-                    <TableCell>{sourceBadge(c.source)}</TableCell>
                     <TableCell className="text-ink-400 text-xs">
                       {c.created_at ? format(new Date(c.created_at), "dd MMM yyyy", { locale: it }) : "—"}
                     </TableCell>
