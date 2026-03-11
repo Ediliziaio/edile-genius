@@ -345,7 +345,7 @@ export default function ContactDetailPanel({ contact, open, onOpenChange, onUpda
             </div>
 
             {/* Quick contact actions */}
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-2 mt-4 flex-wrap">
               {contact.phone && (
                 <Button variant="outline" size="sm" asChild className="border-ink-200 text-ink-700">
                   <a href={`tel:${contact.phone}`}><Phone className="w-3.5 h-3.5 mr-1.5" /> Chiama</a>
@@ -356,7 +356,41 @@ export default function ContactDetailPanel({ contact, open, onOpenChange, onUpda
                   <a href={`mailto:${contact.email}`}><Mail className="w-3.5 h-3.5 mr-1.5" /> Email</a>
                 </Button>
               )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-brand/30 text-brand hover:bg-brand-light"
+                onClick={handleGenerateFollowUp}
+                disabled={generatingFollowUp}
+              >
+                {generatingFollowUp ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
+                Genera Follow-up
+              </Button>
             </div>
+
+            {/* Follow-up AI message */}
+            {(followUpMsg || generatingFollowUp) && (
+              <div className="mt-3 bg-brand-light/50 border border-brand/20 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-xs font-medium text-brand flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" /> Messaggio suggerito
+                  </p>
+                  {followUpMsg && (
+                    <Button variant="ghost" size="sm" className="h-6 text-xs text-brand" onClick={copyFollowUp}>
+                      <Copy className="w-3 h-3 mr-1" /> Copia
+                    </Button>
+                  )}
+                </div>
+                {generatingFollowUp ? (
+                  <div className="flex items-center gap-2 py-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-brand" />
+                    <span className="text-sm text-ink-500">Generazione in corso...</span>
+                  </div>
+                ) : (
+                  <p className="text-sm text-ink-800 whitespace-pre-wrap">{followUpMsg}</p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Tabs */}
