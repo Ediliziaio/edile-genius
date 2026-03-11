@@ -1,21 +1,24 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  corsHeaders, generateRequestId, log, jsonError, errorResponse,
+  fetchWithRetry,
+} from "../_shared/utils.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+const FN = "create-elevenlabs-agent";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const rid = generateRequestId();
+
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+    if (!authHeader?.startsWith("Bearer ")) return jsonError("Unauthorized", "auth_error", 401, rid);
 
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: authHeader } } });
     const token = authHeader.replace("Bearer ", "");
     const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+    if (claimsError || !claimsData?.claims) return jsonError("Unauthorized", "auth_error", 401, rid);
     const userId = claimsData.claims.sub;
 
     const body = await req.json();
@@ -26,7 +29,9 @@ Deno.serve(async (req) => {
     } = body;
     const agentType = VALID_AGENT_TYPES.includes(rawType) ? rawType : "vocal";
 
-    if (!company_id || !name) return new Response(JSON.stringify({ error: "company_id and name required" }), { status: 400, headers: corsHeaders });
+    if (!company_id || !name) return jsonError("company_id and name required", "validation_error", 400, rid);
+
+    log("info", "Creating agent", { request_id: rid, company_id, name, type: agentType });
 
     const serviceClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
@@ -117,20 +122,28 @@ Deno.serve(async (req) => {
         const webhookUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/elevenlabs-webhook`;
         conversationConfig.post_call = { webhook: { url: webhookUrl } };
 
-        const elResponse = await fetch("https://api.elevenlabs.io/v1/convai/agents/create", {
-          method: "POST",
-          headers: { "xi-api-key": apiKey, "Content-Type": "application/json" },
-          body: JSON.stringify({ name, conversation_config: conversationConfig }),
-        });
+        // 20s timeout, 1 retry on 502/503 (safe before DB insert)
+        const elResponse = await fetchWithRetry(
+          "https://api.elevenlabs.io/v1/convai/agents/create",
+          {
+            method: "POST",
+            headers: { "xi-api-key": apiKey, "Content-Type": "application/json" },
+            body: JSON.stringify({ name, conversation_config: conversationConfig }),
+          },
+          20_000,
+          { maxRetries: 1 }
+        );
 
         if (elResponse.ok) {
           const elData = await elResponse.json();
           el_agent_id = elData.agent_id;
+          log("info", "ElevenLabs agent created", { request_id: rid, el_agent_id });
         } else {
-          console.error("ElevenLabs error:", await elResponse.text());
+          const errText = await elResponse.text();
+          log("error", "ElevenLabs agent creation failed", { request_id: rid, status: elResponse.status, detail: errText.slice(0, 500) });
         }
       } catch (e) {
-        console.error("ElevenLabs API call failed:", e);
+        log("error", "ElevenLabs API call exception", { request_id: rid, error: (e as Error).message });
       }
     }
 
@@ -166,10 +179,19 @@ Deno.serve(async (req) => {
       created_by: userId,
     }).select().single();
 
-    if (insertError) return new Response(JSON.stringify({ error: insertError.message }), { status: 500, headers: corsHeaders });
+    if (insertError) {
+      log("error", "DB insert failed", { request_id: rid, error: insertError.message });
+      return jsonError("Errore salvataggio agente", "system_error", 500, rid);
+    }
 
-    return new Response(JSON.stringify({ agent, el_agent_id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    log("info", "Agent created successfully", { request_id: rid, agent_id: agent.id, el_agent_id });
+
+    // Backward compatible response shape
+    return new Response(
+      JSON.stringify({ ok: true, agent, el_agent_id, request_id: rid }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   } catch (error) {
-    return new Response(JSON.stringify({ error: (error as Error).message }), { status: 500, headers: corsHeaders });
+    return errorResponse(error, rid, FN);
   }
 });
