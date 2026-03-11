@@ -197,7 +197,7 @@ export default function Settings() {
   const saveNotif = async () => {
     if (!companyId) return;
     setSavingNotif(true);
-    const { error } = await supabase.from("companies").update({ settings: notif as unknown as Json }).eq("id", companyId);
+    const { error } = await supabase.from("companies").update({ settings: JSON.parse(JSON.stringify(notif)) as Json }).eq("id", companyId);
     setSavingNotif(false);
     toast(error ? { title: "Errore", description: error.message, variant: "destructive" } : { title: "Preferenze salvate" });
   };
