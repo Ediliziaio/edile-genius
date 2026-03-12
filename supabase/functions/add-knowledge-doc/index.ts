@@ -170,6 +170,7 @@ Deno.serve(async (req) => {
       file_path,
       doc_id,
       size_bytes,
+      scraped_content,
     } = body;
 
     // ── 4. Tenant authorization ───────────────────────────────────
