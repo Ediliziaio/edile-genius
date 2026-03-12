@@ -449,10 +449,10 @@ function buildBlock_G(infisso: NuovoInfisso): string {
 
   const f = infisso.ferramenta;
   const manigliaDesc: Record<ManigliaType, string> = {
-    leva_alluminio: "aluminum lever handle — die-cast aluminum body with smooth matte or anodized finish, rectangular cross-section grip approximately 130mm long",
-    leva_acciaio: "stainless steel lever handle — precision-machined 316 stainless steel, satin brushed or mirror polish finish, slim ergonomic grip 120-140mm",
-    pomolo: "round knob handle (pomolo) — spherical or cylindrical knob approximately 35-45mm diameter, compact low-profile",
-    alzante: "lift-and-slide long lever handle 200-300mm with ergonomic palm grip and upward-lift mechanism, heavy-duty die-cast body",
+    leva_alluminio: "aluminum lever handle — die-cast aluminum body with smooth matte or anodized finish, rectangular cross-section grip approximately 130mm long, 8mm square spindle",
+    leva_acciaio: "stainless steel lever handle — precision-machined 316 stainless steel, satin brushed or mirror polish finish, slim ergonomic grip 120-140mm, premium minimalist aesthetic",
+    pomolo: "round knob handle (pomolo) — spherical or cylindrical knob approximately 35-45mm diameter, compact low-profile, typically used on fixed panels or low-use windows",
+    alzante: "lift-and-slide long lever handle 200-300mm with ergonomic palm grip and upward-lift-then-push-down mechanism, heavy-duty die-cast body for panel weights up to 400kg",
   };
   const coloreDesc: Record<ColoreFerratura, string> = {
     argento: "silver polished chrome finish",
