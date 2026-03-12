@@ -386,9 +386,12 @@ function buildBlock_C(analisi: FotoAnalisi, infisso: NuovoInfisso): string {
     if (c.azione === "rimuovi") {
       items.push(`✅ REMOVE cassonetto (roller shutter box) — fill with continuous wall surface`);
     } else if (c.azione === "sostituisci" && c.materiale) {
+      const cassRalObj = infisso.cass_colore 
+        ? { ral: infisso.cass_colore.ral, name: infisso.cass_colore.name, hex: infisso.cass_colore.hex, group: "" }
+        : (c.colore?.ral ? { ral: c.colore.ral, name: c.colore.nome, hex: c.colore.hex || "", group: "" } : null);
       const cassColor = formatColorPrompt(
         infisso.cass_colore_mode ?? c.colore_mode ?? "ral",
-        (infisso.cass_colore || (c.colore?.ral ? { ral: c.colore.ral, name: c.colore.nome, hex: c.colore.hex || "", group: "" } : null)),
+        cassRalObj,
         infisso.cass_wood_effect ?? c.colore_wood_effect ?? null
       );
       items.push(`✅ REPLACE cassonetto (roller shutter box above window) → new finish: ${cassColor}`);
