@@ -43,9 +43,9 @@ const TAPPARELLA_DESC: Record<string, string> = {
 };
 
 const CERNIERA_DESC: Record<string, string> = {
-  europea: "Standard European butt hinge — two plates ~50×35mm, 3 screws per plate, 8mm knuckle, projects 3-4mm from frame",
-  a_libro: "Book-fold concealed hinge — partially recessed, only outer knuckle visible as 6mm × 40mm strip",
-  invisibile: "Fully concealed pivot hinge — completely hidden when closed, no visible hardware, premium appearance",
+  europea: "Standard European butt hinge (cerniera europea) — two rectangular steel plates approximately 50×35mm each, 3 countersunk screws per plate, polished or coated to match hardware, central pin knuckle approximately 8mm diameter, hinge projects 3-4mm from frame face when closed",
+  a_libro: "Book-fold concealed hinge (cerniera a libro) — when door/window is closed hinge is partially recessed into frame rebate, only the outer knuckle visible as a thin strip approximately 6mm × 40mm, appears more elegant and flush than standard hinge",
+  invisibile: "Fully concealed pivot hinge (cerniera invisibile/nascosta) — completely hidden inside frame rebate when window is closed, no visible hardware on frame face, only a very faint rebate shadow line indicates hinge location, premium invisible appearance",
 };
 
 const CERNIERA_COLORE_DESC: Record<string, string> = {
