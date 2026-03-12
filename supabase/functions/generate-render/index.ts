@@ -127,7 +127,7 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
       if (tapparella.colore?.nome) { tDesc += `\nSlat color: ${tapparella.colore.nome}${tapparella.colore.ral ? ` (RAL ${tapparella.colore.ral})` : ""}`; }
       if (tapparella.colore_guide?.nome) { tDesc += `\nGuide color: ${tapparella.colore_guide.nome}${tapparella.colore_guide.ral ? ` (RAL ${tapparella.colore_guide.ral})` : ""}`; }
       const stato = tapparella.stato_render || "chiusa";
-      tDesc += `\nState: ${stato === 'aperta' ? 'FULLY OPEN (rolled up)' : stato === 'mezza' ? 'HALF OPEN (lower 50%)' : 'FULLY CLOSED'}`;
+      tDesc += `\nState: ${stato === 'aperta' ? 'FULLY OPEN (rolled up into cassonetto, no curtain visible below the cassonetto, only side guide channels visible)' : stato === 'mezza' ? 'HALF OPEN (curtain visible covering lower ~50% of glass, slat texture and horizontal joint lines visible on lower portion)' : 'FULLY CLOSED (curtain covers entire glass surface from cassonetto bottom to windowsill level, full slat texture visible)'}`;
       cLines.push(tDesc);
     } else {
       cLines.push(`\n🚫 DO NOT TOUCH shutter`);
