@@ -8,13 +8,14 @@ import {
   Bot, ArrowRight, PhoneOff, CreditCard, Sparkles,
   MessageSquare, Zap, CheckCircle2, Circle, CalendarCheck,
   TrendingUp, TrendingDown, AlertTriangle, FileText, PhoneCall,
-  ShieldAlert, Clock, Megaphone, Brain, RefreshCw
+  ShieldAlert, Clock, Megaphone, Brain, RefreshCw, Phone, Activity
 } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { it } from "date-fns/locale";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface BriefingAction {
   label: string;
@@ -257,6 +258,53 @@ export default function AppDashboard() {
   });
 
   const [briefingExpanded, setBriefingExpanded] = useState(true);
+
+  // ── Active Calls (live widget) ──
+  const queryClient = useQueryClient();
+  const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+
+  const { data: activeCalls = [] } = useQuery({
+    queryKey: ["dashboard-active-calls", companyId],
+    enabled: !!companyId,
+    refetchInterval: 15_000,
+    staleTime: 5_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("outbound_call_log")
+        .select("id, status, started_at, to_number, contact_id, agent_id, contacts(full_name), agents(name)")
+        .eq("company_id", companyId!)
+        .in("status", ["initiated", "ringing", "in_progress"])
+        .gte("started_at", twoHoursAgo)
+        .order("started_at", { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return (data ?? []).map((r: any) => ({
+        id: r.id,
+        status: r.status,
+        started_at: r.started_at,
+        to_number: r.to_number,
+        contact_name: r.contacts?.full_name ?? null,
+        agent_name: r.agents?.name ?? null,
+      }));
+    },
+  });
+
+  // Realtime for active calls widget
+  useEffect(() => {
+    if (!companyId) return;
+    const channel = supabase
+      .channel(`dashboard-calls-${companyId}`)
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "outbound_call_log",
+        filter: `company_id=eq.${companyId}`,
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ["dashboard-active-calls", companyId] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [companyId, queryClient]);
 
   // ── Derived data ──
   const totalAgents = agents?.length ?? 0;
@@ -672,6 +720,49 @@ export default function AppDashboard() {
           </Link>
         </div>
       </div>
+
+      {/* ═══ Active Calls Widget (only when calls are active) ═══ */}
+      {activeCalls.length > 0 && (
+        <div className="rounded-xl border border-primary/30 bg-card p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
+              </span>
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                <Activity className="w-4 h-4 text-primary" />
+                {activeCalls.length} chiamat{activeCalls.length === 1 ? "a" : "e"} attiv{activeCalls.length === 1 ? "a" : "e"}
+              </h3>
+            </div>
+            <Link to="/app/call-monitor" className="text-xs text-primary hover:underline flex items-center gap-1">
+              Vedi monitor completo <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {activeCalls.slice(0, 3).map((call) => (
+              <div key={call.id} className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Phone className={`w-3.5 h-3.5 shrink-0 ${call.status === "in_progress" ? "text-primary animate-pulse" : "text-muted-foreground"}`} />
+                  <span className="text-sm font-medium truncate">{call.contact_name || call.to_number}</span>
+                  {call.agent_name && (
+                    <span className="text-xs text-muted-foreground hidden sm:inline">· {call.agent_name}</span>
+                  )}
+                </div>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${
+                  call.status === "in_progress"
+                    ? "bg-primary/10 text-primary"
+                    : call.status === "ringing"
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-muted text-muted-foreground"
+                }`}>
+                  {call.status === "in_progress" ? "In conversazione" : call.status === "ringing" ? "In chiamata" : "Avvio"}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ═══ ZONA C — Smart Actions OR Onboarding ═══ */}
       {!hasAgents ? (
