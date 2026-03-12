@@ -188,7 +188,7 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
 
   // Block I — Tapparella
   if (sost.tapparella && tapparella.azione === "rimuovi") {
-    blocks.I = `[BLOCK I – SHUTTER REMOVAL]\nRemove existing shutter system completely. Show bare window frame.`;
+    blocks.I = `[BLOCK I – SHUTTER REMOVAL]\nRemove the existing shutter/blind system completely. Show bare window frame with no shutter curtain, no side guides, no bottom bar. If guide channels were surface-mounted on wall: remove them and show clean wall face.`;
   } else if (sost.tapparella && tapparella.azione === "sostituisci" && tapparella.materiale) {
     let iLines = `[BLOCK I – NEW SHUTTER]\nInstall: ${TAPPARELLA_DESC[tapparella.materiale] || tapparella.materiale}`;
     if (tapparella.colore?.nome) iLines += `\nSlat color: ${tapparella.colore.nome}${tapparella.colore.ral ? ` (RAL ${tapparella.colore.ral})` : ""}`;
