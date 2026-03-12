@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
 import { toast } from "sonner";
@@ -33,34 +33,37 @@ const STATUS_MESSAGES: Record<string, { emoji: string; template: (name: string) 
   },
 };
 
-// Cache contact names to avoid repeated lookups
-const contactNameCache = new Map<string, string>();
-
-async function getContactName(contactId: string | null): Promise<string | null> {
-  if (!contactId) return null;
-  if (contactNameCache.has(contactId)) return contactNameCache.get(contactId)!;
-
-  const { data } = await supabase
-    .from("contacts")
-    .select("full_name")
-    .eq("id", contactId)
-    .single();
-
-  const name = data?.full_name ?? null;
-  if (name) {
-    contactNameCache.set(contactId, name);
-    // Evict old entries
-    if (contactNameCache.size > 100) {
-      const first = contactNameCache.keys().next().value;
-      if (first) contactNameCache.delete(first);
-    }
-  }
-  return name;
-}
-
 export function useCallNotifications() {
   const companyId = useCompanyId();
   const prevStatuses = useRef<Map<string, string>>(new Map());
+  const contactNameCache = useRef<Map<string, string>>(new Map());
+
+  // Clear caches when companyId changes (logout / tenant switch)
+  useEffect(() => {
+    prevStatuses.current.clear();
+    contactNameCache.current.clear();
+  }, [companyId]);
+
+  const getContactName = useCallback(async (contactId: string | null): Promise<string | null> => {
+    if (!contactId) return null;
+    if (contactNameCache.current.has(contactId)) return contactNameCache.current.get(contactId)!;
+
+    const { data } = await supabase
+      .from("contacts")
+      .select("full_name")
+      .eq("id", contactId)
+      .single();
+
+    const name = data?.full_name ?? null;
+    if (name) {
+      contactNameCache.current.set(contactId, name);
+      if (contactNameCache.current.size > 100) {
+        const first = contactNameCache.current.keys().next().value;
+        if (first) contactNameCache.current.delete(first);
+      }
+    }
+    return name;
+  }, []);
 
   useEffect(() => {
     if (!companyId) return;

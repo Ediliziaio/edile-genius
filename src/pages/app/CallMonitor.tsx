@@ -98,17 +98,16 @@ export default function CallMonitorPage() {
   const companyId = useCompanyId();
   const queryClient = useQueryClient();
 
-  const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
-
   const { data: activeCalls = [], isLoading: loadingActive } = useQuery({
     queryKey: ["call-monitor-active", companyId],
     queryFn: async () => {
+      const freshTwoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
       const { data, error } = await supabase
         .from("outbound_call_log")
         .select("id, conversation_id, contact_id, status, started_at, to_number, agent_id, dynamic_variables, contacts(full_name, company_name), agents(name)")
         .eq("company_id", companyId!)
         .in("status", ["initiated", "ringing", "in_progress"])
-        .gte("started_at", twoHoursAgo)
+        .gte("started_at", freshTwoHoursAgo)
         .order("started_at", { ascending: false });
       if (error) throw error;
       return (data ?? []).map((r: any) => ({
