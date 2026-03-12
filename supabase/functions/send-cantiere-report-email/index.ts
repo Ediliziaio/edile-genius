@@ -7,10 +7,18 @@ Deno.serve(async (req) => {
   const FN = "send-cantiere-report-email";
 
   try {
+    // ── Auth: internal-only (service role or cron secret) ──
+    const authHeader = req.headers.get("Authorization");
+    const isServiceRole = authHeader === `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`;
+    if (!isServiceRole) {
+      return jsonError("Unauthorized — internal only", "auth_error", 401, rid);
+    }
+
     const { report_id, destinatari, company_id } = await req.json();
     const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
-    const { data: report } = await sb.from("agent_reports").select("*").eq("id", report_id).single();
+    // Verify report belongs to company
+    const { data: report } = await sb.from("agent_reports").select("*").eq("id", report_id).eq("company_id", company_id).single();
     if (!report) return jsonError("Report non trovato", "not_found", 404, rid);
 
     const { data: company } = await sb.from("companies").select("name").eq("id", company_id).single();

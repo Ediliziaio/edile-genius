@@ -18,10 +18,18 @@ Deno.serve(async (req) => {
     if (userError || !user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
 
     const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    const { company_id, phone_number, label, twilio_sid, twilio_token, agent_id } = await req.json();
 
-    if (!phone_number || !twilio_sid || !twilio_token || !company_id) {
-      return new Response(JSON.stringify({ error: "phone_number, twilio_sid, twilio_token, company_id richiesti" }), { status: 400, headers: corsHeaders });
+    // ── Tenant check ──
+    const { data: profile } = await sb.from("profiles").select("company_id").eq("id", user.id).single();
+    if (!profile?.company_id) {
+      return new Response(JSON.stringify({ error: "No company" }), { status: 400, headers: corsHeaders });
+    }
+
+    const { phone_number, label, twilio_sid, twilio_token, agent_id } = await req.json();
+    const company_id = profile.company_id;
+
+    if (!phone_number || !twilio_sid || !twilio_token) {
+      return new Response(JSON.stringify({ error: "phone_number, twilio_sid, twilio_token richiesti" }), { status: 400, headers: corsHeaders });
     }
 
     const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
