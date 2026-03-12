@@ -548,6 +548,7 @@ export default function RenderNew() {
             analysisData={analysisData}
             loading={analysisLoading}
             error={analysisError}
+            onRetry={uploadedPhotoUrl ? () => runPhotoAnalysis(uploadedPhotoUrl) : undefined}
           />
 
           {/* ── SEZIONE 1: Cosa vuoi sostituire? ── */}
