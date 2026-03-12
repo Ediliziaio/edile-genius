@@ -134,6 +134,8 @@ export interface CassonettoConfig {
   azione: "mantieni" | "rimuovi" | "sostituisci";
   materiale?: CassonettoMateriale;
   colore?: ColoreConfig;
+  colore_mode?: ColorMode;
+  colore_wood_effect?: WoodEffect;
   dimensione_h?: number;
   prompt_fragment?: string;
 }
@@ -142,6 +144,8 @@ export interface TapparellaConfig {
   azione: "mantieni" | "rimuovi" | "sostituisci";
   materiale?: TapparellaMateriale;
   colore?: ColoreConfig;
+  colore_mode?: ColorMode;
+  colore_wood_effect?: WoodEffect;
   colore_guide?: ColoreConfig;
   stato_render?: "aperta" | "chiusa" | "mezza";
   cinghia?: CinghiaMode;
