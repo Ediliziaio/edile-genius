@@ -1606,7 +1606,7 @@ export default function WhatsAppPage() {
 
           {/* Conversations Tab */}
           <TabsContent value="conversations">
-            <TabConversations companyId={companyId!} conversations={conversations} onRefresh={fetchData} />
+            <TabConversations companyId={companyId!} conversations={conversations} templates={templates} onRefresh={fetchData} />
           </TabsContent>
 
           {/* Broadcast Tab */}
