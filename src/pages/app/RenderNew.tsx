@@ -232,6 +232,7 @@ export default function RenderNew() {
       setSessionId(session.id);
       setStep(1);
 
+      setUploadedPhotoUrl(urlData.publicUrl);
       runPhotoAnalysis(urlData.publicUrl);
     } catch (err: any) {
       toast({ title: "Errore upload", description: err.message, variant: "destructive" });
