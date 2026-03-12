@@ -9,7 +9,7 @@ import {
   BookUser, Megaphone, type LucideIcon,
   AlertTriangle, MessageCircle, Puzzle, Palette, HardHat,
   FileSignature, ShieldCheck, ClipboardList,
-  Coins, ChevronDown, Clock, Zap,
+  Coins, ChevronDown, Clock, Zap, Activity, CalendarClock,
 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { differenceInDays } from "date-fns";
