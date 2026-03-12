@@ -572,9 +572,12 @@ Remove the entire cassonetto (roller shutter box) above the window. Replace with
 
   if (c.azione === "sostituisci" && c.materiale) {
     let colorLine = "";
-    if (c.colore) {
+    if (c.colore_mode === "legno" && c.colore_wood_effect) {
+      colorLine = `Color: ${formatColorPrompt("legno", null, c.colore_wood_effect)}\n\nCASSO WOOD EFFECT RULES:\n- The cassonetto face panel MUST show realistic wood grain pattern matching the specified wood effect\n- Grain direction runs HORIZONTALLY along the cassonetto length\n- Surface is a high-quality laminate film — looks like real wood with factory-applied precision`;
+    } else if (c.colore) {
       colorLine = `Color: ${c.colore.nome}`;
       if (c.colore.ral) colorLine += ` (RAL ${c.colore.ral})`;
+      colorLine += ` — solid smooth finish, NO wood grain`;
     }
 
     return `[BLOCK H – NEW ROLLER BOX (CASSONETTO)]
