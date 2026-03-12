@@ -166,7 +166,7 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
 
   // Block G — Hardware
   if (sost.infissi) {
-    blocks.G = `[BLOCK G – HARDWARE]\nHandle: ${manigliaDesc[ferramenta.maniglia] || ferramenta.maniglia || "lever handle"}\nColor: ${coloreFerrDesc[ferramenta.colore] || ferramenta.colore || "silver"}`;
+    blocks.G = `[BLOCK G – HARDWARE DETAILS]\nHandle: ${manigliaDesc[ferramenta.maniglia] || ferramenta.maniglia || "lever handle"}\nColor: ${coloreFerrDesc[ferramenta.colore] || ferramenta.colore || "silver"}\nHandle position: centered on the meeting stile (vertical center of sash height) for battente windows, lower third for portafinestre\nEspagnolette lock bar: concealed inside frame rebate, only the multi-point locking pins (3-4) visible at frame edge when window is shown open\nCorner connectors: thin aluminum corner keys inside profile — not visible externally\nStrikeplate: small 20×60mm metal plate recessed into frame face opposite handle — show subtle shadow`;
   } else {
     blocks.G = `[BLOCK G – HARDWARE — SKIPPED]`;
   }
