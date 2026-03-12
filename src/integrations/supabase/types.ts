@@ -3666,6 +3666,57 @@ export type Database = {
           },
         ]
       }
+      whatsapp_contacts: {
+        Row: {
+          company_id: string
+          contact_id: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string
+          last_inbound_at: string | null
+          last_message_at: string | null
+          phone_number: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          contact_id?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          last_inbound_at?: string | null
+          last_message_at?: string | null
+          phone_number: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          contact_id?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          last_inbound_at?: string | null
+          last_message_at?: string | null
+          phone_number?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_contacts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       whatsapp_conversations: {
         Row: {
           ai_enabled: boolean | null
@@ -3741,6 +3792,8 @@ export type Database = {
           error_code: string | null
           error_message: string | null
           id: string
+          media_type: string | null
+          media_url: string | null
           meta_message_id: string | null
           phone_number_id: string
           read_at: string | null
@@ -3759,6 +3812,8 @@ export type Database = {
           error_code?: string | null
           error_message?: string | null
           id?: string
+          media_type?: string | null
+          media_url?: string | null
           meta_message_id?: string | null
           phone_number_id: string
           read_at?: string | null
@@ -3777,6 +3832,8 @@ export type Database = {
           error_code?: string | null
           error_message?: string | null
           id?: string
+          media_type?: string | null
+          media_url?: string | null
           meta_message_id?: string | null
           phone_number_id?: string
           read_at?: string | null

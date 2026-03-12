@@ -726,15 +726,18 @@ function TabOverview({ numbers, templates, conversations, subscription, wabaConf
 }
 
 // ── Tab Conversazioni ──
-function TabConversations({ companyId, conversations, onRefresh }: {
-  companyId: string; conversations: WaConversation[]; onRefresh: () => void;
+function TabConversations({ companyId, conversations, templates, onRefresh }: {
+  companyId: string; conversations: WaConversation[]; templates: WaTemplate[]; onRefresh: () => void;
 }) {
   const [selectedConv, setSelectedConv] = useState<WaConversation | null>(null);
   const [messages, setMessages] = useState<WaMessage[]>([]);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
   const [replyText, setReplyText] = useState("");
   const [sending, setSending] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const approvedTemplates = templates.filter(t => t.status === "APPROVED");
 
   const loadMessages = useCallback(async (conv: WaConversation) => {
     setLoadingMsgs(true);
@@ -753,6 +756,20 @@ function TabConversations({ companyId, conversations, onRefresh }: {
     if (selectedConv) loadMessages(selectedConv);
   }, [selectedConv, loadMessages]);
 
+  const isWindowOpen = (conv: WaConversation) => {
+    if (!conv.window_expires_at) return false;
+    return new Date(conv.window_expires_at) > new Date();
+  };
+
+  const getWindowRemaining = (conv: WaConversation) => {
+    if (!conv.window_expires_at) return null;
+    const remaining = new Date(conv.window_expires_at).getTime() - Date.now();
+    if (remaining <= 0) return null;
+    const hours = Math.floor(remaining / (1000 * 60 * 60));
+    const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+    return `${hours}h ${mins}m`;
+  };
+
   const handleSendReply = async () => {
     if (!replyText.trim() || !selectedConv) return;
     setSending(true);
@@ -766,11 +783,46 @@ function TabConversations({ companyId, conversations, onRefresh }: {
         },
       });
       if (error) throw error;
+      if (data?.error_code === "window_closed") {
+        toast.error(data?.error || "Finestra 24h scaduta. Usa un template.");
+        setSending(false);
+        return;
+      }
       toast.success("Messaggio inviato");
       setReplyText("");
       loadMessages(selectedConv);
     } catch (err: any) {
-      toast.error("Errore invio: " + (err.message || "Errore sconosciuto"));
+      const msg = err.message || "Errore sconosciuto";
+      if (msg.includes("window_closed") || msg.includes("422")) {
+        toast.error("Finestra 24h scaduta. Usa un template per riaprire.");
+      } else {
+        toast.error("Errore invio: " + msg);
+      }
+    }
+    setSending(false);
+  };
+
+  const handleSendTemplate = async () => {
+    if (!selectedTemplate || !selectedConv) return;
+    const tpl = approvedTemplates.find(t => t.id === selectedTemplate);
+    if (!tpl) return;
+    setSending(true);
+    try {
+      const { error } = await supabase.functions.invoke("whatsapp-send", {
+        body: {
+          phone_number_id: selectedConv.phone_number_id,
+          to: selectedConv.contact_phone,
+          type: "template",
+          template_name: tpl.name,
+          template_language: tpl.language,
+        },
+      });
+      if (error) throw error;
+      toast.success("Template inviato");
+      setSelectedTemplate("");
+      loadMessages(selectedConv);
+    } catch (err: any) {
+      toast.error("Errore invio template: " + (err.message || "Errore"));
     }
     setSending(false);
   };
@@ -780,10 +832,7 @@ function TabConversations({ companyId, conversations, onRefresh }: {
     onRefresh();
   };
 
-  const isWindowOpen = (conv: WaConversation) => {
-    if (!conv.window_expires_at) return false;
-    return new Date(conv.window_expires_at) > new Date();
-  };
+  const windowOpen = selectedConv ? isWindowOpen(selectedConv) : false;
 
   return (
     <div className="flex border border-border rounded-lg overflow-hidden h-[600px] bg-background">
@@ -800,49 +849,53 @@ function TabConversations({ companyId, conversations, onRefresh }: {
               <p className="text-xs text-muted-foreground">Nessuna conversazione</p>
             </div>
           ) : (
-            conversations.map(conv => (
-              <button
-                key={conv.id}
-                onClick={() => setSelectedConv(conv)}
-                className={`w-full text-left p-3 border-b border-border hover:bg-muted/50 transition-colors ${
-                  selectedConv?.id === conv.id ? "bg-muted" : ""
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-mono text-xs font-semibold text-foreground truncate max-w-[160px]">
-                    {conv.contact_phone}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    {conv.ai_enabled && (
-                      <Badge variant="secondary" className="text-[9px] px-1 py-0 gap-0.5">
-                        <Bot className="h-2.5 w-2.5" />AI
-                      </Badge>
-                    )}
-                    {conv.unread_count > 0 && (
-                      <span className="w-5 h-5 rounded-full bg-green-600 text-white text-[10px] font-bold flex items-center justify-center">
-                        {conv.unread_count}
+            conversations.map(conv => {
+              const wOpen = isWindowOpen(conv);
+              const remaining = getWindowRemaining(conv);
+              return (
+                <button
+                  key={conv.id}
+                  onClick={() => setSelectedConv(conv)}
+                  className={`w-full text-left p-3 border-b border-border hover:bg-muted/50 transition-colors ${
+                    selectedConv?.id === conv.id ? "bg-muted" : ""
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-mono text-xs font-semibold text-foreground truncate max-w-[160px]">
+                      {conv.contact_phone}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      {conv.ai_enabled && (
+                        <Badge variant="secondary" className="text-[9px] px-1 py-0 gap-0.5">
+                          <Bot className="h-2.5 w-2.5" />AI
+                        </Badge>
+                      )}
+                      {conv.unread_count > 0 && (
+                        <span className="w-5 h-5 rounded-full bg-green-600 text-white text-[10px] font-bold flex items-center justify-center">
+                          {conv.unread_count}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Badge variant={statusConfig[conv.status]?.variant || "outline"} className="text-[9px]">
+                      {statusConfig[conv.status]?.label || conv.status}
+                    </Badge>
+                    {conv.last_message_at && (
+                      <span className="text-[10px] text-muted-foreground">
+                        {new Date(conv.last_message_at).toLocaleString("it", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" })}
                       </span>
                     )}
                   </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <Badge variant={statusConfig[conv.status]?.variant || "outline"} className="text-[9px]">
-                    {statusConfig[conv.status]?.label || conv.status}
-                  </Badge>
-                  {conv.last_message_at && (
-                    <span className="text-[10px] text-muted-foreground">
-                      {new Date(conv.last_message_at).toLocaleString("it", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" })}
+                  <div className="mt-1 flex items-center gap-1 text-[10px]">
+                    <div className={`w-1.5 h-1.5 rounded-full ${wOpen ? "bg-green-500" : "bg-orange-400"}`} />
+                    <span className={wOpen ? "text-green-600" : "text-orange-500"}>
+                      {wOpen ? `Finestra aperta — ${remaining}` : "Finestra chiusa — solo template"}
                     </span>
-                  )}
-                </div>
-                {isWindowOpen(conv) && (
-                  <div className="mt-1 flex items-center gap-1 text-[10px] text-green-600">
-                    <Clock className="h-2.5 w-2.5" />
-                    Finestra 24h aperta
                   </div>
-                )}
-              </button>
-            ))
+                </button>
+              );
+            })
           )}
         </ScrollArea>
       </div>
@@ -866,9 +919,15 @@ function TabConversations({ companyId, conversations, onRefresh }: {
                   <Badge variant={statusConfig[selectedConv.status]?.variant || "outline"} className="text-[9px]">
                     {statusConfig[selectedConv.status]?.label || selectedConv.status}
                   </Badge>
-                  {isWindowOpen(selectedConv) && (
+                  {windowOpen ? (
                     <span className="text-[10px] text-green-600 flex items-center gap-1">
-                      <Clock className="h-2.5 w-2.5" />24h aperta
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                      24h aperta — {getWindowRemaining(selectedConv)}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-orange-500 flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-orange-400" />
+                      Finestra chiusa
                     </span>
                   )}
                 </div>
@@ -892,7 +951,7 @@ function TabConversations({ companyId, conversations, onRefresh }: {
                   {messages.map(msg => {
                     const isOutbound = msg.direction === "outbound";
                     const msgContent = typeof msg.content === "object"
-                      ? (msg.content as any)?.body || (msg.content as any)?.template || JSON.stringify(msg.content)
+                      ? (msg.content as any)?.body || (msg.content as any)?.template || (msg.content as any)?.caption || JSON.stringify(msg.content)
                       : String(msg.content);
                     return (
                       <div key={msg.id} className={`flex ${isOutbound ? "justify-end" : "justify-start"}`}>
@@ -901,6 +960,11 @@ function TabConversations({ companyId, conversations, onRefresh }: {
                             ? "bg-green-600 text-white rounded-br-sm"
                             : "bg-muted text-foreground rounded-bl-sm"
                         }`}>
+                          {msg.type !== "text" && msg.type !== "template" && (
+                            <span className={`text-[9px] uppercase font-semibold ${isOutbound ? "text-green-200" : "text-muted-foreground"}`}>
+                              📎 {msg.type}
+                            </span>
+                          )}
                           <p className="text-xs whitespace-pre-wrap">{msgContent}</p>
                           <div className={`flex items-center gap-1 mt-1 ${isOutbound ? "justify-end" : "justify-start"}`}>
                             <span className={`text-[10px] ${isOutbound ? "text-green-200" : "text-muted-foreground"}`}>
@@ -921,18 +985,46 @@ function TabConversations({ companyId, conversations, onRefresh }: {
               )}
             </ScrollArea>
 
-            {/* Reply Input */}
-            <div className="p-3 border-t border-border flex gap-2">
-              <Input
-                value={replyText}
-                onChange={e => setReplyText(e.target.value)}
-                placeholder="Scrivi un messaggio..."
-                className="text-sm"
-                onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendReply(); } }}
-              />
-              <Button size="sm" onClick={handleSendReply} disabled={!replyText.trim() || sending} className="bg-green-600 hover:bg-green-700 text-white">
-                {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              </Button>
+            {/* Reply Input — adapts to window status */}
+            <div className="p-3 border-t border-border">
+              {windowOpen ? (
+                <div className="flex gap-2">
+                  <Input
+                    value={replyText}
+                    onChange={e => setReplyText(e.target.value)}
+                    placeholder="Scrivi un messaggio..."
+                    className="text-sm"
+                    onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendReply(); } }}
+                  />
+                  <Button size="sm" onClick={handleSendReply} disabled={!replyText.trim() || sending} className="bg-green-600 hover:bg-green-700 text-white">
+                    {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-xs text-orange-600 bg-orange-50 border border-orange-200 rounded-md px-3 py-2">
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                    <span>Finestra 24h chiusa. Puoi inviare solo template approvati.</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                      <SelectTrigger className="text-sm flex-1"><SelectValue placeholder="Seleziona template..." /></SelectTrigger>
+                      <SelectContent>
+                        {approvedTemplates.length === 0 ? (
+                          <SelectItem value="_none" disabled>Nessun template approvato</SelectItem>
+                        ) : (
+                          approvedTemplates.map(t => (
+                            <SelectItem key={t.id} value={t.id}>{t.name} ({t.language})</SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <Button size="sm" onClick={handleSendTemplate} disabled={!selectedTemplate || sending} className="bg-green-600 hover:bg-green-700 text-white">
+                      {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </>
         )}
@@ -1514,7 +1606,7 @@ export default function WhatsAppPage() {
 
           {/* Conversations Tab */}
           <TabsContent value="conversations">
-            <TabConversations companyId={companyId!} conversations={conversations} onRefresh={fetchData} />
+            <TabConversations companyId={companyId!} conversations={conversations} templates={templates} onRefresh={fetchData} />
           </TabsContent>
 
           {/* Broadcast Tab */}
