@@ -273,7 +273,7 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
     if (manigliaStile && MANIGLIE_V5[manigliaStile]) {
       const handleDesc = MANIGLIE_V5[manigliaStile];
       const finishDesc = hwFinish ? hwFinish : (ferramenta.colore_hardware_id && HARDWARE_COLORS_V5[ferramenta.colore_hardware_id]) ? HARDWARE_COLORS_V5[ferramenta.colore_hardware_id] : "silver chrome finish";
-      blocks.G = `[BLOCK G – HARDWARE DETAILS]\nHandle style: ${handleDesc}\nHandle finish: ${finishDesc}\nHandle position: centered on the meeting stile (vertical center of sash height) for battente windows, lower third for portafinestre\nEspagnolette lock bar: concealed inside frame rebate, only the multi-point locking pins (3-4) visible at frame edge when window is shown open\nCorner connectors: thin aluminum corner keys inside profile — not visible externally\nStrikeplate: small 20×60mm metal plate recessed into frame face opposite handle — show subtle shadow`;
+      blocks.G = `[BLOCK G – HARDWARE DETAILS]\nHandle style: ${handleDesc}\nHandle finish: ${finishDesc}\nHandle position: centered on the meeting stile (vertical center of sash height) for battente windows, lower third for portafinestre\nEspagnolette lock bar: concealed inside frame rebate, only the multi-point locking pins (3-4) visible at frame edge when window is shown open\nCorner connectors: thin aluminum corner keys inside profile — not visible externally\nStrikeplate: small 20×60mm metal plate recessed into frame face opposite handle — show subtle shadow\n\nCRITICAL — HANDLE VISIBILITY:\n- The handle MUST be clearly visible on every opening sash. Do NOT omit the handle.\n- The handle style MUST exactly match the specification above — do NOT substitute with a generic lever.\n- The handle finish (${finishDesc}) MUST be accurate — correct metallic reflection and color.\n- Render the handle shadow on the sash face consistent with scene lighting direction.`;
     } else {
       // Legacy fallback
       const legacyManigliaDesc: Record<string, string> = { leva_alluminio: "aluminum lever handle", leva_acciaio: "stainless steel lever handle", pomolo: "round knob handle", alzante: "lift-and-slide lever handle" };
@@ -375,9 +375,64 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
     blocks.M = transformInstructions;
   }
 
+  // Block N — Final Preservation Checklist (recency bias: last instruction)
+  {
+    const items: string[] = [];
+
+    // Frame
+    if (sost.infissi) {
+      const matLabel = nuovoInfisso.materiale || "PVC";
+      const colorLabel = nuovoInfisso.colore_mode === "legno"
+        ? (nuovoInfisso.wood_effect?.name || "wood-effect laminate")
+        : (nuovoInfisso.colore?.name || nuovoInfisso.colore?.nome || "specified RAL color");
+      items.push(`☐ FRAME → REPLACE with ${matLabel} in ${colorLabel}`);
+    } else {
+      items.push(`☐ FRAME → KEEP identical to original photo`);
+    }
+
+    // Cassonetto
+    if (sost.cassonetto && cassonetto.azione === "sostituisci") {
+      const cassLabel = cassonetto.colore_mode === "legno"
+        ? (nuovoInfisso.cass_wood_effect?.name || cassonetto.colore_wood_effect?.name || "wood-effect")
+        : (nuovoInfisso.cass_colore?.name || cassonetto.colore?.name || cassonetto.colore?.nome || "specified color");
+      items.push(`☐ CASSONETTO → REPLACE in ${cassLabel} — verify it is NOT the original color`);
+    } else if (sost.cassonetto && cassonetto.azione === "rimuovi") {
+      items.push(`☐ CASSONETTO → REMOVE completely — show clean wall`);
+    } else {
+      items.push(`☐ CASSONETTO → ${analisi.presenza_cassonetto ? "KEEP as-is" : "NOT PRESENT — do not add"}`);
+    }
+
+    // Tapparella
+    if (sost.tapparella && tapparella.azione === "sostituisci") {
+      const tapLabel = tapparella.colore_mode === "legno"
+        ? (nuovoInfisso.tap_wood_effect?.name || tapparella.colore_wood_effect?.name || "wood-effect")
+        : (nuovoInfisso.tap_colore?.name || tapparella.colore?.name || tapparella.colore?.nome || "specified color");
+      items.push(`☐ TAPPARELLA → REPLACE in ${tapLabel}`);
+    } else if (sost.tapparella && tapparella.azione === "rimuovi") {
+      items.push(`☐ TAPPARELLA → REMOVE completely`);
+    } else {
+      items.push(`☐ TAPPARELLA → ${analisi.presenza_tapparella ? "KEEP as-is" : "NOT PRESENT — do not add"}`);
+    }
+
+    // Handle
+    if (sost.infissi && ferramenta.maniglia_stile) {
+      const mStile = ferramenta.maniglia_stile;
+      const mName = MANIGLIE_V5[mStile] ? mStile : "lever";
+      const hwF = ferramenta.colore_hardware_finish || "chrome";
+      items.push(`☐ HANDLE → MUST be ${mName} style in ${hwF} — clearly visible on each opening sash`);
+    }
+
+    // Environment
+    items.push(`☐ WALL, SILL, SURROUNDINGS → KEEP 100% identical — zero changes`);
+    items.push(`☐ IMAGE DIMENSIONS → output MUST match original photo dimensions exactly`);
+
+    blocks.N = `[BLOCK N – FINAL PRESERVATION CHECKLIST]\nBefore outputting the image, verify EVERY item below. If any item is wrong, regenerate.\n\n${items.join("\n")}`;
+  }
+
   const systemPrompt = blocks.A;
   const userParts = [blocks.B, blocks.C, blocks.D, blocks.E, blocks.F, blocks.G, blocks.H, blocks.I, blocks.J, blocks.K, blocks.L];
   if (blocks.M) userParts.push(blocks.M);
+  userParts.push(blocks.N); // Block N always last (recency bias)
   if (notes) userParts.push(`[ADDITIONAL NOTES]\n${notes}`);
   const userPrompt = userParts.join("\n\n");
   const negativePrompt = "cartoon, illustration, sketch, drawing, watermark, text overlay, blurry, distorted perspective, different building, changed wall color, unrealistic lighting, 3D render, CGI artifacts, missing hinges, wrong panels, shutters not requested, cassonetto added without request, wood grain on RAL solid color, flat color on wood-effect laminate, wrong handle style, mismatched hardware finish, cassonetto unchanged when replacement was requested, wrong cassonetto color, cassonetto same color as original when asked to change, tapparella unchanged when replacement was requested, resized or cropped original photo, different image dimensions than original, letterboxing, pillarboxing";
