@@ -47,6 +47,7 @@ const ApiKeysPage = lazy(() => import("./pages/superadmin/ApiKeys"));
 const SystemLogsPage = lazy(() => import("./pages/superadmin/SystemLogs"));
 const PlatformSettingsPage = lazy(() => import("./pages/superadmin/PlatformSettings"));
 const RenderConfig = lazy(() => import("./pages/superadmin/RenderConfig"));
+const MonitoringPage = lazy(() => import("./pages/superadmin/Monitoring"));
 
 // Lazy-loaded Company pages
 const AppDashboard = lazy(() => import("./pages/app/Dashboard"));
