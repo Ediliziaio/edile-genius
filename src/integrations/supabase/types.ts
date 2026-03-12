@@ -3198,6 +3198,7 @@ export type Database = {
           is_global: boolean | null
           materiale_tipo: string | null
           name: string
+          preset_group: string | null
           prompt_fragment: string
           sort_order: number | null
           value: string
@@ -3216,6 +3217,7 @@ export type Database = {
           is_global?: boolean | null
           materiale_tipo?: string | null
           name: string
+          preset_group?: string | null
           prompt_fragment: string
           sort_order?: number | null
           value: string
@@ -3234,6 +3236,7 @@ export type Database = {
           is_global?: boolean | null
           materiale_tipo?: string | null
           name?: string
+          preset_group?: string | null
           prompt_fragment?: string
           sort_order?: number | null
           value?: string

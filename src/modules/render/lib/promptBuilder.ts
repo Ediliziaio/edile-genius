@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════════
 // PROMPT MASTER — Sistema a Blocchi (A–L) per Sostituzione Strutturale Infissi
-// Versione: 2.0.0
+// Versione: 3.0.0
 // ═══════════════════════════════════════════════════════════════════
 
 // ─── Type Enums ───────────────────────────────────────────────────
@@ -52,6 +52,18 @@ export type ProfiloForma = "squadrato" | "arrotondato" | "europeo";
 export type ManigliaType = "leva_alluminio" | "leva_acciaio" | "pomolo" | "alzante";
 export type ColoreFerratura = "argento" | "nero_opaco" | "inox" | "bronzo" | "oro";
 
+// ─── NEW v3 Types ─────────────────────────────────────────────────
+
+export type CernieraColore = "argento" | "nero_opaco" | "inox" | "bronzo" | "oro" | "uguale_maniglia";
+export type CassonettoMateriale = "pvc_tradizionale" | "pvc_slim" | "pvc_integrato" | "alluminio_coibentato";
+export type TapparellaMateriale = "pvc_avvolgibile" | "alluminio_avvolgibile" | "microforata" | "persiana_alluminio" | "veneziana_integrata" | "nessuna";
+
+export type SostituzioneSelezione = {
+  infissi: boolean;
+  cassonetto: boolean;
+  tapparella: boolean;
+};
+
 // ─── Interfaces ───────────────────────────────────────────────────
 
 export interface FotoAnalisi {
@@ -63,11 +75,16 @@ export interface FotoAnalisi {
   spessore_telaio: string;
   presenza_cassonetto: boolean;
   tipo_cassonetto: string;
+  colore_cassonetto_attuale?: string;
   tipo_vetro_attuale: string;
-  stile_edificio: StileEdificio;
+  presenza_tapparella?: boolean;
+  tipo_tapparella_attuale?: string;
+  colore_tapparella_attuale?: string;
+  stile_edificio: StileEdificio | string;
   materiale_muro: string;
   colore_muro: string;
   presenza_davanzale: boolean;
+  tipo_davanzale?: string;
   presenza_inferriata: boolean;
   piano: string;
   luce: string;
@@ -89,6 +106,29 @@ export interface ProfiloTelaio {
   forma: ProfiloForma;
 }
 
+export interface CerniereConfig {
+  num_per_anta: 2 | 3;
+  colore: CernieraColore;
+  tipo: "europea" | "a_libro" | "invisibile";
+}
+
+export interface CassonettoConfig {
+  azione: "mantieni" | "rimuovi" | "sostituisci";
+  materiale?: CassonettoMateriale;
+  colore?: ColoreConfig;
+  dimensione_h?: number;
+  prompt_fragment?: string;
+}
+
+export interface TapparellaConfig {
+  azione: "mantieni" | "rimuovi" | "sostituisci";
+  materiale?: TapparellaMateriale;
+  colore?: ColoreConfig;
+  colore_guide?: ColoreConfig;
+  stato_render?: "aperta" | "chiusa" | "mezza";
+  prompt_fragment?: string;
+}
+
 export interface VetroConfig {
   tipo: string;
   prompt_fragment?: string;
@@ -104,19 +144,18 @@ export interface FerramentaConfig {
   colore: ColoreFerratura;
 }
 
-export interface CassonettoConfig {
-  azione: "mantieni" | "rimuovi" | "integra";
-}
-
 export interface NuovoInfisso {
   materiale: MaterialeNuovo;
   colore: ColoreConfig;
   profilo: ProfiloTelaio;
+  cerniere: CerniereConfig;
   vetro: VetroConfig;
   oscurante?: OscuranteConfig;
+  cassonetto: CassonettoConfig;
+  tapparella: TapparellaConfig;
   ferramenta: FerramentaConfig;
-  cassonetto?: CassonettoConfig;
   num_ante?: number;
+  sostituzione: SostituzioneSelezione;
 }
 
 export interface RenderOptions {
@@ -150,28 +189,61 @@ export interface RenderConfig {
 // ─── Material Physics Dictionary ──────────────────────────────────
 
 const MATERIAL_PHYSICS: Record<MaterialeNuovo, string> = {
-  pvc: "white or colored PVC (polyvinyl chloride) with smooth matte surface, visible internal chamber structure at edges, welded corners with subtle seam lines, slight plastic sheen under direct light, uniform color without grain, rounded or sharp profile edges depending on system",
-  alluminio: "extruded aluminum with anodized or powder-coated finish, sharp precise edges, visible thermal break strips (dark polyamide) between inner and outer shells, metallic surface with subtle directional brushing marks, thin elegant profile (typically 50-65mm visible width), matte or semi-gloss finish",
-  legno: "solid wood frame with visible natural grain pattern, slightly rounded edges from milling, paint or stain finish showing subtle wood texture beneath, traditional mortise-and-tenon corner joints, warm organic appearance, thicker profile (68-92mm), possible hairline cracks in painted surfaces",
-  legno_alluminio: "hybrid frame: interior shows solid wood with natural grain and warm finish, exterior shows slim aluminum cladding with powder-coated color, visible transition line where wood meets aluminum at the edge, combines warmth of wood inside with weather-resistant aluminum outside",
-  acciaio_corten: "Corten weathering steel frame with characteristic rust-orange patina, rough oxidized surface texture, ultra-thin profiles (25-35mm sight lines), dark brown-orange color with natural variation, industrial aesthetic",
-  acciaio_minimale: "minimal steel frame with extremely thin sight lines (15-25mm), black or dark gray powder-coated surface, precise geometric edges, virtually invisible frame creating a nearly frameless glass appearance, modern industrial look",
+  pvc: "white or colored PVC (polyvinyl chloride) frame — smooth matte surface with very slight plastic texture under direct light, internal multi-chamber structure visible at frame cross-section edges, corners welded with subtle seam lines, uniform color throughout without natural grain, exterior surface shows shallow surface relief from extrusion process",
+  alluminio: "extruded aluminum frame — anodized or powder-coated exterior, sharp precise 90° or slightly beveled edges, clearly visible thermal break (dark polyamide strip, approximately 3-5mm wide) between inner and outer shells at frame cross-section, surface shows very subtle directional micro-texture from coating process, thin elegant profile (typically 50-65mm visible sight line width), consistent metallic finish",
+  legno: "solid wood frame — clearly visible natural wood grain running along the frame length, slightly rounded milled edges, paint or opaque stain finish showing faint grain texture beneath the coating, traditional mortise-and-tenon visible corner joint geometry (slight raised line at 45° miter), warm organic color variation, thicker profile (68-92mm sight line), possible hairline micro-cracks at painted corners",
+  legno_alluminio: "hybrid timber-aluminum composite frame — interior side shows solid wood with warm grain and stain finish, exterior side shows slim precision-extruded aluminum cladding with powder-coated finish, visible thin shadow line at the wood-aluminum transition edge, combines warmth of interior wood aesthetic with weather-resistant modern aluminum exterior",
+  acciaio_corten: "Corten weathering steel frame — unmistakable rust-orange patina with rough oxidized surface texture and natural color variation from dark rust-red to lighter orange-tan, ultra-thin sight line profiles (25-35mm visible width), industrial precise geometric form, characteristic streaking pattern typical of Cor-Ten oxidation",
+  acciaio_minimale: "ultra-minimal structural steel frame — extremely thin sight lines (15-25mm), deep matte black or dark anthracite powder-coated surface, machined precise geometric edges, nearly frameless appearance with maximum glass-to-frame ratio, industrial modern aesthetic, tiny cap screws or concealed fixings visible at mullion intersections",
 };
 
 // ─── Apertura Descriptions ────────────────────────────────────────
 
 const APERTURA_DESCRIPTION: Record<TipoApertura, string> = {
-  battente_1_anta: "single-leaf casement window that opens inward on side hinges, with visible handle on the opening side",
-  battente_2_ante: "double-leaf casement window with two opening panels meeting at center, both with handles, typically with a central mullion",
-  battente_3_ante: "triple-leaf casement window with three panels, typically center fixed and sides opening",
-  scorrevole: "horizontal sliding window with one or more panels sliding on tracks, visible rail at top and bottom",
-  scorrevole_alzante: "lift-and-slide door/window with large glass panels that lift slightly then slide horizontally, heavy-duty hardware",
-  vasistas: "top-hinged window that tilts inward from the bottom, with a handle at the bottom rail",
-  anta_ribalta: "tilt-and-turn window that can both swing inward like a door and tilt inward from the top, with a multi-position handle",
-  bilico: "pivot window rotating on a central horizontal axis, the top swings inward while the bottom swings outward",
-  fisso: "fixed non-opening window with no handles or hinges, glass held firmly in the frame",
-  portafinestra: "full-height French door/balcony door reaching from floor to near ceiling, with handle and typically a low threshold",
-  cassonetto_integrato: "window with integrated roller shutter box (cassonetto) visible above the frame, housing a roll-up shutter",
+  battente_1_anta: "single-leaf inward-opening casement window — ONE sash panel hinged on the LEFT or RIGHT side, operated by a single lever handle on the opposite stile, 2 hinges visible on the hinge side stile (top and bottom)",
+  battente_2_ante: "double-leaf inward-opening casement window — TWO equal sash panels meeting at center, each hinged on its outer side stile, 2 hinges per sash = 4 hinges total, each sash has its own lever handle near the center meeting stile",
+  battente_3_ante: "triple-leaf casement window — THREE panels, typically center panel fixed flanked by two opening sashes each with 2 hinges and a handle",
+  scorrevole: "horizontal sliding window — two or more panels sliding on visible aluminum top rail and bottom track, each panel has a flush pull handle or recessed grip, no hinges visible",
+  scorrevole_alzante: "lift-and-slide large door/window — very large glass panels, bottom track system with lifting hardware visible, heavy-duty multi-point lock handle on leading edge, no exposed hinges",
+  vasistas: "top-hung tilt-in window — sash hinged at TOP rail only, opens by tilting inward from the bottom, handle located on bottom rail of sash, 2 friction hinges at top corners",
+  anta_ribalta: "tilt-and-turn window — multi-function sash with BOTH tilt-in and side-swing capability, 2 hinges on hinge-side stile, distinctive multi-position lever handle",
+  bilico: "center-pivot window — sash rotates on central horizontal pivot axis, top half swings inward while bottom swings outward, visible pivot fittings at mid-height of both side stiles",
+  fisso: "fixed non-opening light — no hinges, no handle, no gaps or shadow lines from sash rebate, glass beaded directly into fixed frame",
+  portafinestra: "full-height balcony/French door — floor-to-near-ceiling height (typically 210-240cm), low threshold at floor level, same 2-hinges-per-leaf as standard window but larger scale",
+  cassonetto_integrato: "window with integrated roller box — standard opening sash below, above the frame top rail a visible box housing containing the rolled-up shutter",
+};
+
+// ─── NEW v3 Dictionaries ──────────────────────────────────────────
+
+const CASSONETTO_MATERIAL_DESC: Record<CassonettoMateriale, string> = {
+  pvc_tradizionale: "traditional PVC roller shutter housing (cassonetto PVC standard) — rectangular box profile protruding 160-200mm above window top rail, face panel approximately 200mm tall, smooth matte PVC surface with subtle panel seam line, bottom strip slightly recessed where shutter curtain exits",
+  pvc_slim: "slim-profile PVC cassonetto — reduced-depth housing only 110-130mm visible height above frame, lower profile ratio for modern facades, smooth face panel with minimal protrusion (80-100mm from wall), contemporary proportions",
+  pvc_integrato: "wall-integrated cassonetto (cassonetto a muro/incassato) — fully recessed into masonry, only the bottom inspection strip approximately 30-40mm visible below wall surface level, wall plaster runs continuously over the housing, virtually invisible from exterior",
+  alluminio_coibentato: "insulated aluminum cassonetto — aluminum face panels with powder-coated finish, visible side inspection cover flanges at 45° angles, polyurethane foam fill, face panel 170-210mm height, crisp machined edges and corners",
+};
+
+const TAPPARELLA_DESC: Record<string, string> = {
+  pvc_avvolgibile: "PVC roll-up shutter curtain — horizontal extruded PVC slats 37-55mm wide, each slat with smooth rounded upper edge and male-female interlocking lower edge, uniform matte colored surface, bottom end-rail heavier profile with integrated rubber seal, side guide channels visible as thin U-profile strips on left and right jamb faces",
+  alluminio_avvolgibile: "aluminum roll-up shutter curtain — extruded aluminum foam-filled slats 37-55mm wide, slightly metallic surface sheen compared to PVC, crisp precise slat-to-slat joints, heavier appearance than PVC, bottom bar with EPDM rubber weatherstrip, side guide channels in matching aluminum",
+  microforata: "microperforated roll-up shutter — same slat profile as standard but with regular grid of circular perforations 3-4mm diameter, perforation pattern creates a screen-like texture, light passes through holes creating dappled interior light",
+  persiana_alluminio: "aluminum louvered shutter (persiana) — horizontal extruded aluminum slats 60-80mm wide with traditional shutter profile (S-curve cross-section), visible twin pivot pins at each slat end, side guide channels deeper (40-50mm), traditional Mediterranean aesthetic",
+  veneziana_integrata: "integral blind between glazing (tendina veneziana integrata) — visible only as thin parallel horizontal lines 25mm apart suspended between the two glass panes inside the double-glazing unit, operated by external control on frame edge, ultra-minimal modern look",
+  nessuna: "No shutter or blind — bare window frame only.",
+};
+
+const CERNIERA_DESC: Record<string, string> = {
+  europea: "Standard European butt hinge (cerniera europea) — two rectangular steel plates approximately 50×35mm each, 3 countersunk screws per plate, central pin knuckle approximately 8mm diameter, hinge projects 3-4mm from frame face when closed",
+  a_libro: "Book-fold concealed hinge (cerniera a libro) — when closed hinge is partially recessed into frame rebate, only the outer knuckle visible as a thin strip approximately 6mm × 40mm, more elegant and flush than standard hinge",
+  invisibile: "Fully concealed pivot hinge (cerniera invisibile/nascosta) — completely hidden inside frame rebate when window is closed, no visible hardware on frame face, only a very faint rebate shadow line indicates hinge location, premium invisible appearance",
+};
+
+const CERNIERA_COLORE_DESC: Record<CernieraColore, string> = {
+  argento: "silver polished chrome finish",
+  nero_opaco: "matte black finish",
+  inox: "brushed stainless steel finish",
+  bronzo: "antique bronze finish",
+  oro: "polished gold/brass finish",
+  uguale_maniglia: "same finish as the window handle",
 };
 
 // ─── Material Distinction ─────────────────────────────────────────
@@ -195,40 +267,106 @@ export function getMaterialDistinction(
   return `Remove the existing ${oldDesc[oldMat] || "old frame"} completely. Replace it with a brand new ${MATERIAL_PHYSICS[newMat]}. The material change should be clearly visible — this is a full structural replacement, not a repaint or overlay.`;
 }
 
-// ─── Block Builders (A–L) ─────────────────────────────────────────
+// ─── Block Builders (A–L) v3 ──────────────────────────────────────
 
 function buildBlock_A(): string {
   return `[BLOCK A – ROLE & MISSION]
-You are an expert architectural visualization AI specializing in photorealistic window and door replacement. Your mission is to perform a COMPLETE STRUCTURAL REPLACEMENT of the existing windows/doors in the photograph — not a simple color overlay or filter. You must remove the old frame entirely and render a new frame with different material physics, profile geometry, and surface properties. The result must be indistinguishable from a real professional photograph.`;
+You are a SURGICAL PHOTOREALISTIC IMAGE EDITOR for architectural visualization. Your ONLY task: replace EXACTLY the specified building elements (window frames, roller box, shutters) while leaving EVERYTHING ELSE in the photo 100% pixel-perfect identical.
+This is NOT image generation. This is NOT artistic interpretation. This is PRECISE SURGICAL REPLACEMENT of specific architectural elements.`;
 }
 
 function buildBlock_B(analisi: FotoAnalisi): string {
-  return `[BLOCK B – PHOTO ANALYSIS]
-Current window analysis:
-- Opening type: ${APERTURA_DESCRIPTION[analisi.tipo_apertura] || analisi.tipo_apertura}
-- Current material: ${analisi.materiale_attuale}
-- Current color: ${analisi.colore_attuale}
-- Condition: ${analisi.condizioni}
-- Number of panels: ${analisi.num_ante_attuale}
-- Frame thickness: ${analisi.spessore_telaio}
-- Roller shutter box present: ${analisi.presenza_cassonetto ? "yes — " + analisi.tipo_cassonetto : "no"}
-- Current glass type: ${analisi.tipo_vetro_attuale}
-- Building style: ${analisi.stile_edificio}
-- Wall material: ${analisi.materiale_muro}
-- Wall color: ${analisi.colore_muro}
-- Window sill present: ${analisi.presenza_davanzale ? "yes" : "no"}
-- Security bars present: ${analisi.presenza_inferriata ? "yes" : "no"}
-- Floor level: ${analisi.piano}
-- Lighting: ${analisi.luce}
-- Camera angle: ${analisi.angolo_ripresa}`;
+  return `[BLOCK B – EXISTING ELEMENTS INVENTORY]
+Window/door type: ${APERTURA_DESCRIPTION[analisi.tipo_apertura] || analisi.tipo_apertura}
+Current frame material: ${analisi.materiale_attuale}
+Color: ${analisi.colore_attuale}
+Condition: ${analisi.condizioni}
+Panel count: ${analisi.num_ante_attuale}
+Frame depth visible: ${analisi.spessore_telaio}
+Glass: ${analisi.tipo_vetro_attuale}
+Roller box (cassonetto): ${analisi.presenza_cassonetto ? 'YES — type: ' + analisi.tipo_cassonetto + ', color: ' + (analisi.colore_cassonetto_attuale || 'unknown') : 'NOT PRESENT'}
+Shutter/blind (tapparella): ${analisi.presenza_tapparella ? 'YES — type: ' + (analisi.tipo_tapparella_attuale || 'unknown') + ', color: ' + (analisi.colore_tapparella_attuale || 'unknown') : 'NOT PRESENT'}
+Building style: ${analisi.stile_edificio}
+Wall: ${analisi.materiale_muro} (${analisi.colore_muro})
+Sill: ${analisi.presenza_davanzale ? 'YES (' + (analisi.tipo_davanzale || 'unknown type') + ')' : 'NO'}
+Security bars: ${analisi.presenza_inferriata ? 'YES' : 'NO'}
+Floor: ${analisi.piano}
+Lighting: ${analisi.luce}
+Angle: ${analisi.angolo_ripresa}`;
 }
 
 function buildBlock_C(analisi: FotoAnalisi, infisso: NuovoInfisso): string {
-  return `[BLOCK C – STRUCTURAL REPLACEMENT]
-${getMaterialDistinction(analisi.materiale_attuale, infisso.materiale)}`;
+  const sost = infisso.sostituzione;
+  const lines: string[] = ['[BLOCK C – SELECTIVE REPLACEMENT INSTRUCTIONS]', 'Replace ONLY the following elements (others: DO NOT TOUCH):'];
+
+  // Infissi
+  if (sost.infissi) {
+    lines.push(`\n✅ REPLACE — Window/door frames and glass:`);
+    lines.push(`Remove COMPLETELY: ${analisi.materiale_attuale} ${analisi.colore_attuale} frame`);
+    lines.push(`Install NEW: ${MATERIAL_PHYSICS[infisso.materiale]}`);
+  } else {
+    lines.push(`\n🚫 DO NOT TOUCH — Keep existing window/door frames exactly as they are`);
+  }
+
+  // Cassonetto
+  const c = infisso.cassonetto;
+  if (sost.cassonetto) {
+    if (c.azione === "rimuovi") {
+      lines.push(`\n✅ REPLACE — Roller shutter box (cassonetto): REMOVE completely`);
+      lines.push(`Fill wall above window with continuous masonry matching surroundings`);
+    } else if (c.azione === "sostituisci" && c.materiale) {
+      lines.push(`\n✅ REPLACE — Roller shutter box (cassonetto):`);
+      lines.push(`Remove existing: ${analisi.presenza_cassonetto ? analisi.tipo_cassonetto : 'existing cassonetto'}`);
+      lines.push(`Install NEW: ${CASSONETTO_MATERIAL_DESC[c.materiale] || c.materiale}`);
+      if (c.colore) {
+        let colorLine = `Color: ${c.colore.nome}`;
+        if (c.colore.ral) colorLine += ` (RAL ${c.colore.ral})`;
+        lines.push(colorLine);
+      }
+    } else {
+      lines.push(`\n🚫 DO NOT TOUCH — ${analisi.presenza_cassonetto ? 'Keep existing cassonetto exactly as in photo' : 'No cassonetto present — do not add one'}`);
+    }
+  } else {
+    lines.push(`\n🚫 DO NOT TOUCH — ${analisi.presenza_cassonetto ? 'Keep existing cassonetto exactly as in photo' : 'No cassonetto present — do not add one'}`);
+  }
+
+  // Tapparella
+  const t = infisso.tapparella;
+  if (sost.tapparella) {
+    if (t.azione === "rimuovi") {
+      lines.push(`\n✅ REPLACE — Roller shutter/blind (tapparella): REMOVE completely`);
+      lines.push(`Show bare window frame without any shutter system`);
+    } else if (t.azione === "sostituisci" && t.materiale) {
+      lines.push(`\n✅ REPLACE — Roller shutter/blind (tapparella):`);
+      lines.push(`Remove existing shutter system`);
+      lines.push(`Install NEW: ${TAPPARELLA_DESC[t.materiale] || t.materiale}`);
+      if (t.colore) {
+        let cDesc = t.colore.nome;
+        if (t.colore.ral) cDesc += ` (RAL ${t.colore.ral})`;
+        lines.push(`Slat/blade color: ${cDesc}`);
+      }
+      if (t.colore_guide) {
+        let gDesc = t.colore_guide.nome;
+        if (t.colore_guide.ral) gDesc += ` (RAL ${t.colore_guide.ral})`;
+        lines.push(`Side guide channels (guide) color: ${gDesc}`);
+      }
+      const stato = t.stato_render || "chiusa";
+      lines.push(`Render the shutter: ${stato === 'aperta' ? 'FULLY OPEN (rolled up into cassonetto, no curtain visible)' : stato === 'mezza' ? 'HALF OPEN (curtain visible covering lower ~50% of glass)' : 'FULLY CLOSED (curtain covers entire glass surface)'}`);
+    } else {
+      lines.push(`\n🚫 DO NOT TOUCH — ${analisi.presenza_tapparella ? 'Keep existing shutter/blind exactly as in photo' : 'No shutter present — do not add one'}`);
+    }
+  } else {
+    lines.push(`\n🚫 DO NOT TOUCH — ${analisi.presenza_tapparella ? 'Keep existing shutter/blind exactly as in photo' : 'No shutter present — do not add one'}`);
+  }
+
+  return lines.join('\n');
 }
 
 function buildBlock_D(infisso: NuovoInfisso): string {
+  if (!infisso.sostituzione.infissi) {
+    return `[BLOCK D – FRAME MATERIAL — SKIPPED]\nFrame replacement not requested. Skip this block.`;
+  }
+
   const mat = MATERIAL_PHYSICS[infisso.materiale];
   const col = infisso.colore;
   let colorDesc = col.nome;
@@ -236,9 +374,9 @@ function buildBlock_D(infisso: NuovoInfisso): string {
   if (col.ncs) colorDesc += ` (NCS ${col.ncs})`;
 
   const finituraMap: Record<string, string> = {
-    liscio_opaco: "smooth matte finish with no visible sheen",
-    liscio_lucido: "smooth glossy finish with visible reflections",
-    venatura_legno: "wood-grain textured surface (foil or laminated)",
+    liscio_opaco: "smooth matte finish — no visible sheen or specular highlight",
+    liscio_lucido: "smooth gloss finish — clear specular highlight visible on frame face",
+    venatura_legno: "wood-grain texture laminate (woodgrain foil) — subtle grain lines running along frame length",
     spazzolato: "brushed metallic finish with directional micro-lines",
     satinato: "satin finish with soft, diffused light reflection",
     goffrato: "embossed/textured surface with tactile micro-pattern",
@@ -251,6 +389,10 @@ Surface finish: ${finituraMap[col.finitura] || col.finitura}`;
 }
 
 function buildBlock_E(infisso: NuovoInfisso): string {
+  if (!infisso.sostituzione.infissi) {
+    return `[BLOCK E – FRAME PROFILE — SKIPPED]\nFrame replacement not requested. Skip this block.`;
+  }
+
   const p = infisso.profilo;
   const sizeDesc: Record<ProfiloTelaioSize, string> = {
     "70mm": "70mm residential profile with 3 internal chambers, standard thermal insulation",
@@ -263,97 +405,179 @@ function buildBlock_E(infisso: NuovoInfisso): string {
     europeo: "classic European profile with slight bevel and gentle curves",
   };
 
-  return `[BLOCK E – FRAME PROFILE GEOMETRY]
-Profile: ${sizeDesc[p.dimensione]}
-Shape: ${formaDesc[p.forma]}
-${infisso.num_ante ? `Number of panels: ${infisso.num_ante}` : ""}`;
+  const numAnte = infisso.num_ante || 1;
+  const cer = infisso.cerniere;
+  const cernierePerLato = cer.num_per_anta;
+  const cerniereTotal = cernierePerLato * numAnte;
+  const cerTipoDesc = CERNIERA_DESC[cer.tipo] || cer.tipo;
+  const cerColoreDesc = CERNIERA_COLORE_DESC[cer.colore] || cer.colore;
+
+  return `[BLOCK E – FRAME PROFILE & HINGE GEOMETRY]
+Profile system: ${sizeDesc[p.dimensione]}
+Edge shape: ${formaDesc[p.forma]}
+Number of opening panels (sashes): ${numAnte}
+
+HINGE DETAIL (technically accurate Italian window standard):
+Total hinges: ${cerniereTotal} (${cernierePerLato} per sash × ${numAnte} sash${numAnte > 1 ? 'es' : ''})
+Hinge type: ${cerTipoDesc}
+Hinge color/finish: ${cerColoreDesc}
+Hinge placement rule: place hinges at 1/5 and 4/5 of sash height (top hinge ~200mm from top rail, bottom hinge ~200mm from bottom rail)
+Each hinge: ${cer.tipo === 'invisibile' ? 'fully recessed — NOT visible from exterior' : 'two plates visible on hinge-side stile, ~50×35mm each, 3 screws per plate'}
+Cast correct shadow of hinge knuckle onto frame face and wall rebate.`;
 }
 
 function buildBlock_F(infisso: NuovoInfisso): string {
+  if (!infisso.sostituzione.infissi) {
+    return `[BLOCK F – GLASS — SKIPPED]\nFrame replacement not requested. Skip this block.`;
+  }
+
   const v = infisso.vetro;
-  return `[BLOCK F – GLASS TYPE]
+  return `[BLOCK F – GLASS UNIT]
 ${v.prompt_fragment || v.tipo}
-The glass must show realistic reflections consistent with the scene lighting, slight greenish tint on edges typical of multi-pane glass, and proper transparency showing interior darkness or curtains.`;
+Technical rendering requirements:
+- Thin greenish tint at glass edge (typical of multi-pane float glass)
+- Specular highlight/reflection matching scene light source direction
+- Interior appears as dark/neutral (curtains or room interior barely visible)
+- Spacer bar (15-16mm) visible only at perimeter inside rebate`;
 }
 
 function buildBlock_G(infisso: NuovoInfisso): string {
-  if (!infisso.oscurante || infisso.oscurante.tipo === "nessuno") {
-    return `[BLOCK G – SHUTTERS/BLINDS]
-No external shutters or blinds. Clean window frame only.`;
+  if (!infisso.sostituzione.infissi) {
+    return `[BLOCK G – HARDWARE — SKIPPED]\nFrame replacement not requested. Skip this block.`;
   }
-  return `[BLOCK G – SHUTTERS/BLINDS]
-${infisso.oscurante.prompt_fragment || infisso.oscurante.tipo}`;
-}
 
-function buildBlock_H(infisso: NuovoInfisso): string {
   const f = infisso.ferramenta;
   const manigliaDesc: Record<ManigliaType, string> = {
-    leva_alluminio: "aluminum lever handle with clean modern lines",
-    leva_acciaio: "stainless steel lever handle with premium feel",
-    pomolo: "round knob handle (pomolo), compact profile",
-    alzante: "lift-and-slide handle with ergonomic grip for heavy panels",
+    leva_alluminio: "aluminum lever handle — die-cast aluminum body with smooth matte or anodized finish, rectangular cross-section grip approximately 130mm long",
+    leva_acciaio: "stainless steel lever handle — precision-machined 316 stainless steel, satin brushed or mirror polish finish, slim ergonomic grip 120-140mm",
+    pomolo: "round knob handle (pomolo) — spherical or cylindrical knob approximately 35-45mm diameter, compact low-profile",
+    alzante: "lift-and-slide long lever handle 200-300mm with ergonomic palm grip and upward-lift mechanism, heavy-duty die-cast body",
   };
   const coloreDesc: Record<ColoreFerratura, string> = {
-    argento: "silver/chrome finish",
+    argento: "silver polished chrome finish",
     nero_opaco: "matte black finish",
     inox: "brushed stainless steel finish",
     bronzo: "antique bronze finish",
     oro: "polished gold/brass finish",
   };
 
-  return `[BLOCK H – HARDWARE & HANDLES]
-Handle type: ${manigliaDesc[f.maniglia]}
+  return `[BLOCK G – HARDWARE DETAILS]
+Handle: ${manigliaDesc[f.maniglia]}
 Handle color: ${coloreDesc[f.colore]}
-Hinges should be barely visible, matching the handle color. Show realistic hardware shadows.`;
+Handle position: centered on the meeting stile for battente windows, lower third for portafinestre
+Espagnolette lock bar: concealed inside frame rebate
+Strikeplate: small 20×60mm metal plate recessed into frame face opposite handle — show subtle shadow`;
+}
+
+function buildBlock_H(analisi: FotoAnalisi, infisso: NuovoInfisso): string {
+  const c = infisso.cassonetto;
+
+  if (!infisso.sostituzione.cassonetto) {
+    return `[BLOCK H – ROLLER BOX — NOT MODIFIED]\n${analisi.presenza_cassonetto ? 'Cassonetto present in photo — keep EXACTLY as-is, do not alter color, shape or position.' : 'No cassonetto in original photo — do not add one.'}`;
+  }
+
+  if (c.azione === "rimuovi") {
+    return `[BLOCK H – ROLLER BOX REMOVAL]
+Remove the entire cassonetto above the window. Replace with: continuous wall surface matching the exact wall texture, color, and material of the surrounding facade. The wall fill must be seamless — no visible ghost outline, shadow gap or discoloration where the box was.`;
+  }
+
+  if (c.azione === "sostituisci" && c.materiale) {
+    let colorLine = "";
+    if (c.colore) {
+      colorLine = `Color: ${c.colore.nome}`;
+      if (c.colore.ral) colorLine += ` (RAL ${c.colore.ral})`;
+    }
+
+    return `[BLOCK H – NEW ROLLER BOX (CASSONETTO)]
+Replace existing cassonetto with:
+${CASSONETTO_MATERIAL_DESC[c.materiale]}
+${colorLine}
+Position: directly above window top frame rail, face flush with or slightly proud of wall plane
+Bottom reveal: show the shutter exit slot (approximately 15-20mm slit) at bottom of cassonetto face panel
+Width: exactly matching window frame outer width
+Cast appropriate shadow from cassonetto protrusion onto wall below`;
+  }
+
+  return `[BLOCK H – ROLLER BOX — MAINTAIN]\n${analisi.presenza_cassonetto ? 'Keep existing cassonetto exactly as photographed.' : 'No cassonetto in original photo — do not add one.'}`;
 }
 
 function buildBlock_I(analisi: FotoAnalisi, infisso: NuovoInfisso): string {
-  const c = infisso.cassonetto;
-  if (!c || c.azione === "mantieni") {
-    return `[BLOCK I – ROLLER SHUTTER BOX]
-${analisi.presenza_cassonetto ? "Keep the existing roller shutter box (cassonetto) as-is, matching its current appearance." : "No roller shutter box present in the original. Do not add one."}`;
+  const t = infisso.tapparella;
+
+  if (!infisso.sostituzione.tapparella) {
+    return `[BLOCK I – SHUTTER/BLIND — NOT MODIFIED]\n${analisi.presenza_tapparella ? 'Shutter/blind present in photo — keep EXACTLY as-is.' : 'No shutter/blind in original — do not add one.'}`;
   }
-  if (c.azione === "rimuovi") {
-    return `[BLOCK I – ROLLER SHUTTER BOX]
-Remove the existing roller shutter box completely. The wall above the window should show continuous wall surface matching the surrounding masonry.`;
+
+  if (t.azione === "rimuovi") {
+    return `[BLOCK I – SHUTTER REMOVAL]
+Remove the existing shutter/blind system completely. Show bare window frame with no shutter curtain, no side guides, no bottom bar. If guide channels were surface-mounted: remove them and show clean wall face.`;
   }
-  return `[BLOCK I – ROLLER SHUTTER BOX]
-Replace the existing roller shutter box with a modern integrated cassonetto that blends with the new frame color and material.`;
+
+  if (t.azione === "sostituisci" && t.materiale) {
+    const lines: string[] = [`[BLOCK I – NEW SHUTTER/BLIND SYSTEM]`];
+    lines.push(`Install new: ${TAPPARELLA_DESC[t.materiale] || t.materiale}`);
+    if (t.colore) {
+      lines.push(`Slat color: ${t.colore.nome}${t.colore.ral ? ` (RAL ${t.colore.ral})` : ""}`);
+    }
+    if (t.colore_guide) {
+      lines.push(`Side guide channel color: ${t.colore_guide.nome}${t.colore_guide.ral ? ` (RAL ${t.colore_guide.ral})` : ""}`);
+    } else if (t.colore) {
+      lines.push(`Side guide channel color: same as slats`);
+    }
+    const stato = t.stato_render || "chiusa";
+    if (stato === "aperta") {
+      lines.push("FULLY OPEN STATE: shutter curtain completely rolled up inside cassonetto — NO curtain visible. Only side guide channels remain visible.");
+    } else if (stato === "mezza") {
+      lines.push("HALF-OPEN STATE: shutter curtain partially lowered covering approximately lower 50% of glass height.");
+    } else {
+      lines.push("FULLY CLOSED STATE: shutter curtain completely lowered, covering the ENTIRE glass area from cassonetto bottom to windowsill level.");
+    }
+    lines.push("Guide channel width: approximately 16-20mm × 20-25mm deep. Ensure guide channels are straight, parallel, and symmetrically positioned.");
+    return lines.join("\n");
+  }
+
+  return `[BLOCK I – SHUTTER — MAINTAIN]\n${analisi.presenza_tapparella ? 'Keep existing shutter exactly as photographed.' : 'No shutter present — do not add one.'}`;
 }
 
 function buildBlock_J(analisi: FotoAnalisi): string {
-  return `[BLOCK J – ENVIRONMENTAL PRESERVATION]
-CRITICAL CONSTRAINTS — preserve ALL of the following exactly as in the original photo:
-- Wall color (${analisi.colore_muro}), texture, and material (${analisi.materiale_muro})
-- ${analisi.presenza_davanzale ? "Window sill — keep exact same shape, material, and position" : "No window sill — do not add one"}
-- ${analisi.presenza_inferriata ? "Security bars/grilles — keep in place unless explicitly asked to remove" : "No security bars present"}
-- Building perspective, vanishing points, and camera angle (${analisi.angolo_ripresa})
-- All surrounding elements: pipes, cables, gutters, plants, adjacent windows
-- Street/ground level elements
-- Sky and ambient lighting (${analisi.luce})`;
+  return `[BLOCK J – PIXEL-PERFECT ENVIRONMENT PRESERVATION]
+The following MUST remain 100% unchanged — zero modification allowed:
+- Wall: color (${analisi.colore_muro}), material (${analisi.materiale_muro}), texture, aging, stains, weathering
+- Window sill: ${analisi.presenza_davanzale ? 'KEEP — same ' + (analisi.tipo_davanzale || 'material') + ', shape, shadow' : 'NOT PRESENT — do not add a sill'}
+- Security bars: ${analisi.presenza_inferriata ? 'KEEP — maintain all bars at exact position, color, shadow' : 'NOT PRESENT — do not add bars'}
+- Camera: preserve exact perspective, focal length, vanishing points (${analisi.angolo_ripresa})
+- Surroundings: every pipe, cable, drain, crack, plant, neighboring window, balcony, street element
+- Sky/background: identical — no color shift, no weather change
+- Lighting: same direction, same ambient/diffuse ratio (${analisi.luce})`;
 }
 
 function buildBlock_K(analisi: FotoAnalisi): string {
-  return `[BLOCK K – LIGHTING & SHADOWS]
-Match the exact lighting conditions:
-- Light source: ${analisi.luce}
-- Render correct shadows cast by the new frame profile onto the wall and sill
-- Inner frame shadows showing the depth/recession of the new profile
-- Glass reflections must match the scene's light direction
-- Ambient occlusion in frame corners and where frame meets wall`;
+  return `[BLOCK K – PHOTOREALISTIC LIGHTING & SHADOWS]
+Lighting scene: ${analisi.luce}
+Required shadow elements (all must be physically correct):
+- Frame shadow: new frame profile casts shadow into wall rebate — depth approximately 15-25mm
+- Hinge shadow: small cast shadow from each hinge knuckle on hinge-side stile face
+- Handle shadow: lever or knob casts shadow on frame face — direction matches scene light
+- Cassonetto shadow: ${analisi.presenza_cassonetto ? 'box face casts horizontal shadow onto wall below it' : 'no cassonetto shadow'}
+- Shutter shadow: if shutter partially open, hanging curtain edge casts shadow on window below
+- Glass reflection: specular highlight on glass matches scene light direction
+- Ambient occlusion: soft dark gradient in wall-to-frame rebate transition, in frame corners, under sill`;
 }
 
 function buildBlock_L(): string {
-  return `[BLOCK L – NEGATIVE CONSTRAINTS]
-DO NOT:
-- Change the wall color, texture, or any part of the building facade
-- Alter the camera perspective or focal length
-- Add elements not present in the original (plants, decorations, people)
-- Change the sky, weather, or ambient lighting
-- Create cartoon, illustrated, or obviously AI-generated artifacts
-- Add text, watermarks, or overlays
-- Distort proportions or change window opening dimensions
-- Make the image look like a 3D rendering — it must be photorealistic`;
+  return `[BLOCK L – ABSOLUTE NEGATIVE CONSTRAINTS]
+NEVER DO any of the following:
+- ✗ Change wall color, texture, plaster pattern, or any facade element not explicitly requested
+- ✗ Alter camera perspective, field of view, or tilt/shift
+- ✗ Add elements absent in the original (plants, people, decorations, extra windows)
+- ✗ Change sky color, cloud pattern, or weather conditions
+- ✗ Produce cartoon, illustrated, or CGI-look artifacts
+- ✗ Add text, watermarks, copyright marks, or any overlays
+- ✗ Distort window proportions or change opening/glass dimensions
+- ✗ Add hinges to fixed lights (fisso) — fixed panels have NO hinges
+- ✗ Add shutters or cassonetto if replacement was NOT requested AND none existed in photo
+- ✗ Change the number of window panes unless explicitly requested
+- ✗ Make the result look like a 3D render — must be indistinguishable from real photograph`;
 }
 
 // ─── Main Builder ─────────────────────────────────────────────────
@@ -381,7 +605,7 @@ export function buildRenderPromptV2(
     E: buildBlock_E(nuovo_infisso),
     F: buildBlock_F(nuovo_infisso),
     G: buildBlock_G(nuovo_infisso),
-    H: buildBlock_H(nuovo_infisso),
+    H: buildBlock_H(foto_analisi, nuovo_infisso),
     I: buildBlock_I(foto_analisi, nuovo_infisso),
     J: buildBlock_J(foto_analisi),
     K: buildBlock_K(foto_analisi),
@@ -392,11 +616,17 @@ export function buildRenderPromptV2(
 
   const userParts = [blocks.B, blocks.C, blocks.D, blocks.E, blocks.F, blocks.G, blocks.H, blocks.I, blocks.J, blocks.K, blocks.L];
   if (options?.notes) {
-    userParts.push(`[ADDITIONAL NOTES]\n${options.notes}`);
+    userParts.push(`[ADDITIONAL CLIENT NOTES]\n${options.notes}`);
   }
   const userPrompt = userParts.join("\n\n");
 
-  const negativePrompt = "cartoon, illustration, sketch, drawing, watermark, text overlay, blurry, distorted perspective, different building, changed wall color, unrealistic lighting, 3D render look, CGI artifacts, plastic appearance, oversaturated colors";
+  const negativePrompt = [
+    "cartoon", "illustration", "sketch", "drawing", "watermark", "text overlay",
+    "blurry", "distorted perspective", "different building", "changed wall color",
+    "unrealistic lighting", "3D render look", "CGI artifacts", "plastic fake appearance",
+    "oversaturated colors", "missing hinges on opening windows", "wrong number of panels",
+    "shutters not requested", "cassonetto added without request",
+  ].join(", ");
 
   const fullText = systemPrompt + userPrompt;
 
@@ -404,7 +634,7 @@ export function buildRenderPromptV2(
     systemPrompt,
     userPrompt,
     negativePrompt,
-    promptVersion: "2.0.0",
+    promptVersion: "3.0.0",
     charCount: fullText.length,
     blocks,
   };
