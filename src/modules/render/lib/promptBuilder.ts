@@ -609,8 +609,11 @@ Remove the existing shutter/blind system completely. Show bare window frame with
   if (t.azione === "sostituisci" && t.materiale) {
     const lines: string[] = [`[BLOCK I – NEW SHUTTER/BLIND SYSTEM]`];
     lines.push(`Install new: ${TAPPARELLA_DESC[t.materiale] || t.materiale}`);
-    if (t.colore) {
-      lines.push(`Slat color: ${t.colore.nome}${t.colore.ral ? ` (RAL ${t.colore.ral})` : ""}`);
+    if (t.colore_mode === "legno" && t.colore_wood_effect) {
+      lines.push(`Slat color: ${formatColorPrompt("legno", null, t.colore_wood_effect)}`);
+      lines.push(`SLAT WOOD EFFECT: Each slat MUST show horizontal wood grain pattern matching the specified wood effect laminate. Grain runs along the slat length.`);
+    } else if (t.colore) {
+      lines.push(`Slat color: ${t.colore.nome}${t.colore.ral ? ` (RAL ${t.colore.ral})` : ""} — solid uniform color, NO wood grain`);
     }
     if (t.colore_guide) {
       lines.push(`Side guide channel color: ${t.colore_guide.nome}${t.colore_guide.ral ? ` (RAL ${t.colore_guide.ral})` : ""}`);
