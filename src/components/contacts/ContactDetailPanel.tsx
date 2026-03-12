@@ -526,6 +526,11 @@ export default function ContactDetailPanel({ contact, open, onOpenChange, onUpda
               )}
             </TabsContent>
 
+            {/* Calls Tab — Call History from outbound_call_log */}
+            <TabsContent value="calls" className="px-6 py-4 mt-0">
+              <CallHistorySection contactId={contact.id} nextCallAt={contact.next_call_at} />
+            </TabsContent>
+
             {/* Info Tab */}
             <TabsContent value="info" className="px-6 py-4 space-y-1 mt-0">
               {editing ? (
