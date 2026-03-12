@@ -21,9 +21,28 @@ Deno.serve(async (req) => {
     if (authErr || !userData?.user) return jsonError("Unauthorized", "auth_error", 401, rid);
 
     const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    const { agent_id, to_number, dynamic_variables } = await req.json();
+    const { agent_id, to_number, contact_id, dynamic_variables } = await req.json();
 
     if (!agent_id || !to_number) return jsonError("agent_id e to_number richiesti", "validation_error", 400, rid);
+
+    // DNC check if contact_id provided
+    if (contact_id) {
+      const { data: contactData } = await sb
+        .from("contacts")
+        .select("do_not_call, full_name")
+        .eq("id", contact_id)
+        .single();
+
+      if (contactData?.do_not_call) {
+        log("warn", "DNC contact call blocked", { request_id: rid, contact_id });
+        return jsonError(
+          `${contactData.full_name} è nella lista Non Chiamare`,
+          "do_not_call",
+          403,
+          rid,
+        );
+      }
+    }
 
     log("info", "Outbound call requested", { request_id: rid, agent_id, to_number: to_number.replace(/\d(?=\d{4})/g, "*") });
 
@@ -69,20 +88,23 @@ Deno.serve(async (req) => {
 
     const elData = await elRes.json();
 
-    await sb.from("outbound_call_log").insert({
+    const { data: logRow } = await sb.from("outbound_call_log").insert({
       company_id: agent.company_id,
       agent_id,
+      contact_id: contact_id || null,
       to_number: to_number.replace(/\s/g, ""),
       el_call_id: elData.call_sid || null,
+      el_conversation_id: elData.conversation_id || null,
+      dynamic_variables: dynamic_variables || {},
       status: "initiated",
       started_at: new Date().toISOString(),
-    });
+    }).select("id").single();
 
     log("info", "Outbound call initiated", { request_id: rid, call_sid: elData.call_sid });
 
     // Backward compatible: keep success + call_sid at top level
     return new Response(
-      JSON.stringify({ ok: true, success: true, call_sid: elData.call_sid, request_id: rid }),
+      JSON.stringify({ ok: true, success: true, call_sid: elData.call_sid, call_log_id: logRow?.id || null, request_id: rid }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {

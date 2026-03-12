@@ -105,3 +105,58 @@ export async function generateCallSummary(transcript: any[], requestId: string):
   const result = await generateCallAnalysis(transcript, requestId);
   return result.summary;
 }
+
+/**
+ * Generate a CRM-oriented Italian summary for a call.
+ * Shorter and action-focused compared to generateCallAnalysis.
+ */
+export async function generateItalianCallSummary(
+  transcript: Array<{ role: string; message?: string; text?: string }>,
+  contactName: string,
+  outcome: string,
+): Promise<string> {
+  const openaiKey = Deno.env.get("OPENAI_API_KEY");
+  if (!openaiKey || transcript.length === 0) return "";
+
+  const transcriptText = transcript
+    .map((t) => `${t.role === "agent" ? "AI" : contactName}: ${t.message || t.text || ""}`)
+    .join("\n")
+    .slice(0, 4000);
+
+  const outcomeLabel: Record<string, string> = {
+    answered: "risposto",
+    no_answer: "non risposto",
+    busy: "occupato",
+    voicemail: "segreteria",
+    failed: "fallita",
+  };
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${openaiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        max_tokens: 200,
+        temperature: 0.3,
+        messages: [
+          {
+            role: "system",
+            content:
+              "Sei un assistente CRM. Riassumi le chiamate in italiano in modo conciso (max 3 frasi). Indica: esito principale, interesse del cliente, e azione successiva suggerita.",
+          },
+          {
+            role: "user",
+            content: `Chiamata ${outcomeLabel[outcome] || outcome} con ${contactName}:\n\n${transcriptText}\n\nRiassumi in 2-3 frasi.`,
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) return "";
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content?.trim() ?? "";
+  } catch {
+    return "";
+  }
+}

@@ -1879,18 +1879,27 @@ export type Database = {
         Row: {
           address: string | null
           ai_actions_log: Json | null
+          ai_call_notes: string | null
           assigned_agent: string | null
           assigned_user: string | null
+          best_call_time: string | null
           call_attempts: number | null
+          call_count: number | null
           cap: string | null
           city: string | null
           company_id: string
           company_name: string | null
           created_at: string | null
           created_by: string | null
+          do_not_call: boolean | null
+          do_not_call_reason: string | null
           email: string | null
           full_name: string
           id: string
+          last_call_agent_id: string | null
+          last_call_at: string | null
+          last_call_duration_sec: number | null
+          last_call_outcome: string | null
           last_contact_at: string | null
           metadata: Json | null
           next_call_at: string | null
@@ -1908,18 +1917,27 @@ export type Database = {
         Insert: {
           address?: string | null
           ai_actions_log?: Json | null
+          ai_call_notes?: string | null
           assigned_agent?: string | null
           assigned_user?: string | null
+          best_call_time?: string | null
           call_attempts?: number | null
+          call_count?: number | null
           cap?: string | null
           city?: string | null
           company_id: string
           company_name?: string | null
           created_at?: string | null
           created_by?: string | null
+          do_not_call?: boolean | null
+          do_not_call_reason?: string | null
           email?: string | null
           full_name: string
           id?: string
+          last_call_agent_id?: string | null
+          last_call_at?: string | null
+          last_call_duration_sec?: number | null
+          last_call_outcome?: string | null
           last_contact_at?: string | null
           metadata?: Json | null
           next_call_at?: string | null
@@ -1937,18 +1955,27 @@ export type Database = {
         Update: {
           address?: string | null
           ai_actions_log?: Json | null
+          ai_call_notes?: string | null
           assigned_agent?: string | null
           assigned_user?: string | null
+          best_call_time?: string | null
           call_attempts?: number | null
+          call_count?: number | null
           cap?: string | null
           city?: string | null
           company_id?: string
           company_name?: string | null
           created_at?: string | null
           created_by?: string | null
+          do_not_call?: boolean | null
+          do_not_call_reason?: string | null
           email?: string | null
           full_name?: string
           id?: string
+          last_call_agent_id?: string | null
+          last_call_at?: string | null
+          last_call_duration_sec?: number | null
+          last_call_outcome?: string | null
           last_contact_at?: string | null
           metadata?: Json | null
           next_call_at?: string | null
@@ -1976,6 +2003,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_last_call_agent_id_fkey"
+            columns: ["last_call_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
             referencedColumns: ["id"]
           },
         ]
@@ -2377,45 +2411,66 @@ export type Database = {
       outbound_call_log: {
         Row: {
           agent_id: string | null
+          ai_summary: string | null
           company_id: string
+          contact_id: string | null
           duration_sec: number | null
+          dynamic_variables: Json | null
           el_call_id: string | null
+          el_conversation_id: string | null
           ended_at: string | null
           error_message: string | null
           from_number: string | null
           id: string
+          outcome: string | null
           phone_number_id: string | null
+          sentiment: string | null
           started_at: string | null
           status: string | null
           to_number: string
+          transcript: Json | null
         }
         Insert: {
           agent_id?: string | null
+          ai_summary?: string | null
           company_id: string
+          contact_id?: string | null
           duration_sec?: number | null
+          dynamic_variables?: Json | null
           el_call_id?: string | null
+          el_conversation_id?: string | null
           ended_at?: string | null
           error_message?: string | null
           from_number?: string | null
           id?: string
+          outcome?: string | null
           phone_number_id?: string | null
+          sentiment?: string | null
           started_at?: string | null
           status?: string | null
           to_number: string
+          transcript?: Json | null
         }
         Update: {
           agent_id?: string | null
+          ai_summary?: string | null
           company_id?: string
+          contact_id?: string | null
           duration_sec?: number | null
+          dynamic_variables?: Json | null
           el_call_id?: string | null
+          el_conversation_id?: string | null
           ended_at?: string | null
           error_message?: string | null
           from_number?: string | null
           id?: string
+          outcome?: string | null
           phone_number_id?: string | null
+          sentiment?: string | null
           started_at?: string | null
           status?: string | null
           to_number?: string
+          transcript?: Json | null
         }
         Relationships: [
           {
@@ -2430,6 +2485,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outbound_call_log_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
             referencedColumns: ["id"]
           },
           {
@@ -3415,6 +3477,80 @@ export type Database = {
           },
         ]
       }
+      scheduled_calls: {
+        Row: {
+          agent_id: string
+          call_log_id: string | null
+          company_id: string
+          contact_id: string
+          created_at: string
+          created_by: string | null
+          dynamic_variables: Json | null
+          executed_at: string | null
+          id: string
+          notes: string | null
+          scheduled_at: string
+          status: string
+        }
+        Insert: {
+          agent_id: string
+          call_log_id?: string | null
+          company_id: string
+          contact_id: string
+          created_at?: string
+          created_by?: string | null
+          dynamic_variables?: Json | null
+          executed_at?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_at: string
+          status?: string
+        }
+        Update: {
+          agent_id?: string
+          call_log_id?: string | null
+          company_id?: string
+          contact_id?: string
+          created_at?: string
+          created_by?: string | null
+          dynamic_variables?: Json | null
+          executed_at?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_calls_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_calls_call_log_id_fkey"
+            columns: ["call_log_id"]
+            isOneToOne: false
+            referencedRelation: "outbound_call_log"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_calls_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_calls_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       superadmin_whatsapp_config: {
         Row: {
           created_at: string | null
@@ -4255,6 +4391,18 @@ export type Database = {
       try_acquire_campaign_lock: {
         Args: { p_lock_id: number }
         Returns: boolean
+      }
+      update_contact_after_call: {
+        Args: {
+          p_agent_id: string
+          p_ai_summary?: string
+          p_contact_id: string
+          p_duration_sec: number
+          p_next_call_at?: string
+          p_outcome: string
+          p_sentiment?: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

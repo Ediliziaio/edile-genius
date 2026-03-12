@@ -29,6 +29,8 @@ import { it } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import ContactDetailPanel from "@/components/contacts/ContactDetailPanel";
 import LeadScoreBadge from "@/components/contacts/LeadScoreBadge";
+import CallContactModal from "@/components/contacts/CallContactModal";
+import { formatDistanceToNow } from "date-fns";
 
 const STATUS_OPTIONS = [
   { value: "new", label: "Nuovo", color: "bg-ink-100 text-ink-600" },
@@ -118,6 +120,9 @@ export default function ContactsPage() {
   // Detail panel
   const [selectedContact, setSelectedContact] = useState<any>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+
+  // Call modal
+  const [callModalContact, setCallModalContact] = useState<any>(null);
 
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["contacts", companyId],
@@ -576,8 +581,9 @@ export default function ContactsPage() {
                   <TableHead className="text-ink-500">Score</TableHead>
                   <TableHead className="text-ink-500">Stato</TableHead>
                   <TableHead className="text-ink-500">Priorità</TableHead>
+                  <TableHead className="text-ink-500">Ultima chiamata</TableHead>
                   <TableHead className="text-ink-500">Creato</TableHead>
-                  <TableHead className="w-[40px]" />
+                  <TableHead className="w-[80px]" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -608,10 +614,27 @@ export default function ContactsPage() {
                     <TableCell>{statusBadge(c.status)}</TableCell>
                     <TableCell>{priorityBadge(c.priority)}</TableCell>
                     <TableCell className="text-ink-400 text-xs">
+                      {c.last_call_at
+                        ? formatDistanceToNow(new Date(c.last_call_at), { locale: it, addSuffix: true })
+                        : "—"}
+                    </TableCell>
+                    <TableCell className="text-ink-400 text-xs">
                       {c.created_at ? format(new Date(c.created_at), "dd MMM yyyy", { locale: it }) : "—"}
                     </TableCell>
                     <TableCell onClick={e => e.stopPropagation()}>
-                      <ContactRowActions contact={c} />
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={`h-7 w-7 ${c.do_not_call ? "text-status-error" : c.phone ? "text-status-success hover:bg-status-success/10" : "text-ink-300"}`}
+                          disabled={!c.phone}
+                          onClick={() => setCallModalContact(c)}
+                          title={c.do_not_call ? "Non chiamare" : c.phone ? `Chiama ${c.full_name}` : "Nessun telefono"}
+                        >
+                          {c.do_not_call ? <PhoneOff className="h-3.5 w-3.5" /> : <Phone className="h-3.5 w-3.5" />}
+                        </Button>
+                        <ContactRowActions contact={c} />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -631,6 +654,18 @@ export default function ContactsPage() {
       )}
 
       <ContactDetailPanel contact={selectedContact} open={detailOpen} onOpenChange={setDetailOpen} onUpdated={() => { invalidate(); }} onDeleted={() => { invalidate(); setSelectedIds(new Set()); }} />
+
+      {callModalContact && companyId && (
+        <CallContactModal
+          contact={callModalContact}
+          companyId={companyId}
+          open={!!callModalContact}
+          onOpenChange={(open) => !open && setCallModalContact(null)}
+          onCallStarted={() => {
+            invalidate();
+          }}
+        />
+      )}
 
       {/* Create Dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>

@@ -158,3 +158,6 @@ verify_jwt = false
 
 [functions.stripe-webhook]
 verify_jwt = false
+
+[functions.execute-scheduled-calls]
+verify_jwt = false
