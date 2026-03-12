@@ -803,8 +803,30 @@ export function buildRenderPromptV2(
 
   const systemPrompt = blocks.A;
 
+  // v6.1: Block N — Final Preservation Checklist
+  const cassAction = nuovo_infisso.sostituzione.cassonetto
+    ? (nuovo_infisso.cassonetto.azione === "rimuovi" ? "REMOVE entirely" : `REPLACE with new ${nuovo_infisso.cassonetto.materiale || "cassonetto"}`)
+    : "🚫 KEEP unchanged — do NOT alter";
+  const tapAction = nuovo_infisso.sostituzione.tapparella
+    ? (nuovo_infisso.tapparella.azione === "rimuovi" ? "REMOVE entirely" : `REPLACE with new ${nuovo_infisso.tapparella.materiale || "shutter"}`)
+    : "🚫 KEEP unchanged — do NOT alter";
+
+  blocks.N = `[BLOCK N – FINAL PRESERVATION CHECKLIST]
+⚠️ BEFORE generating the output image, verify each element:
+- WINDOW FRAME: REPLACE with new ${nuovo_infisso.materiale} frame as described above
+- CASSONETTO (roller box above window): ${cassAction}
+- TAPPARELLA (roller shutter curtain): ${tapAction}
+- WALL, SILL, SURROUNDINGS: 🚫 MUST remain 100% identical to original photo
+- IMAGE DIMENSIONS: 🚫 MUST match original photo exactly — no cropping, no resizing, no bars
+
+CRITICAL RULE: Any element marked 🚫 KEEP must appear IDENTICAL to the original photo.
+DO NOT remove, recolor, reshape, or alter any element marked 🚫 KEEP.
+If the cassonetto is marked KEEP, it must remain exactly as in the original photo — same color, same shape, same position.`;
+
   const userParts = [blocks.B, blocks.C, blocks.D, blocks.E, blocks.F, blocks.G, blocks.H, blocks.I, blocks.J, blocks.K, blocks.L];
   if (blockM) userParts.push(blockM);
+  // Block N always last — "recency bias" in LLMs makes last instructions strongest
+  userParts.push(blocks.N);
   if (options?.notes) {
     userParts.push(`[ADDITIONAL CLIENT NOTES]\n${options.notes}`);
   }
