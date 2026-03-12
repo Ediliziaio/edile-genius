@@ -180,24 +180,36 @@
 - Opportunity Recovery: Smart Actions per lead qualificati dormenti >5 giorni
 - Campi conversazione vuoti nascosti per UX più pulita
 
+## ✅ Blocco 10 — Criticità Pre-Lancio Risolte
+
+### Database
+- Rimossi RLS duplicati su `ai_credits` (2 policy rimossi: `company_ai_credits_select`, `superadmin_ai_credits`)
+- Rimosso indice duplicato `idx_topups_stripe_session` su `ai_credit_topups`
+- `topup_credits` RPC riscritta con `FOR UPDATE` lock (come `deduct_call_credits`)
+- Aggiunta funzione `reset_agents_calls_month()` per cron mensile
+
+### Auth Edge Functions (25 file corretti)
+- Sostituito `supabase.auth.getClaims(token)` (non-standard) con `supabase.auth.getUser(token)` in tutte le Edge Functions
+- Aggiornato helper condiviso `_shared/utils.ts` → `authenticateRequest()`
+
+### Frontend
+- `Credits.tsx`: aggiunto `companyId` come dipendenza del useEffect per il polling post-pagamento Stripe
+
+### Stripe Webhook
+- Insert topup record: aggiunto error handling per violazione unique constraint
+- Documentato comportamento auto-recharge (crediti senza addebito Stripe)
+
+### Secrets da configurare (azione manuale)
+- `STRIPE_SECRET_KEY` — per pagamenti
+- `STRIPE_WEBHOOK_SECRET` — per webhook Stripe
+- `OPENAI_API_KEY` — per AI summary e follow-up
+- `META_ENCRYPTION_KEY` — per cifratura token WhatsApp
+- `RESEND_API_KEY` — per invio email
+
 ## 🔜 Prossimi Step
-
-### ✅ Completato — Campagne Outbound E2E
-- Tabella `campaign_contacts` per tracking stato per-contatto (pending/calling/retry/completed/failed)
-- Edge function `run-campaign-batch`: populate contatti da lista + esecuzione batch con chiamate EL outbound
-- Retry automatico con delay configurabile e max tentativi
-- Bottone "Avvia" popola + lancia primo batch
-- Bottone "Lancia batch" per batch successivi su campagne attive
-- Aggiornamento stats campagna in tempo reale
-
-### ✅ Completato — Motivo Principale
-- Colonna `main_reason` aggiunta a `conversations`
-- summary.ts riscritto: genera JSON con `summary` + `main_reason` in una sola chiamata GPT-4o-mini
-- Mostrato nella tabella conversazioni (💡 badge) e nel dettaglio (card evidenziata)
-- Esempi: "Interessato a ristrutturazione bagno", "Non interessato: ha già un fornitore"
 
 ### P3 — Avanzato / successivo
 - Personalizzazione regole Smart Actions per admin
 - Report settimanale automatico via email al titolare
 - Trend predittivo su tasso conversione
-- Integrazione Stripe per pagamenti reali
+- Auto-recharge con addebito Stripe reale (attualmente wallet-based)
