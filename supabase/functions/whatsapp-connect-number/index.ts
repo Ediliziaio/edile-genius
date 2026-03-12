@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, generateRequestId, log, fetchWithTimeout, jsonOk, jsonError, errorResponse } from "../_shared/utils.ts";
-import { encryptToken, getEncryptionKey } from "../_shared/crypto.ts";
+import { encryptToken, decryptToken, getEncryptionKey } from "../_shared/crypto.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -28,7 +28,17 @@ Deno.serve(async (req) => {
       return jsonError("Meta App not configured by SuperAdmin", "system_error", 500, rid);
     }
 
-    // 2. Exchange for long-lived token via POST (secret in body, not URL)
+    // 2. Decrypt app secret before sending to Meta
+    const encryptionKey = getEncryptionKey();
+    let appSecret: string;
+    try {
+      appSecret = await decryptToken(saConfig.meta_app_secret_encrypted, encryptionKey);
+    } catch (decryptErr) {
+      log("error", "Failed to decrypt app secret", { request_id: rid, fn: FN, error: decryptErr instanceof Error ? decryptErr.message : String(decryptErr) });
+      return jsonError("Impossibile decriptare app secret. Riconfigura la connessione WhatsApp.", "system_error", 500, rid);
+    }
+
+    // 3. Exchange for long-lived token via POST (secret in body, not URL)
     const tokenExchangeRes = await fetchWithTimeout(
       "https://graph.facebook.com/v21.0/oauth/access_token",
       {
@@ -37,7 +47,7 @@ Deno.serve(async (req) => {
         body: new URLSearchParams({
           grant_type: "fb_exchange_token",
           client_id: saConfig.meta_app_id,
-          client_secret: saConfig.meta_app_secret_encrypted,
+          client_secret: appSecret,
           fb_exchange_token: user_access_token,
         }).toString(),
       },
