@@ -272,6 +272,7 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
     } else if (tapparella.colore?.nome) {
       iLines += `\nSlat color: ${tapparella.colore.nome}${tapparella.colore.ral ? ` (RAL ${tapparella.colore.ral})` : ""} — solid uniform color, NO wood grain`;
     }
+    if (tapparella.colore_guide?.nome) iLines += `\nGuide color: ${tapparella.colore_guide.nome}${tapparella.colore_guide.ral ? ` (RAL ${tapparella.colore_guide.ral})` : ""}`;
     const stato = tapparella.stato_render || "chiusa";
     iLines += `\nState: ${stato === 'aperta' ? 'FULLY OPEN (rolled up into cassonetto, no curtain visible below. Only side guide channels remain visible)' : stato === 'mezza' ? 'HALF OPEN (curtain partially lowered covering lower 50%, slat texture visible on lower portion, upper glass clear)' : 'FULLY CLOSED (entire glass covered from cassonetto bottom to sill, full slat texture visible, bottom bar resting on or near sill)'}`;
     iLines += `\nGuide channels: 16-20mm wide × 20-25mm deep, mounted on wall face or frame edge. Guide channel extends from cassonetto bottom to window sill level (or floor for portafinestre). Ensure guide channels are straight, parallel, and symmetrically positioned on both sides.`;
