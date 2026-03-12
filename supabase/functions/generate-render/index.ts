@@ -358,8 +358,8 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
   if (blocks.M) userParts.push(blocks.M);
   if (notes) userParts.push(`[ADDITIONAL NOTES]\n${notes}`);
   const userPrompt = userParts.join("\n\n");
-  const negativePrompt = "cartoon, illustration, sketch, drawing, watermark, text overlay, blurry, distorted perspective, different building, changed wall color, unrealistic lighting, 3D render, CGI artifacts, missing hinges, wrong panels, shutters not requested, cassonetto added without request, wood grain on RAL solid color, flat color on wood-effect laminate, wrong handle style, mismatched hardware finish";
-  return { systemPrompt, userPrompt, negativePrompt, promptVersion: "5.0.0", blocks };
+  const negativePrompt = "cartoon, illustration, sketch, drawing, watermark, text overlay, blurry, distorted perspective, different building, changed wall color, unrealistic lighting, 3D render, CGI artifacts, missing hinges, wrong panels, shutters not requested, cassonetto added without request, wood grain on RAL solid color, flat color on wood-effect laminate, wrong handle style, mismatched hardware finish, cassonetto unchanged when replacement was requested, wrong cassonetto color, cassonetto same color as original when asked to change, tapparella unchanged when replacement was requested, resized or cropped original photo, different image dimensions than original, letterboxing, pillarboxing";
+  return { systemPrompt, userPrompt, negativePrompt, promptVersion: "6.0.0", blocks };
 }
 
 // ─── Main Handler ─────────────────────────────────────────────────
