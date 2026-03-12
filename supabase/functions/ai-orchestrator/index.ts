@@ -9,12 +9,13 @@ const corsHeaders = {
 const FN = "ai-orchestrator";
 const MAX_EVENTS_PER_COMPANY = 20;
 const DEDUP_HOURS = 48;
+const MAX_ACTIONS_PER_MINUTE = 10;
 
 interface OrchestratorEvent {
   event_type: string;
   entity_type: string;
   entity_id: string;
-  priority: number; // lower = higher priority
+  priority: number;
   action: string;
   details: Record<string, unknown>;
 }
@@ -30,7 +31,6 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Determine target company (single or all)
     let body: any = {};
     try { body = await req.json(); } catch { /* cron */ }
 
@@ -39,7 +39,6 @@ Deno.serve(async (req) => {
     if (body.company_id) {
       companyIds.push(body.company_id);
     } else {
-      // Process all active companies
       const { data: companies } = await sb
         .from("companies")
         .select("id")
@@ -56,7 +55,7 @@ Deno.serve(async (req) => {
 
     log("info", `${FN} starting`, { request_id: rid, companies: companyIds.length });
 
-    const results: { company_id: string; events: number; actions: number }[] = [];
+    const results: { company_id: string; events: number; actions: number; throttled?: boolean }[] = [];
 
     for (const cid of companyIds) {
       try {
@@ -82,10 +81,27 @@ Deno.serve(async (req) => {
 });
 
 async function processCompany(sb: any, companyId: string, rid: string) {
-  // ── 1. Collect state in parallel ──
   const now = new Date();
+
+  // ── Backpressure check: count recent actions in the last minute ──
+  const oneMinuteAgo = new Date(now.getTime() - 60_000).toISOString();
+  const { count: recentActions } = await sb
+    .from("ai_orchestrator_log")
+    .select("id", { count: "exact", head: true })
+    .eq("company_id", companyId)
+    .gte("created_at", oneMinuteAgo);
+
+  if (recentActions && recentActions >= MAX_ACTIONS_PER_MINUTE) {
+    log("info", `${FN} backpressure: throttling company`, {
+      request_id: rid,
+      company_id: companyId,
+      recent_actions: recentActions,
+    });
+    return { events: 0, actions: 0, throttled: true };
+  }
+
+  // ── 1. Collect state in parallel ──
   const fiveDaysAgo = new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString();
-  const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
   const tenDaysAgo = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString();
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -98,7 +114,6 @@ async function processCompany(sb: any, companyId: string, rid: string) {
     automationsRes,
     usageRes,
   ] = await Promise.all([
-    // Dormant qualified leads (no contact in 5+ days)
     sb.from("contacts")
       .select("id, full_name, phone, last_contact_at, status")
       .eq("company_id", companyId)
@@ -107,7 +122,6 @@ async function processCompany(sb: any, companyId: string, rid: string) {
       .not("phone", "is", null)
       .order("last_contact_at", { ascending: true })
       .limit(10),
-    // Overdue callbacks
     sb.from("contacts")
       .select("id, full_name, next_call_at, status")
       .eq("company_id", companyId)
@@ -115,29 +129,24 @@ async function processCompany(sb: any, companyId: string, rid: string) {
       .lt("next_call_at", now.toISOString())
       .order("next_call_at", { ascending: true })
       .limit(10),
-    // Credits
     sb.from("ai_credits")
       .select("balance_eur, calls_blocked, total_spent_eur, total_recharged_eur")
       .eq("company_id", companyId)
       .single(),
-    // Active campaigns
     sb.from("campaigns")
       .select("id, name, contacts_reached, appointments_set, contacts_total, contacts_called, status")
       .eq("company_id", companyId)
       .eq("status", "active")
       .limit(10),
-    // Stale preventivi
     sb.from("preventivi")
       .select("id, numero, cliente_nome, stato, inviato_at, created_at")
       .eq("company_id", companyId)
       .in("stato", ["inviato"])
       .lt("inviato_at", tenDaysAgo)
       .limit(10),
-    // Automation configs
     sb.from("agent_automations")
       .select("automation_type, is_enabled, config")
       .eq("company_id", companyId),
-    // Recent credit usage for burn rate
     sb.from("ai_credit_usage")
       .select("cost_billed_total, created_at")
       .eq("company_id", companyId)
@@ -229,10 +238,18 @@ async function processCompany(sb: any, companyId: string, rid: string) {
   events.sort((a, b) => a.priority - b.priority);
   const processable = events.slice(0, MAX_EVENTS_PER_COMPANY);
 
-  // ── 3. Deduplicate via memory ──
+  // ── 3. Deduplicate + execute (with backpressure-aware limit) ──
   let actionsLogged = 0;
+  const remainingBudget = MAX_ACTIONS_PER_MINUTE - (recentActions || 0);
 
   for (const evt of processable) {
+    if (actionsLogged >= remainingBudget) {
+      log("info", `${FN} backpressure: hit per-minute limit mid-loop`, {
+        request_id: rid, company_id: companyId, actions_so_far: actionsLogged,
+      });
+      break;
+    }
+
     // Check dedup
     const { data: existing } = await sb
       .from("ai_orchestrator_log")
@@ -245,14 +262,13 @@ async function processCompany(sb: any, companyId: string, rid: string) {
       .limit(1);
 
     if (existing && existing.length > 0) {
-      continue; // Already acted on this entity recently
+      continue;
     }
 
     // ── 4. Execute action ──
     let finalAction = evt.action;
 
     if (evt.action === "outbound_call" && followupEnabled) {
-      // Delegate to auto-followup-agent for this specific contact
       try {
         const { error } = await sb.functions.invoke("auto-followup-agent", {
           body: { company_id: companyId, contact_ids: [evt.entity_id] },
