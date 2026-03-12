@@ -1,12 +1,14 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Eye, AlertTriangle, CheckCircle } from "lucide-react";
+import { Loader2, Eye, AlertTriangle, CheckCircle, RefreshCw } from "lucide-react";
 import type { FotoAnalisi } from "@/modules/render/lib/promptBuilder";
 
 interface Props {
   analysisData: FotoAnalisi | null;
   loading: boolean;
   error?: string;
+  onRetry?: () => void;
 }
 
 const conditionColor: Record<string, string> = {
@@ -23,7 +25,7 @@ const conditionIcon: Record<string, typeof CheckCircle> = {
   fatiscente: AlertTriangle,
 };
 
-export default function PhotoAnalysisCard({ analysisData, loading, error }: Props) {
+export default function PhotoAnalysisCard({ analysisData, loading, error, onRetry }: Props) {
   if (loading) {
     return (
       <Card className="border-primary/20 bg-primary/5">
@@ -41,8 +43,14 @@ export default function PhotoAnalysisCard({ analysisData, loading, error }: Prop
   if (error) {
     return (
       <Card className="border-destructive/20 bg-destructive/5">
-        <CardContent className="py-4">
+        <CardContent className="py-4 space-y-2">
           <p className="text-sm text-destructive">{error}</p>
+          {onRetry && (
+            <Button variant="outline" size="sm" onClick={onRetry} className="gap-2">
+              <RefreshCw className="h-3.5 w-3.5" />
+              Riprova Analisi
+            </Button>
+          )}
         </CardContent>
       </Card>
     );

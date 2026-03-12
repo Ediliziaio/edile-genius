@@ -69,7 +69,7 @@ export default function RenderNew() {
   const [status, setStatus] = useState<string>("pending");
   const [resultUrls, setResultUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
-
+  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState<string>("");
   // V2 state
   const [analysisData, setAnalysisData] = useState<FotoAnalisi | null>(null);
   const [analysisLoading, setAnalysisLoading] = useState(false);
@@ -232,6 +232,7 @@ export default function RenderNew() {
       setSessionId(session.id);
       setStep(1);
 
+      setUploadedPhotoUrl(urlData.publicUrl);
       runPhotoAnalysis(urlData.publicUrl);
     } catch (err: any) {
       toast({ title: "Errore upload", description: err.message, variant: "destructive" });
@@ -547,6 +548,7 @@ export default function RenderNew() {
             analysisData={analysisData}
             loading={analysisLoading}
             error={analysisError}
+            onRetry={uploadedPhotoUrl ? () => runPhotoAnalysis(uploadedPhotoUrl) : undefined}
           />
 
           {/* ── SEZIONE 1: Cosa vuoi sostituire? ── */}
@@ -1032,11 +1034,14 @@ export default function RenderNew() {
           {nessunElementoSelezionato && (
             <p className="text-sm text-destructive text-center">⚠ Seleziona almeno un elemento da sostituire</p>
           )}
+          {!analysisData && !analysisLoading && analysisError && (
+            <p className="text-sm text-destructive text-center">⚠ L'analisi foto è necessaria per generare il render. Riprova l'analisi dalla sezione sopra.</p>
+          )}
           <Button
             className="w-full"
             size="lg"
             onClick={startRender}
-            disabled={nessunElementoSelezionato || analysisLoading}
+            disabled={nessunElementoSelezionato || analysisLoading || (!analysisData && !analysisLoading && !!analysisError)}
           >
             {analysisLoading ? (
               <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Analisi in corso...</>

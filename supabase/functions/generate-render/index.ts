@@ -98,12 +98,34 @@ const HARDWARE_COLORS_V5: Record<string, string> = {
 };
 
 function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt: string; negativePrompt: string; promptVersion: string; blocks: Record<string, string> } {
-  const analisi = session.foto_analisi || {};
+  // Fallback defaults for missing analysis fields to avoid "undefined" in prompts
+  const analisi = {
+    tipo_apertura: "battente_2_ante",
+    materiale_attuale: "sconosciuto",
+    colore_attuale: "sconosciuto",
+    condizioni: "sconosciuto",
+    num_ante_attuale: 2,
+    spessore_telaio: "circa 70mm",
+    tipo_vetro_attuale: "non identificabile",
+    presenza_cassonetto: false,
+    tipo_cassonetto: "non presente",
+    presenza_tapparella: false,
+    stile_edificio: "classico",
+    materiale_muro: "intonaco",
+    colore_muro: "chiaro",
+    presenza_davanzale: false,
+    presenza_inferriata: false,
+    piano: "non identificabile",
+    luce: "luce naturale",
+    angolo_ripresa: "frontale",
+    ...(session.foto_analisi || {}),
+  };
   const config = session.config || {};
   const nuovoInfisso = config.nuovo_infisso || {};
   const notes = config.notes || config.options?.notes || "";
 
-  const hasV2 = analisi.tipo_apertura && (nuovoInfisso.materiale || nuovoInfisso.sostituzione);
+  // Use v6 prompt if sostituzione is configured (always true in v5/v6 UI), even without analysis data
+  const hasV2 = nuovoInfisso.sostituzione || (analisi.tipo_apertura && nuovoInfisso.materiale);
 
   if (!hasV2) {
     // Legacy v1 fallback
