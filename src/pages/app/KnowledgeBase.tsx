@@ -71,6 +71,13 @@ export default function KnowledgeBase() {
   const [selectedAgentId, setSelectedAgentId] = useState<string>("global");
   const [saving, setSaving] = useState(false);
 
+  // Scraping
+  const [scrapeUrl, setScrapeUrl] = useState("");
+  const [scrapeLoading, setScrapeLoading] = useState(false);
+  const [scrapedMarkdown, setScrapedMarkdown] = useState("");
+  const [scrapedTitle, setScrapedTitle] = useState("");
+  const [scrapeSaving, setScrapeSaving] = useState(false);
+
   // File upload
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -275,6 +282,60 @@ export default function KnowledgeBase() {
     fetchData();
   };
 
+  const scrapeWebPage = async () => {
+    if (!scrapeUrl) return;
+    setScrapeLoading(true);
+    setScrapedMarkdown("");
+    setScrapedTitle("");
+    try {
+      const { data, error } = await supabase.functions.invoke("firecrawl-scrape", {
+        body: { url: scrapeUrl },
+      });
+      if (error) throw error;
+      if (!data?.success) {
+        toast({ variant: "destructive", title: "Errore scraping", description: data?.error || "Impossibile analizzare la pagina." });
+        return;
+      }
+      setScrapedMarkdown(data.markdown || "");
+      setScrapedTitle(data.title || new URL(data.url || scrapeUrl).hostname);
+      toast({ title: "Pagina analizzata", description: `Estratti ${(data.markdown || "").length} caratteri.` });
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Errore", description: err.message });
+    } finally {
+      setScrapeLoading(false);
+    }
+  };
+
+  const saveScrapeToKB = async () => {
+    if (!scrapedMarkdown || !companyId) return;
+    setScrapeSaving(true);
+    try {
+      const agentId = selectedAgentId === "global" ? null : selectedAgentId;
+      const { data, error } = await supabase.functions.invoke("add-knowledge-doc", {
+        body: {
+          company_id: companyId,
+          agent_id: agentId,
+          name: scrapedTitle || new URL(scrapeUrl).hostname,
+          type: "scrape",
+          source_url: scrapeUrl,
+          scraped_content: scrapedMarkdown,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) {
+        toast({ variant: "destructive", title: "Errore", description: data.error });
+        return;
+      }
+      toast({ title: "Documento salvato", description: "Il contenuto scrappato è stato aggiunto alla Knowledge Base." });
+      closeModal();
+      fetchData();
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Errore", description: err.message });
+    } finally {
+      setScrapeSaving(false);
+    }
+  };
+
   const closeModal = () => {
     setAddModal(false);
     setUploadFile(null);
@@ -283,6 +344,9 @@ export default function KnowledgeBase() {
     setTextName("");
     setTextContent("");
     setSelectedAgentId("global");
+    setScrapeUrl("");
+    setScrapedMarkdown("");
+    setScrapedTitle("");
   };
 
   const totalSize = docs.reduce((s, d) => s + (d.size_bytes || 0), 0);
@@ -576,10 +640,11 @@ export default function KnowledgeBase() {
           </div>
 
           <Tabs value={addTab} onValueChange={setAddTab}>
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="file"><FileText className="h-3 w-3 mr-1" /> File</TabsTrigger>
               <TabsTrigger value="url"><Globe className="h-3 w-3 mr-1" /> URL</TabsTrigger>
               <TabsTrigger value="text"><Type className="h-3 w-3 mr-1" /> Testo</TabsTrigger>
+              <TabsTrigger value="scrape"><Search className="h-3 w-3 mr-1" /> Scraping</TabsTrigger>
             </TabsList>
 
             {/* File Tab */}
@@ -642,11 +707,73 @@ export default function KnowledgeBase() {
               <div className="space-y-2">
                 <Label>Contenuto</Label>
                 <Textarea rows={6} placeholder="Incolla o scrivi il testo..." value={textContent} onChange={(e) => setTextContent(e.target.value)} />
-                {textContent && <p className="text-[10px] text-ink-400 text-right">{textContent.length} caratteri</p>}
+                {textContent && <p className="text-[10px] text-muted-foreground text-right">{textContent.length} caratteri</p>}
               </div>
               <Button className="w-full bg-brand hover:bg-brand-hover text-white" onClick={addText} disabled={saving || !textName || !textContent}>
                 {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />} Aggiungi Testo
               </Button>
+            </TabsContent>
+
+            {/* Scraping Tab */}
+            <TabsContent value="scrape" className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label>URL della pagina da analizzare</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="https://esempio.com/pagina"
+                    value={scrapeUrl}
+                    onChange={(e) => setScrapeUrl(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    onClick={scrapeWebPage}
+                    disabled={scrapeLoading || !scrapeUrl}
+                    variant="outline"
+                  >
+                    {scrapeLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  Firecrawl estrarrà il contenuto testuale della pagina in formato Markdown.
+                </p>
+              </div>
+
+              {scrapedMarkdown && (
+                <>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label>Contenuto estratto</Label>
+                      <Badge variant="secondary" className="text-[10px]">
+                        {scrapedMarkdown.length} caratteri
+                      </Badge>
+                    </div>
+                    <div className="bg-muted rounded-md p-3 max-h-48 overflow-y-auto">
+                      <p className="text-xs text-foreground whitespace-pre-wrap font-mono leading-relaxed">
+                        {scrapedMarkdown.slice(0, 2000)}
+                        {scrapedMarkdown.length > 2000 && "..."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Nome documento</Label>
+                    <Input
+                      value={scrapedTitle}
+                      onChange={(e) => setScrapedTitle(e.target.value)}
+                      placeholder="Nome del documento"
+                    />
+                  </div>
+
+                  <Button
+                    className="w-full bg-brand hover:bg-brand-hover text-white"
+                    onClick={saveScrapeToKB}
+                    disabled={scrapeSaving}
+                  >
+                    {scrapeSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                    Salva nella Knowledge Base
+                  </Button>
+                </>
+              )}
             </TabsContent>
           </Tabs>
         </DialogContent>

@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 // --- Constants ---
-const VALID_DOC_TYPES = ["url", "text", "file"];
+const VALID_DOC_TYPES = ["url", "text", "file", "scrape"];
 const MAX_NAME_LENGTH = 255;
 const MAX_CONTENT_PREVIEW_LENGTH = 50000;
 const MAX_BODY_SIZE = 1_000_000; // 1 MB
@@ -170,6 +170,7 @@ Deno.serve(async (req) => {
       file_path,
       doc_id,
       size_bytes,
+      scraped_content,
     } = body;
 
     // ── 4. Tenant authorization ───────────────────────────────────
@@ -364,6 +365,38 @@ Deno.serve(async (req) => {
         }
       } catch {
         await supabase.from("ai_knowledge_docs").update({ status: "error" }).eq("id", doc.id);
+      }
+      return json({ success: true, doc_id: doc.id });
+    }
+
+    // --- SCRAPE: save scraped markdown content and sync ---
+    if (type === "scrape" && scraped_content) {
+      const textForEL = (typeof scraped_content === "string" ? scraped_content : "").slice(0, 10000);
+      await supabase.from("ai_knowledge_docs").update({
+        content_preview: textForEL.slice(0, 500),
+        status: "ready",
+      }).eq("id", doc.id);
+
+      if (agent_id && elApiKey) {
+        const { data: agent } = await supabase.from("agents").select("el_agent_id").eq("id", agent_id).single();
+        if (agent?.el_agent_id && textForEL.length > 20) {
+          await syncToEL(agent.el_agent_id, doc.id, { text: textForEL, name });
+        }
+      } else if (!agent_id && elApiKey) {
+        const { data: companyAgents } = await supabase.from("agents")
+          .select("id, el_agent_id").eq("company_id", targetCompanyId).eq("status", "active").not("el_agent_id", "is", null);
+        if (companyAgents?.length) {
+          for (const ag of companyAgents) {
+            if (!ag.el_agent_id) continue;
+            try {
+              await fetch(`https://api.elevenlabs.io/v1/convai/agents/${ag.el_agent_id}/add-to-knowledge-base`, {
+                method: "POST", headers: { "xi-api-key": elApiKey, "Content-Type": "application/json" },
+                body: JSON.stringify({ text: textForEL, name }),
+              });
+            } catch (e) { console.error("Global scrape sync error for agent", ag.id, e); }
+          }
+        }
+        await supabase.from("ai_knowledge_docs").update({ el_sync_status: "synced", el_sync_at: new Date().toISOString() }).eq("id", doc.id);
       }
       return json({ success: true, doc_id: doc.id });
     }
