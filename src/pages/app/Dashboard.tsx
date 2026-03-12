@@ -721,6 +721,49 @@ export default function AppDashboard() {
         </div>
       </div>
 
+      {/* ═══ Active Calls Widget (only when calls are active) ═══ */}
+      {activeCalls.length > 0 && (
+        <div className="rounded-xl border border-primary/30 bg-card p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
+              </span>
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                <Activity className="w-4 h-4 text-primary" />
+                {activeCalls.length} chiamat{activeCalls.length === 1 ? "a" : "e"} attiv{activeCalls.length === 1 ? "a" : "e"}
+              </h3>
+            </div>
+            <Link to="/app/call-monitor" className="text-xs text-primary hover:underline flex items-center gap-1">
+              Vedi monitor completo <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {activeCalls.slice(0, 3).map((call) => (
+              <div key={call.id} className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Phone className={`w-3.5 h-3.5 shrink-0 ${call.status === "in_progress" ? "text-primary animate-pulse" : "text-muted-foreground"}`} />
+                  <span className="text-sm font-medium truncate">{call.contact_name || call.to_number}</span>
+                  {call.agent_name && (
+                    <span className="text-xs text-muted-foreground hidden sm:inline">· {call.agent_name}</span>
+                  )}
+                </div>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${
+                  call.status === "in_progress"
+                    ? "bg-primary/10 text-primary"
+                    : call.status === "ringing"
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-muted text-muted-foreground"
+                }`}>
+                  {call.status === "in_progress" ? "In conversazione" : call.status === "ringing" ? "In chiamata" : "Avvio"}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ═══ ZONA C — Smart Actions OR Onboarding ═══ */}
       {!hasAgents ? (
         <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 p-8 md:p-12">
