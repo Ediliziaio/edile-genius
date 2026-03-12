@@ -197,10 +197,18 @@ Deno.serve(async (req) => {
         return new Response(JSON.stringify({ error: "provider and api_key required" }), { status: 400, headers: corsHeaders });
       }
 
+      // Encrypt API key before storing
+      let storedKey = api_key;
+      const encKey = Deno.env.get("META_ENCRYPTION_KEY");
+      if (encKey && encKey.length === 64) {
+        const { encryptToken } = await import("../_shared/crypto.ts");
+        storedKey = await encryptToken(api_key, encKey);
+      }
+
       const { error } = await supabase.from("company_integrations").upsert({
         company_id,
         provider,
-        api_key_encrypted: api_key,
+        api_key_encrypted: storedKey,
         instance_url: instance_url || null,
         is_active: true,
         status: "connected",

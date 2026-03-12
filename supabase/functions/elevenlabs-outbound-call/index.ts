@@ -12,14 +12,13 @@ Deno.serve(async (req) => {
   const rid = generateRequestId();
 
   try {
-    // Auth
+    // Auth — use getUser() instead of getClaims()
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) return jsonError("Unauthorized", "auth_error", 401, rid);
 
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: authHeader } } });
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData } = await supabase.auth.getClaims(token);
-    if (!claimsData?.claims) return jsonError("Unauthorized", "auth_error", 401, rid);
+    const { data: userData, error: authErr } = await supabase.auth.getUser();
+    if (authErr || !userData?.user) return jsonError("Unauthorized", "auth_error", 401, rid);
 
     const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     const { agent_id, to_number, dynamic_variables } = await req.json();

@@ -1,18 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, generateRequestId, log, fetchWithTimeout, jsonOk, jsonError, errorResponse } from "../_shared/utils.ts";
-
-// AES-256-GCM encryption
-async function encryptToken(plaintext: string, keyHex: string): Promise<string> {
-  const keyBytes = new Uint8Array(keyHex.match(/.{1,2}/g)!.map(b => parseInt(b, 16)));
-  const key = await crypto.subtle.importKey("raw", keyBytes, "AES-GCM", false, ["encrypt"]);
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encoded = new TextEncoder().encode(plaintext);
-  const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoded);
-  const combined = new Uint8Array(iv.length + new Uint8Array(ciphertext).length);
-  combined.set(iv);
-  combined.set(new Uint8Array(ciphertext), iv.length);
-  return btoa(String.fromCharCode(...combined));
-}
+import { encryptToken, getEncryptionKey } from "../_shared/crypto.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -40,10 +28,20 @@ Deno.serve(async (req) => {
       return jsonError("Meta App not configured by SuperAdmin", "system_error", 500, rid);
     }
 
-    // 2. Exchange for long-lived token (no retry — stateful OAuth)
+    // 2. Exchange for long-lived token via POST (secret in body, not URL)
     const tokenExchangeRes = await fetchWithTimeout(
-      `https://graph.facebook.com/v21.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${saConfig.meta_app_id}&client_secret=${saConfig.meta_app_secret_encrypted}&fb_exchange_token=${user_access_token}`,
-      {}, 15_000
+      "https://graph.facebook.com/v21.0/oauth/access_token",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          grant_type: "fb_exchange_token",
+          client_id: saConfig.meta_app_id,
+          client_secret: saConfig.meta_app_secret_encrypted,
+          fb_exchange_token: user_access_token,
+        }).toString(),
+      },
+      15_000
     );
     const tokenData = await tokenExchangeRes.json();
     if (!tokenExchangeRes.ok || !tokenData.access_token) {
@@ -54,14 +52,8 @@ Deno.serve(async (req) => {
     const longLivedToken = tokenData.access_token;
 
     // 3. Encrypt token
-    const encryptionKey = Deno.env.get("META_ENCRYPTION_KEY");
-    let storedToken: string;
-    if (encryptionKey && encryptionKey.length === 64) {
-      storedToken = await encryptToken(longLivedToken, encryptionKey);
-    } else {
-      log("warn", "META_ENCRYPTION_KEY not set, storing token unencrypted", { request_id: rid, fn: FN });
-      storedToken = longLivedToken;
-    }
+    const encryptionKey = getEncryptionKey();
+    const storedToken = await encryptToken(longLivedToken, encryptionKey);
 
     // 4. Fetch phone number details
     let phoneDetails: any = {};

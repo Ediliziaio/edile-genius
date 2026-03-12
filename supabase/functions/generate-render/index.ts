@@ -182,6 +182,9 @@ Deno.serve(async (req) => {
     const { data: urlData } = supabase.storage.from("render-results").getPublicUrl(resultPath);
     const resultUrl = urlData.publicUrl;
 
+    // Deduct credits AFTER successful upload (not before)
+    await supabase.rpc("deduct_render_credit", { _company_id: session.company_id });
+
     await supabase.from("render_sessions").update({
       status: "completed", result_urls: [resultUrl], prompt_used: userPrompt.substring(0, 10000),
       provider_key: providerConfig.provider_key, cost_real: providerConfig.cost_real_per_render,
@@ -190,7 +193,6 @@ Deno.serve(async (req) => {
       config_snapshot: session.config,
     }).eq("id", sessionId);
 
-    await supabase.rpc("deduct_render_credit", { _company_id: session.company_id });
     await supabase.from("render_provider_config").update({ renders_generated: (providerConfig.renders_generated || 0) + 1 }).eq("id", providerConfig.id);
     await supabase.from("ai_audit_log").insert({
       action: "render_generated", company_id: session.company_id, user_id: session.created_by,
