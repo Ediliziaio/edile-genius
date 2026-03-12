@@ -49,8 +49,12 @@ const CERNIERA_DESC: Record<string, string> = {
 };
 
 const CERNIERA_COLORE_DESC: Record<string, string> = {
-  argento: "silver chrome", nero_opaco: "matte black", inox: "brushed stainless steel",
-  bronzo: "antique bronze", oro: "polished gold/brass", uguale_maniglia: "same as handle",
+  argento: "silver polished chrome finish",
+  nero_opaco: "matte black finish",
+  inox: "brushed stainless steel finish",
+  bronzo: "antique bronze finish",
+  oro: "polished gold/brass finish",
+  uguale_maniglia: "same finish as the window handle",
 };
 
 function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt: string; negativePrompt: string; promptVersion: string; blocks: Record<string, string> } {
