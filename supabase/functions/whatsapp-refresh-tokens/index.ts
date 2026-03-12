@@ -16,6 +16,15 @@ Deno.serve(async (req) => {
       return jsonError("Meta App not configured by SuperAdmin", "system_error", 500, rid);
     }
 
+    // Decrypt app secret once for all refreshes
+    let appSecret: string;
+    try {
+      appSecret = await decryptToken(saConfig.meta_app_secret_encrypted, encryptionKey);
+    } catch (decryptErr) {
+      log("error", "Failed to decrypt app secret", { request_id: rid, fn: FN, error: decryptErr instanceof Error ? decryptErr.message : String(decryptErr) });
+      return jsonError("Impossibile decriptare app secret. Riconfigura la connessione WhatsApp.", "system_error", 500, rid);
+    }
+
     const { data: wabaConfigs } = await adminClient.from("whatsapp_waba_config").select("id, waba_id, access_token_encrypted, company_id").not("access_token_encrypted", "is", null);
     if (!wabaConfigs || wabaConfigs.length === 0) {
       return jsonOk({ message: "No tokens to refresh", results: [] }, rid);
