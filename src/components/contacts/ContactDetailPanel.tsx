@@ -399,6 +399,9 @@ export default function ContactDetailPanel({ contact, open, onOpenChange, onUpda
               <TabsTrigger value="timeline" className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none text-ink-500 px-3 py-2.5 text-sm">
                 <Activity className="w-3.5 h-3.5 mr-1.5" /> Timeline
               </TabsTrigger>
+              <TabsTrigger value="calls" className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none text-ink-500 px-3 py-2.5 text-sm">
+                <Phone className="w-3.5 h-3.5 mr-1.5" /> Chiamate
+              </TabsTrigger>
               <TabsTrigger value="info" className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:shadow-none text-ink-500 px-3 py-2.5 text-sm">
                 <User className="w-3.5 h-3.5 mr-1.5" /> Info
               </TabsTrigger>
