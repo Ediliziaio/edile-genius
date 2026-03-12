@@ -652,7 +652,7 @@ export default function RenderNew() {
 
           {/* ── SEZIONE 4: Configura Tapparella (condizionale) ── */}
           {sostituzione.tapparella && (
-            <div className="border-t pt-4">
+            <div className="border-l-2 border-primary/20 pl-4">
               <Label className="text-sm font-semibold mb-3 block">🔽 Configura Tapparella / Persiana</Label>
               <div className="grid grid-cols-3 gap-2 mb-3">
                 {[
