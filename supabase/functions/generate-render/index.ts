@@ -265,8 +265,13 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
     blocks.I = `[BLOCK I – SHUTTER REMOVAL]\nRemove the existing shutter/blind system completely. Show bare window frame with no shutter curtain, no side guides, no bottom bar. If guide channels were surface-mounted on wall: remove them and show clean wall face.`;
   } else if (sost.tapparella && tapparella.azione === "sostituisci" && tapparella.materiale) {
     let iLines = `[BLOCK I – NEW SHUTTER]\nInstall: ${TAPPARELLA_DESC[tapparella.materiale] || tapparella.materiale}`;
-    if (tapparella.colore?.nome) iLines += `\nSlat color: ${tapparella.colore.nome}${tapparella.colore.ral ? ` (RAL ${tapparella.colore.ral})` : ""}`;
-    if (tapparella.colore_guide?.nome) iLines += `\nGuide color: ${tapparella.colore_guide.nome}${tapparella.colore_guide.ral ? ` (RAL ${tapparella.colore_guide.ral})` : ""}`;
+    if (tapparella.colore_mode === "legno" && tapparella.colore_wood_effect) {
+      const we = tapparella.colore_wood_effect;
+      iLines += `\nSlat color: ${we.name || we.id} wood-effect laminate — ${we.prompt_fragment || "realistic wood grain laminate"}`;
+      iLines += `\nSLAT WOOD EFFECT: Each slat MUST show horizontal wood grain pattern matching the specified wood effect. Grain runs along slat length. Do NOT render as solid color.`;
+    } else if (tapparella.colore?.nome) {
+      iLines += `\nSlat color: ${tapparella.colore.nome}${tapparella.colore.ral ? ` (RAL ${tapparella.colore.ral})` : ""} — solid uniform color, NO wood grain`;
+    }
     const stato = tapparella.stato_render || "chiusa";
     iLines += `\nState: ${stato === 'aperta' ? 'FULLY OPEN (rolled up into cassonetto, no curtain visible below. Only side guide channels remain visible)' : stato === 'mezza' ? 'HALF OPEN (curtain partially lowered covering lower 50%, slat texture visible on lower portion, upper glass clear)' : 'FULLY CLOSED (entire glass covered from cassonetto bottom to sill, full slat texture visible, bottom bar resting on or near sill)'}`;
     iLines += `\nGuide channels: 16-20mm wide × 20-25mm deep, mounted on wall face or frame edge. Guide channel extends from cassonetto bottom to window sill level (or floor for portafinestre). Ensure guide channels are straight, parallel, and symmetrically positioned on both sides.`;
