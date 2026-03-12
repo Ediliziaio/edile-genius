@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 // --- Constants ---
-const VALID_DOC_TYPES = ["url", "text", "file"];
+const VALID_DOC_TYPES = ["url", "text", "file", "scrape"];
 const MAX_NAME_LENGTH = 255;
 const MAX_CONTENT_PREVIEW_LENGTH = 50000;
 const MAX_BODY_SIZE = 1_000_000; // 1 MB
