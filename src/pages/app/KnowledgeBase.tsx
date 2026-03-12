@@ -71,6 +71,13 @@ export default function KnowledgeBase() {
   const [selectedAgentId, setSelectedAgentId] = useState<string>("global");
   const [saving, setSaving] = useState(false);
 
+  // Scraping
+  const [scrapeUrl, setScrapeUrl] = useState("");
+  const [scrapeLoading, setScrapeLoading] = useState(false);
+  const [scrapedMarkdown, setScrapedMarkdown] = useState("");
+  const [scrapedTitle, setScrapedTitle] = useState("");
+  const [scrapeSaving, setScrapeSaving] = useState(false);
+
   // File upload
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
