@@ -190,7 +190,7 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
     if (tapparella.colore?.nome) iLines += `\nSlat color: ${tapparella.colore.nome}${tapparella.colore.ral ? ` (RAL ${tapparella.colore.ral})` : ""}`;
     if (tapparella.colore_guide?.nome) iLines += `\nGuide color: ${tapparella.colore_guide.nome}${tapparella.colore_guide.ral ? ` (RAL ${tapparella.colore_guide.ral})` : ""}`;
     const stato = tapparella.stato_render || "chiusa";
-    iLines += `\nState: ${stato === 'aperta' ? 'FULLY OPEN (rolled up, no curtain visible)' : stato === 'mezza' ? 'HALF OPEN (lower 50% covered)' : 'FULLY CLOSED (entire glass covered)'}`;
+    iLines += `\nState: ${stato === 'aperta' ? 'FULLY OPEN (rolled up into cassonetto, no curtain visible below. Only side guide channels remain visible)' : stato === 'mezza' ? 'HALF OPEN (curtain partially lowered covering lower 50%, slat texture visible on lower portion, upper glass clear)' : 'FULLY CLOSED (entire glass covered from cassonetto bottom to sill, full slat texture visible, bottom bar resting on or near sill)'}`;
     iLines += `\nGuide channels: 16-20mm wide, straight, parallel, both sides.`;
     blocks.I = iLines;
   } else {
