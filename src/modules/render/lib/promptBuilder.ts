@@ -560,7 +560,7 @@ Required shadow elements (all must be physically correct):
 - Frame shadow: new frame profile casts shadow into wall rebate — depth approximately 15-25mm
 - Hinge shadow: small cast shadow from each hinge knuckle on hinge-side stile face
 - Handle shadow: lever or knob casts shadow on frame face — direction matches scene light
-- Cassonetto shadow: ${analisi.presenza_cassonetto ? 'box face casts horizontal shadow onto wall below it' : 'no cassonetto shadow'}
+- Cassonetto shadow: ${analisi.presenza_cassonetto ? 'box face casts horizontal shadow onto wall below it — match overhang depth' : 'no cassonetto shadow'}
 - Shutter shadow: if shutter partially open, hanging curtain edge casts shadow on window below
 - Glass reflection: specular highlight on glass matches scene light direction
 - Ambient occlusion: soft dark gradient in wall-to-frame rebate transition, in frame corners, under sill`;
