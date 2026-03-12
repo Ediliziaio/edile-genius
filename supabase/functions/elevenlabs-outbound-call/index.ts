@@ -21,9 +21,28 @@ Deno.serve(async (req) => {
     if (authErr || !userData?.user) return jsonError("Unauthorized", "auth_error", 401, rid);
 
     const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    const { agent_id, to_number, dynamic_variables } = await req.json();
+    const { agent_id, to_number, contact_id, dynamic_variables } = await req.json();
 
     if (!agent_id || !to_number) return jsonError("agent_id e to_number richiesti", "validation_error", 400, rid);
+
+    // DNC check if contact_id provided
+    if (contact_id) {
+      const { data: contactData } = await sb
+        .from("contacts")
+        .select("do_not_call, full_name")
+        .eq("id", contact_id)
+        .single();
+
+      if (contactData?.do_not_call) {
+        log("warn", "DNC contact call blocked", { request_id: rid, contact_id });
+        return jsonError(
+          `${contactData.full_name} è nella lista Non Chiamare`,
+          "do_not_call",
+          403,
+          rid,
+        );
+      }
+    }
 
     log("info", "Outbound call requested", { request_id: rid, agent_id, to_number: to_number.replace(/\d(?=\d{4})/g, "*") });
 
