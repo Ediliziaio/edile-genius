@@ -496,6 +496,9 @@ export default function ContactsPage() {
             <Button variant="outline" size="sm" onClick={() => { setScheduleContactId(null); setShowScheduleCall(true); }} className="border-ink-200 text-ink-700">
               <CalendarClock className="w-3.5 h-3.5 mr-1.5" /> Pianifica Chiamata
             </Button>
+            <Button size="sm" onClick={() => setShowBulkCallModal(true)} className="gap-1.5 bg-status-success hover:bg-status-success/90 text-white">
+              <Phone className="w-3.5 h-3.5" /> Chiama {selectedIds.size} contatti
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setShowBulkDelete(true)} className="border-status-error text-status-error hover:bg-status-error hover:text-white">
               <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Elimina
             </Button>
