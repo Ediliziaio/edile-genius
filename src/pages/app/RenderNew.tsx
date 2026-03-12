@@ -332,6 +332,28 @@ export default function RenderNew() {
         tipo_originale: analysisData?.tipo_apertura || "battente_2_ante" as TipoApertura,
         tipo_target: analysisData?.tipo_apertura || "battente_2_ante" as TipoApertura,
       },
+
+      // v6: Colore cassonetto (top-level)
+      cass_colore_mode: sostituzione.cassonetto && cassonettoAzione === "sostituisci" ? cassonettoColorMode : undefined,
+      cass_colore: sostituzione.cassonetto && cassonettoAzione === "sostituisci" && cassonettoColorMode === "ral"
+        ? { name: (cassonettoColoreSameAsInfisso ? infissoRalColor : cassRalColor).name, ral: (cassonettoColoreSameAsInfisso ? infissoRalColor : cassRalColor).ral, hex: (cassonettoColoreSameAsInfisso ? infissoRalColor : cassRalColor).hex }
+        : null,
+      cass_wood_effect: sostituzione.cassonetto && cassonettoAzione === "sostituisci" && cassonettoColorMode === "legno"
+        ? cassonettoWoodEffect
+        : null,
+
+      // v6: Colore tapparella (top-level)
+      tap_colore_mode: sostituzione.tapparella && tapparellaAzione === "sostituisci" ? tapColorMode : undefined,
+      tap_colore: sostituzione.tapparella && tapparellaAzione === "sostituisci" && tapColorMode === "ral"
+        ? { name: tapRalColor.name, ral: tapRalColor.ral, hex: tapRalColor.hex }
+        : null,
+      tap_wood_effect: sostituzione.tapparella && tapparellaAzione === "sostituisci" && tapColorMode === "legno"
+        ? tapWoodEffect
+        : null,
+
+      // v6: Dimensioni immagine
+      original_image_width: imageNaturalWidth,
+      original_image_height: imageNaturalHeight,
     };
 
     // Update session with V5 config + analysis
