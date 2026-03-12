@@ -707,11 +707,73 @@ export default function KnowledgeBase() {
               <div className="space-y-2">
                 <Label>Contenuto</Label>
                 <Textarea rows={6} placeholder="Incolla o scrivi il testo..." value={textContent} onChange={(e) => setTextContent(e.target.value)} />
-                {textContent && <p className="text-[10px] text-ink-400 text-right">{textContent.length} caratteri</p>}
+                {textContent && <p className="text-[10px] text-muted-foreground text-right">{textContent.length} caratteri</p>}
               </div>
               <Button className="w-full bg-brand hover:bg-brand-hover text-white" onClick={addText} disabled={saving || !textName || !textContent}>
                 {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />} Aggiungi Testo
               </Button>
+            </TabsContent>
+
+            {/* Scraping Tab */}
+            <TabsContent value="scrape" className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label>URL della pagina da analizzare</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="https://esempio.com/pagina"
+                    value={scrapeUrl}
+                    onChange={(e) => setScrapeUrl(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    onClick={scrapeWebPage}
+                    disabled={scrapeLoading || !scrapeUrl}
+                    variant="outline"
+                  >
+                    {scrapeLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  Firecrawl estrarrà il contenuto testuale della pagina in formato Markdown.
+                </p>
+              </div>
+
+              {scrapedMarkdown && (
+                <>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label>Contenuto estratto</Label>
+                      <Badge variant="secondary" className="text-[10px]">
+                        {scrapedMarkdown.length} caratteri
+                      </Badge>
+                    </div>
+                    <div className="bg-muted rounded-md p-3 max-h-48 overflow-y-auto">
+                      <p className="text-xs text-foreground whitespace-pre-wrap font-mono leading-relaxed">
+                        {scrapedMarkdown.slice(0, 2000)}
+                        {scrapedMarkdown.length > 2000 && "..."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Nome documento</Label>
+                    <Input
+                      value={scrapedTitle}
+                      onChange={(e) => setScrapedTitle(e.target.value)}
+                      placeholder="Nome del documento"
+                    />
+                  </div>
+
+                  <Button
+                    className="w-full bg-brand hover:bg-brand-hover text-white"
+                    onClick={saveScrapeToKB}
+                    disabled={scrapeSaving}
+                  >
+                    {scrapeSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                    Salva nella Knowledge Base
+                  </Button>
+                </>
+              )}
             </TabsContent>
           </Tabs>
         </DialogContent>
