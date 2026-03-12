@@ -8,7 +8,7 @@ import {
   Bot, ArrowRight, PhoneOff, CreditCard, Sparkles,
   MessageSquare, Zap, CheckCircle2, Circle, CalendarCheck,
   TrendingUp, TrendingDown, AlertTriangle, FileText, PhoneCall,
-  ShieldAlert, Clock, Megaphone, Brain, RefreshCw
+  ShieldAlert, Clock, Megaphone, Brain, RefreshCw, Phone, Activity
 } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { it } from "date-fns/locale";

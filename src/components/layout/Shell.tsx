@@ -8,10 +8,14 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import SidebarNav from "./SidebarNav";
+import { useCallNotifications } from "@/hooks/useCallNotifications";
 
 export default function Shell() {
   const isMobile = useIsMobile();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Real-time toast notifications for call status changes
+  useCallNotifications();
 
   return (
     <div className="min-h-screen flex bg-muted/30">
