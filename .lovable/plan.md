@@ -1,215 +1,83 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro + AI Avanzata
 
-## ✅ Completato in questo blocco
+# Render Infissi v5 — RAL + Effetti Legno + Maniglie + Nodo Ridotto + Cinghia + Trasformazione
 
-### Database Migration
-- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
-- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
-- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
-- RLS policies per tutte le nuove tabelle
+## Summary
 
-## ✅ Blocco 2 — Sistema Crediti Euro-based
+The uploaded document defines 6 new macro-features for the Render configurator. This is a significant upgrade from v3 to v5.
 
-### Database
-- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
-- ai_credit_topups (ricariche manual/auto/promo/adjustment)
-- ai_credit_usage (consumo per conversazione con margini)
-- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
-- monthly_billing_summary view (security_invoker)
+## 6 Features to Implement
 
-### Edge Functions
-- check-credits-before-call: verifica saldo pre-chiamata
-- topup-credits: ricarica manuale con fattura
-- elevenlabs-webhook: post-call billing, auto-recharge, blocco
-- platform-config: +apply_global_markup action
+### Feature 1 — Unified Color Picker (RAL + Wood Effects)
 
-### Frontend
-- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
-- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
-- Sidebar: footer saldo crediti con barra e alert
-- VoiceTestPanel: check crediti pre-chiamata con blocco UI
+**New file**: `src/components/render/RalColorPicker.tsx`
+- Dual-tab picker: "Colori RAL" (58 colors, grouped/expandable) and "Effetti Legno" (15 wood laminate effects with CSS grain swatches)
+- Exports: `RalColor`, `WoodEffect`, `ColorMode` types, `RAL_COLORS`, `WOOD_EFFECTS` catalogs, `formatColorPrompt()` helper
+- Custom RAL input field option
 
-## ✅ Blocco 3-5 — Agent Templates System
+**Update `RenderNew.tsx`**: Replace simple color preset selectors with 3 instances of `RalColorPicker` (infisso, cassonetto, tapparella), each with independent `colorMode`/`ralColor`/`woodEffect` state.
 
-### Database
-- agent_templates + agent_template_instances + agent_reports + company_channels
-- RLS policies PERMISSIVE (fix da RESTRICTIVE)
-- Funzione DB `increment_installs_count(tpl_id UUID)`
-- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+**Update `promptBuilder.ts`**: Add `colore_mode` and `colore_wood_effect` fields to `NuovoInfisso`. Update `buildBlock_D` to use `formatColorPrompt()` and emit wood-effect vs solid-color rendering rules.
 
-### Edge Functions (CORS headers completi)
-- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
-- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
-- save-report: salva report in DB + aggiorna contatori istanza
+### Feature 2 — Detailed Handle Selector (8 types + 8 finishes)
 
-### Frontend — Wizard 5 Step (TemplateSetup.tsx)
-- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + importa CSV con template scaricabile
-- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
-- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
+**New file**: `src/components/render/ManigliaSelector.tsx`
+- 8 handle styles: Toulon, Classica, Vienna, Q Moderna, Con Rosetta, Pomolo, Alzante, Nessuna
+- 8 hardware finishes: Cromo Lucido, Inox Spazzolato, Nero Opaco, Nero Lucido, Bronzo, Oro PVD, Ottone Spazzolato, Titanio
+- Each with detailed AI prompt fragments
 
-### SuperAdmin
-- /superadmin/templates: CRUD completo con JSON editor per config_schema
+**Update `promptBuilder.ts`**: New `ManigliaStile` type, new `FerramentaConfig` with `maniglia_stile`/`colore_hardware_id`/`colore_hardware_finish`. Update `buildBlock_G` to use detailed handle prompt fragments.
 
-## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+**Update `RenderNew.tsx`**: Replace simple `maniglia`/`coloreFerratura` selects with `ManigliaSelector` component.
 
-### Database (5 tabelle)
-- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
-- RLS PERMISSIVE per tutte le tabelle
-- Trigger set_updated_at + init_render_credits su companies
-- Funzione deduct_render_credit
-- Storage buckets: render-originals (privato), render-results (pubblico)
+### Feature 3 — Nodo Ridotto + Central Handle Frame Styles
 
-### Edge Functions
-- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
-- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+**Update `promptBuilder.ts`**: Add `stile_telaio` field to `NuovoInfisso`. Update `buildBlock_E` with `STILE_DESC` dictionary for 6 styles (nodo_ridotto, nodo_ridotto_maniglia_centrale, minimal_squadrato, classico_arrotondato, europeo_classico, arco_sagomato). Add central handle placement instructions when style is `nodo_ridotto_maniglia_centrale`.
 
-### Frontend
-- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
-- RenderConfig (/superadmin/render-config)
-- BeforeAfterSlider, promptBuilder.ts
+**Update `RenderNew.tsx`**: Add frame style selector UI in the infissi config section.
 
-## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
+### Feature 4 — Shutter Strap/Motor Configuration (Cinghia)
 
-### Database
-- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
-- Estensione `preventivi` con +26 colonne
-- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
-- Storage buckets: preventivi-media (privato), template-assets (pubblico)
-- RLS company-scoped + superadmin
+**Update `promptBuilder.ts`**: New `CinghiaMode` type (con_cinghia, senza_cinghia, con_catenella, con_manovella). Add `cinghia` field to `TapparellaConfig`. New `CINGHIA_DESC` dictionary. Update `buildBlock_I` to append strap/motor configuration.
 
-### Edge Functions
-- `process-preventivo-audio` RISCRITTO
+**Update `RenderNew.tsx`**: Add 4-option cinghia selector in tapparella section (cinghia manuale, motorizzata, catenella, manovella).
 
-### PDF Client-side (@react-pdf/renderer)
-- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4
+### Feature 5 — Opening Type Transformation
 
-### Frontend
-- NuovoPreventivo.tsx, PreventivoDetail.tsx, PreventiviList.tsx, TemplatePreventivo.tsx
+**New file**: `src/modules/render/lib/trasformazioneCompatibility.ts`
+- `TrasformazioneRule` type with from/to/label/feasibility/note
+- `TRASFORMAZIONI_SUGGERITE` catalog (17 rules)
+- `getTrasformazioniDisponibili()` filter function
 
-## ✅ Blocco 8 — AI Avanzata P1 (Smart Actions + Lead Score + Timeline)
+**Update `promptBuilder.ts`**: New `TrasformazioneApertura` interface. New `buildBlock_M()` with transformation-specific instructions for 5 common conversions. Add Block M to prompt assembly in `buildRenderPromptV2`.
 
-### Smart Actions Engine (Dashboard)
-- Espanso da 3 regole hardcoded a 10+ regole basate su dati reali:
-  - Crediti in esaurimento (danger)
-  - Agenti in bozza (warning)
-  - Agenti senza numero telefono (warning)
-  - Agenti inattivi >7 giorni (info)
-  - Contatti da richiamare con next_call_at scaduto (warning)
-  - Preventivi in bozza da >7 giorni (warning)
-  - Preventivi inviati senza risposta da >10 giorni (warning)
-  - Documenti in scadenza entro 15 giorni (warning)
-  - Campagne con tasso appuntamenti <5% (info)
-- Query Supabase dedicate per ogni regola
-- Stato "Tutto in ordine" quando nessuna azione è necessaria
-- Mostra summary delle conversazioni recenti nella tabella attività
+**Update `RenderNew.tsx`**: Add toggle "Trasforma Tipo Apertura" with feasibility badges (facile/media/complessa). Pass transformation config to `startRender()`.
 
-### Lead Score Automatico
-- `src/lib/lead-score.ts`: motore di scoring 0-100 senza LLM
-  - +30 outcome qualified/appointment
-  - +20 sentiment positivo
-  - +15 preventivo associato
-  - +10 contatto completo (tel+email)
-  - +10 callback attempts
-  - +5 fonte inbound
-  - -10 inattivo >30 giorni
-  - -20 not_interested
-  - -30 do_not_call/invalid
-- `src/components/contacts/LeadScoreBadge.tsx`: badge con tooltip fattori
-  - Compact mode per tabella (emoji + score numerico)
-  - Full mode per scheda contatto (con lista fattori)
-  - Colori: 🔴 Caldo (>60), 🟠 Tiepido (30-60), 🔵 Freddo (<30)
-- Badge integrato nella tabella contatti (nuova colonna "Score")
-- Badge integrato nell'header della scheda contatto
+### Feature 6 — General Prompt Improvements
 
-### Timeline Unificata del Contatto
-- `ContactDetailPanel.tsx` completamente refactorato:
-  - Tab "Timeline" come default (al posto di "Info")
-  - Cronologia verticale con linea e pallini colorati per tipo:
-    - 🔵 Conversazioni (con summary, outcome, sentiment, durata)
-    - 🟡 Note manuali
-    - 🟢 Preventivi collegati (stato, importo, numero)
-    - ⚪ Eventi (contatto creato)
-  - Query preventivi per nome/telefono contatto
-  - Lead Score full display nell'header della scheda
+**Update `generate-render/index.ts`**:
+- System prompt v5 with 8 explicit rules (including wood-effect and RAL solid rules)
+- Negative prompt v5 with specific anti-grain-on-RAL and anti-flat-on-wood terms
+- `promptVersion: "5.0.0"`
+- API params: `temperature: 1`, `max_tokens: 8192`
+- Sync all inline dictionaries with new handle types, wood effects, cinghia, and transformation support
 
-## ✅ Blocco 8 — P1-C: Call Summary Automatico
+## Files Changed
 
-### Backend
-- `supabase/functions/elevenlabs-webhook/summary.ts`: modulo separato per generazione summary
-  - Chiama OpenAI gpt-4o-mini con prompt minimale in italiano
-  - Non-blocking: se OPENAI_API_KEY non è configurata, salta silenziosamente
-  - Cap transcript a 6000 chars per contenere i costi (~$0.001/call)
-- `elevenlabs-webhook/index.ts`: importa e chiama `generateCallSummary()` dopo step 7
-  - Popola `conversations.summary` solo se la generazione ha successo
+| File | Action |
+|------|--------|
+| `src/components/render/RalColorPicker.tsx` | **CREATE** — Full color picker component |
+| `src/components/render/ManigliaSelector.tsx` | **CREATE** — Handle selector component |
+| `src/modules/render/lib/trasformazioneCompatibility.ts` | **CREATE** — Transformation rules |
+| `src/modules/render/lib/promptBuilder.ts` | **UPDATE** — New types, Block D/E/G/I/M, v5 assembly |
+| `src/pages/app/RenderNew.tsx` | **UPDATE** — New state, 3x RalColorPicker, ManigliaSelector, cinghia, transformation UI |
+| `supabase/functions/generate-render/index.ts` | **UPDATE** — v5 system/negative prompts, inline dicts, Block M, API params |
 
-### Frontend (già predisposto)
-- Dashboard "Attività recente": mostra `c.summary` sotto il nome agente
-- Conversazioni: mostra summary nella tabella e nel dialog dettaglio
-- Timeline contatto: mostra summary nelle conversazioni
+## Implementation Order
 
-### Requisito SuperAdmin
-- Aggiungere OPENAI_API_KEY come Supabase Secret (da configurare via SuperAdmin)
+1. Create `RalColorPicker.tsx` and `ManigliaSelector.tsx` (no dependencies)
+2. Create `trasformazioneCompatibility.ts`
+3. Update `promptBuilder.ts` with all new types, blocks, and assembly
+4. Update `RenderNew.tsx` with all new UI components and state
+5. Update `generate-render/index.ts` with v5 prompts and deploy
 
-## ✅ Blocco 9 — Audit Finale & Hardening
-
-### Sicurezza Edge Functions
-- Validazione JWT (getClaims) aggiunta a: generate-render, crm-sync, deploy-template-instance, process-preventivo-audio, generate-preventivo-pdf
-- Verifica tenant (company_id cross-check) aggiunta a tutte le funzioni interne
-- Funzioni webhook esterne (elevenlabs-webhook, whatsapp-webhook, telegram-cantiere-webhook) lasciate senza JWT (corretto)
-
-### Atomicità Crediti
-- Creata RPC `topup_credits(_company_id, _amount_eur)` con UPDATE atomico
-- topup-credits edge function refactorato per usare RPC
-
-### UX — Progressive Disclosure Sidebar
-- Sezioni OPERATIVITÀ e STRUMENTI AI visibili solo se il settore è rilevante o se esistono dati
-- Campi vuoti nelle conversazioni nascosti (eval_score, minutes_billed, cost_billed_eur)
-
-### UX — Dead-End Fix
-- Card CRM e Webhooks in Integrazioni: badge "Prossimamente" + bottoni disabilitati
-
-### Signup Self-Service
-- Pagina /signup con form registrazione
-- Edge function self-service-signup: crea company (trial 14gg) + profilo + ruolo company_admin
-
-### AI Avanzata P2
-- Follow-up Generator: edge function generate-followup (GPT-4o-mini) + bottone in ContactDetailPanel
-- Opportunity Recovery: Smart Actions per lead qualificati dormenti >5 giorni
-- Campi conversazione vuoti nascosti per UX più pulita
-
-## ✅ Blocco 10 — Criticità Pre-Lancio Risolte
-
-### Database
-- Rimossi RLS duplicati su `ai_credits` (2 policy rimossi: `company_ai_credits_select`, `superadmin_ai_credits`)
-- Rimosso indice duplicato `idx_topups_stripe_session` su `ai_credit_topups`
-- `topup_credits` RPC riscritta con `FOR UPDATE` lock (come `deduct_call_credits`)
-- Aggiunta funzione `reset_agents_calls_month()` per cron mensile
-
-### Auth Edge Functions (25 file corretti)
-- Sostituito `supabase.auth.getClaims(token)` (non-standard) con `supabase.auth.getUser(token)` in tutte le Edge Functions
-- Aggiornato helper condiviso `_shared/utils.ts` → `authenticateRequest()`
-
-### Frontend
-- `Credits.tsx`: aggiunto `companyId` come dipendenza del useEffect per il polling post-pagamento Stripe
-
-### Stripe Webhook
-- Insert topup record: aggiunto error handling per violazione unique constraint
-- Documentato comportamento auto-recharge (crediti senza addebito Stripe)
-
-### Secrets da configurare (azione manuale)
-- `STRIPE_SECRET_KEY` — per pagamenti
-- `STRIPE_WEBHOOK_SECRET` — per webhook Stripe
-- `OPENAI_API_KEY` — per AI summary e follow-up
-- `META_ENCRYPTION_KEY` — per cifratura token WhatsApp
-- `RESEND_API_KEY` — per invio email
-
-## 🔜 Prossimi Step
-
-### P3 — Avanzato / successivo
-- Personalizzazione regole Smart Actions per admin
-- Report settimanale automatico via email al titolare
-- Trend predittivo su tasso conversione
-- Auto-recharge con addebito Stripe reale (attualmente wallet-based)
