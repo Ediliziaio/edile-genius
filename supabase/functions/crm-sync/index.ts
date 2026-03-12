@@ -197,10 +197,18 @@ Deno.serve(async (req) => {
         return new Response(JSON.stringify({ error: "provider and api_key required" }), { status: 400, headers: corsHeaders });
       }
 
+      // Encrypt API key before storing
+      let storedKey = api_key;
+      const encKey = Deno.env.get("META_ENCRYPTION_KEY");
+      if (encKey && encKey.length === 64) {
+        const { encryptToken } = await import("../_shared/crypto.ts");
+        storedKey = await encryptToken(api_key, encKey);
+      }
+
       const { error } = await supabase.from("company_integrations").upsert({
         company_id,
         provider,
-        api_key_encrypted: api_key,
+        api_key_encrypted: storedKey,
         instance_url: instance_url || null,
         is_active: true,
         status: "connected",
@@ -254,16 +262,28 @@ Deno.serve(async (req) => {
 
       const integ = integration as any;
 
+      // Decrypt API key if encrypted
+      let apiKeyPlain = integ.api_key_encrypted;
+      const encKey = Deno.env.get("META_ENCRYPTION_KEY");
+      if (encKey && encKey.length === 64) {
+        try {
+          const { decryptToken } = await import("../_shared/crypto.ts");
+          apiKeyPlain = await decryptToken(integ.api_key_encrypted, encKey);
+        } catch {
+          // Key might not be encrypted (legacy), use as-is
+        }
+      }
+
       try {
         let crmContacts: CrmContact[] = [];
 
         if (provider === "hubspot") {
-          crmContacts = await fetchHubSpotContacts(integ.api_key_encrypted);
+          crmContacts = await fetchHubSpotContacts(apiKeyPlain);
         } else if (provider === "pipedrive") {
-          crmContacts = await fetchPipedriveContacts(integ.api_key_encrypted);
+          crmContacts = await fetchPipedriveContacts(apiKeyPlain);
         } else if (provider === "salesforce") {
           if (!integ.instance_url) throw new Error("Salesforce instance_url missing");
-          crmContacts = await fetchSalesforceContacts(integ.api_key_encrypted, integ.instance_url);
+          crmContacts = await fetchSalesforceContacts(apiKeyPlain, integ.instance_url);
         }
 
         // Upsert contacts — match by email or phone

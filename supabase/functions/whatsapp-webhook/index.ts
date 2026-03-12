@@ -8,7 +8,7 @@ async function verifySignature(
   appSecret: string
 ): Promise<boolean> {
   if (!signatureHeader || !signatureHeader.startsWith("sha256=")) return false;
-  const expectedSig = signatureHeader.slice(7); // remove "sha256=" prefix
+  const expectedSig = signatureHeader.slice(7);
 
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey(
@@ -58,20 +58,20 @@ Deno.serve(async (req) => {
 
     // POST — Process Meta webhook events
     if (req.method === "POST") {
-      // Read raw body for signature verification
       const rawBody = await req.text();
 
-      // Verify X-Hub-Signature-256
+      // HMAC signature verification is MANDATORY
       const appSecret = Deno.env.get("WHATSAPP_APP_SECRET");
-      if (appSecret) {
-        const sigHeader = req.headers.get("x-hub-signature-256");
-        const valid = await verifySignature(rawBody, sigHeader, appSecret);
-        if (!valid) {
-          log("warn", "HMAC signature verification failed", { request_id: rid, fn: FN });
-          return new Response("Forbidden", { status: 403, headers: corsHeaders });
-        }
-      } else {
-        log("warn", "WHATSAPP_APP_SECRET not set — skipping signature verification", { request_id: rid, fn: FN });
+      if (!appSecret) {
+        log("error", "WHATSAPP_APP_SECRET not set — rejecting webhook", { request_id: rid, fn: FN });
+        return new Response("Server misconfigured", { status: 500, headers: corsHeaders });
+      }
+
+      const sigHeader = req.headers.get("x-hub-signature-256");
+      const valid = await verifySignature(rawBody, sigHeader, appSecret);
+      if (!valid) {
+        log("warn", "HMAC signature verification failed", { request_id: rid, fn: FN });
+        return new Response("Forbidden", { status: 403, headers: corsHeaders });
       }
 
       const payload = JSON.parse(rawBody);

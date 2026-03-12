@@ -1,29 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, generateRequestId, log, fetchWithTimeout, jsonOk, jsonError, errorResponse } from "../_shared/utils.ts";
-
-// AES-256-GCM decrypt
-async function decryptToken(cipherB64: string, keyHex: string): Promise<string> {
-  const keyBytes = new Uint8Array(keyHex.match(/.{1,2}/g)!.map(b => parseInt(b, 16)));
-  const key = await crypto.subtle.importKey("raw", keyBytes, "AES-GCM", false, ["decrypt"]);
-  const combined = Uint8Array.from(atob(cipherB64), c => c.charCodeAt(0));
-  const iv = combined.slice(0, 12);
-  const ciphertext = combined.slice(12);
-  const plainBuf = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
-  return new TextDecoder().decode(plainBuf);
-}
-
-// AES-256-GCM encrypt
-async function encryptToken(plaintext: string, keyHex: string): Promise<string> {
-  const keyBytes = new Uint8Array(keyHex.match(/.{1,2}/g)!.map(b => parseInt(b, 16)));
-  const key = await crypto.subtle.importKey("raw", keyBytes, "AES-GCM", false, ["encrypt"]);
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encoded = new TextEncoder().encode(plaintext);
-  const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoded);
-  const combined = new Uint8Array(iv.length + new Uint8Array(ciphertext).length);
-  combined.set(iv);
-  combined.set(new Uint8Array(ciphertext), iv.length);
-  return btoa(String.fromCharCode(...combined));
-}
+import { encryptToken, decryptToken, getEncryptionKey } from "../_shared/crypto.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -32,11 +9,7 @@ Deno.serve(async (req) => {
 
   try {
     const adminClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-
-    const encryptionKey = Deno.env.get("META_ENCRYPTION_KEY");
-    if (!encryptionKey || encryptionKey.length !== 64) {
-      return jsonError("META_ENCRYPTION_KEY not configured", "system_error", 500, rid);
-    }
+    const encryptionKey = getEncryptionKey();
 
     const { data: saConfig } = await adminClient.from("superadmin_whatsapp_config").select("meta_app_id, meta_app_secret_encrypted").limit(1).single();
     if (!saConfig?.meta_app_id || !saConfig?.meta_app_secret_encrypted) {
@@ -53,9 +26,22 @@ Deno.serve(async (req) => {
     for (const waba of wabaConfigs) {
       try {
         const currentToken = await decryptToken(waba.access_token_encrypted!, encryptionKey);
-        const exchangeUrl = `https://graph.facebook.com/v21.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${saConfig.meta_app_id}&client_secret=${saConfig.meta_app_secret_encrypted}&fb_exchange_token=${currentToken}`;
-        
-        const res = await fetchWithTimeout(exchangeUrl, {}, 15_000);
+
+        // POST with secret in body, not URL query params
+        const res = await fetchWithTimeout(
+          "https://graph.facebook.com/v21.0/oauth/access_token",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+              grant_type: "fb_exchange_token",
+              client_id: saConfig.meta_app_id,
+              client_secret: saConfig.meta_app_secret_encrypted,
+              fb_exchange_token: currentToken,
+            }).toString(),
+          },
+          15_000
+        );
         const data = await res.json();
 
         if (!res.ok || !data.access_token) {

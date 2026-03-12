@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, generateRequestId, log, fetchWithTimeout, jsonOk, jsonError, errorResponse } from "../_shared/utils.ts";
+import { decryptToken, getEncryptionKey } from "../_shared/crypto.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -25,6 +26,10 @@ Deno.serve(async (req) => {
     const { data: wabaConfig } = await adminClient.from("whatsapp_waba_config").select("access_token_encrypted").eq("company_id", phoneNum.company_id).eq("waba_id", phoneNum.waba_id).single();
     if (!wabaConfig?.access_token_encrypted) return jsonError("WABA not configured", "validation_error", 400, rid);
 
+    // Decrypt the token before using it
+    const encryptionKey = getEncryptionKey();
+    const accessToken = await decryptToken(wabaConfig.access_token_encrypted, encryptionKey);
+
     let metaPayload: any = { messaging_product: "whatsapp", to };
     if (type === "template" && template_name) {
       metaPayload.type = "template";
@@ -36,7 +41,7 @@ Deno.serve(async (req) => {
 
     const metaRes = await fetchWithTimeout(`https://graph.facebook.com/v21.0/${phone_number_id}/messages`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${wabaConfig.access_token_encrypted}` },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
       body: JSON.stringify(metaPayload),
     }, 15_000);
 

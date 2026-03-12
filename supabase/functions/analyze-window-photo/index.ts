@@ -1,3 +1,4 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, generateRequestId, log, fetchWithTimeout, jsonOk, jsonError, errorResponse } from "../_shared/utils.ts";
 
 Deno.serve(async (req) => {
@@ -6,6 +7,15 @@ Deno.serve(async (req) => {
   const FN = "analyze-window-photo";
 
   try {
+    // Auth validation — prevent unauthorized AI credit consumption
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) return jsonError("Unauthorized", "auth_error", 401, rid);
+
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: authHeader } } });
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsErr } = await supabase.auth.getClaims(token);
+    if (claimsErr || !claimsData?.claims) return jsonError("Unauthorized", "auth_error", 401, rid);
+
     const { image_url } = await req.json();
     if (!image_url) return jsonError("image_url required", "validation_error", 400, rid);
 
