@@ -68,14 +68,13 @@ export default function AppDashboard() {
   });
 
   // ── Month conversations (current) ──
-  const startOfMonth = new Date();
-  startOfMonth.setDate(1);
-  startOfMonth.setHours(0, 0, 0, 0);
-
   const { data: monthConversations } = useQuery({
     queryKey: ["month-conversations", companyId],
     enabled: !!companyId,
     queryFn: async () => {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
       const { data } = await supabase
         .from("conversations")
         .select("outcome")
@@ -86,13 +85,15 @@ export default function AppDashboard() {
   });
 
   // ── Previous month conversations (for delta) ──
-  const startOfPrevMonth = new Date(startOfMonth);
-  startOfPrevMonth.setMonth(startOfPrevMonth.getMonth() - 1);
-
   const { data: prevMonthConversations } = useQuery({
     queryKey: ["prev-month-conversations", companyId],
     enabled: !!companyId,
     queryFn: async () => {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+      const startOfPrevMonth = new Date(startOfMonth);
+      startOfPrevMonth.setMonth(startOfPrevMonth.getMonth() - 1);
       const { data } = await supabase
         .from("conversations")
         .select("outcome")
