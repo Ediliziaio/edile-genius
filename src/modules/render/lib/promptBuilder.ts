@@ -408,9 +408,12 @@ function buildBlock_C(analisi: FotoAnalisi, infisso: NuovoInfisso): string {
     if (t.azione === "rimuovi") {
       items.push(`✅ REMOVE tapparella (roller shutter slats) completely`);
     } else if (t.azione === "sostituisci" && t.materiale) {
+      const tapRalObj = infisso.tap_colore
+        ? { ral: infisso.tap_colore.ral, name: infisso.tap_colore.name, hex: infisso.tap_colore.hex, group: "" }
+        : (t.colore?.ral ? { ral: t.colore.ral, name: t.colore.nome, hex: t.colore.hex || "", group: "" } : null);
       const tapColor = formatColorPrompt(
         infisso.tap_colore_mode ?? t.colore_mode ?? "ral",
-        (infisso.tap_colore || (t.colore?.ral ? { ral: t.colore.ral, name: t.colore.nome, hex: t.colore.hex || "", group: "" } : null)),
+        tapRalObj,
         infisso.tap_wood_effect ?? t.colore_wood_effect ?? null
       );
       items.push(`✅ REPLACE tapparella (roller shutter slats) → new finish: ${tapColor}`);
