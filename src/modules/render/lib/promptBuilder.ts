@@ -528,13 +528,13 @@ Remove the existing shutter/blind system completely. Show bare window frame with
     }
     const stato = t.stato_render || "chiusa";
     if (stato === "aperta") {
-      lines.push("FULLY OPEN STATE: shutter curtain completely rolled up inside cassonetto — NO curtain visible. Only side guide channels remain visible.");
+      lines.push("FULLY OPEN STATE: shutter curtain completely rolled up inside cassonetto — NO curtain visible below the cassonetto. Only side guide channels (guide) remain visible running down both sides of the window. Show empty guide channels with no curtain engaged.");
     } else if (stato === "mezza") {
-      lines.push("HALF-OPEN STATE: shutter curtain partially lowered covering approximately lower 50% of glass height.");
+      lines.push("HALF-OPEN STATE: shutter curtain partially lowered covering approximately lower 50% of glass height. Top of curtain visible inside guide channels at mid-height. Show slat texture and horizontal joint lines on lower curtain portion. Upper glass area clear and visible.");
     } else {
-      lines.push("FULLY CLOSED STATE: shutter curtain completely lowered, covering the ENTIRE glass area from cassonetto bottom to windowsill level.");
+      lines.push("FULLY CLOSED STATE: shutter curtain completely lowered, covering the ENTIRE glass area from cassonetto bottom to windowsill level. Full slat texture visible across entire curtain face. Bottom bar resting on or near sill.");
     }
-    lines.push("Guide channel width: approximately 16-20mm × 20-25mm deep. Ensure guide channels are straight, parallel, and symmetrically positioned.");
+    lines.push("Guide channel width: approximately 16-20mm × 20-25mm deep, mounted on wall face or frame edge. Guide channel extends from cassonetto bottom to window sill level (or floor for portafinestre). Ensure guide channels are straight, parallel, and symmetrically positioned on both sides.");
     return lines.join("\n");
   }
 
