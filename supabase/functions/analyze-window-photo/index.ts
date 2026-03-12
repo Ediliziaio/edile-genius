@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are an expert window and building analyst for an architectural visualization system. Analyze the photo and return a JSON object with ALL of the following fields. Be precise and technical.
+            content: `You are an expert window and building analyst for an architectural visualization system. Analyze the photo and return a JSON object with ALL of the following fields. Be precise and technical. Use Italian architectural terminology where specified.
 
 Required JSON fields:
 - tipo_apertura: one of "battente_1_anta", "battente_2_ante", "battente_3_ante", "scorrevole", "scorrevole_alzante", "vasistas", "anta_ribalta", "bilico", "fisso", "portafinestra", "cassonetto_integrato"
@@ -41,12 +41,17 @@ Required JSON fields:
 - num_ante_attuale: integer
 - spessore_telaio: string estimate
 - presenza_cassonetto: boolean
-- tipo_cassonetto: string
-- tipo_vetro_attuale: string
+- tipo_cassonetto: one of "cassonetto a vista tradizionale", "cassonetto slim", "cassonetto integrato a muro", "non presente"
+- colore_cassonetto_attuale: string describing the current cassonetto color, or null if not present
+- tipo_vetro_attuale: one of "singolo", "doppio", "triplo", "non identificabile"
+- presenza_tapparella: boolean
+- tipo_tapparella_attuale: one of "avvolgibile PVC", "avvolgibile alluminio", "persiana", "veneziana", or null if not present
+- colore_tapparella_attuale: string describing the current shutter/blind color, or null if not present
 - stile_edificio: one of "moderno", "classico", "industriale", "rurale", "liberty", "anni_60_70", "contemporaneo", "storico"
-- materiale_muro: string
+- materiale_muro: one of "intonaco liscio", "intonaco rustico", "mattone faccia vista", "pietra", "rivestimento in clinker", "pannelli prefabbricati", or other
 - colore_muro: string
 - presenza_davanzale: boolean
+- tipo_davanzale: one of "marmo bianco", "pietra grigia", "cemento", "laterizio", "PVC", or null if not present
 - presenza_inferriata: boolean
 - piano: string
 - luce: string
