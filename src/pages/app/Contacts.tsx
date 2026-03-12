@@ -121,6 +121,9 @@ export default function ContactsPage() {
   const [selectedContact, setSelectedContact] = useState<any>(null);
   const [detailOpen, setDetailOpen] = useState(false);
 
+  // Call modal
+  const [callModalContact, setCallModalContact] = useState<any>(null);
+
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["contacts", companyId],
     enabled: !!companyId,
