@@ -562,7 +562,7 @@ Required shadow elements (all must be physically correct):
 - Handle shadow: lever or knob casts shadow on frame face — direction matches scene light
 - Cassonetto shadow: ${analisi.presenza_cassonetto ? 'box face casts horizontal shadow onto wall below it — match overhang depth' : 'no cassonetto shadow'}
 - Shutter shadow: if shutter partially open, hanging curtain edge casts shadow on window below
-- Glass reflection: specular highlight on glass matches scene light direction
+- Glass reflection: specular highlight on glass matches scene light direction, not perpendicular to camera
 - Ambient occlusion: soft dark gradient in wall-to-frame rebate transition, in frame corners, under sill`;
 }
 
