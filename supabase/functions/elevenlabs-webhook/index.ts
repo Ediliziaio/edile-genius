@@ -202,6 +202,8 @@ Deno.serve(async (req) => {
     }
     
     // Auto-recharge if enabled and balance is low
+    // NOTE: This adds credits without charging Stripe. This is by design for prepaid
+    // wallet systems. For real billing, integrate Stripe PaymentIntents here.
     if (!wasBlocked && credits?.auto_recharge_enabled && balanceAfter <= Number(credits?.auto_recharge_threshold || 5)) {
       const rechargeAmount = Math.min(Math.max(Number(credits?.auto_recharge_amount || 20), 5), 500);
       
