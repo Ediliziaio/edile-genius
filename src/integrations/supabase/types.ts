@@ -727,6 +727,7 @@ export type Database = {
           price_eur: number
           price_per_min: number | null
           sort_order: number
+          stripe_price_id: string | null
         }
         Insert: {
           badge?: string | null
@@ -739,6 +740,7 @@ export type Database = {
           price_eur: number
           price_per_min?: number | null
           sort_order?: number
+          stripe_price_id?: string | null
         }
         Update: {
           badge?: string | null
@@ -751,6 +753,7 @@ export type Database = {
           price_eur?: number
           price_per_min?: number | null
           sort_order?: number
+          stripe_price_id?: string | null
         }
         Relationships: []
       }
@@ -813,10 +816,12 @@ export type Database = {
           id: string
           invoice_number: string | null
           notes: string | null
+          package_id: string | null
           payment_method: string | null
           payment_ref: string | null
           processed_at: string | null
           status: string
+          stripe_session_id: string | null
           triggered_by: string | null
           type: string
         }
@@ -827,10 +832,12 @@ export type Database = {
           id?: string
           invoice_number?: string | null
           notes?: string | null
+          package_id?: string | null
           payment_method?: string | null
           payment_ref?: string | null
           processed_at?: string | null
           status?: string
+          stripe_session_id?: string | null
           triggered_by?: string | null
           type?: string
         }
@@ -841,10 +848,12 @@ export type Database = {
           id?: string
           invoice_number?: string | null
           notes?: string | null
+          package_id?: string | null
           payment_method?: string | null
           payment_ref?: string | null
           processed_at?: string | null
           status?: string
+          stripe_session_id?: string | null
           triggered_by?: string | null
           type?: string
         }
@@ -854,6 +863,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_credit_topups_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "ai_credit_packages"
             referencedColumns: ["id"]
           },
         ]

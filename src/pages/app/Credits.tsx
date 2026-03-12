@@ -94,6 +94,21 @@ export default function CreditsPage() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
+  // Handle Stripe redirect query params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get("payment");
+    if (payment === "success") {
+      toast({ title: "Pagamento completato! 🎉", description: "I crediti verranno accreditati automaticamente entro pochi secondi." });
+      window.history.replaceState({}, "", window.location.pathname);
+      // Refresh after short delay to allow webhook processing
+      setTimeout(() => fetchAll(), 3000);
+    } else if (payment === "cancelled") {
+      toast({ variant: "destructive", title: "Pagamento annullato", description: "Nessun addebito effettuato." });
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
+
   const topupAmount = selectedAmount ?? (parseFloat(customAmount) || 0);
 
   const handleTopup = async () => {
@@ -118,15 +133,22 @@ export default function CreditsPage() {
     if (!confirmPackage) return;
     setProcessing(true);
     try {
-      const { data, error } = await supabase.functions.invoke("topup-credits", {
-        body: { companyId, packageId: confirmPackage.id, paymentMethod: "manual", type: "package" },
+      const { data, error } = await supabase.functions.invoke("create-checkout-session", {
+        body: {
+          packageId: confirmPackage.id,
+          companyId,
+          successUrl: `${window.location.origin}/app/credits?payment=success`,
+          cancelUrl: `${window.location.origin}/app/credits?payment=cancelled`,
+        },
       });
       if (error || data?.error) throw new Error(data?.error || error?.message);
-      toast({ title: "Pacchetto acquistato!", description: `+€${Number(data.amount_added).toFixed(2)} aggiunti. Nuovo saldo: €${Number(data.new_balance_eur).toFixed(2)}` });
-      setConfirmPackage(null);
-      fetchAll();
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("URL di pagamento non ricevuto");
+      }
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Errore acquisto", description: err.message });
+      toast({ variant: "destructive", title: "Errore pagamento", description: err.message });
     } finally {
       setProcessing(false);
     }
