@@ -589,24 +589,43 @@ Remove the entire cassonetto (roller shutter box) above the window. Replace with
   }
 
   if (c.azione === "sostituisci" && c.materiale) {
-    let colorLine = "";
-    if (c.colore_mode === "legno" && c.colore_wood_effect) {
-      colorLine = `Color: ${formatColorPrompt("legno", null, c.colore_wood_effect)}\n\nCASSO WOOD EFFECT RULES:\n- The cassonetto face panel MUST show realistic wood grain pattern matching the specified wood effect\n- Grain direction runs HORIZONTALLY along the cassonetto length\n- Surface is a high-quality laminate film — looks like real wood with factory-applied precision`;
-    } else if (c.colore) {
-      colorLine = `Color: ${c.colore.nome}`;
-      if (c.colore.ral) colorLine += ` (RAL ${c.colore.ral})`;
-      colorLine += ` — solid smooth finish, NO wood grain`;
-    }
+    // v6: Use top-level cass_colore fields with fallback to cassonetto sub-object
+    const cassMode = infisso.cass_colore_mode ?? c.colore_mode ?? "ral";
+    const cassWood = infisso.cass_wood_effect ?? c.colore_wood_effect ?? null;
+    const cassRal = infisso.cass_colore
+      ? { ral: infisso.cass_colore.ral, name: infisso.cass_colore.name, hex: infisso.cass_colore.hex, group: "" }
+      : (c.colore?.ral ? { ral: c.colore.ral, name: c.colore.nome, hex: c.colore.hex || "", group: "" } : null);
+
+    const cassColorDesc = formatColorPrompt(cassMode, cassRal, cassWood);
+    const isWoodCass = cassMode === "legno";
 
     return `[BLOCK H – NEW ROLLER BOX (CASSONETTO)]
-Replace existing cassonetto with:
-${CASSONETTO_MATERIAL_DESC[c.materiale]}
-${colorLine}
+IMPORTANT: The cassonetto (roller shutter box housing) mounted above the window MUST be replaced.
+Replace existing cassonetto with: ${CASSONETTO_MATERIAL_DESC[c.materiale]}
+Target cassonetto finish: ${cassColorDesc}
+
+${isWoodCass
+  ? `CASSONETTO WOOD EFFECT RENDERING RULES:
+- The cassonetto box MUST show visible wood grain texture on its visible face
+- Grain orientation: horizontal (parallel to the top of the window)
+- The cassonetto is covered with the same laminate foil as specified
+- Do NOT render it as flat solid color — grain must be visible
+- Match wood grain character to: ${cassWood?.name_en || cassWood?.name || "specified wood effect"}`
+  : `CASSONETTO RAL COLOR RENDERING RULES:
+- The cassonetto box MUST be rendered in the exact RAL color specified
+- Render as smooth flat consistent tone — no grain, no texture
+- The color must match RAL ${cassRal?.ral || "9016"} (${cassRal?.hex || "#F1F0EB"})
+- Correct specular highlights for PVC surface (matte-satin)`
+}
+
+Cassonetto shape: keep EXACT same dimensions and proportions as existing cassonetto in photo.
+Only the color/finish changes — NOT the shape, size, or position.
 Position: directly above window top frame rail, face flush with or slightly proud of wall plane
 Bottom reveal: show the shutter exit slot (approximately 15-20mm slit) at bottom of cassonetto face panel
 Width: exactly matching window frame outer width
 Side flanges: small triangular or stepped PVC/aluminum caps where cassonetto meets wall on left and right
-Cast appropriate shadow from cassonetto protrusion onto wall below`;
+Cast appropriate shadow from cassonetto protrusion onto wall below
+CRITICAL: Do NOT leave the cassonetto in the original color if replacement was requested.`;
   }
 
   return `[BLOCK H – ROLLER BOX — MAINTAIN]\n${analisi.presenza_cassonetto ? 'Keep existing cassonetto exactly as photographed.' : 'No cassonetto in original photo — do not add one.'}`;
