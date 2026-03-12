@@ -719,6 +719,7 @@ export type Database = {
         Row: {
           badge: string | null
           created_at: string | null
+          credits_eur: number | null
           id: string
           is_active: boolean
           minutes: number
@@ -730,6 +731,7 @@ export type Database = {
         Insert: {
           badge?: string | null
           created_at?: string | null
+          credits_eur?: number | null
           id?: string
           is_active?: boolean
           minutes: number
@@ -741,6 +743,7 @@ export type Database = {
         Update: {
           badge?: string | null
           created_at?: string | null
+          credits_eur?: number | null
           id?: string
           is_active?: boolean
           minutes?: number
@@ -933,7 +936,7 @@ export type Database = {
           auto_recharge_method: string | null
           auto_recharge_payment_ref: string | null
           auto_recharge_threshold: number | null
-          balance_eur: number | null
+          balance_eur: number
           blocked_at: string | null
           blocked_reason: string | null
           calls_blocked: boolean | null
@@ -942,6 +945,7 @@ export type Database = {
           minutes_purchased: number
           minutes_reserved: number
           minutes_used: number
+          system_version: number | null
           total_recharged_eur: number | null
           total_spent_eur: number | null
           updated_at: string | null
@@ -955,7 +959,7 @@ export type Database = {
           auto_recharge_method?: string | null
           auto_recharge_payment_ref?: string | null
           auto_recharge_threshold?: number | null
-          balance_eur?: number | null
+          balance_eur?: number
           blocked_at?: string | null
           blocked_reason?: string | null
           calls_blocked?: boolean | null
@@ -964,6 +968,7 @@ export type Database = {
           minutes_purchased?: number
           minutes_reserved?: number
           minutes_used?: number
+          system_version?: number | null
           total_recharged_eur?: number | null
           total_spent_eur?: number | null
           updated_at?: string | null
@@ -977,7 +982,7 @@ export type Database = {
           auto_recharge_method?: string | null
           auto_recharge_payment_ref?: string | null
           auto_recharge_threshold?: number | null
-          balance_eur?: number | null
+          balance_eur?: number
           blocked_at?: string | null
           blocked_reason?: string | null
           calls_blocked?: boolean | null
@@ -986,6 +991,7 @@ export type Database = {
           minutes_purchased?: number
           minutes_reserved?: number
           minutes_used?: number
+          system_version?: number | null
           total_recharged_eur?: number | null
           total_spent_eur?: number | null
           updated_at?: string | null

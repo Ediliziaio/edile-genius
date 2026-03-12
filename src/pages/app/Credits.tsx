@@ -2,10 +2,11 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyId } from "@/hooks/useCompanyId";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw, Package, Sparkles } from "lucide-react";
 import CreditsBalanceCard from "@/components/credits/CreditsBalanceCard";
 import TopupSelector from "@/components/credits/TopupSelector";
 import CreditsUsageTabs from "@/components/credits/CreditsUsageTabs";
@@ -44,6 +45,15 @@ interface UsageRow {
   created_at: string;
 }
 
+interface CreditPackage {
+  id: string;
+  name: string;
+  price_eur: number;
+  credits_eur: number;
+  badge: string | null;
+  sort_order: number;
+}
+
 export default function CreditsPage() {
   const companyId = useCompanyId();
   const { toast } = useToast();
@@ -52,19 +62,22 @@ export default function CreditsPage() {
   const [topups, setTopups] = useState<Topup[]>([]);
   const [usage, setUsage] = useState<UsageRow[]>([]);
   const [agentNames, setAgentNames] = useState<Record<string, string>>({});
+  const [packages, setPackages] = useState<CreditPackage[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAmount, setSelectedAmount] = useState<number | null>(20);
   const [customAmount, setCustomAmount] = useState("");
   const [confirmModal, setConfirmModal] = useState(false);
+  const [confirmPackage, setConfirmPackage] = useState<CreditPackage | null>(null);
   const [processing, setProcessing] = useState(false);
 
   const fetchAll = useCallback(async () => {
     if (!companyId) return;
-    const [creditsRes, topupsRes, usageRes, agentsRes] = await Promise.all([
+    const [creditsRes, topupsRes, usageRes, agentsRes, packagesRes] = await Promise.all([
       supabase.from("ai_credits").select("*").eq("company_id", companyId).single(),
       supabase.from("ai_credit_topups").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).limit(20),
       supabase.from("ai_credit_usage").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).limit(30),
       supabase.from("agents").select("id, name").eq("company_id", companyId),
+      supabase.from("ai_credit_packages").select("*").eq("is_active", true).order("sort_order"),
     ]);
 
     if (creditsRes.data) setCredits(creditsRes.data as unknown as Credits);
@@ -75,6 +88,7 @@ export default function CreditsPage() {
       agentsRes.data.forEach((a: any) => { map[a.id] = a.name; });
       setAgentNames(map);
     }
+    if (packagesRes.data) setPackages(packagesRes.data as unknown as CreditPackage[]);
     setLoading(false);
   }, [companyId]);
 
@@ -90,11 +104,29 @@ export default function CreditsPage() {
         body: { companyId, amountEur: topupAmount, paymentMethod: "manual", type: "manual" },
       });
       if (error || data?.error) throw new Error(data?.error || error?.message);
-      toast({ title: "Ricarica completata", description: `Nuovo saldo: €${data.new_balance_eur?.toFixed(2)}` });
+      toast({ title: "Ricarica completata", description: `Nuovo saldo: €${Number(data.new_balance_eur).toFixed(2)}` });
       setConfirmModal(false);
       fetchAll();
     } catch (err: any) {
       toast({ variant: "destructive", title: "Errore ricarica", description: err.message });
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handlePackagePurchase = async () => {
+    if (!confirmPackage) return;
+    setProcessing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("topup-credits", {
+        body: { companyId, packageId: confirmPackage.id, paymentMethod: "manual", type: "package" },
+      });
+      if (error || data?.error) throw new Error(data?.error || error?.message);
+      toast({ title: "Pacchetto acquistato!", description: `+€${Number(data.amount_added).toFixed(2)} aggiunti. Nuovo saldo: €${Number(data.new_balance_eur).toFixed(2)}` });
+      setConfirmPackage(null);
+      fetchAll();
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Errore acquisto", description: err.message });
     } finally {
       setProcessing(false);
     }
@@ -121,6 +153,44 @@ export default function CreditsPage() {
 
       <CreditsBalanceCard credits={credits} onRechargeNow={() => setConfirmModal(true)} onToggleAutoRecharge={toggleAutoRecharge} />
 
+      {/* Package Cards */}
+      {packages.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-4">
+            <Package className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-bold text-foreground">Pacchetti Crediti</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {packages.map((pkg) => (
+              <Card
+                key={pkg.id}
+                className={`relative cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 ${pkg.badge ? "border-primary/30 shadow-md" : ""}`}
+                onClick={() => setConfirmPackage(pkg)}
+              >
+                {pkg.badge && (
+                  <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-3">
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    {pkg.badge}
+                  </Badge>
+                )}
+                <CardContent className="p-6 text-center space-y-3 pt-6">
+                  <p className="text-sm font-semibold text-muted-foreground">{pkg.name}</p>
+                  <p className="text-4xl font-extrabold text-foreground">€{Number(pkg.credits_eur).toFixed(0)}</p>
+                  <p className="text-xs text-muted-foreground">di crediti conversazionali</p>
+                  <p className="text-lg font-bold text-primary">€{Number(pkg.price_eur).toFixed(0)}</p>
+                  <Button className="w-full" variant={pkg.badge ? "default" : "outline"} size="sm">
+                    Acquista
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground mt-3">
+            I pagamenti con carta saranno disponibili a breve. Per ora le ricariche vengono processate manualmente entro 24h.
+          </p>
+        </div>
+      )}
+
       <TopupSelector
         selectedAmount={selectedAmount}
         customAmount={customAmount}
@@ -131,18 +201,38 @@ export default function CreditsPage() {
 
       <CreditsUsageTabs usage={usage} topups={topups} agentNames={agentNames} />
 
-      {/* Confirm Modal */}
+      {/* Confirm Manual Topup Modal */}
       <Dialog open={confirmModal} onOpenChange={setConfirmModal}>
         <DialogContent>
           <DialogHeader><DialogTitle>Conferma Ricarica</DialogTitle></DialogHeader>
           <Card className="bg-muted/50"><CardContent className="p-5 space-y-2">
             <div className="flex justify-between"><span className="text-sm text-muted-foreground">Importo:</span><span className="font-bold">€{topupAmount.toFixed(2)}</span></div>
             <div className="flex justify-between"><span className="text-sm text-muted-foreground">Saldo attuale:</span><span className="font-mono">€{credits.balance_eur.toFixed(2)}</span></div>
-            <div className="flex justify-between border-t pt-2"><span className="text-sm font-semibold">Saldo dopo ricarica:</span><span className="font-bold text-primary">€{(credits.balance_eur + topupAmount).toFixed(2)}</span></div>
+            <div className="flex justify-between border-t pt-2"><span className="text-sm font-semibold">Saldo dopo ricarica:</span><span className="font-bold text-primary">€{Number((credits.balance_eur + topupAmount).toFixed(2))}</span></div>
           </CardContent></Card>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmModal(false)}>Annulla</Button>
             <Button onClick={handleTopup} disabled={processing}>{processing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}Conferma e Ricarica</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm Package Purchase Modal */}
+      <Dialog open={!!confirmPackage} onOpenChange={(open) => !open && setConfirmPackage(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Conferma Acquisto Pacchetto</DialogTitle></DialogHeader>
+          {confirmPackage && (
+            <Card className="bg-muted/50"><CardContent className="p-5 space-y-2">
+              <div className="flex justify-between"><span className="text-sm text-muted-foreground">Pacchetto:</span><span className="font-bold">{confirmPackage.name}</span></div>
+              <div className="flex justify-between"><span className="text-sm text-muted-foreground">Crediti aggiunti:</span><span className="font-bold">€{Number(confirmPackage.credits_eur).toFixed(2)}</span></div>
+              <div className="flex justify-between"><span className="text-sm text-muted-foreground">Prezzo:</span><span className="font-bold text-primary">€{Number(confirmPackage.price_eur).toFixed(0)}</span></div>
+              <div className="flex justify-between border-t pt-2"><span className="text-sm font-semibold">Saldo dopo acquisto:</span><span className="font-bold text-primary">€{Number((credits.balance_eur + Number(confirmPackage.credits_eur)).toFixed(2))}</span></div>
+            </CardContent></Card>
+          )}
+          <p className="text-xs text-muted-foreground">Riceverai una conferma entro 24h e i crediti verranno aggiunti automaticamente.</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmPackage(null)}>Annulla</Button>
+            <Button onClick={handlePackagePurchase} disabled={processing}>{processing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}Conferma Acquisto</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
