@@ -646,15 +646,28 @@ Remove the existing shutter/blind system completely. Show bare window frame with
   if (t.azione === "sostituisci" && t.materiale) {
     const lines: string[] = [`[BLOCK I – NEW SHUTTER/BLIND SYSTEM]`];
     lines.push(`Install new: ${TAPPARELLA_DESC[t.materiale] || t.materiale}`);
-    if (t.colore_mode === "legno" && t.colore_wood_effect) {
-      lines.push(`Slat color: ${formatColorPrompt("legno", null, t.colore_wood_effect)}`);
-      lines.push(`SLAT WOOD EFFECT: Each slat MUST show horizontal wood grain pattern matching the specified wood effect laminate. Grain runs along the slat length.`);
-    } else if (t.colore) {
-      lines.push(`Slat color: ${t.colore.nome}${t.colore.ral ? ` (RAL ${t.colore.ral})` : ""} — solid uniform color, NO wood grain`);
+
+    // v6: Use top-level tap_colore fields with fallback to tapparella sub-object
+    const tapMode = infisso.tap_colore_mode ?? t.colore_mode ?? "ral";
+    const tapWood = infisso.tap_wood_effect ?? t.colore_wood_effect ?? null;
+    const tapRal = infisso.tap_colore
+      ? { ral: infisso.tap_colore.ral, name: infisso.tap_colore.name, hex: infisso.tap_colore.hex, group: "" }
+      : (t.colore?.ral ? { ral: t.colore.ral, name: t.colore.nome, hex: t.colore.hex || "", group: "" } : null);
+
+    const tapColorDesc = formatColorPrompt(tapMode, tapRal, tapWood);
+    const isWoodTap = tapMode === "legno";
+
+    lines.push(`Roller shutter finish: ${tapColorDesc}`);
+
+    if (isWoodTap) {
+      lines.push(`TAPPARELLA WOOD EFFECT: slats MUST show wood grain texture — grain runs horizontally across each slat. Do NOT render as solid color.`);
+    } else {
+      lines.push(`TAPPARELLA RAL COLOR: slats must be smooth flat ${tapRal?.name || "specified"} color — no grain`);
     }
+
     if (t.colore_guide) {
       lines.push(`Side guide channel color: ${t.colore_guide.nome}${t.colore_guide.ral ? ` (RAL ${t.colore_guide.ral})` : ""}`);
-    } else if (t.colore) {
+    } else {
       lines.push(`Side guide channel color: same as slats`);
     }
     const stato = t.stato_render || "chiusa";
