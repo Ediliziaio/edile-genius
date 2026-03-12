@@ -3481,6 +3481,7 @@ export type Database = {
         Row: {
           agent_id: string
           call_log_id: string | null
+          cancelled_reason: string | null
           company_id: string
           contact_id: string
           created_at: string
@@ -3489,12 +3490,14 @@ export type Database = {
           executed_at: string | null
           id: string
           notes: string | null
+          rescheduled_at: string | null
           scheduled_at: string
           status: string
         }
         Insert: {
           agent_id: string
           call_log_id?: string | null
+          cancelled_reason?: string | null
           company_id: string
           contact_id: string
           created_at?: string
@@ -3503,12 +3506,14 @@ export type Database = {
           executed_at?: string | null
           id?: string
           notes?: string | null
+          rescheduled_at?: string | null
           scheduled_at: string
           status?: string
         }
         Update: {
           agent_id?: string
           call_log_id?: string | null
+          cancelled_reason?: string | null
           company_id?: string
           contact_id?: string
           created_at?: string
@@ -3517,6 +3522,7 @@ export type Database = {
           executed_at?: string | null
           id?: string
           notes?: string | null
+          rescheduled_at?: string | null
           scheduled_at?: string
           status?: string
         }
@@ -4335,6 +4341,10 @@ export type Database = {
         Args: { p_foto_url: string; p_report_id: string }
         Returns: undefined
       }
+      cancel_scheduled_call: {
+        Args: { p_call_id: string; p_reason?: string }
+        Returns: undefined
+      }
       deduct_call_credits: {
         Args: { _company_id: string; _cost_billed: number; _cost_real: number }
         Returns: {
@@ -4377,6 +4387,10 @@ export type Database = {
           p_reserved_eur: number
           p_used_eur: number
         }
+        Returns: undefined
+      }
+      reschedule_call: {
+        Args: { p_call_id: string; p_new_scheduled_at: string }
         Returns: undefined
       }
       reserve_followup_credits: {

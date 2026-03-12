@@ -9,7 +9,7 @@ import {
   BookUser, Megaphone, type LucideIcon,
   AlertTriangle, MessageCircle, Puzzle, Palette, HardHat,
   FileSignature, ShieldCheck, ClipboardList,
-  Coins, ChevronDown, Clock, Zap,
+  Coins, ChevronDown, Clock, Zap, Activity, CalendarClock,
 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { differenceInDays } from "date-fns";
@@ -35,6 +35,8 @@ const companyNav: NavSection[] = [
   { header: "VENDITE", items: [
     { label: "Contatti", icon: BookUser, href: "/app/contacts" },
     { label: "Campagne", icon: Megaphone, href: "/app/campaigns" },
+    { label: "Monitor Chiamate", icon: Activity, href: "/app/call-monitor" },
+    { label: "Chiamate Programmate", icon: CalendarClock, href: "/app/scheduled-calls" },
   ]},
   { header: "VENDITE AVANZATE", collapsible: true, defaultOpen: false, visibilityKey: "preventivi", items: [
     { label: "Preventivi", icon: FileSignature, href: "/app/preventivi" },
