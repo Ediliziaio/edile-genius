@@ -3,7 +3,7 @@ import { useCompanyId } from "@/hooks/useCompanyId";
 import { useQuery } from "@tanstack/react-query";
 import { SMART_ACTIONS_DEFAULTS } from "@/lib/automation-defaults";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import {
   Bot, ArrowRight, PhoneOff, CreditCard, Sparkles,
   MessageSquare, Zap, CheckCircle2, Circle, CalendarCheck,
@@ -28,8 +28,18 @@ interface BriefingData {
 }
 
 export default function AppDashboard() {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const companyId = useCompanyId();
+
+  // Check onboarding status
+  const { data: onboardingProfile, isLoading: onboardingLoading } = useQuery({
+    queryKey: ["onboarding-check", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("onboarding_completed" as any).eq("id", user!.id).single();
+      return data as unknown as { onboarding_completed: boolean } | null;
+    },
+  });
 
   // ── Agents ──
   const { data: agents } = useQuery({
@@ -487,6 +497,12 @@ export default function AppDashboard() {
   const creditUsagePercent = totalRecharged > 0
     ? Math.min(100, Math.round((totalSpent / totalRecharged) * 100))
     : 0;
+
+  // Onboarding redirect (after all hooks)
+  if (onboardingLoading) return null;
+  if (onboardingProfile && onboardingProfile.onboarding_completed === false) {
+    return <Navigate to="/app/onboarding" replace />;
+  }
 
   return (
     <div className="space-y-8 max-w-6xl">

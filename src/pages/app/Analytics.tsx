@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
 import { BarChart3, Phone, Clock, TrendingUp, Target, AlertTriangle, LineChart as LineChartIcon, Download } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { subDays, format, startOfDay, isAfter, parseISO } from "date-fns";
@@ -152,6 +153,27 @@ export default function AnalyticsPage() {
     { label: "Tasso successo", value: `${stats.successRate}%`, icon: TrendingUp, colorClass: "text-status-success bg-status-success-light" },
     { label: "Esito principale", value: stats.topOutcome, icon: Target, colorClass: "text-status-warning bg-status-warning-light" },
   ];
+
+  if (loadingConvs) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <BarChart3 className="w-6 h-6 text-brand" />
+          <h1 className="text-2xl font-bold text-ink-900">Analytics</h1>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-24 rounded-xl" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-[300px] rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
