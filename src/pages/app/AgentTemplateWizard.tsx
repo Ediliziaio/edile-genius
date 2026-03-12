@@ -22,17 +22,20 @@ const VOCAL_SLUGS = [
   "vocale-custom", "richiama-lead-ads", "qualifica-serramenti", "qualifica-ristrutturazione",
   "qualifica-fotovoltaico", "conferma-appuntamenti", "recupera-preventivi", "recupera-noshow",
   "followup-sopralluogo", "raccolta-recensioni", "verifica-soddisfazione",
-  "primo-contatto-wa", "followup-preventivi-wa", "assistente-whatsapp",
   // legacy slugs
   "qualifica-infissi", "inbound-campagne", "conferma-sopralluogo",
   "recupero-preventivi", "recupero-noshow", "recensioni-post-lavoro",
 ];
 const RENDER_SLUGS = ["render-infissi"];
+const WHATSAPP_SLUGS = [
+  "primo-contatto-wa", "followup-preventivi-wa", "assistente-whatsapp",
+  "whatsapp-preventivi",
+];
 
 function getAgentType(slug: string): string {
+  if (WHATSAPP_SLUGS.includes(slug) || slug.includes("whatsapp") || slug.includes("-wa")) return "whatsapp";
   if (VOCAL_SLUGS.includes(slug)) return "vocal";
   if (RENDER_SLUGS.includes(slug)) return "render";
-  if (slug.startsWith("assistente-whatsapp") || slug.includes("whatsapp")) return "vocal";
   return "vocal";
 }
 
@@ -189,10 +192,12 @@ export default function AgentTemplateWizard() {
   useEffect(() => {
     if (agentType === "render") {
       navigate("/app/render/new", { replace: true });
+    } else if (agentType === "whatsapp") {
+      navigate("/app/whatsapp", { replace: true });
     }
   }, [agentType, navigate]);
 
-  if (agentType === "render") {
+  if (agentType === "render" || agentType === "whatsapp") {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
