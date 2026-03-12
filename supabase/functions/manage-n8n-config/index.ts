@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { encryptToken, getEncryptionKey } from "../_shared/crypto.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,8 +23,7 @@ Deno.serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
     }
@@ -77,26 +77,55 @@ Deno.serve(async (req) => {
         return new Response(JSON.stringify({ error: "Invalid base_url format" }), { status: 400, headers: corsHeaders });
       }
 
-      const updates: Record<string, unknown> = {
-        n8n_base_url: base_url.replace(/\/+$/, ""),
-        n8n_configured: true,
-        updated_by: userId,
-      };
+      const cleanUrl = base_url.replace(/\/+$/, "");
 
+      // If API key provided, validate connection first
       if (api_key && typeof api_key === "string" && api_key.trim().length > 0) {
-        updates.n8n_api_key_set = true;
-        // Store the API key as a Deno env variable is not possible at runtime,
-        // so we store it in the DB encrypted column. The edge function
-        // deploy-template-instance will read it from here.
-        // For true secret management, the user should set N8N_API_KEY as a Supabase secret.
+        try {
+          const testResponse = await fetch(`${cleanUrl}/api/v1/workflows?limit=1`, {
+            headers: { "X-N8N-API-KEY": api_key, "Accept": "application/json" },
+            signal: AbortSignal.timeout(5000),
+          });
+          if (!testResponse.ok) {
+            return new Response(JSON.stringify({
+              error: "Impossibile raggiungere n8n. Verifica URL e API key.",
+              details: `n8n returned ${testResponse.status}`,
+            }), { status: 422, headers: corsHeaders });
+          }
+        } catch (err) {
+          return new Response(JSON.stringify({
+            error: "Impossibile raggiungere n8n. Verifica URL e API key.",
+            details: (err as Error).message,
+          }), { status: 422, headers: corsHeaders });
+        }
+
+        // Encrypt the API key before saving
+        const encryptionKey = getEncryptionKey();
+        const encryptedKey = await encryptToken(api_key.trim(), encryptionKey);
+
+        await serviceClient
+          .from("platform_config")
+          .update({
+            n8n_base_url: cleanUrl,
+            n8n_configured: true,
+            n8n_api_key_set: true,
+            n8n_api_key_encrypted: encryptedKey,
+            updated_by: userId,
+          })
+          .neq("id", "00000000-0000-0000-0000-000000000000");
+      } else {
+        // Only update URL, keep existing key
+        await serviceClient
+          .from("platform_config")
+          .update({
+            n8n_base_url: cleanUrl,
+            n8n_configured: true,
+            updated_by: userId,
+          })
+          .neq("id", "00000000-0000-0000-0000-000000000000");
       }
 
-      await serviceClient
-        .from("platform_config")
-        .update(updates)
-        .neq("id", "00000000-0000-0000-0000-000000000000");
-
-      return new Response(JSON.stringify({ success: true }), {
+      return new Response(JSON.stringify({ success: true, message: "Configurazione n8n salvata" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -119,10 +148,8 @@ Deno.serve(async (req) => {
 
       try {
         const response = await fetch(`${cleanUrl}/api/v1/workflows?limit=100`, {
-          headers: {
-            "X-N8N-API-KEY": effectiveKey,
-            "Accept": "application/json",
-          },
+          headers: { "X-N8N-API-KEY": effectiveKey, "Accept": "application/json" },
+          signal: AbortSignal.timeout(5000),
         });
 
         if (!response.ok) {

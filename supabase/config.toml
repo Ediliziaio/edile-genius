@@ -140,3 +140,9 @@ verify_jwt = false
 
 [functions.weekly-report]
 verify_jwt = false
+
+[functions.n8n-trigger-webhook]
+verify_jwt = false
+
+[functions.n8n-execution-callback]
+verify_jwt = false
