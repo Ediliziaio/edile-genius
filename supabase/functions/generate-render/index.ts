@@ -438,7 +438,7 @@ Deno.serve(async (req) => {
         ],
         modalities: ["image", "text"],
         temperature: 1,
-        max_tokens: 8192,
+        max_tokens: 16384,
       }),
     }, 120_000);
 
