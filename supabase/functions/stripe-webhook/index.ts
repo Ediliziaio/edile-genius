@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
     const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 
     if (!stripeKey || !webhookSecret) {
-      console.error("Missing STRIPE_SECRET_KEY or STRIPE_WEBHOOK_SECRET");
+      console.error("[stripe-webhook] Missing STRIPE_SECRET_KEY or STRIPE_WEBHOOK_SECRET");
       return new Response("Server misconfigured", { status: 500 });
     }
 
@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
     try {
       event = await stripe.webhooks.constructEventAsync(body, sig, webhookSecret);
     } catch (err) {
-      console.error("Webhook signature verification failed:", (err as Error).message);
+      console.error("[stripe-webhook] Signature verification failed:", (err as Error).message);
       return new Response("Invalid signature", { status: 400 });
     }
 
@@ -40,9 +40,24 @@ Deno.serve(async (req) => {
       const session = event.data.object as Stripe.Checkout.Session;
       const meta = session.metadata;
 
-      if (!meta?.company_id || !meta?.credits_eur) {
-        console.error("Missing metadata in checkout session:", session.id);
-        return new Response("OK", { status: 200 });
+      console.log("[stripe-webhook] Event received:", {
+        type: event.type,
+        session_id: session.id,
+        company_id: meta?.company_id,
+        credits_eur: meta?.credits_eur,
+        package_id: meta?.package_id,
+        timestamp: new Date().toISOString(),
+      });
+
+      // Validate metadata — return 400 so Stripe retries
+      if (!meta?.company_id) {
+        console.error("[stripe-webhook] Missing company_id in metadata:", session.id);
+        return new Response("Missing company_id in metadata", { status: 400 });
+      }
+
+      if (!meta?.credits_eur && !meta?.package_id) {
+        console.error("[stripe-webhook] Missing credits_eur and package_id in metadata:", session.id);
+        return new Response("Missing credits metadata", { status: 400 });
       }
 
       const sb = createClient(
@@ -58,11 +73,26 @@ Deno.serve(async (req) => {
         .limit(1);
 
       if (existing && existing.length > 0) {
-        console.log("Already processed session:", session.id);
+        console.log("[stripe-webhook] Already processed session:", session.id);
         return new Response("OK", { status: 200 });
       }
 
-      const creditsEur = Number(meta.credits_eur);
+      // Determine credits amount — fallback to package lookup
+      let creditsEur = parseFloat(meta.credits_eur || "0");
+      if (creditsEur <= 0 && meta.package_id) {
+        const { data: pkg } = await sb
+          .from("ai_credit_packages")
+          .select("credits_eur")
+          .eq("id", meta.package_id)
+          .single();
+        if (pkg) creditsEur = Number(pkg.credits_eur);
+      }
+
+      if (creditsEur <= 0) {
+        console.error("[stripe-webhook] Could not determine credits amount:", session.id);
+        return new Response("Invalid credits amount", { status: 400 });
+      }
+
       const companyId = meta.company_id;
       const packageId = meta.package_id || null;
       const userId = meta.user_id || null;
@@ -75,17 +105,26 @@ Deno.serve(async (req) => {
       });
 
       if (rpcError) {
-        console.error("topup_credits RPC error:", rpcError);
-        return new Response("RPC error", { status: 500 });
+        console.error("[stripe-webhook] RPC topup_credits FAILED:", {
+          company_id: companyId,
+          amount: creditsEur,
+          error: rpcError.message,
+          session_id: session.id,
+        });
+        return new Response("Credit topup failed - will retry", { status: 500 });
       }
 
       const newBalance = Number(newBalanceRows);
-      const invoiceNum = `EIO-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+
+      // Generate unique invoice number via DB sequence
+      const { data: invoiceData } = await sb.rpc("generate_invoice_number");
+      const invoiceNum = invoiceData || `EIO-${Date.now()}`;
 
       // Record topup
       await sb.from("ai_credit_topups").insert({
         company_id: companyId,
         amount_eur: creditsEur,
+        price_paid_eur: (session.amount_total || 0) / 100,
         type: "stripe",
         status: "completed",
         payment_method: "stripe",
@@ -113,12 +152,17 @@ Deno.serve(async (req) => {
         },
       });
 
-      console.log(`✅ Stripe topup: company=${companyId} +€${creditsEur} balance=€${newBalance}`);
+      console.log("[stripe-webhook] Credits added successfully:", {
+        company_id: companyId,
+        amount_added: creditsEur,
+        new_balance: newBalance,
+        invoice: invoiceNum,
+      });
     }
 
     return new Response("OK", { status: 200 });
   } catch (err) {
-    console.error("stripe-webhook error:", err);
+    console.error("[stripe-webhook] Unhandled error:", err);
     return new Response("Internal error", { status: 500 });
   }
 });

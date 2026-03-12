@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
   try {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) {
-      return new Response(JSON.stringify({ error: "Stripe non configurato. Contatta l'amministratore." }), {
+      return new Response(JSON.stringify({ error: "Stripe non configurato. Contatta l'amministratore.", code: "stripe_not_configured" }), {
         status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -107,10 +107,35 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (err) {
-    console.error("create-checkout-session error:", err);
-    return new Response(JSON.stringify({ error: (err as Error).message }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  } catch (err: any) {
+    console.error("[create-checkout-session] Error:", err);
+
+    const headers = { ...corsHeaders, "Content-Type": "application/json" };
+
+    if (err?.type === "StripeAuthenticationError") {
+      return new Response(JSON.stringify({
+        error: "Configurazione pagamenti non valida. Contatta il supporto.",
+        code: "stripe_auth_error",
+      }), { status: 500, headers });
+    }
+
+    if (err?.type === "StripeInvalidRequestError") {
+      return new Response(JSON.stringify({
+        error: "Richiesta di pagamento non valida. Riprova.",
+        code: "stripe_invalid_request",
+      }), { status: 400, headers });
+    }
+
+    if (err?.code === "ECONNREFUSED" || err?.message?.includes("fetch")) {
+      return new Response(JSON.stringify({
+        error: "Servizio pagamenti temporaneamente non disponibile. Riprova tra qualche minuto.",
+        code: "stripe_unavailable",
+      }), { status: 503, headers });
+    }
+
+    return new Response(JSON.stringify({
+      error: "Si è verificato un errore. Riprova o contatta il supporto.",
+      code: "unknown_error",
+    }), { status: 500, headers });
   }
 });

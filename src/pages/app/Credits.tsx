@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Loader2, RefreshCw, Package, Sparkles } from "lucide-react";
+import { Loader2, RefreshCw, Package, Sparkles, Lock } from "lucide-react";
 import CreditsBalanceCard from "@/components/credits/CreditsBalanceCard";
 import TopupSelector from "@/components/credits/TopupSelector";
 import CreditsUsageTabs from "@/components/credits/CreditsUsageTabs";
@@ -54,6 +54,14 @@ interface CreditPackage {
   sort_order: number;
 }
 
+const ERROR_MESSAGES: Record<string, string> = {
+  stripe_auth_error: "Problema di configurazione pagamenti. Contatta il supporto.",
+  stripe_unavailable: "Pagamenti temporaneamente non disponibili. Riprova tra qualche minuto.",
+  stripe_invalid_request: "Richiesta non valida. Aggiorna la pagina e riprova.",
+  stripe_not_configured: "Sistema di pagamento non ancora configurato. Contatta il supporto.",
+  unknown_error: "Errore durante la creazione del pagamento. Riprova.",
+};
+
 export default function CreditsPage() {
   const companyId = useCompanyId();
   const { toast } = useToast();
@@ -94,15 +102,52 @@ export default function CreditsPage() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
+  // Polling after Stripe payment — wait for webhook to process credits
+  const pollForCredits = useCallback(async (previousBalance: number, maxAttempts = 12) => {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      await new Promise(r => setTimeout(r, 2500));
+      const { data } = await supabase
+        .from("ai_credits")
+        .select("balance_eur")
+        .eq("company_id", companyId!)
+        .single();
+
+      if (data && data.balance_eur > previousBalance) {
+        await fetchAll();
+        toast({
+          title: "✅ Crediti aggiunti!",
+          description: `Nuovo saldo: €${data.balance_eur.toFixed(2)}`,
+        });
+        return;
+      }
+    }
+    // After 30s without update, show patience message
+    toast({
+      title: "Pagamento ricevuto",
+      description: "I crediti verranno aggiunti entro pochi minuti. Ricarica la pagina per aggiornare.",
+      duration: 8000,
+    });
+  }, [companyId, fetchAll, toast]);
+
   // Handle Stripe redirect query params
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const payment = params.get("payment");
     if (payment === "success") {
-      toast({ title: "Pagamento completato! 🎉", description: "I crediti verranno accreditati automaticamente entro pochi secondi." });
       window.history.replaceState({}, "", window.location.pathname);
-      // Refresh after short delay to allow webhook processing
-      setTimeout(() => fetchAll(), 3000);
+      supabase
+        .from("ai_credits")
+        .select("balance_eur")
+        .eq("company_id", companyId!)
+        .single()
+        .then(({ data }) => {
+          const currentBalance = data?.balance_eur ?? 0;
+          toast({
+            title: "💳 Pagamento completato!",
+            description: "Sto verificando l'accredito dei crediti...",
+          });
+          pollForCredits(currentBalance);
+        });
     } else if (payment === "cancelled") {
       toast({ variant: "destructive", title: "Pagamento annullato", description: "Nessun addebito effettuato." });
       window.history.replaceState({}, "", window.location.pathname);
@@ -141,14 +186,24 @@ export default function CreditsPage() {
           cancelUrl: `${window.location.origin}/app/credits?payment=cancelled`,
         },
       });
-      if (error || data?.error) throw new Error(data?.error || error?.message);
+
+      if (error || data?.error) {
+        const code = data?.code || "unknown_error";
+        toast({
+          variant: "destructive",
+          title: "Errore pagamento",
+          description: ERROR_MESSAGES[code] || ERROR_MESSAGES.unknown_error,
+        });
+        return;
+      }
+
       if (data?.url) {
         window.location.href = data.url;
       } else {
         throw new Error("URL di pagamento non ricevuto");
       }
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Errore pagamento", description: err.message });
+      toast({ variant: "destructive", title: "Errore di rete", description: "Controlla la connessione e riprova." });
     } finally {
       setProcessing(false);
     }
@@ -207,8 +262,9 @@ export default function CreditsPage() {
               </Card>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground mt-3">
-            I pagamenti con carta saranno disponibili a breve. Per ora le ricariche vengono processate manualmente entro 24h.
+          <p className="text-xs text-muted-foreground mt-3 flex items-center justify-center gap-1">
+            <Lock className="w-3 h-3" />
+            Pagamento sicuro via Stripe — crediti accreditati automaticamente in pochi secondi
           </p>
         </div>
       )}
@@ -251,7 +307,10 @@ export default function CreditsPage() {
               <div className="flex justify-between border-t pt-2"><span className="text-sm font-semibold">Saldo dopo acquisto:</span><span className="font-bold text-primary">€{Number((credits.balance_eur + Number(confirmPackage.credits_eur)).toFixed(2))}</span></div>
             </CardContent></Card>
           )}
-          <p className="text-xs text-muted-foreground">Riceverai una conferma entro 24h e i crediti verranno aggiunti automaticamente.</p>
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <Lock className="w-3 h-3" />
+            Verrai reindirizzato a Stripe per il pagamento sicuro. I crediti verranno aggiunti automaticamente.
+          </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmPackage(null)}>Annulla</Button>
             <Button onClick={handlePackagePurchase} disabled={processing}>{processing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}Conferma Acquisto</Button>

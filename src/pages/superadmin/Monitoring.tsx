@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Activity, Mail, MailX, Clock, ShieldAlert, Cpu, Zap,
@@ -10,12 +10,22 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import StatsCard from "@/components/superadmin/StatsCard";
-import { format, parseISO, subHours, subDays } from "date-fns";
+import { format, parseISO, subHours } from "date-fns";
 import { it } from "date-fns/locale";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, AreaChart, Area, Legend,
+  ResponsiveContainer,
 } from "recharts";
+
+/* ── Config ────────────────────────────────────── */
+
+const MONITORING_CONFIG = {
+  WEEKLY_REPORTS_LIMIT: 50,
+  ORCHESTRATOR_LOGS_LIMIT: 200,
+  LOGS_WINDOW_HOURS: 24,
+  CREDITS_LOW_THRESHOLD: 5,
+  STALE_TIME_MS: 5 * 60 * 1000,
+} as const;
 
 /* ── Types ─────────────────────────────────────── */
 
@@ -51,16 +61,25 @@ interface CompanyName {
   name: string;
 }
 
+/* ── Helpers ───────────────────────────────────── */
+
+const sanitizeErrorMessage = (msg: string | null): string => {
+  if (!msg) return "—";
+  const sanitized = msg.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[email]");
+  return sanitized.length > 80 ? sanitized.slice(0, 80) + "…" : sanitized;
+};
+
 /* ── Component ─────────────────────────────────── */
 
 export default function Monitoring() {
-  const { data: companies } = useQuery({
+  const { data: companies, error: companiesError } = useQuery({
     queryKey: ["sa-monitoring-companies"],
     queryFn: async () => {
-      const { data } = await supabase.from("companies").select("id, name");
+      const { data, error } = await supabase.from("companies").select("id, name").order("name");
+      if (error) throw error;
       return (data || []) as CompanyName[];
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: MONITORING_CONFIG.STALE_TIME_MS,
   });
 
   const nameMap = useMemo(() => {
@@ -70,16 +89,18 @@ export default function Monitoring() {
   }, [companies]);
 
   /* ── Weekly Reports ── */
-  const { data: weeklyReports, isLoading: loadingReports, refetch: refetchReports } = useQuery({
+  const { data: weeklyReports, isLoading: loadingReports, error: reportsError, refetch: refetchReports } = useQuery({
     queryKey: ["sa-weekly-reports"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("weekly_reports_log")
         .select("*")
         .order("week_start", { ascending: false })
-        .limit(50);
+        .limit(MONITORING_CONFIG.WEEKLY_REPORTS_LIMIT);
+      if (error) throw error;
       return (data || []) as WeeklyReport[];
     },
+    staleTime: MONITORING_CONFIG.STALE_TIME_MS,
   });
 
   const reportStats = useMemo(() => {
@@ -93,18 +114,20 @@ export default function Monitoring() {
   }, [weeklyReports]);
 
   /* ── Orchestrator Backpressure ── */
-  const { data: orchestratorLogs, isLoading: loadingOrch, refetch: refetchOrch } = useQuery({
+  const { data: orchestratorLogs, isLoading: loadingOrch, error: logsError, refetch: refetchOrch } = useQuery({
     queryKey: ["sa-orchestrator-logs"],
     queryFn: async () => {
-      const cutoff = subHours(new Date(), 24).toISOString();
-      const { data } = await supabase
+      const cutoff = subHours(new Date(), MONITORING_CONFIG.LOGS_WINDOW_HOURS).toISOString();
+      const { data, error } = await supabase
         .from("ai_orchestrator_log")
         .select("*")
         .gte("created_at", cutoff)
         .order("created_at", { ascending: false })
-        .limit(200);
+        .limit(MONITORING_CONFIG.ORCHESTRATOR_LOGS_LIMIT);
+      if (error) throw error;
       return (data || []) as OrchestratorLog[];
     },
+    staleTime: MONITORING_CONFIG.STALE_TIME_MS,
   });
 
   const orchStats = useMemo(() => {
@@ -122,7 +145,6 @@ export default function Monitoring() {
     return { total: orchestratorLogs.length, throttled, perCompany };
   }, [orchestratorLogs, nameMap]);
 
-  // Orchestrator actions per hour (last 24h)
   const orchTimeline = useMemo(() => {
     if (!orchestratorLogs) return [];
     const hourMap: Record<string, number> = {};
@@ -137,14 +159,16 @@ export default function Monitoring() {
   }, [orchestratorLogs]);
 
   /* ── Credits / Reserved ── */
-  const { data: credits, isLoading: loadingCredits, refetch: refetchCredits } = useQuery({
+  const { data: credits, isLoading: loadingCredits, error: creditsError, refetch: refetchCredits } = useQuery({
     queryKey: ["sa-monitoring-credits"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("ai_credits")
         .select("company_id, balance_eur, minutes_reserved, calls_blocked, total_spent_eur");
+      if (error) throw error;
       return (data || []) as CreditRow[];
     },
+    staleTime: MONITORING_CONFIG.STALE_TIME_MS,
   });
 
   const creditStats = useMemo(() => {
@@ -153,7 +177,7 @@ export default function Monitoring() {
       totalBalance: credits.reduce((s, c) => s + (c.balance_eur || 0), 0),
       totalReserved: credits.reduce((s, c) => s + (c.minutes_reserved || 0), 0),
       blocked: credits.filter((c) => c.calls_blocked).length,
-      lowBalance: credits.filter((c) => (c.balance_eur || 0) > 0 && (c.balance_eur || 0) <= 5).length,
+      lowBalance: credits.filter((c) => (c.balance_eur || 0) > 0 && (c.balance_eur || 0) <= MONITORING_CONFIG.CREDITS_LOW_THRESHOLD).length,
     };
   }, [credits]);
 
@@ -177,6 +201,21 @@ export default function Monitoring() {
     refetchOrch();
     refetchCredits();
   };
+
+  // Error state
+  const hasError = companiesError || reportsError || logsError || creditsError;
+  if (hasError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 space-y-4">
+        <AlertTriangle className="h-12 w-12 text-destructive" />
+        <h2 className="text-lg font-bold text-foreground">Errore nel caricamento dati di monitoraggio</h2>
+        <p className="text-sm text-muted-foreground max-w-md text-center">{(hasError as Error).message}</p>
+        <Button variant="outline" onClick={handleRefreshAll} className="gap-2">
+          <RefreshCw className="h-4 w-4" /> Riprova
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -240,7 +279,9 @@ export default function Monitoring() {
                       {r.sent_at ? format(parseISO(r.sent_at), "dd MMM HH:mm", { locale: it }) : "—"}
                     </TableCell>
                     <TableCell className="text-right font-mono text-sm">{r.retry_count}</TableCell>
-                    <TableCell className="text-xs text-destructive max-w-[200px] truncate">{r.error_message || "—"}</TableCell>
+                    <TableCell className="text-xs text-destructive max-w-[200px] truncate" title={r.error_message || undefined}>
+                      {sanitizeErrorMessage(r.error_message)}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -256,7 +297,7 @@ export default function Monitoring() {
       {/* ═══ ORCHESTRATOR ═══ */}
       <div className="space-y-4">
         <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-          <Cpu className="h-5 w-5 text-brand" /> AI Orchestrator — Backpressure (24h)
+          <Cpu className="h-5 w-5 text-brand" /> AI Orchestrator — Backpressure ({MONITORING_CONFIG.LOGS_WINDOW_HOURS}h)
         </h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -276,7 +317,7 @@ export default function Monitoring() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-sm text-muted-foreground py-8 text-center">Nessuna attività nelle ultime 24h</p>
+              <p className="text-sm text-muted-foreground py-8 text-center">Nessuna attività nelle ultime {MONITORING_CONFIG.LOGS_WINDOW_HOURS}h</p>
             )}
           </div>
 
@@ -307,7 +348,7 @@ export default function Monitoring() {
               <div className="mt-4 p-3 rounded-md bg-destructive/10 border border-destructive/20 flex items-start gap-2">
                 <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0 mt-0.5" />
                 <p className="text-xs text-destructive">
-                  <strong>{orchStats.throttled}</strong> azioni throttled nelle ultime 24h — possibile sovraccarico.
+                  <strong>{orchStats.throttled}</strong> azioni throttled nelle ultime {MONITORING_CONFIG.LOGS_WINDOW_HOURS}h — possibile sovraccarico.
                 </p>
               </div>
             )}
@@ -339,7 +380,7 @@ export default function Monitoring() {
                   <TableRow key={c.company}>
                     <TableCell className="text-sm font-medium">{c.company}</TableCell>
                     <TableCell className="text-right font-mono text-sm font-semibold text-brand">{c.reserved}</TableCell>
-                    <TableCell className={`text-right font-mono text-sm ${c.balance <= 5 ? "text-destructive" : "text-foreground"}`}>
+                    <TableCell className={`text-right font-mono text-sm ${c.balance <= MONITORING_CONFIG.CREDITS_LOW_THRESHOLD ? "text-destructive" : "text-foreground"}`}>
                       €{c.balance.toFixed(2)}
                     </TableCell>
                     <TableCell>
@@ -365,7 +406,7 @@ export default function Monitoring() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { label: "Aziende con crediti", value: credits.filter((c) => (c.balance_eur || 0) > 0).length, icon: CheckCircle2, color: "text-emerald-600" },
-              { label: "Saldo basso (< €5)", value: creditStats.lowBalance, icon: AlertTriangle, color: creditStats.lowBalance > 0 ? "text-yellow-600" : "text-muted-foreground" },
+              { label: `Saldo basso (< €${MONITORING_CONFIG.CREDITS_LOW_THRESHOLD})`, value: creditStats.lowBalance, icon: AlertTriangle, color: creditStats.lowBalance > 0 ? "text-yellow-600" : "text-muted-foreground" },
               { label: "Chiamate bloccate", value: creditStats.blocked, icon: XCircle, color: creditStats.blocked > 0 ? "text-destructive" : "text-muted-foreground" },
               { label: "Spesa totale", value: `€${credits.reduce((s, c) => s + (c.total_spent_eur || 0), 0).toFixed(0)}`, icon: Zap, color: "text-brand" },
             ].map((kpi) => (
