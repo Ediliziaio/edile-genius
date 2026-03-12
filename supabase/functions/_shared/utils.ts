@@ -234,10 +234,10 @@ export async function authenticateRequest(
   ) as AuthResult["supabase"];
 
   const token = authHeader.replace("Bearer ", "");
-  const { data: claimsData, error: claimsError } = await (supabase as any).auth.getClaims(token);
-  if (claimsError || !claimsData?.claims) {
+  const { data: { user }, error: userError } = await (supabase as any).auth.getUser(token);
+  if (userError || !user) {
     return { errorResponse: jsonError("Unauthorized", "auth_error", 401, requestId) };
   }
 
-  return { auth: { userId: claimsData.claims.sub as string, supabase } };
+  return { auth: { userId: user.id as string, supabase } };
 }

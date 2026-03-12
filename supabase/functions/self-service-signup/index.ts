@@ -33,12 +33,12 @@ Deno.serve(async (req) => {
     );
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser(token);
+    if (userError || !user) {
       return jsonError("Unauthorized", "auth_error", 401, rid);
     }
 
-    const user_id = claimsData.claims.sub as string;
+    const user_id = user.id;
 
     const sb = createClient(
       Deno.env.get("SUPABASE_URL")!,

@@ -17,9 +17,9 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: authHeader } } });
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) return jsonError("Unauthorized", "auth_error", 401, rid);
-    const userId = claimsData.claims.sub;
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !user) return jsonError("Unauthorized", "auth_error", 401, rid);
+    const userId = user.id;
 
     const body = await req.json();
     const VALID_AGENT_TYPES = ["vocal", "render", "whatsapp", "operative"] as const;
