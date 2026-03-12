@@ -142,42 +142,62 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
   // Block B
   blocks.B = `[BLOCK B – EXISTING ELEMENTS INVENTORY]\nWindow/door type: ${APERTURA_DESCRIPTION[analisi.tipo_apertura] || analisi.tipo_apertura}\nCurrent material: ${analisi.materiale_attuale}, Color: ${analisi.colore_attuale}, Condition: ${analisi.condizioni}\nPanels: ${analisi.num_ante_attuale}, Frame depth: ${analisi.spessore_telaio}\nGlass: ${analisi.tipo_vetro_attuale}\nRoller box: ${analisi.presenza_cassonetto ? 'YES — ' + analisi.tipo_cassonetto + ', color: ' + (analisi.colore_cassonetto_attuale || 'unknown') : 'NOT PRESENT'}\nShutter: ${analisi.presenza_tapparella ? 'YES — ' + (analisi.tipo_tapparella_attuale || 'unknown') + ', color: ' + (analisi.colore_tapparella_attuale || 'unknown') : 'NOT PRESENT'}\nBuilding: ${analisi.stile_edificio}, Wall: ${analisi.materiale_muro} (${analisi.colore_muro})\nSill: ${analisi.presenza_davanzale ? 'YES (' + (analisi.tipo_davanzale || 'unknown') + ')' : 'NO'}, Bars: ${analisi.presenza_inferriata ? 'YES' : 'NO'}\nFloor: ${analisi.piano}, Light: ${analisi.luce}, Angle: ${analisi.angolo_ripresa}`;
 
-  // Block C — Selective replacement
-  const cLines: string[] = ['[BLOCK C – SELECTIVE REPLACEMENT INSTRUCTIONS]', 'Replace ONLY the following elements:'];
+  // Block C — Selective replacement (v6: explicit color descriptions)
+  const cLines: string[] = ['[BLOCK C – REPLACEMENT MANIFEST]', 'EXACTLY these elements must change — NOTHING else:'];
   if (sost.infissi) {
-    cLines.push(`\n✅ REPLACE — Window/door frames and glass:\nRemove: ${oldMatDesc[analisi.materiale_attuale] || "old frame"}\nInstall: ${MATERIAL_PHYSICS[nuovoInfisso.materiale] || nuovoInfisso.materiale}`);
+    let infissoColorDesc = colore.nome || "white";
+    if (nuovoInfisso.colore_mode === "legno" && nuovoInfisso.colore_wood_effect) {
+      infissoColorDesc = `${nuovoInfisso.colore_wood_effect.name || nuovoInfisso.colore_wood_effect.id} wood-effect laminate`;
+    } else if (colore.ral) {
+      infissoColorDesc = `${colore.nome} (RAL ${colore.ral})`;
+    }
+    cLines.push(`\n✅ REPLACE window/door frame (infisso) → new finish: ${infissoColorDesc}`);
   } else {
-    cLines.push(`\n🚫 DO NOT TOUCH — Keep existing frames as-is`);
+    cLines.push(`\n🚫 KEEP window/door frame exactly as in original photo`);
   }
   if (sost.cassonetto) {
     if (cassonetto.azione === "rimuovi") {
-      cLines.push(`\n✅ REMOVE cassonetto — fill with continuous wall surface`);
+      cLines.push(`\n✅ REMOVE cassonetto (roller shutter box) — fill with continuous wall surface`);
     } else if (cassonetto.azione === "sostituisci" && cassonetto.materiale) {
-      let cColor = "";
-      if (cassonetto.colore?.nome) { cColor = `Color: ${cassonetto.colore.nome}`; if (cassonetto.colore.ral) cColor += ` (RAL ${cassonetto.colore.ral})`; }
-      cLines.push(`\n✅ REPLACE cassonetto:\n${CASSONETTO_MATERIAL_DESC[cassonetto.materiale] || cassonetto.materiale}\n${cColor}`);
+      // v6: use top-level cass_ fields with fallback
+      const cassMode = nuovoInfisso.cass_colore_mode || cassonetto.colore_mode || "ral";
+      let cassColorDesc = "";
+      if (cassMode === "legno") {
+        const cwe = nuovoInfisso.cass_wood_effect || cassonetto.colore_wood_effect;
+        cassColorDesc = cwe ? `${cwe.name || cwe.id} wood-effect laminate` : "wood-effect laminate";
+      } else {
+        const cc = nuovoInfisso.cass_colore || cassonetto.colore;
+        cassColorDesc = cc ? `${cc.name || cc.nome || ""}${cc.ral ? ` (RAL ${cc.ral})` : ""}` : "specified color";
+      }
+      cLines.push(`\n✅ REPLACE cassonetto (roller shutter box above window) → new finish: ${cassColorDesc}`);
     } else {
-      cLines.push(`\n🚫 DO NOT TOUCH cassonetto`);
+      cLines.push(`\n🚫 KEEP cassonetto exactly as in original photo`);
     }
   } else {
-    cLines.push(`\n🚫 DO NOT TOUCH — ${analisi.presenza_cassonetto ? 'Keep existing cassonetto' : 'No cassonetto — do not add'}`);
+    cLines.push(`\n🚫 ${analisi.presenza_cassonetto ? 'KEEP existing cassonetto exactly as in photo' : 'No cassonetto present — do not add one'}`);
   }
   if (sost.tapparella) {
     if (tapparella.azione === "rimuovi") {
-      cLines.push(`\n✅ REMOVE shutter system completely`);
+      cLines.push(`\n✅ REMOVE tapparella (roller shutter slats) completely`);
     } else if (tapparella.azione === "sostituisci" && tapparella.materiale) {
-      let tDesc = `\n✅ REPLACE shutter:\n${TAPPARELLA_DESC[tapparella.materiale] || tapparella.materiale}`;
-      if (tapparella.colore?.nome) { tDesc += `\nSlat color: ${tapparella.colore.nome}${tapparella.colore.ral ? ` (RAL ${tapparella.colore.ral})` : ""}`; }
-      if (tapparella.colore_guide?.nome) { tDesc += `\nGuide color: ${tapparella.colore_guide.nome}${tapparella.colore_guide.ral ? ` (RAL ${tapparella.colore_guide.ral})` : ""}`; }
-      const stato = tapparella.stato_render || "chiusa";
-      tDesc += `\nState: ${stato === 'aperta' ? 'FULLY OPEN (rolled up into cassonetto, no curtain visible below the cassonetto, only side guide channels visible)' : stato === 'mezza' ? 'HALF OPEN (curtain visible covering lower ~50% of glass, slat texture and horizontal joint lines visible on lower portion)' : 'FULLY CLOSED (curtain covers entire glass surface from cassonetto bottom to windowsill level, full slat texture visible)'}`;
-      cLines.push(tDesc);
+      const tapMode = nuovoInfisso.tap_colore_mode || tapparella.colore_mode || "ral";
+      let tapColorDesc = "";
+      if (tapMode === "legno") {
+        const twe = nuovoInfisso.tap_wood_effect || tapparella.colore_wood_effect;
+        tapColorDesc = twe ? `${twe.name || twe.id} wood-effect laminate` : "wood-effect laminate";
+      } else {
+        const tc = nuovoInfisso.tap_colore || tapparella.colore;
+        tapColorDesc = tc ? `${tc.name || tc.nome || ""}${tc.ral ? ` (RAL ${tc.ral})` : ""}` : "specified color";
+      }
+      cLines.push(`\n✅ REPLACE tapparella (roller shutter slats) → new finish: ${tapColorDesc}`);
     } else {
-      cLines.push(`\n🚫 DO NOT TOUCH shutter`);
+      cLines.push(`\n🚫 KEEP tapparella exactly as in original photo`);
     }
   } else {
-    cLines.push(`\n🚫 DO NOT TOUCH — ${analisi.presenza_tapparella ? 'Keep existing shutter' : 'No shutter — do not add'}`);
+    cLines.push(`\n🚫 ${analisi.presenza_tapparella ? 'KEEP existing shutter exactly as in photo' : 'No shutter present — do not add one'}`);
   }
+  cLines.push(`\n⚠️ CRITICAL: Every element marked 🚫 KEEP must be pixel-identical to the original.`);
+  cLines.push(`⚠️ CRITICAL: Every element marked ✅ REPLACE must be rendered with the EXACT specified finish.`);
   blocks.C = cLines.join('\n');
 
   // Block D — Material & Color (v5: wood effect support)
