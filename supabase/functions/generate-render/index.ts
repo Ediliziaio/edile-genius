@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, generateRequestId, log, fetchWithTimeout, jsonOk, jsonError, errorResponse } from "../_shared/utils.ts";
 
-// ─── Inline Prompt Builder v3 ─────────────────────────────────────
+// ─── Inline Prompt Builder v5 ─────────────────────────────────────
 
 const MATERIAL_PHYSICS: Record<string, string> = {
   pvc: "white or colored PVC (polyvinyl chloride) frame — smooth matte surface with very slight plastic texture under direct light, internal multi-chamber structure visible at frame cross-section edges, corners welded with subtle seam lines, uniform color throughout without natural grain, exterior surface shows shallow surface relief from extrusion process",
@@ -57,6 +57,46 @@ const CERNIERA_COLORE_DESC: Record<string, string> = {
   uguale_maniglia: "same finish as the window handle",
 };
 
+// ─── v5 Dictionaries ──────────────────────────────────────────────
+
+const CINGHIA_DESC: Record<string, string> = {
+  con_cinghia: "manual strap winder (avvolgitore a cinghia) — rectangular surface-mounted plastic box (120×160mm) on interior wall beside window, 15mm wide woven polyester strap exits through wall slot and wraps around internal spring-loaded drum, visible strap hanging in slight arc when at rest",
+  senza_cinghia: "motorized (no strap) — no visible strap or winder on interior or exterior; small flush switch plate (single rocker UP/DOWN/STOP) or RF remote receiver mounted near frame; motor housed inside roller tube within cassonetto, inaudible from exterior",
+  con_catenella: "bead chain operator (catenella) — small-diameter stainless-steel or plastic bead chain loop hanging 300-400mm beside window frame, connected to internal geared clutch mechanism at frame edge, used for venetian blinds or light roller screens",
+  con_manovella: "manual crank operator (manovella) — folding or fixed metal crank handle 100-150mm long projecting from frame edge or wall plate, connected via rigid rod through wall to worm-gear mechanism on roller tube, visible crank hardware at waist height beside window",
+};
+
+const STILE_TELAIO_DESC: Record<string, string> = {
+  nodo_ridotto: "reduced-node (nodo ridotto) profile — sash sits nearly flush with outer frame, minimal step between sash face and frame face (only 3-5mm reveal), maximizes glass area, contemporary flush-line aesthetic, gasket lines barely visible",
+  nodo_ridotto_maniglia_centrale: "reduced-node profile with CENTER-PLACED handle — same flush geometry as nodo ridotto, BUT the lever handle is positioned at exact vertical center of the sash height (not at standard 1/2-down or lock-stile position), creating a symmetrical visual balance point",
+  minimal_squadrato: "minimal squared profile — ultra-thin sight lines (35-45mm), sharp 90° edges with no rounding, Bauhaus-inspired geometric precision, maximum glass-to-frame ratio",
+  classico_arrotondato: "classic rounded profile — traditional residential proportions with softly rounded edges (radius 3-5mm), wider sight lines (55-70mm), familiar warm aesthetic",
+  europeo_classico: "classic European profile — standard 70-82mm system with gentle 2mm edge radius, balanced proportions suitable for renovation of traditional buildings",
+  arco_sagomato: "arched/shaped frame — non-rectangular frame following arch, gothic, or custom curved geometry at top rail, requires bent or segmented profile pieces, traditional architectural feature",
+};
+
+const MANIGLIE_V5: Record<string, string> = {
+  toulon: "Toulon-style curved ergonomic lever handle — smooth S-curve body form, rounded grip terminus, 130-145mm total length, slim 22-25mm grip diameter, visible curved shank transition from backplate to lever body",
+  classica_dritta: "Classic straight lever handle — flat rectangular profile, 120-130mm lever length, 20-22mm grip thickness, square or slightly beveled edges, standard Italian residential window hardware",
+  vienna: "Vienna butterfly-wing (farfalla) lever handle — two symmetric curved wing-lobes flanking the center spindle rose, graceful organic silhouette, traditional Viennese architectural style, ornate period-appropriate appearance with visible casting detail",
+  q_moderna: "Q-model squared minimal lever handle — strict rectangular cross-section with sharp 90° corners, completely flat face with no rounding, 125-135mm lever length, Bauhaus/industrial minimalist style, clean architectural appearance",
+  con_rosetta: "Lever handle with decorative backplate (con rosetta) — circular or square backplate 50-60mm spanning the spindle area, lever body 120-130mm emerging from plate center, visible screw heads on plate corners or perimeter",
+  pomolo: "Round pomolo knob handle — spherical or cylindrical form 35-45mm diameter, compact low projection from frame face, smooth rounded surface with visible setscrew or cover cap",
+  alzante: "Lift-and-slide (alzante) operating handle — long ergonomic lever 200-280mm with curved palm grip, heavy die-cast body with visible mechanism pivot, projects 60-80mm from frame face, used on large sliding door panels",
+  nessuna: "Fixed light (no handle) — completely clean frame face with no handle hardware, no backplate, no visible spindle hole. The sash is non-opening.",
+};
+
+const HARDWARE_COLORS_V5: Record<string, string> = {
+  cromo_lucido: "polished chrome — bright specular reflection",
+  inox_spazzolato: "brushed stainless steel — directional satin micro-lines",
+  nero_opaco: "matte black powder coat — no specular highlight",
+  nero_lucido: "gloss black — clear specular reflection",
+  bronzo_anticato: "antique bronze patina — warm irregular oxidized surface",
+  oro_pvd: "polished gold PVD coating — warm yellow specular reflection",
+  ottone_spazzolato: "brushed brass — warm gold directional micro-lines",
+  titanio: "titanium anodized — cool grey with subtle metallic depth",
+};
+
 function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt: string; negativePrompt: string; promptVersion: string; blocks: Record<string, string> } {
   const analisi = session.foto_analisi || {};
   const config = session.config || {};
@@ -78,7 +118,7 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
     return { systemPrompt: system, userPrompt: user, negativePrompt: negative, promptVersion: "1.0.0", blocks: { legacy: user } };
   }
 
-  // v3 prompt
+  // v5 prompt
   const sost = nuovoInfisso.sostituzione || { infissi: true, cassonetto: false, tapparella: false };
   const colore = nuovoInfisso.colore || {};
   const profilo = nuovoInfisso.profilo || {};
@@ -87,18 +127,17 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
   const cassonetto = nuovoInfisso.cassonetto || {};
   const tapparella = nuovoInfisso.tapparella || {};
   const cerniere = nuovoInfisso.cerniere || {};
+  const trasformazione = nuovoInfisso.trasformazione || {};
 
   const oldMatDesc: Record<string, string> = { legno_vecchio: "aged wood", legno_verniciato: "painted wood", alluminio_anodizzato: "old anodized aluminum", alluminio_verniciato: "painted aluminum", pvc_bianco: "white PVC possibly yellowed", pvc_colorato: "colored PVC", ferro: "old iron frame", acciaio: "steel frame", sconosciuto: "existing frame" };
   const finituraMap: Record<string, string> = { liscio_opaco: "smooth matte finish", liscio_lucido: "smooth glossy finish", venatura_legno: "wood-grain textured surface", spazzolato: "brushed metallic finish", satinato: "satin finish", goffrato: "embossed/textured surface" };
   const profiloSize: Record<string, string> = { "70mm": "70mm residential profile with 3 chambers", "82mm": "82mm premium profile with 5 chambers", "92mm": "92mm Passivhaus-grade profile with 7 chambers" };
   const profiloForma: Record<string, string> = { squadrato: "squared/angular edges", arrotondato: "softly rounded edges", europeo: "classic European profile" };
-  const manigliaDesc: Record<string, string> = { leva_alluminio: "aluminum lever handle — die-cast aluminum body with smooth matte or anodized finish, rectangular cross-section grip approximately 130mm long, 8mm square spindle", leva_acciaio: "stainless steel lever handle — precision-machined 316 stainless steel, satin brushed or mirror polish finish, slim ergonomic grip 120-140mm, premium minimalist aesthetic", pomolo: "round knob handle (pomolo) — spherical or cylindrical knob approximately 35-45mm diameter, compact low-profile, typically used on fixed panels or low-use windows", alzante: "lift-and-slide long lever handle 200-300mm with ergonomic palm grip and upward-lift-then-push-down mechanism, heavy-duty die-cast body for panel weights up to 400kg" };
-  const coloreFerrDesc: Record<string, string> = { argento: "silver/chrome", nero_opaco: "matte black", inox: "brushed stainless steel", bronzo: "antique bronze", oro: "polished gold/brass" };
 
   const blocks: Record<string, string> = {};
 
   // Block A
-  blocks.A = `[BLOCK A – ROLE & MISSION]\nYou are a SURGICAL PHOTOREALISTIC IMAGE EDITOR for architectural visualization. Your ONLY task: replace EXACTLY the specified building elements while leaving EVERYTHING ELSE 100% pixel-perfect identical. This is PRECISE SURGICAL REPLACEMENT, not artistic interpretation.`;
+  blocks.A = `[BLOCK A – ROLE & MISSION]\nYou are a SURGICAL PHOTOREALISTIC IMAGE EDITOR for architectural visualization. Your ONLY task: replace EXACTLY the specified building elements while leaving EVERYTHING ELSE 100% pixel-perfect identical. This is PRECISE SURGICAL REPLACEMENT, not artistic interpretation.\n\nCRITICAL RENDERING RULES:\n1. If the frame color is a SOLID RAL color: render perfectly uniform flat color with NO wood grain, NO natural texture variation, NO organic patterns. Only the specified finish texture (matte/glossy/satin) is allowed.\n2. If the frame color is a WOOD EFFECT laminate: render realistic wood grain pattern with natural color variation, visible grain direction running along the frame length, knot patterns, and subtle depth — as a high-quality laminate film applied over PVC or aluminum substrate.\n3. Never mix these two modes — a RAL color must never show grain, and a wood effect must always show grain.\n4. Handle hardware must match the exact style and finish specified — do not default to generic lever handles.\n5. Frame profile style (nodo ridotto, minimal, classic) must be accurately represented in sight-line width and edge geometry.\n6. If cinghia/motor mode is specified, render the appropriate operating mechanism.\n7. If a transformation is requested, accurately depict the new opening type while preserving the original wall opening dimensions.\n8. All shadows, reflections, and ambient occlusion must be physically correct for the new elements.`;
 
   // Block B
   blocks.B = `[BLOCK B – EXISTING ELEMENTS INVENTORY]\nWindow/door type: ${APERTURA_DESCRIPTION[analisi.tipo_apertura] || analisi.tipo_apertura}\nCurrent material: ${analisi.materiale_attuale}, Color: ${analisi.colore_attuale}, Condition: ${analisi.condizioni}\nPanels: ${analisi.num_ante_attuale}, Frame depth: ${analisi.spessore_telaio}\nGlass: ${analisi.tipo_vetro_attuale}\nRoller box: ${analisi.presenza_cassonetto ? 'YES — ' + analisi.tipo_cassonetto + ', color: ' + (analisi.colore_cassonetto_attuale || 'unknown') : 'NOT PRESENT'}\nShutter: ${analisi.presenza_tapparella ? 'YES — ' + (analisi.tipo_tapparella_attuale || 'unknown') + ', color: ' + (analisi.colore_tapparella_attuale || 'unknown') : 'NOT PRESENT'}\nBuilding: ${analisi.stile_edificio}, Wall: ${analisi.materiale_muro} (${analisi.colore_muro})\nSill: ${analisi.presenza_davanzale ? 'YES (' + (analisi.tipo_davanzale || 'unknown') + ')' : 'NO'}, Bars: ${analisi.presenza_inferriata ? 'YES' : 'NO'}\nFloor: ${analisi.piano}, Light: ${analisi.luce}, Angle: ${analisi.angolo_ripresa}`;
@@ -141,22 +180,38 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
   }
   blocks.C = cLines.join('\n');
 
-  // Block D
+  // Block D — Material & Color (v5: wood effect support)
   if (sost.infissi) {
-    let colorDesc = colore.nome || ""; if (colore.ral) colorDesc += ` (RAL ${colore.ral})`;
-    blocks.D = `[BLOCK D – NEW FRAME MATERIAL & COLOR]\nMaterial: ${MATERIAL_PHYSICS[nuovoInfisso.materiale] || nuovoInfisso.materiale}\nColor: ${colorDesc}\nFinish: ${finituraMap[colore.finitura] || colore.finitura || "smooth matte"}`;
+    const coloreMode = nuovoInfisso.colore_mode || "ral";
+    if (coloreMode === "legno" && nuovoInfisso.colore_wood_effect) {
+      const we = nuovoInfisso.colore_wood_effect;
+      blocks.D = `[BLOCK D – NEW FRAME MATERIAL & COLOR]\nMaterial: ${MATERIAL_PHYSICS[nuovoInfisso.materiale] || nuovoInfisso.materiale}\nColor mode: WOOD EFFECT LAMINATE\nWood effect: ${we.name || we.id} — ${we.prompt_fragment || "realistic wood grain laminate film"}\nFinish: ${finituraMap[colore.finitura] || colore.finitura || "wood-grain textured surface"}\n\nWOOD EFFECT RENDERING RULES:\n- The frame surface MUST show realistic wood grain pattern with natural color variation\n- Grain direction runs ALONG the frame length (horizontal on top/bottom rails, vertical on side stiles)\n- Show subtle depth and knot patterns characteristic of the specified wood species\n- The surface is a high-quality laminate film applied over the substrate — it should look like real wood but with the precision and uniformity of a factory-applied finish\n- Do NOT render as painted solid color — grain texture is mandatory`;
+    } else {
+      let colorDesc = colore.nome || ""; if (colore.ral) colorDesc += ` (RAL ${colore.ral})`;
+      blocks.D = `[BLOCK D – NEW FRAME MATERIAL & COLOR]\nMaterial: ${MATERIAL_PHYSICS[nuovoInfisso.materiale] || nuovoInfisso.materiale}\nColor: ${colorDesc}\nFinish: ${finituraMap[colore.finitura] || colore.finitura || "smooth matte"}\n\nSOLID RAL COLOR RENDERING RULES:\n- The frame surface MUST be perfectly uniform in color with NO wood grain, NO natural texture variation, NO organic patterns\n- Only the specified surface finish texture (matte/glossy/satin/brushed) is permitted\n- Color must be consistent across all frame members (rails, stiles, mullions)\n- Do NOT add any grain or natural material patterns to a solid RAL color`;
+    }
   } else {
     blocks.D = `[BLOCK D – FRAME MATERIAL — SKIPPED]\nFrame replacement not requested.`;
   }
 
-  // Block E — Profile + Hinges
+  // Block E — Profile + Hinges + Frame Style (v5: stile telaio)
   if (sost.infissi) {
     const numAnte = nuovoInfisso.num_ante || analisi.num_ante_attuale || 1;
     const cerPerAnta = cerniere.num_per_anta || 2;
     const cerTotal = cerPerAnta * numAnte;
     const cerTipo = CERNIERA_DESC[cerniere.tipo] || cerniere.tipo || "standard hinge";
     const cerColore = CERNIERA_COLORE_DESC[cerniere.colore] || cerniere.colore || "silver";
-    blocks.E = `[BLOCK E – FRAME PROFILE & HINGE GEOMETRY]\nProfile system: ${profiloSize[profilo.dimensione] || profilo.dimensione || "standard"}\nEdge shape: ${profiloForma[profilo.forma] || profilo.forma || "standard"}\nNumber of opening panels (sashes): ${numAnte}\n\nHINGE DETAIL (technically accurate Italian window standard):\nTotal hinges: ${cerTotal} (${cerPerAnta} per sash × ${numAnte} sash${numAnte > 1 ? 'es' : ''})\nHinge type: ${cerTipo}\nHinge color/finish: ${cerColore}\nHinge placement rule: place hinges at 1/5 and 4/5 of sash height (top hinge ~200mm from top rail, bottom hinge ~200mm from bottom rail)\nEach hinge: ${cerniere.tipo === 'invisibile' ? 'fully recessed — NOT visible from exterior' : 'two plates visible on hinge-side stile, ~50×35mm each, 3 screws per plate'}\nCast correct shadow of hinge knuckle onto frame face and wall rebate.`;
+
+    let stileTelaioPart = "";
+    const stileTelaio = nuovoInfisso.stile_telaio;
+    if (stileTelaio && STILE_TELAIO_DESC[stileTelaio]) {
+      stileTelaioPart = `\nFrame style: ${STILE_TELAIO_DESC[stileTelaio]}`;
+      if (stileTelaio === "nodo_ridotto_maniglia_centrale") {
+        stileTelaioPart += `\nHANDLE PLACEMENT OVERRIDE: The lever handle MUST be positioned at the exact vertical CENTER of the sash height, creating visual symmetry. Do NOT place it at the standard lock-stile position.`;
+      }
+    }
+
+    blocks.E = `[BLOCK E – FRAME PROFILE & HINGE GEOMETRY]\nProfile system: ${profiloSize[profilo.dimensione] || profilo.dimensione || "standard"}\nEdge shape: ${profiloForma[profilo.forma] || profilo.forma || "standard"}${stileTelaioPart}\nNumber of opening panels (sashes): ${numAnte}\n\nHINGE DETAIL (technically accurate Italian window standard):\nTotal hinges: ${cerTotal} (${cerPerAnta} per sash × ${numAnte} sash${numAnte > 1 ? 'es' : ''})\nHinge type: ${cerTipo}\nHinge color/finish: ${cerColore}\nHinge placement rule: place hinges at 1/5 and 4/5 of sash height (top hinge ~200mm from top rail, bottom hinge ~200mm from bottom rail)\nEach hinge: ${cerniere.tipo === 'invisibile' ? 'fully recessed — NOT visible from exterior' : 'two plates visible on hinge-side stile, ~50×35mm each, 3 screws per plate'}\nCast correct shadow of hinge knuckle onto frame face and wall rebate.`;
   } else {
     blocks.E = `[BLOCK E – FRAME PROFILE — SKIPPED]\nFrame replacement not requested.`;
   }
@@ -168,9 +223,21 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
     blocks.F = `[BLOCK F – GLASS — SKIPPED]`;
   }
 
-  // Block G — Hardware
+  // Block G — Hardware (v5: detailed handle types + finishes)
   if (sost.infissi) {
-    blocks.G = `[BLOCK G – HARDWARE DETAILS]\nHandle: ${manigliaDesc[ferramenta.maniglia] || ferramenta.maniglia || "lever handle"}\nColor: ${coloreFerrDesc[ferramenta.colore] || ferramenta.colore || "silver"}\nHandle position: centered on the meeting stile (vertical center of sash height) for battente windows, lower third for portafinestre\nEspagnolette lock bar: concealed inside frame rebate, only the multi-point locking pins (3-4) visible at frame edge when window is shown open\nCorner connectors: thin aluminum corner keys inside profile — not visible externally\nStrikeplate: small 20×60mm metal plate recessed into frame face opposite handle — show subtle shadow`;
+    const manigliaStile = ferramenta.maniglia_stile;
+    const hwFinish = ferramenta.colore_hardware_finish;
+
+    if (manigliaStile && MANIGLIE_V5[manigliaStile]) {
+      const handleDesc = MANIGLIE_V5[manigliaStile];
+      const finishDesc = hwFinish ? hwFinish : (ferramenta.colore_hardware_id && HARDWARE_COLORS_V5[ferramenta.colore_hardware_id]) ? HARDWARE_COLORS_V5[ferramenta.colore_hardware_id] : "silver chrome finish";
+      blocks.G = `[BLOCK G – HARDWARE DETAILS]\nHandle style: ${handleDesc}\nHandle finish: ${finishDesc}\nHandle position: centered on the meeting stile (vertical center of sash height) for battente windows, lower third for portafinestre\nEspagnolette lock bar: concealed inside frame rebate, only the multi-point locking pins (3-4) visible at frame edge when window is shown open\nCorner connectors: thin aluminum corner keys inside profile — not visible externally\nStrikeplate: small 20×60mm metal plate recessed into frame face opposite handle — show subtle shadow`;
+    } else {
+      // Legacy fallback
+      const legacyManigliaDesc: Record<string, string> = { leva_alluminio: "aluminum lever handle", leva_acciaio: "stainless steel lever handle", pomolo: "round knob handle", alzante: "lift-and-slide lever handle" };
+      const legacyColoreDesc: Record<string, string> = { argento: "silver/chrome", nero_opaco: "matte black", inox: "brushed stainless steel", bronzo: "antique bronze", oro: "polished gold/brass" };
+      blocks.G = `[BLOCK G – HARDWARE DETAILS]\nHandle: ${legacyManigliaDesc[ferramenta.maniglia] || ferramenta.maniglia || "lever handle"}\nColor: ${legacyColoreDesc[ferramenta.colore] || ferramenta.colore || "silver"}\nHandle position: centered on the meeting stile (vertical center of sash height) for battente windows, lower third for portafinestre\nEspagnolette lock bar: concealed inside frame rebate, only the multi-point locking pins (3-4) visible at frame edge when window is shown open\nCorner connectors: thin aluminum corner keys inside profile — not visible externally\nStrikeplate: small 20×60mm metal plate recessed into frame face opposite handle — show subtle shadow`;
+    }
   } else {
     blocks.G = `[BLOCK G – HARDWARE — SKIPPED]`;
   }
@@ -186,7 +253,7 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
     blocks.H = `[BLOCK H – ROLLER BOX]\n${analisi.presenza_cassonetto ? "Keep existing cassonetto as-is." : "No cassonetto. Do not add one."}`;
   }
 
-  // Block I — Tapparella
+  // Block I — Tapparella (v5: cinghia support)
   if (sost.tapparella && tapparella.azione === "rimuovi") {
     blocks.I = `[BLOCK I – SHUTTER REMOVAL]\nRemove the existing shutter/blind system completely. Show bare window frame with no shutter curtain, no side guides, no bottom bar. If guide channels were surface-mounted on wall: remove them and show clean wall face.`;
   } else if (sost.tapparella && tapparella.azione === "sostituisci" && tapparella.materiale) {
@@ -196,6 +263,13 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
     const stato = tapparella.stato_render || "chiusa";
     iLines += `\nState: ${stato === 'aperta' ? 'FULLY OPEN (rolled up into cassonetto, no curtain visible below. Only side guide channels remain visible)' : stato === 'mezza' ? 'HALF OPEN (curtain partially lowered covering lower 50%, slat texture visible on lower portion, upper glass clear)' : 'FULLY CLOSED (entire glass covered from cassonetto bottom to sill, full slat texture visible, bottom bar resting on or near sill)'}`;
     iLines += `\nGuide channels: 16-20mm wide × 20-25mm deep, mounted on wall face or frame edge. Guide channel extends from cassonetto bottom to window sill level (or floor for portafinestre). Ensure guide channels are straight, parallel, and symmetrically positioned on both sides.`;
+
+    // v5: cinghia/motor
+    const cinghia = tapparella.cinghia;
+    if (cinghia && CINGHIA_DESC[cinghia]) {
+      iLines += `\n\nOPERATING MECHANISM:\n${CINGHIA_DESC[cinghia]}`;
+    }
+
     blocks.I = iLines;
   } else {
     blocks.I = `[BLOCK I – SHUTTER]\n${analisi.presenza_tapparella ? "Keep existing shutter as-is." : "No shutter. Do not add one."}`;
@@ -208,14 +282,40 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
   blocks.K = `[BLOCK K – PHOTOREALISTIC LIGHTING & SHADOWS]\nLighting scene: ${analisi.luce}\nRequired shadow elements (all must be physically correct):\n- Frame shadow: new frame profile casts shadow into wall rebate — depth approximately 15-25mm\n- Hinge shadow: small cast shadow from each hinge knuckle on hinge-side stile face\n- Handle shadow: lever or knob casts shadow on frame face — direction matches scene light\n- Cassonetto shadow: ${analisi.presenza_cassonetto ? 'box face casts horizontal shadow onto wall below it — match overhang depth' : 'no cassonetto shadow'}\n- Shutter shadow: if shutter partially open, hanging curtain edge casts shadow on window below\n- Glass reflection: specular highlight on glass matches scene light direction, not perpendicular to camera\n- Ambient occlusion: soft dark gradient in wall-to-frame rebate transition, in frame corners, under sill`;
 
   // Block L
-  blocks.L = `[BLOCK L – ABSOLUTE NEGATIVE CONSTRAINTS]\nNEVER DO any of the following — instant disqualification:\n- ✗ Change wall color, texture, plaster pattern, or any facade element not explicitly requested\n- ✗ Alter camera perspective, field of view, or tilt/shift\n- ✗ Add elements absent in the original (plants, people, decorations, extra windows)\n- ✗ Change sky color, cloud pattern, or weather conditions\n- ✗ Produce cartoon, illustrated, or CGI-look artifacts\n- ✗ Add text, watermarks, copyright marks, or any overlays\n- ✗ Distort window proportions or change opening/glass dimensions\n- ✗ Add hinges to fixed lights (fisso) — fixed panels have NO hinges\n- ✗ Add shutters or cassonetto if replacement was NOT requested AND none existed in photo\n- ✗ Change the number of window panes unless explicitly requested in config\n- ✗ Make the result look like a 3D render — must be indistinguishable from real photograph`;
+  blocks.L = `[BLOCK L – ABSOLUTE NEGATIVE CONSTRAINTS]\nNEVER DO any of the following — instant disqualification:\n- ✗ Change wall color, texture, plaster pattern, or any facade element not explicitly requested\n- ✗ Alter camera perspective, field of view, or tilt/shift\n- ✗ Add elements absent in the original (plants, people, decorations, extra windows)\n- ✗ Change sky color, cloud pattern, or weather conditions\n- ✗ Produce cartoon, illustrated, or CGI-look artifacts\n- ✗ Add text, watermarks, copyright marks, or any overlays\n- ✗ Distort window proportions or change opening/glass dimensions\n- ✗ Add hinges to fixed lights (fisso) — fixed panels have NO hinges\n- ✗ Add shutters or cassonetto if replacement was NOT requested AND none existed in photo\n- ✗ Change the number of window panes unless explicitly requested in config\n- ✗ Make the result look like a 3D render — must be indistinguishable from real photograph\n- ✗ Show wood grain on a solid RAL color frame\n- ✗ Show flat uniform color on a wood-effect laminate frame`;
+
+  // Block M — Transformation (v5)
+  if (trasformazione?.attiva && trasformazione.da && trasformazione.a) {
+    const da = trasformazione.da;
+    const a = trasformazione.a;
+    const daDesc = APERTURA_DESCRIPTION[da] || da;
+    const aDesc = APERTURA_DESCRIPTION[a] || a;
+
+    let transformInstructions = `[BLOCK M – OPENING TYPE TRANSFORMATION]\nTransform opening from: ${daDesc}\nTransform opening to: ${aDesc}\n\nTRANSFORMATION RULES:\n- The wall opening (masonry hole) dimensions MUST remain identical — do not enlarge or shrink the opening\n- Only the frame, sash configuration, and hardware change to match the new opening type\n- Preserve exact wall opening position, lintel, and sill`;
+
+    // Specific transformation guidance
+    if (da.includes("fisso") && a.includes("battente")) {
+      transformInstructions += `\n\nSPECIFIC: Fixed → Casement conversion:\n- Add hinges on one side stile (2 hinges for standard height)\n- Add lever handle on opposite stile\n- Show subtle sash rebate line (shadow gap ~2mm) around the opening sash perimeter\n- The fixed glass-bead profile is replaced by an opening sash profile with gaskets`;
+    } else if (a.includes("anta_ribalta")) {
+      transformInstructions += `\n\nSPECIFIC: Conversion to Tilt-and-Turn:\n- Show multi-position lever handle on lock stile\n- Add 2 hinges on hinge-side stile\n- Show tilt-and-turn hardware: visible corner drives at top corners, mushroom-head locking pins at frame edge\n- Sash rebate line visible all around`;
+    } else if (a.includes("scorrevole")) {
+      transformInstructions += `\n\nSPECIFIC: Conversion to Sliding:\n- Show visible bottom track rail and top guide rail\n- Panels overlap at center — show the overlap shadow line\n- Flush pull handles or recessed grips instead of lever handles\n- No hinges — only sliding guides at top corners`;
+    } else if (da.includes("battente_1") && a.includes("battente_2")) {
+      transformInstructions += `\n\nSPECIFIC: Single to Double casement:\n- Split the existing opening into TWO equal sash panels meeting at center\n- Add a central mullion or meeting stile\n- Each sash gets its own handle and 2 hinges\n- Show center rebate line where panels meet`;
+    } else if (a.includes("vasistas")) {
+      transformInstructions += `\n\nSPECIFIC: Conversion to Top-hung Vasistas:\n- Hinges at TOP rail only (2 friction hinges)\n- Handle at BOTTOM rail of sash\n- Scissor-arm stay mechanism on side stiles`;
+    }
+
+    blocks.M = transformInstructions;
+  }
 
   const systemPrompt = blocks.A;
   const userParts = [blocks.B, blocks.C, blocks.D, blocks.E, blocks.F, blocks.G, blocks.H, blocks.I, blocks.J, blocks.K, blocks.L];
+  if (blocks.M) userParts.push(blocks.M);
   if (notes) userParts.push(`[ADDITIONAL NOTES]\n${notes}`);
   const userPrompt = userParts.join("\n\n");
-  const negativePrompt = "cartoon, illustration, sketch, drawing, watermark, text overlay, blurry, distorted perspective, different building, changed wall color, unrealistic lighting, 3D render, CGI artifacts, missing hinges, wrong panels, shutters not requested, cassonetto added without request";
-  return { systemPrompt, userPrompt, negativePrompt, promptVersion: "3.0.0", blocks };
+  const negativePrompt = "cartoon, illustration, sketch, drawing, watermark, text overlay, blurry, distorted perspective, different building, changed wall color, unrealistic lighting, 3D render, CGI artifacts, missing hinges, wrong panels, shutters not requested, cassonetto added without request, wood grain on RAL solid color, flat color on wood-effect laminate, wrong handle style, mismatched hardware finish";
+  return { systemPrompt, userPrompt, negativePrompt, promptVersion: "5.0.0", blocks };
 }
 
 // ─── Main Handler ─────────────────────────────────────────────────
@@ -293,6 +393,8 @@ Deno.serve(async (req) => {
           { role: "user", content: [{ type: "text", text: userPrompt }, { type: "image_url", image_url: { url: imageUrl } }] },
         ],
         modalities: ["image", "text"],
+        temperature: 1,
+        max_tokens: 8192,
       }),
     }, 120_000);
 
