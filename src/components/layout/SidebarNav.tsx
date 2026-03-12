@@ -68,6 +68,7 @@ const superadminNav: NavSection[] = [
   ]},
   { header: "REPORT", items: [
     { label: "Analytics Globali", icon: BarChart3, href: "/superadmin/analytics" },
+    { label: "Monitoraggio", icon: AlertTriangle, href: "/superadmin/monitoring" },
   ]},
   { header: "PIATTAFORMA", items: [
     { label: "Config Render AI", icon: Palette, href: "/superadmin/render-config" },

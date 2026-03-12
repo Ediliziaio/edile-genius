@@ -47,6 +47,7 @@ const ApiKeysPage = lazy(() => import("./pages/superadmin/ApiKeys"));
 const SystemLogsPage = lazy(() => import("./pages/superadmin/SystemLogs"));
 const PlatformSettingsPage = lazy(() => import("./pages/superadmin/PlatformSettings"));
 const RenderConfig = lazy(() => import("./pages/superadmin/RenderConfig"));
+const MonitoringPage = lazy(() => import("./pages/superadmin/Monitoring"));
 
 // Lazy-loaded Company pages
 const AppDashboard = lazy(() => import("./pages/app/Dashboard"));
@@ -150,6 +151,7 @@ const App = () => (
                 <Route path="/superadmin/logs" element={<SafeRoute><SystemLogsPage /></SafeRoute>} />
                 <Route path="/superadmin/platform-settings" element={<SafeRoute><PlatformSettingsPage /></SafeRoute>} />
                 <Route path="/superadmin/render-config" element={<SafeRoute><RenderConfig /></SafeRoute>} />
+                <Route path="/superadmin/monitoring" element={<SafeRoute><MonitoringPage /></SafeRoute>} />
               </Route>
             </Route>
 
