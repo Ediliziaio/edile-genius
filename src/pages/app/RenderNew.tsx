@@ -164,6 +164,9 @@ export default function RenderNew() {
       toast({ title: "Errore", description: dims.error, variant: "destructive" });
       return;
     }
+    // v6: save natural dimensions for prompt & edge function
+    setImageNaturalWidth(dims.width);
+    setImageNaturalHeight(dims.height);
     setFile(f);
     setPreview(URL.createObjectURL(f));
   }, [toast]);
