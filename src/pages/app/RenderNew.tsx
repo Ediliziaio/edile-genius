@@ -293,11 +293,13 @@ export default function RenderNew() {
       tapparella: {
         azione: sostituzione.tapparella ? tapparellaAzione : "mantieni" as const,
         materiale: sostituzione.tapparella && tapparellaAzione === "sostituisci" ? tapparellaMateriale as TapparellaMateriale : undefined,
-        colore: sostituzione.tapparella && tapparellaAzione === "sostituisci" ? {
-          nome: tapRalColor.name,
-          ral: tapRalColor.ral,
-          finitura: "liscio_opaco" as const,
-        } : undefined,
+        colore: sostituzione.tapparella && tapparellaAzione === "sostituisci" ? (
+          tapColorMode === "legno"
+            ? { nome: tapWoodEffect?.name || "Legno", finitura: "venatura_legno" as const }
+            : { nome: tapRalColor.name, ral: tapRalColor.ral, finitura: "liscio_opaco" as const }
+        ) : undefined,
+        colore_mode: sostituzione.tapparella && tapparellaAzione === "sostituisci" ? tapColorMode : undefined,
+        colore_wood_effect: sostituzione.tapparella && tapparellaAzione === "sostituisci" && tapColorMode === "legno" ? tapWoodEffect : undefined,
         stato_render: tapparellaStato,
         cinghia: tapparellaCinghia,
         prompt_fragment: tapparellaPresets.find(p => p.value === tapparellaMateriale)?.prompt_fragment,
