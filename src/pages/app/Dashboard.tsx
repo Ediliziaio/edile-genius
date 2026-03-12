@@ -498,6 +498,12 @@ export default function AppDashboard() {
     ? Math.min(100, Math.round((totalSpent / totalRecharged) * 100))
     : 0;
 
+  // Onboarding redirect (after all hooks)
+  if (onboardingLoading) return null;
+  if (onboardingProfile && onboardingProfile.onboarding_completed === false) {
+    return <Navigate to="/app/onboarding" replace />;
+  }
+
   return (
     <div className="space-y-8 max-w-6xl">
 
