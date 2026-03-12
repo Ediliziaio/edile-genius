@@ -12,13 +12,19 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { validatePhoto, checkImageDimensions } from "@/modules/render/lib/promptBuilder";
 import type {
-  FotoAnalisi, ProfiloTelaioSize, ProfiloForma, ManigliaType, ColoreFerratura,
+  FotoAnalisi, ProfiloTelaioSize, ProfiloForma,
   CassonettoMateriale, TapparellaMateriale, CernieraColore, SostituzioneSelezione,
+  CinghiaMode, StileTelaio, TipoApertura,
 } from "@/modules/render/lib/promptBuilder";
 import BeforeAfterSlider from "@/components/render/BeforeAfterSlider";
 import PhotoAnalysisCard from "@/components/render/PhotoAnalysisCard";
 import ProfileHardwareConfig from "@/components/render/ProfileHardwareConfig";
 import StructuralChangeBox from "@/components/render/StructuralChangeBox";
+import { RalColorPicker, RAL_COLORS, WOOD_EFFECTS, formatColorPrompt } from "@/components/render/RalColorPicker";
+import type { RalColor, WoodEffect, ColorMode } from "@/components/render/RalColorPicker";
+import ManigliaSelector, { HARDWARE_COLORS } from "@/components/render/ManigliaSelector";
+import type { ManigliaConfig, ManigliaStile } from "@/components/render/ManigliaSelector";
+import { getTrasformazioniDisponibili } from "@/modules/render/lib/trasformazioneCompatibility";
 import {
   Upload, ArrowRight, Check, Loader2,
   Sparkles, ChevronLeft
@@ -37,6 +43,15 @@ interface Preset {
 }
 
 const STEPS = ["Foto", "Configura", "Elaborazione", "Risultati"];
+
+const STILE_TELAIO_OPTIONS: { value: StileTelaio; label: string; icon: string }[] = [
+  { value: "classico_arrotondato", label: "Classico", icon: "⬭" },
+  { value: "europeo_classico", label: "Europeo", icon: "◻" },
+  { value: "minimal_squadrato", label: "Minimal", icon: "□" },
+  { value: "nodo_ridotto", label: "Nodo Ridotto", icon: "▭" },
+  { value: "nodo_ridotto_maniglia_centrale", label: "Nodo + Centrale", icon: "┰" },
+  { value: "arco_sagomato", label: "Arco", icon: "⌒" },
+];
 
 export default function RenderNew() {
   const navigate = useNavigate();
@@ -61,8 +76,38 @@ export default function RenderNew() {
   const [analysisError, setAnalysisError] = useState<string>("");
   const [profiloDimensione, setProfiloDimensione] = useState<ProfiloTelaioSize>("70mm");
   const [profiloForma, setProfiloForma] = useState<ProfiloForma>("arrotondato");
-  const [maniglia, setManiglia] = useState<ManigliaType>("leva_alluminio");
-  const [coloreFerratura, setColoreFerratura] = useState<ColoreFerratura>("argento");
+
+  // v5: Unified color state — Infisso
+  const [infissoColorMode, setInfissoColorMode] = useState<ColorMode>("ral");
+  const [infissoRalColor, setInfissoRalColor] = useState<RalColor>(RAL_COLORS.find(c => c.ral === "9016")!);
+  const [infissoWoodEffect, setInfissoWoodEffect] = useState<WoodEffect | null>(null);
+
+  // v5: Unified color state — Cassonetto
+  const [cassColorMode, setCassColorMode] = useState<ColorMode>("ral");
+  const [cassRalColor, setCassRalColor] = useState<RalColor>(RAL_COLORS.find(c => c.ral === "9016")!);
+  const [cassWoodEffect, setCassWoodEffect] = useState<WoodEffect | null>(null);
+
+  // v5: Unified color state — Tapparella
+  const [tapColorMode, setTapColorMode] = useState<ColorMode>("ral");
+  const [tapRalColor, setTapRalColor] = useState<RalColor>(RAL_COLORS.find(c => c.ral === "7016")!);
+  const [tapWoodEffect, setTapWoodEffect] = useState<WoodEffect | null>(null);
+
+  // v5: Maniglia dettagliata
+  const [manigliaConfig, setManigliaConfig] = useState<ManigliaConfig>({
+    stile: "classica_dritta",
+    colore_hardware_id: "inox_spazzolato",
+    colore_hardware_finish: "brushed stainless steel — directional satin micro-lines",
+  });
+
+  // v5: Stile telaio
+  const [stileTelaio, setStileTelaio] = useState<StileTelaio>("classico_arrotondato");
+
+  // v5: Cinghia tapparella
+  const [tapparellaCinghia, setTapparellaCinghia] = useState<CinghiaMode>("con_cinghia");
+
+  // v5: Trasformazione apertura
+  const [trasformazioneAttiva, setTrasformazioneAttiva] = useState(false);
+  const [trasformazioneTipoTarget, setTrasformazioneTipoTarget] = useState<TipoApertura | null>(null);
 
   // V3 state — Sostituzione selettiva
   const [sostituzione, setSostituzione] = useState<SostituzioneSelezione>({
@@ -72,14 +117,11 @@ export default function RenderNew() {
   // Cassonetto
   const [cassonettoAzione, setCassonettoAzione] = useState<"mantieni" | "sostituisci" | "rimuovi">("mantieni");
   const [cassonettoMateriale, setCassonettoMateriale] = useState("pvc_tradizionale");
-  const [cassonettoColoreValue, setCassonettoColoreValue] = useState("bianco_9016");
   const [cassonettoColoreSameAsInfisso, setCassonettoColoreSameAsInfisso] = useState(true);
 
   // Tapparella
   const [tapparellaAzione, setTapparellaAzione] = useState<"mantieni" | "sostituisci" | "rimuovi">("mantieni");
   const [tapparellaMateriale, setTapparellaMateriale] = useState("pvc_avvolgibile");
-  const [tapparellaColoreValue, setTapparellaColoreValue] = useState("bianco_9016");
-  const [tapparellaGuideValue, setTapparellaGuideValue] = useState("uguale_infisso");
   const [tapparellaStato, setTapparellaStato] = useState<"aperta" | "chiusa" | "mezza">("chiusa");
 
   // Cerniere
@@ -90,8 +132,6 @@ export default function RenderNew() {
   // Preset groups
   const [cassonettoPresets, setCassonettoPresets] = useState<Preset[]>([]);
   const [tapparellaPresets, setTapparellaPresets] = useState<Preset[]>([]);
-  const [cassonettoColoriPresets, setCassonettoColoriPresets] = useState<Preset[]>([]);
-  const [tapparellaColoriPresets, setTapparellaColoriPresets] = useState<Preset[]>([]);
 
   // Load presets
   useEffect(() => {
@@ -99,18 +139,15 @@ export default function RenderNew() {
       .then(({ data }) => {
         if (!data) return;
         const all = data as any as Preset[];
-        setPresets(all.filter(p => !['cassonetto_materiale', 'tapparella_materiale', 'cassonetto_colore', 'tapparella_colore'].includes(p.category)));
+        setPresets(all.filter(p => !['cassonetto_materiale', 'tapparella_materiale', 'cassonetto_colore', 'tapparella_colore', 'colore_legno'].includes(p.category)));
         setCassonettoPresets(all.filter(p => p.category === 'cassonetto_materiale'));
         setTapparellaPresets(all.filter(p => p.category === 'tapparella_materiale'));
-        setCassonettoColoriPresets(all.filter(p => p.category === 'cassonetto_colore'));
-        setTapparellaColoriPresets(all.filter(p => p.category === 'tapparella_colore'));
       });
   }, []);
 
-  const categories = ["materiale", "colore", "stile", "vetro"];
+  const categories = ["materiale", "stile", "vetro"];
   const categoryLabels: Record<string, string> = {
     materiale: "Materiale Telaio",
-    colore: "Colore Telaio",
     stile: "Stile Profilo",
     vetro: "Tipo Vetro",
   };
@@ -203,35 +240,25 @@ export default function RenderNew() {
       if (preset) fragments[cat] = preset.prompt_fragment;
     }
 
-    const colorePreset = presets.find(p => p.category === "colore" && p.value === config.colore);
-
     // Resolve cassonetto color
-    const cassonettoColorePreset = cassonettoColoriPresets.find(p => p.value === cassonettoColoreValue);
     const cassonettoColoreConfig = cassonettoColoreSameAsInfisso
-      ? { nome: "Uguale Infisso", ral: colorePreset?.colore_ral || undefined, finitura: "liscio_opaco" as const }
-      : { nome: cassonettoColorePreset?.name || cassonettoColoreValue, ral: cassonettoColorePreset?.colore_ral || undefined, finitura: "liscio_opaco" as const };
+      ? { nome: infissoRalColor.name, ral: infissoRalColor.ral, finitura: "liscio_opaco" as const }
+      : { nome: cassRalColor.name, ral: cassRalColor.ral, finitura: "liscio_opaco" as const };
 
-    // Resolve tapparella colors
-    const tapparellaColorePreset = tapparellaColoriPresets.find(p => p.value === tapparellaColoreValue);
-    const tapparellaGuidePreset = tapparellaColoriPresets.find(p => p.value === tapparellaGuideValue);
-    const tapparellaColoreConfig = {
-      nome: tapparellaColorePreset?.name || tapparellaColoreValue,
-      ral: tapparellaColorePreset?.colore_ral || undefined,
-      finitura: "liscio_opaco" as const,
-    };
-    const tapparellaGuideConfig = tapparellaGuideValue === 'uguale_infisso'
-      ? { ...tapparellaColoreConfig, nome: "Uguale tapparella" }
-      : { nome: tapparellaGuidePreset?.name || tapparellaGuideValue, ral: tapparellaGuidePreset?.colore_ral || undefined, finitura: "liscio_opaco" as const };
-
-    // Build V3 config
+    // Build V5 config
     const nuovoInfisso = {
       materiale: config.materiale || "pvc",
-      colore: {
-        nome: colorePreset?.name || config.colore || "bianco",
-        ral: colorePreset?.colore_ral || undefined,
-        ncs: colorePreset?.colore_ncs || undefined,
-        finitura: (colorePreset?.finitura as any) || "liscio_opaco",
+      colore_mode: infissoColorMode,
+      colore: infissoColorMode === "ral" ? {
+        nome: infissoRalColor.name,
+        ral: infissoRalColor.ral,
+        hex: infissoRalColor.hex,
+        finitura: "liscio_opaco" as const,
+      } : {
+        nome: infissoWoodEffect?.name || "Bianco",
+        finitura: "venatura_legno" as const,
       },
+      colore_wood_effect: infissoColorMode === "legno" ? infissoWoodEffect : undefined,
       profilo: {
         dimensione: profiloDimensione,
         camere: profiloDimensione === "70mm" ? 3 : profiloDimensione === "82mm" ? 5 : 7,
@@ -255,23 +282,38 @@ export default function RenderNew() {
       tapparella: {
         azione: sostituzione.tapparella ? tapparellaAzione : "mantieni" as const,
         materiale: sostituzione.tapparella && tapparellaAzione === "sostituisci" ? tapparellaMateriale as TapparellaMateriale : undefined,
-        colore: sostituzione.tapparella && tapparellaAzione === "sostituisci" ? tapparellaColoreConfig : undefined,
-        colore_guide: sostituzione.tapparella && tapparellaAzione === "sostituisci" ? tapparellaGuideConfig : undefined,
+        colore: sostituzione.tapparella && tapparellaAzione === "sostituisci" ? {
+          nome: tapRalColor.name,
+          ral: tapRalColor.ral,
+          finitura: "liscio_opaco" as const,
+        } : undefined,
         stato_render: tapparellaStato,
+        cinghia: tapparellaCinghia,
         prompt_fragment: tapparellaPresets.find(p => p.value === tapparellaMateriale)?.prompt_fragment,
       },
       ferramenta: {
-        maniglia,
-        colore: coloreFerratura,
+        maniglia_stile: manigliaConfig.stile,
+        colore_hardware_id: manigliaConfig.colore_hardware_id,
+        colore_hardware_finish: manigliaConfig.colore_hardware_finish,
       },
       num_ante: analysisData?.num_ante_attuale || undefined,
       sostituzione,
+      stile_telaio: stileTelaio,
+      trasformazione: trasformazioneAttiva && trasformazioneTipoTarget ? {
+        attiva: true,
+        tipo_originale: analysisData?.tipo_apertura || "battente_2_ante" as TipoApertura,
+        tipo_target: trasformazioneTipoTarget,
+      } : {
+        attiva: false,
+        tipo_originale: analysisData?.tipo_apertura || "battente_2_ante" as TipoApertura,
+        tipo_target: analysisData?.tipo_apertura || "battente_2_ante" as TipoApertura,
+      },
     };
 
-    // Update session with V3 config + analysis
+    // Update session with V5 config + analysis
     await supabase.from("render_sessions").update({
-      config: { ...config, notes, fragments, nuovo_infisso: nuovoInfisso, options: { notes } },
-      foto_analisi: analysisData || {},
+      config: { ...config, notes, fragments, nuovo_infisso: nuovoInfisso, options: { notes } } as any,
+      foto_analisi: (analysisData || {}) as any,
       status: "queued",
     }).eq("id", sessionId);
 
@@ -332,7 +374,7 @@ export default function RenderNew() {
   const processingMessages = [
     "Analisi della foto in corso...",
     "Identificazione finestre esistenti...",
-    "Costruzione prompt strutturale v3...",
+    "Costruzione prompt strutturale v5...",
     "Generazione sostituzione selettiva...",
     "Applicazione materiali e texture...",
     "Regolazione luci e ombre...",
@@ -350,8 +392,9 @@ export default function RenderNew() {
     switch (field) {
       case "profiloDimensione": setProfiloDimensione(value as ProfiloTelaioSize); break;
       case "profiloForma": setProfiloForma(value as ProfiloForma); break;
-      case "maniglia": setManiglia(value as ManigliaType); break;
-      case "coloreFerratura": setColoreFerratura(value as ColoreFerratura); break;
+      // Legacy fields still handled for ProfileHardwareConfig backward compat
+      case "maniglia": break;
+      case "coloreFerratura": break;
     }
   };
 
@@ -486,11 +529,11 @@ export default function RenderNew() {
                 <StructuralChangeBox
                   analisi={analysisData}
                   nuovoMateriale={config.materiale}
-                  nuovoColore={presets.find(p => p.category === "colore" && p.value === config.colore)?.name}
+                  nuovoColore={infissoRalColor.name}
                 />
               </div>
 
-              {/* Legacy preset categories (materiale, colore, stile, vetro) */}
+              {/* Legacy preset categories (materiale, stile, vetro — colore removed, now RalColorPicker) */}
               {categories.map((cat) => {
                 const catPresets = presets.filter(p => p.category === cat);
                 if (catPresets.length === 0) return null;
@@ -516,6 +559,37 @@ export default function RenderNew() {
                   </div>
                 );
               })}
+
+              {/* v5: Colore Infisso — RalColorPicker */}
+              <RalColorPicker
+                label="🎨 Colore Telaio"
+                colorMode={infissoColorMode}
+                onColorModeChange={setInfissoColorMode}
+                ralValue={infissoRalColor.ral}
+                onRalChange={(c) => { setInfissoRalColor(c); setInfissoColorMode("ral"); }}
+                woodValue={infissoWoodEffect?.id ?? null}
+                onWoodChange={(e) => { setInfissoWoodEffect(e); setInfissoColorMode("legno"); }}
+                showCustomRal={true}
+              />
+
+              {/* v5: Stile Telaio */}
+              <div>
+                <Label className="text-sm font-semibold mb-2 block">🏗️ Stile Telaio</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {STILE_TELAIO_OPTIONS.map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setStileTelaio(opt.value)}
+                      className={`p-3 rounded-xl border text-center transition-all ${
+                        stileTelaio === opt.value ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border hover:border-primary/30"
+                      }`}
+                    >
+                      <span className="text-lg block">{opt.icon}</span>
+                      <span className="text-xs font-medium text-foreground">{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               {/* Cerniere v3 */}
               <div>
@@ -567,14 +641,116 @@ export default function RenderNew() {
                 </div>
               </div>
 
-              {/* Profile & Hardware Config */}
-              <ProfileHardwareConfig
-                profiloDimensione={profiloDimensione}
-                profiloForma={profiloForma}
-                maniglia={maniglia}
-                coloreFerratura={coloreFerratura}
-                onChange={handleProfileChange}
-              />
+              {/* v5: Maniglia dettagliata */}
+              <ManigliaSelector value={manigliaConfig} onChange={setManigliaConfig} />
+
+              {/* Profile dimensions (without old handle/ferratura) */}
+              <div>
+                <Label className="text-sm font-semibold mb-2 block">Profilo Telaio</Label>
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  {[
+                    { value: "70mm" as const, label: "Residenziale", desc: "70mm · 3 camere", icon: "🏠" },
+                    { value: "82mm" as const, label: "Premium", desc: "82mm · 5 camere", icon: "⭐" },
+                    { value: "92mm" as const, label: "Passivhaus", desc: "92mm · 7 camere", icon: "🛡️" },
+                  ].map((p) => (
+                    <button
+                      key={p.value}
+                      onClick={() => setProfiloDimensione(p.value)}
+                      className={`flex flex-col items-center gap-1 p-3 rounded-xl border text-center text-sm transition-all ${
+                        profiloDimensione === p.value
+                          ? "border-primary bg-primary/5 ring-1 ring-primary"
+                          : "border-border hover:border-primary/30"
+                      }`}
+                    >
+                      <span className="text-lg">{p.icon}</span>
+                      <span className="font-medium text-foreground text-xs">{p.label}</span>
+                      <span className="text-[10px] text-muted-foreground">{p.desc}</span>
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-1.5">
+                  {([
+                    { value: "squadrato" as const, label: "Squadrato" },
+                    { value: "arrotondato" as const, label: "Arrotondato" },
+                    { value: "europeo" as const, label: "Europeo" },
+                  ]).map((f) => (
+                    <button
+                      key={f.value}
+                      onClick={() => setProfiloForma(f.value)}
+                      className={`flex-1 px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
+                        profiloForma === f.value
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border text-muted-foreground hover:border-primary/30"
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* v5: Trasformazione Apertura */}
+              {analysisData?.tipo_apertura && (
+                <div>
+                  <button
+                    onClick={() => {
+                      setTrasformazioneAttiva(!trasformazioneAttiva);
+                      setTrasformazioneTipoTarget(null);
+                    }}
+                    className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
+                      trasformazioneAttiva ? "border-violet-500 bg-violet-50 dark:bg-violet-950/20" : "border-dashed border-border hover:border-violet-300"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">🔀</span>
+                      <div className="text-left">
+                        <span className="text-sm font-semibold text-foreground block">Trasforma Tipo Apertura</span>
+                        <span className="text-xs text-muted-foreground">Visualizza come sarà con una diversa tipologia</span>
+                      </div>
+                    </div>
+                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                      trasformazioneAttiva ? "bg-violet-500 border-violet-500" : "border-muted-foreground/30"
+                    }`}>
+                      {trasformazioneAttiva && <Check className="h-3 w-3 text-white" />}
+                    </div>
+                  </button>
+
+                  {trasformazioneAttiva && (() => {
+                    const opzioni = getTrasformazioniDisponibili(analysisData.tipo_apertura);
+                    return opzioni.length === 0 ? (
+                      <p className="text-xs text-muted-foreground mt-2">Nessuna trasformazione disponibile per questo tipo di apertura.</p>
+                    ) : (
+                      <div className="mt-3 space-y-2">
+                        <p className="text-xs text-muted-foreground">Apertura attuale: <span className="font-medium text-foreground">{analysisData.tipo_apertura.replace(/_/g, " ")}</span></p>
+                        {opzioni.map(opt => (
+                          <button
+                            key={opt.to}
+                            onClick={() => setTrasformazioneTipoTarget(opt.to)}
+                            className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
+                              trasformazioneTipoTarget === opt.to
+                                ? "border-violet-500 bg-violet-50 dark:bg-violet-950/20 ring-1 ring-violet-400"
+                                : "border-border hover:border-violet-300"
+                            }`}
+                          >
+                            <span className="text-lg">🔀</span>
+                            <div className="flex-1">
+                              <span className="text-sm font-medium text-foreground block">{opt.label}</span>
+                              {opt.note && <span className="text-[10px] text-muted-foreground">{opt.note}</span>}
+                            </div>
+                            <Badge variant="outline" className={`text-[10px] ${
+                              opt.feasibility === "facile" ? "border-green-300 text-green-700" :
+                              opt.feasibility === "media" ? "border-yellow-300 text-yellow-700" :
+                              "border-red-300 text-red-700"
+                            }`}>
+                              {opt.feasibility}
+                            </Badge>
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
             </>
           )}
 
@@ -619,7 +795,6 @@ export default function RenderNew() {
                     ))}
                   </div>
 
-                  <Label className="text-xs font-semibold mb-2 block">Colore cassonetto</Label>
                   <button
                     onClick={() => setCassonettoColoreSameAsInfisso(!cassonettoColoreSameAsInfisso)}
                     className={`w-full flex items-center gap-2 p-3 rounded-xl border text-sm transition-all mb-2 ${
@@ -630,20 +805,15 @@ export default function RenderNew() {
                     <span className="font-medium text-foreground">Uguale all'infisso</span>
                   </button>
                   {!cassonettoColoreSameAsInfisso && (
-                    <div className="grid grid-cols-3 gap-2">
-                      {cassonettoColoriPresets.filter(p => p.value !== 'uguale_infisso').map(p => (
-                        <button
-                          key={p.value}
-                          onClick={() => setCassonettoColoreValue(p.value)}
-                          className={`p-2.5 rounded-xl border text-center transition-all ${
-                            cassonettoColoreValue === p.value ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border"
-                          }`}
-                        >
-                          {p.icon && <span className="text-sm">{p.icon}</span>}
-                          <span className="text-xs text-foreground block">{p.name}</span>
-                        </button>
-                      ))}
-                    </div>
+                    <RalColorPicker
+                      label="Colore Cassonetto"
+                      colorMode={cassColorMode}
+                      onColorModeChange={setCassColorMode}
+                      ralValue={cassRalColor.ral}
+                      onRalChange={(c) => { setCassRalColor(c); setCassColorMode("ral"); }}
+                      woodValue={cassWoodEffect?.id ?? null}
+                      onWoodChange={(e) => { setCassWoodEffect(e); setCassColorMode("legno"); }}
+                    />
                   )}
                 </>
               )}
@@ -691,48 +861,18 @@ export default function RenderNew() {
                     ))}
                   </div>
 
-                  <Label className="text-xs font-semibold mb-2 block">Colore lamelle</Label>
-                  <div className="grid grid-cols-3 gap-2 mb-3">
-                    {tapparellaColoriPresets.filter(p => p.value !== 'uguale_infisso').map(p => (
-                      <button
-                        key={p.value}
-                        onClick={() => setTapparellaColoreValue(p.value)}
-                        className={`p-2.5 rounded-xl border text-center transition-all ${
-                          tapparellaColoreValue === p.value ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border"
-                        }`}
-                      >
-                        {p.icon && <span className="text-sm">{p.icon}</span>}
-                        <span className="text-xs text-foreground block">{p.name}</span>
-                      </button>
-                    ))}
-                  </div>
+                  {/* v5: Colore Tapparella — RalColorPicker */}
+                  <RalColorPicker
+                    label="Colore Lamelle"
+                    colorMode={tapColorMode}
+                    onColorModeChange={setTapColorMode}
+                    ralValue={tapRalColor.ral}
+                    onRalChange={(c) => { setTapRalColor(c); setTapColorMode("ral"); }}
+                    woodValue={tapWoodEffect?.id ?? null}
+                    onWoodChange={(e) => { setTapWoodEffect(e); setTapColorMode("legno"); }}
+                  />
 
-                  <Label className="text-xs font-semibold mb-2 block">Colore guide laterali</Label>
-                  <div className="grid grid-cols-4 gap-2 mb-3">
-                    <button
-                      onClick={() => setTapparellaGuideValue("uguale_infisso")}
-                      className={`p-2 rounded-xl border text-center transition-all ${
-                        tapparellaGuideValue === "uguale_infisso" ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border"
-                      }`}
-                    >
-                      <span className="text-sm">🔁</span>
-                      <span className="text-[10px] text-foreground block">= Infisso</span>
-                    </button>
-                    {tapparellaColoriPresets.slice(0, 5).filter(p => p.value !== 'uguale_infisso').map(p => (
-                      <button
-                        key={p.value}
-                        onClick={() => setTapparellaGuideValue(p.value)}
-                        className={`p-2 rounded-xl border text-center transition-all ${
-                          tapparellaGuideValue === p.value ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border"
-                        }`}
-                      >
-                        {p.icon && <span className="text-sm">{p.icon}</span>}
-                        <span className="text-[10px] text-foreground block">{p.name}</span>
-                      </button>
-                    ))}
-                  </div>
-
-                  <Label className="text-xs font-semibold mb-2 block">Come mostrarla nel render?</Label>
+                  <Label className="text-xs font-semibold mb-2 block mt-3">Come mostrarla nel render?</Label>
                   <div className="grid grid-cols-3 gap-2 mb-3">
                     {[
                       { value: "chiusa" as const, emoji: "⬛", label: "Chiusa", sub: "Copre vetro" },
@@ -749,6 +889,31 @@ export default function RenderNew() {
                         <span className="text-xl block">{opt.emoji}</span>
                         <span className="text-xs font-medium text-foreground block">{opt.label}</span>
                         <span className="text-[10px] text-muted-foreground">{opt.sub}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* v5: Cinghia / Azionamento */}
+                  <Label className="text-xs font-semibold mb-2 block">Azionamento tapparella</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { value: "con_cinghia" as CinghiaMode, label: "Con cinghia", sub: "Manuale, cinghia a parete", emoji: "🪢" },
+                      { value: "senza_cinghia" as CinghiaMode, label: "Motorizzata", sub: "Elettrica, no cinghia", emoji: "⚡" },
+                      { value: "con_catenella" as CinghiaMode, label: "Catenella", sub: "Catena laterale", emoji: "⛓" },
+                      { value: "con_manovella" as CinghiaMode, label: "Manovella", sub: "Manovella esterna", emoji: "🔄" },
+                    ].map(opt => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setTapparellaCinghia(opt.value)}
+                        className={`flex items-center gap-2 p-3 rounded-xl border text-left transition-all ${
+                          tapparellaCinghia === opt.value ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border hover:border-primary/30"
+                        }`}
+                      >
+                        <span className="text-lg">{opt.emoji}</span>
+                        <div>
+                          <span className="text-xs font-medium text-foreground block">{opt.label}</span>
+                          <span className="text-[10px] text-muted-foreground">{opt.sub}</span>
+                        </div>
                       </button>
                     ))}
                   </div>
