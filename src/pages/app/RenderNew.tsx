@@ -92,6 +92,14 @@ export default function RenderNew() {
   const [tapRalColor, setTapRalColor] = useState<RalColor>(RAL_COLORS.find(c => c.ral === "7016")!);
   const [tapWoodEffect, setTapWoodEffect] = useState<WoodEffect | null>(null);
 
+  // v6: Image natural dimensions
+  const [imageNaturalWidth, setImageNaturalWidth] = useState(1024);
+  const [imageNaturalHeight, setImageNaturalHeight] = useState(1024);
+
+  // v6: Debug panel
+  const [showDebugPrompt, setShowDebugPrompt] = useState(false);
+  const [debugPromptText, setDebugPromptText] = useState("");
+
   // v5: Maniglia dettagliata
   const [manigliaConfig, setManigliaConfig] = useState<ManigliaConfig>({
     stile: "classica_dritta",
@@ -164,6 +172,9 @@ export default function RenderNew() {
       toast({ title: "Errore", description: dims.error, variant: "destructive" });
       return;
     }
+    // v6: save natural dimensions for prompt & edge function
+    setImageNaturalWidth(dims.width);
+    setImageNaturalHeight(dims.height);
     setFile(f);
     setPreview(URL.createObjectURL(f));
   }, [toast]);
@@ -321,9 +332,49 @@ export default function RenderNew() {
         tipo_originale: analysisData?.tipo_apertura || "battente_2_ante" as TipoApertura,
         tipo_target: analysisData?.tipo_apertura || "battente_2_ante" as TipoApertura,
       },
+
+      // v6: Colore cassonetto (top-level)
+      cass_colore_mode: sostituzione.cassonetto && cassonettoAzione === "sostituisci" ? cassonettoColorMode : undefined,
+      cass_colore: sostituzione.cassonetto && cassonettoAzione === "sostituisci" && cassonettoColorMode === "ral"
+        ? { name: (cassonettoColoreSameAsInfisso ? infissoRalColor : cassRalColor).name, ral: (cassonettoColoreSameAsInfisso ? infissoRalColor : cassRalColor).ral, hex: (cassonettoColoreSameAsInfisso ? infissoRalColor : cassRalColor).hex }
+        : null,
+      cass_wood_effect: sostituzione.cassonetto && cassonettoAzione === "sostituisci" && cassonettoColorMode === "legno"
+        ? cassonettoWoodEffect
+        : null,
+
+      // v6: Colore tapparella (top-level)
+      tap_colore_mode: sostituzione.tapparella && tapparellaAzione === "sostituisci" ? tapColorMode : undefined,
+      tap_colore: sostituzione.tapparella && tapparellaAzione === "sostituisci" && tapColorMode === "ral"
+        ? { name: tapRalColor.name, ral: tapRalColor.ral, hex: tapRalColor.hex }
+        : null,
+      tap_wood_effect: sostituzione.tapparella && tapparellaAzione === "sostituisci" && tapColorMode === "legno"
+        ? tapWoodEffect
+        : null,
+
+      // v6: Dimensioni immagine
+      original_image_width: imageNaturalWidth,
+      original_image_height: imageNaturalHeight,
     };
 
-    // Update session with V5 config + analysis
+    // v6: Build debug prompt text (before sending)
+    try {
+      const { buildRenderPromptV2 } = await import("@/modules/render/lib/promptBuilder");
+      const debugConfig = {
+        foto_analisi: analysisData || {} as any,
+        nuovo_infisso: nuovoInfisso as any,
+        options: { notes },
+      };
+      const { systemPrompt: dbgSys, userPrompt: dbgUser, negativePrompt: dbgNeg } = buildRenderPromptV2(debugConfig, "gemini");
+      setDebugPromptText(
+        `=== SYSTEM PROMPT ===\n${dbgSys}\n\n` +
+        `=== USER PROMPT ===\n${dbgUser}\n\n` +
+        `=== NEGATIVE PROMPT ===\n${dbgNeg}\n\n` +
+        `=== IMAGE DIMENSIONS ===\n` +
+        `Original: ${imageNaturalWidth}×${imageNaturalHeight}px`
+      );
+    } catch { /* non-blocking */ }
+
+    // Update session with v6 config + analysis
     await supabase.from("render_sessions").update({
       config: { ...config, notes, fragments, nuovo_infisso: nuovoInfisso, options: { notes } } as any,
       foto_analisi: (analysisData || {}) as any,
@@ -334,7 +385,7 @@ export default function RenderNew() {
 
     try {
       const { error } = await supabase.functions.invoke("generate-render", {
-        body: { session_id: sessionId },
+        body: { session_id: sessionId, target_width: imageNaturalWidth, target_height: imageNaturalHeight },
       });
       if (error) throw error;
     } catch (err: any) {
@@ -945,6 +996,37 @@ export default function RenderNew() {
               rows={3}
             />
           </div>
+
+          {/* v6: Debug Panel — visible only in development */}
+          {import.meta.env.DEV && (
+            <Card className="border-amber-200 bg-amber-50/50">
+              <button
+                onClick={() => setShowDebugPrompt(!showDebugPrompt)}
+                className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-amber-100 transition-colors rounded-t-lg"
+              >
+                <span className="text-xs font-medium text-amber-800">
+                  🔍 Debug Prompt ({showDebugPrompt ? "nascondi" : "mostra"})
+                </span>
+                <span className="text-xs text-amber-600">
+                  {imageNaturalWidth}×{imageNaturalHeight}px
+                </span>
+              </button>
+              {showDebugPrompt && (
+                <CardContent className="pt-0 pb-3 px-4">
+                  <p className="text-xs font-semibold text-amber-700 mb-1">Prompt inviato all'AI:</p>
+                  <pre className="text-[10px] leading-tight text-amber-900 bg-amber-100 p-2 rounded max-h-[300px] overflow-auto whitespace-pre-wrap break-words">
+                    {debugPromptText || "Premi Genera per vedere il prompt"}
+                  </pre>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(debugPromptText)}
+                    className="text-xs text-amber-600 hover:text-amber-800 underline mt-1"
+                  >
+                    📋 Copia prompt negli appunti
+                  </button>
+                </CardContent>
+              )}
+            </Card>
+          )}
 
           {/* Genera button */}
           {nessunElementoSelezionato && (
