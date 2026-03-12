@@ -435,10 +435,11 @@ function buildBlock_F(infisso: NuovoInfisso): string {
   return `[BLOCK F – GLASS UNIT]
 ${v.prompt_fragment || v.tipo}
 Technical rendering requirements:
-- Thin greenish tint at glass edge (typical of multi-pane float glass)
+- Thin greenish tint at glass edge (typical of multi-pane low-iron or standard float glass)
 - Specular highlight/reflection matching scene light source direction
 - Interior appears as dark/neutral (curtains or room interior barely visible)
-- Spacer bar (15-16mm) visible only at perimeter inside rebate`;
+- Air gap line between panes invisible from exterior at normal viewing angle
+- Spacer bar (15-16mm aluminum or warm-edge) visible only at perimeter inside rebate`;
 }
 
 function buildBlock_G(infisso: NuovoInfisso): string {
@@ -448,10 +449,10 @@ function buildBlock_G(infisso: NuovoInfisso): string {
 
   const f = infisso.ferramenta;
   const manigliaDesc: Record<ManigliaType, string> = {
-    leva_alluminio: "aluminum lever handle — die-cast aluminum body with smooth matte or anodized finish, rectangular cross-section grip approximately 130mm long",
-    leva_acciaio: "stainless steel lever handle — precision-machined 316 stainless steel, satin brushed or mirror polish finish, slim ergonomic grip 120-140mm",
-    pomolo: "round knob handle (pomolo) — spherical or cylindrical knob approximately 35-45mm diameter, compact low-profile",
-    alzante: "lift-and-slide long lever handle 200-300mm with ergonomic palm grip and upward-lift mechanism, heavy-duty die-cast body",
+    leva_alluminio: "aluminum lever handle — die-cast aluminum body with smooth matte or anodized finish, rectangular cross-section grip approximately 130mm long, 8mm square spindle",
+    leva_acciaio: "stainless steel lever handle — precision-machined 316 stainless steel, satin brushed or mirror polish finish, slim ergonomic grip 120-140mm, premium minimalist aesthetic",
+    pomolo: "round knob handle (pomolo) — spherical or cylindrical knob approximately 35-45mm diameter, compact low-profile, typically used on fixed panels or low-use windows",
+    alzante: "lift-and-slide long lever handle 200-300mm with ergonomic palm grip and upward-lift-then-push-down mechanism, heavy-duty die-cast body for panel weights up to 400kg",
   };
   const coloreDesc: Record<ColoreFerratura, string> = {
     argento: "silver polished chrome finish",
@@ -545,7 +546,7 @@ function buildBlock_J(analisi: FotoAnalisi): string {
   return `[BLOCK J – PIXEL-PERFECT ENVIRONMENT PRESERVATION]
 The following MUST remain 100% unchanged — zero modification allowed:
 - Wall: color (${analisi.colore_muro}), material (${analisi.materiale_muro}), texture, aging, stains, weathering
-- Window sill: ${analisi.presenza_davanzale ? 'KEEP — same ' + (analisi.tipo_davanzale || 'material') + ', shape, shadow' : 'NOT PRESENT — do not add a sill'}
+- Window sill: ${analisi.presenza_davanzale ? 'KEEP — same ' + (analisi.tipo_davanzale || 'material') + ', shape, shadow, any chips or weathering' : 'NOT PRESENT — do not add a sill'}
 - Security bars: ${analisi.presenza_inferriata ? 'KEEP — maintain all bars at exact position, color, shadow' : 'NOT PRESENT — do not add bars'}
 - Camera: preserve exact perspective, focal length, vanishing points (${analisi.angolo_ripresa})
 - Surroundings: every pipe, cable, drain, crack, plant, neighboring window, balcony, street element

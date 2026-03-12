@@ -49,8 +49,12 @@ const CERNIERA_DESC: Record<string, string> = {
 };
 
 const CERNIERA_COLORE_DESC: Record<string, string> = {
-  argento: "silver chrome", nero_opaco: "matte black", inox: "brushed stainless steel",
-  bronzo: "antique bronze", oro: "polished gold/brass", uguale_maniglia: "same as handle",
+  argento: "silver polished chrome finish",
+  nero_opaco: "matte black finish",
+  inox: "brushed stainless steel finish",
+  bronzo: "antique bronze finish",
+  oro: "polished gold/brass finish",
+  uguale_maniglia: "same finish as the window handle",
 };
 
 function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt: string; negativePrompt: string; promptVersion: string; blocks: Record<string, string> } {
@@ -88,7 +92,7 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
   const finituraMap: Record<string, string> = { liscio_opaco: "smooth matte finish", liscio_lucido: "smooth glossy finish", venatura_legno: "wood-grain textured surface", spazzolato: "brushed metallic finish", satinato: "satin finish", goffrato: "embossed/textured surface" };
   const profiloSize: Record<string, string> = { "70mm": "70mm residential profile with 3 chambers", "82mm": "82mm premium profile with 5 chambers", "92mm": "92mm Passivhaus-grade profile with 7 chambers" };
   const profiloForma: Record<string, string> = { squadrato: "squared/angular edges", arrotondato: "softly rounded edges", europeo: "classic European profile" };
-  const manigliaDesc: Record<string, string> = { leva_alluminio: "aluminum lever handle", leva_acciaio: "stainless steel lever handle", pomolo: "round knob handle", alzante: "lift-and-slide handle" };
+  const manigliaDesc: Record<string, string> = { leva_alluminio: "aluminum lever handle — die-cast aluminum body with smooth matte or anodized finish, rectangular cross-section grip approximately 130mm long, 8mm square spindle", leva_acciaio: "stainless steel lever handle — precision-machined 316 stainless steel, satin brushed or mirror polish finish, slim ergonomic grip 120-140mm, premium minimalist aesthetic", pomolo: "round knob handle (pomolo) — spherical or cylindrical knob approximately 35-45mm diameter, compact low-profile, typically used on fixed panels or low-use windows", alzante: "lift-and-slide long lever handle 200-300mm with ergonomic palm grip and upward-lift-then-push-down mechanism, heavy-duty die-cast body for panel weights up to 400kg" };
   const coloreFerrDesc: Record<string, string> = { argento: "silver/chrome", nero_opaco: "matte black", inox: "brushed stainless steel", bronzo: "antique bronze", oro: "polished gold/brass" };
 
   const blocks: Record<string, string> = {};
@@ -152,14 +156,14 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
     const cerTotal = cerPerAnta * numAnte;
     const cerTipo = CERNIERA_DESC[cerniere.tipo] || cerniere.tipo || "standard hinge";
     const cerColore = CERNIERA_COLORE_DESC[cerniere.colore] || cerniere.colore || "silver";
-    blocks.E = `[BLOCK E – FRAME PROFILE & HINGE GEOMETRY]\nProfile: ${profiloSize[profilo.dimensione] || profilo.dimensione || "standard"}\nShape: ${profiloForma[profilo.forma] || profilo.forma || "standard"}\nPanels: ${numAnte}\n\nHINGE DETAIL:\nTotal hinges: ${cerTotal} (${cerPerAnta} per sash × ${numAnte} sash${numAnte > 1 ? 'es' : ''})\nHinge type: ${cerTipo}\nHinge color: ${cerColore}\nPlacement: 1/5 and 4/5 of sash height\nEach hinge: ${cerniere.tipo === 'invisibile' ? 'fully recessed — NOT visible' : 'two plates visible ~50×35mm, 3 screws per plate'}`;
+    blocks.E = `[BLOCK E – FRAME PROFILE & HINGE GEOMETRY]\nProfile system: ${profiloSize[profilo.dimensione] || profilo.dimensione || "standard"}\nEdge shape: ${profiloForma[profilo.forma] || profilo.forma || "standard"}\nNumber of opening panels (sashes): ${numAnte}\n\nHINGE DETAIL (technically accurate Italian window standard):\nTotal hinges: ${cerTotal} (${cerPerAnta} per sash × ${numAnte} sash${numAnte > 1 ? 'es' : ''})\nHinge type: ${cerTipo}\nHinge color/finish: ${cerColore}\nHinge placement rule: place hinges at 1/5 and 4/5 of sash height (top hinge ~200mm from top rail, bottom hinge ~200mm from bottom rail)\nEach hinge: ${cerniere.tipo === 'invisibile' ? 'fully recessed — NOT visible from exterior' : 'two plates visible on hinge-side stile, ~50×35mm each, 3 screws per plate'}\nCast correct shadow of hinge knuckle onto frame face and wall rebate.`;
   } else {
     blocks.E = `[BLOCK E – FRAME PROFILE — SKIPPED]\nFrame replacement not requested.`;
   }
 
   // Block F
   if (sost.infissi) {
-    blocks.F = `[BLOCK F – GLASS UNIT]\n${vetro.prompt_fragment || vetro.tipo || "double glazed clear glass"}\nRealistic reflections, greenish tint on edges, proper transparency.`;
+    blocks.F = `[BLOCK F – GLASS UNIT]\n${vetro.prompt_fragment || vetro.tipo || "double glazed clear glass"}\nTechnical rendering requirements:\n- Thin greenish tint at glass edge (typical of multi-pane low-iron or standard float glass)\n- Specular highlight/reflection matching scene light source direction\n- Interior appears as dark/neutral (curtains or room interior barely visible)\n- Air gap line between panes invisible from exterior at normal viewing angle\n- Spacer bar (15-16mm aluminum or warm-edge) visible only at perimeter inside rebate`;
   } else {
     blocks.F = `[BLOCK F – GLASS — SKIPPED]`;
   }
@@ -184,7 +188,7 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
 
   // Block I — Tapparella
   if (sost.tapparella && tapparella.azione === "rimuovi") {
-    blocks.I = `[BLOCK I – SHUTTER REMOVAL]\nRemove existing shutter system completely. Show bare window frame.`;
+    blocks.I = `[BLOCK I – SHUTTER REMOVAL]\nRemove the existing shutter/blind system completely. Show bare window frame with no shutter curtain, no side guides, no bottom bar. If guide channels were surface-mounted on wall: remove them and show clean wall face.`;
   } else if (sost.tapparella && tapparella.azione === "sostituisci" && tapparella.materiale) {
     let iLines = `[BLOCK I – NEW SHUTTER]\nInstall: ${TAPPARELLA_DESC[tapparella.materiale] || tapparella.materiale}`;
     if (tapparella.colore?.nome) iLines += `\nSlat color: ${tapparella.colore.nome}${tapparella.colore.ral ? ` (RAL ${tapparella.colore.ral})` : ""}`;
