@@ -546,7 +546,7 @@ function buildBlock_J(analisi: FotoAnalisi): string {
   return `[BLOCK J – PIXEL-PERFECT ENVIRONMENT PRESERVATION]
 The following MUST remain 100% unchanged — zero modification allowed:
 - Wall: color (${analisi.colore_muro}), material (${analisi.materiale_muro}), texture, aging, stains, weathering
-- Window sill: ${analisi.presenza_davanzale ? 'KEEP — same ' + (analisi.tipo_davanzale || 'material') + ', shape, shadow' : 'NOT PRESENT — do not add a sill'}
+- Window sill: ${analisi.presenza_davanzale ? 'KEEP — same ' + (analisi.tipo_davanzale || 'material') + ', shape, shadow, any chips or weathering' : 'NOT PRESENT — do not add a sill'}
 - Security bars: ${analisi.presenza_inferriata ? 'KEEP — maintain all bars at exact position, color, shadow' : 'NOT PRESENT — do not add bars'}
 - Camera: preserve exact perspective, focal length, vanishing points (${analisi.angolo_ripresa})
 - Surroundings: every pipe, cable, drain, crack, plant, neighboring window, balcony, street element
