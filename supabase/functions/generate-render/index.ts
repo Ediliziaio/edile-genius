@@ -173,7 +173,7 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
 
   // Block H — Cassonetto
   if (sost.cassonetto && cassonetto.azione === "rimuovi") {
-    blocks.H = `[BLOCK H – ROLLER BOX REMOVAL]\nRemove entire cassonetto. Show continuous wall surface matching surrounding facade.`;
+    blocks.H = `[BLOCK H – ROLLER BOX REMOVAL]\nRemove entire cassonetto. Show continuous wall surface matching surrounding facade. The wall fill must be seamless — no visible ghost outline, shadow gap or discoloration where the box was. Match plaster texture, paint sheen level, aging/weathering exactly to surrounding wall.`;
   } else if (sost.cassonetto && cassonetto.azione === "sostituisci" && cassonetto.materiale) {
     let cColor = "";
     if (cassonetto.colore?.nome) { cColor = `Color: ${cassonetto.colore.nome}`; if (cassonetto.colore.ral) cColor += ` (RAL ${cassonetto.colore.ral})`; }
