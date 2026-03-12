@@ -48,11 +48,12 @@ Deno.serve(async (req) => {
 
     const { agentId } = await req.json();
 
-    // Get agent config
+    // Get agent config — scoped to user's company
     const { data: agent } = await sb
       .from("agents")
       .select("llm_model, tts_model")
       .eq("id", agentId)
+      .eq("company_id", profile.company_id)
       .single();
 
     // Get pricing for this agent's model combo

@@ -24,12 +24,23 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
     }
 
-    const { company_id, mese, anno, cantiere_id } = await req.json();
-    if (!company_id || !mese || !anno) {
-      return new Response(JSON.stringify({ error: "company_id, mese, anno richiesti" }), { status: 400, headers: corsHeaders });
+    // ── Tenant check ──
+    const adminClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    const { data: profile } = await adminClient.from("profiles").select("company_id").eq("id", user.id).single();
+    if (!profile?.company_id) {
+      return new Response(JSON.stringify({ error: "No company" }), { status: 400, headers: corsHeaders });
     }
 
-    const adminClient = createClient(
+    const { company_id, mese, anno, cantiere_id } = await req.json();
+    if (!mese || !anno) {
+      return new Response(JSON.stringify({ error: "mese, anno richiesti" }), { status: 400, headers: corsHeaders });
+    }
+
+    // Enforce tenant: ignore client-provided company_id
+    const resolvedCompanyId = profile.company_id;
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
