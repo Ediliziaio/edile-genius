@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
             body: new URLSearchParams({
               grant_type: "fb_exchange_token",
               client_id: saConfig.meta_app_id,
-              client_secret: saConfig.meta_app_secret_encrypted,
+              client_secret: appSecret,
               fb_exchange_token: currentToken,
             }).toString(),
           },

@@ -756,6 +756,47 @@ function TabConversations({ companyId, conversations, templates, onRefresh }: {
     if (selectedConv) loadMessages(selectedConv);
   }, [selectedConv, loadMessages]);
 
+  // Realtime: new/updated messages for selected conversation
+  useEffect(() => {
+    if (!selectedConv?.id) return;
+    const channel = supabase
+      .channel(`wa-msgs-${selectedConv.id}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "whatsapp_messages", filter: `conversation_id=eq.${selectedConv.id}` },
+        (payload) => {
+          setMessages(prev => {
+            if (prev.some(m => m.id === (payload.new as any).id)) return prev;
+            return [...prev, payload.new as WaMessage];
+          });
+          setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "whatsapp_messages", filter: `conversation_id=eq.${selectedConv.id}` },
+        (payload) => {
+          setMessages(prev => prev.map(m => m.id === (payload.new as any).id ? { ...m, ...(payload.new as any) } : m));
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [selectedConv?.id]);
+
+  // Realtime: conversation list updates
+  useEffect(() => {
+    if (!companyId) return;
+    const channel = supabase
+      .channel("wa-convs-list")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "whatsapp_conversations", filter: `company_id=eq.${companyId}` },
+        () => { onRefresh(); }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [companyId, onRefresh]);
+
   const isWindowOpen = (conv: WaConversation) => {
     if (!conv.window_expires_at) return false;
     return new Date(conv.window_expires_at) > new Date();
