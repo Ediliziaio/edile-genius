@@ -748,26 +748,7 @@ export default function Settings() {
 
         {/* Billing Tab */}
         <TabsContent value="billing">
-          <div className="rounded-card border border-ink-200 bg-white p-6 space-y-4 max-w-lg shadow-card">
-            <h3 className="text-lg font-semibold text-ink-900">Piano & Fatturazione</h3>
-            <p className="text-sm text-ink-500">Gestisci il tuo piano, i crediti e le informazioni di fatturazione.</p>
-            <div className="space-y-3">
-              <div className="rounded-lg border border-ink-200 p-4 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-ink-900">Crediti conversazionali</p>
-                  <p className="text-xs text-ink-500">Ricarica, storico consumo e auto-recharge</p>
-                </div>
-                <Button size="sm" variant="outline" onClick={() => navigate("/app/credits")} className="gap-2 border-ink-200 text-ink-700">
-                  <CreditCard className="h-4 w-4" /> Vai ai Crediti
-                </Button>
-              </div>
-              <div className="rounded-lg bg-ink-50 border border-ink-200 p-4">
-                <p className="text-sm font-medium text-ink-700">Piano attuale</p>
-                <p className="text-xs text-ink-500 mt-1">La gestione del piano e dei pagamenti ricorrenti sarà disponibile con l'integrazione Stripe.</p>
-                <Badge variant="outline" className="mt-2 text-xs">🚧 Prossimamente</Badge>
-              </div>
-            </div>
-          </div>
+          <BillingTabContent companyId={companyId} navigate={navigate} />
         </TabsContent>
       </Tabs>
     </div>

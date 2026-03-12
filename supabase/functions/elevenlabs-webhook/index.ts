@@ -203,16 +203,29 @@ Deno.serve(async (req) => {
     
     // Auto-recharge if enabled and balance is low
     if (!wasBlocked && credits?.auto_recharge_enabled && balanceAfter <= Number(credits?.auto_recharge_threshold || 5)) {
-      const rechargeAmount = Number(credits?.auto_recharge_amount || 20);
-      // Use topup_credits RPC for atomic recharge
-      await sb.rpc("topup_credits", { _company_id: agent.company_id, _amount_eur: rechargeAmount });
-      await sb.from("ai_credit_topups").insert({
-        company_id: agent.company_id, amount_eur: rechargeAmount, type: "auto", status: "completed",
-        payment_method: credits?.auto_recharge_method || "card",
-        notes: `Ricarica automatica — saldo era €${balanceAfter.toFixed(2)}`,
-        processed_at: new Date().toISOString(),
-      });
-      log("info", "Auto-recharge triggered", { request_id: rid, company_id: agent.company_id, amount: rechargeAmount });
+      const rechargeAmount = Math.min(Math.max(Number(credits?.auto_recharge_amount || 20), 5), 500);
+      
+      // Dedup: check if auto-recharge already executed in last 5 minutes
+      const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      const { count: recentAutoTopups } = await sb
+        .from("ai_credit_topups")
+        .select("*", { count: "exact", head: true })
+        .eq("company_id", agent.company_id)
+        .eq("type", "auto")
+        .gte("created_at", fiveMinAgo);
+
+      if (recentAutoTopups && recentAutoTopups > 0) {
+        log("info", "Auto-recharge skipped (dedup)", { request_id: rid, company_id: agent.company_id });
+      } else {
+        await sb.rpc("topup_credits", { _company_id: agent.company_id, _amount_eur: rechargeAmount });
+        await sb.from("ai_credit_topups").insert({
+          company_id: agent.company_id, amount_eur: rechargeAmount, type: "auto", status: "completed",
+          payment_method: credits?.auto_recharge_method || "card",
+          notes: `Ricarica automatica — saldo era €${balanceAfter.toFixed(2)}`,
+          processed_at: new Date().toISOString(),
+        });
+        log("info", "Auto-recharge triggered", { request_id: rid, company_id: agent.company_id, amount: rechargeAmount });
+      }
     } else if (!wasBlocked && balanceAfter <= Number(credits?.alert_threshold_eur || 5)) {
       await sb.from("ai_credits").update({ alert_email_sent_at: new Date().toISOString() }).eq("company_id", agent.company_id);
     }
