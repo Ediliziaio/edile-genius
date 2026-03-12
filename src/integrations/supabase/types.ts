@@ -3461,6 +3461,50 @@ export type Database = {
           },
         ]
       }
+      telegram_message_log: {
+        Row: {
+          action_taken: string | null
+          chat_id: number | null
+          company_id: string | null
+          error_message: string | null
+          id: string
+          message_text: string | null
+          message_type: string | null
+          processed_at: string | null
+          telegram_user_id: number | null
+        }
+        Insert: {
+          action_taken?: string | null
+          chat_id?: number | null
+          company_id?: string | null
+          error_message?: string | null
+          id?: string
+          message_text?: string | null
+          message_type?: string | null
+          processed_at?: string | null
+          telegram_user_id?: number | null
+        }
+        Update: {
+          action_taken?: string | null
+          chat_id?: number | null
+          company_id?: string | null
+          error_message?: string | null
+          id?: string
+          message_text?: string | null
+          message_type?: string | null
+          processed_at?: string | null
+          telegram_user_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_message_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       telegram_sessions: {
         Row: {
           cantiere_id: string | null
@@ -4016,6 +4060,10 @@ export type Database = {
       }
     }
     Functions: {
+      append_foto_report: {
+        Args: { p_foto_url: string; p_report_id: string }
+        Returns: undefined
+      }
       deduct_call_credits: {
         Args: { _company_id: string; _cost_billed: number; _cost_real: number }
         Returns: {
