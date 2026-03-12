@@ -4367,6 +4367,16 @@ export type Database = {
         Returns: boolean
       }
       increment_installs_count: { Args: { tpl_id: string }; Returns: undefined }
+      launch_bulk_calls: {
+        Args: {
+          p_agent_id: string
+          p_company_id: string
+          p_contact_ids: string[]
+          p_notes?: string
+          p_scheduled_at?: string
+        }
+        Returns: Json
+      }
       my_company: { Args: never; Returns: string }
       my_role: { Args: never; Returns: Database["public"]["Enums"]["app_role"] }
       process_post_call_atomic: {

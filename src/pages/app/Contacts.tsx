@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 import ContactDetailPanel from "@/components/contacts/ContactDetailPanel";
 import LeadScoreBadge from "@/components/contacts/LeadScoreBadge";
 import CallContactModal from "@/components/contacts/CallContactModal";
+import { BulkCallModal } from "@/components/contacts/BulkCallModal";
 import { formatDistanceToNow } from "date-fns";
 
 const STATUS_OPTIONS = [
@@ -111,6 +112,7 @@ export default function ContactsPage() {
   const [bulkStatus, setBulkStatus] = useState("to_call");
   const [showBulkList, setShowBulkList] = useState(false);
   const [bulkListId, setBulkListId] = useState("");
+  const [showBulkCallModal, setShowBulkCallModal] = useState(false);
 
   // Schedule call
   const [showScheduleCall, setShowScheduleCall] = useState(false);
@@ -495,6 +497,9 @@ export default function ContactsPage() {
             <Button variant="outline" size="sm" onClick={() => { setScheduleContactId(null); setShowScheduleCall(true); }} className="border-ink-200 text-ink-700">
               <CalendarClock className="w-3.5 h-3.5 mr-1.5" /> Pianifica Chiamata
             </Button>
+            <Button size="sm" onClick={() => setShowBulkCallModal(true)} className="gap-1.5 bg-status-success hover:bg-status-success/90 text-white">
+              <Phone className="w-3.5 h-3.5" /> Chiama {selectedIds.size} contatti
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setShowBulkDelete(true)} className="border-status-error text-status-error hover:bg-status-error hover:text-white">
               <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Elimina
             </Button>
@@ -816,6 +821,17 @@ export default function ContactsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <BulkCallModal
+        open={showBulkCallModal}
+        onClose={() => setShowBulkCallModal(false)}
+        contactIds={Array.from(selectedIds)}
+        onSuccess={() => {
+          setSelectedIds(new Set());
+          setShowBulkCallModal(false);
+          invalidate();
+        }}
+      />
     </div>
   );
 }

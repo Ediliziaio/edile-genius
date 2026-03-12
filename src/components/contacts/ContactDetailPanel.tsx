@@ -8,7 +8,7 @@ import { it } from "date-fns/locale";
 import {
   Phone, Mail, Loader2, MessageSquare, StickyNote, Activity,
   User, Building2, MapPin, Calendar, Clock, Tag, Trash2, Edit3,
-  FileText, Sparkles, Copy
+  FileText, Sparkles, Copy, BarChart2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -146,6 +146,144 @@ function CallHistorySection({ contactId, nextCallAt }: { contactId: string; next
         </div>
       )}
     </div>
+  );
+}
+
+function CallAnalyticsSection({ contactId }: { contactId: string }) {
+  const { data: callLogs = [] } = useQuery({
+    queryKey: ["contact-call-analytics", contactId],
+    enabled: !!contactId,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("outbound_call_log")
+        .select("id, started_at, duration_sec, outcome, sentiment")
+        .eq("contact_id", contactId)
+        .order("started_at", { ascending: false })
+        .limit(500);
+      return (data as any[]) || [];
+    },
+    staleTime: 2 * 60 * 1000,
+  });
+
+  if (callLogs.length === 0) return null;
+
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const totalCalls = callLogs.length;
+  const calls30d = callLogs.filter((c: any) => new Date(c.started_at) > thirtyDaysAgo).length;
+  const durations = callLogs.filter((c: any) => c.duration_sec != null).map((c: any) => c.duration_sec as number);
+  const avgDuration = durations.length > 0 ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : null;
+  const maxDuration = durations.length > 0 ? Math.max(...durations) : null;
+
+  const outcomes: Record<string, number> = {};
+  const sentiments: Record<string, number> = { positive: 0, neutral: 0, negative: 0 };
+  const positiveHours: number[] = [];
+
+  callLogs.forEach((c: any) => {
+    if (c.outcome) outcomes[c.outcome] = (outcomes[c.outcome] || 0) + 1;
+    if (c.sentiment && sentiments[c.sentiment] !== undefined) sentiments[c.sentiment]++;
+    if (c.sentiment === "positive" && c.started_at) positiveHours.push(new Date(c.started_at).getHours());
+  });
+
+  const interested = (outcomes["interested"] || 0) + (outcomes["appointment_set"] || 0) + (outcomes["answered"] || 0);
+  const conversionRate = totalCalls > 0 ? Math.round((interested / totalCalls) * 100) : null;
+
+  // Best hour
+  const bestHour = positiveHours.length > 0
+    ? positiveHours.sort((a, b) =>
+        positiveHours.filter(v => v === a).length - positiveHours.filter(v => v === b).length
+      ).pop()
+    : null;
+  const bestHourLabel = bestHour != null
+    ? `${String(bestHour).padStart(2, "0")}:00–${String(bestHour + 1).padStart(2, "0")}:00`
+    : null;
+
+  const fmtDuration = (s: number | null) => {
+    if (!s) return "—";
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
+  };
+
+  const outcomeEntries = [
+    { label: "Interessato", key: "interested", color: "bg-status-success" },
+    { label: "Appuntamento", key: "appointment_set", color: "bg-status-info" },
+    { label: "Risposto", key: "answered", color: "bg-brand" },
+    { label: "Richiama", key: "callback", color: "bg-status-warning" },
+    { label: "Non risponde", key: "no_answer", color: "bg-ink-300" },
+    { label: "Non interessato", key: "not_interested", color: "bg-status-error" },
+  ].filter(e => (outcomes[e.key] || 0) > 0);
+
+  return (
+    <section className="mt-6">
+      <h3 className="text-sm font-semibold text-ink-400 uppercase tracking-wide mb-3 flex items-center gap-2">
+        <BarChart2 className="w-4 h-4" />
+        Statistiche Chiamate
+      </h3>
+
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="bg-ink-50 rounded-xl p-3">
+          <p className="text-xs text-ink-400 mb-1">Totale chiamate</p>
+          <p className="text-2xl font-bold text-ink-900">{totalCalls}</p>
+          <p className="text-xs text-ink-300 mt-0.5">{calls30d} ultimi 30gg</p>
+        </div>
+        <div className="bg-ink-50 rounded-xl p-3">
+          <p className="text-xs text-ink-400 mb-1">Tasso conversione</p>
+          <p className="text-2xl font-bold text-status-success">{conversionRate !== null ? `${conversionRate}%` : "—"}</p>
+          <p className="text-xs text-ink-300 mt-0.5">{interested} positivi</p>
+        </div>
+        <div className="bg-ink-50 rounded-xl p-3">
+          <p className="text-xs text-ink-400 mb-1 flex items-center gap-1"><Clock className="w-3 h-3" /> Durata media</p>
+          <p className="text-xl font-bold text-ink-900">{fmtDuration(avgDuration)}</p>
+          <p className="text-xs text-ink-300 mt-0.5">Max: {fmtDuration(maxDuration)}</p>
+        </div>
+        <div className="bg-ink-50 rounded-xl p-3">
+          <p className="text-xs text-ink-400 mb-1">Orario ottimale</p>
+          <p className="text-lg font-bold text-brand">{bestHourLabel ?? "—"}</p>
+          <p className="text-xs text-ink-300 mt-0.5">basato su risposte positive</p>
+        </div>
+      </div>
+
+      {outcomeEntries.length > 0 && (
+        <div className="mb-4">
+          <p className="text-xs font-medium text-ink-400 mb-2">Distribuzione esiti</p>
+          <div className="space-y-1.5">
+            {outcomeEntries.map(({ label, key, color }) => {
+              const count = outcomes[key] || 0;
+              const pct = Math.round((count / totalCalls) * 100);
+              return (
+                <div key={key} className="flex items-center gap-2">
+                  <span className="text-xs text-ink-500 w-28 flex-shrink-0">{label}</span>
+                  <div className="flex-1 bg-ink-100 rounded-full h-2 overflow-hidden">
+                    <div className={`h-2 rounded-full ${color} transition-all`} style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className="text-xs text-ink-400 w-8 text-right">{pct}%</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div>
+        <p className="text-xs font-medium text-ink-400 mb-2">Sentiment complessivo</p>
+        <div className="flex gap-3">
+          {[
+            { icon: "😊", label: "Positivo", count: sentiments.positive, color: "text-status-success bg-status-success-light" },
+            { icon: "😐", label: "Neutro", count: sentiments.neutral, color: "text-ink-500 bg-ink-50" },
+            { icon: "😔", label: "Negativo", count: sentiments.negative, color: "text-status-error bg-status-error-light" },
+          ].map(({ icon, label, count, color }) => (
+            <div key={label} className={`flex-1 rounded-lg p-2 text-center ${color}`}>
+              <p className="text-lg">{icon}</p>
+              <p className="text-xs font-semibold">{count}</p>
+              <p className="text-xs opacity-70">{label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -616,6 +754,7 @@ export default function ContactDetailPanel({ contact, open, onOpenChange, onUpda
             {/* Calls Tab — Call History from outbound_call_log */}
             <TabsContent value="calls" className="px-6 py-4 mt-0">
               <CallHistorySection contactId={contact.id} nextCallAt={contact.next_call_at} />
+              <CallAnalyticsSection contactId={contact.id} />
             </TabsContent>
 
             {/* Info Tab */}
