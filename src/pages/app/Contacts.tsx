@@ -614,10 +614,27 @@ export default function ContactsPage() {
                     <TableCell>{statusBadge(c.status)}</TableCell>
                     <TableCell>{priorityBadge(c.priority)}</TableCell>
                     <TableCell className="text-ink-400 text-xs">
+                      {c.last_call_at
+                        ? formatDistanceToNow(new Date(c.last_call_at), { locale: it, addSuffix: true })
+                        : "—"}
+                    </TableCell>
+                    <TableCell className="text-ink-400 text-xs">
                       {c.created_at ? format(new Date(c.created_at), "dd MMM yyyy", { locale: it }) : "—"}
                     </TableCell>
                     <TableCell onClick={e => e.stopPropagation()}>
-                      <ContactRowActions contact={c} />
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={`h-7 w-7 ${c.do_not_call ? "text-status-error" : c.phone ? "text-status-success hover:bg-status-success/10" : "text-ink-300"}`}
+                          disabled={!c.phone}
+                          onClick={() => setCallModalContact(c)}
+                          title={c.do_not_call ? "Non chiamare" : c.phone ? `Chiama ${c.full_name}` : "Nessun telefono"}
+                        >
+                          {c.do_not_call ? <PhoneOff className="h-3.5 w-3.5" /> : <Phone className="h-3.5 w-3.5" />}
+                        </Button>
+                        <ContactRowActions contact={c} />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
