@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 import ContactDetailPanel from "@/components/contacts/ContactDetailPanel";
 import LeadScoreBadge from "@/components/contacts/LeadScoreBadge";
 import CallContactModal from "@/components/contacts/CallContactModal";
+import { BulkCallModal } from "@/components/contacts/BulkCallModal";
 import { formatDistanceToNow } from "date-fns";
 
 const STATUS_OPTIONS = [
