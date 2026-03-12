@@ -4,48 +4,48 @@ import { corsHeaders, generateRequestId, log, fetchWithTimeout, jsonOk, jsonErro
 // ─── Inline Prompt Builder v3 ─────────────────────────────────────
 
 const MATERIAL_PHYSICS: Record<string, string> = {
-  pvc: "white or colored PVC (polyvinyl chloride) frame — smooth matte surface with very slight plastic texture under direct light, internal multi-chamber structure visible at edges, welded corners with subtle seam lines, uniform color without grain",
-  alluminio: "extruded aluminum frame — anodized or powder-coated exterior, sharp precise edges, visible thermal break strips (dark polyamide) between inner and outer shells, metallic surface with subtle directional brushing marks, thin elegant profile (50-65mm)",
-  legno: "solid wood frame — visible natural grain pattern, slightly rounded milled edges, paint or stain finish showing subtle wood texture beneath, traditional mortise-and-tenon corner joints, warm organic appearance, thicker profile (68-92mm)",
-  legno_alluminio: "hybrid timber-aluminum composite frame — interior shows solid wood with warm grain, exterior shows slim aluminum cladding with powder-coated finish, visible transition line at wood-aluminum edge",
-  acciaio_corten: "Corten weathering steel frame — unmistakable rust-orange patina with rough oxidized surface texture, ultra-thin profiles (25-35mm sight lines), industrial aesthetic",
-  acciaio_minimale: "ultra-minimal structural steel frame — extremely thin sight lines (15-25mm), deep matte black or dark anthracite powder-coated surface, nearly frameless appearance, modern industrial look",
+  pvc: "white or colored PVC (polyvinyl chloride) frame — smooth matte surface with very slight plastic texture under direct light, internal multi-chamber structure visible at frame cross-section edges, corners welded with subtle seam lines, uniform color throughout without natural grain, exterior surface shows shallow surface relief from extrusion process",
+  alluminio: "extruded aluminum frame — anodized or powder-coated exterior, sharp precise 90° or slightly beveled edges, clearly visible thermal break (dark polyamide strip, approximately 3-5mm wide) between inner and outer shells at frame cross-section, surface shows very subtle directional micro-texture from coating process, thin elegant profile (typically 50-65mm visible sight line width), consistent metallic finish",
+  legno: "solid wood frame — clearly visible natural wood grain running along the frame length, slightly rounded milled edges, paint or opaque stain finish showing faint grain texture beneath the coating, traditional mortise-and-tenon visible corner joint geometry (slight raised line at 45° miter), warm organic color variation, thicker profile (68-92mm sight line), possible hairline micro-cracks at painted corners",
+  legno_alluminio: "hybrid timber-aluminum composite frame — interior side shows solid wood with warm grain and stain finish, exterior side shows slim precision-extruded aluminum cladding with powder-coated finish, visible thin shadow line at the wood-aluminum transition edge, combines warmth of interior wood aesthetic with weather-resistant modern aluminum exterior",
+  acciaio_corten: "Corten weathering steel frame — unmistakable rust-orange patina with rough oxidized surface texture and natural color variation from dark rust-red to lighter orange-tan, ultra-thin sight line profiles (25-35mm visible width), industrial precise geometric form, characteristic streaking pattern typical of Cor-Ten oxidation",
+  acciaio_minimale: "ultra-minimal structural steel frame — extremely thin sight lines (15-25mm), deep matte black or dark anthracite powder-coated surface, machined precise geometric edges, nearly frameless appearance with maximum glass-to-frame ratio, industrial modern aesthetic, tiny cap screws or concealed fixings visible at mullion intersections",
 };
 
 const APERTURA_DESCRIPTION: Record<string, string> = {
-  battente_1_anta: "single-leaf inward-opening casement window, 2 hinges on hinge side",
-  battente_2_ante: "double-leaf casement window, 2 hinges per sash = 4 total",
-  battente_3_ante: "triple-leaf casement window, center fixed, sides opening",
-  scorrevole: "horizontal sliding window on tracks",
-  scorrevole_alzante: "lift-and-slide door/window with large glass panels",
-  vasistas: "top-hinged tilt-in window",
-  anta_ribalta: "tilt-and-turn window with multi-position handle",
-  bilico: "center-pivot window",
-  fisso: "fixed non-opening window, no hinges, no handle",
-  portafinestra: "full-height French door/balcony door",
-  cassonetto_integrato: "window with integrated roller shutter box above",
+  battente_1_anta: "single-leaf inward-opening casement window — ONE sash panel hinged on the LEFT or RIGHT side, operated by a single lever handle on the opposite stile, 2 hinges visible on the hinge side stile (top and bottom), center-of-glass gasket line visible",
+  battente_2_ante: "double-leaf inward-opening casement window — TWO equal sash panels meeting at center, each hinged on its outer side stile, 2 hinges per sash = 4 hinges total (2 visible on left stile, 2 on right stile), each sash has its own lever handle near the center meeting stile, center rebate/espagnolette bolt visible where panels meet",
+  battente_3_ante: "triple-leaf casement window — THREE panels, typically center panel fixed (no hinges, no handle) flanked by two opening sashes each with 2 hinges and a handle, visible central fixed mullion and two moving sash dividers",
+  scorrevole: "horizontal sliding window — two or more panels sliding on visible aluminum top rail and bottom track, each panel has a flush pull handle or recessed grip, no hinges visible, only sliding hardware guides at top corners",
+  scorrevole_alzante: "lift-and-slide large door/window — very large glass panels (typically 1.5-3m wide each), bottom track system with lifting hardware visible, heavy-duty multi-point lock handle on leading edge, no exposed hinges, minimal frame profile at panel edges",
+  vasistas: "top-hung tilt-in window — sash hinged at TOP rail only, opens by tilting inward from the bottom, handle located on bottom rail of sash, 2 friction hinges at top corners, scissor-arm stay mechanism visible on both side stiles when open",
+  anta_ribalta: "tilt-and-turn window — multi-function sash with BOTH tilt-in (vasistas) and side-swing (battente) capability, 2 hinges on hinge-side stile, distinctive multi-position lever handle (pointing DOWN=closed, HORIZONTAL=tilt, UP=turn), rebated all around",
+  bilico: "center-pivot window — sash rotates on central horizontal pivot axis, top half swings inward while bottom swings outward, visible pivot fittings at mid-height of both side stiles, no traditional hinges on frame edges",
+  fisso: "fixed non-opening light — no hinges, no handle, no gaps or shadow lines from sash rebate, glass beaded directly into fixed frame, single uninterrupted frame profile all around",
+  portafinestra: "full-height balcony/French door — floor-to-near-ceiling height (typically 210-240cm), low threshold (15-20mm) at floor level, same 2-hinges-per-leaf as standard window but larger scale, may have floor-mounted pivot pin, anti-panic handle or lever, often with fixed sidelight panels",
+  cassonetto_integrato: "window with integrated roller box — standard opening sash below, above the frame top rail a visible box housing containing the rolled-up shutter, box face-panel protrudes 60-200mm from wall plane, typically same color as frame",
 };
 
 const CASSONETTO_MATERIAL_DESC: Record<string, string> = {
-  pvc_tradizionale: "traditional PVC roller shutter housing — rectangular box profile 160-200mm above window, smooth matte PVC surface",
-  pvc_slim: "slim-profile PVC cassonetto — reduced-depth 110-130mm visible height, minimalist profile",
-  pvc_integrato: "wall-integrated cassonetto — fully recessed into masonry, only 30-40mm visible, virtually invisible",
-  alluminio_coibentato: "insulated aluminum cassonetto — powder-coated panels, visible side inspection covers, 170-210mm height",
+  pvc_tradizionale: "traditional PVC roller shutter housing (cassonetto PVC standard) — rectangular box profile protruding 160-200mm above window top rail, face panel approximately 200mm tall, smooth matte PVC surface with subtle panel seam line, bottom strip slightly recessed where shutter curtain exits, same extrusion quality as PVC window frame",
+  pvc_slim: "slim-profile PVC cassonetto — reduced-depth housing only 110-130mm visible height above frame, lower profile ratio for modern facades, smooth face panel with minimal protrusion (80-100mm from wall), contemporary proportions matching thin-profile frame systems",
+  pvc_integrato: "wall-integrated cassonetto (cassonetto a muro/incassato) — fully recessed into masonry, only the bottom inspection strip approximately 30-40mm visible below wall surface level, wall plaster or cladding runs continuously over the housing, virtually invisible from exterior — only a thin reveal line marks its position",
+  alluminio_coibentato: "insulated aluminum cassonetto — aluminum face panels with powder-coated finish matching or contrasting frame, visible side inspection cover flanges at 45° angles, polyurethane foam fill (not visible but implied by professional thermal appearance), face panel 170-210mm height, crisp machined edges and corners",
 };
 
 const TAPPARELLA_DESC: Record<string, string> = {
-  pvc_avvolgibile: "PVC roll-up shutter — horizontal PVC slats 37-55mm wide, smooth rounded profile, bottom rail with rubber seal, side guide channels",
-  alluminio_avvolgibile: "aluminum roll-up shutter — aluminum foam-filled slats 37-55mm wide, metallic sheen, precise joints, side guide channels",
-  microforata: "microperforated roll-up shutter — slats with circular perforations 3-4mm diameter, filtered light, partial vision",
-  persiana_alluminio: "aluminum louvered shutter (persiana) — horizontal slats 60-80mm wide, S-curve profile, pivot pins, Mediterranean aesthetic",
-  veneziana_integrata: "integral venetian blind between glazing — thin horizontal lines 25mm apart inside double-glazing unit, ultra-minimal",
-  nessuna: "No shutter or blind — bare window frame only",
+  pvc_avvolgibile: "PVC roll-up shutter curtain — horizontal extruded PVC slats 37-55mm wide, each slat with smooth rounded upper edge and male-female interlocking lower edge, uniform matte colored surface with very subtle extrusion line texture running horizontally, bottom end-rail heavier profile (40-60mm) with integrated rubber seal and lift lug, side guide channels (guide) visible as thin U-profile strips on left and right jamb faces, total curtain thickness approximately 8-12mm",
+  alluminio_avvolgibile: "aluminum roll-up shutter curtain — extruded aluminum foam-filled slats 37-55mm wide, slightly metallic surface sheen compared to PVC, slat walls approximately 1.2-1.5mm thick with visible interior foam at side edges when looked at obliquely, crisp precise slat-to-slat joints, heavier appearance than PVC equivalent, bottom bar with EPDM rubber weatherstrip, side guide channels in matching anodized or powder-coated aluminum",
+  microforata: "microperforated roll-up shutter — same slat profile as standard PVC/aluminum avvolgibile but with regular grid of circular perforations 3-4mm diameter at approximately 6-8mm centers, perforation pattern creates a screenprint-like texture visible across the curtain surface, light passes through holes creating dappled interior light, retains privacy from outside while allowing partial outward vision from inside",
+  persiana_alluminio: "aluminum louvered shutter (persiana avvolgibile) — horizontal extruded aluminum slats 60-80mm wide with traditional shutter profile (S-curve cross-section), visible twin pivot pins at each slat end inserted into side guide channels, slats appear at consistent angle (typically 30-45° open or closed), side channel guides are deeper (40-50mm) than standard roller guides, traditional Mediterranean aesthetic, bottom rail is a solid bar connecting all slat pivots",
+  veneziana_integrata: "integral blind between glazing (tendina veneziana integrata) — visible only as a series of very thin parallel horizontal lines 25mm apart suspended between the two glass panes inside the double-glazing unit, slat lines cast faint shadow on interior glass surface, operated by a small external thumb-wheel or magnetic control on frame edge, no external mechanism visible, glass still appears transparent with blind fully open, gives ultra-minimal modern look",
+  nessuna: "No shutter or blind — bare window frame only with no additional covering system",
 };
 
 const CERNIERA_DESC: Record<string, string> = {
-  europea: "Standard European butt hinge — two plates ~50×35mm, 3 screws per plate, 8mm knuckle, projects 3-4mm from frame",
-  a_libro: "Book-fold concealed hinge — partially recessed, only outer knuckle visible as 6mm × 40mm strip",
-  invisibile: "Fully concealed pivot hinge — completely hidden when closed, no visible hardware, premium appearance",
+  europea: "Standard European butt hinge (cerniera europea) — two rectangular steel plates approximately 50×35mm each, 3 countersunk screws per plate, polished or coated to match hardware, central pin knuckle approximately 8mm diameter, hinge projects 3-4mm from frame face when closed",
+  a_libro: "Book-fold concealed hinge (cerniera a libro) — when door/window is closed hinge is partially recessed into frame rebate, only the outer knuckle visible as a thin strip approximately 6mm × 40mm, appears more elegant and flush than standard hinge",
+  invisibile: "Fully concealed pivot hinge (cerniera invisibile/nascosta) — completely hidden inside frame rebate when window is closed, no visible hardware on frame face, only a very faint rebate shadow line indicates hinge location, premium invisible appearance",
 };
 
 const CERNIERA_COLORE_DESC: Record<string, string> = {
@@ -127,7 +127,7 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
       if (tapparella.colore?.nome) { tDesc += `\nSlat color: ${tapparella.colore.nome}${tapparella.colore.ral ? ` (RAL ${tapparella.colore.ral})` : ""}`; }
       if (tapparella.colore_guide?.nome) { tDesc += `\nGuide color: ${tapparella.colore_guide.nome}${tapparella.colore_guide.ral ? ` (RAL ${tapparella.colore_guide.ral})` : ""}`; }
       const stato = tapparella.stato_render || "chiusa";
-      tDesc += `\nState: ${stato === 'aperta' ? 'FULLY OPEN (rolled up)' : stato === 'mezza' ? 'HALF OPEN (lower 50%)' : 'FULLY CLOSED'}`;
+      tDesc += `\nState: ${stato === 'aperta' ? 'FULLY OPEN (rolled up into cassonetto, no curtain visible below the cassonetto, only side guide channels visible)' : stato === 'mezza' ? 'HALF OPEN (curtain visible covering lower ~50% of glass, slat texture and horizontal joint lines visible on lower portion)' : 'FULLY CLOSED (curtain covers entire glass surface from cassonetto bottom to windowsill level, full slat texture visible)'}`;
       cLines.push(tDesc);
     } else {
       cLines.push(`\n🚫 DO NOT TOUCH shutter`);
@@ -166,18 +166,18 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
 
   // Block G — Hardware
   if (sost.infissi) {
-    blocks.G = `[BLOCK G – HARDWARE]\nHandle: ${manigliaDesc[ferramenta.maniglia] || ferramenta.maniglia || "lever handle"}\nColor: ${coloreFerrDesc[ferramenta.colore] || ferramenta.colore || "silver"}`;
+    blocks.G = `[BLOCK G – HARDWARE DETAILS]\nHandle: ${manigliaDesc[ferramenta.maniglia] || ferramenta.maniglia || "lever handle"}\nColor: ${coloreFerrDesc[ferramenta.colore] || ferramenta.colore || "silver"}\nHandle position: centered on the meeting stile (vertical center of sash height) for battente windows, lower third for portafinestre\nEspagnolette lock bar: concealed inside frame rebate, only the multi-point locking pins (3-4) visible at frame edge when window is shown open\nCorner connectors: thin aluminum corner keys inside profile — not visible externally\nStrikeplate: small 20×60mm metal plate recessed into frame face opposite handle — show subtle shadow`;
   } else {
     blocks.G = `[BLOCK G – HARDWARE — SKIPPED]`;
   }
 
   // Block H — Cassonetto
   if (sost.cassonetto && cassonetto.azione === "rimuovi") {
-    blocks.H = `[BLOCK H – ROLLER BOX REMOVAL]\nRemove entire cassonetto. Show continuous wall surface matching surrounding facade.`;
+    blocks.H = `[BLOCK H – ROLLER BOX REMOVAL]\nRemove entire cassonetto. Show continuous wall surface matching surrounding facade. The wall fill must be seamless — no visible ghost outline, shadow gap or discoloration where the box was. Match plaster texture, paint sheen level, aging/weathering exactly to surrounding wall.`;
   } else if (sost.cassonetto && cassonetto.azione === "sostituisci" && cassonetto.materiale) {
     let cColor = "";
     if (cassonetto.colore?.nome) { cColor = `Color: ${cassonetto.colore.nome}`; if (cassonetto.colore.ral) cColor += ` (RAL ${cassonetto.colore.ral})`; }
-    blocks.H = `[BLOCK H – NEW ROLLER BOX]\nReplace with: ${CASSONETTO_MATERIAL_DESC[cassonetto.materiale] || cassonetto.materiale}\n${cColor}\nPosition: above window, flush with wall. Bottom: shutter exit slot ~15-20mm. Width: matching frame outer width.`;
+    blocks.H = `[BLOCK H – NEW ROLLER BOX]\nReplace with: ${CASSONETTO_MATERIAL_DESC[cassonetto.materiale] || cassonetto.materiale}\n${cColor}\nPosition: above window, flush with wall. Bottom: shutter exit slot ~15-20mm. Width: matching frame outer width.\nSide flanges: small triangular or stepped PVC/aluminum caps where cassonetto meets wall on left and right.\nCast appropriate shadow from cassonetto protrusion onto wall below.`;
   } else {
     blocks.H = `[BLOCK H – ROLLER BOX]\n${analisi.presenza_cassonetto ? "Keep existing cassonetto as-is." : "No cassonetto. Do not add one."}`;
   }
@@ -190,21 +190,21 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
     if (tapparella.colore?.nome) iLines += `\nSlat color: ${tapparella.colore.nome}${tapparella.colore.ral ? ` (RAL ${tapparella.colore.ral})` : ""}`;
     if (tapparella.colore_guide?.nome) iLines += `\nGuide color: ${tapparella.colore_guide.nome}${tapparella.colore_guide.ral ? ` (RAL ${tapparella.colore_guide.ral})` : ""}`;
     const stato = tapparella.stato_render || "chiusa";
-    iLines += `\nState: ${stato === 'aperta' ? 'FULLY OPEN (rolled up, no curtain visible)' : stato === 'mezza' ? 'HALF OPEN (lower 50% covered)' : 'FULLY CLOSED (entire glass covered)'}`;
-    iLines += `\nGuide channels: 16-20mm wide, straight, parallel, both sides.`;
+    iLines += `\nState: ${stato === 'aperta' ? 'FULLY OPEN (rolled up into cassonetto, no curtain visible below. Only side guide channels remain visible)' : stato === 'mezza' ? 'HALF OPEN (curtain partially lowered covering lower 50%, slat texture visible on lower portion, upper glass clear)' : 'FULLY CLOSED (entire glass covered from cassonetto bottom to sill, full slat texture visible, bottom bar resting on or near sill)'}`;
+    iLines += `\nGuide channels: 16-20mm wide × 20-25mm deep, mounted on wall face or frame edge. Guide channel extends from cassonetto bottom to window sill level (or floor for portafinestre). Ensure guide channels are straight, parallel, and symmetrically positioned on both sides.`;
     blocks.I = iLines;
   } else {
     blocks.I = `[BLOCK I – SHUTTER]\n${analisi.presenza_tapparella ? "Keep existing shutter as-is." : "No shutter. Do not add one."}`;
   }
 
   // Block J
-  blocks.J = `[BLOCK J – ENVIRONMENT PRESERVATION]\nKeep EXACTLY: wall (${analisi.colore_muro}, ${analisi.materiale_muro}), ${analisi.presenza_davanzale ? "sill (" + (analisi.tipo_davanzale || "existing") + ")" : "no sill"}, ${analisi.presenza_inferriata ? "security bars" : "no bars"}, perspective (${analisi.angolo_ripresa}), all surroundings, sky, lighting (${analisi.luce}).`;
+  blocks.J = `[BLOCK J – PIXEL-PERFECT ENVIRONMENT PRESERVATION]\nThe following MUST remain 100% unchanged — zero modification allowed:\n- Wall: color (${analisi.colore_muro}), material (${analisi.materiale_muro}), texture, aging, stains, weathering\n- Window sill: ${analisi.presenza_davanzale ? "KEEP — same " + (analisi.tipo_davanzale || "material") + ", shape, shadow, any chips or weathering" : "NOT PRESENT — do not add a sill"}\n- Security bars: ${analisi.presenza_inferriata ? "KEEP — maintain all bars at exact position, color, shadow" : "NOT PRESENT — do not add bars"}\n- Camera: preserve exact perspective, focal length, vanishing points (${analisi.angolo_ripresa})\n- Surroundings: every pipe, cable, drain, crack, plant, neighboring window, balcony, street element\n- Sky/background: identical — no color shift, no weather change\n- Lighting: same direction, same ambient/diffuse ratio (${analisi.luce})`;
 
   // Block K
-  blocks.K = `[BLOCK K – LIGHTING & SHADOWS]\nMatch lighting (${analisi.luce}). Render correct shadows from new frame, hinges, handle, cassonetto protrusion. Glass reflections match scene light direction. Ambient occlusion in frame corners and wall-frame transition.`;
+  blocks.K = `[BLOCK K – PHOTOREALISTIC LIGHTING & SHADOWS]\nLighting scene: ${analisi.luce}\nRequired shadow elements (all must be physically correct):\n- Frame shadow: new frame profile casts shadow into wall rebate — depth approximately 15-25mm\n- Hinge shadow: small cast shadow from each hinge knuckle on hinge-side stile face\n- Handle shadow: lever or knob casts shadow on frame face — direction matches scene light\n- Cassonetto shadow: ${analisi.presenza_cassonetto ? 'box face casts horizontal shadow onto wall below it — match overhang depth' : 'no cassonetto shadow'}\n- Shutter shadow: if shutter partially open, hanging curtain edge casts shadow on window below\n- Glass reflection: specular highlight on glass matches scene light direction, not perpendicular to camera\n- Ambient occlusion: soft dark gradient in wall-to-frame rebate transition, in frame corners, under sill`;
 
   // Block L
-  blocks.L = `[BLOCK L – NEGATIVE CONSTRAINTS]\nDO NOT: change wall/facade, alter perspective, add absent elements, change sky/weather, create CGI artifacts, add text/watermarks, distort proportions, add hinges to fixed windows, add shutters/cassonetto not requested. Must be photorealistic.`;
+  blocks.L = `[BLOCK L – ABSOLUTE NEGATIVE CONSTRAINTS]\nNEVER DO any of the following — instant disqualification:\n- ✗ Change wall color, texture, plaster pattern, or any facade element not explicitly requested\n- ✗ Alter camera perspective, field of view, or tilt/shift\n- ✗ Add elements absent in the original (plants, people, decorations, extra windows)\n- ✗ Change sky color, cloud pattern, or weather conditions\n- ✗ Produce cartoon, illustrated, or CGI-look artifacts\n- ✗ Add text, watermarks, copyright marks, or any overlays\n- ✗ Distort window proportions or change opening/glass dimensions\n- ✗ Add hinges to fixed lights (fisso) — fixed panels have NO hinges\n- ✗ Add shutters or cassonetto if replacement was NOT requested AND none existed in photo\n- ✗ Change the number of window panes unless explicitly requested in config\n- ✗ Make the result look like a 3D render — must be indistinguishable from real photograph`;
 
   const systemPrompt = blocks.A;
   const userParts = [blocks.B, blocks.C, blocks.D, blocks.E, blocks.F, blocks.G, blocks.H, blocks.I, blocks.J, blocks.K, blocks.L];

@@ -200,40 +200,40 @@ const MATERIAL_PHYSICS: Record<MaterialeNuovo, string> = {
 // ─── Apertura Descriptions ────────────────────────────────────────
 
 const APERTURA_DESCRIPTION: Record<TipoApertura, string> = {
-  battente_1_anta: "single-leaf inward-opening casement window — ONE sash panel hinged on the LEFT or RIGHT side, operated by a single lever handle on the opposite stile, 2 hinges visible on the hinge side stile (top and bottom)",
-  battente_2_ante: "double-leaf inward-opening casement window — TWO equal sash panels meeting at center, each hinged on its outer side stile, 2 hinges per sash = 4 hinges total, each sash has its own lever handle near the center meeting stile",
-  battente_3_ante: "triple-leaf casement window — THREE panels, typically center panel fixed flanked by two opening sashes each with 2 hinges and a handle",
-  scorrevole: "horizontal sliding window — two or more panels sliding on visible aluminum top rail and bottom track, each panel has a flush pull handle or recessed grip, no hinges visible",
-  scorrevole_alzante: "lift-and-slide large door/window — very large glass panels, bottom track system with lifting hardware visible, heavy-duty multi-point lock handle on leading edge, no exposed hinges",
-  vasistas: "top-hung tilt-in window — sash hinged at TOP rail only, opens by tilting inward from the bottom, handle located on bottom rail of sash, 2 friction hinges at top corners",
-  anta_ribalta: "tilt-and-turn window — multi-function sash with BOTH tilt-in and side-swing capability, 2 hinges on hinge-side stile, distinctive multi-position lever handle",
-  bilico: "center-pivot window — sash rotates on central horizontal pivot axis, top half swings inward while bottom swings outward, visible pivot fittings at mid-height of both side stiles",
-  fisso: "fixed non-opening light — no hinges, no handle, no gaps or shadow lines from sash rebate, glass beaded directly into fixed frame",
-  portafinestra: "full-height balcony/French door — floor-to-near-ceiling height (typically 210-240cm), low threshold at floor level, same 2-hinges-per-leaf as standard window but larger scale",
-  cassonetto_integrato: "window with integrated roller box — standard opening sash below, above the frame top rail a visible box housing containing the rolled-up shutter",
+  battente_1_anta: "single-leaf inward-opening casement window — ONE sash panel hinged on the LEFT or RIGHT side, operated by a single lever handle on the opposite stile, 2 hinges visible on the hinge side stile (top and bottom), center-of-glass gasket line visible",
+  battente_2_ante: "double-leaf inward-opening casement window — TWO equal sash panels meeting at center, each hinged on its outer side stile, 2 hinges per sash = 4 hinges total (2 visible on left stile, 2 on right stile), each sash has its own lever handle near the center meeting stile, center rebate/espagnolette bolt visible where panels meet",
+  battente_3_ante: "triple-leaf casement window — THREE panels, typically center panel fixed (no hinges, no handle) flanked by two opening sashes each with 2 hinges and a handle, visible central fixed mullion and two moving sash dividers",
+  scorrevole: "horizontal sliding window — two or more panels sliding on visible aluminum top rail and bottom track, each panel has a flush pull handle or recessed grip, no hinges visible, only sliding hardware guides at top corners",
+  scorrevole_alzante: "lift-and-slide large door/window — very large glass panels (typically 1.5-3m wide each), bottom track system with lifting hardware visible, heavy-duty multi-point lock handle on leading edge, no exposed hinges, minimal frame profile at panel edges",
+  vasistas: "top-hung tilt-in window — sash hinged at TOP rail only, opens by tilting inward from the bottom, handle located on bottom rail of sash, 2 friction hinges at top corners, scissor-arm stay mechanism visible on both side stiles when open",
+  anta_ribalta: "tilt-and-turn window — multi-function sash with BOTH tilt-in (vasistas) and side-swing (battente) capability, 2 hinges on hinge-side stile, distinctive multi-position lever handle (pointing DOWN=closed, HORIZONTAL=tilt, UP=turn), rebated all around",
+  bilico: "center-pivot window — sash rotates on central horizontal pivot axis, top half swings inward while bottom swings outward, visible pivot fittings at mid-height of both side stiles, no traditional hinges on frame edges",
+  fisso: "fixed non-opening light — no hinges, no handle, no gaps or shadow lines from sash rebate, glass beaded directly into fixed frame, single uninterrupted frame profile all around",
+  portafinestra: "full-height balcony/French door — floor-to-near-ceiling height (typically 210-240cm), low threshold (15-20mm) at floor level, same 2-hinges-per-leaf as standard window but larger scale, may have floor-mounted pivot pin, anti-panic handle or lever, often with fixed sidelight panels",
+  cassonetto_integrato: "window with integrated roller box — standard opening sash below, above the frame top rail a visible box housing containing the rolled-up shutter, box face-panel protrudes 60-200mm from wall plane, typically same color as frame",
 };
 
 // ─── NEW v3 Dictionaries ──────────────────────────────────────────
 
 const CASSONETTO_MATERIAL_DESC: Record<CassonettoMateriale, string> = {
-  pvc_tradizionale: "traditional PVC roller shutter housing (cassonetto PVC standard) — rectangular box profile protruding 160-200mm above window top rail, face panel approximately 200mm tall, smooth matte PVC surface with subtle panel seam line, bottom strip slightly recessed where shutter curtain exits",
-  pvc_slim: "slim-profile PVC cassonetto — reduced-depth housing only 110-130mm visible height above frame, lower profile ratio for modern facades, smooth face panel with minimal protrusion (80-100mm from wall), contemporary proportions",
-  pvc_integrato: "wall-integrated cassonetto (cassonetto a muro/incassato) — fully recessed into masonry, only the bottom inspection strip approximately 30-40mm visible below wall surface level, wall plaster runs continuously over the housing, virtually invisible from exterior",
-  alluminio_coibentato: "insulated aluminum cassonetto — aluminum face panels with powder-coated finish, visible side inspection cover flanges at 45° angles, polyurethane foam fill, face panel 170-210mm height, crisp machined edges and corners",
+  pvc_tradizionale: "traditional PVC roller shutter housing (cassonetto PVC standard) — rectangular box profile protruding 160-200mm above window top rail, face panel approximately 200mm tall, smooth matte PVC surface with subtle panel seam line, bottom strip slightly recessed where shutter curtain exits, same extrusion quality as PVC window frame",
+  pvc_slim: "slim-profile PVC cassonetto — reduced-depth housing only 110-130mm visible height above frame, lower profile ratio for modern facades, smooth face panel with minimal protrusion (80-100mm from wall), contemporary proportions matching thin-profile frame systems",
+  pvc_integrato: "wall-integrated cassonetto (cassonetto a muro/incassato) — fully recessed into masonry, only the bottom inspection strip approximately 30-40mm visible below wall surface level, wall plaster or cladding runs continuously over the housing, virtually invisible from exterior — only a thin reveal line marks its position",
+  alluminio_coibentato: "insulated aluminum cassonetto — aluminum face panels with powder-coated finish matching or contrasting frame, visible side inspection cover flanges at 45° angles, polyurethane foam fill (not visible but implied by professional thermal appearance), face panel 170-210mm height, crisp machined edges and corners",
 };
 
 const TAPPARELLA_DESC: Record<string, string> = {
-  pvc_avvolgibile: "PVC roll-up shutter curtain — horizontal extruded PVC slats 37-55mm wide, each slat with smooth rounded upper edge and male-female interlocking lower edge, uniform matte colored surface, bottom end-rail heavier profile with integrated rubber seal, side guide channels visible as thin U-profile strips on left and right jamb faces",
-  alluminio_avvolgibile: "aluminum roll-up shutter curtain — extruded aluminum foam-filled slats 37-55mm wide, slightly metallic surface sheen compared to PVC, crisp precise slat-to-slat joints, heavier appearance than PVC, bottom bar with EPDM rubber weatherstrip, side guide channels in matching aluminum",
-  microforata: "microperforated roll-up shutter — same slat profile as standard but with regular grid of circular perforations 3-4mm diameter, perforation pattern creates a screen-like texture, light passes through holes creating dappled interior light",
-  persiana_alluminio: "aluminum louvered shutter (persiana) — horizontal extruded aluminum slats 60-80mm wide with traditional shutter profile (S-curve cross-section), visible twin pivot pins at each slat end, side guide channels deeper (40-50mm), traditional Mediterranean aesthetic",
-  veneziana_integrata: "integral blind between glazing (tendina veneziana integrata) — visible only as thin parallel horizontal lines 25mm apart suspended between the two glass panes inside the double-glazing unit, operated by external control on frame edge, ultra-minimal modern look",
-  nessuna: "No shutter or blind — bare window frame only.",
+  pvc_avvolgibile: "PVC roll-up shutter curtain — horizontal extruded PVC slats 37-55mm wide, each slat with smooth rounded upper edge and male-female interlocking lower edge, uniform matte colored surface with very subtle extrusion line texture running horizontally, bottom end-rail heavier profile (40-60mm) with integrated rubber seal and lift lug, side guide channels (guide) visible as thin U-profile strips on left and right jamb faces, total curtain thickness approximately 8-12mm",
+  alluminio_avvolgibile: "aluminum roll-up shutter curtain — extruded aluminum foam-filled slats 37-55mm wide, slightly metallic surface sheen compared to PVC, slat walls approximately 1.2-1.5mm thick with visible interior foam at side edges when looked at obliquely, crisp precise slat-to-slat joints, heavier appearance than PVC equivalent, bottom bar with EPDM rubber weatherstrip, side guide channels in matching anodized or powder-coated aluminum",
+  microforata: "microperforated roll-up shutter — same slat profile as standard PVC/aluminum avvolgibile but with regular grid of circular perforations 3-4mm diameter at approximately 6-8mm centers, perforation pattern creates a screenprint-like texture visible across the curtain surface, light passes through holes creating dappled interior light, retains privacy from outside while allowing partial outward vision from inside",
+  persiana_alluminio: "aluminum louvered shutter (persiana avvolgibile) — horizontal extruded aluminum slats 60-80mm wide with traditional shutter profile (S-curve cross-section), visible twin pivot pins at each slat end inserted into side guide channels, slats appear at consistent angle (typically 30-45° open or closed), side channel guides are deeper (40-50mm) than standard roller guides, traditional Mediterranean aesthetic, bottom rail is a solid bar connecting all slat pivots",
+  veneziana_integrata: "integral blind between glazing (tendina veneziana integrata) — visible only as a series of very thin parallel horizontal lines 25mm apart suspended between the two glass panes inside the double-glazing unit, slat lines cast faint shadow on interior glass surface, operated by a small external thumb-wheel or magnetic control on frame edge, no external mechanism visible, glass still appears transparent with blind fully open, gives ultra-minimal modern look",
+  nessuna: "No shutter or blind — bare window frame only with no additional covering system.",
 };
 
 const CERNIERA_DESC: Record<string, string> = {
-  europea: "Standard European butt hinge (cerniera europea) — two rectangular steel plates approximately 50×35mm each, 3 countersunk screws per plate, central pin knuckle approximately 8mm diameter, hinge projects 3-4mm from frame face when closed",
-  a_libro: "Book-fold concealed hinge (cerniera a libro) — when closed hinge is partially recessed into frame rebate, only the outer knuckle visible as a thin strip approximately 6mm × 40mm, more elegant and flush than standard hinge",
+  europea: "Standard European butt hinge (cerniera europea) — two rectangular steel plates approximately 50×35mm each, 3 countersunk screws per plate, polished or coated to match hardware, central pin knuckle approximately 8mm diameter, hinge projects 3-4mm from frame face when closed",
+  a_libro: "Book-fold concealed hinge (cerniera a libro) — when door/window is closed hinge is partially recessed into frame rebate, only the outer knuckle visible as a thin strip approximately 6mm × 40mm, appears more elegant and flush than standard hinge",
   invisibile: "Fully concealed pivot hinge (cerniera invisibile/nascosta) — completely hidden inside frame rebate when window is closed, no visible hardware on frame face, only a very faint rebate shadow line indicates hinge location, premium invisible appearance",
 };
 
@@ -464,8 +464,9 @@ function buildBlock_G(infisso: NuovoInfisso): string {
   return `[BLOCK G – HARDWARE DETAILS]
 Handle: ${manigliaDesc[f.maniglia]}
 Handle color: ${coloreDesc[f.colore]}
-Handle position: centered on the meeting stile for battente windows, lower third for portafinestre
-Espagnolette lock bar: concealed inside frame rebate
+Handle position: centered on the meeting stile (vertical center of sash height) for battente windows, lower third for portafinestre
+Espagnolette lock bar: concealed inside frame rebate, only the multi-point locking pins (3-4) visible at frame edge when window is shown open
+Corner connectors: thin aluminum corner keys inside profile — not visible externally
 Strikeplate: small 20×60mm metal plate recessed into frame face opposite handle — show subtle shadow`;
 }
 
@@ -478,7 +479,7 @@ function buildBlock_H(analisi: FotoAnalisi, infisso: NuovoInfisso): string {
 
   if (c.azione === "rimuovi") {
     return `[BLOCK H – ROLLER BOX REMOVAL]
-Remove the entire cassonetto above the window. Replace with: continuous wall surface matching the exact wall texture, color, and material of the surrounding facade. The wall fill must be seamless — no visible ghost outline, shadow gap or discoloration where the box was.`;
+Remove the entire cassonetto (roller shutter box) above the window. Replace with: continuous wall surface matching the exact wall texture, color, and material of the surrounding facade. The wall fill must be seamless — no visible ghost outline, shadow gap or discoloration where the box was. Match plaster texture, paint sheen level, aging/weathering exactly to surrounding wall.`;
   }
 
   if (c.azione === "sostituisci" && c.materiale) {
@@ -495,6 +496,7 @@ ${colorLine}
 Position: directly above window top frame rail, face flush with or slightly proud of wall plane
 Bottom reveal: show the shutter exit slot (approximately 15-20mm slit) at bottom of cassonetto face panel
 Width: exactly matching window frame outer width
+Side flanges: small triangular or stepped PVC/aluminum caps where cassonetto meets wall on left and right
 Cast appropriate shadow from cassonetto protrusion onto wall below`;
   }
 
@@ -526,13 +528,13 @@ Remove the existing shutter/blind system completely. Show bare window frame with
     }
     const stato = t.stato_render || "chiusa";
     if (stato === "aperta") {
-      lines.push("FULLY OPEN STATE: shutter curtain completely rolled up inside cassonetto — NO curtain visible. Only side guide channels remain visible.");
+      lines.push("FULLY OPEN STATE: shutter curtain completely rolled up inside cassonetto — NO curtain visible below the cassonetto. Only side guide channels (guide) remain visible running down both sides of the window. Show empty guide channels with no curtain engaged.");
     } else if (stato === "mezza") {
-      lines.push("HALF-OPEN STATE: shutter curtain partially lowered covering approximately lower 50% of glass height.");
+      lines.push("HALF-OPEN STATE: shutter curtain partially lowered covering approximately lower 50% of glass height. Top of curtain visible inside guide channels at mid-height. Show slat texture and horizontal joint lines on lower curtain portion. Upper glass area clear and visible.");
     } else {
-      lines.push("FULLY CLOSED STATE: shutter curtain completely lowered, covering the ENTIRE glass area from cassonetto bottom to windowsill level.");
+      lines.push("FULLY CLOSED STATE: shutter curtain completely lowered, covering the ENTIRE glass area from cassonetto bottom to windowsill level. Full slat texture visible across entire curtain face. Bottom bar resting on or near sill.");
     }
-    lines.push("Guide channel width: approximately 16-20mm × 20-25mm deep. Ensure guide channels are straight, parallel, and symmetrically positioned.");
+    lines.push("Guide channel width: approximately 16-20mm × 20-25mm deep, mounted on wall face or frame edge. Guide channel extends from cassonetto bottom to window sill level (or floor for portafinestre). Ensure guide channels are straight, parallel, and symmetrically positioned on both sides.");
     return lines.join("\n");
   }
 
@@ -558,15 +560,15 @@ Required shadow elements (all must be physically correct):
 - Frame shadow: new frame profile casts shadow into wall rebate — depth approximately 15-25mm
 - Hinge shadow: small cast shadow from each hinge knuckle on hinge-side stile face
 - Handle shadow: lever or knob casts shadow on frame face — direction matches scene light
-- Cassonetto shadow: ${analisi.presenza_cassonetto ? 'box face casts horizontal shadow onto wall below it' : 'no cassonetto shadow'}
+- Cassonetto shadow: ${analisi.presenza_cassonetto ? 'box face casts horizontal shadow onto wall below it — match overhang depth' : 'no cassonetto shadow'}
 - Shutter shadow: if shutter partially open, hanging curtain edge casts shadow on window below
-- Glass reflection: specular highlight on glass matches scene light direction
+- Glass reflection: specular highlight on glass matches scene light direction, not perpendicular to camera
 - Ambient occlusion: soft dark gradient in wall-to-frame rebate transition, in frame corners, under sill`;
 }
 
 function buildBlock_L(): string {
   return `[BLOCK L – ABSOLUTE NEGATIVE CONSTRAINTS]
-NEVER DO any of the following:
+NEVER DO any of the following — instant disqualification:
 - ✗ Change wall color, texture, plaster pattern, or any facade element not explicitly requested
 - ✗ Alter camera perspective, field of view, or tilt/shift
 - ✗ Add elements absent in the original (plants, people, decorations, extra windows)
@@ -576,7 +578,7 @@ NEVER DO any of the following:
 - ✗ Distort window proportions or change opening/glass dimensions
 - ✗ Add hinges to fixed lights (fisso) — fixed panels have NO hinges
 - ✗ Add shutters or cassonetto if replacement was NOT requested AND none existed in photo
-- ✗ Change the number of window panes unless explicitly requested
+- ✗ Change the number of window panes unless explicitly requested in config
 - ✗ Make the result look like a 3D render — must be indistinguishable from real photograph`;
 }
 

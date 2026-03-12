@@ -446,24 +446,31 @@ export default function RenderNew() {
           <div>
             <Label className="text-sm font-semibold mb-3 block">🎯 Cosa vuoi sostituire?</Label>
             <p className="text-xs text-muted-foreground mb-3">Seleziona solo gli elementi che vuoi cambiare. Il resto rimane invariato.</p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="space-y-2">
               {[
                 { key: "infissi" as const, emoji: "🪟", label: "Infissi", sub: "Telai, vetri, maniglie" },
-                { key: "cassonetto" as const, emoji: "📦", label: "Cassonetto", sub: "Cassonetto avvolgibile" },
-                { key: "tapparella" as const, emoji: "🔽", label: "Tapparella", sub: "Tapparella o persiana" },
+                { key: "cassonetto" as const, emoji: "📦", label: "Cassonetto", sub: "Cassonetto avvolgibile sopra" },
+                { key: "tapparella" as const, emoji: "🔽", label: "Tapparella", sub: "Tapparella, persiana o veneziana" },
               ].map(opt => (
                 <button
                   key={opt.key}
                   onClick={() => toggleSostituzione(opt.key)}
-                  className={`p-3 rounded-xl border text-center transition-all ${
+                  className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
                     sostituzione[opt.key]
                       ? "border-primary bg-primary/5 ring-1 ring-primary"
                       : "border-border hover:border-primary/30"
                   }`}
                 >
-                  <span className="text-2xl block mb-1">{opt.emoji}</span>
-                  <span className="text-sm font-medium text-foreground block">{opt.label}</span>
-                  <span className="text-xs text-muted-foreground">{opt.sub}</span>
+                  <span className="text-2xl">{opt.emoji}</span>
+                  <div className="flex-1">
+                    <span className="text-sm font-medium text-foreground block">{opt.label}</span>
+                    <span className="text-xs text-muted-foreground">{opt.sub}</span>
+                  </div>
+                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                    sostituzione[opt.key] ? "bg-primary border-primary" : "border-muted-foreground/30"
+                  }`}>
+                    {sostituzione[opt.key] && <Check className="h-3 w-3 text-primary-foreground" />}
+                  </div>
                 </button>
               ))}
             </div>
@@ -573,7 +580,7 @@ export default function RenderNew() {
 
           {/* ── SEZIONE 3: Configura Cassonetto (condizionale) ── */}
           {sostituzione.cassonetto && (
-            <div className="border-t pt-4">
+            <div className="border-l-2 border-primary/20 pl-4">
               <Label className="text-sm font-semibold mb-3 block">📦 Configura Cassonetto</Label>
               <div className="grid grid-cols-3 gap-2 mb-3">
                 {[
@@ -645,7 +652,7 @@ export default function RenderNew() {
 
           {/* ── SEZIONE 4: Configura Tapparella (condizionale) ── */}
           {sostituzione.tapparella && (
-            <div className="border-t pt-4">
+            <div className="border-l-2 border-primary/20 pl-4">
               <Label className="text-sm font-semibold mb-3 block">🔽 Configura Tapparella / Persiana</Label>
               <div className="grid grid-cols-3 gap-2 mb-3">
                 {[
