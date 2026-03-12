@@ -200,6 +200,8 @@ const App = () => (
                 <Route path="/app/settings" element={<SafeRoute><SettingsPage /></SafeRoute>} />
                 <Route path="/app/integrations" element={<SafeRoute><Integrations /></SafeRoute>} />
                 <Route path="/app/automations" element={<SafeRoute><Automations /></SafeRoute>} />
+                <Route path="/app/call-monitor" element={<SafeRoute><CallMonitor /></SafeRoute>} />
+                <Route path="/app/scheduled-calls" element={<SafeRoute><ScheduledCalls /></SafeRoute>} />
               </Route>
             </Route>
 
