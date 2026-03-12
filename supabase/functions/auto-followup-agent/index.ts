@@ -9,6 +9,7 @@ const corsHeaders = {
 const FN = "auto-followup-agent";
 const DEFAULT_DORMANT_DAYS = 5;
 const DEFAULT_MAX_PER_RUN = 10;
+const COST_PER_CALL_EUR = 0.08; // estimated cost per outbound call
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -21,15 +22,11 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Auth: either cron (service role) or user JWT
     const authHeader = req.headers.get("Authorization");
     let companyId: string | null = null;
 
-    // Check if specific company_id was passed (for cron/service calls)
     let body: any = {};
-    try {
-      body = await req.json();
-    } catch { /* empty body is fine for cron */ }
+    try { body = await req.json(); } catch { /* empty body is fine for cron */ }
 
     if (body.company_id) {
       companyId = body.company_id;
@@ -42,13 +39,11 @@ Deno.serve(async (req) => {
       }
     }
 
-    // If no specific company, process ALL companies with enabled automation
     const companyIds: string[] = [];
 
     if (companyId) {
       companyIds.push(companyId);
     } else {
-      // Cron mode: find all companies with followup_agent enabled
       const { data: automations } = await sb
         .from("agent_automations")
         .select("company_id, config")
@@ -76,14 +71,11 @@ Deno.serve(async (req) => {
         totalActions += actions;
       } catch (err) {
         log("warn", "Failed to process company", {
-          request_id: rid,
-          company_id: cid,
-          error: (err as Error).message,
+          request_id: rid, company_id: cid, error: (err as Error).message,
         });
       }
     }
 
-    // Update last_run_at for all processed companies
     if (companyIds.length > 0) {
       await sb.from("agent_automations")
         .update({ last_run_at: new Date().toISOString() })
@@ -93,7 +85,7 @@ Deno.serve(async (req) => {
 
     log("info", "Auto-followup agent completed", { request_id: rid, total_actions: totalActions });
 
-    return new Response(JSON.stringify({ 
+    return new Response(JSON.stringify({
       companies_processed: companyIds.length,
       total_actions: totalActions,
     }), {
@@ -120,18 +112,6 @@ async function processCompany(sb: any, companyId: string, rid: string): Promise<
   const dormantDays = config.dormant_days || DEFAULT_DORMANT_DAYS;
   const maxPerRun = Math.min(config.max_per_run || DEFAULT_MAX_PER_RUN, 10);
 
-  // Check credits
-  const { data: credits } = await sb
-    .from("ai_credits")
-    .select("balance_eur, calls_blocked")
-    .eq("company_id", companyId)
-    .single();
-
-  if (credits?.calls_blocked || (Number(credits?.balance_eur) || 0) < 0.50) {
-    log("info", "Skipping company — insufficient credits", { request_id: rid, company_id: companyId });
-    return 0;
-  }
-
   // Find dormant qualified leads
   const dormantDate = new Date(Date.now() - dormantDays * 24 * 60 * 60 * 1000).toISOString();
 
@@ -145,9 +125,7 @@ async function processCompany(sb: any, companyId: string, rid: string): Promise<
     .order("last_contact_at", { ascending: true })
     .limit(maxPerRun);
 
-  if (!dormantContacts || dormantContacts.length === 0) {
-    return 0;
-  }
+  if (!dormantContacts || dormantContacts.length === 0) return 0;
 
   const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
   if (!apiKey) {
@@ -155,114 +133,131 @@ async function processCompany(sb: any, companyId: string, rid: string): Promise<
     return 0;
   }
 
+  // ── Atomic credit reservation ──
+  const estimatedCost = dormantContacts.length * COST_PER_CALL_EUR;
+  const { data: reservation, error: reserveErr } = await sb.rpc("reserve_followup_credits", {
+    p_company_id: companyId,
+    p_amount_eur: estimatedCost,
+  });
+
+  if (reserveErr || !reservation?.success) {
+    log("info", "Skipping company — insufficient credits for batch", {
+      request_id: rid,
+      company_id: companyId,
+      available: reservation?.available,
+      required: estimatedCost,
+    });
+    return 0;
+  }
+
+  let creditsUsed = 0;
   let actionsPerformed = 0;
 
-  for (const contact of dormantContacts) {
-    try {
-      // Find an agent to use: prefer assigned_agent, then any active outbound agent
-      let agentData: any = null;
+  try {
+    for (const contact of dormantContacts) {
+      try {
+        let agentData: any = null;
 
-      if (contact.assigned_agent) {
-        const { data: a } = await sb.from("agents")
-          .select("id, el_agent_id, el_phone_number_id, outbound_enabled")
-          .eq("id", contact.assigned_agent)
-          .eq("outbound_enabled", true)
-          .single();
-        agentData = a;
-      }
+        if (contact.assigned_agent) {
+          const { data: a } = await sb.from("agents")
+            .select("id, el_agent_id, el_phone_number_id, outbound_enabled")
+            .eq("id", contact.assigned_agent)
+            .eq("outbound_enabled", true)
+            .single();
+          agentData = a;
+        }
 
-      if (!agentData) {
-        const { data: a } = await sb.from("agents")
-          .select("id, el_agent_id, el_phone_number_id, outbound_enabled")
-          .eq("company_id", companyId)
-          .eq("outbound_enabled", true)
-          .eq("status", "active")
-          .not("el_agent_id", "is", null)
-          .not("el_phone_number_id", "is", null)
-          .limit(1)
-          .single();
-        agentData = a;
-      }
+        if (!agentData) {
+          const { data: a } = await sb.from("agents")
+            .select("id, el_agent_id, el_phone_number_id, outbound_enabled")
+            .eq("company_id", companyId)
+            .eq("outbound_enabled", true)
+            .eq("status", "active")
+            .not("el_agent_id", "is", null)
+            .not("el_phone_number_id", "is", null)
+            .limit(1)
+            .single();
+          agentData = a;
+        }
 
-      if (!agentData?.el_agent_id || !agentData?.el_phone_number_id) {
-        log("info", "No outbound agent available for company", { request_id: rid, company_id: companyId });
-        break; // No point continuing for this company
-      }
+        if (!agentData?.el_agent_id || !agentData?.el_phone_number_id) {
+          log("info", "No outbound agent available for company", { request_id: rid, company_id: companyId });
+          break;
+        }
 
-      // Make outbound call
-      const callBody: Record<string, unknown> = {
-        agent_id: agentData.el_agent_id,
-        agent_phone_number_id: agentData.el_phone_number_id,
-        to_number: contact.phone.replace(/\s/g, ""),
-        conversation_initiation_client_data: {
-          dynamic_variables: {
-            nome_contatto: contact.full_name || "",
-            tipo_followup: "recupero_lead",
+        const callBody: Record<string, unknown> = {
+          agent_id: agentData.el_agent_id,
+          agent_phone_number_id: agentData.el_phone_number_id,
+          to_number: contact.phone.replace(/\s/g, ""),
+          conversation_initiation_client_data: {
+            dynamic_variables: {
+              nome_contatto: contact.full_name || "",
+              tipo_followup: "recupero_lead",
+            },
           },
-        },
-      };
+        };
 
-      const elRes = await fetch("https://api.elevenlabs.io/v1/convai/twilio/outbound-call", {
-        method: "POST",
-        headers: { "xi-api-key": apiKey, "Content-Type": "application/json" },
-        body: JSON.stringify(callBody),
-      });
-
-      if (elRes.ok) {
-        const elData = await elRes.json();
-
-        // Create conversation record
-        await sb.from("conversations").insert({
-          agent_id: agentData.id,
-          company_id: companyId,
-          contact_id: contact.id,
-          direction: "outbound",
-          phone_number: contact.phone,
-          status: "in_progress",
-          started_at: new Date().toISOString(),
-          el_conv_id: elData.call_sid || null,
-          metadata: { source: "auto_followup_agent" },
+        const elRes = await fetch("https://api.elevenlabs.io/v1/convai/twilio/outbound-call", {
+          method: "POST",
+          headers: { "xi-api-key": apiKey, "Content-Type": "application/json" },
+          body: JSON.stringify(callBody),
         });
 
-        // Update contact
-        const existingLog = contact.ai_actions_log || [];
-        await sb.from("contacts").update({
-          call_attempts: (contact.call_attempts || 0) + 1,
-          last_contact_at: new Date().toISOString(),
-          ai_actions_log: [...(Array.isArray(existingLog) ? existingLog : []), {
-            ts: new Date().toISOString(),
-            type: "auto_followup",
-            action: "outbound_call",
+        if (elRes.ok) {
+          const elData = await elRes.json();
+
+          await sb.from("conversations").insert({
             agent_id: agentData.id,
-          }].slice(-50),
-        }).eq("id", contact.id);
+            company_id: companyId,
+            contact_id: contact.id,
+            direction: "outbound",
+            phone_number: contact.phone,
+            status: "in_progress",
+            started_at: new Date().toISOString(),
+            el_conv_id: elData.call_sid || null,
+            metadata: { source: "auto_followup_agent" },
+          });
 
-        actionsPerformed++;
+          const existingLog = contact.ai_actions_log || [];
+          await sb.from("contacts").update({
+            call_attempts: (contact.call_attempts || 0) + 1,
+            last_contact_at: new Date().toISOString(),
+            ai_actions_log: [...(Array.isArray(existingLog) ? existingLog : []), {
+              ts: new Date().toISOString(),
+              type: "auto_followup",
+              action: "outbound_call",
+              agent_id: agentData.id,
+            }].slice(-50),
+          }).eq("id", contact.id);
 
-        log("info", "Auto-followup call initiated", {
-          request_id: rid,
-          company_id: companyId,
-          contact_id: contact.id,
-          contact_name: contact.full_name,
-        });
+          actionsPerformed++;
+          creditsUsed += COST_PER_CALL_EUR;
 
-        // Delay between calls
-        await new Promise(r => setTimeout(r, 2000));
-      } else {
-        const errText = await elRes.text();
-        log("warn", "Auto-followup call failed", {
-          request_id: rid,
-          contact_id: contact.id,
-          error: errText.slice(0, 200),
+          log("info", "Auto-followup call initiated", {
+            request_id: rid, company_id: companyId,
+            contact_id: contact.id, contact_name: contact.full_name,
+          });
+
+          await new Promise(r => setTimeout(r, 2000));
+        } else {
+          const errText = await elRes.text();
+          log("warn", "Auto-followup call failed", {
+            request_id: rid, contact_id: contact.id, error: errText.slice(0, 200),
+          });
+        }
+      } catch (err) {
+        log("warn", "Error processing contact for auto-followup", {
+          request_id: rid, contact_id: contact.id, error: (err as Error).message,
         });
       }
-    } catch (err) {
-      log("warn", "Error processing contact for auto-followup", {
-        request_id: rid,
-        contact_id: contact.id,
-        error: (err as Error).message,
-      });
     }
+  } finally {
+    // ── Release unused reserved credits ──
+    await sb.rpc("release_followup_credits", {
+      p_company_id: companyId,
+      p_used_eur: creditsUsed,
+      p_reserved_eur: estimatedCost,
+    });
   }
 
   // Update total_actions counter

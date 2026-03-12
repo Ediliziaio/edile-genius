@@ -1,8 +1,8 @@
 import { log } from "../_shared/utils.ts";
 
 /**
- * Post-Call Actions: Enhanced autonomous pipeline manager.
- * Auto-updates contact status, logs AI actions, removes from campaigns, schedules callbacks.
+ * Post-Call Actions: Atomic pipeline using process_post_call_atomic RPC.
+ * Single transaction: contact update + action log + campaign exclusion.
  */
 export async function runPostCallActions(
   sb: any,
@@ -25,7 +25,6 @@ export async function runPostCallActions(
   try {
     // 1. Find the contact by caller_number
     let contactId: string | null = null;
-    let currentContact: any = null;
 
     if (callerNumber) {
       const normalizedNumbers = [callerNumber];
@@ -37,14 +36,13 @@ export async function runPostCallActions(
 
       const { data: contacts } = await sb
         .from("contacts")
-        .select("id, status, ai_actions_log, call_attempts")
+        .select("id")
         .eq("company_id", companyId)
         .in("phone", normalizedNumbers)
         .limit(1);
 
       if (contacts && contacts.length > 0) {
         contactId = contacts[0].id;
-        currentContact = contacts[0];
       }
     }
 
@@ -58,21 +56,15 @@ export async function runPostCallActions(
 
       if (conv?.contact_id) {
         contactId = conv.contact_id;
-        const { data: c } = await sb.from("contacts")
-          .select("id, status, ai_actions_log, call_attempts")
-          .eq("id", contactId)
-          .single();
-        if (c) currentContact = c;
       } else if (conv?.caller_number && conv.caller_number !== callerNumber) {
         const { data: contacts } = await sb
           .from("contacts")
-          .select("id, status, ai_actions_log, call_attempts")
+          .select("id")
           .eq("company_id", companyId)
           .eq("phone", conv.caller_number)
           .limit(1);
         if (contacts && contacts.length > 0) {
           contactId = contacts[0].id;
-          currentContact = contacts[0];
         }
       }
     }
@@ -85,8 +77,8 @@ export async function runPostCallActions(
       return;
     }
 
-    // 3. Build AI action log entry
-    const actionLog = {
+    // 3. Build action log entry
+    const actionLogEntry = {
       ts: new Date().toISOString(),
       type: "post_call",
       outcome: outcomeAi,
@@ -94,103 +86,35 @@ export async function runPostCallActions(
       conversation_id: conversationId,
     };
 
-    const existingLog = Array.isArray(currentContact?.ai_actions_log) ? currentContact.ai_actions_log : [];
-    const updatedLog = [...existingLog, actionLog].slice(-50); // Keep last 50 entries
+    // 4. Execute atomic RPC — single transaction for all updates
+    const { data, error } = await sb.rpc("process_post_call_atomic", {
+      p_contact_id: contactId,
+      p_company_id: companyId,
+      p_outcome: outcomeAi,
+      p_next_step: nextStep || null,
+      p_conversation_id: conversationId || null,
+      p_action_log_entry: actionLogEntry,
+    });
 
-    // 4. Map AI outcome to contact status with enhanced logic
-    const statusMap: Record<string, string> = {
-      appointment: "qualified",
-      qualified: "qualified",
-      callback: "callback",
-      not_interested: "not_interested",
-      do_not_call: "do_not_call",
-      wrong_number: "invalid",
-      voicemail: "new",
-      no_answer: "new",
-    };
-
-    const newStatus = statusMap[outcomeAi];
-    const skipStatuses = ["new"]; // don't downgrade to "new"
-
-    const updateData: Record<string, any> = {
-      last_contact_at: new Date().toISOString(),
-      ai_actions_log: updatedLog,
-      call_attempts: (currentContact?.call_attempts || 0) + 1,
-    };
-
-    if (newStatus && !skipStatuses.includes(newStatus)) {
-      updateData.status = newStatus;
-
-      // ── APPOINTMENT: set next_call_at as reminder ──
-      if (outcomeAi === "appointment") {
-        // Set reminder for tomorrow 9am (confirmation call)
-        const reminder = new Date();
-        reminder.setDate(reminder.getDate() + 1);
-        if (reminder.getDay() === 0) reminder.setDate(reminder.getDate() + 1);
-        if (reminder.getDay() === 6) reminder.setDate(reminder.getDate() + 2);
-        reminder.setHours(9, 0, 0, 0);
-        updateData.next_call_at = reminder.toISOString();
-      }
-
-      // ── CALLBACK: schedule callback for next business day ──
-      if (outcomeAi === "callback") {
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        if (tomorrow.getDay() === 0) tomorrow.setDate(tomorrow.getDate() + 1);
-        if (tomorrow.getDay() === 6) tomorrow.setDate(tomorrow.getDate() + 2);
-        tomorrow.setHours(10, 0, 0, 0);
-        updateData.next_call_at = tomorrow.toISOString();
-      }
-
-      // ── NOT_INTERESTED / DO_NOT_CALL: remove from active campaigns ──
-      if (outcomeAi === "not_interested" || outcomeAi === "do_not_call") {
-        try {
-          // Get active campaigns for this company
-          const { data: activeCampaigns } = await sb
-            .from("campaigns")
-            .select("id")
-            .eq("company_id", companyId)
-            .in("status", ["active", "scheduled"]);
-
-          if (activeCampaigns && activeCampaigns.length > 0) {
-            const campaignIds = activeCampaigns.map((c: any) => c.id);
-            const { count } = await sb
-              .from("campaign_contacts")
-              .update({ status: "excluded", updated_at: new Date().toISOString() })
-              .eq("contact_id", contactId)
-              .in("campaign_id", campaignIds)
-              .in("status", ["pending", "retry"]);
-
-            if (count && count > 0) {
-              log("info", "Excluded contact from active campaigns", {
-                request_id: requestId,
-                contact_id: contactId,
-                campaigns_affected: count,
-              });
-            }
-          }
-        } catch (err) {
-          log("warn", "Failed to exclude from campaigns (non-blocking)", {
-            request_id: requestId,
-            error: (err as Error).message,
-          });
-        }
-      }
-
-      // Store next_step as note
-      if (nextStep) {
-        updateData.notes = nextStep;
-      }
+    if (error) {
+      throw new Error(`process_post_call_atomic failed: ${error.message}`);
     }
 
-    await sb.from("contacts").update(updateData).eq("id", contactId);
+    if (!data?.success) {
+      log("warn", "Post-call atomic RPC returned failure", {
+        request_id: requestId,
+        contact_id: contactId,
+        error: data?.error,
+      });
+      return;
+    }
 
-    log("info", "Post-call action completed", {
+    log("info", "Post-call action completed (atomic)", {
       request_id: requestId,
       contact_id: contactId,
-      new_status: updateData.status || "(unchanged)",
+      new_status: data.new_status,
       outcome_ai: outcomeAi,
-      actions_logged: updatedLog.length,
+      campaigns_excluded: data.campaigns_excluded,
     });
   } catch (err) {
     log("warn", "Post-call actions failed (non-blocking)", {
