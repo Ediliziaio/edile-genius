@@ -90,6 +90,8 @@ const TemplatePreventivo = lazy(() => import("./pages/app/TemplatePreventivo"));
 const Integrations = lazy(() => import("./pages/app/Integrations"));
 const Automations = lazy(() => import("./pages/app/Automations"));
 const OnboardingPage = lazy(() => import("./pages/app/Onboarding"));
+const CallMonitor = lazy(() => import("./pages/app/CallMonitor"));
+const ScheduledCalls = lazy(() => import("./pages/app/ScheduledCalls"));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-screen">
