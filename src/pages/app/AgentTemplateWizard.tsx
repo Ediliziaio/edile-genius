@@ -197,7 +197,7 @@ export default function AgentTemplateWizard() {
     }
   }, [agentType, navigate]);
 
-  if (agentType === "render") {
+  if (agentType === "render" || agentType === "whatsapp") {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
