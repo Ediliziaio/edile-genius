@@ -366,48 +366,64 @@ Angle: ${analisi.angolo_ripresa}`;
 
 function buildBlock_C(analisi: FotoAnalisi, infisso: NuovoInfisso): string {
   const sost = infisso.sostituzione;
-  const lines: string[] = ['[BLOCK C – SELECTIVE REPLACEMENT INSTRUCTIONS]', 'Replace ONLY the following elements (others: DO NOT TOUCH):'];
+  const items: string[] = [];
 
+  // Infisso
   if (sost.infissi) {
-    lines.push(`\n✅ REPLACE — Window/door frames and glass:`);
-    lines.push(`Remove COMPLETELY: ${analisi.materiale_attuale} ${analisi.colore_attuale} frame`);
-    lines.push(`Install NEW: ${MATERIAL_PHYSICS[infisso.materiale]}`);
+    const infissoColor = formatColorPrompt(
+      infisso.colore_mode ?? "ral",
+      infisso.colore_mode === "ral" && infisso.colore?.ral ? { ral: infisso.colore.ral, name: infisso.colore.nome, hex: infisso.colore.hex || "", group: "" } : null,
+      infisso.colore_wood_effect ?? null
+    );
+    items.push(`✅ REPLACE window/door frame (infisso) → new finish: ${infissoColor}`);
   } else {
-    lines.push(`\n🚫 DO NOT TOUCH — Keep existing window/door frames exactly as they are`);
+    items.push(`🚫 KEEP window/door frame exactly as in original photo`);
   }
 
+  // Cassonetto
   const c = infisso.cassonetto;
   if (sost.cassonetto) {
     if (c.azione === "rimuovi") {
-      lines.push(`\n✅ REPLACE — Roller shutter box (cassonetto): REMOVE completely`);
-      lines.push(`Fill wall above window with continuous masonry matching surroundings`);
+      items.push(`✅ REMOVE cassonetto (roller shutter box) — fill with continuous wall surface`);
     } else if (c.azione === "sostituisci" && c.materiale) {
-      lines.push(`\n✅ REPLACE — Roller shutter box (cassonetto):`);
-      lines.push(`Remove existing: ${analisi.presenza_cassonetto ? analisi.tipo_cassonetto : 'existing cassonetto'}`);
-      lines.push(`Install NEW: ${CASSONETTO_MATERIAL_DESC[c.materiale] || c.materiale}`);
-      if (c.colore) {
-        let colorLine = `Color: ${c.colore.nome}`;
-        if (c.colore.ral) colorLine += ` (RAL ${c.colore.ral})`;
-        lines.push(colorLine);
-      }
+      const cassColor = formatColorPrompt(
+        infisso.cass_colore_mode ?? c.colore_mode ?? "ral",
+        (infisso.cass_colore || (c.colore?.ral ? { ral: c.colore.ral, name: c.colore.nome, hex: c.colore.hex || "", group: "" } : null)),
+        infisso.cass_wood_effect ?? c.colore_wood_effect ?? null
+      );
+      items.push(`✅ REPLACE cassonetto (roller shutter box above window) → new finish: ${cassColor}`);
     } else {
-      lines.push(`\n🚫 DO NOT TOUCH — ${analisi.presenza_cassonetto ? 'Keep existing cassonetto exactly as in photo' : 'No cassonetto present — do not add one'}`);
+      items.push(`🚫 KEEP cassonetto exactly as in original photo`);
     }
   } else {
-    lines.push(`\n🚫 DO NOT TOUCH — ${analisi.presenza_cassonetto ? 'Keep existing cassonetto exactly as in photo' : 'No cassonetto present — do not add one'}`);
+    items.push(`🚫 ${analisi.presenza_cassonetto ? 'KEEP existing cassonetto exactly as in photo' : 'No cassonetto present — do not add one'}`);
   }
 
+  // Tapparella
   const t = infisso.tapparella;
   if (sost.tapparella) {
     if (t.azione === "rimuovi") {
-      lines.push(`\n✅ REPLACE — Roller shutter/blind (tapparella): REMOVE completely`);
-      lines.push(`Show bare window frame without any shutter system`);
+      items.push(`✅ REMOVE tapparella (roller shutter slats) completely`);
     } else if (t.azione === "sostituisci" && t.materiale) {
-      lines.push(`\n✅ REPLACE — Roller shutter/blind (tapparella):`);
-      lines.push(`Remove existing shutter system`);
-      lines.push(`Install NEW: ${TAPPARELLA_DESC[t.materiale] || t.materiale}`);
-      if (t.colore) {
-        let cDesc = t.colore.nome;
+      const tapColor = formatColorPrompt(
+        infisso.tap_colore_mode ?? t.colore_mode ?? "ral",
+        (infisso.tap_colore || (t.colore?.ral ? { ral: t.colore.ral, name: t.colore.nome, hex: t.colore.hex || "", group: "" } : null)),
+        infisso.tap_wood_effect ?? t.colore_wood_effect ?? null
+      );
+      items.push(`✅ REPLACE tapparella (roller shutter slats) → new finish: ${tapColor}`);
+    } else {
+      items.push(`🚫 KEEP tapparella exactly as in original photo`);
+    }
+  } else {
+    items.push(`🚫 ${analisi.presenza_tapparella ? 'KEEP existing shutter exactly as in photo' : 'No shutter present — do not add one'}`);
+  }
+
+  return `[BLOCK C – REPLACEMENT MANIFEST]
+EXACTLY these elements must change — NOTHING else:
+${items.join("\n")}
+
+⚠️ CRITICAL RULE: Every element marked 🚫 KEEP must be pixel-identical to the original.
+⚠️ CRITICAL RULE: Every element marked ✅ REPLACE must be rendered with the EXACT specified finish.`;
         if (t.colore.ral) cDesc += ` (RAL ${t.colore.ral})`;
         lines.push(`Slat/blade color: ${cDesc}`);
       }
