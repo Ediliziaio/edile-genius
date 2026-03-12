@@ -1,7 +1,13 @@
 // ═══════════════════════════════════════════════════════════════════
-// PROMPT MASTER — Sistema a Blocchi (A–L) per Sostituzione Strutturale Infissi
-// Versione: 3.0.0
+// PROMPT MASTER — Sistema a Blocchi (A–M) per Sostituzione Strutturale Infissi
+// Versione: 5.0.0
 // ═══════════════════════════════════════════════════════════════════
+
+import type { ColorMode } from "@/components/render/RalColorPicker";
+import type { WoodEffect } from "@/components/render/RalColorPicker";
+import { formatColorPrompt } from "@/components/render/RalColorPicker";
+import type { ManigliaStile } from "@/components/render/ManigliaSelector";
+import { MANIGLIE } from "@/components/render/ManigliaSelector";
 
 // ─── Type Enums ───────────────────────────────────────────────────
 
@@ -49,14 +55,26 @@ export type StileEdificio =
 
 export type ProfiloTelaioSize = "70mm" | "82mm" | "92mm";
 export type ProfiloForma = "squadrato" | "arrotondato" | "europeo";
+
+// Legacy types kept for backward compat
 export type ManigliaType = "leva_alluminio" | "leva_acciaio" | "pomolo" | "alzante";
 export type ColoreFerratura = "argento" | "nero_opaco" | "inox" | "bronzo" | "oro";
 
-// ─── NEW v3 Types ─────────────────────────────────────────────────
+// ─── v5 Types ─────────────────────────────────────────────────────
 
 export type CernieraColore = "argento" | "nero_opaco" | "inox" | "bronzo" | "oro" | "uguale_maniglia";
 export type CassonettoMateriale = "pvc_tradizionale" | "pvc_slim" | "pvc_integrato" | "alluminio_coibentato";
 export type TapparellaMateriale = "pvc_avvolgibile" | "alluminio_avvolgibile" | "microforata" | "persiana_alluminio" | "veneziana_integrata" | "nessuna";
+
+export type CinghiaMode = "con_cinghia" | "senza_cinghia" | "con_catenella" | "con_manovella";
+
+export type StileTelaio =
+  | "nodo_ridotto"
+  | "nodo_ridotto_maniglia_centrale"
+  | "minimal_squadrato"
+  | "classico_arrotondato"
+  | "europeo_classico"
+  | "arco_sagomato";
 
 export type SostituzioneSelezione = {
   infissi: boolean;
@@ -126,6 +144,7 @@ export interface TapparellaConfig {
   colore?: ColoreConfig;
   colore_guide?: ColoreConfig;
   stato_render?: "aperta" | "chiusa" | "mezza";
+  cinghia?: CinghiaMode;
   prompt_fragment?: string;
 }
 
@@ -140,13 +159,27 @@ export interface OscuranteConfig {
 }
 
 export interface FerramentaConfig {
-  maniglia: ManigliaType;
-  colore: ColoreFerratura;
+  // Legacy fields
+  maniglia?: ManigliaType;
+  colore?: ColoreFerratura;
+  // v5 fields
+  maniglia_stile?: ManigliaStile;
+  colore_hardware_id?: string;
+  colore_hardware_finish?: string;
+}
+
+export interface TrasformazioneApertura {
+  attiva: boolean;
+  tipo_originale: TipoApertura;
+  tipo_target: TipoApertura;
+  num_ante_target?: number;
 }
 
 export interface NuovoInfisso {
   materiale: MaterialeNuovo;
   colore: ColoreConfig;
+  colore_mode?: ColorMode;
+  colore_wood_effect?: WoodEffect;
   profilo: ProfiloTelaio;
   cerniere: CerniereConfig;
   vetro: VetroConfig;
@@ -156,6 +189,8 @@ export interface NuovoInfisso {
   ferramenta: FerramentaConfig;
   num_ante?: number;
   sostituzione: SostituzioneSelezione;
+  stile_telaio?: StileTelaio;
+  trasformazione?: TrasformazioneApertura;
 }
 
 export interface RenderOptions {
@@ -213,7 +248,7 @@ const APERTURA_DESCRIPTION: Record<TipoApertura, string> = {
   cassonetto_integrato: "window with integrated roller box — standard opening sash below, above the frame top rail a visible box housing containing the rolled-up shutter, box face-panel protrudes 60-200mm from wall plane, typically same color as frame",
 };
 
-// ─── NEW v3 Dictionaries ──────────────────────────────────────────
+// ─── v5 Dictionaries ──────────────────────────────────────────────
 
 const CASSONETTO_MATERIAL_DESC: Record<CassonettoMateriale, string> = {
   pvc_tradizionale: "traditional PVC roller shutter housing (cassonetto PVC standard) — rectangular box profile protruding 160-200mm above window top rail, face panel approximately 200mm tall, smooth matte PVC surface with subtle panel seam line, bottom strip slightly recessed where shutter curtain exits, same extrusion quality as PVC window frame",
@@ -246,6 +281,22 @@ const CERNIERA_COLORE_DESC: Record<CernieraColore, string> = {
   uguale_maniglia: "same finish as the window handle",
 };
 
+const CINGHIA_DESC: Record<CinghiaMode, string> = {
+  con_cinghia: "Manual strap operation (cinghia manuale): show a flat 20-25mm wide fabric strap exiting the bottom of the cassonetto through a small rectangular strap guide (passante/archetto) mounted on the wall face adjacent to the window, approximately 120-150cm below cassonetto level. The strap hangs visibly down the wall face and may have a winding reel mounted on the wall.",
+  senza_cinghia: "Electric motor operation (motorizzato): NO visible strap, NO strap guide on wall. Cassonetto and window appear completely clean on exterior. The electric motor is concealed inside the cassonetto housing — completely invisible from exterior.",
+  con_catenella: "Chain operation (catenella): show a continuous loop ball-chain on one side of the shutter assembly, running through a small chain guide mounted at the side frame or wall jamb. Chain diameter approximately 4-5mm, metallic appearance.",
+  con_manovella: "Crank handle operation (manovella): show a small folding crank handle receiver port (presa manovella) on the cassonetto face or side. The crank itself is not shown (stored indoors) but the receiver socket is visible.",
+};
+
+const STILE_TELAIO_DESC: Record<StileTelaio, string> = {
+  nodo_ridotto: "ULTRA-SLIM NODO RIDOTTO: frame sight lines 25-35mm max, sash and fixed frame nearly flush, nearly frameless modern appearance",
+  nodo_ridotto_maniglia_centrale: "ULTRA-SLIM NODO RIDOTTO WITH CENTRAL HANDLE: Frame sight lines: 25-35mm maximum. Sash nearly flush with fixed frame, minimal rebate step (~3mm). Central handle: horizontal bar or T-grip centered on bottom rail — NOT on side stile. Visual result: glass panels appear nearly frameless, completely symmetrical facade.",
+  minimal_squadrato: "sharp-edged minimal frame, 90° squared profile, no chamfers or bevels, Bauhaus-inspired",
+  classico_arrotondato: "traditional rounded-edge profile, 3-5mm radius, warm residential Italian style",
+  europeo_classico: "classic European profile, traditional rebate, slight outer bevel",
+  arco_sagomato: "arched/shaped frame following curved opening geometry",
+};
+
 // ─── Material Distinction ─────────────────────────────────────────
 
 export function getMaterialDistinction(
@@ -267,7 +318,7 @@ export function getMaterialDistinction(
   return `Remove the existing ${oldDesc[oldMat] || "old frame"} completely. Replace it with a brand new ${MATERIAL_PHYSICS[newMat]}. The material change should be clearly visible — this is a full structural replacement, not a repaint or overlay.`;
 }
 
-// ─── Block Builders (A–L) v3 ──────────────────────────────────────
+// ─── Block Builders (A–M) v5 ──────────────────────────────────────
 
 function buildBlock_A(): string {
   return `[BLOCK A – ROLE & MISSION]
@@ -299,7 +350,6 @@ function buildBlock_C(analisi: FotoAnalisi, infisso: NuovoInfisso): string {
   const sost = infisso.sostituzione;
   const lines: string[] = ['[BLOCK C – SELECTIVE REPLACEMENT INSTRUCTIONS]', 'Replace ONLY the following elements (others: DO NOT TOUCH):'];
 
-  // Infissi
   if (sost.infissi) {
     lines.push(`\n✅ REPLACE — Window/door frames and glass:`);
     lines.push(`Remove COMPLETELY: ${analisi.materiale_attuale} ${analisi.colore_attuale} frame`);
@@ -308,7 +358,6 @@ function buildBlock_C(analisi: FotoAnalisi, infisso: NuovoInfisso): string {
     lines.push(`\n🚫 DO NOT TOUCH — Keep existing window/door frames exactly as they are`);
   }
 
-  // Cassonetto
   const c = infisso.cassonetto;
   if (sost.cassonetto) {
     if (c.azione === "rimuovi") {
@@ -330,7 +379,6 @@ function buildBlock_C(analisi: FotoAnalisi, infisso: NuovoInfisso): string {
     lines.push(`\n🚫 DO NOT TOUCH — ${analisi.presenza_cassonetto ? 'Keep existing cassonetto exactly as in photo' : 'No cassonetto present — do not add one'}`);
   }
 
-  // Tapparella
   const t = infisso.tapparella;
   if (sost.tapparella) {
     if (t.azione === "rimuovi") {
@@ -368,24 +416,39 @@ function buildBlock_D(infisso: NuovoInfisso): string {
   }
 
   const mat = MATERIAL_PHYSICS[infisso.materiale];
-  const col = infisso.colore;
-  let colorDesc = col.nome;
-  if (col.ral) colorDesc += ` (RAL ${col.ral})`;
-  if (col.ncs) colorDesc += ` (NCS ${col.ncs})`;
+  const colorMode = infisso.colore_mode || "ral";
 
-  const finituraMap: Record<string, string> = {
-    liscio_opaco: "smooth matte finish — no visible sheen or specular highlight",
-    liscio_lucido: "smooth gloss finish — clear specular highlight visible on frame face",
-    venatura_legno: "wood-grain texture laminate (woodgrain foil) — subtle grain lines running along frame length",
-    spazzolato: "brushed metallic finish with directional micro-lines",
-    satinato: "satin finish with soft, diffused light reflection",
-    goffrato: "embossed/textured surface with tactile micro-pattern",
-  };
+  // Use v5 formatColorPrompt if available
+  const colorDesc = formatColorPrompt(
+    colorMode,
+    colorMode === "ral" && infisso.colore ? { ral: infisso.colore.ral || "9016", name: infisso.colore.nome, hex: infisso.colore.hex || "#F1F0EB", group: "" } : null,
+    colorMode === "legno" && infisso.colore_wood_effect ? infisso.colore_wood_effect : null
+  );
 
-  return `[BLOCK D – NEW FRAME MATERIAL & COLOR]
+  let block = `[BLOCK D – MATERIAL & COLOR SPECIFICATION]
 Material: ${mat}
-Color: ${colorDesc}
-Surface finish: ${finituraMap[col.finitura] || col.finitura}`;
+Color/finish: ${colorDesc}`;
+
+  if (colorMode === "legno") {
+    block += `
+
+IMPORTANT — WOOD EFFECT RENDERING RULES:
+- Do NOT render solid flat color — the frame MUST show visible wood grain texture
+- Grain runs parallel to the frame members (vertical on stiles, horizontal on rails)
+- The grain texture is embossed/subtle, NOT painted-on
+- The effect is a PVC laminate foil — the frame is structurally PVC but visually wood
+- Do NOT add knots or imperfections unless the specific wood type is known for them (Pine, Douglas)
+- Keep the grain realistic but not exaggerated`;
+  } else {
+    block += `
+
+IMPORTANT — SOLID COLOR RENDERING RULES:
+- Render as smooth, flat, consistent RAL color
+- No grain, no wood texture
+- Correct specular highlights for the material (PVC: matte-satin, aluminium: satin-metallic)`;
+  }
+
+  return block;
 }
 
 function buildBlock_E(infisso: NuovoInfisso): string {
@@ -399,11 +462,10 @@ function buildBlock_E(infisso: NuovoInfisso): string {
     "82mm": "82mm premium profile with 5 internal chambers, enhanced thermal insulation (Uw ~1.0)",
     "92mm": "92mm Passivhaus-grade profile with 7 internal chambers, maximum thermal insulation (Uw ~0.7)",
   };
-  const formaDesc: Record<ProfiloForma, string> = {
-    squadrato: "squared/angular edges with sharp 90° corners",
-    arrotondato: "softly rounded edges with radius corners",
-    europeo: "classic European profile with slight bevel and gentle curves",
-  };
+
+  const stile = infisso.stile_telaio || "classico_arrotondato";
+  const stileDesc = STILE_TELAIO_DESC[stile] || stile;
+  const isCentrale = stile === "nodo_ridotto_maniglia_centrale";
 
   const numAnte = infisso.num_ante || 1;
   const cer = infisso.cerniere;
@@ -412,18 +474,24 @@ function buildBlock_E(infisso: NuovoInfisso): string {
   const cerTipoDesc = CERNIERA_DESC[cer.tipo] || cer.tipo;
   const cerColoreDesc = CERNIERA_COLORE_DESC[cer.colore] || cer.colore;
 
-  return `[BLOCK E – FRAME PROFILE & HINGE GEOMETRY]
+  return `[BLOCK E – FRAME PROFILE, GEOMETRY & STYLE]
 Profile system: ${sizeDesc[p.dimensione]}
-Edge shape: ${formaDesc[p.forma]}
+Style: ${stileDesc}
 Number of opening panels (sashes): ${numAnte}
 
-HINGE DETAIL (technically accurate Italian window standard):
+HINGE SPECIFICATION:
 Total hinges: ${cerniereTotal} (${cernierePerLato} per sash × ${numAnte} sash${numAnte > 1 ? 'es' : ''})
 Hinge type: ${cerTipoDesc}
 Hinge color/finish: ${cerColoreDesc}
-Hinge placement rule: place hinges at 1/5 and 4/5 of sash height (top hinge ~200mm from top rail, bottom hinge ~200mm from bottom rail)
-Each hinge: ${cer.tipo === 'invisibile' ? 'fully recessed — NOT visible from exterior' : 'two plates visible on hinge-side stile, ~50×35mm each, 3 screws per plate'}
-Cast correct shadow of hinge knuckle onto frame face and wall rebate.`;
+Position per sash: top hinge at 15-20% of sash height, bottom hinge at 80-85% of sash height
+${cer.tipo !== 'invisibile' ? `Hinge plate: approx 50×35mm, ${cer.num_per_anta === 2 ? '2 screws/plate' : '3 screws/plate'}` : ''}
+${cer.tipo === 'invisibile' ? 'Fully concealed — NOT visible from exterior' : 'Two plates visible on hinge-side stile'}
+Cast correct shadow of hinge knuckle onto frame face and wall rebate.
+${isCentrale ? `
+CENTRAL HANDLE PLACEMENT:
+Handle MUST be centered on bottom rail (horizontal center of glass panel)
+NO handle on side stile — if rendered on side stile it is WRONG
+Handle appears symmetric when viewed frontally` : ''}`;
 }
 
 function buildBlock_F(infisso: NuovoInfisso): string {
@@ -448,6 +516,21 @@ function buildBlock_G(infisso: NuovoInfisso): string {
   }
 
   const f = infisso.ferramenta;
+
+  // v5: use detailed maniglia stile if available
+  if (f.maniglia_stile) {
+    const manigliaEntry = MANIGLIE.find(x => x.stile === f.maniglia_stile);
+    const manigliaPrompt = manigliaEntry?.prompt_fragment || `standard lever handle, ${f.colore_hardware_finish || "brushed stainless steel finish"}`;
+
+    return `[BLOCK G – HARDWARE DETAILS]
+Handle: ${manigliaPrompt}
+Handle finish: ${f.colore_hardware_finish || "brushed stainless steel"}
+Handle position: centered vertically on meeting stile for battente windows, lower-third for portafinestre
+Espagnolette lock: multi-point locking system visible at frame rebate edge
+All hardware must cast correct shadows matching scene lighting direction`;
+  }
+
+  // Legacy fallback
   const manigliaDesc: Record<ManigliaType, string> = {
     leva_alluminio: "aluminum lever handle — die-cast aluminum body with smooth matte or anodized finish, rectangular cross-section grip approximately 130mm long, 8mm square spindle",
     leva_acciaio: "stainless steel lever handle — precision-machined 316 stainless steel, satin brushed or mirror polish finish, slim ergonomic grip 120-140mm, premium minimalist aesthetic",
@@ -463,8 +546,8 @@ function buildBlock_G(infisso: NuovoInfisso): string {
   };
 
   return `[BLOCK G – HARDWARE DETAILS]
-Handle: ${manigliaDesc[f.maniglia]}
-Handle color: ${coloreDesc[f.colore]}
+Handle: ${manigliaDesc[f.maniglia || "leva_alluminio"]}
+Handle color: ${coloreDesc[f.colore || "argento"]}
 Handle position: centered on the meeting stile (vertical center of sash height) for battente windows, lower third for portafinestre
 Espagnolette lock bar: concealed inside frame rebate, only the multi-point locking pins (3-4) visible at frame edge when window is shown open
 Corner connectors: thin aluminum corner keys inside profile — not visible externally
@@ -536,6 +619,12 @@ Remove the existing shutter/blind system completely. Show bare window frame with
       lines.push("FULLY CLOSED STATE: shutter curtain completely lowered, covering the ENTIRE glass area from cassonetto bottom to windowsill level. Full slat texture visible across entire curtain face. Bottom bar resting on or near sill.");
     }
     lines.push("Guide channel width: approximately 16-20mm × 20-25mm deep, mounted on wall face or frame edge. Guide channel extends from cassonetto bottom to window sill level (or floor for portafinestre). Ensure guide channels are straight, parallel, and symmetrically positioned on both sides.");
+
+    // v5: Cinghia/motor configuration
+    if (t.cinghia) {
+      lines.push(`\nStrap/motor configuration: ${CINGHIA_DESC[t.cinghia]}`);
+    }
+
     return lines.join("\n");
   }
 
@@ -583,6 +672,37 @@ NEVER DO any of the following — instant disqualification:
 - ✗ Make the result look like a 3D render — must be indistinguishable from real photograph`;
 }
 
+function buildBlock_M(analisi: FotoAnalisi, infisso: NuovoInfisso): string | null {
+  const t = infisso.trasformazione;
+  if (!t || !t.attiva) return null;
+
+  const TRANSFORMATION_INSTRUCTIONS: Partial<Record<string, string>> = {
+    "battente_2_ante→battente_1_anta": `Convert from double-leaf to single-leaf casement.
+Remove the central mullion. Single sash occupies FULL opening width.
+One set of hinges on left OR right side. One handle on opposite stile.
+Opening size stays identical.`,
+    "battente_2_ante→scorrevole": `Convert from inward-opening casement to horizontal sliding window.
+Remove both casement sashes. Install sliding track top and bottom. Two sliding panels each ~50% of total opening width. No hinges visible.`,
+    "portafinestra→scorrevole_alzante": `Convert from French door to lift-and-slide door.
+Panels align flush with frame when closed. Very low-profile 15mm lift-and-slide threshold. Heavy-duty lift handle on leading panel edge. No hinges on side frame. Maximum glass area.`,
+    "battente_1_anta→anta_ribalta": `Convert single casement to tilt-and-turn.
+Same frame profile. Add tilt-and-turn handle (pointing sideways for closed position). Add friction scissors-arm stays on both side stiles. Bottom hinge: tilt pivot at bottom center.`,
+    "battente_3_ante→battente_2_ante": `Convert triple-leaf to double-leaf casement.
+Remove center fixed panel and mullion. Two opening sashes each ~50% of opening width. Central rebate line where sashes meet. Both sashes with handles.`,
+  };
+
+  const key = `${t.tipo_originale}→${t.tipo_target}`;
+  const specificInstructions = TRANSFORMATION_INSTRUCTIONS[key] || "";
+
+  return `[BLOCK M – OPENING TYPE TRANSFORMATION]
+⚠ IMPORTANT: This render shows a TYPE TRANSFORMATION — the window opening type is being CHANGED.
+CURRENT type (in photo): ${APERTURA_DESCRIPTION[t.tipo_originale] || t.tipo_originale}
+NEW type to render: ${APERTURA_DESCRIPTION[t.tipo_target] || t.tipo_target}
+${specificInstructions ? `\nTransformation details:\n${specificInstructions}` : ""}
+Transformation: completely remove current configuration. Install new type within SAME rough opening dimensions. Masonry opening stays exactly the same — only the window product changes. Adjust hardware, hinges, and handles to match the new type.
+CRITICAL: Keep IDENTICAL — wall opening, wall material, lintel, sill, all surroundings. ONLY the window product inside the opening changes.`;
+}
+
 // ─── Main Builder ─────────────────────────────────────────────────
 
 export interface PromptResult {
@@ -615,20 +735,36 @@ export function buildRenderPromptV2(
     L: buildBlock_L(),
   };
 
+  // v5: Block M (transformation)
+  const blockM = buildBlock_M(foto_analisi, nuovo_infisso);
+  if (blockM) {
+    blocks.M = blockM;
+  }
+
   const systemPrompt = blocks.A;
 
   const userParts = [blocks.B, blocks.C, blocks.D, blocks.E, blocks.F, blocks.G, blocks.H, blocks.I, blocks.J, blocks.K, blocks.L];
+  if (blockM) userParts.push(blockM);
   if (options?.notes) {
     userParts.push(`[ADDITIONAL CLIENT NOTES]\n${options.notes}`);
   }
   const userPrompt = userParts.join("\n\n");
 
   const negativePrompt = [
-    "cartoon", "illustration", "sketch", "drawing", "watermark", "text overlay",
-    "blurry", "distorted perspective", "different building", "changed wall color",
-    "unrealistic lighting", "3D render look", "CGI artifacts", "plastic fake appearance",
-    "oversaturated colors", "missing hinges on opening windows", "wrong number of panels",
-    "shutters not requested", "cassonetto added without request",
+    // Generali
+    "cartoon", "illustration", "sketch", "watermark", "text overlay",
+    "3D render", "CGI look", "oversaturated", "HDR effect", "vignette",
+    // Finestre
+    "wrong number of window panes", "handles on wrong side", "hinges on fixed panels",
+    "missing hinges", "wrong hinge count", "shutters not requested", "cassonetto not requested",
+    "strap visible on motorized window",
+    // Colore/finitura
+    "wood grain on RAL solid color", "flat solid color on wood-effect foil", "wrong wood species grain pattern",
+    // Trasformazione
+    "changed wall opening size", "moved lintel", "different rough opening",
+    // Anti-collateral-damage
+    "changed wall color", "changed facade", "different building style",
+    "altered perspective", "different weather", "different lighting",
   ].join(", ");
 
   const fullText = systemPrompt + userPrompt;
@@ -637,7 +773,7 @@ export function buildRenderPromptV2(
     systemPrompt,
     userPrompt,
     negativePrompt,
-    promptVersion: "3.0.0",
+    promptVersion: "5.0.0",
     charCount: fullText.length,
     blocks,
   };
