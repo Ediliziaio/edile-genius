@@ -4144,6 +4144,7 @@ export type Database = {
       increment_installs_count: { Args: { tpl_id: string }; Returns: undefined }
       my_company: { Args: never; Returns: string }
       my_role: { Args: never; Returns: Database["public"]["Enums"]["app_role"] }
+      release_campaign_lock: { Args: { p_lock_id: number }; Returns: boolean }
       topup_credits: {
         Args: { _amount_eur: number; _company_id: string }
         Returns: number
