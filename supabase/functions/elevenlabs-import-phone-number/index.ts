@@ -28,6 +28,10 @@ Deno.serve(async (req) => {
     const { phone_number, label, twilio_sid, twilio_token, agent_id } = await req.json();
     const company_id = profile.company_id;
 
+    if (!phone_number || !twilio_sid || !twilio_token) {
+      return new Response(JSON.stringify({ error: "phone_number, twilio_sid, twilio_token richiesti" }), { status: 400, headers: corsHeaders });
+    }
+
     const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
     if (!apiKey) return new Response(JSON.stringify({ error: "ELEVENLABS_API_KEY non configurata" }), { status: 500, headers: corsHeaders });
 
