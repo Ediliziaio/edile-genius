@@ -435,10 +435,11 @@ function buildBlock_F(infisso: NuovoInfisso): string {
   return `[BLOCK F – GLASS UNIT]
 ${v.prompt_fragment || v.tipo}
 Technical rendering requirements:
-- Thin greenish tint at glass edge (typical of multi-pane float glass)
+- Thin greenish tint at glass edge (typical of multi-pane low-iron or standard float glass)
 - Specular highlight/reflection matching scene light source direction
 - Interior appears as dark/neutral (curtains or room interior barely visible)
-- Spacer bar (15-16mm) visible only at perimeter inside rebate`;
+- Air gap line between panes invisible from exterior at normal viewing angle
+- Spacer bar (15-16mm aluminum or warm-edge) visible only at perimeter inside rebate`;
 }
 
 function buildBlock_G(infisso: NuovoInfisso): string {
