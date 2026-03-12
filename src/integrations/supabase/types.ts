@@ -3666,6 +3666,47 @@ export type Database = {
           },
         ]
       }
+      weekly_reports_log: {
+        Row: {
+          company_id: string
+          created_at: string
+          error_message: string | null
+          id: string
+          retry_count: number
+          sent_at: string | null
+          status: string
+          week_start: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          retry_count?: number
+          sent_at?: string | null
+          status?: string
+          week_start: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          retry_count?: number
+          sent_at?: string | null
+          status?: string
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_reports_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       whatsapp_contacts: {
         Row: {
           company_id: string
@@ -4144,10 +4185,37 @@ export type Database = {
       increment_installs_count: { Args: { tpl_id: string }; Returns: undefined }
       my_company: { Args: never; Returns: string }
       my_role: { Args: never; Returns: Database["public"]["Enums"]["app_role"] }
+      process_post_call_atomic: {
+        Args: {
+          p_action_log_entry?: Json
+          p_company_id: string
+          p_contact_id: string
+          p_conversation_id?: string
+          p_next_step?: string
+          p_outcome: string
+        }
+        Returns: Json
+      }
       release_campaign_lock: { Args: { p_lock_id: number }; Returns: boolean }
+      release_followup_credits: {
+        Args: {
+          p_company_id: string
+          p_reserved_eur: number
+          p_used_eur: number
+        }
+        Returns: undefined
+      }
+      reserve_followup_credits: {
+        Args: { p_amount_eur: number; p_company_id: string }
+        Returns: Json
+      }
       topup_credits: {
         Args: { _amount_eur: number; _company_id: string }
         Returns: number
+      }
+      try_acquire_campaign_lock: {
+        Args: { p_lock_id: number }
+        Returns: boolean
       }
     }
     Enums: {
