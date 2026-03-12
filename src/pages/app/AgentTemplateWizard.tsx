@@ -22,12 +22,15 @@ const VOCAL_SLUGS = [
   "vocale-custom", "richiama-lead-ads", "qualifica-serramenti", "qualifica-ristrutturazione",
   "qualifica-fotovoltaico", "conferma-appuntamenti", "recupera-preventivi", "recupera-noshow",
   "followup-sopralluogo", "raccolta-recensioni", "verifica-soddisfazione",
-  "primo-contatto-wa", "followup-preventivi-wa", "assistente-whatsapp",
   // legacy slugs
   "qualifica-infissi", "inbound-campagne", "conferma-sopralluogo",
   "recupero-preventivi", "recupero-noshow", "recensioni-post-lavoro",
 ];
 const RENDER_SLUGS = ["render-infissi"];
+const WHATSAPP_SLUGS = [
+  "primo-contatto-wa", "followup-preventivi-wa", "assistente-whatsapp",
+  "whatsapp-preventivi",
+];
 
 function getAgentType(slug: string): string {
   if (VOCAL_SLUGS.includes(slug)) return "vocal";
