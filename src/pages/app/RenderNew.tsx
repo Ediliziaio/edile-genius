@@ -356,7 +356,25 @@ export default function RenderNew() {
       original_image_height: imageNaturalHeight,
     };
 
-    // Update session with V5 config + analysis
+    // v6: Build debug prompt text (before sending)
+    try {
+      const { buildRenderPromptV2 } = await import("@/modules/render/lib/promptBuilder");
+      const debugConfig = {
+        foto_analisi: analysisData || {} as any,
+        nuovo_infisso: nuovoInfisso as any,
+        options: { notes },
+      };
+      const { systemPrompt: dbgSys, userPrompt: dbgUser, negativePrompt: dbgNeg } = buildRenderPromptV2(debugConfig, "gemini");
+      setDebugPromptText(
+        `=== SYSTEM PROMPT ===\n${dbgSys}\n\n` +
+        `=== USER PROMPT ===\n${dbgUser}\n\n` +
+        `=== NEGATIVE PROMPT ===\n${dbgNeg}\n\n` +
+        `=== IMAGE DIMENSIONS ===\n` +
+        `Original: ${imageNaturalWidth}×${imageNaturalHeight}px`
+      );
+    } catch { /* non-blocking */ }
+
+    // Update session with v6 config + analysis
     await supabase.from("render_sessions").update({
       config: { ...config, notes, fragments, nuovo_infisso: nuovoInfisso, options: { notes } } as any,
       foto_analisi: (analysisData || {}) as any,
@@ -367,7 +385,7 @@ export default function RenderNew() {
 
     try {
       const { error } = await supabase.functions.invoke("generate-render", {
-        body: { session_id: sessionId },
+        body: { session_id: sessionId, target_width: imageNaturalWidth, target_height: imageNaturalHeight },
       });
       if (error) throw error;
     } catch (err: any) {
