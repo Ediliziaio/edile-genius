@@ -655,6 +655,18 @@ export default function ContactsPage() {
 
       <ContactDetailPanel contact={selectedContact} open={detailOpen} onOpenChange={setDetailOpen} onUpdated={() => { invalidate(); }} onDeleted={() => { invalidate(); setSelectedIds(new Set()); }} />
 
+      {callModalContact && companyId && (
+        <CallContactModal
+          contact={callModalContact}
+          companyId={companyId}
+          open={!!callModalContact}
+          onOpenChange={(open) => !open && setCallModalContact(null)}
+          onCallStarted={() => {
+            invalidate();
+          }}
+        />
+      )}
+
       {/* Create Dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent className="bg-white border-ink-200 max-w-lg max-h-[85vh] overflow-y-auto">
