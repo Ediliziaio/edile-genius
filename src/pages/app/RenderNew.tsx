@@ -69,7 +69,7 @@ export default function RenderNew() {
   const [status, setStatus] = useState<string>("pending");
   const [resultUrls, setResultUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
-
+  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState<string>("");
   // V2 state
   const [analysisData, setAnalysisData] = useState<FotoAnalisi | null>(null);
   const [analysisLoading, setAnalysisLoading] = useState(false);
