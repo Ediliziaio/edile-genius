@@ -1032,11 +1032,14 @@ export default function RenderNew() {
           {nessunElementoSelezionato && (
             <p className="text-sm text-destructive text-center">⚠ Seleziona almeno un elemento da sostituire</p>
           )}
+          {!analysisData && !analysisLoading && analysisError && (
+            <p className="text-sm text-destructive text-center">⚠ L'analisi foto è necessaria per generare il render. Riprova l'analisi dalla sezione sopra.</p>
+          )}
           <Button
             className="w-full"
             size="lg"
             onClick={startRender}
-            disabled={nessunElementoSelezionato || analysisLoading}
+            disabled={nessunElementoSelezionato || analysisLoading || (!analysisData && !analysisLoading && !!analysisError)}
           >
             {analysisLoading ? (
               <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Analisi in corso...</>
