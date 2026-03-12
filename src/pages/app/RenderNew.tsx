@@ -312,8 +312,8 @@ export default function RenderNew() {
 
     // Update session with V5 config + analysis
     await supabase.from("render_sessions").update({
-      config: { ...config, notes, fragments, nuovo_infisso: nuovoInfisso, options: { notes } },
-      foto_analisi: analysisData || {},
+      config: { ...config, notes, fragments, nuovo_infisso: nuovoInfisso, options: { notes } } as any,
+      foto_analisi: (analysisData || {}) as any,
       status: "queued",
     }).eq("id", sessionId);
 
