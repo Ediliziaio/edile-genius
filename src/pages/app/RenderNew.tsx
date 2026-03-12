@@ -580,7 +580,7 @@ export default function RenderNew() {
 
           {/* ── SEZIONE 3: Configura Cassonetto (condizionale) ── */}
           {sostituzione.cassonetto && (
-            <div className="border-t pt-4">
+            <div className="border-l-2 border-primary/20 pl-4">
               <Label className="text-sm font-semibold mb-3 block">📦 Configura Cassonetto</Label>
               <div className="grid grid-cols-3 gap-2 mb-3">
                 {[
