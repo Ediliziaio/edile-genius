@@ -3,7 +3,7 @@ import { useCompanyId } from "@/hooks/useCompanyId";
 import { useQuery } from "@tanstack/react-query";
 import { SMART_ACTIONS_DEFAULTS } from "@/lib/automation-defaults";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import {
   Bot, ArrowRight, PhoneOff, CreditCard, Sparkles,
   MessageSquare, Zap, CheckCircle2, Circle, CalendarCheck,
