@@ -21,8 +21,8 @@ Deno.serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) return jsonError("Unauthorized", "auth_error", 401, rid);
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !user) return jsonError("Unauthorized", "auth_error", 401, rid);
 
     const { text, voice_id, voice_settings } = await req.json();
     if (!text || !voice_id) return jsonError("text and voice_id required", "validation_error", 400, rid);

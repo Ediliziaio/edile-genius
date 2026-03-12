@@ -120,8 +120,8 @@ Deno.serve(async (req) => {
       const { data: invoiceData } = await sb.rpc("generate_invoice_number");
       const invoiceNum = invoiceData || `EIO-${Date.now()}`;
 
-      // Record topup
-      await sb.from("ai_credit_topups").insert({
+      // Record topup — handle unique constraint violation gracefully
+      const { error: insertError } = await sb.from("ai_credit_topups").insert({
         company_id: companyId,
         amount_eur: creditsEur,
         price_paid_eur: (session.amount_total || 0) / 100,
@@ -136,6 +136,15 @@ Deno.serve(async (req) => {
         notes: packageName ? `Pacchetto: ${packageName} (Stripe)` : "Pagamento Stripe",
         processed_at: new Date().toISOString(),
       });
+
+      if (insertError) {
+        // If unique constraint on stripe_session_id, credits were already added by RPC above
+        // This is a partial failure — log but don't retry (would double-add credits)
+        console.error("[stripe-webhook] Topup insert failed (credits already added via RPC):", {
+          session_id: session.id,
+          error: insertError.message,
+        });
+      }
 
       // Audit log
       await sb.from("ai_audit_log").insert({

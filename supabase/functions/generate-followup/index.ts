@@ -19,8 +19,8 @@ Deno.serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsErr } = await supabase.auth.getClaims(token);
-    if (claimsErr || !claimsData?.claims) return jsonError("Unauthorized", "auth_error", 401, rid);
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !user) return jsonError("Unauthorized", "auth_error", 401, rid);
 
     const openaiKey = Deno.env.get("OPENAI_API_KEY");
     if (!openaiKey) return jsonError("OPENAI_API_KEY non configurata", "system_error", 500, rid);

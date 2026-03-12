@@ -131,6 +131,8 @@ export default function CreditsPage() {
 
   // Handle Stripe redirect query params
   useEffect(() => {
+    if (!companyId) return; // Wait for auth to load
+
     const params = new URLSearchParams(window.location.search);
     const payment = params.get("payment");
     if (payment === "success") {
@@ -138,7 +140,7 @@ export default function CreditsPage() {
       supabase
         .from("ai_credits")
         .select("balance_eur")
-        .eq("company_id", companyId!)
+        .eq("company_id", companyId)
         .single()
         .then(({ data }) => {
           const currentBalance = data?.balance_eur ?? 0;
@@ -152,7 +154,7 @@ export default function CreditsPage() {
       toast({ variant: "destructive", title: "Pagamento annullato", description: "Nessun addebito effettuato." });
       window.history.replaceState({}, "", window.location.pathname);
     }
-  }, []);
+  }, [companyId, pollForCredits, toast]);
 
   const topupAmount = selectedAmount ?? (parseFloat(customAmount) || 0);
 
