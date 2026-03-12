@@ -241,9 +241,18 @@ export default function RenderNew() {
     }
 
     // Resolve cassonetto color
-    const cassonettoColoreConfig = cassonettoColoreSameAsInfisso
-      ? { nome: infissoRalColor.name, ral: infissoRalColor.ral, finitura: "liscio_opaco" as const }
-      : { nome: cassRalColor.name, ral: cassRalColor.ral, finitura: "liscio_opaco" as const };
+    const cassonettoColoreConfig = (() => {
+      if (cassonettoColoreSameAsInfisso) {
+        return infissoColorMode === "legno"
+          ? { nome: infissoWoodEffect?.name || "Legno", finitura: "venatura_legno" as const }
+          : { nome: infissoRalColor.name, ral: infissoRalColor.ral, finitura: "liscio_opaco" as const };
+      }
+      return cassColorMode === "legno"
+        ? { nome: cassWoodEffect?.name || "Legno", finitura: "venatura_legno" as const }
+        : { nome: cassRalColor.name, ral: cassRalColor.ral, finitura: "liscio_opaco" as const };
+    })();
+    const cassonettoColorMode = cassonettoColoreSameAsInfisso ? infissoColorMode : cassColorMode;
+    const cassonettoWoodEffect = cassonettoColoreSameAsInfisso ? infissoWoodEffect : cassWoodEffect;
 
     // Build V5 config
     const nuovoInfisso = {
@@ -277,16 +286,20 @@ export default function RenderNew() {
         azione: sostituzione.cassonetto ? cassonettoAzione : "mantieni" as const,
         materiale: sostituzione.cassonetto && cassonettoAzione === "sostituisci" ? cassonettoMateriale as CassonettoMateriale : undefined,
         colore: sostituzione.cassonetto && cassonettoAzione === "sostituisci" ? cassonettoColoreConfig : undefined,
+        colore_mode: sostituzione.cassonetto && cassonettoAzione === "sostituisci" ? cassonettoColorMode : undefined,
+        colore_wood_effect: sostituzione.cassonetto && cassonettoAzione === "sostituisci" && cassonettoColorMode === "legno" ? cassonettoWoodEffect : undefined,
         prompt_fragment: cassonettoPresets.find(p => p.value === cassonettoMateriale)?.prompt_fragment,
       },
       tapparella: {
         azione: sostituzione.tapparella ? tapparellaAzione : "mantieni" as const,
         materiale: sostituzione.tapparella && tapparellaAzione === "sostituisci" ? tapparellaMateriale as TapparellaMateriale : undefined,
-        colore: sostituzione.tapparella && tapparellaAzione === "sostituisci" ? {
-          nome: tapRalColor.name,
-          ral: tapRalColor.ral,
-          finitura: "liscio_opaco" as const,
-        } : undefined,
+        colore: sostituzione.tapparella && tapparellaAzione === "sostituisci" ? (
+          tapColorMode === "legno"
+            ? { nome: tapWoodEffect?.name || "Legno", finitura: "venatura_legno" as const }
+            : { nome: tapRalColor.name, ral: tapRalColor.ral, finitura: "liscio_opaco" as const }
+        ) : undefined,
+        colore_mode: sostituzione.tapparella && tapparellaAzione === "sostituisci" ? tapColorMode : undefined,
+        colore_wood_effect: sostituzione.tapparella && tapparellaAzione === "sostituisci" && tapColorMode === "legno" ? tapWoodEffect : undefined,
         stato_render: tapparellaStato,
         cinghia: tapparellaCinghia,
         prompt_fragment: tapparellaPresets.find(p => p.value === tapparellaMateriale)?.prompt_fragment,

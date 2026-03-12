@@ -134,6 +134,8 @@ export interface CassonettoConfig {
   azione: "mantieni" | "rimuovi" | "sostituisci";
   materiale?: CassonettoMateriale;
   colore?: ColoreConfig;
+  colore_mode?: ColorMode;
+  colore_wood_effect?: WoodEffect;
   dimensione_h?: number;
   prompt_fragment?: string;
 }
@@ -142,6 +144,8 @@ export interface TapparellaConfig {
   azione: "mantieni" | "rimuovi" | "sostituisci";
   materiale?: TapparellaMateriale;
   colore?: ColoreConfig;
+  colore_mode?: ColorMode;
+  colore_wood_effect?: WoodEffect;
   colore_guide?: ColoreConfig;
   stato_render?: "aperta" | "chiusa" | "mezza";
   cinghia?: CinghiaMode;
@@ -568,9 +572,12 @@ Remove the entire cassonetto (roller shutter box) above the window. Replace with
 
   if (c.azione === "sostituisci" && c.materiale) {
     let colorLine = "";
-    if (c.colore) {
+    if (c.colore_mode === "legno" && c.colore_wood_effect) {
+      colorLine = `Color: ${formatColorPrompt("legno", null, c.colore_wood_effect)}\n\nCASSO WOOD EFFECT RULES:\n- The cassonetto face panel MUST show realistic wood grain pattern matching the specified wood effect\n- Grain direction runs HORIZONTALLY along the cassonetto length\n- Surface is a high-quality laminate film — looks like real wood with factory-applied precision`;
+    } else if (c.colore) {
       colorLine = `Color: ${c.colore.nome}`;
       if (c.colore.ral) colorLine += ` (RAL ${c.colore.ral})`;
+      colorLine += ` — solid smooth finish, NO wood grain`;
     }
 
     return `[BLOCK H – NEW ROLLER BOX (CASSONETTO)]
@@ -602,8 +609,11 @@ Remove the existing shutter/blind system completely. Show bare window frame with
   if (t.azione === "sostituisci" && t.materiale) {
     const lines: string[] = [`[BLOCK I – NEW SHUTTER/BLIND SYSTEM]`];
     lines.push(`Install new: ${TAPPARELLA_DESC[t.materiale] || t.materiale}`);
-    if (t.colore) {
-      lines.push(`Slat color: ${t.colore.nome}${t.colore.ral ? ` (RAL ${t.colore.ral})` : ""}`);
+    if (t.colore_mode === "legno" && t.colore_wood_effect) {
+      lines.push(`Slat color: ${formatColorPrompt("legno", null, t.colore_wood_effect)}`);
+      lines.push(`SLAT WOOD EFFECT: Each slat MUST show horizontal wood grain pattern matching the specified wood effect laminate. Grain runs along the slat length.`);
+    } else if (t.colore) {
+      lines.push(`Slat color: ${t.colore.nome}${t.colore.ral ? ` (RAL ${t.colore.ral})` : ""} — solid uniform color, NO wood grain`);
     }
     if (t.colore_guide) {
       lines.push(`Side guide channel color: ${t.colore_guide.nome}${t.colore_guide.ral ? ` (RAL ${t.colore_guide.ral})` : ""}`);
