@@ -241,9 +241,18 @@ export default function RenderNew() {
     }
 
     // Resolve cassonetto color
-    const cassonettoColoreConfig = cassonettoColoreSameAsInfisso
-      ? { nome: infissoRalColor.name, ral: infissoRalColor.ral, finitura: "liscio_opaco" as const }
-      : { nome: cassRalColor.name, ral: cassRalColor.ral, finitura: "liscio_opaco" as const };
+    const cassonettoColoreConfig = (() => {
+      if (cassonettoColoreSameAsInfisso) {
+        return infissoColorMode === "legno"
+          ? { nome: infissoWoodEffect?.name || "Legno", finitura: "venatura_legno" as const }
+          : { nome: infissoRalColor.name, ral: infissoRalColor.ral, finitura: "liscio_opaco" as const };
+      }
+      return cassColorMode === "legno"
+        ? { nome: cassWoodEffect?.name || "Legno", finitura: "venatura_legno" as const }
+        : { nome: cassRalColor.name, ral: cassRalColor.ral, finitura: "liscio_opaco" as const };
+    })();
+    const cassonettoColorMode = cassonettoColoreSameAsInfisso ? infissoColorMode : cassColorMode;
+    const cassonettoWoodEffect = cassonettoColoreSameAsInfisso ? infissoWoodEffect : cassWoodEffect;
 
     // Build V5 config
     const nuovoInfisso = {
