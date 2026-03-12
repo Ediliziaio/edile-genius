@@ -198,7 +198,7 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
   }
 
   // Block J
-  blocks.J = `[BLOCK J – ENVIRONMENT PRESERVATION]\nKeep EXACTLY: wall (${analisi.colore_muro}, ${analisi.materiale_muro}), ${analisi.presenza_davanzale ? "sill (" + (analisi.tipo_davanzale || "existing") + ")" : "no sill"}, ${analisi.presenza_inferriata ? "security bars" : "no bars"}, perspective (${analisi.angolo_ripresa}), all surroundings, sky, lighting (${analisi.luce}).`;
+  blocks.J = `[BLOCK J – PIXEL-PERFECT ENVIRONMENT PRESERVATION]\nThe following MUST remain 100% unchanged — zero modification allowed:\n- Wall: color (${analisi.colore_muro}), material (${analisi.materiale_muro}), texture, aging, stains, weathering\n- Window sill: ${analisi.presenza_davanzale ? "KEEP — same " + (analisi.tipo_davanzale || "material") + ", shape, shadow, any chips or weathering" : "NOT PRESENT — do not add a sill"}\n- Security bars: ${analisi.presenza_inferriata ? "KEEP — maintain all bars at exact position, color, shadow" : "NOT PRESENT — do not add bars"}\n- Camera: preserve exact perspective, focal length, vanishing points (${analisi.angolo_ripresa})\n- Surroundings: every pipe, cable, drain, crack, plant, neighboring window, balcony, street element\n- Sky/background: identical — no color shift, no weather change\n- Lighting: same direction, same ambient/diffuse ratio (${analisi.luce})`;
 
   // Block K
   blocks.K = `[BLOCK K – LIGHTING & SHADOWS]\nMatch lighting (${analisi.luce}). Render correct shadows from new frame, hinges, handle, cassonetto protrusion. Glass reflections match scene light direction. Ambient occlusion in frame corners and wall-frame transition.`;
