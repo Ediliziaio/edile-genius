@@ -425,6 +425,8 @@ function TemplateHubCard({ template: t }: { template: HubTemplate }) {
     if (t.disabled) return;
     if (t.fromDb) {
       navigate(`/app/templates/${t.slug}/setup`);
+    } else if (t.channel?.includes("whatsapp")) {
+      navigate("/app/whatsapp");
     } else {
       navigate(`/app/agents/new/${t.slug}`);
     }

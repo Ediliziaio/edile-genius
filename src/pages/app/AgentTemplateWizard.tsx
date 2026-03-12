@@ -192,6 +192,8 @@ export default function AgentTemplateWizard() {
   useEffect(() => {
     if (agentType === "render") {
       navigate("/app/render/new", { replace: true });
+    } else if (agentType === "whatsapp") {
+      navigate("/app/whatsapp", { replace: true });
     }
   }, [agentType, navigate]);
 
