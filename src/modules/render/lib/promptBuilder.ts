@@ -568,7 +568,7 @@ Required shadow elements (all must be physically correct):
 
 function buildBlock_L(): string {
   return `[BLOCK L – ABSOLUTE NEGATIVE CONSTRAINTS]
-NEVER DO any of the following:
+NEVER DO any of the following — instant disqualification:
 - ✗ Change wall color, texture, plaster pattern, or any facade element not explicitly requested
 - ✗ Alter camera perspective, field of view, or tilt/shift
 - ✗ Add elements absent in the original (plants, people, decorations, extra windows)
