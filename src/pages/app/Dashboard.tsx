@@ -28,8 +28,23 @@ interface BriefingData {
 }
 
 export default function AppDashboard() {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const companyId = useCompanyId();
+
+  // Check onboarding status
+  const { data: onboardingProfile, isLoading: onboardingLoading } = useQuery({
+    queryKey: ["onboarding-check", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles" as any).select("onboarding_completed").eq("id", user!.id).single();
+      return data as { onboarding_completed: boolean } | null;
+    },
+  });
+
+  if (onboardingLoading) return null;
+  if (onboardingProfile && onboardingProfile.onboarding_completed === false) {
+    return <Navigate to="/app/onboarding" replace />;
+  }
 
   // ── Agents ──
   const { data: agents } = useQuery({

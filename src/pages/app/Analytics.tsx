@@ -154,6 +154,27 @@ export default function AnalyticsPage() {
     { label: "Esito principale", value: stats.topOutcome, icon: Target, colorClass: "text-status-warning bg-status-warning-light" },
   ];
 
+  if (loadingConvs) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <BarChart3 className="w-6 h-6 text-brand" />
+          <h1 className="text-2xl font-bold text-ink-900">Analytics</h1>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-24 rounded-xl" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-[300px] rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
