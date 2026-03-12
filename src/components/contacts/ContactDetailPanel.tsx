@@ -62,6 +62,93 @@ interface ContactDetailPanelProps {
   onDeleted: () => void;
 }
 
+function CallHistorySection({ contactId, nextCallAt }: { contactId: string; nextCallAt?: string }) {
+  const { data: callHistory = [], isLoading: loadingCalls } = useQuery({
+    queryKey: ["contact-call-history", contactId],
+    enabled: !!contactId,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("outbound_call_log")
+        .select("id, started_at, ended_at, duration_sec, outcome, sentiment, ai_summary, status, agents(name)")
+        .eq("contact_id", contactId)
+        .order("started_at", { ascending: false })
+        .limit(20);
+      return (data as any[]) || [];
+    },
+  });
+
+  const outcomeBadge = (outcome: string | null) => {
+    const map: Record<string, { label: string; cls: string }> = {
+      answered: { label: "✅ Risposto", cls: "bg-status-success-light text-status-success" },
+      no_answer: { label: "📵 Non risposto", cls: "bg-ink-100 text-ink-500" },
+      voicemail: { label: "📮 Segreteria", cls: "bg-status-warning-light text-status-warning" },
+      busy: { label: "🔴 Occupato", cls: "bg-status-error-light text-status-error" },
+      failed: { label: "❌ Fallita", cls: "bg-status-error-light text-status-error" },
+    };
+    const m = outcome ? map[outcome] : null;
+    return m ? <Badge className={`${m.cls} border-none text-[10px]`}>{m.label}</Badge> : null;
+  };
+
+  if (loadingCalls) {
+    return <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-brand" /></div>;
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-sm font-medium text-ink-700">
+        <Phone className="w-4 h-4" />
+        Storico chiamate ({callHistory.length})
+      </div>
+      {callHistory.length === 0 ? (
+        <div className="text-center py-8">
+          <Phone className="w-8 h-8 text-ink-200 mx-auto mb-2" />
+          <p className="text-sm text-ink-400">Nessuna chiamata ancora</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {callHistory.map((call: any) => (
+            <div key={call.id} className="rounded-lg border border-ink-100 p-3">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-ink-500">
+                  {call.started_at ? format(new Date(call.started_at), "dd/MM/yy HH:mm", { locale: it }) : "—"}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  {outcomeBadge(call.outcome)}
+                  {call.sentiment && call.sentiment !== "unknown" && (
+                    <span className="text-xs">{call.sentiment === "positive" ? "😊" : call.sentiment === "negative" ? "😕" : "😐"}</span>
+                  )}
+                  {call.duration_sec != null && (
+                    <span className="text-[10px] text-ink-400">
+                      {Math.floor(call.duration_sec / 60)}:{String(call.duration_sec % 60).padStart(2, "0")}
+                    </span>
+                  )}
+                </div>
+              </div>
+              {call.ai_summary && (
+                <p className="text-xs text-ink-600 mt-1.5 bg-ink-50 rounded p-2">💬 {call.ai_summary}</p>
+              )}
+              {call.agents?.name && (
+                <p className="text-[10px] text-ink-400 mt-1">Agente: {call.agents.name}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      {nextCallAt && new Date(nextCallAt) > new Date() && (
+        <div className="rounded-lg border border-brand/20 bg-brand-light/30 p-3">
+          <div className="flex items-center gap-2 text-xs font-medium text-brand">
+            <Calendar className="w-3.5 h-3.5" />
+            Prossima chiamata schedulata
+          </div>
+          <p className="text-sm text-ink-700 mt-1">
+            {format(new Date(nextCallAt), "EEEE d MMMM, HH:mm", { locale: it })}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ContactDetailPanel({ contact, open, onOpenChange, onUpdated, onDeleted }: ContactDetailPanelProps) {
   const { profile } = useAuth();
   const { toast } = useToast();
