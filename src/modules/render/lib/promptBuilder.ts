@@ -479,7 +479,7 @@ function buildBlock_H(analisi: FotoAnalisi, infisso: NuovoInfisso): string {
 
   if (c.azione === "rimuovi") {
     return `[BLOCK H – ROLLER BOX REMOVAL]
-Remove the entire cassonetto above the window. Replace with: continuous wall surface matching the exact wall texture, color, and material of the surrounding facade. The wall fill must be seamless — no visible ghost outline, shadow gap or discoloration where the box was.`;
+Remove the entire cassonetto (roller shutter box) above the window. Replace with: continuous wall surface matching the exact wall texture, color, and material of the surrounding facade. The wall fill must be seamless — no visible ghost outline, shadow gap or discoloration where the box was. Match plaster texture, paint sheen level, aging/weathering exactly to surrounding wall.`;
   }
 
   if (c.azione === "sostituisci" && c.materiale) {
