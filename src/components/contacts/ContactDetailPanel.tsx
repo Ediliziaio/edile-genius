@@ -8,7 +8,7 @@ import { it } from "date-fns/locale";
 import {
   Phone, Mail, Loader2, MessageSquare, StickyNote, Activity,
   User, Building2, MapPin, Calendar, Clock, Tag, Trash2, Edit3,
-  FileText, Sparkles, Copy
+  FileText, Sparkles, Copy, BarChart2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
