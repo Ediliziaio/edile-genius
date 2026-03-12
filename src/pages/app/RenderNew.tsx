@@ -92,6 +92,14 @@ export default function RenderNew() {
   const [tapRalColor, setTapRalColor] = useState<RalColor>(RAL_COLORS.find(c => c.ral === "7016")!);
   const [tapWoodEffect, setTapWoodEffect] = useState<WoodEffect | null>(null);
 
+  // v6: Image natural dimensions
+  const [imageNaturalWidth, setImageNaturalWidth] = useState(1024);
+  const [imageNaturalHeight, setImageNaturalHeight] = useState(1024);
+
+  // v6: Debug panel
+  const [showDebugPrompt, setShowDebugPrompt] = useState(false);
+  const [debugPromptText, setDebugPromptText] = useState("");
+
   // v5: Maniglia dettagliata
   const [manigliaConfig, setManigliaConfig] = useState<ManigliaConfig>({
     stile: "classica_dritta",
