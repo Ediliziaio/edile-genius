@@ -122,27 +122,20 @@ export default function KnowledgeBase() {
     setSaving(true);
     try {
       const agentId = selectedAgentId === "global" ? null : selectedAgentId;
-      const { data: doc } = await supabase.from("ai_knowledge_docs").insert({
-        company_id: companyId,
-        agent_id: agentId,
-        name: new URL(urlInput).hostname,
-        type: "url",
-        source_url: urlInput,
-        status: "processing",
-      } as any).select().single();
+      const { data, error } = await supabase.functions.invoke("add-knowledge-doc", {
+        body: {
+          company_id: companyId,
+          agent_id: agentId,
+          name: new URL(urlInput).hostname,
+          type: "url",
+          source_url: urlInput,
+        },
+      });
 
-      // Invoke edge function
-      if (doc) {
-        await supabase.functions.invoke("add-knowledge-doc", {
-          body: {
-            doc_id: (doc as any).id,
-            company_id: companyId,
-            agent_id: agentId,
-            name: new URL(urlInput).hostname,
-            type: "url",
-            source_url: urlInput,
-          },
-        });
+      if (error) throw error;
+      if (data?.error) {
+        toast({ variant: "destructive", title: "Errore", description: data.error });
+        return;
       }
 
       toast({ title: "URL aggiunto", description: "Il documento verrà elaborato a breve." });
@@ -158,27 +151,20 @@ export default function KnowledgeBase() {
     setSaving(true);
     try {
       const agentId = selectedAgentId === "global" ? null : selectedAgentId;
-      const { data: doc } = await supabase.from("ai_knowledge_docs").insert({
-        company_id: companyId,
-        agent_id: agentId,
-        name: textName,
-        type: "text",
-        content_preview: textContent.slice(0, 500),
-        size_bytes: new TextEncoder().encode(textContent).length,
-        status: "processing",
-      } as any).select().single();
+      const { data, error } = await supabase.functions.invoke("add-knowledge-doc", {
+        body: {
+          company_id: companyId,
+          agent_id: agentId,
+          name: textName,
+          type: "text",
+          content_preview: textContent,
+        },
+      });
 
-      if (doc) {
-        await supabase.functions.invoke("add-knowledge-doc", {
-          body: {
-            doc_id: (doc as any).id,
-            company_id: companyId,
-            agent_id: agentId,
-            name: textName,
-            type: "text",
-            content_preview: textContent,
-          },
-        });
+      if (error) throw error;
+      if (data?.error) {
+        toast({ variant: "destructive", title: "Errore", description: data.error });
+        return;
       }
 
       toast({ title: "Documento aggiunto" });
@@ -229,31 +215,24 @@ export default function KnowledgeBase() {
       }
 
       setUploadProgress(60);
-      const { data: doc, error: dbError } = await supabase
-        .from("ai_knowledge_docs")
-        .insert({
+      const { data, error } = await supabase.functions.invoke("add-knowledge-doc", {
+        body: {
           company_id: companyId,
           agent_id: agentId,
-          name: uploadFile.name,
-          type: "file",
           file_path: filePath,
+          type: "file",
+          name: uploadFile.name,
           size_bytes: uploadFile.size,
-          status: "processing",
-        } as any)
-        .select()
-        .single();
+        },
+      });
 
-      if (dbError) {
-        toast({ variant: "destructive", title: "Errore database", description: dbError.message });
+      if (error) throw error;
+      if (data?.error) {
+        toast({ variant: "destructive", title: "Errore", description: data.error });
         return;
       }
 
-      setUploadProgress(80);
-      await supabase.functions.invoke("add-knowledge-doc", {
-        body: { doc_id: (doc as any).id, company_id: companyId, agent_id: agentId, file_path: filePath, type: "file", name: uploadFile.name },
-      });
       setUploadProgress(100);
-
       toast({ title: "File caricato", description: `"${uploadFile.name}" caricato con successo.` });
       closeModal();
       fetchData();
