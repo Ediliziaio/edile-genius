@@ -106,7 +106,7 @@ const SLUG_TO_USE_CASE: Record<string, UseCaseId> = {
 const defaultForm: AgentForm = {
   use_case: null, name: "", description: "", sector: "", language: "it",
   additional_languages: [],
-  voice_id: "", system_prompt: "", first_message: "", temperature: 0.7, status: "draft",
+  voice_id: "", system_prompt: "", first_message: "", temperature: 0.7, status: "active",
   llm_model: "gpt-4o-mini", tts_model: "eleven_turbo_v2_5", llm_backup_model: "",
   turn_timeout_sec: 10, soft_timeout_sec: -1, soft_timeout_message: "",
   interruptions_enabled: true, turn_eagerness: "normal",
