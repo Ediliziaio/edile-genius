@@ -94,6 +94,21 @@ export default function CreditsPage() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
+  // Handle Stripe redirect query params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get("payment");
+    if (payment === "success") {
+      toast({ title: "Pagamento completato! 🎉", description: "I crediti verranno accreditati automaticamente entro pochi secondi." });
+      window.history.replaceState({}, "", window.location.pathname);
+      // Refresh after short delay to allow webhook processing
+      setTimeout(() => fetchAll(), 3000);
+    } else if (payment === "cancelled") {
+      toast({ variant: "destructive", title: "Pagamento annullato", description: "Nessun addebito effettuato." });
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
+
   const topupAmount = selectedAmount ?? (parseFloat(customAmount) || 0);
 
   const handleTopup = async () => {
