@@ -1,0 +1,1 @@
+UPDATE render_credits SET balance = balance + 10, total_purchased = total_purchased + 10, updated_at = now() WHERE company_id = 'f9361dd6-2499-4a70-afc6-43d69438bda8';
