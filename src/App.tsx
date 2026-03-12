@@ -151,6 +151,7 @@ const App = () => (
                 <Route path="/superadmin/logs" element={<SafeRoute><SystemLogsPage /></SafeRoute>} />
                 <Route path="/superadmin/platform-settings" element={<SafeRoute><PlatformSettingsPage /></SafeRoute>} />
                 <Route path="/superadmin/render-config" element={<SafeRoute><RenderConfig /></SafeRoute>} />
+                <Route path="/superadmin/monitoring" element={<SafeRoute><MonitoringPage /></SafeRoute>} />
               </Route>
             </Route>
 
