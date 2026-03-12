@@ -640,10 +640,11 @@ export default function KnowledgeBase() {
           </div>
 
           <Tabs value={addTab} onValueChange={setAddTab}>
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="file"><FileText className="h-3 w-3 mr-1" /> File</TabsTrigger>
               <TabsTrigger value="url"><Globe className="h-3 w-3 mr-1" /> URL</TabsTrigger>
               <TabsTrigger value="text"><Type className="h-3 w-3 mr-1" /> Testo</TabsTrigger>
+              <TabsTrigger value="scrape"><Search className="h-3 w-3 mr-1" /> Scraping</TabsTrigger>
             </TabsList>
 
             {/* File Tab */}
