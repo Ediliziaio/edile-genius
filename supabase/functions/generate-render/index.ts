@@ -34,12 +34,12 @@ const CASSONETTO_MATERIAL_DESC: Record<string, string> = {
 };
 
 const TAPPARELLA_DESC: Record<string, string> = {
-  pvc_avvolgibile: "PVC roll-up shutter — horizontal PVC slats 37-55mm wide, smooth rounded profile, bottom rail with rubber seal, side guide channels",
-  alluminio_avvolgibile: "aluminum roll-up shutter — aluminum foam-filled slats 37-55mm wide, metallic sheen, precise joints, side guide channels",
-  microforata: "microperforated roll-up shutter — slats with circular perforations 3-4mm diameter, filtered light, partial vision",
-  persiana_alluminio: "aluminum louvered shutter (persiana) — horizontal slats 60-80mm wide, S-curve profile, pivot pins, Mediterranean aesthetic",
-  veneziana_integrata: "integral venetian blind between glazing — thin horizontal lines 25mm apart inside double-glazing unit, ultra-minimal",
-  nessuna: "No shutter or blind — bare window frame only",
+  pvc_avvolgibile: "PVC roll-up shutter curtain — horizontal extruded PVC slats 37-55mm wide, each slat with smooth rounded upper edge and male-female interlocking lower edge, uniform matte colored surface with very subtle extrusion line texture running horizontally, bottom end-rail heavier profile (40-60mm) with integrated rubber seal and lift lug, side guide channels (guide) visible as thin U-profile strips on left and right jamb faces, total curtain thickness approximately 8-12mm",
+  alluminio_avvolgibile: "aluminum roll-up shutter curtain — extruded aluminum foam-filled slats 37-55mm wide, slightly metallic surface sheen compared to PVC, slat walls approximately 1.2-1.5mm thick with visible interior foam at side edges when looked at obliquely, crisp precise slat-to-slat joints, heavier appearance than PVC equivalent, bottom bar with EPDM rubber weatherstrip, side guide channels in matching anodized or powder-coated aluminum",
+  microforata: "microperforated roll-up shutter — same slat profile as standard PVC/aluminum avvolgibile but with regular grid of circular perforations 3-4mm diameter at approximately 6-8mm centers, perforation pattern creates a screenprint-like texture visible across the curtain surface, light passes through holes creating dappled interior light, retains privacy from outside while allowing partial outward vision from inside",
+  persiana_alluminio: "aluminum louvered shutter (persiana avvolgibile) — horizontal extruded aluminum slats 60-80mm wide with traditional shutter profile (S-curve cross-section), visible twin pivot pins at each slat end inserted into side guide channels, slats appear at consistent angle (typically 30-45° open or closed), side channel guides are deeper (40-50mm) than standard roller guides, traditional Mediterranean aesthetic, bottom rail is a solid bar connecting all slat pivots",
+  veneziana_integrata: "integral blind between glazing (tendina veneziana integrata) — visible only as a series of very thin parallel horizontal lines 25mm apart suspended between the two glass panes inside the double-glazing unit, slat lines cast faint shadow on interior glass surface, operated by a small external thumb-wheel or magnetic control on frame edge, no external mechanism visible, glass still appears transparent with blind fully open, gives ultra-minimal modern look",
+  nessuna: "No shutter or blind — bare window frame only with no additional covering system",
 };
 
 const CERNIERA_DESC: Record<string, string> = {
