@@ -819,6 +819,7 @@ export type Database = {
           package_id: string | null
           payment_method: string | null
           payment_ref: string | null
+          price_paid_eur: number | null
           processed_at: string | null
           status: string
           stripe_session_id: string | null
@@ -835,6 +836,7 @@ export type Database = {
           package_id?: string | null
           payment_method?: string | null
           payment_ref?: string | null
+          price_paid_eur?: number | null
           processed_at?: string | null
           status?: string
           stripe_session_id?: string | null
@@ -851,6 +853,7 @@ export type Database = {
           package_id?: string | null
           payment_method?: string | null
           payment_ref?: string | null
+          price_paid_eur?: number | null
           processed_at?: string | null
           status?: string
           stripe_session_id?: string | null
@@ -4208,6 +4211,7 @@ export type Database = {
         Args: { _company_id: string }
         Returns: undefined
       }
+      generate_invoice_number: { Args: never; Returns: string }
       get_user_company_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
