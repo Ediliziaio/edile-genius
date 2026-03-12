@@ -259,6 +259,53 @@ export default function AppDashboard() {
 
   const [briefingExpanded, setBriefingExpanded] = useState(true);
 
+  // ── Active Calls (live widget) ──
+  const queryClient = useQueryClient();
+  const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+
+  const { data: activeCalls = [] } = useQuery({
+    queryKey: ["dashboard-active-calls", companyId],
+    enabled: !!companyId,
+    refetchInterval: 15_000,
+    staleTime: 5_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("outbound_call_log")
+        .select("id, status, started_at, to_number, contact_id, agent_id, contacts(full_name), agents(name)")
+        .eq("company_id", companyId!)
+        .in("status", ["initiated", "ringing", "in_progress"])
+        .gte("started_at", twoHoursAgo)
+        .order("started_at", { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return (data ?? []).map((r: any) => ({
+        id: r.id,
+        status: r.status,
+        started_at: r.started_at,
+        to_number: r.to_number,
+        contact_name: r.contacts?.full_name ?? null,
+        agent_name: r.agents?.name ?? null,
+      }));
+    },
+  });
+
+  // Realtime for active calls widget
+  useEffect(() => {
+    if (!companyId) return;
+    const channel = supabase
+      .channel(`dashboard-calls-${companyId}`)
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "outbound_call_log",
+        filter: `company_id=eq.${companyId}`,
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ["dashboard-active-calls", companyId] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [companyId, queryClient]);
+
   // ── Derived data ──
   const totalAgents = agents?.length ?? 0;
   const activeAgents = agents?.filter((a) => a.status === "active").length ?? 0;
