@@ -578,7 +578,7 @@ NEVER DO any of the following — instant disqualification:
 - ✗ Distort window proportions or change opening/glass dimensions
 - ✗ Add hinges to fixed lights (fisso) — fixed panels have NO hinges
 - ✗ Add shutters or cassonetto if replacement was NOT requested AND none existed in photo
-- ✗ Change the number of window panes unless explicitly requested
+- ✗ Change the number of window panes unless explicitly requested in config
 - ✗ Make the result look like a 3D render — must be indistinguishable from real photograph`;
 }
 
