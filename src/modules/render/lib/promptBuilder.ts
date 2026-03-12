@@ -496,6 +496,7 @@ ${colorLine}
 Position: directly above window top frame rail, face flush with or slightly proud of wall plane
 Bottom reveal: show the shutter exit slot (approximately 15-20mm slit) at bottom of cassonetto face panel
 Width: exactly matching window frame outer width
+Side flanges: small triangular or stepped PVC/aluminum caps where cassonetto meets wall on left and right
 Cast appropriate shadow from cassonetto protrusion onto wall below`;
   }
 
