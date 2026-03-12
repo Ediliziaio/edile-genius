@@ -112,6 +112,7 @@ export default function ContactsPage() {
   const [bulkStatus, setBulkStatus] = useState("to_call");
   const [showBulkList, setShowBulkList] = useState(false);
   const [bulkListId, setBulkListId] = useState("");
+  const [showBulkCallModal, setShowBulkCallModal] = useState(false);
 
   // Schedule call
   const [showScheduleCall, setShowScheduleCall] = useState(false);
