@@ -1,106 +1,215 @@
 
+# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro + AI Avanzata
 
-# Analisi Criticità Sistema — Edile Genius
+## ✅ Completato in questo blocco
 
-## Riepilogo
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
-Dopo un'analisi approfondita del codice frontend, edge functions, migrazioni SQL e tipi Supabase, ho identificato le seguenti criticità organizzate per gravità.
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
----
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-## CRITICHE (possono causare bug in produzione)
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
-### 1. `launch_bulk_calls` — SECURITY DEFINER + `my_company()` potenziale conflitto
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
-La funzione SQL usa `SECURITY DEFINER` ma anche `my_company()` per la validazione. Con `SECURITY DEFINER` la funzione gira come owner (tipicamente `postgres`), quindi `my_company()` potrebbe non risolvere correttamente perché `auth.uid()` dentro un contesto SECURITY DEFINER potrebbe restituire NULL o l'uid sbagliato. La validazione `p_company_id != my_company()` potrebbe fallire sempre, bloccando tutti gli utenti.
+## ✅ Blocco 3-5 — Agent Templates System
 
-**Fix**: Testare il comportamento di `my_company()` dentro SECURITY DEFINER. Se fallisce, rimuovere il check `my_company()` e fare il check a livello RPC caller (già fatto via RLS su `contacts`), oppure passare l'uid come parametro e validare internamente.
+### Database
+- agent_templates + agent_template_instances + agent_reports + company_channels
+- RLS policies PERMISSIVE (fix da RESTRICTIVE)
+- Funzione DB `increment_installs_count(tpl_id UUID)`
+- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
 
-### 2. `execute-scheduled-calls` — Nessuna autenticazione
+### Edge Functions (CORS headers completi)
+- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
+- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
+- save-report: salva report in DB + aggiorna contatori istanza
 
-La edge function usa direttamente `SUPABASE_SERVICE_ROLE_KEY` senza alcuna validazione dell'origine della richiesta. Chiunque conosca l'URL può triggerare l'esecuzione di tutte le chiamate pending. Con `verify_jwt = false` nel config.toml, è completamente esposta.
+### Frontend — Wizard 5 Step (TemplateSetup.tsx)
+- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
+- Step 2 Operai: lista card + importa CSV con template scaricabile
+- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
+- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
 
-**Fix**: Aggiungere validazione — o un secret header custom, o limitare l'invocazione solo da pg_cron/interno.
+### SuperAdmin
+- /superadmin/templates: CRUD completo con JSON editor per config_schema
 
-### 3. `elevenlabs-outbound-call` — Auth bypassa company_id check
+## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
 
-La funzione verifica l'autenticazione dell'utente (`getUser`) ma non verifica che l'`agent_id` fornito appartenga alla company dell'utente. Qualsiasi utente autenticato potrebbe potenzialmente lanciare chiamate con l'agente di un'altra company.
+### Database (5 tabelle)
+- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
+- RLS PERMISSIVE per tutte le tabelle
+- Trigger set_updated_at + init_render_credits su companies
+- Funzione deduct_render_credit
+- Storage buckets: render-originals (privato), render-results (pubblico)
 
-**Fix**: Dopo aver recuperato l'agente, verificare che `agent.company_id` corrisponda alla company dell'utente autenticato.
+### Edge Functions
+- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
+- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
 
-### 4. `contactNameCache` — Memory leak globale
+### Frontend
+- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
+- RenderConfig (/superadmin/render-config)
+- BeforeAfterSlider, promptBuilder.ts
 
-In `useCallNotifications.ts`, la cache `contactNameCache` è un `Map` a livello modulo (fuori dal componente). Non viene mai ripulita completamente al logout/cambio utente. Potrebbe mostrare nomi di contatti di un'azienda a un utente di un'altra azienda dopo un cambio sessione.
+## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
 
-**Fix**: Spostare la cache dentro il hook con `useRef`, o pulirla al cambio di `companyId`.
+### Database
+- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
+- Estensione `preventivi` con +26 colonne
+- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
+- Storage buckets: preventivi-media (privato), template-assets (pubblico)
+- RLS company-scoped + superadmin
 
----
+### Edge Functions
+- `process-preventivo-audio` RISCRITTO
 
-## MEDIE (UX/performance/robustezza)
+### PDF Client-side (@react-pdf/renderer)
+- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4
 
-### 5. Dashboard — `twoHoursAgo` calcolato fuori dal componente
+### Frontend
+- NuovoPreventivo.tsx, PreventivoDetail.tsx, PreventiviList.tsx, TemplatePreventivo.tsx
 
-```
-const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
-```
+## ✅ Blocco 8 — AI Avanzata P1 (Smart Actions + Lead Score + Timeline)
 
-Questa variabile è calcolata al primo render e mai aggiornata. Se l'utente tiene la dashboard aperta per ore, il filtro diventa stale e potrebbe mostrare chiamate "attive" vecchie di 4+ ore.
+### Smart Actions Engine (Dashboard)
+- Espanso da 3 regole hardcoded a 10+ regole basate su dati reali:
+  - Crediti in esaurimento (danger)
+  - Agenti in bozza (warning)
+  - Agenti senza numero telefono (warning)
+  - Agenti inattivi >7 giorni (info)
+  - Contatti da richiamare con next_call_at scaduto (warning)
+  - Preventivi in bozza da >7 giorni (warning)
+  - Preventivi inviati senza risposta da >10 giorni (warning)
+  - Documenti in scadenza entro 15 giorni (warning)
+  - Campagne con tasso appuntamenti <5% (info)
+- Query Supabase dedicate per ogni regola
+- Stato "Tutto in ordine" quando nessuna azione è necessaria
+- Mostra summary delle conversazioni recenti nella tabella attività
 
-**Fix**: Spostare dentro `queryFn` o usare `useMemo` con dipendenza temporale.
+### Lead Score Automatico
+- `src/lib/lead-score.ts`: motore di scoring 0-100 senza LLM
+  - +30 outcome qualified/appointment
+  - +20 sentiment positivo
+  - +15 preventivo associato
+  - +10 contatto completo (tel+email)
+  - +10 callback attempts
+  - +5 fonte inbound
+  - -10 inattivo >30 giorni
+  - -20 not_interested
+  - -30 do_not_call/invalid
+- `src/components/contacts/LeadScoreBadge.tsx`: badge con tooltip fattori
+  - Compact mode per tabella (emoji + score numerico)
+  - Full mode per scheda contatto (con lista fattori)
+  - Colori: 🔴 Caldo (>60), 🟠 Tiepido (30-60), 🔵 Freddo (<30)
+- Badge integrato nella tabella contatti (nuova colonna "Score")
+- Badge integrato nell'header della scheda contatto
 
-### 6. Dashboard — `startOfMonth` calcolato fuori da useMemo
+### Timeline Unificata del Contatto
+- `ContactDetailPanel.tsx` completamente refactorato:
+  - Tab "Timeline" come default (al posto di "Info")
+  - Cronologia verticale con linea e pallini colorati per tipo:
+    - 🔵 Conversazioni (con summary, outcome, sentiment, durata)
+    - 🟡 Note manuali
+    - 🟢 Preventivi collegati (stato, importo, numero)
+    - ⚪ Eventi (contatto creato)
+  - Query preventivi per nome/telefono contatto
+  - Lead Score full display nell'header della scheda
 
-Le variabili `startOfMonth` e `startOfPrevMonth` sono calcolate a ogni render (non memoizzate), creando nuovi oggetti `Date` ad ogni re-render, il che potrebbe causare re-fetch inutili se usate come query key dependencies (anche se attualmente non lo sono direttamente, è fragile).
+## ✅ Blocco 8 — P1-C: Call Summary Automatico
 
-### 7. `CallAnalyticsSection` — Best Hour calculation è O(n²)
+### Backend
+- `supabase/functions/elevenlabs-webhook/summary.ts`: modulo separato per generazione summary
+  - Chiama OpenAI gpt-4o-mini con prompt minimale in italiano
+  - Non-blocking: se OPENAI_API_KEY non è configurata, salta silenziosamente
+  - Cap transcript a 6000 chars per contenere i costi (~$0.001/call)
+- `elevenlabs-webhook/index.ts`: importa e chiama `generateCallSummary()` dopo step 7
+  - Popola `conversations.summary` solo se la generazione ha successo
 
-```typescript
-positiveHours.sort((a, b) =>
-  positiveHours.filter(v => v === a).length - positiveHours.filter(v => v === b).length
-).pop()
-```
+### Frontend (già predisposto)
+- Dashboard "Attività recente": mostra `c.summary` sotto il nome agente
+- Conversazioni: mostra summary nella tabella e nel dialog dettaglio
+- Timeline contatto: mostra summary nelle conversazioni
 
-Questo è O(n²) per ogni elemento nel sort. Con 500 call logs e molte ore positive, è lento. Meglio usare una frequency map.
+### Requisito SuperAdmin
+- Aggiungere OPENAI_API_KEY come Supabase Secret (da configurare via SuperAdmin)
 
-### 8. BulkCallModal — `agents` query non filtra per `status = 'active'`
+## ✅ Blocco 9 — Audit Finale & Hardening
 
-Mostra anche agenti in `draft` o `inactive` purché abbiano `outbound_enabled = true`. Un utente potrebbe selezionare un agente non ancora configurato per il bulk calling.
+### Sicurezza Edge Functions
+- Validazione JWT (getClaims) aggiunta a: generate-render, crm-sync, deploy-template-instance, process-preventivo-audio, generate-preventivo-pdf
+- Verifica tenant (company_id cross-check) aggiunta a tutte le funzioni interne
+- Funzioni webhook esterne (elevenlabs-webhook, whatsapp-webhook, telegram-cantiere-webhook) lasciate senza JWT (corretto)
 
-**Fix**: Aggiungere `.eq("status", "active")` alla query.
+### Atomicità Crediti
+- Creata RPC `topup_credits(_company_id, _amount_eur)` con UPDATE atomico
+- topup-credits edge function refactorato per usare RPC
 
-### 9. Dual Realtime channels sulla Dashboard
+### UX — Progressive Disclosure Sidebar
+- Sezioni OPERATIVITÀ e STRUMENTI AI visibili solo se il settore è rilevante o se esistono dati
+- Campi vuoti nelle conversazioni nascosti (eval_score, minutes_billed, cost_billed_eur)
 
-La Dashboard crea un channel Realtime per le active calls. Contemporaneamente, `useCallNotifications` in Shell.tsx ascolta la stessa tabella `outbound_call_log`. Sono 2 subscription Realtime sulla stessa tabella per lo stesso utente — raddoppia il consumo di connessioni Realtime.
+### UX — Dead-End Fix
+- Card CRM e Webhooks in Integrazioni: badge "Prossimamente" + bottoni disabilitati
 
-**Fix**: Consolidare in un unico channel, o accettare il costo (è comunque basso).
+### Signup Self-Service
+- Pagina /signup con form registrazione
+- Edge function self-service-signup: crea company (trial 14gg) + profilo + ruolo company_admin
 
----
+### AI Avanzata P2
+- Follow-up Generator: edge function generate-followup (GPT-4o-mini) + bottone in ContactDetailPanel
+- Opportunity Recovery: Smart Actions per lead qualificati dormenti >5 giorni
+- Campi conversazione vuoti nascosti per UX più pulita
 
-## BASSE (pulizia / robustezza marginale)
+## ✅ Blocco 10 — Criticità Pre-Lancio Risolte
 
-### 10. `launch_bulk_calls` — `p_agent_id` è TEXT, non UUID
+### Database
+- Rimossi RLS duplicati su `ai_credits` (2 policy rimossi: `company_ai_credits_select`, `superadmin_ai_credits`)
+- Rimosso indice duplicato `idx_topups_stripe_session` su `ai_credit_topups`
+- `topup_credits` RPC riscritta con `FOR UPDATE` lock (come `deduct_call_credits`)
+- Aggiunta funzione `reset_agents_calls_month()` per cron mensile
 
-Nel SQL l'agent_id è `TEXT`, ma nella tabella `scheduled_calls` è `string` (UUID FK). Se qualcuno passa un valore non-UUID, l'insert fallirà con un errore poco chiaro. Dovrebbe essere `UUID`.
+### Auth Edge Functions (25 file corretti)
+- Sostituito `supabase.auth.getClaims(token)` (non-standard) con `supabase.auth.getUser(token)` in tutte le Edge Functions
+- Aggiornato helper condiviso `_shared/utils.ts` → `authenticateRequest()`
 
-### 11. Tipo Supabase mancante per `launch_bulk_calls`
+### Frontend
+- `Credits.tsx`: aggiunto `companyId` come dipendenza del useEffect per il polling post-pagamento Stripe
 
-I tipi generati includono `launch_bulk_calls` ma il return type è `Json` (generico). Il frontend fa `as unknown as BulkCallResult` — fragile ma funzionante.
+### Stripe Webhook
+- Insert topup record: aggiunto error handling per violazione unique constraint
+- Documentato comportamento auto-recharge (crediti senza addebito Stripe)
 
-### 12. `outbound_call_log` non ha `duration_seconds` — solo `duration_sec`
+### Secrets da configurare (azione manuale)
+- `STRIPE_SECRET_KEY` — per pagamenti
+- `STRIPE_WEBHOOK_SECRET` — per webhook Stripe
+- `OPENAI_API_KEY` — per AI summary e follow-up
+- `META_ENCRYPTION_KEY` — per cifratura token WhatsApp
+- `RESEND_API_KEY` — per invio email
 
-Coerente: il frontend usa correttamente `duration_sec`. Nessun bug, ma il webhook edge function usa `duration_seconds` (dal payload ElevenLabs) e lo mappa a `duration_sec` nel DB — corretto.
+## 🔜 Prossimi Step
 
----
-
-## Priorità Fix Consigliata
-
-| # | Criticità | Effort |
-|---|-----------|--------|
-| 3 | Auth company check in outbound-call | 5 min |
-| 2 | Auth su execute-scheduled-calls | 10 min |
-| 4 | contactNameCache memory leak | 5 min |
-| 1 | SECURITY DEFINER + my_company() | 15 min (test needed) |
-| 8 | Filtro status active in BulkCallModal | 2 min |
-| 5 | twoHoursAgo stale | 2 min |
-| 7 | Best hour O(n²) | 5 min |
-
+### P3 — Avanzato / successivo
+- Personalizzazione regole Smart Actions per admin
+- Report settimanale automatico via email al titolare
+- Trend predittivo su tasso conversione
+- Auto-recharge con addebito Stripe reale (attualmente wallet-based)

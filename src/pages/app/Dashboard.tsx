@@ -261,20 +261,19 @@ export default function AppDashboard() {
 
   // ── Active Calls (live widget) ──
   const queryClient = useQueryClient();
-  const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
-
   const { data: activeCalls = [] } = useQuery({
     queryKey: ["dashboard-active-calls", companyId],
     enabled: !!companyId,
     refetchInterval: 15_000,
     staleTime: 5_000,
     queryFn: async () => {
+      const freshTwoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
       const { data, error } = await supabase
         .from("outbound_call_log")
         .select("id, status, started_at, to_number, contact_id, agent_id, contacts(full_name), agents(name)")
         .eq("company_id", companyId!)
         .in("status", ["initiated", "ringing", "in_progress"])
-        .gte("started_at", twoHoursAgo)
+        .gte("started_at", freshTwoHoursAgo)
         .order("started_at", { ascending: false })
         .limit(5);
       if (error) throw error;

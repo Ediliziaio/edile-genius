@@ -11,6 +11,15 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const rid = generateRequestId();
+
+  // Auth: require secret header (for pg_cron / internal invocation only)
+  const cronSecret = Deno.env.get("CRON_SECRET");
+  const providedSecret = req.headers.get("x-cron-secret");
+  if (cronSecret && providedSecret !== cronSecret) {
+    log("warn", "Unauthorized execute-scheduled-calls attempt", { request_id: rid });
+    return jsonError("Unauthorized", "auth_error", 401, rid);
+  }
+
   const sb = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
