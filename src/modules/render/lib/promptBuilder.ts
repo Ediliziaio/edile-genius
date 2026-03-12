@@ -195,6 +195,20 @@ export interface NuovoInfisso {
   sostituzione: SostituzioneSelezione;
   stile_telaio?: StileTelaio;
   trasformazione?: TrasformazioneApertura;
+
+  // v6: Colore cassonetto (top-level per accesso diretto)
+  cass_colore_mode?: ColorMode;
+  cass_colore?: { name: string; ral: string; hex: string } | null;
+  cass_wood_effect?: WoodEffect | null;
+
+  // v6: Colore tapparella (top-level per accesso diretto)
+  tap_colore_mode?: ColorMode;
+  tap_colore?: { name: string; ral: string; hex: string } | null;
+  tap_wood_effect?: WoodEffect | null;
+
+  // v6: Dimensioni immagine originale
+  original_image_width?: number;
+  original_image_height?: number;
 }
 
 export interface RenderOptions {
