@@ -182,11 +182,10 @@ function BillingTabContent({ companyId, navigate }: { companyId: string | null |
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            I pagamenti automatici con carta di credito saranno disponibili presto.
-            Per ora le ricariche vengono processate manualmente entro 24h.
+            I pagamenti vengono processati automaticamente via Stripe. I crediti sono accreditati in pochi secondi.
           </p>
-          <Button size="sm" variant="outline" onClick={() => window.open("mailto:supporto@edilegenius.it", "_blank")}>
-            Contatta supporto per upgrade
+          <Button size="sm" variant="outline" onClick={() => navigate("/app/credits")} className="gap-2">
+            <CreditCard className="h-4 w-4" /> Acquista crediti
           </Button>
         </CardContent>
       </Card>
