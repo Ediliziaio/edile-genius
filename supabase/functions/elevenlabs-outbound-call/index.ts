@@ -88,14 +88,17 @@ Deno.serve(async (req) => {
 
     const elData = await elRes.json();
 
-    await sb.from("outbound_call_log").insert({
+    const { data: logRow } = await sb.from("outbound_call_log").insert({
       company_id: agent.company_id,
       agent_id,
+      contact_id: contact_id || null,
       to_number: to_number.replace(/\s/g, ""),
       el_call_id: elData.call_sid || null,
+      el_conversation_id: elData.conversation_id || null,
+      dynamic_variables: dynamic_variables || {},
       status: "initiated",
       started_at: new Date().toISOString(),
-    });
+    }).select("id").single();
 
     log("info", "Outbound call initiated", { request_id: rid, call_sid: elData.call_sid });
 
