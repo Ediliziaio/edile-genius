@@ -93,6 +93,88 @@ const EVENT_TYPES = [
   { value: "agent.status_changed", label: "Stato agente cambiato" },
 ];
 
+function BillingTabContent({ companyId, navigate }: { companyId: string | null | undefined; navigate: (path: string) => void }) {
+  const [billingCredits, setBillingCredits] = useState<{ balance_eur: number; auto_recharge_enabled: boolean; auto_recharge_threshold: number } | null>(null);
+  const [recentTopups, setRecentTopups] = useState<{ amount_eur: number; created_at: string; type: string; status: string }[]>([]);
+
+  useEffect(() => {
+    if (!companyId) return;
+    Promise.all([
+      supabase.from("ai_credits").select("balance_eur, auto_recharge_enabled, auto_recharge_threshold").eq("company_id", companyId).single(),
+      supabase.from("ai_credit_topups").select("amount_eur, created_at, type, status").eq("company_id", companyId).order("created_at", { ascending: false }).limit(5),
+    ]).then(([creditsRes, topupsRes]) => {
+      if (creditsRes.data) setBillingCredits(creditsRes.data as any);
+      if (topupsRes.data) setRecentTopups(topupsRes.data as any);
+    });
+  }, [companyId]);
+
+  const balanceStatus = !billingCredits ? null : billingCredits.balance_eur < 10 ? "destructive" : billingCredits.balance_eur < 50 ? "secondary" : "default";
+
+  return (
+    <div className="space-y-4 max-w-lg">
+      <Card className="border border-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Crediti conversazionali</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-3xl font-extrabold text-foreground">
+              €{billingCredits?.balance_eur?.toFixed(2) ?? "—"}
+            </span>
+            {balanceStatus && (
+              <Badge variant={balanceStatus as any}>
+                {billingCredits!.balance_eur < 10 ? "Quasi esauriti" : billingCredits!.balance_eur < 50 ? "Scorta bassa" : "OK"}
+              </Badge>
+            )}
+          </div>
+          {billingCredits?.auto_recharge_enabled && (
+            <p className="text-xs text-muted-foreground">
+              ✓ Auto-ricarica attiva — si ricarica sotto €{billingCredits.auto_recharge_threshold}
+            </p>
+          )}
+          <Button size="sm" variant="outline" onClick={() => navigate("/app/credits")} className="gap-2">
+            <CreditCard className="h-4 w-4" /> Gestisci crediti
+          </Button>
+        </CardContent>
+      </Card>
+
+      {recentTopups.length > 0 && (
+        <Card className="border border-border">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Ultime ricariche</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {recentTopups.map((t, i) => (
+              <div key={i} className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground">{new Date(t.created_at).toLocaleDateString("it-IT")}</span>
+                  {t.type === "auto" && <Badge variant="secondary" className="text-xs">auto</Badge>}
+                </div>
+                <span className="font-semibold text-foreground">+€{Number(t.amount_eur).toFixed(2)}</span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      <Card className="border border-border bg-muted/30">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Piano attuale</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            I pagamenti automatici con carta di credito saranno disponibili presto.
+            Per ora le ricariche vengono processate manualmente entro 24h.
+          </p>
+          <Button size="sm" variant="outline" onClick={() => window.open("mailto:supporto@edilegenius.it", "_blank")}>
+            Contatta supporto per upgrade
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export default function Settings() {
   const { profile, user } = useAuth();
   const companyId = useCompanyId();
