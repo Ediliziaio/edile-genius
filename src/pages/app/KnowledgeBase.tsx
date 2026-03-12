@@ -122,27 +122,20 @@ export default function KnowledgeBase() {
     setSaving(true);
     try {
       const agentId = selectedAgentId === "global" ? null : selectedAgentId;
-      const { data: doc } = await supabase.from("ai_knowledge_docs").insert({
-        company_id: companyId,
-        agent_id: agentId,
-        name: new URL(urlInput).hostname,
-        type: "url",
-        source_url: urlInput,
-        status: "processing",
-      } as any).select().single();
+      const { data, error } = await supabase.functions.invoke("add-knowledge-doc", {
+        body: {
+          company_id: companyId,
+          agent_id: agentId,
+          name: new URL(urlInput).hostname,
+          type: "url",
+          source_url: urlInput,
+        },
+      });
 
-      // Invoke edge function
-      if (doc) {
-        await supabase.functions.invoke("add-knowledge-doc", {
-          body: {
-            doc_id: (doc as any).id,
-            company_id: companyId,
-            agent_id: agentId,
-            name: new URL(urlInput).hostname,
-            type: "url",
-            source_url: urlInput,
-          },
-        });
+      if (error) throw error;
+      if (data?.error) {
+        toast({ variant: "destructive", title: "Errore", description: data.error });
+        return;
       }
 
       toast({ title: "URL aggiunto", description: "Il documento verrà elaborato a breve." });
