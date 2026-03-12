@@ -9,16 +9,19 @@ const corsHeaders = {
 const REQUIRED_SECRETS = [
   "SUPABASE_URL",
   "SUPABASE_SERVICE_ROLE_KEY",
+  "SUPABASE_ANON_KEY",
+  "META_ENCRYPTION_KEY",
   "ELEVENLABS_API_KEY",
+  "OPENAI_API_KEY",
+  "RESEND_API_KEY",
 ];
 
 const OPTIONAL_SECRETS = [
-  "RESEND_API_KEY",
-  "OPENAI_API_KEY",
   "TELEGRAM_BOT_TOKEN",
   "WHATSAPP_APP_SECRET",
   "N8N_CALLBACK_SECRET",
-  "ENCRYPTION_KEY",
+  "HEALTH_CHECK_TOKEN",
+  "STRIPE_SECRET_KEY",
 ];
 
 serve(async (req) => {
@@ -45,10 +48,30 @@ serve(async (req) => {
     results[secret] = value ? { status: "ok" } : { status: "missing" };
   }
 
-  // Check ENCRYPTION_KEY format if present
-  const encKey = Deno.env.get("ENCRYPTION_KEY");
-  if (encKey && !/^[0-9a-f]{64}$/i.test(encKey)) {
-    results["ENCRYPTION_KEY"] = { status: "invalid", details: "Must be 64 hex chars (openssl rand -hex 32)" };
+  // Validate META_ENCRYPTION_KEY format (must be 64 hex chars = 32 bytes)
+  const encKey = Deno.env.get("META_ENCRYPTION_KEY");
+  if (encKey) {
+    if (!/^[0-9a-fA-F]{64}$/.test(encKey)) {
+      results["META_ENCRYPTION_KEY"] = {
+        status: "invalid",
+        details: "Deve essere 64 caratteri esadecimali. Genera con: openssl rand -hex 32",
+      };
+    }
+  }
+
+  // Crypto roundtrip test
+  if (encKey && results["META_ENCRYPTION_KEY"]?.status === "ok") {
+    try {
+      const { encryptToken, decryptToken } = await import("../_shared/crypto.ts");
+      const testPlain = "health-check-test-string";
+      const encrypted = await encryptToken(testPlain, encKey);
+      const decrypted = await decryptToken(encrypted, encKey);
+      results["CRYPTO_ROUNDTRIP"] = testPlain === decrypted
+        ? { status: "ok" }
+        : { status: "invalid", details: "encrypt/decrypt roundtrip fallito" };
+    } catch (e) {
+      results["CRYPTO_ROUNDTRIP"] = { status: "invalid", details: (e as Error).message };
+    }
   }
 
   // Test DB connection

@@ -93,6 +93,7 @@ Deno.serve(async (req) => {
           "Content-Type": "application/json",
           "X-N8N-API-KEY": apiKey,
           "X-Idempotency-Key": idempotencyKey,
+          "X-Callback-Token": Deno.env.get("N8N_CALLBACK_SECRET") || "",
         },
         body: JSON.stringify({
           ...trigger_data,
@@ -100,7 +101,6 @@ Deno.serve(async (req) => {
             company_id: companyId,
             execution_db_id: execution.id,
             callback_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/n8n-execution-callback`,
-            callback_token: Deno.env.get("N8N_CALLBACK_SECRET") || "",
           },
         }),
         signal: AbortSignal.timeout(10000),

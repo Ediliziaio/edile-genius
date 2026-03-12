@@ -262,16 +262,39 @@ Deno.serve(async (req) => {
 
       const integ = integration as any;
 
-      // Decrypt API key if encrypted
-      let apiKeyPlain = integ.api_key_encrypted;
+      // Decrypt API key
+      let apiKeyPlain: string;
       const encKey = Deno.env.get("META_ENCRYPTION_KEY");
-      if (encKey && encKey.length === 64) {
-        try {
-          const { decryptToken } = await import("../_shared/crypto.ts");
-          apiKeyPlain = await decryptToken(integ.api_key_encrypted, encKey);
-        } catch {
-          // Key might not be encrypted (legacy), use as-is
-        }
+      if (!encKey || encKey.length !== 64) {
+        console.error("[crm-sync] META_ENCRYPTION_KEY non configurata o non valida");
+        return new Response(JSON.stringify({ error: "Chiave di crittografia non configurata — contatta il supporto" }), { status: 500, headers: corsHeaders });
+      }
+
+      try {
+        const { decryptToken } = await import("../_shared/crypto.ts");
+        apiKeyPlain = await decryptToken(integ.api_key_encrypted, encKey);
+      } catch (decryptErr) {
+        console.error(
+          `[crm-sync] Decriptazione API key fallita per integrazione ${integ.id}:`,
+          (decryptErr as Error).message
+        );
+
+        await supabase.from("company_integrations").update({
+          last_sync_status: "error",
+          last_sync_error: "Chiave API non leggibile — riconfigura la connessione CRM",
+          last_sync_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }).eq("company_id", company_id).eq("provider", provider);
+
+        return new Response(JSON.stringify({
+          error: "Chiave API non leggibile — riconfigura la connessione CRM",
+        }), { status: 400, headers: corsHeaders });
+      }
+
+      // Validate decrypted key
+      if (!apiKeyPlain || apiKeyPlain.length < 10) {
+        console.error(`[crm-sync] API key decriptata troppo corta per integrazione ${integ.id}`);
+        return new Response(JSON.stringify({ error: "Chiave API non valida — riconfigura la connessione" }), { status: 400, headers: corsHeaders });
       }
 
       try {

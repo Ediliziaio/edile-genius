@@ -43,6 +43,7 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [seedingDemo, setSeedingDemo] = useState(false);
+  const [seedCompleted, setSeedCompleted] = useState(false);
 
   const [step1, setStep1] = useState<Step1Data>({ nome_azienda: "", partita_iva: "", indirizzo: "" });
   const [step2, setStep2] = useState<Step2Data>({ nome_cantiere: "", indirizzo_cantiere: "", data_inizio: "", data_fine_prevista: "", responsabile: "" });
@@ -51,7 +52,10 @@ export default function OnboardingPage() {
 
   const completeOnboarding = async () => {
     if (!user) return;
-    await supabase.from("profiles" as any).update({ onboarding_completed: true }).eq("id", user.id);
+    await supabase.from("profiles" as any).update({
+      onboarding_completed: true,
+      onboarding_completed_at: new Date().toISOString(),
+    }).eq("id", user.id);
     navigate("/app", { replace: true });
   };
 
@@ -81,6 +85,24 @@ export default function OnboardingPage() {
       toast({ title: "Inserisci il nome del cantiere", variant: "destructive" });
       return;
     }
+
+    // Date validation
+    if (step2.data_inizio && step2.data_fine_prevista) {
+      const inizio = new Date(step2.data_inizio);
+      const fine = new Date(step2.data_fine_prevista);
+      if (fine <= inizio) {
+        toast({ title: "La data di fine deve essere successiva alla data di inizio", variant: "destructive" });
+        return;
+      }
+      const durataGiorni = (fine.getTime() - inizio.getTime()) / (1000 * 60 * 60 * 24);
+      if (durataGiorni > 365 * 5) {
+        const conferma = window.confirm(
+          `Il cantiere dura ${Math.round(durataGiorni / 365)} anni. Sei sicuro?`
+        );
+        if (!conferma) return;
+      }
+    }
+
     if (!companyId) return;
     setLoading(true);
     try {
@@ -129,11 +151,20 @@ export default function OnboardingPage() {
   };
 
   const handleSeedDemo = async () => {
+    if (seedCompleted) return;
     setSeedingDemo(true);
     try {
       const { error } = await supabase.functions.invoke("seed-demo-data");
-      if (error) throw error;
-      toast({ title: "Dati demo caricati con successo!" });
+      if (error) {
+        if (error.message?.includes("409") || error.message?.includes("already")) {
+          toast({ title: "Hai già dei dati — l'app è pronta!" });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({ title: "Dati demo caricati con successo!" });
+      }
+      setSeedCompleted(true);
       await completeOnboarding();
     } catch {
       toast({ title: "Errore nel caricamento dei dati demo", variant: "destructive" });
@@ -259,9 +290,9 @@ export default function OnboardingPage() {
               <Button variant="ghost" onClick={completeOnboarding} className="text-muted-foreground">
                 Fallo dopo
               </Button>
-              <Button variant="outline" onClick={handleSeedDemo} disabled={seedingDemo} className="gap-2">
-                {seedingDemo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                Carica dati demo
+              <Button variant="outline" onClick={handleSeedDemo} disabled={seedingDemo || seedCompleted} className="gap-2">
+                {seedingDemo ? <Loader2 className="w-4 h-4 animate-spin" /> : seedCompleted ? <CheckCircle2 className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+                {seedingDemo ? "Caricamento..." : seedCompleted ? "Dati caricati" : "Carica dati demo"}
               </Button>
             </div>
             <Button onClick={handleStep3AddWorker} disabled={loading} className="gap-2">

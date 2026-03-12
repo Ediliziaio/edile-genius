@@ -1722,6 +1722,7 @@ export type Database = {
           is_active: boolean
           last_sync_at: string | null
           last_sync_count: number | null
+          last_sync_error: string | null
           last_sync_status: string | null
           provider: string
           status: string
@@ -1738,6 +1739,7 @@ export type Database = {
           is_active?: boolean
           last_sync_at?: string | null
           last_sync_count?: number | null
+          last_sync_error?: string | null
           last_sync_status?: string | null
           provider: string
           status?: string
@@ -1754,6 +1756,7 @@ export type Database = {
           is_active?: boolean
           last_sync_at?: string | null
           last_sync_count?: number | null
+          last_sync_error?: string | null
           last_sync_status?: string | null
           provider?: string
           status?: string
@@ -2944,6 +2947,8 @@ export type Database = {
           id: string
           job_title: string | null
           onboarding_completed: boolean | null
+          onboarding_completed_at: string | null
+          onboarding_skipped_seed: boolean | null
           phone: string | null
           updated_at: string | null
         }
@@ -2956,6 +2961,8 @@ export type Database = {
           id: string
           job_title?: string | null
           onboarding_completed?: boolean | null
+          onboarding_completed_at?: string | null
+          onboarding_skipped_seed?: boolean | null
           phone?: string | null
           updated_at?: string | null
         }
@@ -2968,6 +2975,8 @@ export type Database = {
           id?: string
           job_title?: string | null
           onboarding_completed?: boolean | null
+          onboarding_completed_at?: string | null
+          onboarding_skipped_seed?: boolean | null
           phone?: string | null
           updated_at?: string | null
         }
