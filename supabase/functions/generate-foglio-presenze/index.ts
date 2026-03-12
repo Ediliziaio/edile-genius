@@ -41,14 +41,11 @@ Deno.serve(async (req) => {
 
     // Enforce tenant: ignore client-provided company_id
     const resolvedCompanyId = profile.company_id;
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
 
     let query = adminClient
       .from("presenze_mensili")
       .select("*, cantiere_operai(nome, cognome, ruolo), cantieri(nome)")
-      .eq("company_id", company_id)
+      .eq("company_id", resolvedCompanyId)
       .eq("mese", mese)
       .eq("anno", anno);
 
