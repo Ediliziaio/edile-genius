@@ -4247,6 +4247,7 @@ export type Database = {
         Args: { p_amount_eur: number; p_company_id: string }
         Returns: Json
       }
+      reset_agents_calls_month: { Args: never; Returns: undefined }
       topup_credits: {
         Args: { _amount_eur: number; _company_id: string }
         Returns: number
