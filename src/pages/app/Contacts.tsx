@@ -821,6 +821,17 @@ export default function ContactsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <BulkCallModal
+        open={showBulkCallModal}
+        onClose={() => setShowBulkCallModal(false)}
+        contactIds={Array.from(selectedIds)}
+        onSuccess={() => {
+          setSelectedIds(new Set());
+          setShowBulkCallModal(false);
+          invalidate();
+        }}
+      />
     </div>
   );
 }
