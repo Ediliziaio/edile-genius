@@ -33,9 +33,9 @@ const WHATSAPP_SLUGS = [
 ];
 
 function getAgentType(slug: string): string {
+  if (WHATSAPP_SLUGS.includes(slug) || slug.includes("whatsapp") || slug.includes("-wa")) return "whatsapp";
   if (VOCAL_SLUGS.includes(slug)) return "vocal";
   if (RENDER_SLUGS.includes(slug)) return "render";
-  if (slug.startsWith("assistente-whatsapp") || slug.includes("whatsapp")) return "vocal";
   return "vocal";
 }
 
