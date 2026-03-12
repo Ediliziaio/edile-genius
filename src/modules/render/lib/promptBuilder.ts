@@ -424,24 +424,6 @@ ${items.join("\n")}
 
 ⚠️ CRITICAL RULE: Every element marked 🚫 KEEP must be pixel-identical to the original.
 ⚠️ CRITICAL RULE: Every element marked ✅ REPLACE must be rendered with the EXACT specified finish.`;
-        if (t.colore.ral) cDesc += ` (RAL ${t.colore.ral})`;
-        lines.push(`Slat/blade color: ${cDesc}`);
-      }
-      if (t.colore_guide) {
-        let gDesc = t.colore_guide.nome;
-        if (t.colore_guide.ral) gDesc += ` (RAL ${t.colore_guide.ral})`;
-        lines.push(`Side guide channels (guide) color: ${gDesc}`);
-      }
-      const stato = t.stato_render || "chiusa";
-      lines.push(`Render the shutter: ${stato === 'aperta' ? 'FULLY OPEN (rolled up into cassonetto, no curtain visible)' : stato === 'mezza' ? 'HALF OPEN (curtain visible covering lower ~50% of glass)' : 'FULLY CLOSED (curtain covers entire glass surface)'}`);
-    } else {
-      lines.push(`\n🚫 DO NOT TOUCH — ${analisi.presenza_tapparella ? 'Keep existing shutter/blind exactly as in photo' : 'No shutter present — do not add one'}`);
-    }
-  } else {
-    lines.push(`\n🚫 DO NOT TOUCH — ${analisi.presenza_tapparella ? 'Keep existing shutter/blind exactly as in photo' : 'No shutter present — do not add one'}`);
-  }
-
-  return lines.join('\n');
 }
 
 function buildBlock_D(infisso: NuovoInfisso): string {
