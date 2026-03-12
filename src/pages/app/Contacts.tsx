@@ -581,8 +581,9 @@ export default function ContactsPage() {
                   <TableHead className="text-ink-500">Score</TableHead>
                   <TableHead className="text-ink-500">Stato</TableHead>
                   <TableHead className="text-ink-500">Priorità</TableHead>
+                  <TableHead className="text-ink-500">Ultima chiamata</TableHead>
                   <TableHead className="text-ink-500">Creato</TableHead>
-                  <TableHead className="w-[40px]" />
+                  <TableHead className="w-[80px]" />
                 </TableRow>
               </TableHeader>
               <TableBody>
