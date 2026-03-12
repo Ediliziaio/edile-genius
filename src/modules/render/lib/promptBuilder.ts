@@ -464,8 +464,9 @@ function buildBlock_G(infisso: NuovoInfisso): string {
   return `[BLOCK G – HARDWARE DETAILS]
 Handle: ${manigliaDesc[f.maniglia]}
 Handle color: ${coloreDesc[f.colore]}
-Handle position: centered on the meeting stile for battente windows, lower third for portafinestre
-Espagnolette lock bar: concealed inside frame rebate
+Handle position: centered on the meeting stile (vertical center of sash height) for battente windows, lower third for portafinestre
+Espagnolette lock bar: concealed inside frame rebate, only the multi-point locking pins (3-4) visible at frame edge when window is shown open
+Corner connectors: thin aluminum corner keys inside profile — not visible externally
 Strikeplate: small 20×60mm metal plate recessed into frame face opposite handle — show subtle shadow`;
 }
 
