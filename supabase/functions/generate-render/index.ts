@@ -163,7 +163,7 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
 
   // Block F
   if (sost.infissi) {
-    blocks.F = `[BLOCK F – GLASS UNIT]\n${vetro.prompt_fragment || vetro.tipo || "double glazed clear glass"}\nRealistic reflections, greenish tint on edges, proper transparency.`;
+    blocks.F = `[BLOCK F – GLASS UNIT]\n${vetro.prompt_fragment || vetro.tipo || "double glazed clear glass"}\nTechnical rendering requirements:\n- Thin greenish tint at glass edge (typical of multi-pane low-iron or standard float glass)\n- Specular highlight/reflection matching scene light source direction\n- Interior appears as dark/neutral (curtains or room interior barely visible)\n- Air gap line between panes invisible from exterior at normal viewing angle\n- Spacer bar (15-16mm aluminum or warm-edge) visible only at perimeter inside rebate`;
   } else {
     blocks.F = `[BLOCK F – GLASS — SKIPPED]`;
   }
