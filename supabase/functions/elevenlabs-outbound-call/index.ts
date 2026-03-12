@@ -25,6 +25,14 @@ Deno.serve(async (req) => {
 
     if (!agent_id || !to_number) return jsonError("agent_id e to_number richiesti", "validation_error", 400, rid);
 
+    // Resolve caller's company_id for tenant isolation
+    const { data: callerProfile } = await sb
+      .from("profiles")
+      .select("company_id")
+      .eq("id", userData.user.id)
+      .single();
+    const callerCompanyId = callerProfile?.company_id;
+
     // DNC check if contact_id provided
     if (contact_id) {
       const { data: contactData } = await sb
@@ -48,6 +56,13 @@ Deno.serve(async (req) => {
 
     const { data: agent } = await sb.from("agents").select("el_agent_id, company_id, el_phone_number_id, outbound_enabled").eq("id", agent_id).single();
     if (!agent?.el_agent_id) return jsonError("Agente non ha ID ElevenLabs", "validation_error", 400, rid);
+
+    // Tenant isolation: verify agent belongs to caller's company
+    if (callerCompanyId && agent.company_id !== callerCompanyId) {
+      log("warn", "Cross-tenant outbound call blocked", { request_id: rid, caller_company: callerCompanyId, agent_company: agent.company_id });
+      return jsonError("Agente non appartiene alla tua azienda", "forbidden", 403, rid);
+    }
+
     if (!agent.outbound_enabled) return jsonError("Chiamate outbound non abilitate", "forbidden", 403, rid);
     if (!agent.el_phone_number_id) return jsonError("Nessun numero ElevenLabs associato", "validation_error", 400, rid);
 

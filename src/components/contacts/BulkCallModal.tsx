@@ -50,6 +50,7 @@ export function BulkCallModal({ open, onClose, contactIds, onSuccess }: BulkCall
         .select("id, name, outbound_enabled, el_phone_number_id")
         .eq("company_id", companyId!)
         .eq("outbound_enabled", true)
+        .eq("status", "active")
         .not("el_phone_number_id", "is", null)
         .order("name");
       if (error) throw error;

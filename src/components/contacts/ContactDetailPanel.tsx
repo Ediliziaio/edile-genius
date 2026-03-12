@@ -190,12 +190,18 @@ function CallAnalyticsSection({ contactId }: { contactId: string }) {
   const interested = (outcomes["interested"] || 0) + (outcomes["appointment_set"] || 0) + (outcomes["answered"] || 0);
   const conversionRate = totalCalls > 0 ? Math.round((interested / totalCalls) * 100) : null;
 
-  // Best hour
-  const bestHour = positiveHours.length > 0
-    ? positiveHours.sort((a, b) =>
-        positiveHours.filter(v => v === a).length - positiveHours.filter(v => v === b).length
-      ).pop()
-    : null;
+  // Best hour (frequency map — O(n))
+  const bestHour = (() => {
+    if (positiveHours.length === 0) return null;
+    const freq: Record<number, number> = {};
+    let maxCount = 0;
+    let maxHour = 0;
+    for (const h of positiveHours) {
+      freq[h] = (freq[h] || 0) + 1;
+      if (freq[h] > maxCount) { maxCount = freq[h]; maxHour = h; }
+    }
+    return maxHour;
+  })();
   const bestHourLabel = bestHour != null
     ? `${String(bestHour).padStart(2, "0")}:00–${String(bestHour + 1).padStart(2, "0")}:00`
     : null;
