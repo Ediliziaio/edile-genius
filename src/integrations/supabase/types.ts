@@ -2194,6 +2194,106 @@ export type Database = {
           },
         ]
       }
+      n8n_executions: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          idempotency_key: string
+          n8n_execution_id: string | null
+          output_data: Json | null
+          retry_count: number | null
+          status: string
+          trigger_data: Json | null
+          triggered_at: string
+          triggered_by: string | null
+          workflow_id: string
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          idempotency_key: string
+          n8n_execution_id?: string | null
+          output_data?: Json | null
+          retry_count?: number | null
+          status?: string
+          trigger_data?: Json | null
+          triggered_at?: string
+          triggered_by?: string | null
+          workflow_id: string
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          idempotency_key?: string
+          n8n_execution_id?: string | null
+          output_data?: Json | null
+          retry_count?: number | null
+          status?: string
+          trigger_data?: Json | null
+          triggered_at?: string
+          triggered_by?: string | null
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "n8n_executions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      n8n_workflows: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          trigger_event: string | null
+          workflow_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          trigger_event?: string | null
+          workflow_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          trigger_event?: string | null
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "n8n_workflows_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notes: {
         Row: {
           author_id: string
@@ -2324,6 +2424,7 @@ export type Database = {
           el_default_voice_id: string | null
           el_voices_count: number | null
           id: string
+          n8n_api_key_encrypted: string | null
           n8n_api_key_set: boolean
           n8n_base_url: string | null
           n8n_configured: boolean
@@ -2342,6 +2443,7 @@ export type Database = {
           el_default_voice_id?: string | null
           el_voices_count?: number | null
           id?: string
+          n8n_api_key_encrypted?: string | null
           n8n_api_key_set?: boolean
           n8n_base_url?: string | null
           n8n_configured?: boolean
@@ -2360,6 +2462,7 @@ export type Database = {
           el_default_voice_id?: string | null
           el_voices_count?: number | null
           id?: string
+          n8n_api_key_encrypted?: string | null
           n8n_api_key_set?: boolean
           n8n_base_url?: string | null
           n8n_configured?: boolean
