@@ -177,7 +177,7 @@ function buildPromptFromConfig(session: any): { systemPrompt: string; userPrompt
   } else if (sost.cassonetto && cassonetto.azione === "sostituisci" && cassonetto.materiale) {
     let cColor = "";
     if (cassonetto.colore?.nome) { cColor = `Color: ${cassonetto.colore.nome}`; if (cassonetto.colore.ral) cColor += ` (RAL ${cassonetto.colore.ral})`; }
-    blocks.H = `[BLOCK H – NEW ROLLER BOX]\nReplace with: ${CASSONETTO_MATERIAL_DESC[cassonetto.materiale] || cassonetto.materiale}\n${cColor}\nPosition: above window, flush with wall. Bottom: shutter exit slot ~15-20mm. Width: matching frame outer width.`;
+    blocks.H = `[BLOCK H – NEW ROLLER BOX]\nReplace with: ${CASSONETTO_MATERIAL_DESC[cassonetto.materiale] || cassonetto.materiale}\n${cColor}\nPosition: above window, flush with wall. Bottom: shutter exit slot ~15-20mm. Width: matching frame outer width.\nSide flanges: small triangular or stepped PVC/aluminum caps where cassonetto meets wall on left and right.\nCast appropriate shadow from cassonetto protrusion onto wall below.`;
   } else {
     blocks.H = `[BLOCK H – ROLLER BOX]\n${analisi.presenza_cassonetto ? "Keep existing cassonetto as-is." : "No cassonetto. Do not add one."}`;
   }
