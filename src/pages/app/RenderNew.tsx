@@ -286,6 +286,8 @@ export default function RenderNew() {
         azione: sostituzione.cassonetto ? cassonettoAzione : "mantieni" as const,
         materiale: sostituzione.cassonetto && cassonettoAzione === "sostituisci" ? cassonettoMateriale as CassonettoMateriale : undefined,
         colore: sostituzione.cassonetto && cassonettoAzione === "sostituisci" ? cassonettoColoreConfig : undefined,
+        colore_mode: sostituzione.cassonetto && cassonettoAzione === "sostituisci" ? cassonettoColorMode : undefined,
+        colore_wood_effect: sostituzione.cassonetto && cassonettoAzione === "sostituisci" && cassonettoColorMode === "legno" ? cassonettoWoodEffect : undefined,
         prompt_fragment: cassonettoPresets.find(p => p.value === cassonettoMateriale)?.prompt_fragment,
       },
       tapparella: {
