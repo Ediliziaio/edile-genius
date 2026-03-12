@@ -49,43 +49,55 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: corsHeaders });
     }
 
-    let finalAmountEur = amountEur;
+    let finalAmountEur: number;
+    let finalCreditsEur: number;
     let packageName: string | null = null;
 
-    // If packageId is provided, look up package price
     if (packageId) {
+      // packageId has PRIORITY over amountEur
       const { data: pkg, error: pkgErr } = await sb
         .from("ai_credit_packages")
-        .select("price_eur, credits_eur, name")
+        .select("price_eur, credits_eur, name, is_active")
         .eq("id", packageId)
-        .eq("is_active", true)
         .single();
 
       if (pkgErr || !pkg) {
         return new Response(
-          JSON.stringify({ error: "Pacchetto non trovato o non disponibile" }),
+          JSON.stringify({ error: "Pacchetto non trovato" }),
           { status: 404, headers: corsHeaders }
         );
       }
-      finalAmountEur = Number(pkg.credits_eur || pkg.price_eur);
+      if (!pkg.is_active) {
+        return new Response(
+          JSON.stringify({ error: "Pacchetto non più disponibile" }),
+          { status: 410, headers: corsHeaders }
+        );
+      }
+      finalAmountEur = Number(pkg.price_eur);
+      finalCreditsEur = Number(pkg.credits_eur || pkg.price_eur);
       packageName = pkg.name;
-    }
 
-    // Validate amount
-    if (!finalAmountEur || typeof finalAmountEur !== "number" || finalAmountEur < 5) {
-      return new Response(JSON.stringify({ error: "Importo minimo: €5" }), { status: 400, headers: corsHeaders });
-    }
-    if (finalAmountEur > 2000) {
+    } else if (amountEur) {
+      if (typeof amountEur !== "number" || amountEur < 5 || amountEur > 2000) {
+        return new Response(
+          JSON.stringify({ error: "Importo non valido. Min €5, Max €2.000." }),
+          { status: 400, headers: corsHeaders }
+        );
+      }
+      finalAmountEur = amountEur;
+      finalCreditsEur = amountEur; // 1:1 for free topups
+
+    } else {
       return new Response(
-        JSON.stringify({ error: "Importo massimo per transazione: €2.000. Per importi maggiori contatta il supporto." }),
+        JSON.stringify({ error: "Specifica packageId oppure amountEur" }),
         { status: 400, headers: corsHeaders }
       );
     }
 
-    // Atomic topup via RPC
+    // Atomic topup via RPC — use finalCreditsEur (credits to add)
     const { data: newBalanceRows, error: rpcError } = await sb.rpc("topup_credits", {
       _company_id: companyId,
-      _amount_eur: finalAmountEur,
+      _amount_eur: finalCreditsEur,
     });
 
     if (rpcError) {
@@ -94,13 +106,15 @@ Deno.serve(async (req) => {
 
     const newBalance = Number(newBalanceRows);
 
-    // Generate invoice number
-    const invoiceNum = `EIO-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+    // Generate unique invoice number via DB sequence
+    const { data: invoiceData } = await sb.rpc("generate_invoice_number");
+    const invoiceNum = invoiceData || `EIO-${Date.now()}`;
 
     // Record topup
     await sb.from("ai_credit_topups").insert({
       company_id: companyId,
-      amount_eur: finalAmountEur,
+      amount_eur: finalCreditsEur,
+      price_paid_eur: finalAmountEur,
       type: type || (packageId ? "package" : "manual"),
       status: "completed",
       payment_method: paymentMethod || "manual_admin",
@@ -117,13 +131,19 @@ Deno.serve(async (req) => {
       user_id: userId,
       action: "credit_topup",
       entity_type: "credits",
-      details: { amount_eur: finalAmountEur, new_balance: newBalance, invoice: invoiceNum, package_id: packageId || null },
+      details: {
+        amount_eur: finalCreditsEur,
+        price_paid: finalAmountEur,
+        new_balance: newBalance,
+        invoice: invoiceNum,
+        package_id: packageId || null,
+      },
     });
 
     return new Response(JSON.stringify({
       success: true,
       new_balance_eur: Number(newBalance.toFixed(2)),
-      amount_added: Number(finalAmountEur.toFixed(2)),
+      amount_added: Number(finalCreditsEur.toFixed(2)),
       invoice_number: invoiceNum,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 

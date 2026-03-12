@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useCompanyId } from "@/hooks/useCompanyId";
@@ -95,19 +96,36 @@ const EVENT_TYPES = [
 ];
 
 function BillingTabContent({ companyId, navigate }: { companyId: string | null | undefined; navigate: (path: string) => void }) {
-  const [billingCredits, setBillingCredits] = useState<{ balance_eur: number; auto_recharge_enabled: boolean; auto_recharge_threshold: number } | null>(null);
-  const [recentTopups, setRecentTopups] = useState<{ amount_eur: number; created_at: string; type: string; status: string }[]>([]);
+  const { data: billingCredits } = useQuery({
+    queryKey: ["billing-credits", companyId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ai_credits")
+        .select("balance_eur, auto_recharge_enabled, auto_recharge_threshold")
+        .eq("company_id", companyId!)
+        .single();
+      if (error) throw error;
+      return data as { balance_eur: number; auto_recharge_enabled: boolean; auto_recharge_threshold: number };
+    },
+    enabled: !!companyId,
+    staleTime: 2 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    if (!companyId) return;
-    Promise.all([
-      supabase.from("ai_credits").select("balance_eur, auto_recharge_enabled, auto_recharge_threshold").eq("company_id", companyId).single(),
-      supabase.from("ai_credit_topups").select("amount_eur, created_at, type, status").eq("company_id", companyId).order("created_at", { ascending: false }).limit(5),
-    ]).then(([creditsRes, topupsRes]) => {
-      if (creditsRes.data) setBillingCredits(creditsRes.data as any);
-      if (topupsRes.data) setRecentTopups(topupsRes.data as any);
-    });
-  }, [companyId]);
+  const { data: recentTopups = [] } = useQuery({
+    queryKey: ["billing-topups", companyId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ai_credit_topups")
+        .select("amount_eur, created_at, type, status")
+        .eq("company_id", companyId!)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return (data ?? []) as { amount_eur: number; created_at: string; type: string; status: string }[];
+    },
+    enabled: !!companyId,
+    staleTime: 2 * 60 * 1000,
+  });
 
   const balanceStatus = !billingCredits ? null : billingCredits.balance_eur < 10 ? "destructive" : billingCredits.balance_eur < 50 ? "secondary" : "default";
 
@@ -164,11 +182,10 @@ function BillingTabContent({ companyId, navigate }: { companyId: string | null |
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            I pagamenti automatici con carta di credito saranno disponibili presto.
-            Per ora le ricariche vengono processate manualmente entro 24h.
+            I pagamenti vengono processati automaticamente via Stripe. I crediti sono accreditati in pochi secondi.
           </p>
-          <Button size="sm" variant="outline" onClick={() => window.open("mailto:supporto@edilegenius.it", "_blank")}>
-            Contatta supporto per upgrade
+          <Button size="sm" variant="outline" onClick={() => navigate("/app/credits")} className="gap-2">
+            <CreditCard className="h-4 w-4" /> Acquista crediti
           </Button>
         </CardContent>
       </Card>
