@@ -282,6 +282,60 @@ export default function KnowledgeBase() {
     fetchData();
   };
 
+  const scrapeWebPage = async () => {
+    if (!scrapeUrl) return;
+    setScrapeLoading(true);
+    setScrapedMarkdown("");
+    setScrapedTitle("");
+    try {
+      const { data, error } = await supabase.functions.invoke("firecrawl-scrape", {
+        body: { url: scrapeUrl },
+      });
+      if (error) throw error;
+      if (!data?.success) {
+        toast({ variant: "destructive", title: "Errore scraping", description: data?.error || "Impossibile analizzare la pagina." });
+        return;
+      }
+      setScrapedMarkdown(data.markdown || "");
+      setScrapedTitle(data.title || new URL(data.url || scrapeUrl).hostname);
+      toast({ title: "Pagina analizzata", description: `Estratti ${(data.markdown || "").length} caratteri.` });
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Errore", description: err.message });
+    } finally {
+      setScrapeLoading(false);
+    }
+  };
+
+  const saveScrapeToKB = async () => {
+    if (!scrapedMarkdown || !companyId) return;
+    setScrapeSaving(true);
+    try {
+      const agentId = selectedAgentId === "global" ? null : selectedAgentId;
+      const { data, error } = await supabase.functions.invoke("add-knowledge-doc", {
+        body: {
+          company_id: companyId,
+          agent_id: agentId,
+          name: scrapedTitle || new URL(scrapeUrl).hostname,
+          type: "scrape",
+          source_url: scrapeUrl,
+          scraped_content: scrapedMarkdown,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) {
+        toast({ variant: "destructive", title: "Errore", description: data.error });
+        return;
+      }
+      toast({ title: "Documento salvato", description: "Il contenuto scrappato è stato aggiunto alla Knowledge Base." });
+      closeModal();
+      fetchData();
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Errore", description: err.message });
+    } finally {
+      setScrapeSaving(false);
+    }
+  };
+
   const closeModal = () => {
     setAddModal(false);
     setUploadFile(null);
@@ -290,6 +344,9 @@ export default function KnowledgeBase() {
     setTextName("");
     setTextContent("");
     setSelectedAgentId("global");
+    setScrapeUrl("");
+    setScrapedMarkdown("");
+    setScrapedTitle("");
   };
 
   const totalSize = docs.reduce((s, d) => s + (d.size_bytes || 0), 0);
