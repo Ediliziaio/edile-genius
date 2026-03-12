@@ -825,6 +825,12 @@ export function buildRenderPromptV2(
     // Anti-collateral-damage
     "changed wall color", "changed facade", "different building style",
     "altered perspective", "different weather", "different lighting",
+    // v6: Cassonetto & dimensioni
+    "cassonetto unchanged when replacement was requested",
+    "wrong cassonetto color", "cassonetto same color as original when asked to change",
+    "tapparella unchanged when replacement was requested",
+    "resized or cropped original photo", "different image dimensions than original",
+    "black bars added", "white bars added", "letterboxing", "pillarboxing",
   ].join(", ");
 
   const fullText = systemPrompt + userPrompt;
@@ -833,7 +839,7 @@ export function buildRenderPromptV2(
     systemPrompt,
     userPrompt,
     negativePrompt,
-    promptVersion: "5.0.0",
+    promptVersion: "6.0.0",
     charCount: fullText.length,
     blocks,
   };
