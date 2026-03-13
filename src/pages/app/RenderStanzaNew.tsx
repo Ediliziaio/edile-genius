@@ -571,10 +571,15 @@ export default function RenderStanzaNew() {
   // Toggle intervento ON/OFF
   const toggleIntervento = (key: keyof InterventiState, value: boolean) => {
     setInterventiAttivi(prev => ({ ...prev, [key]: value }));
-    setConfig(prev => ({
-      ...prev,
-      [key]: { ...(prev[key as keyof WizardConfig] as any), attivo: value },
-    }));
+    setConfig(prev => {
+      const existing = prev[key as keyof WizardConfig];
+      return {
+        ...prev,
+        [key]: typeof existing === 'object' && existing !== null
+          ? { ...existing, attivo: value }
+          : { attivo: value },
+      };
+    });
   };
 
   // Aggiorna una sub-config
