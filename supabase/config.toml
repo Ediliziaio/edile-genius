@@ -218,3 +218,12 @@ verify_jwt = false
 
 [functions.embed-query]
 verify_jwt = false
+
+[functions.analizza-superfici-preventivo]
+verify_jwt = false
+
+[functions.genera-sezione-preventivo]
+verify_jwt = false
+
+[functions.genera-preventivo-completo]
+verify_jwt = false
