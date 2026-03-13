@@ -57,6 +57,7 @@ export default function RenderPavimentoNew() {
       return;
     }
     setFile(selectedFile);
+    if (preview) URL.revokeObjectURL(preview);
     const url = URL.createObjectURL(selectedFile);
     setPreview(url);
 

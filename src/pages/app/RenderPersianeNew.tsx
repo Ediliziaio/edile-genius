@@ -132,6 +132,7 @@ export default function RenderPersianeNew() {
     setUploading(true);
     setAnalyzeError(null);
     setFoto(file);
+    if (fotoPreview) URL.revokeObjectURL(fotoPreview);
     const previewUrl = URL.createObjectURL(file);
     setFotoPreview(previewUrl);
 

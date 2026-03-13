@@ -485,6 +485,7 @@ export default function RenderStanzaNew() {
     }
 
     setFoto(file);
+    if (fotoPreview) URL.revokeObjectURL(fotoPreview);
     const previewUrl = URL.createObjectURL(file);
     setFotoPreview(previewUrl);
 
@@ -507,13 +508,11 @@ export default function RenderStanzaNew() {
     setAnalizzando(true);
 
     try {
-      // 1. Crea sessione DB
-      // 1. Crea sessione DB con company_id per isolamento multi-tenant
+      // 1. Crea sessione DB — render_stanza_sessions has NO company_id column
       const { data: session, error: sessErr } = await supabase
         .from('render_stanza_sessions' as any)
         .insert({
           user_id: user.id,
-          company_id: companyId,
           tipo_stanza: config.tipo_stanza,
           status: 'analyzing',
         })
@@ -529,6 +528,15 @@ export default function RenderStanzaNew() {
         .from('stanza-originals')
         .upload(storagePath, foto, { contentType: foto.type });
       if (uploadErr) throw uploadErr;
+
+      // Save original image path and dimensions to session
+      await supabase.from('render_stanza_sessions' as any)
+        .update({
+          original_image_path: storagePath,
+          original_image_width: imageNaturalWidth,
+          original_image_height: imageNaturalHeight,
+        })
+        .eq('id', (session as any).id);
 
       // 3. Chiama edge function analyze-room-photo
       const base64 = await fileToBase64(foto);
@@ -662,21 +670,28 @@ export default function RenderStanzaNew() {
 
       const renderPayload = unwrapEdge<{ result_url?: string; result_image_url?: string; result_base64?: string }>(renderData);
       const finalUrl = renderPayload?.result_url || renderPayload?.result_image_url || renderPayload?.result_base64 || null;
+      
+      // Don't mark as completed if no result URL
+      if (!finalUrl) {
+        toast.error('Render completato ma nessuna immagine ricevuta. Riprova.');
+        setStep(3);
+        return;
+      }
+      
       setRenderUrl(finalUrl);
 
-      // Salva in gallery (colonne corrette)
+      // Salva in gallery — render_stanza_gallery has NO company_id column
       await supabase.from('render_stanza_gallery' as any).insert({
         user_id: user.id,
-        company_id: companyId,
         session_id: sessionId,
         original_image_url: originalUrl || '',
-        result_image_url: finalUrl || '',
+        result_image_url: finalUrl,
         tipo_stanza: config.tipo_stanza,
         interventi: attivi,
         config_snapshot: configForPrompt,
       });
 
-      // Aggiorna stato sessione (colonne corrette)
+      // Aggiorna stato sessione
       await supabase
         .from('render_stanza_sessions' as any)
         .update({

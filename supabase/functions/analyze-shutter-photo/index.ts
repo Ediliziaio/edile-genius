@@ -84,11 +84,11 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Update session if provided
+    // Update session if provided — persiane_sessions has no analisi column; just update status
     if (session_id) {
       const supa = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
       await supa.from("render_persiane_sessions")
-        .update({ analisi_json: analisi, status: "analyzed" } as any)
+        .update({ status: "analyzed" })
         .eq("id", session_id);
     }
 

@@ -176,6 +176,7 @@ export default function RenderNew() {
     setImageNaturalWidth(dims.width);
     setImageNaturalHeight(dims.height);
     setFile(f);
+    if (preview) URL.revokeObjectURL(preview);
     setPreview(URL.createObjectURL(f));
   }, [toast]);
 
@@ -423,7 +424,7 @@ export default function RenderNew() {
     const { error } = await supabase.from("render_gallery").insert({
       company_id: companyId,
       session_id: sessionId,
-      original_url: uploadedPhotoUrl || preview,
+      original_url: uploadedPhotoUrl,
       render_url: resultUrls[resultIndex],
       config_summary: config,
       created_by: user?.id,

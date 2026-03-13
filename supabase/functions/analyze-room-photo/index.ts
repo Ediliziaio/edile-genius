@@ -122,11 +122,11 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Update session if provided
+    // Update session if provided — set status to "analyzed" (not "analyzing")
     if (session_id) {
       const supa = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
       await supa.from("render_stanza_sessions")
-        .update({ analisi_json: analisi, tipo_stanza: analisi?.tipo_stanza ?? null, status: "analyzing" })
+        .update({ analisi_json: analisi, tipo_stanza: analisi?.tipo_stanza ?? null, status: "analyzed" })
         .eq("id", session_id);
     }
 
