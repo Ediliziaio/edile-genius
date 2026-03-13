@@ -455,14 +455,21 @@ function TemplateHubCard({ template: t }: { template: HubTemplate }) {
   const stripColor = t.disabled ? "bg-ink-200" : catConfig.stripColor || "bg-brand";
   const iconBg = t.disabled ? "bg-ink-100" : catConfig.iconBg || "bg-brand-light";
 
+  const RENDER_ROUTES: Record<string, string> = {
+    "render-infissi": "/app/render/new",
+    "render-bagno": "/app/render-bagno/new",
+    "render-facciate": "/app/render-facciata/new",
+    "render-persiane": "/app/render-persiane/new",
+    "render-pavimento": "/app/render-pavimento/new",
+    "render-stanza": "/app/render-stanza/new",
+  };
+
   const handleClick = () => {
     if (t.disabled) return;
     if (t.fromDb) {
       navigate(`/app/templates/${t.slug}/setup`);
-    } else if (t.slug === "render-infissi") {
-      navigate("/app/render/new");
-    } else if (t.slug === "render-bagno") {
-      navigate("/app/render-bagno/new");
+    } else if (RENDER_ROUTES[t.slug]) {
+      navigate(RENDER_ROUTES[t.slug]);
     } else if (t.channel?.includes("whatsapp")) {
       navigate("/app/whatsapp");
     } else {
