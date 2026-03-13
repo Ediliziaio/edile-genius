@@ -164,3 +164,9 @@ verify_jwt = false
 
 [functions.firecrawl-scrape]
 verify_jwt = false
+
+[functions.analyze-bathroom-photo]
+verify_jwt = false
+
+[functions.generate-bathroom-render]
+verify_jwt = false
