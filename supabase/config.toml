@@ -227,3 +227,6 @@ verify_jwt = false
 
 [functions.genera-preventivo-completo]
 verify_jwt = false
+
+[functions.invia-preventivo-email]
+verify_jwt = false
