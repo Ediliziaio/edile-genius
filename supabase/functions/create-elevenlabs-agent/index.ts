@@ -31,6 +31,15 @@ Deno.serve(async (req) => {
 
     if (!company_id || !name) return jsonError("company_id and name required", "validation_error", 400, rid);
 
+    // Tenant verification: user must belong to the target company (superadmin bypass)
+    const serviceCheck = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const { data: profile } = await serviceCheck.from("profiles").select("company_id").eq("id", userId).single();
+    const { data: roleRow } = await serviceCheck.from("user_roles").select("role").eq("user_id", userId).single();
+    const isSuperAdmin = roleRow?.role === "superadmin" || roleRow?.role === "superadmin_user";
+    if (!isSuperAdmin && profile?.company_id !== company_id) {
+      return jsonError("Access denied: cannot create agent for another company", "auth_error", 403, rid);
+    }
+
     log("info", "Creating agent", { request_id: rid, company_id, name, type: agentType });
 
     const serviceClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);

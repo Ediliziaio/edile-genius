@@ -28,6 +28,15 @@ Deno.serve(async (req) => {
     const serviceClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     const { data: currentAgent } = await serviceClient.from("agents").select("el_agent_id, company_id").eq("id", id).single();
+    if (!currentAgent) return jsonError("Agent not found", "not_found", 404, rid);
+
+    // Tenant verification: user must belong to agent's company (superadmin bypass)
+    const { data: profile } = await serviceClient.from("profiles").select("company_id").eq("id", user.id).single();
+    const { data: roleRow } = await serviceClient.from("user_roles").select("role").eq("user_id", user.id).single();
+    const isSuperAdmin = roleRow?.role === "superadmin" || roleRow?.role === "superadmin_user";
+    if (!isSuperAdmin && profile?.company_id !== currentAgent.company_id) {
+      return jsonError("Access denied: agent belongs to another company", "auth_error", 403, rid);
+    }
 
     const allowedFields = [
       "name", "description", "sector", "language", "system_prompt",

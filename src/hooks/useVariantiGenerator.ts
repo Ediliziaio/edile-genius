@@ -21,6 +21,17 @@ interface UseVariantiGeneratorOptions {
   progettoId?: string;
 }
 
+// Map source module to the correct edge function
+const MODULE_EDGE_FUNCTION: Record<string, string> = {
+  stanza: 'generate-room-render',
+  tetto: 'generate-roof-render',
+  facciata: 'generate-facade-render',
+  bagno: 'generate-bathroom-render',
+  pavimento: 'generate-floor-render',
+  persiane: 'generate-shutter-render',
+  infissi: 'generate-render',
+};
+
 export function useVariantiGenerator({ sourceModulo, sourceSessionId }: UseVariantiGeneratorOptions) {
   const [generating, setGenerating] = useState(false);
   const [results, setResults] = useState<VarianteResult[]>([]);
@@ -50,7 +61,8 @@ export function useVariantiGenerator({ sourceModulo, sourceSessionId }: UseVaria
         // Combine base prompt with variant-specific instructions
         const combinedPrompt = `${basePrompt}\n\n--- VARIANTE: ${v.nome} ---\n${v.prompt_extra}`;
 
-        const { data, error } = await supabase.functions.invoke('generate-room-render', {
+        const edgeFn = MODULE_EDGE_FUNCTION[sourceModulo] || 'generate-room-render';
+        const { data, error } = await supabase.functions.invoke(edgeFn, {
           body: {
             image_base64: imageBase64,
             mime_type: mimeType,

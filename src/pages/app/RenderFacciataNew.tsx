@@ -88,6 +88,7 @@ export default function RenderFacciataNew() {
   // Step 1: Upload
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+  const [originalStoragePath, setOriginalStoragePath] = useState<string | null>(null);
   const [fotoFile, setFotoFile] = useState<File | null>(null);
   const [imageNaturalWidth, setImageNaturalWidth] = useState(1024);
   const [imageNaturalHeight, setImageNaturalHeight] = useState(1024);
@@ -185,6 +186,7 @@ export default function RenderFacciataNew() {
         .from("facciata-originals")
         .upload(path, file, { contentType: file.type });
       if (uploadErr) throw new Error(`Upload fallito: ${uploadErr.message}`);
+      setOriginalStoragePath(path);
 
       // Update session with path
       await supabase.from("render_facciata_sessions")
@@ -316,11 +318,18 @@ export default function RenderFacciataNew() {
       tipoIntervento === "rivestimento" ? rivestimento?.tipo_name ?? "" :
       coloreIntonaco.colore_name;
 
+    // Get a long-lived signed URL for the original (facciata-originals is PRIVATE)
+    let originalUrlForGallery = '';
+    if (originalStoragePath) {
+      const { data: signedOrig } = await supabase.storage.from("facciata-originals").createSignedUrl(originalStoragePath, 31536000);
+      originalUrlForGallery = signedOrig?.signedUrl || '';
+    }
+
     const { error } = await supabase.from("render_facciata_gallery").insert({
       user_id: user.id,
       company_id: companyId,
       session_id: sessionId,
-      original_url: fotoPreview || '',
+      original_url: originalUrlForGallery,
       render_url: renderUrl,
       title: `${tipoIntervento.replace(/_/g, " ")} — ${coloreLabel}`,
       tipo_intervento: tipoIntervento,
