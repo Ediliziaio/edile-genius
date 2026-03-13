@@ -30,37 +30,40 @@ export default function VoiceTestPanel({ elevenlabsAgentId, companyId, agentId }
   useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [transcript]);
 
   const checkCredits = useCallback(async (): Promise<boolean> => {
-    if (!agentId) return true; // skip if no agentId provided
+    if (!agentId) return true;
     try {
       const { data, error } = await supabase.functions.invoke("check-credits-before-call", {
         body: { agentId },
       });
-      if (error) {
-        // 402 = insufficient credits
-        const errData = data || {};
-        if (!errData.allowed && errData.allowed !== undefined) {
-          setCreditBlocked({
-            blocked: true,
-            balance: errData.balance_eur,
-            minRequired: errData.min_required_eur,
-            reason: errData.reason,
-          });
-          return false;
-        }
-      }
-      if (data && data.allowed === false) {
+
+      // When invoke returns a non-2xx status, error contains the response body
+      // and data may be null. Parse the credit info from either source.
+      const creditInfo = data || (error ? (() => {
+        try {
+          return typeof error === "object" && error !== null ? error : JSON.parse(String(error));
+        } catch { return {}; }
+      })() : {});
+
+      if (creditInfo.allowed === false) {
         setCreditBlocked({
           blocked: true,
-          balance: data.balance_eur,
-          minRequired: data.min_required_eur,
-          reason: data.reason,
+          balance: creditInfo.balance_eur,
+          minRequired: creditInfo.min_required_eur,
+          reason: creditInfo.reason,
         });
         return false;
       }
+
+      if (error && !creditInfo.allowed) {
+        // Generic error (not a 402 with structured data) — allow call
+        setCreditBlocked({ blocked: false });
+        return true;
+      }
+
       setCreditBlocked({ blocked: false });
       return true;
     } catch {
-      return true; // allow if check fails
+      return true;
     }
   }, [agentId]);
 
