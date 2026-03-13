@@ -23,6 +23,30 @@ Deno.serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) return jsonError("LOVABLE_API_KEY not configured", "system_error", 500, rid);
 
+    const supa = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+
+    // Get company from profile
+    const { data: profile } = await supa.from("profiles").select("company_id").eq("id", user.id).single();
+    const companyId = profile?.company_id || null;
+
+    // Check render credits
+    if (companyId) {
+      const { data: credits } = await supa.from("render_credits").select("balance").eq("company_id", companyId).single();
+      if (!credits || credits.balance <= 0) {
+        return jsonError("No render credits available", "insufficient_credits", 402, rid);
+      }
+    }
+
+    // Verify session ownership if provided
+    if (session_id) {
+      const { data: session } = await supa.from("render_tetto_sessions").select("user_id, company_id").eq("id", session_id).single();
+      if (session && session.user_id !== user.id) {
+        const { data: roles } = await supa.from("user_roles").select("role").eq("user_id", user.id);
+        const isSA = roles?.some((r: any) => r.role === "superadmin" || r.role === "superadmin_user");
+        if (!isSA) return jsonError("Access denied", "auth_error", 403, rid);
+      }
+    }
+
     log("info", "Generating roof render", { request_id: rid, fn: FN, session_id, prompt_length: prompt?.length });
 
     const response = await fetchWithTimeout("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -54,32 +78,50 @@ Deno.serve(async (req) => {
     const data = await response.json();
     const parts = data.choices?.[0]?.message?.content;
 
-    // Extract image from response
+    // Extract image from response — check multiple locations
     let resultBase64 = "";
     let resultUrl = "";
 
-    if (typeof parts === "string") {
-      if (parts.startsWith("data:image")) {
-        resultBase64 = parts.split(",")[1] || "";
-      } else {
-        return jsonError("AI did not return an image. Try a different prompt.", "no_image", 422, rid);
-      }
-    } else if (Array.isArray(parts)) {
-      const imgPart = parts.find((p: any) => p.type === "image_url" || p.inlineData);
-      if (imgPart?.image_url?.url) {
-        resultUrl = imgPart.image_url.url;
-        if (resultUrl.startsWith("data:image")) {
-          resultBase64 = resultUrl.split(",")[1] || "";
-          resultUrl = "";
+    // Check images field first
+    const imagesField = data.choices?.[0]?.message?.images;
+    if (Array.isArray(imagesField) && imagesField.length > 0) {
+      const imgUrl = imagesField[0]?.image_url?.url;
+      if (imgUrl) {
+        if (imgUrl.startsWith("data:image")) {
+          resultBase64 = imgUrl.split(",")[1] || "";
+        } else {
+          resultUrl = imgUrl;
         }
-      } else if (imgPart?.inlineData?.data) {
-        resultBase64 = imgPart.inlineData.data;
       }
+    }
+
+    // Fallback to content field
+    if (!resultBase64 && !resultUrl) {
+      if (typeof parts === "string") {
+        if (parts.startsWith("data:image")) {
+          resultBase64 = parts.split(",")[1] || "";
+        }
+      } else if (Array.isArray(parts)) {
+        const imgPart = parts.find((p: any) => p.type === "image_url" || p.inlineData);
+        if (imgPart?.image_url?.url) {
+          resultUrl = imgPart.image_url.url;
+          if (resultUrl.startsWith("data:image")) {
+            resultBase64 = resultUrl.split(",")[1] || "";
+            resultUrl = "";
+          }
+        } else if (imgPart?.inlineData?.data) {
+          resultBase64 = imgPart.inlineData.data;
+        }
+      }
+    }
+
+    // Guard: no image returned
+    if (!resultBase64 && !resultUrl) {
+      return jsonError("AI did not return an image. Try a different prompt.", "no_image", 422, rid);
     }
 
     // Upload to storage if we have base64
     if (resultBase64 && session_id) {
-      const supa = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
       const bStr = atob(resultBase64);
       const bArr = new Uint8Array(bStr.length);
       for (let i = 0; i < bStr.length; i++) bArr[i] = bStr.charCodeAt(i);
@@ -92,6 +134,15 @@ Deno.serve(async (req) => {
           .update({ result_url: resultUrl, prompt_usato: prompt, status: "completed" })
           .eq("id", session_id);
       }
+    } else if (resultUrl && session_id) {
+      await supa.from("render_tetto_sessions")
+        .update({ result_url: resultUrl, prompt_usato: prompt, status: "completed" })
+        .eq("id", session_id);
+    }
+
+    // Deduct render credit AFTER successful generation
+    if (companyId && (resultBase64 || resultUrl)) {
+      await supa.rpc("deduct_render_credit", { _company_id: companyId });
     }
 
     log("info", "Roof render generated", { request_id: rid, fn: FN, has_result: !!(resultBase64 || resultUrl) });
