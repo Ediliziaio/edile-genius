@@ -435,7 +435,7 @@ export default function RenderPersianeNew() {
           >
             {fotoPreview ? (
               <div className="space-y-2">
-                <img src={fotoPreview} alt="anteprima" className="w-full max-h-96 object-contain rounded-xl" />
+                <img src={fotoPreview} alt="anteprima" className="w-full max-h-[50vh] object-contain rounded-xl" />
                 <p className="text-xs text-muted-foreground">
                   {foto?.name} · {imageNaturalWidth > 0 && `${imageNaturalWidth}×${imageNaturalHeight}px · `}
                   {foto && `${(foto.size / 1024 / 1024).toFixed(1)}MB`}
