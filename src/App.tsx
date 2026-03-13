@@ -108,6 +108,7 @@ const RenderTettoNew = lazy(() => import("./pages/app/RenderTettoNew"));
 const KnowledgeBasePreventivo = lazy(() => import("./pages/app/KnowledgeBasePreventivo"));
 const PreventivoTemplateList = lazy(() => import("./pages/app/PreventivoTemplateList"));
 const PreventivoTemplateBuilder = lazy(() => import("./pages/app/PreventivoTemplateBuilder"));
+const PreventivoHub = lazy(() => import("./pages/app/PreventivoHub"));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-screen">
