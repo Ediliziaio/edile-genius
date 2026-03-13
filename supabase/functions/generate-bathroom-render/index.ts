@@ -348,6 +348,7 @@ ${analisi.note_critiche ? `AI Notes: ${analisi.note_critiche}` : ""}`;
 
 function buildBlock_B(cfg: Record<string, any>): string {
   const s = cfg.sostituzione || {};
+  const san = cfg.sanitari || {};
   const toChange: string[] = [];
   const toKeep: string[] = [];
 
@@ -366,8 +367,14 @@ function buildBlock_B(cfg: Record<string, any>): string {
   const toModernize: string[] = [];
 
   for (const el of elements) {
-    if (s[el.key]) toChange.push(`✅ REPLACE: ${el.label} — full replacement per user specification`);
-    else toModernize.push(`🔄 MODERNIZE (keep type): ${el.label}`);
+    if (s[el.key]) {
+      toChange.push(`✅ REPLACE: ${el.label} — full replacement per user specification`);
+    } else if (el.key === "sanitari" && (san.wc_tipo || san.azione_bidet)) {
+      // User configured sanitari type without full replacement toggle
+      toChange.push(`🔄 UPGRADE TYPE: ${el.label} — upgrade to user-specified type while keeping position`);
+    } else {
+      toModernize.push(`🔄 MODERNIZE (keep type): ${el.label}`);
+    }
   }
 
   return `[BLOCK B – SELECTIVE REPLACEMENT DECLARATION]
@@ -378,6 +385,7 @@ ELEMENTS THAT SHOULD BE MODERNIZED BUT KEEP THEIR TYPE:
 ${toModernize.join("\n")}
 
 CRITICAL RULE: Elements marked "REPLACE" must be replaced entirely per the specifications below.
+Elements marked "UPGRADE TYPE" must be changed to the specified type/style while keeping their position.
 Elements marked "MODERNIZE" may be updated to a cleaner, more modern version that harmonizes
 with the new design — but the CATEGORY of object must NOT change.
 A toilet must remain a toilet. A bidet must remain a bidet. A bathtub must remain a bathtub.
