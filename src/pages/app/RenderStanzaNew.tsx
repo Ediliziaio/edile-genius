@@ -461,6 +461,8 @@ export default function RenderStanzaNew() {
   const [rendering, setRendering] = useState(false);
   const [renderUrl, setRenderUrl] = useState<string | null>(null);
   const [showOriginal, setShowOriginal] = useState(false);
+  const [imageBase64, setImageBase64] = useState<string>('');
+  const [showVarianti, setShowVarianti] = useState(false);
 
   // ── Note libere
   const [noteLibere, setNoteLibere] = useState('');
