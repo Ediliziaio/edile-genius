@@ -65,9 +65,6 @@ const WOOD_SUGGESTIONS: Record<string, string[]> = {
   alluminio: ["noce_scuro", "teak_vintage", "rovere_grigio"],
   acciaio: [],
   fibra_vetro: ["noce_scuro", "larice_naturale", "rovere_grigio"],
-  legno: ["larice_naturale", "noce_scuro", "castagno_rustico"],
-  ferro_battuto: [],
-  composito: ["rovere_grigio", "noce_scuro"],
 };
 
 export function PersianaColorSelector({
