@@ -178,6 +178,10 @@ Deno.serve(async (req) => {
       outcomeAi: analysis.outcome_ai,
       nextStep: analysis.next_step,
       requestId: rid,
+      transcript: transcript || [],
+      durationSeconds: duration_seconds,
+      agentId: agent.id,
+      callStatus: data.call_status || data.status || undefined,
     });
 
     // 9. Update agent stats

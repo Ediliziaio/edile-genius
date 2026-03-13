@@ -182,6 +182,14 @@ async function handleRunBatch(sb: any, campaign: any, campaign_id: string, rid: 
       continue;
     }
 
+    // Skip DNC contacts
+    if (contact.do_not_call) {
+      await sb.from("campaign_contacts").update({
+        status: "excluded", error: "Do not call", updated_at: now,
+      }).eq("id", item.id);
+      continue;
+    }
+
     try {
       const callBody: Record<string, unknown> = {
         agent_id: agent.el_agent_id,

@@ -34,6 +34,35 @@ Deno.serve(async (req) => {
       return jsonError("agent_id required", "validation_error", 400, rid);
     }
 
+    // Tenant verification: ensure the agent belongs to the user's company
+    const sb = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+
+    const { data: profile } = await sb
+      .from("profiles")
+      .select("company_id")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile?.company_id) {
+      return jsonError("Utente senza azienda", "auth_error", 403, rid);
+    }
+
+    // Verify the ElevenLabs agent_id belongs to an agent of the user's company
+    const { data: agentRecord } = await sb
+      .from("agents")
+      .select("id")
+      .eq("el_agent_id", agent_id)
+      .eq("company_id", profile.company_id)
+      .maybeSingle();
+
+    if (!agentRecord) {
+      log("warn", "Agent not found or not owned by company", { request_id: rid, agent_id, company_id: profile.company_id });
+      return jsonError("Agente non trovato o non autorizzato", "auth_error", 403, rid);
+    }
+
     const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
     if (!apiKey) {
       log("error", "ELEVENLABS_API_KEY not configured", { request_id: rid });
