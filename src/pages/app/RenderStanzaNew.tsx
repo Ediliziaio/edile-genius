@@ -2296,6 +2296,22 @@ export default function RenderStanzaNew() {
           </div>
         )}
 
+        {/* Modal varianti */}
+        {showVarianti && renderUrl && imageBase64 && (
+          <VariantiModal
+            imageBase64={imageBase64}
+            mimeType={foto?.type || 'image/jpeg'}
+            originalUrl={fotoPreview || ''}
+            basePrompt={buildStanzaPrompt(analisi ?? null, mapWizardToConfig(config, noteLibere)).userPrompt}
+            systemPrompt={buildStanzaPrompt(analisi ?? null, mapWizardToConfig(config, noteLibere)).systemPrompt}
+            naturalWidth={imageNaturalWidth}
+            naturalHeight={imageNaturalHeight}
+            sourceModulo="stanza"
+            sourceSessionId={sessionId || undefined}
+            onClose={() => setShowVarianti(false)}
+          />
+        )}
+
       </div>
     </div>
   );
