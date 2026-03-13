@@ -131,7 +131,23 @@ Deno.serve(async (req) => {
     const data = await response.json();
     const generationMs = Date.now() - startMs;
 
-    const imageData = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    // Extract image — check multiple response formats
+    let imageData: string | undefined;
+    const imagesField = data.choices?.[0]?.message?.images;
+    const contentField = data.choices?.[0]?.message?.content;
+
+    if (Array.isArray(imagesField) && imagesField.length > 0) {
+      imageData = imagesField[0]?.image_url?.url;
+    } else if (typeof contentField === "string" && contentField.startsWith("data:image")) {
+      imageData = contentField;
+    } else if (Array.isArray(contentField)) {
+      const imgPart = contentField.find((p: any) => p.type === "image_url" || p.inlineData);
+      if (imgPart?.image_url?.url) {
+        imageData = imgPart.image_url.url;
+      } else if (imgPart?.inlineData?.data) {
+        imageData = `data:image/png;base64,${imgPart.inlineData.data}`;
+      }
+    }
     if (!imageData) throw new Error("No image returned from AI");
 
     // Upload result
