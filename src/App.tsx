@@ -21,6 +21,7 @@ import Shell from "./components/layout/Shell";
 // Auth pages (lazy)
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const PublicShareViewer = lazy(() => import("./pages/public/PublicShareViewer"));
 
 // Lazy-loaded marketing pages
 const Solutions = lazy(() => import("./pages/Solutions"));
@@ -146,6 +147,7 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<SafeRoute><ForgotPassword /></SafeRoute>} />
             <Route path="/reset-password" element={<SafeRoute><ResetPassword /></SafeRoute>} />
+            <Route path="/s/:token" element={<SafeRoute><PublicShareViewer /></SafeRoute>} />
 
             {/* SuperAdmin routes */}
             <Route element={<AuthGuard requiredRole="superadmin" />}>

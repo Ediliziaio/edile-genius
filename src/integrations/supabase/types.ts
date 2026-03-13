@@ -4184,6 +4184,71 @@ export type Database = {
           },
         ]
       }
+      render_share_links: {
+        Row: {
+          attivo: boolean | null
+          colore_header: string | null
+          company_id: string
+          created_at: string | null
+          created_by: string
+          email_destinatario: string | null
+          gallery_items: Json
+          id: string
+          messaggio: string | null
+          mostra_before: boolean | null
+          nome_destinatario: string | null
+          scade_il: string | null
+          titolo_pagina: string | null
+          token: string
+          ultima_visita_at: string | null
+          views_count: number | null
+        }
+        Insert: {
+          attivo?: boolean | null
+          colore_header?: string | null
+          company_id: string
+          created_at?: string | null
+          created_by: string
+          email_destinatario?: string | null
+          gallery_items?: Json
+          id?: string
+          messaggio?: string | null
+          mostra_before?: boolean | null
+          nome_destinatario?: string | null
+          scade_il?: string | null
+          titolo_pagina?: string | null
+          token: string
+          ultima_visita_at?: string | null
+          views_count?: number | null
+        }
+        Update: {
+          attivo?: boolean | null
+          colore_header?: string | null
+          company_id?: string
+          created_at?: string | null
+          created_by?: string
+          email_destinatario?: string | null
+          gallery_items?: Json
+          id?: string
+          messaggio?: string | null
+          mostra_before?: boolean | null
+          nome_destinatario?: string | null
+          scade_il?: string | null
+          titolo_pagina?: string | null
+          token?: string
+          ultima_visita_at?: string | null
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_share_links_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       render_stanza_gallery: {
         Row: {
           config_snapshot: Json | null
