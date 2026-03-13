@@ -85,15 +85,19 @@ const INTERVENTO_META: Record<
   restyling_bagno:    { label: 'Restyling bagno',        desc: 'Rivestimenti, sanitari, rubinetteria',        icon: Bath,            color: 'teal',   onlyFor: ['bagno'] },
 };
 
-const STILI_TARGET = [
+const STILI_TARGET: { value: StileArredo | 'nessuno'; label: string; emoji: string }[] = [
   { value: 'moderno',      label: 'Moderno',      emoji: '⬛' },
   { value: 'scandinavo',   label: 'Scandinavo',   emoji: '🪵' },
   { value: 'industriale',  label: 'Industriale',  emoji: '⚙️' },
   { value: 'classico',     label: 'Classico',     emoji: '🏛️' },
+  { value: 'rustico',      label: 'Rustico',      emoji: '🏡' },
   { value: 'minimalista',  label: 'Minimalista',  emoji: '⬜' },
   { value: 'mediterraneo', label: 'Mediterraneo', emoji: '🌊' },
+  { value: 'art_deco',     label: 'Art Déco',     emoji: '🎭' },
   { value: 'luxe_contemporaneo', label: 'Lusso',  emoji: '💎' },
   { value: 'giapponese',   label: 'Japandi',      emoji: '🎋' },
+  { value: 'provenzale',   label: 'Provenzale',   emoji: '🌻' },
+  { value: 'eclettico',    label: 'Eclettico',    emoji: '🎨' },
   { value: 'nessuno',      label: 'Mantieni stile attuale', emoji: '✋' },
 ];
 
