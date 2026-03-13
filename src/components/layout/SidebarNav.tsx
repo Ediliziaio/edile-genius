@@ -53,6 +53,7 @@ const companyNav: NavSection[] = [
     { label: "Render Facciata", icon: Home, href: "/app/render-facciata" },
     { label: "Render Persiane", icon: Layers, href: "/app/render-persiane" },
     { label: "Render Pavimento", icon: HardHat, href: "/app/render-pavimento" },
+    { label: "Render Stanza", icon: Wand2, href: "/app/render-stanza" },
   ]},
   { header: "IMPOSTAZIONI", items: [
     { label: "Crediti", icon: Coins, href: "/app/credits" },
