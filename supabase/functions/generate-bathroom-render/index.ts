@@ -715,7 +715,7 @@ CRITICAL:
 const BATHROOM_SYSTEM_PROMPT = `SURGICAL INTERIOR DESIGN VISUALIZATION EDITOR
 You are performing a precise surgical replacement of bathroom interior elements in a real photograph.
 
-RULE 1: Replace ONLY what is explicitly listed in BLOCK B as "✅ REPLACE".
+RULE 1: Replace ONLY what is explicitly listed in BLOCK B as "✅ REPLACE" or "🔄 UPGRADE TYPE".
 RULE 2: Every other surface, object, and pixel must be photorealistic and identical to original.
 RULE 3: The result must be completely indistinguishable from a professional interior design photograph.
 RULE 4: Tile patterns must be geometrically correct — proper perspective, consistent joint width, no floating tiles.
