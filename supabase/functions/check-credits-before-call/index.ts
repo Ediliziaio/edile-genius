@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
       .from("platform_pricing")
       .select("cost_billed_per_min")
       .eq("llm_model", agent?.llm_model || "gemini-2.5-flash")
-      .eq("tts_model", agent?.tts_model || "eleven_turbo_v2_5")
+      .eq("tts_model", agent?.tts_model || "eleven_multilingual_v2")
       .eq("is_active", true)
       .single();
 

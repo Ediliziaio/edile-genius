@@ -146,7 +146,7 @@ async function handleRunBatch(sb: any, campaign: any, campaign_id: string, rid: 
   }).eq("id", campaign_id);
 
   const contactIds = batch.map((b: any) => b.contact_id);
-  const { data: contacts } = await sb.from("contacts").select("id, phone, full_name").in("id", contactIds);
+  const { data: contacts } = await sb.from("contacts").select("id, phone, full_name, do_not_call").in("id", contactIds);
   const contactMap = Object.fromEntries((contacts || []).map((c: any) => [c.id, c]));
 
   const { data: agent } = await sb.from("agents")
@@ -178,6 +178,14 @@ async function handleRunBatch(sb: any, campaign: any, campaign_id: string, rid: 
     if (!contact?.phone) {
       await sb.from("campaign_contacts").update({
         status: "failed", error: "No phone number", updated_at: now,
+      }).eq("id", item.id);
+      continue;
+    }
+
+    // Skip DNC contacts
+    if (contact.do_not_call) {
+      await sb.from("campaign_contacts").update({
+        status: "excluded", error: "Do not call", updated_at: now,
       }).eq("id", item.id);
       continue;
     }

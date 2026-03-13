@@ -1,122 +1,215 @@
 
+# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro + AI Avanzata
 
-# Audit Bug AI Systems — Agenti, Webhook, Campagne, KB, Briefing, Automazioni
+## ✅ Completato in questo blocco
 
-## Sistemi analizzati
-- **Webhook post-call** (elevenlabs-webhook)
-- **Call Analysis** (summary.ts)
-- **Post-Call Actions** (post-call-actions.ts)
-- **Campaign Batch** (run-campaign-batch)
-- **Scheduled Calls** (execute-scheduled-calls)
-- **Knowledge Base** (add-knowledge-doc + frontend)
-- **Morning Briefing** (ai-morning-briefing)
-- **Follow-up Generator** (generate-followup)
-- **Credit Check** (check-credits-before-call)
-- **Conversation Token** (elevenlabs-conversation-token)
-- **Automations UI** (Automations.tsx)
-- **Agents UI** (Agents.tsx)
-- **Voice Test** (VoiceTestPanel.tsx)
-- **Analytics** (Analytics.tsx)
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
----
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
-## BUG CRITICI
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-### 1. `summary.ts` — usa `OPENAI_API_KEY` che NON è nei secrets
-`generateCallAnalysis` (riga 23) richiede `OPENAI_API_KEY`, ma nei secrets configurati c'è solo `LOVABLE_API_KEY`. Risultato: **tutte le analisi post-call falliscono silenziosamente**, restituendo `{ summary: null, outcome_ai: null, ... }`. Nessun summary, nessun outcome automatico, nessun next_step viene mai generato. Le conversazioni restano senza classificazione AI.
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
-**Fix**: Migrare `generateCallAnalysis` per usare `LOVABLE_API_KEY` + Lovable AI Gateway (`https://ai.gateway.lovable.dev/v1/chat/completions`) con modello `google/gemini-2.5-flash`.
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
-### 2. `generate-followup` — usa `OPENAI_API_KEY` che NON è nei secrets
-Stesso problema: riga 25 richiede `OPENAI_API_KEY`. La generazione dei messaggi follow-up è completamente rotta.
+## ✅ Blocco 3-5 — Agent Templates System
 
-**Fix**: Migrare a Lovable AI Gateway.
+### Database
+- agent_templates + agent_template_instances + agent_reports + company_channels
+- RLS policies PERMISSIVE (fix da RESTRICTIVE)
+- Funzione DB `increment_installs_count(tpl_id UUID)`
+- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
 
-### 3. `post-call-actions.ts` — doppio update del contatto, risultati in conflitto
-Il webhook chiama sia `process_post_call_atomic` (con `outcomeAi` dall'analisi AI) sia `update_contact_after_call` (con un outcome derivato da `callStatus`/`durationSeconds`). Questi due update si sovrascrivono. Il secondo (riga 134-143) usa la logica semplice `determineOutcome()` che classifica tutto come "answered" o "no_answer", sovrascrivendo il risultato AI più accurato già salvato dal primo RPC.
+### Edge Functions (CORS headers completi)
+- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
+- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
+- save-report: salva report in DB + aggiorna contatori istanza
 
-**Fix**: Rimuovere la chiamata a `update_contact_after_call` quando `outcomeAi` è già stato processato da `process_post_call_atomic`, oppure condizionarla a `!outcomeAi`.
+### Frontend — Wizard 5 Step (TemplateSetup.tsx)
+- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
+- Step 2 Operai: lista card + importa CSV con template scaricabile
+- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
+- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
 
-### 4. `post-call-actions.ts` — `transcript` e `durationSeconds` non passati dal webhook
-Il webhook (riga 174-181) chiama `runPostCallActions` senza `transcript`, `durationSeconds`, `agentId`, e `callStatus`. Quindi `analyzeSentiment()` riceve un array vuoto (restituisce "unknown"), e `determineOutcome()` riceve `undefined` (restituisce "answered" di default). Il CRM update è basato su dati fittizi.
+### SuperAdmin
+- /superadmin/templates: CRUD completo con JSON editor per config_schema
 
-**Fix**: Passare `transcript`, `durationSeconds`, `agentId: agent.id`, e `callStatus` nella chiamata a `runPostCallActions`.
+## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
 
-### 5. `VoiceTestPanel` — credit check error handling invertita
-Righe 38-50: quando `supabase.functions.invoke` fallisce con un errore, il codice controlla `error` ma poi legge `data` che potrebbe essere null. In caso di 402 (crediti insufficienti), l'`invoke` potrebbe settare `error` con il body della risposta, e `data` sarà null. Il check `if (!errData.allowed && errData.allowed !== undefined)` non matcherà perché `errData` è `{}`.
+### Database (5 tabelle)
+- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
+- RLS PERMISSIVE per tutte le tabelle
+- Trigger set_updated_at + init_render_credits su companies
+- Funzione deduct_render_credit
+- Storage buckets: render-originals (privato), render-results (pubblico)
 
-**Fix**: Parsare correttamente il body dell'errore 402 dall'oggetto `error` di invoke.
+### Edge Functions
+- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
+- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
 
----
+### Frontend
+- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
+- RenderConfig (/superadmin/render-config)
+- BeforeAfterSlider, promptBuilder.ts
 
-## BUG MEDI
+## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
 
-### 6. `Agents.tsx` — console warning: ref su Select component
-Il console log mostra "Function components cannot be given refs" dal `<Select>` in AgentsPage (riga 112). Il `Select` di Radix non supporta ref diretto.
+### Database
+- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
+- Estensione `preventivi` con +26 colonne
+- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
+- Storage buckets: preventivi-media (privato), template-assets (pubblico)
+- RLS company-scoped + superadmin
 
-**Fix**: Avvolgere il `Select` senza passare ref, o wrappare con `forwardRef` se necessario.
+### Edge Functions
+- `process-preventivo-audio` RISCRITTO
 
-### 7. `Analytics.tsx` — query limitata a 1000 conversazioni senza paginazione
-Riga 28: `.limit(1000)`. Per aziende con molte conversazioni, i dati analitici sono troncati senza avviso all'utente (il flag `isTruncated` è calcolato ma mai mostrato nella UI).
+### PDF Client-side (@react-pdf/renderer)
+- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4
 
-**Fix**: Mostrare un banner "Dati parziali: ultime 1000 conversazioni" quando `isTruncated` è true.
+### Frontend
+- NuovoPreventivo.tsx, PreventivoDetail.tsx, PreventiviList.tsx, TemplatePreventivo.tsx
 
-### 8. `run-campaign-batch` — nessuna verifica DNC prima della chiamata
-Il batch carica i contatti (riga 149) senza filtrare `do_not_call = true`. I contatti DNC vengono chiamati lo stesso. Solo `execute-scheduled-calls` e `launch_bulk_calls` verificano DNC.
+## ✅ Blocco 8 — AI Avanzata P1 (Smart Actions + Lead Score + Timeline)
 
-**Fix**: Aggiungere `.eq('do_not_call', false)` alla query contatti o verificare nel loop.
+### Smart Actions Engine (Dashboard)
+- Espanso da 3 regole hardcoded a 10+ regole basate su dati reali:
+  - Crediti in esaurimento (danger)
+  - Agenti in bozza (warning)
+  - Agenti senza numero telefono (warning)
+  - Agenti inattivi >7 giorni (info)
+  - Contatti da richiamare con next_call_at scaduto (warning)
+  - Preventivi in bozza da >7 giorni (warning)
+  - Preventivi inviati senza risposta da >10 giorni (warning)
+  - Documenti in scadenza entro 15 giorni (warning)
+  - Campagne con tasso appuntamenti <5% (info)
+- Query Supabase dedicate per ogni regola
+- Stato "Tutto in ordine" quando nessuna azione è necessaria
+- Mostra summary delle conversazioni recenti nella tabella attività
 
-### 9. `KnowledgeBase.tsx` — `filterAgent` inizializzato a `"all"` ma i documenti globali usano `agent_id = null`
-Riga 121-122: `if (filterAgent === "global" && d.agent_id !== null) return false` — il filtro "global" funziona, ma il dropdown non ha un'opzione per mostrare SOLO i documenti globali vs quelli assegnati. L'utente non ha modo di filtrare per "solo globali" perché il default è `"all"`.
+### Lead Score Automatico
+- `src/lib/lead-score.ts`: motore di scoring 0-100 senza LLM
+  - +30 outcome qualified/appointment
+  - +20 sentiment positivo
+  - +15 preventivo associato
+  - +10 contatto completo (tel+email)
+  - +10 callback attempts
+  - +5 fonte inbound
+  - -10 inattivo >30 giorni
+  - -20 not_interested
+  - -30 do_not_call/invalid
+- `src/components/contacts/LeadScoreBadge.tsx`: badge con tooltip fattori
+  - Compact mode per tabella (emoji + score numerico)
+  - Full mode per scheda contatto (con lista fattori)
+  - Colori: 🔴 Caldo (>60), 🟠 Tiepido (30-60), 🔵 Freddo (<30)
+- Badge integrato nella tabella contatti (nuova colonna "Score")
+- Badge integrato nell'header della scheda contatto
 
-Non è un bug critico ma la UX è confusa.
+### Timeline Unificata del Contatto
+- `ContactDetailPanel.tsx` completamente refactorato:
+  - Tab "Timeline" come default (al posto di "Info")
+  - Cronologia verticale con linea e pallini colorati per tipo:
+    - 🔵 Conversazioni (con summary, outcome, sentiment, durata)
+    - 🟡 Note manuali
+    - 🟢 Preventivi collegati (stato, importo, numero)
+    - ⚪ Eventi (contatto creato)
+  - Query preventivi per nome/telefono contatto
+  - Lead Score full display nell'header della scheda
 
-### 10. `Automations.tsx` — cast `as any` su tabelle e insert
-Righe 229, 246-247: usa `as any` per `ai_orchestrator_log` e `agent_automations.insert`. Se le tabelle non sono nel types.ts generato, le query silenziosamente falliscono o restituiscono dati errati senza type checking.
+## ✅ Blocco 8 — P1-C: Call Summary Automatico
 
----
+### Backend
+- `supabase/functions/elevenlabs-webhook/summary.ts`: modulo separato per generazione summary
+  - Chiama OpenAI gpt-4o-mini con prompt minimale in italiano
+  - Non-blocking: se OPENAI_API_KEY non è configurata, salta silenziosamente
+  - Cap transcript a 6000 chars per contenere i costi (~$0.001/call)
+- `elevenlabs-webhook/index.ts`: importa e chiama `generateCallSummary()` dopo step 7
+  - Popola `conversations.summary` solo se la generazione ha successo
 
-## BUG MINORI
+### Frontend (già predisposto)
+- Dashboard "Attività recente": mostra `c.summary` sotto il nome agente
+- Conversazioni: mostra summary nella tabella e nel dialog dettaglio
+- Timeline contatto: mostra summary nelle conversazioni
 
-### 11. `check-credits-before-call` — TTS model default mismatch
-Riga 64: usa `eleven_turbo_v2_5` come default TTS, ma il webhook (riga 99) usa `eleven_multilingual_v2`. Se il record `platform_pricing` non ha il combo esatto, il pre-check fallisce con "pricing_unavailable" anche se i crediti sono sufficienti.
+### Requisito SuperAdmin
+- Aggiungere OPENAI_API_KEY come Supabase Secret (da configurare via SuperAdmin)
 
-**Fix**: Allineare i default TTS model tra i due endpoint.
+## ✅ Blocco 9 — Audit Finale & Hardening
 
-### 12. `elevenlabs-conversation-token` — nessuna verifica tenant
-L'endpoint genera un token per qualsiasi `agent_id` passato, senza verificare che l'agente appartenga alla company dell'utente. Un utente potrebbe testare agenti di altre company.
+### Sicurezza Edge Functions
+- Validazione JWT (getClaims) aggiunta a: generate-render, crm-sync, deploy-template-instance, process-preventivo-audio, generate-preventivo-pdf
+- Verifica tenant (company_id cross-check) aggiunta a tutte le funzioni interne
+- Funzioni webhook esterne (elevenlabs-webhook, whatsapp-webhook, telegram-cantiere-webhook) lasciate senza JWT (corretto)
 
-**Fix**: Verificare ownership dell'agente prima di generare il token.
+### Atomicità Crediti
+- Creata RPC `topup_credits(_company_id, _amount_eur)` con UPDATE atomico
+- topup-credits edge function refactorato per usare RPC
 
----
+### UX — Progressive Disclosure Sidebar
+- Sezioni OPERATIVITÀ e STRUMENTI AI visibili solo se il settore è rilevante o se esistono dati
+- Campi vuoti nelle conversazioni nascosti (eval_score, minutes_billed, cost_billed_eur)
 
-## Piano di implementazione
+### UX — Dead-End Fix
+- Card CRM e Webhooks in Integrazioni: badge "Prossimamente" + bottoni disabilitati
 
-### Fase 1 — Fix critici backend
-1. **`supabase/functions/elevenlabs-webhook/summary.ts`**: Migrare da OpenAI a Lovable AI Gateway (`LOVABLE_API_KEY` + `google/gemini-2.5-flash`)
-2. **`supabase/functions/generate-followup/index.ts`**: Migrare da OpenAI a Lovable AI Gateway
-3. **`supabase/functions/elevenlabs-webhook/post-call-actions.ts`**: Condizionare `update_contact_after_call` a `!outcomeAi`, evitando doppio update
-4. **`supabase/functions/elevenlabs-webhook/index.ts`**: Passare `transcript`, `durationSeconds`, `agentId`, `callStatus` a `runPostCallActions`
+### Signup Self-Service
+- Pagina /signup con form registrazione
+- Edge function self-service-signup: crea company (trial 14gg) + profilo + ruolo company_admin
 
-### Fase 2 — Fix medi
-5. **`supabase/functions/run-campaign-batch/index.ts`**: Aggiungere filtro DNC nella query contatti
-6. **`supabase/functions/check-credits-before-call/index.ts`**: Allineare default TTS model a `eleven_multilingual_v2`
-7. **`supabase/functions/elevenlabs-conversation-token/index.ts`**: Aggiungere verifica tenant sull'agent_id
-8. **`src/components/agents/VoiceTestPanel.tsx`**: Fix parsing errore 402 dal credit check
+### AI Avanzata P2
+- Follow-up Generator: edge function generate-followup (GPT-4o-mini) + bottone in ContactDetailPanel
+- Opportunity Recovery: Smart Actions per lead qualificati dormenti >5 giorni
+- Campi conversazione vuoti nascosti per UX più pulita
 
-### Fase 3 — Fix frontend
-9. **`src/pages/app/Analytics.tsx`**: Mostrare banner "dati parziali" quando `isTruncated`
-10. **`src/pages/app/Agents.tsx`**: Risolvere warning ref su Select
+## ✅ Blocco 10 — Criticità Pre-Lancio Risolte
 
-### File da modificare
-- `supabase/functions/elevenlabs-webhook/summary.ts`
-- `supabase/functions/elevenlabs-webhook/post-call-actions.ts`
-- `supabase/functions/elevenlabs-webhook/index.ts`
-- `supabase/functions/generate-followup/index.ts`
-- `supabase/functions/run-campaign-batch/index.ts`
-- `supabase/functions/check-credits-before-call/index.ts`
-- `supabase/functions/elevenlabs-conversation-token/index.ts`
-- `src/components/agents/VoiceTestPanel.tsx`
-- `src/pages/app/Analytics.tsx`
-- `src/pages/app/Agents.tsx`
+### Database
+- Rimossi RLS duplicati su `ai_credits` (2 policy rimossi: `company_ai_credits_select`, `superadmin_ai_credits`)
+- Rimosso indice duplicato `idx_topups_stripe_session` su `ai_credit_topups`
+- `topup_credits` RPC riscritta con `FOR UPDATE` lock (come `deduct_call_credits`)
+- Aggiunta funzione `reset_agents_calls_month()` per cron mensile
 
+### Auth Edge Functions (25 file corretti)
+- Sostituito `supabase.auth.getClaims(token)` (non-standard) con `supabase.auth.getUser(token)` in tutte le Edge Functions
+- Aggiornato helper condiviso `_shared/utils.ts` → `authenticateRequest()`
+
+### Frontend
+- `Credits.tsx`: aggiunto `companyId` come dipendenza del useEffect per il polling post-pagamento Stripe
+
+### Stripe Webhook
+- Insert topup record: aggiunto error handling per violazione unique constraint
+- Documentato comportamento auto-recharge (crediti senza addebito Stripe)
+
+### Secrets da configurare (azione manuale)
+- `STRIPE_SECRET_KEY` — per pagamenti
+- `STRIPE_WEBHOOK_SECRET` — per webhook Stripe
+- `OPENAI_API_KEY` — per AI summary e follow-up
+- `META_ENCRYPTION_KEY` — per cifratura token WhatsApp
+- `RESEND_API_KEY` — per invio email
+
+## 🔜 Prossimi Step
+
+### P3 — Avanzato / successivo
+- Personalizzazione regole Smart Actions per admin
+- Report settimanale automatico via email al titolare
+- Trend predittivo su tasso conversione
+- Auto-recharge con addebito Stripe reale (attualmente wallet-based)
