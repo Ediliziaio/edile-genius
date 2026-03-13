@@ -2020,7 +2020,7 @@ export default function RenderStanzaNew() {
               <Card>
                 <CardContent className="pt-4">
                   <p className="text-sm font-semibold text-foreground mb-3">📋 Riepilogo configurazione:</p>
-                  <ConfigRiepilogo config={buildCurrentConfig()} />
+                  <ConfigRiepilogo config={mapWizardToConfig(config, noteLibere)} />
                 </CardContent>
               </Card>
             )}
