@@ -623,7 +623,51 @@ export const PreventivoPDF: React.FC<Props> = ({
           </View>
         </View>
 
-        {/* VALIDITY */}
+        {/* ── AI-GENERATED SECTIONS (ordered by template) ────────────────────── */}
+        {sezioniTemplate && sezioniContenuto && (() => {
+          const orderedSections = [...(sezioniTemplate || [])]
+            .filter(s => s.attiva)
+            .sort((a, b) => a.ordine - b.ordine);
+
+          return orderedSections.map(section => {
+            // Render gallery
+            if (section.tipo === 'render_visivi' && renderEntries && renderEntries.length > 0) {
+              const cfg = section.config as any;
+              return (
+                <RenderGallerySection
+                  key={section.id}
+                  entries={renderEntries}
+                  primario={primario}
+                  titolo={section.titolo || "Render del Progetto"}
+                  mostraDisclaimer={cfg?.mostra_disclaimer !== false}
+                />
+              );
+            }
+
+            // AI text sections
+            const contenuto = sezioniContenuto[section.id];
+            if (!contenuto?.testo) return null;
+
+            const textTypes = [
+              'presentazione_azienda', 'analisi_progetto', 'descrizione_lavori',
+              'schede_prodotti', 'condizioni_contrattuali', 'note_finali',
+              'portfolio_riferimenti', 'certificazioni',
+            ];
+            if (textTypes.includes(section.tipo)) {
+              return (
+                <AITextSection
+                  key={section.id}
+                  titolo={section.titolo}
+                  testo={contenuto.testo}
+                  primario={primario}
+                />
+              );
+            }
+
+            return null;
+          });
+        })()}
+
         {data.validita_giorni && (
           <View style={S.validityBox}>
             <Text style={S.validityText}>
