@@ -213,6 +213,7 @@ const App = () => (
                 <Route path="/app/render-pavimento/new" element={<SafeRoute><RenderPavimentoNew /></SafeRoute>} />
                 <Route path="/app/render-stanza" element={<SafeRoute><RenderStanzaHub /></SafeRoute>} />
                 <Route path="/app/render-stanza/new" element={<SafeRoute><RenderStanzaNew /></SafeRoute>} />
+                <Route path="/app/render-tetto/new" element={<SafeRoute><RenderTettoNew /></SafeRoute>} />
                 <Route path="/app/lists" element={<SafeRoute><ContactListsPage /></SafeRoute>} />
                 <Route path="/app/lists/:id" element={<SafeRoute><ContactListDetailPage /></SafeRoute>} />
                 <Route path="/app/campaigns" element={<SafeRoute><CampaignsPage /></SafeRoute>} />
