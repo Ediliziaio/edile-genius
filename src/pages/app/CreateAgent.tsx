@@ -180,6 +180,15 @@ const STATIC_TEMPLATES: HubTemplate[] = [
     result: "→ Il cliente si convince vedendo il risultato finale",
   },
 
+  {
+    slug: "render-bagno", name: "Render Bagno AI",
+    description: "Trasforma una foto del bagno in un render fotorealistico con nuove piastrelle, sanitari e finiture. Il cliente vede il risultato prima di ristrutturare.",
+    icon: "🛁", category: "vendita", channel: ["visuale"], difficulty: "facile",
+    estimated_setup_min: 5, installs_count: 0, is_featured: true, badge: "NUOVO",
+    settore: "ristrutturazioni", kpi: "Conversione +35%",
+    result: "→ Il cliente decide più velocemente vedendo il bagno finito",
+  },
+
   // ── 🕐 Prossimamente ──
   {
     slug: "render-coperture", name: "Render Coperture AI",
