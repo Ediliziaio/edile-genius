@@ -787,9 +787,9 @@ export default function RenderStanzaNew() {
   // ─── RENDER UI ─────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-background to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50/50 via-background to-purple-50/50">
       {/* Header */}
-      <div className="bg-background border-b shadow-sm sticky top-0 z-10">
+      <div className="bg-background border-b shadow-sm sticky top-14 md:top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => navigate('/app/render-stanza')}>
             <ChevronLeft className="w-4 h-4 mr-1" /> Indietro
