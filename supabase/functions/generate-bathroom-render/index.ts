@@ -555,25 +555,31 @@ ${mountingRules}
 
 function buildBlock_H(cfg: Record<string, any>): string {
   const s = cfg.sostituzione || {};
-  if (!s.sanitari) return `[BLOCK H – TOILET & BIDET — KEPT AS ORIGINAL]`;
-
   const san = cfg.sanitari || {};
   const wcTipo = san.wc_tipo || "sospeso";
   const colore = san.colore || "bianco";
+
+  // If no full replacement AND no user config, keep as original
+  if (!s.sanitari && !san.wc_tipo && !san.azione_bidet) {
+    return `[BLOCK H – TOILET & BIDET — KEPT AS ORIGINAL]`;
+  }
+
+  const upgradeNote = !s.sanitari ? " (upgrade to specified type, keep position)" : "";
 
   const toiletDesc = wcTipo === "sospeso" || wcTipo === "rimless_sospeso"
     ? "wall-hung toilet — the pan is mounted to the wall, floor below is completely clear, in-wall cistern concealed behind wall (not visible externally)"
     : "floor-standing toilet — the base rests on the floor, floor connection visible";
 
-  const bidetLine = san.azione_bidet !== "rimuovi"
-    ? `Bidet: ${san.azione_bidet === "sostituisci" ? "new " : ""}${wcTipo === "sospeso" ? "wall-hung bidet" : "floor-standing bidet"}, ${colore} ceramic, matching toilet style`
+  const bidetAction = san.azione_bidet || "mantieni";
+  const bidetLine = bidetAction !== "rimuovi"
+    ? `Bidet: ${bidetAction === "sostituisci" ? "new " : ""}${wcTipo === "sospeso" ? "wall-hung bidet" : "floor-standing bidet"}, ${colore} ceramic, matching toilet style`
     : "Bidet: REMOVE — show floor tiles where bidet was";
 
   const floorRule = wcTipo === "sospeso"
     ? "NO floor base visible — complete floor continuity under toilet pan"
     : "Floor contact: circular or rectangular base visible at floor level";
 
-  return `[BLOCK H – TOILET & BIDET SPECIFICATION]
+  return `[BLOCK H – TOILET & BIDET SPECIFICATION${upgradeNote}]
 Toilet type: ${toiletDesc}
 Toilet color: ${colore} ceramic
 ${bidetLine}
