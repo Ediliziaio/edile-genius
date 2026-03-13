@@ -284,7 +284,7 @@ CRITICAL: ALL visible taps, faucets, shower heads, and fixtures MUST use this fi
   }
 
   // Block I — Walls
-  const pareti = config.pareti || {};
+  const pareti = config.parete || config.pareti || {};
   if (pareti.tipo) {
     blocks.I = `[BLOCK I – WALL TREATMENT]
 Type: ${pareti.tipo_prompt || pareti.tipo || "keep existing"}
