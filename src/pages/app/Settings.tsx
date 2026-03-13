@@ -486,17 +486,6 @@ export default function Settings() {
               ))}
               <Button onClick={saveNotif} disabled={savingNotif}>{savingNotif ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}Salva preferenze</Button>
             </CardContent></Card>
-
-            <Separator />
-            <Card><CardContent className="p-6 space-y-4">
-              <h3 className="text-base font-semibold text-foreground">Profilo utente</h3>
-              <div className="space-y-2"><Label>Email</Label><Input value={profile?.email || ""} disabled className="opacity-60" /></div>
-              <div className="space-y-2"><Label>Nome completo</Label><Input value={fullName} onChange={e => setFullName(e.target.value)} /></div>
-              <div className="space-y-2"><Label>Avatar URL</Label><Input value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)} placeholder="https://..." /></div>
-              <Button onClick={saveProfile} disabled={savingProfile}>{savingProfile ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}Salva profilo</Button>
-              <Separator className="my-4" />
-              <PasswordChangeForm />
-            </CardContent></Card>
           </div>
         )}
 
