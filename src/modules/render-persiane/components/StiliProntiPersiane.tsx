@@ -1,62 +1,85 @@
 import { Zap } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import type { TipoPersoniana, MaterialePersiana, StatoApertura, TipoOperazione } from "../lib/persianePromptBuilder";
 
 interface StileConfig {
-  tipo_operazione?: string;
-  tipo_persiana?: string;
-  materiale?: string;
+  tipo_operazione?: TipoOperazione;
+  tipo_persiana?: TipoPersoniana;
+  materiale?: MaterialePersiana;
   colore_mode?: "ral" | "legno";
-  stato_apertura?: string;
+  colore_ral_code?: string;
+  colore_ral_name?: string;
+  colore_ral_hex?: string;
+  colore_wood_id?: string;
+  colore_wood_name?: string;
+  stato_apertura?: StatoApertura;
   larghezza_lamella_mm?: number;
 }
 
-const STILI: { name: string; emoji: string; desc: string; config: StileConfig }[] = [
+interface StilePronto {
+  nome: string;
+  descrizione: string;
+  emoji: string;
+  preview_hex?: string;
+  config: StileConfig;
+}
+
+const STILI_FALLBACK: StilePronto[] = [
   {
-    name: "Veneziana Bianca Classica",
-    emoji: "🪟",
-    desc: "Bianco puro RAL 9010, lamelle 80mm chiuse",
-    config: { tipo_operazione: "sostituisci", tipo_persiana: "veneziana_classica", materiale: "pvc", colore_mode: "ral", stato_apertura: "chiuso", larghezza_lamella_mm: 80 },
+    nome: "Classico bianco",
+    descrizione: "Veneziana in PVC bianco traffico, chiuse",
+    emoji: "🤍",
+    preview_hex: "#F1F0EB",
+    config: { tipo_persiana: "veneziana_classica", materiale: "pvc", colore_mode: "ral", colore_ral_code: "9016", colore_ral_name: "Bianco traffico", colore_ral_hex: "#F1F0EB", stato_apertura: "chiuso" },
   },
   {
-    name: "Scuro Noce Tradizionale",
-    emoji: "🚪",
-    desc: "Scuro pieno in legno effetto noce",
-    config: { tipo_operazione: "sostituisci", tipo_persiana: "scuro_pieno", materiale: "legno", colore_mode: "legno" },
+    nome: "Verde toscano",
+    descrizione: "Scuro pieno in legno, verde abete",
+    emoji: "🌲",
+    preview_hex: "#2B3D2A",
+    config: { tipo_persiana: "scuro_pieno", materiale: "legno_naturale", colore_mode: "ral", colore_ral_code: "6009", colore_ral_name: "Verde abete", colore_ral_hex: "#2B3D2A", stato_apertura: "chiuso" },
   },
   {
-    name: "Veneziana Antracite Moderna",
-    emoji: "🏙️",
-    desc: "Grigio antracite RAL 7016, alluminio",
-    config: { tipo_operazione: "sostituisci", tipo_persiana: "veneziana_classica", materiale: "alluminio", colore_mode: "ral", stato_apertura: "chiuso", larghezza_lamella_mm: 80 },
-  },
-  {
-    name: "Gelosia Verde Muschio",
-    emoji: "🌿",
-    desc: "Gelosia in legno verde RAL 6005",
-    config: { tipo_operazione: "sostituisci", tipo_persiana: "gelosia", materiale: "legno", colore_mode: "ral" },
-  },
-  {
-    name: "Avvolgibile Bianco",
-    emoji: "⬆️",
-    desc: "Avvolgibile esterno PVC bianco",
-    config: { tipo_operazione: "sostituisci", tipo_persiana: "avvolgibile_esterno", materiale: "pvc", colore_mode: "ral" },
-  },
-  {
-    name: "Persiana Rovere Naturale",
+    nome: "Larice naturale",
+    descrizione: "Veneziana in larice, aperta 45°",
     emoji: "🪵",
-    desc: "Veneziana in composito effetto rovere",
-    config: { tipo_operazione: "sostituisci", tipo_persiana: "veneziana_classica", materiale: "composito", colore_mode: "legno", larghezza_lamella_mm: 80 },
+    preview_hex: "#B8860B",
+    config: { tipo_persiana: "veneziana_classica", materiale: "legno_naturale", colore_mode: "legno", colore_wood_id: "larice_naturale", colore_wood_name: "Larice naturale", stato_apertura: "aperto_45" },
   },
   {
-    name: "Frangisole Grigio Chiaro",
+    nome: "Antracite moderno",
+    descrizione: "Veneziana alluminio grigio antracite",
+    emoji: "🔲",
+    preview_hex: "#383E42",
+    config: { tipo_persiana: "veneziana_esterna", materiale: "alluminio", colore_mode: "ral", colore_ral_code: "7016", colore_ral_name: "Grigio antracite", colore_ral_hex: "#383E42", stato_apertura: "chiuso" },
+  },
+  {
+    nome: "Gelosia mediterranea",
+    descrizione: "Gelosia in legno composito, avorio",
+    emoji: "🔶",
+    preview_hex: "#E6D3B3",
+    config: { tipo_persiana: "gelosia", materiale: "legno_composito", colore_mode: "ral", colore_ral_code: "1015", colore_ral_name: "Avorio chiaro", colore_ral_hex: "#E6D3B3", stato_apertura: "chiuso" },
+  },
+  {
+    nome: "Brise-soleil alluminio",
+    descrizione: "Brise-soleil tecnico, alluminio bianco",
     emoji: "☀️",
-    desc: "Frangisole alluminio RAL 7035",
-    config: { tipo_operazione: "sostituisci", tipo_persiana: "frangisole", materiale: "alluminio", colore_mode: "ral" },
+    preview_hex: "#F4F4F4",
+    config: { tipo_persiana: "brise_soleil", materiale: "alluminio", colore_mode: "ral", colore_ral_code: "9010", colore_ral_name: "Bianco puro", colore_ral_hex: "#F4F4F4", stato_apertura: "aperto_90" },
   },
   {
-    name: "Alla Romana Marrone",
-    emoji: "🏛️",
-    desc: "Alla romana in legno marrone cioccolato",
-    config: { tipo_operazione: "sostituisci", tipo_persiana: "alla_romana", materiale: "legno", colore_mode: "ral" },
+    nome: "Scuro rovere grigio",
+    descrizione: "Scuro con cornice, effetto rovere grigio",
+    emoji: "🪟",
+    preview_hex: "#8B8B7A",
+    config: { tipo_persiana: "scuro_cornice", materiale: "legno_composito", colore_mode: "legno", colore_wood_id: "rovere_grigio", colore_wood_name: "Rovere grigio", stato_apertura: "chiuso" },
+  },
+  {
+    nome: "Azzurro mare",
+    descrizione: "Scuro pieno in PVC, blu cielo",
+    emoji: "🌊",
+    preview_hex: "#2980B9",
+    config: { tipo_persiana: "scuro_pieno", materiale: "pvc", colore_mode: "ral", colore_ral_code: "5015", colore_ral_name: "Blu cielo", colore_ral_hex: "#2980B9", stato_apertura: "chiuso" },
   },
 ];
 
@@ -69,20 +92,32 @@ export function StiliProntiPersiane({ onApply }: Props) {
     <div className="space-y-2">
       <div className="flex items-center gap-2">
         <Zap className="w-4 h-4 text-primary" />
-        <p className="text-sm font-semibold text-foreground">Stili pronti — applica con un click</p>
+        <p className="text-sm font-semibold text-foreground">Stili pronti</p>
+        <span className="text-xs text-muted-foreground">Applica con un click</span>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        {STILI.map((s) => (
+        {STILI_FALLBACK.map((stile) => (
           <button
-            key={s.name}
-            onClick={() => onApply(s.config)}
-            className="flex items-start gap-2 p-2.5 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 text-left transition-all"
+            key={stile.nome}
+            onClick={() => onApply(stile.config)}
+            className="flex flex-col items-center p-3 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-all group text-center"
           >
-            <span className="text-lg">{s.emoji}</span>
-            <div className="min-w-0">
-              <p className="text-xs font-medium text-foreground leading-tight">{s.name}</p>
-              <p className="text-[10px] text-muted-foreground leading-tight">{s.desc}</p>
+            <div className="relative">
+              {stile.preview_hex && (
+                <div
+                  className="w-8 h-8 rounded-full border border-border mb-1"
+                  style={{ backgroundColor: stile.preview_hex }}
+                />
+              )}
+              <span className="absolute -top-1 -right-2 text-sm">{stile.emoji}</span>
             </div>
+            <p className="text-xs font-medium text-foreground mt-1">{stile.nome}</p>
+            <p className="text-[10px] text-muted-foreground leading-tight">{stile.descrizione}</p>
+            {stile.config.tipo_persiana && (
+              <Badge variant="secondary" className="text-[9px] mt-1.5 px-1.5 py-0">
+                {stile.config.tipo_persiana.replace(/_/g, " ")}
+              </Badge>
+            )}
           </button>
         ))}
       </div>
