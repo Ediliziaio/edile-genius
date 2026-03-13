@@ -25,6 +25,8 @@ import {
   type AnalisiStanza,
   STANZA_STILI_PRONTI_FALLBACK,
 } from '@/modules/render-stanza/lib/stanzaPromptBuilder';
+import { ConfigRiepilogo } from '@/modules/render-stanza/components/ConfigRiepilogo';
+import { InterventiSummaryBar } from '@/modules/render-stanza/components/InterventiSummaryBar';
 
 // ─── COSTANTI ────────────────────────────────────────────────────────────────
 
@@ -2013,6 +2015,16 @@ export default function RenderStanzaNew() {
               </CardContent>
             </Card>
 
+            {/* Riepilogo configurazione */}
+            {countAttivi > 0 && (
+              <Card>
+                <CardContent className="pt-4">
+                  <p className="text-sm font-semibold text-foreground mb-3">📋 Riepilogo configurazione:</p>
+                  <ConfigRiepilogo config={mapWizardToConfig(config, noteLibere)} />
+                </CardContent>
+              </Card>
+            )}
+
             {/* CTA */}
             <div className="space-y-3">
               {countAttivi === 0 && (
@@ -2050,6 +2062,17 @@ export default function RenderStanzaNew() {
                 Torna all'analisi
               </Button>
             </div>
+
+            {/* Sticky summary bar */}
+            <InterventiSummaryBar
+              interventi={interventiAttivi}
+              meta={Object.fromEntries(
+                Object.entries(INTERVENTO_META).map(([k, v]) => [k, { label: v.label, icon: v.icon, color: v.color }])
+              )}
+              onRemove={key => toggleIntervento(key as keyof InterventiState, false)}
+              onGenerate={handleStartRender}
+              loading={rendering}
+            />
           </div>
         )}
 
