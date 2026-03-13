@@ -103,6 +103,7 @@ const RenderPavimentoHub = lazy(() => import("./pages/app/RenderPavimentoHub"));
 const RenderPavimentoNew = lazy(() => import("./pages/app/RenderPavimentoNew"));
 const RenderStanzaHub = lazy(() => import("./pages/app/RenderStanzaHub"));
 const RenderStanzaNew = lazy(() => import("./pages/app/RenderStanzaNew"));
+const RenderTettoNew = lazy(() => import("./pages/app/RenderTettoNew"));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-screen">
