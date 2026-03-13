@@ -830,8 +830,8 @@ export default function AppDashboard() {
                     : "border-border bg-accent/50 hover:bg-accent"
                 }`}
               >
-                <div className="w-9 h-9 rounded-lg bg-card flex items-center justify-center shrink-0 border border-border">
-                  <action.icon className="w-4 h-4 text-muted-foreground" />
+                <div className="w-10 h-10 md:w-9 md:h-9 rounded-lg bg-card flex items-center justify-center shrink-0 border border-border">
+                  <action.icon className="w-4.5 h-4.5 md:w-4 md:h-4 text-muted-foreground" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-foreground">{action.label}</p>

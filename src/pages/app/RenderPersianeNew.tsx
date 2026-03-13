@@ -508,7 +508,7 @@ export default function RenderPersianeNew() {
           </div>
 
           {fotoPreview && (
-            <img src={fotoPreview} alt="foto" className="w-full rounded-2xl max-h-64 object-cover" />
+            <img src={fotoPreview} alt="foto" className="w-full rounded-2xl max-h-[50vh] object-cover" />
           )}
 
           {analyzingPhoto && (
