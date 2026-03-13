@@ -774,10 +774,9 @@ export default function RenderBagnoNew() {
           )}
 
           {/* Doccia */}
-          {sostituzione.doccia && (
             <Card>
               <CardContent className="py-4 space-y-4">
-                <h3 className="font-semibold text-foreground">🚿 Doccia</h3>
+                <h3 className="font-semibold text-foreground">🚿 Doccia{!sostituzione.doccia ? " (personalizza stile)" : ""}</h3>
                 <Label className="text-xs text-muted-foreground">Tipo</Label>
                 <OptionGrid
                   options={SHOWER_TYPES}
@@ -821,13 +820,11 @@ export default function RenderBagnoNew() {
                 </div>
               </CardContent>
             </Card>
-          )}
 
           {/* Vasca */}
-          {sostituzione.vasca && (
             <Card>
               <CardContent className="py-4 space-y-4">
-                <h3 className="font-semibold text-foreground">🛁 Vasca</h3>
+                <h3 className="font-semibold text-foreground">🛁 Vasca{!sostituzione.vasca ? " (personalizza stile)" : ""}</h3>
                 <OptionGrid
                   options={[
                     { value: "mantieni", label: "Mantieni" },
@@ -865,7 +862,6 @@ export default function RenderBagnoNew() {
                 )}
               </CardContent>
             </Card>
-          )}
 
           {/* Mobile Bagno */}
           {sostituzione.mobile_bagno && (

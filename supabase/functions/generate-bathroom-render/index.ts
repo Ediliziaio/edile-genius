@@ -370,8 +370,11 @@ function buildBlock_B(cfg: Record<string, any>): string {
     if (s[el.key]) {
       toChange.push(`✅ REPLACE: ${el.label} — full replacement per user specification`);
     } else if (el.key === "sanitari" && (san.wc_tipo || san.azione_bidet)) {
-      // User configured sanitari type without full replacement toggle
       toChange.push(`🔄 UPGRADE TYPE: ${el.label} — upgrade to user-specified type while keeping position`);
+    } else if (el.key === "doccia" && (cfg.doccia?.tipo || cfg.doccia?.box)) {
+      toChange.push(`🔄 UPGRADE TYPE: ${el.label} — upgrade to user-specified shower type while keeping position`);
+    } else if (el.key === "vasca" && (cfg.vasca?.tipo || cfg.vasca?.azione === "sostituisci" || cfg.vasca?.azione === "rimuovi")) {
+      toChange.push(`🔄 UPGRADE TYPE: ${el.label} — upgrade/change bathtub per user specification`);
     } else {
       toModernize.push(`🔄 MODERNIZE (keep type): ${el.label}`);
     }
@@ -451,7 +454,9 @@ FLOOR RENDERING RULES:
 function buildBlock_E(cfg: Record<string, any>, analisi: Record<string, any>): string {
   const d = cfg.doccia || {};
 
-  if (d.azione === "mantieni" || !cfg.sostituzione?.doccia) return `[BLOCK E – SHOWER — KEPT AS ORIGINAL]`;
+  // Show as original only if no toggle AND no user config
+  const hasDocConfig = d.tipo || d.box;
+  if (d.azione === "mantieni" && !cfg.sostituzione?.doccia && !hasDocConfig) return `[BLOCK E – SHOWER — KEPT AS ORIGINAL]`;
   if (d.azione === "rimuovi")
     return `[BLOCK E – SHOWER — REMOVE: Fill the shower area with wall tiles matching BLOCK C. Remove all shower hardware, screen, tray.]`;
 
@@ -488,7 +493,9 @@ ${showerRules}
 function buildBlock_F(cfg: Record<string, any>): string {
   const v = cfg.vasca || {};
 
-  if (v.azione === "mantieni" || !cfg.sostituzione?.vasca) return `[BLOCK F – BATHTUB — KEPT AS ORIGINAL]`;
+  // Show as original only if no toggle AND no user config
+  const hasVascaConfig = v.tipo || v.azione === "sostituisci" || v.azione === "rimuovi";
+  if (v.azione === "mantieni" && !cfg.sostituzione?.vasca && !hasVascaConfig) return `[BLOCK F – BATHTUB — KEPT AS ORIGINAL]`;
   if (v.azione === "rimuovi")
     return `[BLOCK F – BATHTUB — REMOVE: Remove bathtub entirely. Fill the floor area with matching floor tiles (BLOCK D). Tile the wall behind where bathtub was (BLOCK C).]`;
 
