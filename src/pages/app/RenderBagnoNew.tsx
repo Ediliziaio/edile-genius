@@ -820,13 +820,11 @@ export default function RenderBagnoNew() {
                 </div>
               </CardContent>
             </Card>
-          )}
 
           {/* Vasca */}
-          {sostituzione.vasca && (
             <Card>
               <CardContent className="py-4 space-y-4">
-                <h3 className="font-semibold text-foreground">🛁 Vasca</h3>
+                <h3 className="font-semibold text-foreground">🛁 Vasca{!sostituzione.vasca ? " (personalizza stile)" : ""}</h3>
                 <OptionGrid
                   options={[
                     { value: "mantieni", label: "Mantieni" },
