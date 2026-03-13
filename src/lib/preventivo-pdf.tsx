@@ -359,12 +359,79 @@ function groupByCategory(voci: PreventivoVoce[]): Map<string, PreventivoVoce[]> 
 interface Props {
   data: PreventivoData;
   template: TemplateConfig;
+  /** AI-generated section content keyed by sezioneId */
+  sezioniContenuto?: Record<string, SezioneContenuto>;
+  /** Template section definitions for ordering and display */
+  sezioniTemplate?: PreventivoSezione[];
+  /** Render gallery entries */
+  renderEntries?: RenderEntry[];
 }
 
-export const PreventivoPDF: React.FC<Props> = ({ data, template }) => {
+// ── AI Text Section sub-component ────────────────────────────────────────
+const AITextSection: React.FC<{
+  titolo: string;
+  testo: string;
+  primario: string;
+}> = ({ titolo, testo, primario }) => {
+  const paragraphs = testo.split(/\n\n+/).filter(p => p.trim());
+  return (
+    <View style={{ marginLeft: 30, marginRight: 30, marginBottom: 16 }} wrap={false}>
+      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+        <View style={{ width: 3, height: 12, backgroundColor: primario, marginRight: 6 }} />
+        <Text style={{ fontSize: 12, fontFamily: "Helvetica-Bold", color: "#1e293b" }}>{titolo}</Text>
+      </View>
+      {paragraphs.map((p, i) => (
+        <Text key={i} style={{ fontSize: 9, color: "#555555", lineHeight: 1.5, marginBottom: 4 }}>
+          {p.trim()}
+        </Text>
+      ))}
+    </View>
+  );
+};
+
+// ── Render Gallery sub-component ─────────────────────────────────────────
+const RenderGallerySection: React.FC<{
+  entries: RenderEntry[];
+  primario: string;
+  titolo: string;
+  mostraDisclaimer: boolean;
+}> = ({ entries, primario, titolo, mostraDisclaimer }) => (
+  <View style={{ marginLeft: 30, marginRight: 30, marginBottom: 16 }}>
+    <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+      <View style={{ width: 3, height: 12, backgroundColor: primario, marginRight: 6 }} />
+      <Text style={{ fontSize: 12, fontFamily: "Helvetica-Bold", color: "#1e293b" }}>{titolo}</Text>
+    </View>
+    {mostraDisclaimer && (
+      <View style={{
+        backgroundColor: "#fffce6", borderRadius: 3, paddingTop: 4, paddingBottom: 4,
+        paddingLeft: 8, paddingRight: 8, marginBottom: 8, borderLeftWidth: 3, borderLeftColor: "#f59e0b",
+      }}>
+        <Text style={{ fontSize: 7, color: "#92400e" }}>
+          {"Le immagini sono render simulati generati dall'AI a scopo illustrativo."}
+        </Text>
+      </View>
+    )}
+    <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+      {entries.map((entry, i) => (
+        <View key={i} style={{ width: "48%", marginRight: i % 2 === 0 ? "4%" : 0, marginBottom: 10 }}>
+          <Image src={entry.url} style={{ width: "100%", height: 100, borderRadius: 3 }} />
+          {entry.titolo && (
+            <Text style={{ fontSize: 7, color: "#6b7280", marginTop: 2 }}>{entry.titolo}</Text>
+          )}
+          {entry.tipo && (
+            <Text style={{ fontSize: 6, color: primario, marginTop: 1 }}>{entry.tipo}</Text>
+          )}
+        </View>
+      ))}
+    </View>
+  </View>
+);
+
+export const PreventivoPDF: React.FC<Props> = ({
+  data, template, sezioniContenuto, sezioniTemplate, renderEntries,
+}) => {
   const primario = template.colore_primario || "#f4a100";
   const secondario = template.colore_secondario || "#1e293b";
-  // Memoize styles to avoid recreating StyleSheet on every render with same colors
   const S = React.useMemo(() => createStyles(primario, secondario), [primario, secondario]);
   const categorieMap = groupByCategory(data.voci || []);
   const isDraft = (data as any).stato === "bozza";
