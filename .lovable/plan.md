@@ -1,215 +1,99 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro + AI Avanzata
 
-## ✅ Completato in questo blocco
+# Audit Completo — Render + Agenti AI — Bug Report e Piano Fix
 
-### Database Migration
-- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
-- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
-- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
-- RLS policies per tutte le nuove tabelle
+## Sistemi analizzati
+- **7 moduli Render**: Infissi, Bagno, Facciata, Persiane, Pavimento, Stanza, Tetto
+- **Sistema Agenti AI**: Creazione, aggiornamento, chiamate outbound, webhook post-call
 
-## ✅ Blocco 2 — Sistema Crediti Euro-based
+---
 
-### Database
-- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
-- ai_credit_topups (ricariche manual/auto/promo/adjustment)
-- ai_credit_usage (consumo per conversazione con margini)
-- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
-- monthly_billing_summary view (security_invoker)
+## BUG CRITICI
 
-### Edge Functions
-- check-credits-before-call: verifica saldo pre-chiamata
-- topup-credits: ricarica manuale con fattura
-- elevenlabs-webhook: post-call billing, auto-recharge, blocco
-- platform-config: +apply_global_markup action
+### 1. `generate-render` (Infissi) — parsing immagine fragile
+**Riga 529**: `data.choices[0].message.images[0].image_url.url` — cerca SOLO nel campo `images`. Se il modello Gemini restituisce l'immagine in `content` (come array o stringa data:image), il render fallisce con "No image returned from AI". Tutti gli altri moduli (Bagno, Facciata, Stanza, Tetto, Pavimento, Persiane) hanno già il parsing multi-formato. Questo è l'unico modulo rimasto con il parsing vecchio.
 
-### Frontend
-- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
-- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
-- Sidebar: footer saldo crediti con barra e alert
-- VoiceTestPanel: check crediti pre-chiamata con blocco UI
+**Fix**: Aggiornare `generate-render/index.ts` (righe 528-530) con lo stesso pattern multi-formato usato dagli altri moduli.
 
-## ✅ Blocco 3-5 — Agent Templates System
+### 2. Stanza — `stanza-originals` è bucket PRIVATO, `getPublicUrl` restituisce URL inaccessibile
+**Riga 568**: `supabase.storage.from('stanza-originals').getPublicUrl(origPath)` — il bucket `stanza-originals` è **privato** (vedi storage-buckets). Il `publicUrl` restituito non funziona, quindi `originalUrl` è sempre un URL che dà 403. La gallery salva questo URL rotto come `original_image_url`.
 
-### Database
-- agent_templates + agent_template_instances + agent_reports + company_channels
-- RLS policies PERMISSIVE (fix da RESTRICTIVE)
-- Funzione DB `increment_installs_count(tpl_id UUID)`
-- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+**Fix**: Usare `createSignedUrl` con durata lunga, oppure salvare il path con prefisso `storage:/stanza-originals/` come fa il modulo Bagno.
 
-### Edge Functions (CORS headers completi)
-- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
-- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
-- save-report: salva report in DB + aggiorna contatori istanza
+### 3. Stanza — `original_image_path`, `original_image_width`, `original_image_height` probabilmente non esistono nello schema
+**Righe 533-539**: Il FE scrive campi come `original_image_path`, `original_image_width`, `original_image_height` nella tabella `render_stanza_sessions`, ma queste colonne probabilmente non esistono nello schema DB (non sono nella dichiarazione originale). L'update silenziosamente fallisce o viene ignorato.
 
-### Frontend — Wizard 5 Step (TemplateSetup.tsx)
-- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + importa CSV con template scaricabile
-- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
-- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
+**Fix**: Verificare schema e aggiungere colonne via migrazione, oppure rimuovere gli update a campi inesistenti.
 
-### SuperAdmin
-- /superadmin/templates: CRUD completo con JSON editor per config_schema
+### 4. update-agent — nessuna verifica tenant
+**Riga 30**: `update-agent` legge l'agente con `serviceClient` senza verificare che l'utente appartenga alla stessa `company_id` dell'agente. Qualsiasi utente autenticato può aggiornare qualsiasi agente conoscendo l'ID.
 
-## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+**Fix**: Aggiungere verifica `profile.company_id === currentAgent.company_id` (o bypass per superadmin).
 
-### Database (5 tabelle)
-- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
-- RLS PERMISSIVE per tutte le tabelle
-- Trigger set_updated_at + init_render_credits su companies
-- Funzione deduct_render_credit
-- Storage buckets: render-originals (privato), render-results (pubblico)
+### 5. create-elevenlabs-agent — nessuna verifica che l'utente appartenga a `company_id`
+**Riga 32**: Accetta un `company_id` dal body senza verificare che il chiamante appartenga effettivamente a quella company. Un utente potrebbe creare agenti in company altrui.
 
-### Edge Functions
-- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
-- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+**Fix**: Verificare `profile.company_id === body.company_id`.
 
-### Frontend
-- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
-- RenderConfig (/superadmin/render-config)
-- BeforeAfterSlider, promptBuilder.ts
+---
 
-## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
+## BUG MEDI
 
-### Database
-- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
-- Estensione `preventivi` con +26 colonne
-- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
-- Storage buckets: preventivi-media (privato), template-assets (pubblico)
-- RLS company-scoped + superadmin
+### 6. Bagno — `originale_url` salva path fittizio `storage:/bagno-originals/...`
+**Riga 445**: Salva `storage:/bagno-originals/${originalPath}` come URL originale nella gallery. Questo formato custom non è interpretato da nessun componente frontend per mostrare l'immagine. Il Before/After slider non può mostrare l'originale.
 
-### Edge Functions
-- `process-preventivo-audio` RISCRITTO
+**Fix**: Generare un signed URL di lunga durata (1 anno) o usare un endpoint dedicato per risolvere i path `storage:/`.
 
-### PDF Client-side (@react-pdf/renderer)
-- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4
+### 7. Facciata — gallery non salva `original_url`
+Ho verificato che nella precedente iterazione era stata segnalata la mancanza del salvataggio di `original_url` nella gallery facciata. Bisogna verificare se il fix è stato applicato.
 
-### Frontend
-- NuovoPreventivo.tsx, PreventivoDetail.tsx, PreventiviList.tsx, TemplatePreventivo.tsx
+### 8. Persiane/Pavimento — nessun cleanup `revokeObjectURL` nel reset
+I moduli Persiane e Pavimento non hanno cleanup dell'object URL quando l'utente resetta e carica una nuova foto. Memory leak su uso ripetuto.
 
-## ✅ Blocco 8 — AI Avanzata P1 (Smart Actions + Lead Score + Timeline)
+### 9. Varianti Generator — hardcoded su `generate-room-render`
+**`useVariantiGenerator.ts` riga 48**: Chiama sempre `generate-room-render` indipendentemente dal `sourceModulo`. Le varianti per Tetto, Facciata, Bagno, ecc. non funzionano perché usano la edge function sbagliata.
 
-### Smart Actions Engine (Dashboard)
-- Espanso da 3 regole hardcoded a 10+ regole basate su dati reali:
-  - Crediti in esaurimento (danger)
-  - Agenti in bozza (warning)
-  - Agenti senza numero telefono (warning)
-  - Agenti inattivi >7 giorni (info)
-  - Contatti da richiamare con next_call_at scaduto (warning)
-  - Preventivi in bozza da >7 giorni (warning)
-  - Preventivi inviati senza risposta da >10 giorni (warning)
-  - Documenti in scadenza entro 15 giorni (warning)
-  - Campagne con tasso appuntamenti <5% (info)
-- Query Supabase dedicate per ogni regola
-- Stato "Tutto in ordine" quando nessuna azione è necessaria
-- Mostra summary delle conversazioni recenti nella tabella attività
+**Fix**: Mappare `sourceModulo` all'edge function corretta.
 
-### Lead Score Automatico
-- `src/lib/lead-score.ts`: motore di scoring 0-100 senza LLM
-  - +30 outcome qualified/appointment
-  - +20 sentiment positivo
-  - +15 preventivo associato
-  - +10 contatto completo (tel+email)
-  - +10 callback attempts
-  - +5 fonte inbound
-  - -10 inattivo >30 giorni
-  - -20 not_interested
-  - -30 do_not_call/invalid
-- `src/components/contacts/LeadScoreBadge.tsx`: badge con tooltip fattori
-  - Compact mode per tabella (emoji + score numerico)
-  - Full mode per scheda contatto (con lista fattori)
-  - Colori: 🔴 Caldo (>60), 🟠 Tiepido (30-60), 🔵 Freddo (<30)
-- Badge integrato nella tabella contatti (nuova colonna "Score")
-- Badge integrato nell'header della scheda contatto
+---
 
-### Timeline Unificata del Contatto
-- `ContactDetailPanel.tsx` completamente refactorato:
-  - Tab "Timeline" come default (al posto di "Info")
-  - Cronologia verticale con linea e pallini colorati per tipo:
-    - 🔵 Conversazioni (con summary, outcome, sentiment, durata)
-    - 🟡 Note manuali
-    - 🟢 Preventivi collegati (stato, importo, numero)
-    - ⚪ Eventi (contatto creato)
-  - Query preventivi per nome/telefono contatto
-  - Lead Score full display nell'header della scheda
+## BUG MINORI
 
-## ✅ Blocco 8 — P1-C: Call Summary Automatico
+### 10. Tutti i moduli render — nessun toast specifico per errori 402/429
+I toast mostrano errori generici. L'utente non capisce se ha finito i crediti o se è rate-limited.
 
-### Backend
-- `supabase/functions/elevenlabs-webhook/summary.ts`: modulo separato per generazione summary
-  - Chiama OpenAI gpt-4o-mini con prompt minimale in italiano
-  - Non-blocking: se OPENAI_API_KEY non è configurata, salta silenziosamente
-  - Cap transcript a 6000 chars per contenere i costi (~$0.001/call)
-- `elevenlabs-webhook/index.ts`: importa e chiama `generateCallSummary()` dopo step 7
-  - Popola `conversations.summary` solo se la generazione ha successo
+### 11. Agent — ElevenLabs sync in update-agent non è bloccante ma fallisce silenziosamente
+Se la PATCH a ElevenLabs fallisce, l'agente è aggiornato nel DB locale ma non su ElevenLabs. Non c'è feedback all'utente.
 
-### Frontend (già predisposto)
-- Dashboard "Attività recente": mostra `c.summary` sotto il nome agente
-- Conversazioni: mostra summary nella tabella e nel dialog dettaglio
-- Timeline contatto: mostra summary nelle conversazioni
+### 12. Agent — `dynamic_variables` non validate
+Le variabili dinamiche vengono passate direttamente a ElevenLabs senza sanitizzazione.
 
-### Requisito SuperAdmin
-- Aggiungere OPENAI_API_KEY come Supabase Secret (da configurare via SuperAdmin)
+---
 
-## ✅ Blocco 9 — Audit Finale & Hardening
+## Piano di implementazione
 
-### Sicurezza Edge Functions
-- Validazione JWT (getClaims) aggiunta a: generate-render, crm-sync, deploy-template-instance, process-preventivo-audio, generate-preventivo-pdf
-- Verifica tenant (company_id cross-check) aggiunta a tutte le funzioni interne
-- Funzioni webhook esterne (elevenlabs-webhook, whatsapp-webhook, telegram-cantiere-webhook) lasciate senza JWT (corretto)
+### Fase 1 — Fix critici backend
+- **Edit** `supabase/functions/generate-render/index.ts`: Aggiornare parsing immagine (righe 528-530) con pattern multi-formato
+- **Edit** `supabase/functions/update-agent/index.ts`: Aggiungere verifica tenant (company_id match)
+- **Edit** `supabase/functions/create-elevenlabs-agent/index.ts`: Aggiungere verifica che l'utente appartenga a `company_id`
 
-### Atomicità Crediti
-- Creata RPC `topup_credits(_company_id, _amount_eur)` con UPDATE atomico
-- topup-credits edge function refactorato per usare RPC
+### Fase 2 — Fix critici frontend
+- **Edit** `src/pages/app/RenderStanzaNew.tsx`: Sostituire `getPublicUrl` (bucket privato) con signed URL o path reference
+- **Edit** `src/pages/app/RenderStanzaNew.tsx`: Rimuovere update a colonne inesistenti (`original_image_path`, etc.) o creare migrazione
+- **Edit** `src/hooks/useVariantiGenerator.ts`: Mappare `sourceModulo` alla edge function corretta
 
-### UX — Progressive Disclosure Sidebar
-- Sezioni OPERATIVITÀ e STRUMENTI AI visibili solo se il settore è rilevante o se esistono dati
-- Campi vuoti nelle conversazioni nascosti (eval_score, minutes_billed, cost_billed_eur)
+### Fase 3 — Fix medi
+- **Edit** `src/pages/app/RenderBagnoNew.tsx`: Risolvere il formato `storage:/` per l'originale (o usare signed URL)
+- **Edit** tutti i moduli render: Aggiungere toast specifici per 402 (crediti) e 429 (rate limit)
+- **Edit** `src/pages/app/RenderPersianeNew.tsx`, `RenderPavimentoNew.tsx`: Aggiungere `revokeObjectURL` al reset
 
-### UX — Dead-End Fix
-- Card CRM e Webhooks in Integrazioni: badge "Prossimamente" + bottoni disabilitati
+### File da modificare
+- `supabase/functions/generate-render/index.ts`
+- `supabase/functions/update-agent/index.ts`
+- `supabase/functions/create-elevenlabs-agent/index.ts`
+- `src/pages/app/RenderStanzaNew.tsx`
+- `src/pages/app/RenderBagnoNew.tsx`
+- `src/hooks/useVariantiGenerator.ts`
+- `src/pages/app/RenderPersianeNew.tsx`
+- `src/pages/app/RenderPavimentoNew.tsx`
 
-### Signup Self-Service
-- Pagina /signup con form registrazione
-- Edge function self-service-signup: crea company (trial 14gg) + profilo + ruolo company_admin
-
-### AI Avanzata P2
-- Follow-up Generator: edge function generate-followup (GPT-4o-mini) + bottone in ContactDetailPanel
-- Opportunity Recovery: Smart Actions per lead qualificati dormenti >5 giorni
-- Campi conversazione vuoti nascosti per UX più pulita
-
-## ✅ Blocco 10 — Criticità Pre-Lancio Risolte
-
-### Database
-- Rimossi RLS duplicati su `ai_credits` (2 policy rimossi: `company_ai_credits_select`, `superadmin_ai_credits`)
-- Rimosso indice duplicato `idx_topups_stripe_session` su `ai_credit_topups`
-- `topup_credits` RPC riscritta con `FOR UPDATE` lock (come `deduct_call_credits`)
-- Aggiunta funzione `reset_agents_calls_month()` per cron mensile
-
-### Auth Edge Functions (25 file corretti)
-- Sostituito `supabase.auth.getClaims(token)` (non-standard) con `supabase.auth.getUser(token)` in tutte le Edge Functions
-- Aggiornato helper condiviso `_shared/utils.ts` → `authenticateRequest()`
-
-### Frontend
-- `Credits.tsx`: aggiunto `companyId` come dipendenza del useEffect per il polling post-pagamento Stripe
-
-### Stripe Webhook
-- Insert topup record: aggiunto error handling per violazione unique constraint
-- Documentato comportamento auto-recharge (crediti senza addebito Stripe)
-
-### Secrets da configurare (azione manuale)
-- `STRIPE_SECRET_KEY` — per pagamenti
-- `STRIPE_WEBHOOK_SECRET` — per webhook Stripe
-- `OPENAI_API_KEY` — per AI summary e follow-up
-- `META_ENCRYPTION_KEY` — per cifratura token WhatsApp
-- `RESEND_API_KEY` — per invio email
-
-## 🔜 Prossimi Step
-
-### P3 — Avanzato / successivo
-- Personalizzazione regole Smart Actions per admin
-- Report settimanale automatico via email al titolare
-- Trend predittivo su tasso conversione
-- Auto-recharge con addebito Stripe reale (attualmente wallet-based)
