@@ -176,3 +176,9 @@ verify_jwt = false
 
 [functions.generate-facade-render]
 verify_jwt = false
+
+[functions.analyze-shutter-photo]
+verify_jwt = false
+
+[functions.generate-shutter-render]
+verify_jwt = false
