@@ -222,7 +222,9 @@ export default function RenderNew() {
       const path = `${companyId}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("render-originals").upload(path, file);
       if (error) throw error;
-      const { data: urlData } = supabase.storage.from("render-originals").getPublicUrl(path);
+      // render-originals is a private bucket — use signed URL
+      const { data: urlData } = await supabase.storage.from("render-originals").createSignedUrl(path, 31536000);
+      if (!urlData?.signedUrl) throw new Error("Impossibile generare URL per l'immagine originale");
 
       const { data: session, error: sessErr } = await supabase.from("render_sessions").insert({
         company_id: companyId,

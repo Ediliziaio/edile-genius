@@ -346,10 +346,20 @@ export default function RenderPersianeNew() {
   const saveToGallery = async () => {
     if (!renderUrl || !sessionId || !user || !companyId) return;
     try {
+      // Generate signed URL for original image
+      let origUrl: string | null = null;
+      const ext = foto?.name.split(".").pop() || "jpg";
+      const origPath = `${companyId}/${sessionId}/original.${ext}`;
+      const { data: signedData } = await supabase.storage
+        .from("persiane-originals")
+        .createSignedUrl(origPath, 31536000); // 1 year
+      origUrl = signedData?.signedUrl || null;
+
       await (supabase.from("render_persiane_gallery") as any).insert({
         user_id: user.id,
         company_id: companyId,
         session_id: sessionId,
+        original_image_url: origUrl,
         result_image_url: renderUrl,
         tipo_operazione: tipoOperazione,
         tipo_persiana: tipoPersiana,

@@ -721,10 +721,17 @@ export default function RenderStanzaNew() {
         .eq('id', sessionId);
 
       setStep(5);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error('Errore durante la generazione del render');
-      setDebug(String(err));
+      const msg = String(err?.message || err);
+      if (msg.includes('402') || msg.toLowerCase().includes('credit')) {
+        toast.error('Crediti esauriti — ricarica per continuare a generare render');
+      } else if (msg.includes('429') || msg.toLowerCase().includes('rate')) {
+        toast.error('Troppi render in corso — riprova tra qualche secondo');
+      } else {
+        toast.error('Errore durante la generazione del render');
+      }
+      setDebug(msg);
       setStep(3);
     } finally {
       setRendering(false);

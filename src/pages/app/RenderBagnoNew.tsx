@@ -366,6 +366,8 @@ export default function RenderBagnoNew() {
       setSostituzione({ piastrelle_parete: true, pavimento: true, doccia: false, vasca: false, mobile_bagno: false, sanitari: false, rubinetteria: false, parete_colore: false, illuminazione: false });
     } else if (val === "restyling_completo") {
       setSostituzione({ piastrelle_parete: true, pavimento: true, doccia: true, vasca: false, mobile_bagno: true, sanitari: false, rubinetteria: true, parete_colore: false, illuminazione: false });
+    } else if (val === "demolizione_parziale") {
+      setSostituzione({ piastrelle_parete: true, pavimento: true, doccia: true, vasca: false, mobile_bagno: true, sanitari: false, rubinetteria: true, parete_colore: true, illuminazione: false });
     } else if (val === "demolizione_completa") {
       setSostituzione({ piastrelle_parete: true, pavimento: true, doccia: true, vasca: true, mobile_bagno: true, sanitari: true, rubinetteria: true, parete_colore: true, illuminazione: false });
       setConfigLayout(prev => ({ ...prev, attivo: true }));

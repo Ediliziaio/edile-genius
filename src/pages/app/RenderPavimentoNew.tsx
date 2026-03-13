@@ -170,8 +170,15 @@ export default function RenderPavimentoNew() {
       setResultUrl(url);
       setStep(4);
     },
-    onError: (err) => {
-      toast({ title: "Errore render", description: String(err), variant: "destructive" });
+    onError: (err: any) => {
+      const msg = String(err?.message || err);
+      if (msg.includes('402') || msg.toLowerCase().includes('credit')) {
+        toast({ title: "Crediti esauriti", description: "Ricarica per continuare a generare render", variant: "destructive" });
+      } else if (msg.includes('429') || msg.toLowerCase().includes('rate')) {
+        toast({ title: "Troppi render in corso", description: "Riprova tra qualche secondo", variant: "destructive" });
+      } else {
+        toast({ title: "Errore render", description: msg, variant: "destructive" });
+      }
       setStep(2); // back to config
     },
   });
