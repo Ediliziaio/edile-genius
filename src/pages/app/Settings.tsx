@@ -125,8 +125,7 @@ export default function Settings() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingNotif, setSavingNotif] = useState(false);
   const [testing, setTesting] = useState(false);
-  const [fullName, setFullName] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
+  const [deleteWhId, setDeleteWhId] = useState<string | null>(null);
   const [notif, setNotif] = useState<NotifSettings>({ new_conversation: true, daily_report: false, weekly_report: true });
 
   // Webhooks

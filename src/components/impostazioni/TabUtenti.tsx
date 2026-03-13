@@ -2,15 +2,19 @@ import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useCompanyId } from '@/hooks/useCompanyId';
 import { useAziendaSettings } from '@/hooks/useAziendaSettings';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { UserPermissionsModal } from './UserPermissionsModal';
 import { InvitaUtenteModal } from './InvitaUtenteModal';
-import { Users, UserPlus, Shield, Settings2, Trash2, Search, Crown } from 'lucide-react';
+import { Users, UserPlus, Shield, Settings2, Trash2, Search, Crown, Mail, Clock, XCircle } from 'lucide-react';
 
 const RUOLO_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
   owner: { label: 'Proprietario', color: 'bg-amber-100 text-amber-700', icon: Crown },
@@ -21,6 +25,8 @@ const RUOLO_CONFIG: Record<string, { label: string; color: string; icon: any }> 
 export function TabUtenti() {
   const { user, roles } = useAuth();
   const companyId = useCompanyId();
+  const { toast } = useToast();
+  const qc = useQueryClient();
   const { membri, invitaUtente, rimuoviMembro, cambiaRuolo } = useAziendaSettings(companyId!);
 
   const [search, setSearch] = useState('');
@@ -28,6 +34,35 @@ export function TabUtenti() {
   const [showInvitaModal, setShowInvitaModal] = useState(false);
 
   const isAdmin = roles.includes('company_admin') || roles.includes('superadmin');
+
+  // Pending invitations
+  const { data: invitiPendenti = [] } = useQuery({
+    queryKey: ['azienda-inviti-pendenti', companyId],
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from('azienda_inviti')
+        .select('id, email, ruolo, creato_il, scade_il')
+        .eq('company_id', companyId)
+        .eq('accettato', false);
+      return data || [];
+    },
+    enabled: !!companyId,
+  });
+
+  const revocaInvito = useMutation({
+    mutationFn: async (invitoId: string) => {
+      const { error } = await (supabase as any)
+        .from('azienda_inviti')
+        .delete()
+        .eq('id', invitoId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['azienda-inviti-pendenti', companyId] });
+      toast({ title: 'Invito revocato' });
+    },
+    onError: (err: any) => toast({ title: 'Errore', description: err.message, variant: 'destructive' }),
+  });
 
   const filtratiMembri = membri.filter((m: any) =>
     (m.nome || m.email || '').toLowerCase().includes(search.toLowerCase())
@@ -58,8 +93,8 @@ export function TabUtenti() {
           <p className="text-xs text-muted-foreground">Admin</p>
         </CardContent></Card>
         <Card><CardContent className="p-4 text-center">
-          <p className="text-2xl font-bold text-foreground">{membri.length}</p>
-          <p className="text-xs text-muted-foreground">Accesso attivo</p>
+          <p className="text-2xl font-bold text-foreground">{invitiPendenti.length}</p>
+          <p className="text-xs text-muted-foreground">Inviti in sospeso</p>
         </CardContent></Card>
       </div>
 
@@ -119,10 +154,30 @@ export function TabUtenti() {
                       <Button variant="ghost" size="sm" onClick={() => setPermissionsUserId(membro.user_id)} className="gap-1 h-8 text-muted-foreground hover:text-primary">
                         <Settings2 className="w-4 h-4" /> Permessi
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        onClick={() => rimuoviMembro.mutate(membro.user_id)}>
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Rimuovere questo utente?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {membro.nome || email} perderà l'accesso a tutti gli strumenti dell'azienda. Questa azione non può essere annullata.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Annulla</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => rimuoviMembro.mutate(membro.user_id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Rimuovi
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   )}
                 </div>
@@ -138,6 +193,57 @@ export function TabUtenti() {
           </div>
         )}
       </div>
+
+      {/* Pending invitations */}
+      {invitiPendenti.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Mail className="w-4 h-4 text-muted-foreground" />
+            <h3 className="text-sm font-semibold text-foreground">Inviti in sospeso</h3>
+          </div>
+          {invitiPendenti.map((invito: any) => (
+            <Card key={invito.id}>
+              <CardContent className="p-4 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                  <Clock className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{invito.email}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Ruolo: {invito.ruolo === 'admin' ? 'Admin' : 'Membro'} · Inviato il {new Date(invito.creato_il).toLocaleDateString('it-IT')}
+                  </p>
+                </div>
+                {isAdmin && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground hover:text-destructive">
+                        <XCircle className="w-4 h-4" /> Revoca
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Revocare l'invito?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          L'invito a {invito.email} verrà annullato e il link non sarà più valido.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Annulla</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => revocaInvito.mutate(invito.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Revoca invito
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Modals */}
       {showInvitaModal && (

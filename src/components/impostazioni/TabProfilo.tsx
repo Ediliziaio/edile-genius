@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 import { useCompanyId } from '@/hooks/useCompanyId';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -8,11 +9,13 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { Building2, Upload, Palette, Globe, Phone, Mail, Save, Loader2 } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { Building2, Upload, Palette, Globe, Phone, Mail, Save, Loader2, User, Lock } from 'lucide-react';
 
 const BRAND_PRESETS = ['#2563EB', '#7C3AED', '#059669', '#DC2626', '#D97706', '#0F172A'];
 
 export function TabProfilo() {
+  const { profile, user } = useAuth();
   const companyId = useCompanyId();
   const { toast } = useToast();
   const qc = useQueryClient();
@@ -30,6 +33,17 @@ export function TabProfilo() {
     name: '', email: '', phone: '', website: '', address: '', description: '', brand_color: '#2563EB', logo_url: '',
   });
 
+  // Personal profile state
+  const [fullName, setFullName] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  // Password state
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [pwError, setPwError] = useState('');
+
   useEffect(() => {
     if (company) {
       setForm({
@@ -44,6 +58,13 @@ export function TabProfilo() {
       });
     }
   }, [company]);
+
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.full_name || '');
+      setAvatarUrl(profile.avatar_url || '');
+    }
+  }, [profile]);
 
   const salva = useMutation({
     mutationFn: async () => {
@@ -66,10 +87,87 @@ export function TabProfilo() {
     onError: (err: any) => toast({ title: 'Errore', description: err.message, variant: 'destructive' }),
   });
 
+  const savePersonalProfile = async () => {
+    if (!user) return;
+    setSavingProfile(true);
+    const { error } = await supabase.from('profiles').update({ full_name: fullName, avatar_url: avatarUrl || null }).eq('id', user.id);
+    setSavingProfile(false);
+    toast(error ? { title: 'Errore', description: error.message, variant: 'destructive' } : { title: 'Profilo aggiornato' });
+  };
+
+  const handleChangePassword = async () => {
+    setPwError('');
+    if (newPassword.length < 8) { setPwError('Minimo 8 caratteri'); return; }
+    if (newPassword !== confirmPassword) { setPwError('Le password non corrispondono'); return; }
+    setSavingPassword(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setSavingPassword(false);
+    if (error) { toast({ title: 'Errore', description: error.message, variant: 'destructive' }); }
+    else { toast({ title: 'Password aggiornata' }); setNewPassword(''); setConfirmPassword(''); }
+  };
+
   const update = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }));
 
   return (
     <div className="space-y-6 max-w-2xl">
+      {/* ── Il tuo profilo ── */}
+      <div>
+        <h2 className="text-lg font-semibold text-foreground">Il tuo profilo</h2>
+        <p className="text-sm text-muted-foreground">Gestisci le tue informazioni personali e la password</p>
+      </div>
+
+      <Card>
+        <CardContent className="p-6 space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <User className="w-4 h-4 text-primary" />
+            <span className="font-medium text-sm text-foreground">Dati personali</span>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-muted-foreground text-xs">Email</Label>
+            <Input value={profile?.email || ''} disabled className="opacity-60" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-muted-foreground text-xs">Nome completo</Label>
+              <Input value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Mario Rossi" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-muted-foreground text-xs">Avatar URL</Label>
+              <Input value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)} placeholder="https://..." />
+            </div>
+          </div>
+          <Button onClick={savePersonalProfile} disabled={savingProfile} variant="outline" className="gap-2">
+            {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            Salva profilo
+          </Button>
+
+          <Separator className="my-2" />
+
+          <div className="flex items-center gap-2 mb-1">
+            <Lock className="w-4 h-4 text-primary" />
+            <span className="font-medium text-sm text-foreground">Cambia password</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-muted-foreground text-xs">Nuova password</Label>
+              <Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Minimo 8 caratteri" autoComplete="new-password" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-muted-foreground text-xs">Conferma password</Label>
+              <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Ripeti la password" autoComplete="new-password" />
+            </div>
+          </div>
+          {pwError && <p className="text-sm text-destructive">{pwError}</p>}
+          <Button onClick={handleChangePassword} disabled={savingPassword || !newPassword} variant="outline" className="gap-2">
+            {savingPassword ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+            Aggiorna password
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Separator />
+
+      {/* ── Profilo Azienda ── */}
       <div>
         <h2 className="text-lg font-semibold text-foreground">Profilo Azienda</h2>
         <p className="text-sm text-muted-foreground">Queste informazioni appaiono nei documenti e nelle comunicazioni ai clienti</p>
