@@ -1,93 +1,215 @@
 
+# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro + AI Avanzata
 
-# Analisi Voci Ridondanti nei Moduli Render
+## ✅ Completato in questo blocco
 
-## Ridondanze trovate
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
-### 1. PERSIANE — Tipi duplicati: `frangisole` e `brise_soleil`
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
-Nel type `TipoPersoniana` e nel dizionario prompt, `frangisole` e `brise_soleil` sono sostanzialmente la stessa cosa:
-- `frangisole`: "brise-soleil / sun-screening blades — large horizontal or vertical adjustable blades"
-- `brise_soleil`: "architectural brise-soleil — fixed or adjustable horizontal/vertical blades for solar control, contemporary design"
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-La descrizione stessa di `frangisole` dice "brise-soleil". Sono due nomi per lo stesso prodotto architettonico. Il `PersianaStylePicker` UI mostra solo `brise_soleil` (9 voci), ma il tipo e il prompt contengono entrambi (13 voci).
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
-**Fix**: Rimuovere `frangisole` dal type, dal prompt dictionary e da qualsiasi compatibilità nel MaterialePicker. Mantenere solo `brise_soleil`.
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
-### 2. PERSIANE — Materiali duplicati: `legno` vs `legno_naturale`, `composito` vs `legno_composito`
+## ✅ Blocco 3-5 — Agent Templates System
 
-Nel type `MaterialePersiana` (9 valori) e nel dizionario prompt:
-- `legno`: "natural solid wood with visible grain texture"
-- `legno_naturale`: "premium natural solid wood (larch, pine, iroko) with authentic visible grain texture, painted or natural finish"
-  → Stesso materiale, una con più dettaglio. Il `MaterialePicker` UI mostra solo `legno_naturale` (6 voci), `legno` non appare mai nella UI.
+### Database
+- agent_templates + agent_template_instances + agent_reports + company_channels
+- RLS policies PERMISSIVE (fix da RESTRICTIVE)
+- Funzione DB `increment_installs_count(tpl_id UUID)`
+- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
 
-- `composito`: "wood-composite material with realistic wood-grain embossing"
-- `legno_composito`: "wood-composite material (WPC) — wood fiber + PVC blend, high weather resistance with realistic wood-grain embossing"
-  → Identici. Il `MaterialePicker` UI mostra solo `legno_composito`, `composito` non appare.
+### Edge Functions (CORS headers completi)
+- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
+- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
+- save-report: salva report in DB + aggiorna contatori istanza
 
-**Fix**: Rimuovere `legno` e `composito` dal type e dal prompt dictionary. Mantenere `legno_naturale` e `legno_composito`.
+### Frontend — Wizard 5 Step (TemplateSetup.tsx)
+- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
+- Step 2 Operai: lista card + importa CSV con template scaricabile
+- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
+- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
 
-### 3. PERSIANE — Tipi non nella UI: `scuro_dogato`, `persiana_scorrevole`, `alla_romana`, `frangisole`
+### SuperAdmin
+- /superadmin/templates: CRUD completo con JSON editor per config_schema
 
-Il type `TipoPersoniana` ha 13 valori, ma `PersianaStylePicker` ne mostra solo 9. Questi 4 tipi esistono nel type/prompt ma non sono selezionabili dall'utente:
-- `scuro_dogato` — variante molto simile a `scuro_pieno`
-- `persiana_scorrevole` — tipo di nicchia
-- `alla_romana` — molto simile a `veneziana_classica`
-- `frangisole` — duplicato di `brise_soleil`
+## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
 
-Il materiale `ferro_battuto` esiste nel type ma non nel MaterialePicker UI (3 materiali su 9 sono "fantasma": `legno`, `composito`, `ferro_battuto`).
+### Database (5 tabelle)
+- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
+- RLS PERMISSIVE per tutte le tabelle
+- Trigger set_updated_at + init_render_credits su companies
+- Funzione deduct_render_credit
+- Storage buckets: render-originals (privato), render-results (pubblico)
 
-**Fix**: Rimuovere dal type le voci non presenti nella UI per evitare confusione e codice morto. Se in futuro servissero, si riaggiungeranno.
+### Edge Functions
+- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
+- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
 
-### 4. PERSIANE — `larghezza_lamella_mm` e `apertura_lamelle` mostrate solo per veneziane, ma inviate sempre nel prompt
+### Frontend
+- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
+- RenderConfig (/superadmin/render-config)
+- BeforeAfterSlider, promptBuilder.ts
 
-La UI mostra il `LamellaPicker` solo quando il tipo è `veneziana_classica` o `veneziana_esterna`, ma il `buildPersianaPrompt` include SEMPRE `Slat width` e `Slat aperture` nel Block C, anche per tipi senza lamelle (scuro pieno, griglia sicurezza). Questo genera istruzioni incoerenti per l'AI.
+## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
 
-**Fix**: Nel prompt builder, includere `Slat width` e `Slat aperture` solo per i tipi con lamelle (veneziana_classica, veneziana_esterna, gelosia, brise_soleil).
+### Database
+- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
+- Estensione `preventivi` con +26 colonne
+- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
+- Storage buckets: preventivi-media (privato), template-assets (pubblico)
+- RLS company-scoped + superadmin
 
-### 5. PAVIMENTO — `tipo_operazione` ha `aggiungi` ma non è usato dalla UI
+### Edge Functions
+- `process-preventivo-audio` RISCRITTO
 
-Il type `TipoOperazione` per Pavimento include `"sostituisci" | "aggiungi" | "cambia_colore"`, ma la UI di `RenderPavimentoNew` non mostra mai un selettore per il tipo operazione — è hardcoded a `"sostituisci"`. Le opzioni `aggiungi` e `cambia_colore` sono codice morto.
+### PDF Client-side (@react-pdf/renderer)
+- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4
 
-**Fix**: Rimuovere `aggiungi` e `cambia_colore` dal type (o aggiungere il selettore alla UI se li si vuole supportare).
+### Frontend
+- NuovoPreventivo.tsx, PreventivoDetail.tsx, PreventiviList.tsx, TemplatePreventivo.tsx
 
-### 6. STANZA — Sovrapposizione tra 3 interventi sulle pareti
+## ✅ Blocco 8 — AI Avanzata P1 (Smart Actions + Lead Score + Timeline)
 
-Il modulo Stanza ha tre interventi distinti per le pareti:
-- **Verniciatura pareti** — cambia colore/finitura
-- **Carta da parati** — applica wallpaper decorativo
-- **Rivestimento pareti** — boiserie, mattone, pietra, pannelli 3D
+### Smart Actions Engine (Dashboard)
+- Espanso da 3 regole hardcoded a 10+ regole basate su dati reali:
+  - Crediti in esaurimento (danger)
+  - Agenti in bozza (warning)
+  - Agenti senza numero telefono (warning)
+  - Agenti inattivi >7 giorni (info)
+  - Contatti da richiamare con next_call_at scaduto (warning)
+  - Preventivi in bozza da >7 giorni (warning)
+  - Preventivi inviati senza risposta da >10 giorni (warning)
+  - Documenti in scadenza entro 15 giorni (warning)
+  - Campagne con tasso appuntamenti <5% (info)
+- Query Supabase dedicate per ogni regola
+- Stato "Tutto in ordine" quando nessuna azione è necessaria
+- Mostra summary delle conversazioni recenti nella tabella attività
 
-Tutti e tre agiscono sulle pareti e possono essere attivati contemporaneamente, generando istruzioni contraddittorie per l'AI (es. "vernicia le pareti di bianco" + "applica carta da parati geometrica" + "aggiungi boiserie in legno"). Non c'è un guard che impedisca l'attivazione simultanea.
+### Lead Score Automatico
+- `src/lib/lead-score.ts`: motore di scoring 0-100 senza LLM
+  - +30 outcome qualified/appointment
+  - +20 sentiment positivo
+  - +15 preventivo associato
+  - +10 contatto completo (tel+email)
+  - +10 callback attempts
+  - +5 fonte inbound
+  - -10 inattivo >30 giorni
+  - -20 not_interested
+  - -30 do_not_call/invalid
+- `src/components/contacts/LeadScoreBadge.tsx`: badge con tooltip fattori
+  - Compact mode per tabella (emoji + score numerico)
+  - Full mode per scheda contatto (con lista fattori)
+  - Colori: 🔴 Caldo (>60), 🟠 Tiepido (30-60), 🔵 Freddo (<30)
+- Badge integrato nella tabella contatti (nuova colonna "Score")
+- Badge integrato nell'header della scheda contatto
 
-**Fix**: Aggiungere logica di mutua esclusione: se l'utente attiva `carta_da_parati` o `rivestimento_pareti`, disattivare automaticamente `verniciatura` (e viceversa), oppure mostrare un avviso.
+### Timeline Unificata del Contatto
+- `ContactDetailPanel.tsx` completamente refactorato:
+  - Tab "Timeline" come default (al posto di "Info")
+  - Cronologia verticale con linea e pallini colorati per tipo:
+    - 🔵 Conversazioni (con summary, outcome, sentiment, durata)
+    - 🟡 Note manuali
+    - 🟢 Preventivi collegati (stato, importo, numero)
+    - ⚪ Eventi (contatto creato)
+  - Query preventivi per nome/telefono contatto
+  - Lead Score full display nell'header della scheda
 
-### 7. TETTO — `tipo_tetto` mostrato nella UI ma mai usato nel prompt
+## ✅ Blocco 8 — P1-C: Call Summary Automatico
 
-`TIPO_TETTO_OPTIONS` (a_falde, piano, mansardato, ecc.) viene mostrato nello step analisi come badge informativo, ma il tipo di tetto NON viene passato alla configurazione né usato nel `buildTettoPrompt`. È puramente decorativo.
+### Backend
+- `supabase/functions/elevenlabs-webhook/summary.ts`: modulo separato per generazione summary
+  - Chiama OpenAI gpt-4o-mini con prompt minimale in italiano
+  - Non-blocking: se OPENAI_API_KEY non è configurata, salta silenziosamente
+  - Cap transcript a 6000 chars per contenere i costi (~$0.001/call)
+- `elevenlabs-webhook/index.ts`: importa e chiama `generateCallSummary()` dopo step 7
+  - Popola `conversations.summary` solo se la generazione ha successo
 
-**Fix**: O collegarlo al prompt builder (utile per l'AI), oppure rimuovere il selettore dalla UI per non confondere l'utente.
+### Frontend (già predisposto)
+- Dashboard "Attività recente": mostra `c.summary` sotto il nome agente
+- Conversazioni: mostra summary nella tabella e nel dialog dettaglio
+- Timeline contatto: mostra summary nelle conversazioni
 
----
+### Requisito SuperAdmin
+- Aggiungere OPENAI_API_KEY come Supabase Secret (da configurare via SuperAdmin)
 
-## Piano di implementazione
+## ✅ Blocco 9 — Audit Finale & Hardening
 
-### File da modificare
+### Sicurezza Edge Functions
+- Validazione JWT (getClaims) aggiunta a: generate-render, crm-sync, deploy-template-instance, process-preventivo-audio, generate-preventivo-pdf
+- Verifica tenant (company_id cross-check) aggiunta a tutte le funzioni interne
+- Funzioni webhook esterne (elevenlabs-webhook, whatsapp-webhook, telegram-cantiere-webhook) lasciate senza JWT (corretto)
 
-1. **`src/modules/render-persiane/lib/persianePromptBuilder.ts`**
-   - Rimuovere `frangisole`, `scuro_dogato`, `persiana_scorrevole`, `alla_romana` dal type `TipoPersoniana` e dal dizionario `TIPO_PERSIANA_PROMPTS`
-   - Rimuovere `legno`, `composito`, `ferro_battuto` dal type `MaterialePersiana` e dal dizionario `MATERIALE_PROMPTS`
-   - Condizionare `Slat width`/`Slat aperture` nel Block C solo per tipi con lamelle
+### Atomicità Crediti
+- Creata RPC `topup_credits(_company_id, _amount_eur)` con UPDATE atomico
+- topup-credits edge function refactorato per usare RPC
 
-2. **`src/modules/render-persiane/components/MaterialePicker.tsx`**
-   - Rimuovere riferimenti ai tipi eliminati nelle liste `compatibleWith`
+### UX — Progressive Disclosure Sidebar
+- Sezioni OPERATIVITÀ e STRUMENTI AI visibili solo se il settore è rilevante o se esistono dati
+- Campi vuoti nelle conversazioni nascosti (eval_score, minutes_billed, cost_billed_eur)
 
-3. **`src/modules/render-pavimento/lib/pavimentoPromptBuilder.ts`**
-   - Rimuovere `aggiungi` e `cambia_colore` dal type `TipoOperazione` (oppure aggiungere selettore UI)
+### UX — Dead-End Fix
+- Card CRM e Webhooks in Integrazioni: badge "Prossimamente" + bottoni disabilitati
 
-4. **`src/pages/app/RenderStanzaNew.tsx`**
-   - Aggiungere logica di mutua esclusione per verniciatura / carta_da_parati / rivestimento_pareti
+### Signup Self-Service
+- Pagina /signup con form registrazione
+- Edge function self-service-signup: crea company (trial 14gg) + profilo + ruolo company_admin
 
-5. **`src/pages/app/RenderTettoNew.tsx`** + **`src/modules/render-tetto/lib/buildPrompt.ts`**
-   - Passare `tipo_tetto` dall'analisi al prompt builder come contesto
+### AI Avanzata P2
+- Follow-up Generator: edge function generate-followup (GPT-4o-mini) + bottone in ContactDetailPanel
+- Opportunity Recovery: Smart Actions per lead qualificati dormenti >5 giorni
+- Campi conversazione vuoti nascosti per UX più pulita
 
+## ✅ Blocco 10 — Criticità Pre-Lancio Risolte
+
+### Database
+- Rimossi RLS duplicati su `ai_credits` (2 policy rimossi: `company_ai_credits_select`, `superadmin_ai_credits`)
+- Rimosso indice duplicato `idx_topups_stripe_session` su `ai_credit_topups`
+- `topup_credits` RPC riscritta con `FOR UPDATE` lock (come `deduct_call_credits`)
+- Aggiunta funzione `reset_agents_calls_month()` per cron mensile
+
+### Auth Edge Functions (25 file corretti)
+- Sostituito `supabase.auth.getClaims(token)` (non-standard) con `supabase.auth.getUser(token)` in tutte le Edge Functions
+- Aggiornato helper condiviso `_shared/utils.ts` → `authenticateRequest()`
+
+### Frontend
+- `Credits.tsx`: aggiunto `companyId` come dipendenza del useEffect per il polling post-pagamento Stripe
+
+### Stripe Webhook
+- Insert topup record: aggiunto error handling per violazione unique constraint
+- Documentato comportamento auto-recharge (crediti senza addebito Stripe)
+
+### Secrets da configurare (azione manuale)
+- `STRIPE_SECRET_KEY` — per pagamenti
+- `STRIPE_WEBHOOK_SECRET` — per webhook Stripe
+- `OPENAI_API_KEY` — per AI summary e follow-up
+- `META_ENCRYPTION_KEY` — per cifratura token WhatsApp
+- `RESEND_API_KEY` — per invio email
+
+## 🔜 Prossimi Step
+
+### P3 — Avanzato / successivo
+- Personalizzazione regole Smart Actions per admin
+- Report settimanale automatico via email al titolare
+- Trend predittivo su tasso conversione
+- Auto-recharge con addebito Stripe reale (attualmente wallet-based)

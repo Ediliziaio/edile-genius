@@ -592,17 +592,38 @@ export default function RenderStanzaNew() {
     }));
   };
 
+  // Wall treatment keys that are mutually exclusive
+  const WALL_TREATMENTS: (keyof InterventiState)[] = ['verniciatura', 'carta_da_parati', 'rivestimento_pareti'];
+
   // Toggle intervento ON/OFF
   const toggleIntervento = (key: keyof InterventiState, value: boolean) => {
-    setInterventiAttivi(prev => ({ ...prev, [key]: value }));
+    // Mutual exclusion for wall treatments
+    const isWallTreatment = WALL_TREATMENTS.includes(key);
+    const otherWallKeys = WALL_TREATMENTS.filter(k => k !== key);
+
+    setInterventiAttivi(prev => ({
+      ...prev,
+      [key]: value,
+      ...(isWallTreatment && value ? Object.fromEntries(otherWallKeys.map(k => [k, false])) : {}),
+    }));
     setConfig(prev => {
       const existing = prev[key as keyof WizardConfig];
-      return {
+      const updated = {
         ...prev,
         [key]: typeof existing === 'object' && existing !== null
           ? { ...existing, attivo: value }
           : { attivo: value },
       };
+      // Deactivate other wall treatments when enabling one
+      if (isWallTreatment && value) {
+        for (const otherKey of otherWallKeys) {
+          const otherExisting = updated[otherKey as keyof WizardConfig];
+          if (typeof otherExisting === 'object' && otherExisting !== null) {
+            (updated as any)[otherKey] = { ...otherExisting, attivo: false };
+          }
+        }
+      }
+      return updated;
     });
   };
 

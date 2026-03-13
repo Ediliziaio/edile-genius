@@ -191,7 +191,7 @@ export function useRenderTetto(options: UseRenderTettoOptions = {}) {
     setRendering(true);
 
     try {
-      const prompt = buildTettoPrompt(config, analisi);
+      const prompt = buildTettoPrompt(config, analisi, tipoTetto);
 
       // Sync config to DB before invoking
       await supabase

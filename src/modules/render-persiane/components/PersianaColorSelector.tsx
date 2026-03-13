@@ -65,9 +65,6 @@ const WOOD_SUGGESTIONS: Record<string, string[]> = {
   alluminio: ["noce_scuro", "teak_vintage", "rovere_grigio"],
   acciaio: [],
   fibra_vetro: ["noce_scuro", "larice_naturale", "rovere_grigio"],
-  legno: ["larice_naturale", "noce_scuro", "castagno_rustico"],
-  ferro_battuto: [],
-  composito: ["rovere_grigio", "noce_scuro"],
 };
 
 export function PersianaColorSelector({
@@ -80,7 +77,7 @@ export function PersianaColorSelector({
   const [showAllWoods, setShowAllWoods] = useState(false);
   const [showFullRalPicker, setShowFullRalPicker] = useState(false);
 
-  const canUseLegno = materialePersiana !== "acciaio" && materialePersiana !== "ferro_battuto";
+  const canUseLegno = materialePersiana !== "acciaio";
   const suggestedWoodIds = WOOD_SUGGESTIONS[materialePersiana] ?? [];
   const displayedWoods = showAllWoods
     ? WOOD_EFFECTS_PERSIANE

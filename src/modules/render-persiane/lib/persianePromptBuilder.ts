@@ -2,7 +2,12 @@
 // Render Persiane — Prompt Builder v1.1
 // ════════════════════════════════════════════════════════════════
 
-export const PERSIANE_PROMPT_VERSION = "1.1.0";
+export const PERSIANE_PROMPT_VERSION = "1.2.0";
+
+// Tipi con lamelle (usano slat width/aperture nel prompt)
+const TIPI_CON_LAMELLE: Set<string> = new Set([
+  "veneziana_classica", "veneziana_esterna", "gelosia", "brise_soleil",
+]);
 
 // ── Tipi ──────────────────────────────────────────────────────
 
@@ -12,26 +17,19 @@ export type TipoPersoniana =
   | "veneziana_classica"
   | "veneziana_esterna"
   | "scuro_pieno"
-  | "scuro_dogato"
   | "scuro_cornice"
-  | "persiana_scorrevole"
   | "gelosia"
   | "avvolgibile_esterno"
-  | "frangisole"
-  | "alla_romana"
   | "a_libro"
   | "griglia_sicurezza"
   | "brise_soleil";
 
 export type MaterialePersiana =
-  | "legno"
   | "legno_naturale"
   | "legno_composito"
   | "alluminio"
   | "pvc"
   | "acciaio"
-  | "ferro_battuto"
-  | "composito"
   | "fibra_vetro";
 
 export type StatoApertura = "chiuso" | "socchiuso" | "aperto_45" | "aperto_90" | "anta_singola_aperta";
@@ -95,27 +93,20 @@ const TIPO_PERSIANA_PROMPTS: Record<TipoPersoniana, string> = {
   veneziana_classica: "traditional Italian slatted shutters (persiane alla veneziana) — horizontal angled slats, hinged panels",
   veneziana_esterna: "external Venetian blinds — horizontal aluminum/wood slats, external mounting on guide rail",
   scuro_pieno: "solid panel shutters (scuri pieni) — flat solid wood/PVC panels without slats",
-  scuro_dogato: "tongue-and-groove plank shutters (scuri dogati) — vertical planks with visible joints",
   scuro_cornice: "framed panel shutters (scuri con cornice) — solid panels with decorative raised frame moulding, historic style",
-  persiana_scorrevole: "sliding shutters on external rail — panels slide horizontally on track",
   gelosia: "fixed-louver shutters (gelosie) — angled slats that do not move, permanent ventilation, Mediterranean style",
   avvolgibile_esterno: "external roller shutters (avvolgibili) — horizontal slats that roll into a box above the window",
-  frangisole: "brise-soleil / sun-screening blades — large horizontal or vertical adjustable blades",
-  alla_romana: "Roman-style folding shutters (persiane alla romana) — panels fold flat against the wall",
   a_libro: "bi-fold shutters (persiane a libro) — panels fold in half outward, ideal for wide openings",
   griglia_sicurezza: "security grille (griglia di sicurezza) — metal anti-burglary grate with industrial design",
   brise_soleil: "architectural brise-soleil — fixed or adjustable horizontal/vertical blades for solar control, contemporary design",
 };
 
 const MATERIALE_PROMPTS: Record<MaterialePersiana, string> = {
-  legno: "natural solid wood with visible grain texture",
   legno_naturale: "premium natural solid wood (larch, pine, iroko) with authentic visible grain texture, painted or natural finish",
   legno_composito: "wood-composite material (WPC) — wood fiber + PVC blend, high weather resistance with realistic wood-grain embossing",
   alluminio: "extruded aluminum with smooth powder-coated finish",
   pvc: "PVC/uPVC with smooth matte surface, low maintenance",
   acciaio: "galvanized steel with industrial finish",
-  ferro_battuto: "wrought iron with ornamental hand-forged details",
-  composito: "wood-composite material with realistic wood-grain embossing",
   fibra_vetro: "fiberglass composite — lightweight, non-conductive, ideal for extreme climates",
 };
 
@@ -191,13 +182,16 @@ ${analisi.note_speciali ? `Special notes: ${analisi.note_speciali}` : ""}`);
       colorPrompt = config.colore.wood.prompt_fragment;
     }
 
+    const hasSlats = TIPI_CON_LAMELLE.has(config.tipo_persiana);
+    const slatLines = hasSlats
+      ? `\nSlat width: ${config.larghezza_lamella_mm}mm\nSlat aperture: ${APERTURA_LAMELLE_PROMPTS[config.apertura_lamelle]}`
+      : "";
+
     blocks.push(`[BLOCK C – SHUTTER SPECIFICATION]
 Type: ${TIPO_PERSIANA_PROMPTS[config.tipo_persiana]}
 Material: ${MATERIALE_PROMPTS[config.materiale]}
 Color/Finish: ${colorPrompt}
-Opening state: ${STATO_APERTURA_PROMPTS[config.stato_apertura]}
-Slat width: ${config.larghezza_lamella_mm}mm
-Slat aperture: ${APERTURA_LAMELLE_PROMPTS[config.apertura_lamelle]}
+Opening state: ${STATO_APERTURA_PROMPTS[config.stato_apertura]}${slatLines}
 ${config.aggiungi_a_tutte_finestre ? "Apply to ALL visible windows" : config.finestre_target || ""}`);
 
     // Block D — Profile color (optional)

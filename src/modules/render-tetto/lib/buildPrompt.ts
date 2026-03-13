@@ -54,13 +54,15 @@ const LUCERNARIO_DESC: Record<string, string> = {
 export function buildTettoPrompt(
   config: ConfigurazioneTetto,
   analisi?: AnalisiTetto | null,
+  tipoTetto?: string | null,
 ): string {
   const blocchi: string[] = [];
 
   // ── BLOCCO A: Contesto
+  const tipoLabel = (tipoTetto || analisi?.tipo_tetto || 'sconosciuto').replace(/_/g, ' ');
   const contesto = analisi
-    ? `Tetto attuale: ${analisi.tipo_tetto.replace(/_/g, ' ')}, ${analisi.numero_falde} fald${analisi.numero_falde === 1 ? 'a' : 'e'}, manto attuale ${analisi.manto_attuale}, colore attuale ${analisi.colore_manto_attuale}.`
-    : 'Foto di un tetto di edificio.';
+    ? `Tetto attuale: tipo ${tipoLabel}, ${analisi.numero_falde} fald${analisi.numero_falde === 1 ? 'a' : 'e'}, manto attuale ${analisi.manto_attuale}, colore attuale ${analisi.colore_manto_attuale}.`
+    : `Foto di un tetto di edificio (tipo: ${tipoLabel}).`;
   blocchi.push(`[CONTESTO] ${contesto}`);
 
   // ── BLOCCO B: Manto
