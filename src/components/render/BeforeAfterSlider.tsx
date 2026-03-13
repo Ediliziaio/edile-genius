@@ -48,7 +48,7 @@ export default function BeforeAfterSlider({
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      style={{ touchAction: "none" }}
+      style={{ touchAction: "pan-y" }}
     >
       {/* After image (full) */}
       <img src={afterSrc} alt={afterLabel} className="block w-full h-full object-cover" draggable={false} />
@@ -72,8 +72,8 @@ export default function BeforeAfterSlider({
         className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg z-10"
         style={{ left: `${position}%`, transform: "translateX(-50%)" }}
       >
-        {/* Handle */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-xl flex items-center justify-center border-2 border-primary">
+        {/* Handle — larger on mobile for touch */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-11 h-11 md:w-10 md:h-10 rounded-full bg-white shadow-xl flex items-center justify-center border-2 border-primary">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M5 3L2 8L5 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             <path d="M11 3L14 8L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

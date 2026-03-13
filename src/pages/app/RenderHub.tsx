@@ -73,7 +73,7 @@ export default function RenderHub() {
       {/* How it works */}
       <div>
         <h2 className="text-xl font-semibold text-foreground mb-4">Come Funziona</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           {steps.map((step, i) => (
             <Card key={i} className="relative">
               <CardContent className="p-5">
