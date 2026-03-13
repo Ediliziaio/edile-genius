@@ -507,7 +507,7 @@ export default function RenderStanzaNew() {
 
     try {
       // 1. Crea sessione DB
-      const currentCompanyId = (await import('@/hooks/useCompanyId')).useCompanyId ? companyId : null;
+      // 1. Crea sessione DB con company_id per isolamento multi-tenant
       const { data: session, error: sessErr } = await supabase
         .from('render_stanza_sessions' as any)
         .insert({
