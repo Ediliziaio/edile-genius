@@ -9,6 +9,8 @@ import {
   pdf,
 } from "@react-pdf/renderer";
 
+import type { PreventivoSezione, RenderConfig } from '@/modules/preventivo/types';
+
 // Types
 export interface PreventivoVoce {
   id: string;
@@ -84,6 +86,19 @@ export interface TemplateConfig {
   company_address?: string;
   company_phone?: string;
   company_vat?: string;
+}
+
+// ── AI Section data passed from DB sezioni_json ──────────────────────────
+export interface SezioneContenuto {
+  testo: string;
+  chunks_usati?: string[];
+}
+
+// ── Render gallery entry ─────────────────────────────────────────────────
+export interface RenderEntry {
+  url: string;
+  titolo?: string;
+  tipo?: string;
 }
 
 // ✅ createStyles — dynamic colors, NO gap/objectFit/textTransform/shorthand
@@ -344,12 +359,79 @@ function groupByCategory(voci: PreventivoVoce[]): Map<string, PreventivoVoce[]> 
 interface Props {
   data: PreventivoData;
   template: TemplateConfig;
+  /** AI-generated section content keyed by sezioneId */
+  sezioniContenuto?: Record<string, SezioneContenuto>;
+  /** Template section definitions for ordering and display */
+  sezioniTemplate?: PreventivoSezione[];
+  /** Render gallery entries */
+  renderEntries?: RenderEntry[];
 }
 
-export const PreventivoPDF: React.FC<Props> = ({ data, template }) => {
+// ── AI Text Section sub-component ────────────────────────────────────────
+const AITextSection: React.FC<{
+  titolo: string;
+  testo: string;
+  primario: string;
+}> = ({ titolo, testo, primario }) => {
+  const paragraphs = testo.split(/\n\n+/).filter(p => p.trim());
+  return (
+    <View style={{ marginLeft: 30, marginRight: 30, marginBottom: 16 }} wrap={false}>
+      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+        <View style={{ width: 3, height: 12, backgroundColor: primario, marginRight: 6 }} />
+        <Text style={{ fontSize: 12, fontFamily: "Helvetica-Bold", color: "#1e293b" }}>{titolo}</Text>
+      </View>
+      {paragraphs.map((p, i) => (
+        <Text key={i} style={{ fontSize: 9, color: "#555555", lineHeight: 1.5, marginBottom: 4 }}>
+          {p.trim()}
+        </Text>
+      ))}
+    </View>
+  );
+};
+
+// ── Render Gallery sub-component ─────────────────────────────────────────
+const RenderGallerySection: React.FC<{
+  entries: RenderEntry[];
+  primario: string;
+  titolo: string;
+  mostraDisclaimer: boolean;
+}> = ({ entries, primario, titolo, mostraDisclaimer }) => (
+  <View style={{ marginLeft: 30, marginRight: 30, marginBottom: 16 }}>
+    <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+      <View style={{ width: 3, height: 12, backgroundColor: primario, marginRight: 6 }} />
+      <Text style={{ fontSize: 12, fontFamily: "Helvetica-Bold", color: "#1e293b" }}>{titolo}</Text>
+    </View>
+    {mostraDisclaimer && (
+      <View style={{
+        backgroundColor: "#fffce6", borderRadius: 3, paddingTop: 4, paddingBottom: 4,
+        paddingLeft: 8, paddingRight: 8, marginBottom: 8, borderLeftWidth: 3, borderLeftColor: "#f59e0b",
+      }}>
+        <Text style={{ fontSize: 7, color: "#92400e" }}>
+          {"Le immagini sono render simulati generati dall'AI a scopo illustrativo."}
+        </Text>
+      </View>
+    )}
+    <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+      {entries.map((entry, i) => (
+        <View key={i} style={{ width: "48%", marginRight: i % 2 === 0 ? "4%" : 0, marginBottom: 10 }}>
+          <Image src={entry.url} style={{ width: "100%", height: 100, borderRadius: 3 }} />
+          {entry.titolo && (
+            <Text style={{ fontSize: 7, color: "#6b7280", marginTop: 2 }}>{entry.titolo}</Text>
+          )}
+          {entry.tipo && (
+            <Text style={{ fontSize: 6, color: primario, marginTop: 1 }}>{entry.tipo}</Text>
+          )}
+        </View>
+      ))}
+    </View>
+  </View>
+);
+
+export const PreventivoPDF: React.FC<Props> = ({
+  data, template, sezioniContenuto, sezioniTemplate, renderEntries,
+}) => {
   const primario = template.colore_primario || "#f4a100";
   const secondario = template.colore_secondario || "#1e293b";
-  // Memoize styles to avoid recreating StyleSheet on every render with same colors
   const S = React.useMemo(() => createStyles(primario, secondario), [primario, secondario]);
   const categorieMap = groupByCategory(data.voci || []);
   const isDraft = (data as any).stato === "bozza";
@@ -541,7 +623,51 @@ export const PreventivoPDF: React.FC<Props> = ({ data, template }) => {
           </View>
         </View>
 
-        {/* VALIDITY */}
+        {/* ── AI-GENERATED SECTIONS (ordered by template) ────────────────────── */}
+        {sezioniTemplate && sezioniContenuto && (() => {
+          const orderedSections = [...(sezioniTemplate || [])]
+            .filter(s => s.attiva)
+            .sort((a, b) => a.ordine - b.ordine);
+
+          return orderedSections.map(section => {
+            // Render gallery
+            if (section.tipo === 'render_visivi' && renderEntries && renderEntries.length > 0) {
+              const cfg = section.config as any;
+              return (
+                <RenderGallerySection
+                  key={section.id}
+                  entries={renderEntries}
+                  primario={primario}
+                  titolo={section.titolo || "Render del Progetto"}
+                  mostraDisclaimer={cfg?.mostra_disclaimer !== false}
+                />
+              );
+            }
+
+            // AI text sections
+            const contenuto = sezioniContenuto[section.id];
+            if (!contenuto?.testo) return null;
+
+            const textTypes = [
+              'presentazione_azienda', 'analisi_progetto', 'descrizione_lavori',
+              'schede_prodotti', 'condizioni_contrattuali', 'note_finali',
+              'portfolio_riferimenti', 'certificazioni',
+            ];
+            if (textTypes.includes(section.tipo)) {
+              return (
+                <AITextSection
+                  key={section.id}
+                  titolo={section.titolo}
+                  testo={contenuto.testo}
+                  primario={primario}
+                />
+              );
+            }
+
+            return null;
+          });
+        })()}
+
         {data.validita_giorni && (
           <View style={S.validityBox}>
             <Text style={S.validityText}>
@@ -610,12 +736,33 @@ export const PreventivoPDF: React.FC<Props> = ({ data, template }) => {
 };
 
 // Export utility functions
-export async function getPreventivoBlob(data: PreventivoData, template: TemplateConfig): Promise<Blob> {
-  return await pdf(<PreventivoPDF data={data} template={template} />).toBlob();
+export async function getPreventivoBlob(
+  data: PreventivoData,
+  template: TemplateConfig,
+  sezioniContenuto?: Record<string, SezioneContenuto>,
+  sezioniTemplate?: PreventivoSezione[],
+  renderEntries?: RenderEntry[],
+): Promise<Blob> {
+  return await pdf(
+    <PreventivoPDF
+      data={data}
+      template={template}
+      sezioniContenuto={sezioniContenuto}
+      sezioniTemplate={sezioniTemplate}
+      renderEntries={renderEntries}
+    />
+  ).toBlob();
 }
 
-export async function downloadPreventivoAsPdf(data: PreventivoData, template: TemplateConfig, filename?: string): Promise<void> {
-  const blob = await getPreventivoBlob(data, template);
+export async function downloadPreventivoAsPdf(
+  data: PreventivoData,
+  template: TemplateConfig,
+  filename?: string,
+  sezioniContenuto?: Record<string, SezioneContenuto>,
+  sezioniTemplate?: PreventivoSezione[],
+  renderEntries?: RenderEntry[],
+): Promise<void> {
+  const blob = await getPreventivoBlob(data, template, sezioniContenuto, sezioniTemplate, renderEntries);
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
