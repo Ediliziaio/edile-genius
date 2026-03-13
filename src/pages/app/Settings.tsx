@@ -122,7 +122,6 @@ export default function Settings() {
   const currentTab = TABS.find(t => t.id === activeTab)!;
 
   const [loading, setLoading] = useState(true);
-  const [savingProfile, setSavingProfile] = useState(false);
   const [savingNotif, setSavingNotif] = useState(false);
   const [testing, setTesting] = useState(false);
   const [deleteWhId, setDeleteWhId] = useState<string | null>(null);
