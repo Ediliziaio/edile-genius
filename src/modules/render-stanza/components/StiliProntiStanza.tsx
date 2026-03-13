@@ -38,17 +38,20 @@ export function StiliProntiStanza({ onApply, tipoStanza, className = '' }: Stili
         }
 
         const { data, error } = await query;
-        if (error) return []; // table may not exist yet
+        if (error) return [];
         return (data || []).map((row: any) => ({
           id: row.id,
           nome: row.nome,
-        descrizione: row.descrizione || '',
-        emoji: row.emoji || '✨',
-        tags: row.tags || [],
-        config: row.config as Partial<ConfigurazioneStanza>,
-        preview_hex: row.preview_hex,
-        stile: row.stile,
-      }));
+          descrizione: row.descrizione || '',
+          emoji: row.emoji || '✨',
+          tags: row.tags || [],
+          config: row.config as Partial<ConfigurazioneStanza>,
+          preview_hex: row.preview_hex,
+          stile: row.stile,
+        }));
+      } catch {
+        return [];
+      }
     },
     staleTime: 5 * 60 * 1000,
   });

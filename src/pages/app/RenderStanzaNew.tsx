@@ -2013,6 +2013,16 @@ export default function RenderStanzaNew() {
               </CardContent>
             </Card>
 
+            {/* Riepilogo configurazione */}
+            {countAttivi > 0 && (
+              <Card>
+                <CardContent className="pt-4">
+                  <p className="text-sm font-semibold text-foreground mb-3">📋 Riepilogo configurazione:</p>
+                  <ConfigRiepilogo config={buildCurrentConfig()} />
+                </CardContent>
+              </Card>
+            )}
+
             {/* CTA */}
             <div className="space-y-3">
               {countAttivi === 0 && (
