@@ -318,7 +318,7 @@ export default function RenderBagnoNew() {
       const path = `${companyId}/${session.id}/originale.${ext}`;
       const { error: uploadErr } = await supabase.storage
         .from("bagno-originals")
-        .upload(path, f, { contentType: f.type, upsert: true });
+        .upload(path, f, { contentType: f.type, upsert: false });
       if (uploadErr) throw new Error("Upload foto fallito");
       setOriginalPath(path);
 
