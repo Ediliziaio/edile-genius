@@ -326,7 +326,7 @@ export default function RenderPersianeNew() {
       setRenderUrl(resultUrl);
 
       await (supabase.from("render_persiane_sessions") as any)
-        .update({ result_image_url: data.result_url, status: "completed" })
+        .update({ result_image_url: resultUrl, status: "completed" })
         .eq("id", sessionId);
 
       toast({ title: "🎉 Render completato!", description: "La tua persiana virtuale è pronta" });
