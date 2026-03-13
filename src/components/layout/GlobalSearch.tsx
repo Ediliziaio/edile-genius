@@ -1,6 +1,12 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bot, BookUser, Megaphone, MessageSquare, Search } from "lucide-react";
+import {
+  Bot, BookUser, Megaphone, MessageSquare, Search,
+  LayoutDashboard, Zap, BarChart3, Activity, CalendarClock,
+  FileSignature, HardHat, ShieldCheck, ClipboardList,
+  Palette, Bath, Home, Layers, Wand2,
+  Coins, Puzzle, Settings, FileText, type LucideIcon,
+} from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -18,8 +24,40 @@ interface SearchResult {
   label: string;
   sublabel?: string;
   href: string;
-  icon: typeof Bot;
+  icon: LucideIcon;
 }
+
+interface StaticPage {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  keywords: string[];
+}
+
+const STATIC_PAGES: StaticPage[] = [
+  { label: "Dashboard", href: "/app", icon: LayoutDashboard, keywords: ["home", "pannello", "principale"] },
+  { label: "Agenti", href: "/app/agents", icon: Bot, keywords: ["bot", "vocale", "assistente"] },
+  { label: "Automazioni AI", href: "/app/automations", icon: Zap, keywords: ["workflow", "automazione"] },
+  { label: "Risultati", href: "/app/analytics", icon: BarChart3, keywords: ["statistiche", "grafici", "report"] },
+  { label: "Contatti", href: "/app/contacts", icon: BookUser, keywords: ["rubrica", "lead", "clienti"] },
+  { label: "Campagne", href: "/app/campaigns", icon: Megaphone, keywords: ["outbound", "chiamate massa"] },
+  { label: "Monitor Chiamate", href: "/app/call-monitor", icon: Activity, keywords: ["live", "attive"] },
+  { label: "Chiamate Programmate", href: "/app/scheduled-calls", icon: CalendarClock, keywords: ["schedulate", "pianificate"] },
+  { label: "Preventivi", href: "/app/preventivi", icon: FileSignature, keywords: ["offerta", "quotazione", "prezzo"] },
+  { label: "Template Preventivo", href: "/app/impostazioni/template-preventivo", icon: FileText, keywords: ["modello preventivo"] },
+  { label: "Cantieri", href: "/app/cantieri", icon: HardHat, keywords: ["cantiere", "lavori", "costruzione"] },
+  { label: "Documenti", href: "/app/documenti", icon: ShieldCheck, keywords: ["scadenze", "sicurezza"] },
+  { label: "Presenze", href: "/app/presenze", icon: ClipboardList, keywords: ["foglio", "operai", "ore"] },
+  { label: "Render Infissi", href: "/app/render", icon: Palette, keywords: ["finestre", "porte", "serramenti", "colore infisso", "ral"] },
+  { label: "Render Bagno", href: "/app/render-bagno", icon: Bath, keywords: ["bathroom", "piastrelle", "sanitari"] },
+  { label: "Render Facciata", href: "/app/render-facciata", icon: Home, keywords: ["esterno", "intonaco", "cappotto", "edificio"] },
+  { label: "Render Persiane", href: "/app/render-persiane", icon: Layers, keywords: ["veneziane", "scuri", "lamelle"] },
+  { label: "Render Pavimento", href: "/app/render-pavimento", icon: HardHat, keywords: ["pavimenti", "parquet", "gres", "piastrella"] },
+  { label: "Render Stanza", href: "/app/render-stanza", icon: Wand2, keywords: ["stanze", "soggiorno", "camera", "cucina", "arredo", "trasformazione"] },
+  { label: "Crediti", href: "/app/credits", icon: Coins, keywords: ["saldo", "ricarica", "minuti"] },
+  { label: "Integrazioni", href: "/app/integrations", icon: Puzzle, keywords: ["webhook", "n8n", "api"] },
+  { label: "Account", href: "/app/settings", icon: Settings, keywords: ["profilo", "impostazioni", "password"] },
+];
 
 export default function GlobalSearch() {
   const [open, setOpen] = useState(false);
@@ -31,7 +69,6 @@ export default function GlobalSearch() {
   const navigate = useNavigate();
   const companyId = useCompanyId();
 
-  // Cmd+K shortcut
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -42,6 +79,17 @@ export default function GlobalSearch() {
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
+
+  // Static pages filtered by query
+  const filteredPages = useMemo(() => {
+    if (query.length < 2) return [];
+    const q = query.toLowerCase();
+    return STATIC_PAGES.filter(
+      (p) =>
+        p.label.toLowerCase().includes(q) ||
+        p.keywords.some((k) => k.includes(q))
+    );
+  }, [query]);
 
   const search = useCallback(async (q: string) => {
     if (!companyId || q.length < 2) {
@@ -77,25 +125,42 @@ export default function GlobalSearch() {
     navigate(href);
   };
 
-  const hasResults = agents.length + contacts.length + campaigns.length + conversations.length > 0;
+  const hasResults = filteredPages.length + agents.length + contacts.length + campaigns.length + conversations.length > 0;
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Cerca agenti, contatti, campagne…" value={query} onValueChange={setQuery} />
+      <CommandInput placeholder="Cerca agenti, contatti, pagine, render…" value={query} onValueChange={setQuery} />
       <CommandList>
         {query.length >= 2 && !hasResults && <CommandEmpty>Nessun risultato trovato.</CommandEmpty>}
         {query.length < 2 && <CommandEmpty>Scrivi almeno 2 caratteri per cercare…</CommandEmpty>}
 
-        {agents.length > 0 && (
-          <CommandGroup heading="Agenti">
-            {agents.map((r) => (
-              <CommandItem key={r.id} onSelect={() => select(r.href)} className="cursor-pointer gap-2">
-                <Bot size={16} className="text-muted-foreground" />
-                <span>{r.label}</span>
-                {r.sublabel && <span className="ml-auto text-xs text-muted-foreground">{r.sublabel}</span>}
-              </CommandItem>
-            ))}
+        {filteredPages.length > 0 && (
+          <CommandGroup heading="Pagine">
+            {filteredPages.map((p) => {
+              const Icon = p.icon;
+              return (
+                <CommandItem key={p.href} onSelect={() => select(p.href)} className="cursor-pointer gap-2">
+                  <Icon size={16} className="text-muted-foreground" />
+                  <span>{p.label}</span>
+                </CommandItem>
+              );
+            })}
           </CommandGroup>
+        )}
+
+        {agents.length > 0 && (
+          <>
+            {filteredPages.length > 0 && <CommandSeparator />}
+            <CommandGroup heading="Agenti">
+              {agents.map((r) => (
+                <CommandItem key={r.id} onSelect={() => select(r.href)} className="cursor-pointer gap-2">
+                  <Bot size={16} className="text-muted-foreground" />
+                  <span>{r.label}</span>
+                  {r.sublabel && <span className="ml-auto text-xs text-muted-foreground">{r.sublabel}</span>}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </>
         )}
 
         {contacts.length > 0 && (
