@@ -12,13 +12,9 @@ export type TipoPersoniana =
   | "veneziana_classica"
   | "veneziana_esterna"
   | "scuro_pieno"
-  | "scuro_dogato"
   | "scuro_cornice"
-  | "persiana_scorrevole"
   | "gelosia"
   | "avvolgibile_esterno"
-  | "frangisole"
-  | "alla_romana"
   | "a_libro"
   | "griglia_sicurezza"
   | "brise_soleil";
