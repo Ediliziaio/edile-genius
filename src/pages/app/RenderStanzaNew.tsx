@@ -2062,6 +2062,17 @@ export default function RenderStanzaNew() {
                 Torna all'analisi
               </Button>
             </div>
+
+            {/* Sticky summary bar */}
+            <InterventiSummaryBar
+              interventi={interventiAttivi}
+              meta={Object.fromEntries(
+                Object.entries(INTERVENTO_META).map(([k, v]) => [k, { label: v.label, icon: v.icon, color: v.color }])
+              )}
+              onRemove={key => toggleIntervento(key as keyof InterventiState, false)}
+              onGenerate={handleStartRender}
+              loading={rendering}
+            />
           </div>
         )}
 
