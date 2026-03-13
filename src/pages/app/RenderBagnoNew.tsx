@@ -666,6 +666,16 @@ export default function RenderBagnoNew() {
         <div className="space-y-6">
           <h1 className="text-2xl font-bold text-foreground">Configura il nuovo bagno</h1>
 
+          {/* Layout planner per demolizione completa */}
+          {tipoIntervento === "demolizione_completa" && (
+            <Card>
+              <CardContent className="py-4 space-y-4">
+                <h3 className="font-semibold text-foreground">🏗️ Layout Nuovo Bagno</h3>
+                <BathroomLayoutPlanner value={configLayout} onChange={setConfigLayout} />
+              </CardContent>
+            </Card>
+          )}
+
           {/* Piastrelle Parete */}
           {sostituzione.piastrelle_parete && (
             <Card>
