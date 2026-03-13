@@ -503,6 +503,9 @@ export function buildFacciataPrompt(
   // Block H — qualità fotorealismo
   blocks.push(buildBlock_H_QualityRules());
 
+  // Quality suffix — checklist fotorealismo finale
+  blocks.push(FACADE_QUALITY_SUFFIX);
+
   // Note aggiuntive utente
   if (config.note_aggiuntive) {
     blocks.push(`[BLOCK Z – ADDITIONAL NOTES]\n${config.note_aggiuntive}`);
