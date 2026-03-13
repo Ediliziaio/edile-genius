@@ -373,6 +373,7 @@ export default function RenderFacciataNew() {
               }`}>
                 <Icon className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">{s.label}</span>
+                <span className="sm:hidden text-[10px]">{s.label}</span>
               </div>
               {i < STEP_LABELS.length - 1 && (
                 <div className={`w-4 sm:w-8 h-px mx-0.5 ${isDone ? "bg-primary" : "bg-border"}`} />
@@ -392,10 +393,10 @@ export default function RenderFacciataNew() {
 
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-border rounded-2xl p-12 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/20 transition-all"
+            className="border-2 border-dashed border-border rounded-2xl p-6 md:p-12 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/20 transition-all"
           >
             {fotoPreview ? (
-              <img src={fotoPreview} alt="anteprima" className="w-full max-h-96 object-contain rounded-xl" />
+              <img src={fotoPreview} alt="anteprima" className="w-full max-h-[50vh] object-contain rounded-xl" />
             ) : (
               <div className="flex flex-col items-center gap-3">
                 <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center">
@@ -411,6 +412,7 @@ export default function RenderFacciataNew() {
             ref={fileInputRef}
             type="file"
             accept="image/jpeg,image/png,image/webp"
+            capture="environment"
             className="hidden"
             onChange={(e) => e.target.files?.[0] && handleFotoSelect(e.target.files[0])}
           />
@@ -449,7 +451,7 @@ export default function RenderFacciataNew() {
           </div>
 
           {fotoPreview && (
-            <img src={fotoPreview} alt="foto" className="w-full rounded-2xl max-h-64 object-cover" />
+            <img src={fotoPreview} alt="foto" className="w-full rounded-2xl max-h-[50vh] object-cover" />
           )}
 
           {analyzing && (

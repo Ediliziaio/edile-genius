@@ -787,9 +787,9 @@ export default function RenderStanzaNew() {
   // ─── RENDER UI ─────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-background to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50/50 via-background to-purple-50/50">
       {/* Header */}
-      <div className="bg-background border-b shadow-sm sticky top-0 z-10">
+      <div className="bg-background border-b shadow-sm sticky top-14 md:top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => navigate('/app/render-stanza')}>
             <ChevronLeft className="w-4 h-4 mr-1" /> Indietro
@@ -846,7 +846,7 @@ export default function RenderStanzaNew() {
                 <Label className="text-sm font-medium text-muted-foreground mb-3 block">
                   Che tipo di stanza è?
                 </Label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
                   {TIPO_STANZA_OPTIONS.map(t => (
                     <button
                       key={t.value}
@@ -876,7 +876,7 @@ export default function RenderStanzaNew() {
                   const file = e.dataTransfer.files[0];
                   if (file) handleFotoSelect(file);
                 }}
-                className="border-2 border-dashed border-violet-300 rounded-2xl p-12 text-center cursor-pointer hover:border-violet-500 hover:bg-violet-50 transition-all"
+                className="border-2 border-dashed border-violet-300 rounded-2xl p-6 md:p-12 text-center cursor-pointer hover:border-violet-500 hover:bg-violet-50 transition-all"
               >
                 <div className="w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Upload className="w-8 h-8 text-violet-600" />
@@ -887,6 +887,7 @@ export default function RenderStanzaNew() {
                   ref={fileInputRef}
                   type="file"
                   accept="image/*"
+                  capture="environment"
                   className="hidden"
                   onChange={e => {
                     const file = e.target.files?.[0];
@@ -897,7 +898,7 @@ export default function RenderStanzaNew() {
             ) : (
               <div className="space-y-4">
                 <div className="relative rounded-2xl overflow-hidden shadow-lg">
-                  <img src={fotoPreview} alt="Foto stanza" className="w-full max-h-80 object-cover" />
+                  <img src={fotoPreview} alt="Foto stanza" className="w-full max-h-[50vh] object-cover" />
                   <button
                     onClick={() => {
                       if (fotoPreview) URL.revokeObjectURL(fotoPreview);

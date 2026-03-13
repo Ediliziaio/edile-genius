@@ -29,51 +29,51 @@ export default function RenderHub() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border p-8 md:p-12">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border p-5 md:p-12">
+        {/* Credits widget — inline on mobile, absolute on desktop */}
+        {credits && (
+          <div className="md:absolute md:top-6 md:right-6 bg-card border rounded-xl p-3 md:p-4 shadow-sm mb-4 md:mb-0 flex md:block items-center gap-3">
+            <div className="flex items-center gap-2 md:mb-1">
+              <Coins className="h-4 w-4 text-primary" />
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Crediti Render</span>
+            </div>
+            <p className="text-xl md:text-2xl font-bold text-foreground">{credits.balance}</p>
+            <p className="text-xs text-muted-foreground">{credits.total_used} utilizzati</p>
+          </div>
+        )}
+
         <div className="max-w-2xl">
-          <Badge variant="secondary" className="mb-4">
+          <Badge variant="secondary" className="mb-3 md:mb-4">
             <Sparkles className="h-3 w-3 mr-1" /> AI Render
           </Badge>
-          <h1 className="text-3xl font-bold text-foreground mb-3">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2 md:mb-3">
             Visualizzatore Infissi AI
           </h1>
-          <p className="text-muted-foreground text-lg mb-6">
+          <p className="text-muted-foreground text-sm md:text-lg mb-4 md:mb-6">
             Mostra ai tuoi clienti come appariranno i nuovi infissi sulla loro casa. 
             Carica una foto, configura il serramento e ottieni un render fotorealistico in pochi secondi.
           </p>
-          <div className="flex gap-3">
-            <Button asChild size="lg">
+          <div className="flex gap-2 md:gap-3">
+            <Button asChild size="lg" className="flex-1 md:flex-none">
               <Link to="/app/render/new">
                 <Plus className="h-4 w-4 mr-2" /> Nuovo Render
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg">
+            <Button asChild variant="outline" size="lg" className="flex-1 md:flex-none">
               <Link to="/app/render/gallery">
                 <Image className="h-4 w-4 mr-2" /> Galleria
               </Link>
             </Button>
           </div>
         </div>
-
-        {/* Credits widget */}
-        {credits && (
-          <div className="absolute top-6 right-6 bg-card border rounded-xl p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-1">
-              <Coins className="h-4 w-4 text-primary" />
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Crediti Render</span>
-            </div>
-            <p className="text-2xl font-bold text-foreground">{credits.balance}</p>
-            <p className="text-xs text-muted-foreground">{credits.total_used} utilizzati</p>
-          </div>
-        )}
       </div>
 
       {/* How it works */}
       <div>
         <h2 className="text-xl font-semibold text-foreground mb-4">Come Funziona</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           {steps.map((step, i) => (
             <Card key={i} className="relative">
               <CardContent className="p-5">

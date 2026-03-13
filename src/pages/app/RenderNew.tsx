@@ -503,14 +503,14 @@ export default function RenderNew() {
         <div className="space-y-4">
           {!preview ? (
             <div
-              className="border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer hover:border-primary/50 transition-colors"
+              className="border-2 border-dashed rounded-2xl p-6 md:p-12 text-center cursor-pointer hover:border-primary/50 transition-colors"
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDrop}
               onClick={() => document.getElementById("photo-input")?.click()}
             >
-              <Upload className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
+              <Upload className="h-10 w-10 md:h-12 md:w-12 text-muted-foreground/40 mx-auto mb-3 md:mb-4" />
               <p className="font-medium text-foreground mb-1">Trascina la foto qui</p>
-              <p className="text-sm text-muted-foreground mb-4">oppure clicca per selezionare</p>
+              <p className="text-sm text-muted-foreground mb-3 md:mb-4">oppure clicca per selezionare</p>
               <div className="flex gap-2 justify-center">
                 <Badge variant="outline">JPG</Badge>
                 <Badge variant="outline">PNG</Badge>
@@ -521,6 +521,7 @@ export default function RenderNew() {
                 id="photo-input"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
+                capture="environment"
                 className="hidden"
                 onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
               />
@@ -528,7 +529,7 @@ export default function RenderNew() {
           ) : (
             <div className="space-y-4">
               <div className="rounded-xl overflow-hidden border">
-                <img src={preview} alt="Preview" className="w-full object-cover max-h-[400px]" />
+                <img src={preview} alt="Preview" className="w-full object-cover max-h-[50vh]" />
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1" onClick={() => { setFile(null); setPreview(""); }}>

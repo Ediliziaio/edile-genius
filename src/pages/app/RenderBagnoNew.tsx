@@ -465,7 +465,7 @@ export default function RenderBagnoNew() {
   // ══════════════════════════════════════════════════════════════
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-20">
+    <div className="space-y-6 max-w-2xl mx-auto pb-20">
       {/* Header */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <button onClick={() => navigate("/app/render-bagno")} className="hover:text-foreground transition-colors">
@@ -510,7 +510,7 @@ export default function RenderBagnoNew() {
               onDragOver={e => e.preventDefault()}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-border rounded-2xl p-12 text-center cursor-pointer hover:border-primary/50 hover:bg-accent/30 transition-all"
+              className="border-2 border-dashed border-border rounded-2xl p-6 md:p-12 text-center cursor-pointer hover:border-primary/50 hover:bg-accent/30 transition-all"
             >
               <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-40" />
               <p className="text-lg font-medium text-foreground">Carica foto bagno</p>
@@ -520,7 +520,7 @@ export default function RenderBagnoNew() {
           ) : (
             <div className="space-y-4">
               <div className="relative rounded-2xl overflow-hidden">
-                <img src={fotoPreview} alt="Foto bagno" className="w-full max-h-[400px] object-contain bg-muted" />
+                <img src={fotoPreview} alt="Foto bagno" className="w-full max-h-[50vh] object-contain bg-muted" />
                 <button
                   onClick={() => { setFile(null); setFotoPreview(""); setAnalisi(null); }}
                   className="absolute top-3 right-3 bg-black/60 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/80 text-sm"
@@ -575,18 +575,21 @@ export default function RenderBagnoNew() {
             ref={fileInputRef}
             type="file"
             accept="image/jpeg,image/png,image/webp,image/heic"
+            capture="environment"
             className="hidden"
             onChange={e => e.target.files?.[0] && handleFotoSelect(e.target.files[0])}
           />
 
-          <Button
-            disabled={!analisi}
-            onClick={() => setStep(1)}
-            className="w-full py-3 rounded-xl"
-            size="lg"
-          >
-            Avanti: Tipo Intervento <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
+          <div className="sticky-bottom-cta">
+            <Button
+              disabled={!analisi}
+              onClick={() => setStep(1)}
+              className="w-full py-3 rounded-xl"
+              size="lg"
+            >
+              Avanti: Tipo Intervento <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
         </div>
       )}
 

@@ -578,18 +578,18 @@ export default function AppDashboard() {
       {/* ═══ AI BRIEFING with clickable actions ═══ */}
       {briefingExpanded && (
         <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 via-card to-accent/30 p-5 relative overflow-hidden">
-          <div className="absolute top-3 right-3 flex items-center gap-1">
+          <div className="absolute top-2 right-2 flex items-center gap-0.5">
             <button
               onClick={() => refetchBriefing()}
               disabled={briefingLoading}
-              className="p-1.5 rounded-md hover:bg-accent transition-colors"
+              className="p-2.5 rounded-lg hover:bg-accent transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
               title="Aggiorna briefing"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-muted-foreground ${briefingLoading ? "animate-spin" : ""}`} />
+              <RefreshCw className={`w-4 h-4 text-muted-foreground ${briefingLoading ? "animate-spin" : ""}`} />
             </button>
             <button
               onClick={() => setBriefingExpanded(false)}
-              className="p-1.5 rounded-md hover:bg-accent transition-colors text-muted-foreground text-xs"
+              className="p-2.5 rounded-lg hover:bg-accent transition-colors text-muted-foreground min-w-[44px] min-h-[44px] flex items-center justify-center"
               title="Nascondi"
             >
               ✕
@@ -830,8 +830,8 @@ export default function AppDashboard() {
                     : "border-border bg-accent/50 hover:bg-accent"
                 }`}
               >
-                <div className="w-9 h-9 rounded-lg bg-card flex items-center justify-center shrink-0 border border-border">
-                  <action.icon className="w-4 h-4 text-muted-foreground" />
+                <div className="w-10 h-10 md:w-9 md:h-9 rounded-lg bg-card flex items-center justify-center shrink-0 border border-border">
+                  <action.icon className="w-4.5 h-4.5 md:w-4 md:h-4 text-muted-foreground" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-foreground">{action.label}</p>
