@@ -898,7 +898,7 @@ export default function RenderStanzaNew() {
             ) : (
               <div className="space-y-4">
                 <div className="relative rounded-2xl overflow-hidden shadow-lg">
-                  <img src={fotoPreview} alt="Foto stanza" className="w-full max-h-80 object-cover" />
+                  <img src={fotoPreview} alt="Foto stanza" className="w-full max-h-[50vh] object-cover" />
                   <button
                     onClick={() => {
                       if (fotoPreview) URL.revokeObjectURL(fotoPreview);

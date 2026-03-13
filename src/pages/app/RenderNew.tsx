@@ -529,7 +529,7 @@ export default function RenderNew() {
           ) : (
             <div className="space-y-4">
               <div className="rounded-xl overflow-hidden border">
-                <img src={preview} alt="Preview" className="w-full object-cover max-h-[400px]" />
+                <img src={preview} alt="Preview" className="w-full object-cover max-h-[50vh]" />
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1" onClick={() => { setFile(null); setPreview(""); }}>

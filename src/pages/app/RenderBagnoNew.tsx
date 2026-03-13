@@ -580,14 +580,16 @@ export default function RenderBagnoNew() {
             onChange={e => e.target.files?.[0] && handleFotoSelect(e.target.files[0])}
           />
 
-          <Button
-            disabled={!analisi}
-            onClick={() => setStep(1)}
-            className="w-full py-3 rounded-xl"
-            size="lg"
-          >
-            Avanti: Tipo Intervento <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
+          <div className="sticky-bottom-cta">
+            <Button
+              disabled={!analisi}
+              onClick={() => setStep(1)}
+              className="w-full py-3 rounded-xl"
+              size="lg"
+            >
+              Avanti: Tipo Intervento <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
         </div>
       )}
 
