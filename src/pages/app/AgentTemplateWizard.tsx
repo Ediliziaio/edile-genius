@@ -189,13 +189,22 @@ export default function AgentTemplateWizard() {
   const agentType = getAgentType(slug || "");
   const typeBadge = getTypeBadge(agentType);
 
+  const RENDER_ROUTES: Record<string, string> = {
+    "render-infissi": "/app/render/new",
+    "render-bagno": "/app/render-bagno/new",
+    "render-facciate": "/app/render-facciata/new",
+    "render-persiane": "/app/render-persiane/new",
+    "render-pavimento": "/app/render-pavimento/new",
+    "render-stanza": "/app/render-stanza/new",
+  };
+
   useEffect(() => {
     if (agentType === "render") {
-      navigate("/app/render/new", { replace: true });
+      navigate(RENDER_ROUTES[slug || ""] || "/app/render/new", { replace: true });
     } else if (agentType === "whatsapp") {
       navigate("/app/whatsapp", { replace: true });
     }
-  }, [agentType, navigate]);
+  }, [agentType, navigate, slug]);
 
   if (agentType === "render" || agentType === "whatsapp") {
     return (
