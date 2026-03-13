@@ -5,8 +5,10 @@ import { useCompanyId } from "@/hooks/useCompanyId";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Download, Trash2, Image as ImageIcon, ChevronLeft } from "lucide-react";
+import { Plus, Search, Download, Trash2, Image as ImageIcon, ChevronLeft, Share2 } from "lucide-react";
+import { ShareModal, type ShareableItem } from "@/components/share/ShareModal";
 
 export default function RenderGallery() {
   const companyId = useCompanyId();
@@ -14,6 +16,9 @@ export default function RenderGallery() {
   const [items, setItems] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selecting, setSelecting] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const fetchGallery = async () => {
     if (!companyId) return;
@@ -39,6 +44,34 @@ export default function RenderGallery() {
     fetchGallery();
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const shareableItems: ShareableItem[] = items
+    .filter(i => selectedIds.has(i.id))
+    .map(i => ({
+      table: "render_gallery",
+      id: i.id,
+      title: i.title,
+      thumbnailUrl: i.render_url,
+      modulo: "infissi",
+    }));
+
+  const handleOpenShare = () => {
+    if (selecting && selectedIds.size > 0) {
+      setShowShareModal(true);
+    } else {
+      // Select all and open
+      setSelectedIds(new Set(filtered.map(i => i.id)));
+      setShowShareModal(true);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -51,9 +84,28 @@ export default function RenderGallery() {
             <p className="text-sm text-muted-foreground">{items.length} render salvati</p>
           </div>
         </div>
-        <Button asChild>
-          <Link to="/app/render/new"><Plus className="h-4 w-4 mr-2" /> Nuovo</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          {selecting && selectedIds.size > 0 && (
+            <Button variant="outline" size="sm" onClick={handleOpenShare} className="gap-1.5">
+              <Share2 className="h-4 w-4" /> Condividi ({selectedIds.size})
+            </Button>
+          )}
+          <Button
+            variant={selecting ? "secondary" : "outline"}
+            size="sm"
+            onClick={() => { setSelecting(!selecting); setSelectedIds(new Set()); }}
+          >
+            {selecting ? "Annulla selezione" : "Seleziona"}
+          </Button>
+          {!selecting && items.length > 0 && (
+            <Button variant="outline" size="sm" onClick={handleOpenShare} className="gap-1.5">
+              <Share2 className="h-4 w-4" /> Condividi
+            </Button>
+          )}
+          <Button asChild>
+            <Link to="/app/render/new"><Plus className="h-4 w-4 mr-2" /> Nuovo</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="relative max-w-sm">
@@ -81,12 +133,22 @@ export default function RenderGallery() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filtered.map((item) => (
-          <Card key={item.id} className="overflow-hidden group">
-            <Link to={`/app/render/gallery/${item.id}`}>
-              <div className="aspect-video relative overflow-hidden">
-                <img src={item.render_url} alt={item.title || "Render"} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-              </div>
-            </Link>
+          <Card key={item.id} className={`overflow-hidden group ${selecting && selectedIds.has(item.id) ? 'ring-2 ring-primary' : ''}`}>
+            <div className="relative">
+              {selecting && (
+                <div className="absolute top-2 left-2 z-10">
+                  <Checkbox
+                    checked={selectedIds.has(item.id)}
+                    onCheckedChange={() => toggleSelect(item.id)}
+                  />
+                </div>
+              )}
+              <Link to={selecting ? '#' : `/app/render/gallery/${item.id}`} onClick={e => { if (selecting) { e.preventDefault(); toggleSelect(item.id); } }}>
+                <div className="aspect-video relative overflow-hidden">
+                  <img src={item.render_url} alt={item.title || "Render"} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                </div>
+              </Link>
+            </div>
             <CardContent className="p-3 flex items-center justify-between">
               <div className="min-w-0">
                 <p className="font-medium text-sm text-foreground truncate">{item.title || "Render senza titolo"}</p>
@@ -106,6 +168,20 @@ export default function RenderGallery() {
           </Card>
         ))}
       </div>
+
+      {showShareModal && companyId && (
+        <ShareModal
+          companyId={companyId}
+          items={shareableItems.length > 0 ? shareableItems : items.map(i => ({
+            table: "render_gallery",
+            id: i.id,
+            title: i.title,
+            thumbnailUrl: i.render_url,
+            modulo: "infissi",
+          }))}
+          onClose={() => setShowShareModal(false)}
+        />
+      )}
     </div>
   );
 }
