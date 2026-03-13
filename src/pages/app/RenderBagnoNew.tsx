@@ -334,7 +334,9 @@ export default function RenderBagnoNew() {
         });
       if (analyzeErr) throw new Error("Analisi fallita");
 
-      const result = analysisData?.analysis || analysisData;
+      // Normalize envelope: new format { ok, data: { analysis } } vs legacy { analysis }
+      const analysisPayload = analysisData?.data ?? analysisData;
+      const result = analysisPayload?.analysis ?? analysisPayload;
       setAnalisi(result as AnalysiBagno);
 
       // 5. Update session
