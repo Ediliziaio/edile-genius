@@ -226,7 +226,7 @@ Taps finish: ${a.rubinetteria_finitura || "unknown"}
 Lighting: ${a.illuminazione_tipo || "unknown"}`;
 
   // Block C — Wall tiles configuration
-  const piastrelle = config.piastrelle || {};
+  const piastrelle = config.piastrelle_parete || config.piastrelle || {};
   if (piastrelle.effetto || piastrelle.formato || piastrelle.posa) {
     blocks.C = `[BLOCK C – WALL TILES SPECIFICATION]
 Effect/material: ${piastrelle.effetto_prompt || piastrelle.effetto || "keep existing"}
