@@ -36,7 +36,7 @@ export function StepSezioni({
   const handleGeneraSezione = async (sez: PreventivoSezione) => {
     if (!preventivoId) return;
     await generaSezione(
-      { id: sez.id, tipo: sez.tipo, titolo: sez.titolo, config: sez.config as Record<string, unknown> },
+      { id: sez.id, tipo: sez.tipo, titolo: sez.titolo, config: sez.config as unknown as Record<string, unknown> },
       companyId
     );
   };
