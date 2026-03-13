@@ -736,6 +736,8 @@ Do not add watermarks, text, or any overlay.
 Output format: photorealistic JPEG/PNG, same aspect ratio as input.
 Negative prompt — avoid: ${BATHROOM_NEGATIVE_PROMPT}`);
 
+  blocks.push(QUALITY_SUFFIX);
+
   return {
     userPrompt: blocks.join("\n\n"),
     systemPrompt: BATHROOM_SYSTEM_PROMPT,
