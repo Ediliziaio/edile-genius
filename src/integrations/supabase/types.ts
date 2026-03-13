@@ -4184,6 +4184,155 @@ export type Database = {
           },
         ]
       }
+      render_stanza_gallery: {
+        Row: {
+          config_snapshot: Json | null
+          created_at: string | null
+          id: string
+          intensita: string | null
+          interventi: string[] | null
+          is_favorite: boolean | null
+          result_image_url: string
+          session_id: string | null
+          stile_target: string | null
+          tipo_stanza: string | null
+          user_id: string
+        }
+        Insert: {
+          config_snapshot?: Json | null
+          created_at?: string | null
+          id?: string
+          intensita?: string | null
+          interventi?: string[] | null
+          is_favorite?: boolean | null
+          result_image_url: string
+          session_id?: string | null
+          stile_target?: string | null
+          tipo_stanza?: string | null
+          user_id: string
+        }
+        Update: {
+          config_snapshot?: Json | null
+          created_at?: string | null
+          id?: string
+          intensita?: string | null
+          interventi?: string[] | null
+          is_favorite?: boolean | null
+          result_image_url?: string
+          session_id?: string | null
+          stile_target?: string | null
+          tipo_stanza?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_stanza_gallery_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "render_stanza_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      render_stanza_presets: {
+        Row: {
+          categoria: string
+          codice: string
+          hex: string | null
+          id: string
+          nome: string
+          ordine: number | null
+          valore_extra: string | null
+        }
+        Insert: {
+          categoria: string
+          codice: string
+          hex?: string | null
+          id?: string
+          nome: string
+          ordine?: number | null
+          valore_extra?: string | null
+        }
+        Update: {
+          categoria?: string
+          codice?: string
+          hex?: string | null
+          id?: string
+          nome?: string
+          ordine?: number | null
+          valore_extra?: string | null
+        }
+        Relationships: []
+      }
+      render_stanza_sessions: {
+        Row: {
+          analisi_json: Json | null
+          config_json: Json | null
+          created_at: string | null
+          id: string
+          intensita: string | null
+          interventi_selezionati: string[] | null
+          note_aggiuntive: string | null
+          original_image_height: number | null
+          original_image_path: string | null
+          original_image_width: number | null
+          prompt_system: string | null
+          prompt_user: string | null
+          prompt_version: string | null
+          result_image_path: string | null
+          result_image_url: string | null
+          status: string
+          stile_target: string | null
+          tipo_stanza: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          analisi_json?: Json | null
+          config_json?: Json | null
+          created_at?: string | null
+          id?: string
+          intensita?: string | null
+          interventi_selezionati?: string[] | null
+          note_aggiuntive?: string | null
+          original_image_height?: number | null
+          original_image_path?: string | null
+          original_image_width?: number | null
+          prompt_system?: string | null
+          prompt_user?: string | null
+          prompt_version?: string | null
+          result_image_path?: string | null
+          result_image_url?: string | null
+          status?: string
+          stile_target?: string | null
+          tipo_stanza?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          analisi_json?: Json | null
+          config_json?: Json | null
+          created_at?: string | null
+          id?: string
+          intensita?: string | null
+          interventi_selezionati?: string[] | null
+          note_aggiuntive?: string | null
+          original_image_height?: number | null
+          original_image_path?: string | null
+          original_image_width?: number | null
+          prompt_system?: string | null
+          prompt_user?: string | null
+          prompt_version?: string | null
+          result_image_path?: string | null
+          result_image_url?: string | null
+          status?: string
+          stile_target?: string | null
+          tipo_stanza?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       sal_milestones: {
         Row: {
           alert_ritardo_inviato: boolean | null
