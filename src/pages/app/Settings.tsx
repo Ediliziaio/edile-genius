@@ -263,34 +263,7 @@ export default function Settings() {
     finally { setCrmSyncing(null); }
   };
 
-  // Password change
-  function PasswordChangeForm() {
-    const [newPassword, setNewPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [saving, setSaving] = useState(false);
-    const [pwError, setPwError] = useState("");
-    const handleChangePassword = async () => {
-      setPwError("");
-      if (newPassword.length < 8) { setPwError("Minimo 8 caratteri"); return; }
-      if (newPassword !== confirmPassword) { setPwError("Le password non corrispondono"); return; }
-      setSaving(true);
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      setSaving(false);
-      if (error) { toast({ title: "Errore", description: error.message, variant: "destructive" }); }
-      else { toast({ title: "Password aggiornata" }); setNewPassword(""); setConfirmPassword(""); }
-    };
-    return (
-      <div className="space-y-3">
-        <h4 className="text-sm font-semibold text-foreground">Cambia password</h4>
-        <div className="space-y-2"><Label className="text-muted-foreground">Nuova password</Label><Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Minimo 8 caratteri" autoComplete="new-password" /></div>
-        <div className="space-y-2"><Label className="text-muted-foreground">Conferma password</Label><Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Ripeti la password" autoComplete="new-password" /></div>
-        {pwError && <p className="text-sm text-destructive">{pwError}</p>}
-        <Button onClick={handleChangePassword} disabled={saving || !newPassword} variant="outline">
-          {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}Aggiorna password
-        </Button>
-      </div>
-    );
-  }
+  // (Password change moved to TabProfilo)
 
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
