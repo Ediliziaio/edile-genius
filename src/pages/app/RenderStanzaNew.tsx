@@ -507,13 +507,11 @@ export default function RenderStanzaNew() {
     setAnalizzando(true);
 
     try {
-      // 1. Crea sessione DB
-      // 1. Crea sessione DB con company_id per isolamento multi-tenant
+      // 1. Crea sessione DB — render_stanza_sessions has NO company_id column
       const { data: session, error: sessErr } = await supabase
         .from('render_stanza_sessions' as any)
         .insert({
           user_id: user.id,
-          company_id: companyId,
           tipo_stanza: config.tipo_stanza,
           status: 'analyzing',
         })
