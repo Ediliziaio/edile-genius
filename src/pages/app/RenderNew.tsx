@@ -229,15 +229,15 @@ export default function RenderNew() {
       const { data: session, error: sessErr } = await supabase.from("render_sessions").insert({
         company_id: companyId,
         created_by: user?.id,
-        original_photo_url: urlData.publicUrl,
+        original_photo_url: urlData.signedUrl,
         status: "configuring",
       }).select("id").single();
       if (sessErr) throw sessErr;
       setSessionId(session.id);
       setStep(1);
 
-      setUploadedPhotoUrl(urlData.publicUrl);
-      runPhotoAnalysis(urlData.publicUrl);
+      setUploadedPhotoUrl(urlData.signedUrl);
+      runPhotoAnalysis(urlData.signedUrl);
     } catch (err: any) {
       toast({ title: "Errore upload", description: err.message, variant: "destructive" });
     } finally {

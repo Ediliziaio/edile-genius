@@ -43,9 +43,7 @@ const STEPS = [
   { id: 5, label: 'Risultato', icon: CheckCircle2 },
 ];
 
-type TipoStanza =
-  | 'soggiorno' | 'cucina' | 'camera_da_letto' | 'bagno'
-  | 'studio' | 'sala_da_pranzo' | 'corridoio' | 'altro';
+// TipoStanza imported from stanzaPromptBuilder above
 
 const TIPO_STANZA_OPTIONS: { value: TipoStanza; label: string; emoji: string }[] = [
   { value: 'soggiorno',      label: 'Soggiorno',       emoji: '🛋️' },
