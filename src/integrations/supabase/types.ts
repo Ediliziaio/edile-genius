@@ -2690,10 +2690,12 @@ export type Database = {
           email_aperta_at: string | null
           firma_cliente_url: string | null
           firma_testo: string | null
+          foto_analisi_urls: string[] | null
           foto_copertina_url: string | null
           foto_sopralluogo_urls: string[] | null
           id: string
           imponibile: number | null
+          indirizzo_cantiere: string | null
           intro: string | null
           intro_testo: string | null
           inviato_at: string | null
@@ -2707,19 +2709,24 @@ export type Database = {
           luogo_lavori: string | null
           note: string | null
           note_finali: string | null
+          note_interne: string | null
           numero_preventivo: string
           oggetto: string | null
+          oggetto_lavori: string | null
           parent_id: string | null
           pdf_generato_at: string | null
           pdf_url: string | null
           pdf_versione: number | null
+          render_ids: string[] | null
           rifiutato_at: string | null
           rifiuto_motivo: string | null
           sconto_globale: number | null
           sconto_globale_importo: number | null
           sconto_globale_percentuale: number | null
+          sezioni_json: Json | null
           stato: string | null
           subtotale: number | null
+          superfici_stimate: Json | null
           tempi_esecuzione: string | null
           template_id: string | null
           titolo: string | null
@@ -2756,10 +2763,12 @@ export type Database = {
           email_aperta_at?: string | null
           firma_cliente_url?: string | null
           firma_testo?: string | null
+          foto_analisi_urls?: string[] | null
           foto_copertina_url?: string | null
           foto_sopralluogo_urls?: string[] | null
           id?: string
           imponibile?: number | null
+          indirizzo_cantiere?: string | null
           intro?: string | null
           intro_testo?: string | null
           inviato_at?: string | null
@@ -2773,19 +2782,24 @@ export type Database = {
           luogo_lavori?: string | null
           note?: string | null
           note_finali?: string | null
+          note_interne?: string | null
           numero_preventivo: string
           oggetto?: string | null
+          oggetto_lavori?: string | null
           parent_id?: string | null
           pdf_generato_at?: string | null
           pdf_url?: string | null
           pdf_versione?: number | null
+          render_ids?: string[] | null
           rifiutato_at?: string | null
           rifiuto_motivo?: string | null
           sconto_globale?: number | null
           sconto_globale_importo?: number | null
           sconto_globale_percentuale?: number | null
+          sezioni_json?: Json | null
           stato?: string | null
           subtotale?: number | null
+          superfici_stimate?: Json | null
           tempi_esecuzione?: string | null
           template_id?: string | null
           titolo?: string | null
@@ -2822,10 +2836,12 @@ export type Database = {
           email_aperta_at?: string | null
           firma_cliente_url?: string | null
           firma_testo?: string | null
+          foto_analisi_urls?: string[] | null
           foto_copertina_url?: string | null
           foto_sopralluogo_urls?: string[] | null
           id?: string
           imponibile?: number | null
+          indirizzo_cantiere?: string | null
           intro?: string | null
           intro_testo?: string | null
           inviato_at?: string | null
@@ -2839,19 +2855,24 @@ export type Database = {
           luogo_lavori?: string | null
           note?: string | null
           note_finali?: string | null
+          note_interne?: string | null
           numero_preventivo?: string
           oggetto?: string | null
+          oggetto_lavori?: string | null
           parent_id?: string | null
           pdf_generato_at?: string | null
           pdf_url?: string | null
           pdf_versione?: number | null
+          render_ids?: string[] | null
           rifiutato_at?: string | null
           rifiuto_motivo?: string | null
           sconto_globale?: number | null
           sconto_globale_importo?: number | null
           sconto_globale_percentuale?: number | null
+          sezioni_json?: Json | null
           stato?: string | null
           subtotale?: number | null
+          superfici_stimate?: Json | null
           tempi_esecuzione?: string | null
           template_id?: string | null
           titolo?: string | null
@@ -2896,6 +2917,131 @@ export type Database = {
           },
         ]
       }
+      preventivo_kb_chunks: {
+        Row: {
+          categoria: string | null
+          chunk_index: number | null
+          company_id: string
+          created_at: string | null
+          documento_id: string
+          embedding: string | null
+          id: string
+          pagina: number | null
+          tags: string[] | null
+          testo: string
+          testo_preview: string | null
+        }
+        Insert: {
+          categoria?: string | null
+          chunk_index?: number | null
+          company_id: string
+          created_at?: string | null
+          documento_id: string
+          embedding?: string | null
+          id?: string
+          pagina?: number | null
+          tags?: string[] | null
+          testo: string
+          testo_preview?: string | null
+        }
+        Update: {
+          categoria?: string | null
+          chunk_index?: number | null
+          company_id?: string
+          created_at?: string | null
+          documento_id?: string
+          embedding?: string | null
+          id?: string
+          pagina?: number | null
+          tags?: string[] | null
+          testo?: string
+          testo_preview?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preventivo_kb_chunks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "preventivo_kb_chunks_documento_id_fkey"
+            columns: ["documento_id"]
+            isOneToOne: false
+            referencedRelation: "preventivo_kb_documenti"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      preventivo_kb_documenti: {
+        Row: {
+          categoria: string
+          chunks_count: number | null
+          company_id: string
+          created_at: string | null
+          descrizione: string | null
+          errore_msg: string | null
+          file_size_kb: number | null
+          file_type: string
+          file_url: string
+          id: string
+          indicizzato_at: string | null
+          nome: string
+          pagine: number | null
+          stato: string | null
+          tags: string[] | null
+          updated_at: string | null
+          visibile: boolean | null
+        }
+        Insert: {
+          categoria?: string
+          chunks_count?: number | null
+          company_id: string
+          created_at?: string | null
+          descrizione?: string | null
+          errore_msg?: string | null
+          file_size_kb?: number | null
+          file_type: string
+          file_url: string
+          id?: string
+          indicizzato_at?: string | null
+          nome: string
+          pagine?: number | null
+          stato?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          visibile?: boolean | null
+        }
+        Update: {
+          categoria?: string
+          chunks_count?: number | null
+          company_id?: string
+          created_at?: string | null
+          descrizione?: string | null
+          errore_msg?: string | null
+          file_size_kb?: number | null
+          file_type?: string
+          file_url?: string
+          id?: string
+          indicizzato_at?: string | null
+          nome?: string
+          pagine?: number | null
+          stato?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          visibile?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preventivo_kb_documenti_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       preventivo_templates: {
         Row: {
           attivo: boolean | null
@@ -2913,11 +3059,13 @@ export type Database = {
           company_id: string
           condizioni_default: string | null
           created_at: string | null
+          descrizione: string | null
           firma_testo: string | null
           font: string | null
           id: string
           intestazione_azienda: string | null
           intro_default: string | null
+          is_default: boolean | null
           iva_default: number | null
           iva_inclusa_default: boolean | null
           logo_url: string | null
@@ -2925,6 +3073,7 @@ export type Database = {
           note_finali: string | null
           oggetto_default: string | null
           piede_pagina: string | null
+          sezioni: Json | null
           show_condizioni: boolean | null
           show_firma: boolean | null
           show_foto_copertina: boolean | null
@@ -2950,11 +3099,13 @@ export type Database = {
           company_id: string
           condizioni_default?: string | null
           created_at?: string | null
+          descrizione?: string | null
           firma_testo?: string | null
           font?: string | null
           id?: string
           intestazione_azienda?: string | null
           intro_default?: string | null
+          is_default?: boolean | null
           iva_default?: number | null
           iva_inclusa_default?: boolean | null
           logo_url?: string | null
@@ -2962,6 +3113,7 @@ export type Database = {
           note_finali?: string | null
           oggetto_default?: string | null
           piede_pagina?: string | null
+          sezioni?: Json | null
           show_condizioni?: boolean | null
           show_firma?: boolean | null
           show_foto_copertina?: boolean | null
@@ -2987,11 +3139,13 @@ export type Database = {
           company_id?: string
           condizioni_default?: string | null
           created_at?: string | null
+          descrizione?: string | null
           firma_testo?: string | null
           font?: string | null
           id?: string
           intestazione_azienda?: string | null
           intro_default?: string | null
+          is_default?: boolean | null
           iva_default?: number | null
           iva_inclusa_default?: boolean | null
           logo_url?: string | null
@@ -2999,6 +3153,7 @@ export type Database = {
           note_finali?: string | null
           oggetto_default?: string | null
           piede_pagina?: string | null
+          sezioni?: Json | null
           show_condizioni?: boolean | null
           show_firma?: boolean | null
           show_foto_copertina?: boolean | null
@@ -5627,6 +5782,23 @@ export type Database = {
         Returns: Json
       }
       reset_agents_calls_month: { Args: never; Returns: undefined }
+      search_kb_chunks: {
+        Args: {
+          p_categoria?: string
+          p_company_id: string
+          p_embedding: string
+          p_threshold?: number
+          p_top_k?: number
+        }
+        Returns: {
+          categoria: string
+          documento_id: string
+          id: string
+          pagina: number
+          similarity: number
+          testo: string
+        }[]
+      }
       topup_credits: {
         Args: { _amount_eur: number; _company_id: string }
         Returns: number
