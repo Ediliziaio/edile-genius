@@ -39,8 +39,10 @@ const companyNav: NavSection[] = [
     { label: "Chiamate Programmate", icon: CalendarClock, href: "/app/scheduled-calls" },
   ]},
   { header: "VENDITE AVANZATE", collapsible: true, defaultOpen: false, visibilityKey: "preventivi", items: [
-    { label: "Preventivi", icon: FileSignature, href: "/app/preventivi" },
-    { label: "Template Preventivo", icon: FileText, href: "/app/impostazioni/template-preventivo" },
+    { label: "Hub Preventivi", icon: FileSignature, href: "/app/preventivo-hub" },
+    { label: "Tutti i Preventivi", icon: FileText, href: "/app/preventivi" },
+    { label: "Knowledge Base", icon: BookOpen, href: "/app/preventivo-kb" },
+    { label: "Template", icon: Layers, href: "/app/preventivi/templates" },
   ]},
   { header: "OPERATIVITÀ", collapsible: true, defaultOpen: false, visibilityKey: "cantieri", items: [
     { label: "Cantieri", icon: HardHat, href: "/app/cantieri" },
