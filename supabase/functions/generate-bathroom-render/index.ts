@@ -454,7 +454,9 @@ FLOOR RENDERING RULES:
 function buildBlock_E(cfg: Record<string, any>, analisi: Record<string, any>): string {
   const d = cfg.doccia || {};
 
-  if (d.azione === "mantieni" || !cfg.sostituzione?.doccia) return `[BLOCK E – SHOWER — KEPT AS ORIGINAL]`;
+  // Show as original only if no toggle AND no user config
+  const hasDocConfig = d.tipo || d.box;
+  if (d.azione === "mantieni" && !cfg.sostituzione?.doccia && !hasDocConfig) return `[BLOCK E – SHOWER — KEPT AS ORIGINAL]`;
   if (d.azione === "rimuovi")
     return `[BLOCK E – SHOWER — REMOVE: Fill the shower area with wall tiles matching BLOCK C. Remove all shower hardware, screen, tray.]`;
 
