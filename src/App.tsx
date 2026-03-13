@@ -21,6 +21,7 @@ import Shell from "./components/layout/Shell";
 // Auth pages (lazy)
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const PublicShareViewer = lazy(() => import("./pages/public/PublicShareViewer"));
 
 // Lazy-loaded marketing pages
 const Solutions = lazy(() => import("./pages/Solutions"));
