@@ -198,9 +198,10 @@ export default function RenderPersianeNew() {
       });
 
       if (error) throw error;
-      if (!data?.analisi) throw new Error("Analisi non ricevuta");
+      const payload = (data?.data ?? data) as Record<string, unknown>;
+      if (!payload?.analisi) throw new Error("Analisi non ricevuta");
 
-      const analisiData = data.analisi as AnalisiPersiana;
+      const analisiData = payload.analisi as AnalisiPersiana;
       setAnalisi(analisiData);
 
       // Pre-populate from analysis
