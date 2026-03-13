@@ -213,12 +213,15 @@ export function useRenderTetto(options: UseRenderTettoOptions = {}) {
       setRenderUrl(result_url);
 
       // Save to gallery
-      await supabase.from('render_tetto_gallery').insert({
-        session_id: sessionId,
-        result_image_url: result_url,
-        original_image_url: originalUrl || '',
-        config_snapshot: config as any,
-      });
+      if (companyId) {
+        await supabase.from('render_tetto_gallery').insert({
+          session_id: sessionId,
+          company_id: companyId,
+          result_image_url: result_url,
+          original_image_url: originalUrl || '',
+          config_snapshot: config as any,
+        });
+      }
 
       onSuccess?.(result_url);
       toast.success('Render completato!');
