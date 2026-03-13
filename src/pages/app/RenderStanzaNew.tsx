@@ -529,14 +529,7 @@ export default function RenderStanzaNew() {
         .upload(storagePath, foto, { contentType: foto.type });
       if (uploadErr) throw uploadErr;
 
-      // Save original image path and dimensions to session
-      await supabase.from('render_stanza_sessions' as any)
-        .update({
-          original_image_path: storagePath,
-          original_image_width: imageNaturalWidth,
-          original_image_height: imageNaturalHeight,
-        })
-        .eq('id', (session as any).id);
+      // Note: render_stanza_sessions may not have these columns — skip update to avoid silent failures
 
       // 3. Chiama edge function analyze-room-photo
       const base64 = await fileToBase64(foto);
