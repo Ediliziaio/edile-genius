@@ -3651,6 +3651,161 @@ export type Database = {
           },
         ]
       }
+      render_persiane_gallery: {
+        Row: {
+          colore_mode: string | null
+          colore_ral_code: string | null
+          colore_wood_name: string | null
+          company_id: string | null
+          created_at: string
+          id: string
+          is_favorite: boolean | null
+          materiale: string | null
+          result_image_url: string
+          session_id: string | null
+          tipo_operazione: string | null
+          tipo_persiana: string | null
+          user_id: string
+        }
+        Insert: {
+          colore_mode?: string | null
+          colore_ral_code?: string | null
+          colore_wood_name?: string | null
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_favorite?: boolean | null
+          materiale?: string | null
+          result_image_url: string
+          session_id?: string | null
+          tipo_operazione?: string | null
+          tipo_persiana?: string | null
+          user_id: string
+        }
+        Update: {
+          colore_mode?: string | null
+          colore_ral_code?: string | null
+          colore_wood_name?: string | null
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_favorite?: boolean | null
+          materiale?: string | null
+          result_image_url?: string
+          session_id?: string | null
+          tipo_operazione?: string | null
+          tipo_persiana?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_persiane_gallery_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "render_persiane_gallery_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "render_persiane_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      render_persiane_sessions: {
+        Row: {
+          apertura_lamelle: string | null
+          colore_mode: string | null
+          colore_ral_code: string | null
+          colore_ral_hex: string | null
+          colore_ral_name: string | null
+          colore_wood_id: string | null
+          colore_wood_name: string | null
+          company_id: string
+          created_at: string
+          id: string
+          larghezza_lamella_mm: number | null
+          materiale_persiana: string | null
+          note_aggiuntive: string | null
+          original_height: number | null
+          original_image_path: string | null
+          original_width: number | null
+          prompt_system: string | null
+          prompt_user: string | null
+          prompt_version: string | null
+          result_image_url: string | null
+          stato_apertura: string | null
+          status: string
+          tipo_operazione: string | null
+          tipo_persiana: string | null
+          user_id: string
+        }
+        Insert: {
+          apertura_lamelle?: string | null
+          colore_mode?: string | null
+          colore_ral_code?: string | null
+          colore_ral_hex?: string | null
+          colore_ral_name?: string | null
+          colore_wood_id?: string | null
+          colore_wood_name?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          larghezza_lamella_mm?: number | null
+          materiale_persiana?: string | null
+          note_aggiuntive?: string | null
+          original_height?: number | null
+          original_image_path?: string | null
+          original_width?: number | null
+          prompt_system?: string | null
+          prompt_user?: string | null
+          prompt_version?: string | null
+          result_image_url?: string | null
+          stato_apertura?: string | null
+          status?: string
+          tipo_operazione?: string | null
+          tipo_persiana?: string | null
+          user_id: string
+        }
+        Update: {
+          apertura_lamelle?: string | null
+          colore_mode?: string | null
+          colore_ral_code?: string | null
+          colore_ral_hex?: string | null
+          colore_ral_name?: string | null
+          colore_wood_id?: string | null
+          colore_wood_name?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          larghezza_lamella_mm?: number | null
+          materiale_persiana?: string | null
+          note_aggiuntive?: string | null
+          original_height?: number | null
+          original_image_path?: string | null
+          original_width?: number | null
+          prompt_system?: string | null
+          prompt_user?: string | null
+          prompt_version?: string | null
+          result_image_url?: string | null
+          stato_apertura?: string | null
+          status?: string
+          tipo_operazione?: string | null
+          tipo_persiana?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_persiane_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       render_provider_config: {
         Row: {
           api_endpoint: string | null
