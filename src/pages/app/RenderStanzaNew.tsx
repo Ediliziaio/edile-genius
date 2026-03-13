@@ -553,6 +553,7 @@ export default function RenderStanzaNew() {
 
   // Pre-compila config con i dati rilevati dall'AI
   const prefillFromAnalisi = (a: AnalisiStanza) => {
+    if (!a) return;
     setConfig(prev => ({
       ...prev,
       verniciatura: {
