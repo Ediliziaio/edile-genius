@@ -774,10 +774,9 @@ export default function RenderBagnoNew() {
           )}
 
           {/* Doccia */}
-          {sostituzione.doccia && (
             <Card>
               <CardContent className="py-4 space-y-4">
-                <h3 className="font-semibold text-foreground">🚿 Doccia</h3>
+                <h3 className="font-semibold text-foreground">🚿 Doccia{!sostituzione.doccia ? " (personalizza stile)" : ""}</h3>
                 <Label className="text-xs text-muted-foreground">Tipo</Label>
                 <OptionGrid
                   options={SHOWER_TYPES}
