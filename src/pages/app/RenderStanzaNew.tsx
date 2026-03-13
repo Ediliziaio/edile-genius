@@ -486,6 +486,11 @@ export default function RenderStanzaNew() {
     const previewUrl = URL.createObjectURL(file);
     setFotoPreview(previewUrl);
 
+    // Capture base64 for varianti
+    const reader = new FileReader();
+    reader.onload = (e) => setImageBase64((e.target?.result as string).split(',')[1]);
+    reader.readAsDataURL(file);
+
     // Rileva dimensioni naturali
     const img = new Image();
     img.onload = () => {
