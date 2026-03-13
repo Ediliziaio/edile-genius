@@ -179,13 +179,7 @@ export default function Settings() {
     setLoadingWebhooks(false);
   };
 
-  const saveProfile = async () => {
-    if (!user) return;
-    setSavingProfile(true);
-    const { error } = await supabase.from("profiles").update({ full_name: fullName, avatar_url: avatarUrl || null }).eq("id", user.id);
-    setSavingProfile(false);
-    toast(error ? { title: "Errore", description: error.message, variant: "destructive" } : { title: "Profilo aggiornato" });
-  };
+  // (Profile saving moved to TabProfilo)
 
   const testConnection = async () => {
     if (!companyId) return;
