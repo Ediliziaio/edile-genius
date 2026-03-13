@@ -26,7 +26,7 @@ const VOCAL_SLUGS = [
   "qualifica-infissi", "inbound-campagne", "conferma-sopralluogo",
   "recupero-preventivi", "recupero-noshow", "recensioni-post-lavoro",
 ];
-const RENDER_SLUGS = ["render-infissi"];
+const RENDER_SLUGS = ["render-infissi", "render-bagno", "render-facciate", "render-persiane", "render-pavimento", "render-stanza"];
 const WHATSAPP_SLUGS = [
   "primo-contatto-wa", "followup-preventivi-wa", "assistente-whatsapp",
   "whatsapp-preventivi",
