@@ -20,14 +20,11 @@ export type TipoPersoniana =
   | "brise_soleil";
 
 export type MaterialePersiana =
-  | "legno"
   | "legno_naturale"
   | "legno_composito"
   | "alluminio"
   | "pvc"
   | "acciaio"
-  | "ferro_battuto"
-  | "composito"
   | "fibra_vetro";
 
 export type StatoApertura = "chiuso" | "socchiuso" | "aperto_45" | "aperto_90" | "anta_singola_aperta";
