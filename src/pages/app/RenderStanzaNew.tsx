@@ -553,6 +553,7 @@ export default function RenderStanzaNew() {
 
   // Pre-compila config con i dati rilevati dall'AI
   const prefillFromAnalisi = (a: AnalisiStanza) => {
+    if (!a) return;
     setConfig(prev => ({
       ...prev,
       verniciatura: {
@@ -570,10 +571,15 @@ export default function RenderStanzaNew() {
   // Toggle intervento ON/OFF
   const toggleIntervento = (key: keyof InterventiState, value: boolean) => {
     setInterventiAttivi(prev => ({ ...prev, [key]: value }));
-    setConfig(prev => ({
-      ...prev,
-      [key]: { ...(prev[key as keyof WizardConfig] as any), attivo: value },
-    }));
+    setConfig(prev => {
+      const existing = prev[key as keyof WizardConfig];
+      return {
+        ...prev,
+        [key]: typeof existing === 'object' && existing !== null
+          ? { ...existing, attivo: value }
+          : { attivo: value },
+      };
+    });
   };
 
   // Aggiorna una sub-config
@@ -581,10 +587,15 @@ export default function RenderStanzaNew() {
     key: K,
     partial: Partial<WizardConfig[K]>
   ) => {
-    setConfig(prev => ({
-      ...prev,
-      [key]: { ...(prev[key] as any), ...partial },
-    }));
+    setConfig(prev => {
+      const existing = prev[key];
+      return {
+        ...prev,
+        [key]: typeof existing === 'object' && existing !== null
+          ? { ...existing, ...partial }
+          : { ...partial },
+      };
+    });
   };
 
   const handleStartRender = async () => {
@@ -687,16 +698,16 @@ export default function RenderStanzaNew() {
     setConfig(mapped);
     // Sincronizza i toggle degli interventi
     const nuoviAttivi: InterventiState = {
-      verniciatura: mapped.verniciatura.attivo,
-      pavimento: mapped.pavimento.attivo,
-      arredo: mapped.arredo.attivo,
-      soffitto: mapped.soffitto.attivo,
-      illuminazione: mapped.illuminazione.attivo,
-      carta_da_parati: mapped.carta_da_parati.attivo,
-      rivestimento_pareti: mapped.rivestimento_pareti.attivo,
-      tende: mapped.tende.attivo,
-      restyling_cucina: mapped.restyling_cucina.attivo,
-      restyling_bagno: mapped.restyling_bagno.attivo,
+      verniciatura: mapped.verniciatura?.attivo ?? false,
+      pavimento: mapped.pavimento?.attivo ?? false,
+      arredo: mapped.arredo?.attivo ?? false,
+      soffitto: mapped.soffitto?.attivo ?? false,
+      illuminazione: mapped.illuminazione?.attivo ?? false,
+      carta_da_parati: mapped.carta_da_parati?.attivo ?? false,
+      rivestimento_pareti: mapped.rivestimento_pareti?.attivo ?? false,
+      tende: mapped.tende?.attivo ?? false,
+      restyling_cucina: mapped.restyling_cucina?.attivo ?? false,
+      restyling_bagno: mapped.restyling_bagno?.attivo ?? false,
     };
     setInterventiAttivi(nuoviAttivi);
     toast.success(`Stile "${stile.nome}" applicato`);
