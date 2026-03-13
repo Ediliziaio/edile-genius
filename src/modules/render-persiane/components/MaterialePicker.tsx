@@ -14,19 +14,19 @@ const MATERIALI: MaterialeOption[] = [
   {
     value: "legno_naturale", label: "Legno naturale", emoji: "🪵",
     desc: "Essenze pregiate (larice, pino, iroko), verniciato o naturale",
-    compatibleWith: ["veneziana_classica", "gelosia", "scuro_pieno", "scuro_cornice", "scuro_dogato", "a_libro", "alla_romana"],
+    compatibleWith: ["veneziana_classica", "gelosia", "scuro_pieno", "scuro_cornice", "a_libro"],
     proLabel: "Tradizionale",
   },
   {
     value: "legno_composito", label: "Legno composito", emoji: "🟫",
     desc: "Fibra di legno + PVC, alta resistenza alle intemperie",
-    compatibleWith: ["veneziana_classica", "veneziana_esterna", "gelosia", "scuro_pieno", "scuro_cornice", "scuro_dogato", "a_libro", "alla_romana"],
+    compatibleWith: ["veneziana_classica", "veneziana_esterna", "gelosia", "scuro_pieno", "scuro_cornice", "a_libro"],
     proLabel: "Durabile",
   },
   {
     value: "pvc", label: "PVC", emoji: "⬜",
     desc: "Policloruro di vinile, economico e facile manutenzione",
-    compatibleWith: ["veneziana_classica", "veneziana_esterna", "scuro_pieno", "avvolgibile_esterno", "a_libro", "persiana_scorrevole"],
+    compatibleWith: ["veneziana_classica", "veneziana_esterna", "scuro_pieno", "avvolgibile_esterno", "a_libro"],
     proLabel: "Economico",
   },
   {
@@ -38,13 +38,13 @@ const MATERIALI: MaterialeOption[] = [
   {
     value: "acciaio", label: "Acciaio", emoji: "⚙️",
     desc: "Acciaio galvanizzato, massima resistenza e sicurezza",
-    compatibleWith: ["griglia_sicurezza", "veneziana_esterna", "brise_soleil", "frangisole"],
+    compatibleWith: ["griglia_sicurezza", "veneziana_esterna", "brise_soleil"],
     proLabel: "Resistente",
   },
   {
     value: "fibra_vetro", label: "Fibra di vetro", emoji: "💎",
     desc: "Composito leggero, non conduce calore, ideale per climi estremi",
-    compatibleWith: ["veneziana_classica", "veneziana_esterna", "brise_soleil", "frangisole"],
+    compatibleWith: ["veneziana_classica", "veneziana_esterna", "brise_soleil"],
     proLabel: "Premium",
   },
 ];
