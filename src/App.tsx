@@ -106,6 +106,8 @@ const RenderStanzaNew = lazy(() => import("./pages/app/RenderStanzaNew"));
 const RenderTettoHub = lazy(() => import("./pages/app/RenderTettoHub"));
 const RenderTettoNew = lazy(() => import("./pages/app/RenderTettoNew"));
 const KnowledgeBasePreventivo = lazy(() => import("./pages/app/KnowledgeBasePreventivo"));
+const PreventivoTemplateList = lazy(() => import("./pages/app/PreventivoTemplateList"));
+const PreventivoTemplateBuilder = lazy(() => import("./pages/app/PreventivoTemplateBuilder"));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-screen">
@@ -230,6 +232,9 @@ const App = () => (
                 <Route path="/app/call-monitor" element={<SafeRoute><CallMonitor /></SafeRoute>} />
                 <Route path="/app/scheduled-calls" element={<SafeRoute><ScheduledCalls /></SafeRoute>} />
                 <Route path="/app/preventivo-kb" element={<SafeRoute><KnowledgeBasePreventivo /></SafeRoute>} />
+                <Route path="/app/preventivi/templates" element={<SafeRoute><PreventivoTemplateList /></SafeRoute>} />
+                <Route path="/app/preventivi/templates/nuovo" element={<SafeRoute><PreventivoTemplateBuilder /></SafeRoute>} />
+                <Route path="/app/preventivi/templates/:id" element={<SafeRoute><PreventivoTemplateBuilder /></SafeRoute>} />
               </Route>
             </Route>
 
