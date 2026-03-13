@@ -5,20 +5,45 @@ import { useCompanyId } from "@/hooks/useCompanyId";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Bath, Sparkles, Plus, Coins, Camera, Settings, Image } from "lucide-react";
+import { Bath, Sparkles, Plus, Coins, Camera, Settings, Image, Download, Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+interface GalleryItem {
+  id: string;
+  titolo: string | null;
+  render_url: string;
+  originale_url: string | null;
+  created_at: string;
+}
 
 export default function RenderBagnoHub() {
   const companyId = useCompanyId();
+  const { toast } = useToast();
   const [credits, setCredits] = useState<{ balance: number; total_used: number } | null>(null);
   const [recentCount, setRecentCount] = useState(0);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
 
   useEffect(() => {
     if (!companyId) return;
     supabase.from("render_credits").select("balance, total_used").eq("company_id", companyId).single()
       .then(({ data }) => { if (data) setCredits(data as any); });
-    supabase.from("render_bagno_sessions" as any).select("id", { count: "exact", head: true }).eq("company_id", companyId).eq("stato", "completato")
-      .then(({ count }) => { setRecentCount(count ?? 0); });
+    (supabase.from("render_bagno_sessions") as any).select("id", { count: "exact", head: true }).eq("company_id", companyId).eq("stato", "completato")
+      .then(({ count }: any) => { setRecentCount(count ?? 0); });
+    (supabase.from("render_bagno_gallery") as any)
+      .select("id, titolo, render_url, originale_url, created_at")
+      .eq("company_id", companyId)
+      .order("created_at", { ascending: false })
+      .limit(20)
+      .then(({ data }: any) => { if (data) setGalleryItems(data); });
   }, [companyId]);
+
+  const deleteGalleryItem = async (id: string) => {
+    const { error } = await (supabase.from("render_bagno_gallery") as any).delete().eq("id", id);
+    if (!error) {
+      setGalleryItems(prev => prev.filter(i => i.id !== id));
+      toast({ title: "Eliminato", description: "Render rimosso dalla gallery" });
+    }
+  };
 
   const steps = [
     { step: "1", icon: Camera, title: "Carica foto", desc: "Foto del bagno attuale" },
@@ -82,14 +107,60 @@ export default function RenderBagnoHub() {
         })}
       </div>
 
-      {/* Placeholder gallery */}
-      <Card>
-        <CardContent className="py-12 text-center text-muted-foreground">
-          <Bath className="h-12 w-12 mx-auto mb-4 opacity-30" />
-          <p className="text-lg font-medium">Nessun render bagno ancora</p>
-          <p className="text-sm">Crea il tuo primo render per vederlo qui</p>
-        </CardContent>
-      </Card>
+      {/* Gallery */}
+      {galleryItems.length > 0 ? (
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-foreground">I tuoi render</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {galleryItems.map(item => (
+              <div key={item.id} className="group relative rounded-xl overflow-hidden border bg-card">
+                <img
+                  src={item.render_url}
+                  alt={item.titolo || "Render bagno"}
+                  className="w-full aspect-square object-cover"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-end">
+                  <div className="w-full p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <p className="text-white text-sm font-medium truncate">
+                      {item.titolo || new Date(item.created_at).toLocaleDateString("it-IT")}
+                    </p>
+                    <div className="flex gap-2 mt-2">
+                      <a
+                        href={item.render_url}
+                        download
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1.5 rounded-lg bg-white/20 hover:bg-white/40 transition-colors"
+                      >
+                        <Download className="h-4 w-4 text-white" />
+                      </a>
+                      <button
+                        onClick={() => deleteGalleryItem(item.id)}
+                        className="p-1.5 rounded-lg bg-white/20 hover:bg-destructive/80 transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4 text-white" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            <Bath className="h-12 w-12 mx-auto mb-4 opacity-30" />
+            <p className="text-lg font-medium">Nessun render bagno ancora</p>
+            <p className="text-sm">Crea il tuo primo render per vederlo qui</p>
+            <Button asChild className="mt-4">
+              <Link to="/app/render-bagno/new">
+                <Plus className="h-4 w-4 mr-2" /> Crea il primo render
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

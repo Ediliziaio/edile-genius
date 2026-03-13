@@ -3262,6 +3262,42 @@ export type Database = {
           },
         ]
       }
+      render_bagno_stili_pronti: {
+        Row: {
+          configurazione: Json
+          descrizione: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          nome: string
+          preview_hex: string[] | null
+          sort_order: number | null
+          tags: string[] | null
+        }
+        Insert: {
+          configurazione?: Json
+          descrizione?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          nome: string
+          preview_hex?: string[] | null
+          sort_order?: number | null
+          tags?: string[] | null
+        }
+        Update: {
+          configurazione?: Json
+          descrizione?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          nome?: string
+          preview_hex?: string[] | null
+          sort_order?: number | null
+          tags?: string[] | null
+        }
+        Relationships: []
+      }
       render_credits: {
         Row: {
           balance: number | null

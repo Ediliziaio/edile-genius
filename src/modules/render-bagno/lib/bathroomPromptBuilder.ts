@@ -703,6 +703,46 @@ CRITICAL:
 }
 
 // ═══════════════════════════════════════════════════════════════
+// QUALITY SUFFIX — always appended last
+// ═══════════════════════════════════════════════════════════════
+
+const QUALITY_SUFFIX = `
+[FINAL QUALITY REQUIREMENTS]
+
+PHOTOGRAPHIC REALISM CHECKLIST:
+✅ Result must look like a professional interior design magazine photo
+✅ Same camera perspective, angle, and focal length as original photo
+✅ Correct perspective distortion on all flat surfaces (floor, walls)
+✅ Tile grout lines follow convergence lines correctly
+✅ Reflections on polished surfaces are physically accurate
+✅ All shadows are consistent with a single ambient light source
+✅ Materials have correct surface qualities (marble=polished+reflective, concrete=matte, wood=grain visible)
+✅ No floating objects — everything touches its support surface correctly
+
+ITALIAN BATHROOM PROPORTIONS (standard reference):
+- Toilet: 360-400mm wide, 550-700mm deep
+- Bidet: 360mm wide, 560mm deep (next to toilet, same height)
+- Shower tray: typically 80×80cm, 90×90cm, 70×140cm or custom
+- Bathtub: typically 170×75cm or 160×70cm
+- Vanity height: 85cm standard; floating vanities at 80-90cm from floor
+- Wall tile height: typically 200-240cm (floor to ceiling in new build)
+
+LIGHTING CONSISTENCY:
+- Do not change the direction or quality of ambient light from original photo
+- Correct shadows under floating vanity, behind toilet, in shower corners
+- Reflections on mirror remain consistent with scene
+
+GROUT LINE TECHNICAL REQUIREMENT:
+- Grout joint width must be perfectly consistent throughout
+- 1-2mm for large format slabs
+- 2-3mm for 30×60cm and smaller
+- 3-5mm for mosaics and small format tiles
+- NO wavy or irregular grout lines
+
+Do not include watermarks, text overlays, or any artificial marks.
+Output must be exactly the same pixel dimensions and aspect ratio as the input photo.`;
+
+// ═══════════════════════════════════════════════════════════════
 // MAIN EXPORT
 // ═══════════════════════════════════════════════════════════════
 
@@ -735,6 +775,8 @@ Maintain all lighting, shadows, reflections, and ambient quality from original.
 Do not add watermarks, text, or any overlay.
 Output format: photorealistic JPEG/PNG, same aspect ratio as input.
 Negative prompt — avoid: ${BATHROOM_NEGATIVE_PROMPT}`);
+
+  blocks.push(QUALITY_SUFFIX);
 
   return {
     userPrompt: blocks.join("\n\n"),
