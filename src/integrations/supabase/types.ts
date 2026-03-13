@@ -4192,6 +4192,7 @@ export type Database = {
           intensita: string | null
           interventi: string[] | null
           is_favorite: boolean | null
+          original_image_url: string | null
           result_image_url: string
           session_id: string | null
           stile_target: string | null
@@ -4205,6 +4206,7 @@ export type Database = {
           intensita?: string | null
           interventi?: string[] | null
           is_favorite?: boolean | null
+          original_image_url?: string | null
           result_image_url: string
           session_id?: string | null
           stile_target?: string | null
@@ -4218,6 +4220,7 @@ export type Database = {
           intensita?: string | null
           interventi?: string[] | null
           is_favorite?: boolean | null
+          original_image_url?: string | null
           result_image_url?: string
           session_id?: string | null
           stile_target?: string | null
@@ -4330,6 +4333,51 @@ export type Database = {
           tipo_stanza?: string | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      render_stanza_stili_pronti: {
+        Row: {
+          attivo: boolean | null
+          config: Json
+          created_at: string | null
+          descrizione: string | null
+          emoji: string | null
+          id: string
+          nome: string
+          ordine: number | null
+          preview_hex: string | null
+          stile: string | null
+          tags: string[] | null
+          tipo_stanza: string | null
+        }
+        Insert: {
+          attivo?: boolean | null
+          config: Json
+          created_at?: string | null
+          descrizione?: string | null
+          emoji?: string | null
+          id?: string
+          nome: string
+          ordine?: number | null
+          preview_hex?: string | null
+          stile?: string | null
+          tags?: string[] | null
+          tipo_stanza?: string | null
+        }
+        Update: {
+          attivo?: boolean | null
+          config?: Json
+          created_at?: string | null
+          descrizione?: string | null
+          emoji?: string | null
+          id?: string
+          nome?: string
+          ordine?: number | null
+          preview_hex?: string | null
+          stile?: string | null
+          tags?: string[] | null
+          tipo_stanza?: string | null
         }
         Relationships: []
       }
