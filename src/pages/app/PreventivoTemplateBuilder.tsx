@@ -94,13 +94,12 @@ export default function PreventivoTemplateBuilder() {
         .eq('id', id!)
         .single();
       if (data) {
-        setNome(data.nome);
+        setNome(data.nome || 'Template Standard');
         setDescrizione(data.descrizione || '');
         const sezioniData = data.sezioni as unknown;
         if (Array.isArray(sezioniData)) setSezioni(sezioniData as PreventivoSezione[]);
-        const branding = data.branding_json as Record<string, string> | null;
-        setColore(branding?.colore_primario || '#6D28D9');
-        setPiede(branding?.piede_pagina || '');
+        setColore(data.colore_primario || '#6D28D9');
+        setPiede(data.piede_pagina || '');
       }
       return data;
     },
