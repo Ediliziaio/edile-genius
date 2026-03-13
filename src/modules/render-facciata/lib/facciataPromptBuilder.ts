@@ -446,6 +446,31 @@ export const FACADE_NEGATIVE_PROMPT = [
   "image resized or stretched",
 ].join(", ");
 
+// ── QUALITY SUFFIX — CHECKLIST FOTOREALISMO ──────────────────────
+
+export const FACADE_QUALITY_SUFFIX = `
+[BLOCK QUALITY – PHOTOREALISTIC FACADE RENDERING CHECKLIST]
+✅ Output must be COMPLETELY INDISTINGUISHABLE from a real architectural photograph
+✅ Correct 3-point perspective — horizontal lines parallel to horizon
+✅ Correct light direction and shadow depth consistent with original photo
+✅ Plaster texture scale proportional to building scale (not too large, not too small)
+✅ Stone/brick material shows realistic 3D depth, not flat paint
+✅ Correct mortar joint color and width for the specified masonry type
+✅ Window reveals cast correct shadows at specified cappotto depth
+✅ New material transitions are clean and architecturally correct
+✅ No visible seams between original image elements and new material
+✅ Color accuracy: the rendered color must match the specified hex value in natural daylight conditions
+✅ Surface reflection appropriate to finish (matte plaster ≠ polished stone ≠ high-gloss paint)
+✅ Atmospheric perspective consistent with original photo conditions
+
+Italian building reference dimensions:
+- Standard Italian brick: 25cm × 6cm, 10mm joint
+- Clinker brick: 24cm × 7.1cm, 8-10mm joint
+- Plaster texture scale: graffiato grain approx 1-2.5mm at 1:1 scale
+- Cappotto minimum reveal depth change: same as specified thickness
+- Window cornice frame width: typically 8-15cm
+- Marcapiano band height: typically 15-25cm`;
+
 // ── FUNZIONE PRINCIPALE ───────────────────────────────────────────
 
 export function buildFacciataPrompt(
