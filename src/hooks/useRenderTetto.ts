@@ -207,7 +207,10 @@ export function useRenderTetto(options: UseRenderTettoOptions = {}) {
         },
       });
 
-      const { result_url } = unwrapEdge<{ result_url: string }>(result);
+      // Check for invoke-level errors first
+      if (result.error) throw new Error(result.error.message || 'Edge function error');
+
+      const { result_url } = unwrapEdge<{ result_url: string }>(result.data);
       if (!result_url) throw new Error('Nessun risultato ricevuto');
 
       setRenderUrl(result_url);
