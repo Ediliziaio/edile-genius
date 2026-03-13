@@ -734,6 +734,7 @@ export default function RenderStanzaNew() {
   const handleReset = () => {
     setStep(1);
     setFoto(null);
+    if (fotoPreview) URL.revokeObjectURL(fotoPreview);
     setFotoPreview(null);
     setSessionId(null);
     setOriginalUrl(null);
