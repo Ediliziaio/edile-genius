@@ -664,7 +664,7 @@ export default function RenderStanzaNew() {
     try {
       const { userPrompt, systemPrompt } = buildStanzaPrompt(analisi ?? null, configForPrompt);
 
-      const base64 = await fileToBase64(foto);
+      const base64 = imageBase64 || await fileToBase64(foto);
       const { data: renderData, error: renderErr } = await supabase.functions.invoke(
         'generate-room-render',
         {
