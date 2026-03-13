@@ -1,306 +1,224 @@
-import { useState, useRef, useCallback, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useCompanyId } from "@/hooks/useCompanyId";
-import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import { Mic, Square, Loader2, Upload, ArrowLeft, ArrowRight, Camera, X, GripVertical, Plus, Trash2, Euro, FileDown, Eye } from "lucide-react";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import { PreventivoPDF, type PreventivoVoce, type PreventivoData, type TemplateConfig } from "@/lib/preventivo-pdf";
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useCompanyId } from '@/hooks/useCompanyId';
+import { useQuery } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 
-const UNITS = ["mq", "ml", "mc", "nr", "ore", "forfait", "kg", "cad"];
+import { StepDatiCliente } from '@/components/preventivo/steps/StepDatiCliente';
+import { StepProgetto } from '@/components/preventivo/steps/StepProgetto';
+import { StepSuperfici } from '@/components/preventivo/steps/StepSuperfici';
+import { StepSezioni } from '@/components/preventivo/steps/StepSezioni';
+import { StepVoci } from '@/components/preventivo/steps/StepVoci';
+import { StepPDF } from '@/components/preventivo/steps/StepPDF';
+import { INITIAL_STATE } from '@/components/preventivo/steps/types';
+import type { PreventivoLocalState } from '@/components/preventivo/steps/types';
+import type { PreventivoData, TemplateConfig, SezioneContenuto, RenderEntry } from '@/lib/preventivo-pdf';
+import type { PreventivoSezione, AnalisiSuperfici } from '@/modules/preventivo/types';
+import { SEZIONI_DEFAULT } from '@/modules/preventivo/lib/defaultTemplate';
+
+const STEPS = [
+  { label: '👤 Cliente', key: 'cliente' },
+  { label: '🎙️ Progetto', key: 'progetto' },
+  { label: '📸 Superfici', key: 'superfici' },
+  { label: '📝 Contenuti', key: 'contenuti' },
+  { label: '💶 Prezzi', key: 'prezzi' },
+  { label: '📄 PDF', key: 'pdf' },
+];
 
 export default function NuovoPreventivo() {
   const companyId = useCompanyId();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [step, setStep] = useState(1);
-  const [processing, setProcessing] = useState(false);
-  const [step1Errors, setStep1Errors] = useState<Record<string, string>>({});
 
-  // Step 1 — Client data
-  const [clienteNome, setClienteNome] = useState("");
-  const [clienteIndirizzo, setClienteIndirizzo] = useState("");
-  const [clienteTelefono, setClienteTelefono] = useState("");
-  const [clienteEmail, setClienteEmail] = useState("");
-  const [clientePiva, setClientePiva] = useState("");
-  const [clienteCF, setClienteCF] = useState("");
-  const [cantiereId, setCantiereId] = useState("");
-  const [oggetto, setOggetto] = useState("");
-  const [titolo, setTitolo] = useState("");
-  const [luogoLavori, setLuogoLavori] = useState("");
-  const [scontoGlobalePerc, setScontoGlobalePerc] = useState(0);
-
-  // Step 2 — Audio + Photos
-  const [recording, setRecording] = useState(false);
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [photos, setPhotos] = useState<File[]>([]);
-  const [photosPreviews, setPhotosPreviews] = useState<string[]>([]);
-  const mediaRecorder = useRef<MediaRecorder | null>(null);
-  const chunks = useRef<Blob[]>([]);
-
-  // Step 3 — Voci editor
-  const [voci, setVoci] = useState<PreventivoVoce[]>([]);
-  const [trascrizione, setTrascrizione] = useState("");
-  const [noteGenerali, setNoteGenerali] = useState("");
-  const [tempiEsecuzione, setTempiEsecuzione] = useState("");
+  const [step, setStep] = useState(0);
+  const [state, setState] = useState<PreventivoLocalState>(INITIAL_STATE);
   const [preventivoId, setPreventivoId] = useState<string | null>(null);
-  const dirtyRef = useRef(false);
+  const [sezioni, setSezioni] = useState<PreventivoSezione[]>(() => SEZIONI_DEFAULT.map(s => ({ ...s, id: crypto.randomUUID() })));
+  const [sezioniContenuto, setSezioniContenuto] = useState<Record<string, SezioneContenuto>>({});
+  const [analisi, setAnalisi] = useState<AnalisiSuperfici | null>(null);
 
-  // Pre-populate cantiere from URL params
+  // Load cantiere from URL
   useEffect(() => {
-    const paramCantiereId = searchParams.get("cantiere_id");
-    if (paramCantiereId) setCantiereId(paramCantiereId);
+    const cId = searchParams.get('cantiere_id');
+    if (cId) setState(prev => ({ ...prev, cantiereId: cId }));
+    const pId = searchParams.get('id');
+    if (pId) setPreventivoId(pId);
   }, [searchParams]);
 
-  // Mark dirty when voci change (after initial load)
+  // Load existing preventivo
   useEffect(() => {
-    if (voci.length > 0) dirtyRef.current = true;
-  }, [voci]);
+    if (!preventivoId) return;
+    (async () => {
+      const { data } = await (supabase.from('preventivi') as any).select('*').eq('id', preventivoId).single();
+      if (!data) return;
+      setState(prev => ({
+        ...prev,
+        clienteNome: data.cliente_nome || '',
+        clienteIndirizzo: data.cliente_indirizzo || '',
+        clienteTelefono: data.cliente_telefono || '',
+        clienteEmail: data.cliente_email || '',
+        clientePiva: data.cliente_piva || '',
+        clienteCF: data.cliente_codice_fiscale || '',
+        cantiereId: data.cantiere_id || '',
+        titolo: data.titolo || '',
+        oggetto: data.oggetto || '',
+        luogoLavori: data.luogo_lavori || '',
+        noteInterne: data.note_interne || '',
+        renderIds: data.render_ids || [],
+        voci: data.voci || [],
+        scontoGlobalePerc: data.sconto_globale_percentuale || 0,
+        noteGenerali: data.note || '',
+        tempiEsecuzione: data.tempi_esecuzione || '',
+        fotoAnalisiUrls: data.foto_analisi_urls || [],
+      }));
+      if (data.sezioni_json) setSezioniContenuto(data.sezioni_json);
+      if (data.superfici_stimate) setAnalisi(data.superfici_stimate);
+    })();
+  }, [preventivoId]);
 
-  // Auto-save effect is placed after templateConfig query below
-
-  const { data: cantieri } = useQuery({
-    queryKey: ["cantieri-select", companyId],
+  // Company + template
+  const { data: company } = useQuery({
+    queryKey: ['company-info', companyId],
     enabled: !!companyId,
     queryFn: async () => {
-      const { data } = await (supabase.from("cantieri") as any)
-        .select("id, nome")
-        .eq("company_id", companyId)
-        .eq("stato", "attivo");
-      return data || [];
+      const { data } = await supabase.from('companies').select('name, address, phone, vat_number').eq('id', companyId!).single();
+      return data;
     },
   });
 
   const { data: templateConfig } = useQuery({
-    queryKey: ["preventivo-template", companyId],
+    queryKey: ['preventivo-template', companyId],
     enabled: !!companyId,
     queryFn: async () => {
-      const { data } = await (supabase.from("preventivo_templates") as any)
-        .select("*")
-        .eq("company_id", companyId)
-        .maybeSingle();
+      const { data } = await (supabase.from('preventivo_templates') as any).select('*').eq('company_id', companyId).maybeSingle();
       return data;
     },
   });
 
-  const { data: company } = useQuery({
-    queryKey: ["company-info", companyId],
-    enabled: !!companyId,
-    queryFn: async () => {
-      const { data } = await supabase.from("companies").select("name, address, phone, vat_number").eq("id", companyId!).single();
-      return data;
-    },
-  });
+  // Save/create preventivo on step transition
+  const saveToDb = useCallback(async () => {
+    if (!companyId) return null;
+    const subtotaleBruto = Number(state.voci.reduce((s, v) => s + v.totale, 0).toFixed(2));
+    const scontoImporto = Number((subtotaleBruto * (state.scontoGlobalePerc / 100)).toFixed(2));
+    const imponibile = Number((subtotaleBruto - scontoImporto).toFixed(2));
+    const ivaPerc = templateConfig?.iva_percentuale_default || 22;
+    const ivaImporto = Number((imponibile * (ivaPerc / 100)).toFixed(2));
+    const totale = Number((imponibile + ivaImporto).toFixed(2));
 
-  // Auto-save every 30s if dirty and has an ID
-  useEffect(() => {
-    if (!preventivoId) return;
-    const interval = setInterval(async () => {
-      if (!dirtyRef.current) return;
-      dirtyRef.current = false;
-      const sub = Number(voci.reduce((s, v) => s + v.totale, 0).toFixed(2));
-      const sGlob = Number((sub * (scontoGlobalePerc / 100)).toFixed(2));
-      const imp = Number((sub - sGlob).toFixed(2));
-      const ivaP = templateConfig?.iva_percentuale_default || 22;
-      const ivaI = Number((imp * (ivaP / 100)).toFixed(2));
-      const tot = Number((imp + ivaI).toFixed(2));
-      const { error } = await (supabase.from("preventivi") as any)
-        .update({ voci, subtotale: sub, imponibile: imp, iva_importo: ivaI, totale: tot, totale_finale: tot, note: noteGenerali, oggetto, titolo })
-        .eq("id", preventivoId);
-      if (!error) toast.success("Bozza salvata automaticamente", { duration: 2000 });
-    }, 30_000);
-    return () => clearInterval(interval);
-  }, [preventivoId, voci, scontoGlobalePerc, noteGenerali, oggetto, titolo, templateConfig]);
+    const payload: Record<string, unknown> = {
+      company_id: companyId,
+      cliente_nome: state.clienteNome,
+      cliente_indirizzo: state.clienteIndirizzo,
+      cliente_telefono: state.clienteTelefono,
+      cliente_email: state.clienteEmail,
+      cliente_piva: state.clientePiva,
+      cliente_codice_fiscale: state.clienteCF,
+      cantiere_id: state.cantiereId || null,
+      titolo: state.titolo,
+      oggetto: state.oggetto,
+      luogo_lavori: state.luogoLavori,
+      note_interne: state.noteInterne,
+      render_ids: state.renderIds,
+      voci: state.voci,
+      subtotale: subtotaleBruto,
+      imponibile,
+      iva_percentuale: ivaPerc,
+      iva_importo: ivaImporto,
+      totale,
+      totale_finale: totale,
+      sconto_globale_percentuale: state.scontoGlobalePerc,
+      sconto_globale_importo: scontoImporto,
+      note: state.noteGenerali,
+      tempi_esecuzione: state.tempiEsecuzione,
+      foto_analisi_urls: state.fotoAnalisiUrls,
+      sezioni_json: sezioniContenuto,
+      stato: 'bozza',
+    };
 
-  // Audio recording
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mr = new MediaRecorder(stream, { mimeType: "audio/webm" });
-      chunks.current = [];
-      mr.ondataavailable = (e) => { if (e.data.size > 0) chunks.current.push(e.data); };
-      mr.onstop = () => {
-        const blob = new Blob(chunks.current, { type: "audio/webm" });
-        setAudioBlob(blob);
-        stream.getTracks().forEach(t => t.stop());
-      };
-      mr.start();
-      mediaRecorder.current = mr;
-      setRecording(true);
-    } catch {
-      toast.error("Impossibile accedere al microfono");
-    }
-  };
-
-  const stopRecording = () => {
-    mediaRecorder.current?.stop();
-    setRecording(false);
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('audio/')) {
-      toast.error('File non valido: seleziona un file audio');
-      return;
-    }
-    setAudioBlob(file);
-  };
-
-  // Photo handling
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const newPhotos = [...photos, ...files];
-    setPhotos(newPhotos);
-    const newPreviews = [...photosPreviews, ...files.map(f => URL.createObjectURL(f))];
-    setPhotosPreviews(newPreviews);
-  };
-
-  const removePhoto = (i: number) => {
-    setPhotos(photos.filter((_, idx) => idx !== i));
-    URL.revokeObjectURL(photosPreviews[i]);
-    setPhotosPreviews(photosPreviews.filter((_, idx) => idx !== i));
-  };
-
-  // Process audio → AI
-  const processAudio = async () => {
-    if (!audioBlob || !companyId) {
-      toast.error("Registra o carica un audio prima");
-      return;
-    }
-    setProcessing(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Non autenticato");
-
-      const formData = new FormData();
-      formData.append("audio", audioBlob, "audio.webm");
-      formData.append("company_id", companyId);
-      if (cantiereId) formData.append("cantiere_id", cantiereId);
-      if (clienteNome) formData.append("cliente_nome", clienteNome);
-      if (clienteIndirizzo) formData.append("cliente_indirizzo", clienteIndirizzo);
-      if (clienteTelefono) formData.append("cliente_telefono", clienteTelefono);
-      if (clienteEmail) formData.append("cliente_email", clienteEmail);
-      if (clientePiva) formData.append("cliente_piva", clientePiva);
-      if (clienteCF) formData.append("cliente_codice_fiscale", clienteCF);
-      if (oggetto) formData.append("oggetto", oggetto);
-      if (titolo) formData.append("titolo", titolo);
-
-      const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-preventivo-audio`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${session.access_token}` },
-          body: formData,
-        }
-      );
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Errore elaborazione");
-      }
-
-      const preventivo = await res.json();
-      setPreventivoId(preventivo.id);
-      setVoci(preventivo.voci || []);
-      setTrascrizione(preventivo.trascrizione || "");
-      setNoteGenerali(preventivo.note || "");
-      setTempiEsecuzione(preventivo.tempi_esecuzione || "");
-      if (!oggetto && preventivo.oggetto) setOggetto(preventivo.oggetto);
-      if (!titolo && preventivo.titolo) setTitolo(preventivo.titolo);
-      
-      toast.success("Audio elaborato! Verifica le voci estratte.");
-      setStep(3);
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  // Voci editor
-  const updateVoce = (i: number, field: keyof PreventivoVoce, value: any) => {
-    const newVoci = [...voci];
-    (newVoci[i] as any)[field] = value;
-    if (field === "quantita" || field === "prezzo_unitario" || field === "sconto_percentuale") {
-      const v = newVoci[i];
-      newVoci[i].totale = (v.quantita || 0) * (v.prezzo_unitario || 0) * (1 - (v.sconto_percentuale || 0) / 100);
-    }
-    setVoci(newVoci);
-  };
-
-  const addVoce = () => setVoci([...voci, {
-    id: crypto.randomUUID(),
-    ordine: voci.length + 1,
-    categoria: voci.length > 0 ? voci[voci.length - 1].categoria : "Generale",
-    titolo_voce: "",
-    descrizione: "",
-    unita_misura: "nr",
-    quantita: 1,
-    prezzo_unitario: 0,
-    sconto_percentuale: 0,
-    totale: 0,
-    foto_urls: [],
-    note_voce: "",
-    evidenziata: false,
-  }]);
-
-  const removeVoce = (i: number) => setVoci(voci.filter((_, idx) => idx !== i));
-
-  // Save updated voci
-  // Computed totals (with proper rounding for monetary precision)
-  const subtotaleBruto = Number(voci.reduce((s, v) => s + v.totale, 0).toFixed(2));
-  const scontoGlobaleImporto = Number((subtotaleBruto * (scontoGlobalePerc / 100)).toFixed(2));
-  const subtotale = Number((subtotaleBruto - scontoGlobaleImporto).toFixed(2));
-  const ivaPercentuale = templateConfig?.iva_percentuale_default || 22;
-  const ivaImporto = Number((subtotale * (ivaPercentuale / 100)).toFixed(2));
-  const totaleFinale = Number((subtotale + ivaImporto).toFixed(2));
-
-  const saveVoci = async () => {
-    if (!preventivoId) return;
-
-    const { error } = await (supabase.from("preventivi") as any)
-      .update({
-        voci,
-        subtotale,
-        imponibile: subtotale,
-        iva_percentuale: ivaPercentuale,
-        iva_importo: ivaImporto,
-        totale: totaleFinale,
-        totale_finale: totaleFinale,
-        sconto_globale_percentuale: scontoGlobalePerc,
-        sconto_globale_importo: scontoGlobaleImporto,
-        note: noteGenerali,
-        oggetto,
-        titolo,
-        luogo_lavori: luogoLavori,
-        tempi_esecuzione: tempiEsecuzione,
-      })
-      .eq("id", preventivoId);
-
-    if (error) {
-      toast.error(error.message);
+    if (preventivoId) {
+      await (supabase.from('preventivi') as any).update(payload).eq('id', preventivoId);
+      return preventivoId;
     } else {
-      toast.success("Preventivo salvato!");
-      navigate(`/app/preventivi/${preventivoId}`);
+      const { data, error } = await (supabase.from('preventivi') as any).insert(payload).select('id').single();
+      if (error) { toast.error(error.message); return null; }
+      setPreventivoId(data.id);
+      toast.success('Preventivo creato');
+      return data.id;
     }
+  }, [companyId, state, sezioniContenuto, preventivoId, templateConfig]);
+
+  const handleNext = async () => {
+    // Validate step 0
+    if (step === 0 && !state.clienteNome.trim()) {
+      toast.error('Il nome cliente è obbligatorio');
+      return;
+    }
+    // Auto-save on transition
+    await saveToDb();
+    setStep(s => Math.min(s + 1, STEPS.length - 1));
   };
 
-  // Group voci for display
-  const categories = [...new Set(voci.map(v => v.categoria || "Generale"))];
+  const handleBack = () => {
+    if (step === 0) navigate('/app/preventivi');
+    else setStep(s => s - 1);
+  };
 
-  // Template for PDF preview
+  const handleAudioProcessed = (result: any) => {
+    if (result.id) setPreventivoId(result.id);
+    setState(prev => ({
+      ...prev,
+      voci: result.voci || prev.voci,
+      noteGenerali: result.note || prev.noteGenerali,
+      tempiEsecuzione: result.tempi_esecuzione || prev.tempiEsecuzione,
+      oggetto: prev.oggetto || result.oggetto || '',
+      titolo: prev.titolo || result.titolo || '',
+    }));
+  };
+
+  // PDF data
+  const subtotaleBruto = Number(state.voci.reduce((s, v) => s + v.totale, 0).toFixed(2));
+  const scontoImporto = Number((subtotaleBruto * (state.scontoGlobalePerc / 100)).toFixed(2));
+  const imponibile = Number((subtotaleBruto - scontoImporto).toFixed(2));
+  const ivaPerc = templateConfig?.iva_percentuale_default || 22;
+  const ivaImporto = Number((imponibile * (ivaPerc / 100)).toFixed(2));
+  const totaleFinale = Number((imponibile + ivaImporto).toFixed(2));
+
+  const pdfData: PreventivoData = {
+    numero_preventivo: preventivoId ? `PV-${preventivoId.slice(0, 6).toUpperCase()}` : 'PV-ANTEPRIMA',
+    titolo: state.titolo || state.oggetto || 'Preventivo Lavori',
+    oggetto: state.oggetto,
+    created_at: new Date().toISOString(),
+    luogo_lavori: state.luogoLavori,
+    cliente_nome: state.clienteNome,
+    cliente_indirizzo: state.clienteIndirizzo,
+    cliente_telefono: state.clienteTelefono,
+    cliente_email: state.clienteEmail,
+    cliente_piva: state.clientePiva,
+    cliente_codice_fiscale: state.clienteCF,
+    voci: state.voci,
+    subtotale: subtotaleBruto,
+    sconto_globale_percentuale: state.scontoGlobalePerc,
+    sconto_globale_importo: scontoImporto,
+    imponibile,
+    iva_percentuale: ivaPerc,
+    iva_importo: ivaImporto,
+    totale_finale: totaleFinale,
+    intro: templateConfig?.intro_default,
+    condizioni: templateConfig?.condizioni_default,
+    clausole: templateConfig?.clausole_default,
+    firma_testo: templateConfig?.firma_testo,
+    tempi_esecuzione: state.tempiEsecuzione,
+    note: state.noteGenerali,
+    validita_giorni: state.validitaGiorni,
+  };
+
   const pdfTemplate: TemplateConfig = {
-    colore_primario: templateConfig?.colore_primario || "#1a1a2e",
-    colore_secondario: templateConfig?.colore_secondario || "#e94560",
+    colore_primario: templateConfig?.colore_primario || '#1a1a2e',
+    colore_secondario: templateConfig?.colore_secondario || '#e94560',
     logo_url: templateConfig?.logo_url,
     intestazione_azienda: templateConfig?.intestazione_azienda,
     piede_pagina: templateConfig?.piede_pagina,
@@ -320,409 +238,87 @@ export default function NuovoPreventivo() {
     azienda_piva: templateConfig?.azienda_piva,
   };
 
-  const pdfData: PreventivoData = {
-    numero_preventivo: "PV-ANTEPRIMA",
-    titolo: titolo || oggetto || "Preventivo Lavori",
-    oggetto,
-    created_at: new Date().toISOString(),
-    cliente_nome: clienteNome,
-    cliente_indirizzo: clienteIndirizzo,
-    cliente_telefono: clienteTelefono,
-    cliente_email: clienteEmail,
-    cliente_piva: clientePiva,
-    voci,
-    subtotale: subtotaleBruto,
-    sconto_globale_percentuale: scontoGlobalePerc,
-    sconto_globale_importo: scontoGlobaleImporto,
-    imponibile: subtotale,
-    iva_percentuale: ivaPercentuale,
-    luogo_lavori: luogoLavori,
-    iva_importo: ivaImporto,
-    totale_finale: totaleFinale,
-    intro: templateConfig?.intro_default,
-    condizioni: templateConfig?.condizioni_default,
-    clausole: templateConfig?.clausole_default,
-    firma_testo: templateConfig?.firma_testo,
-    tempi_esecuzione: tempiEsecuzione,
-    note: noteGenerali,
-  };
+  const stepProps = { state, setState, companyId: companyId || '', preventivoId };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => step > 1 ? setStep(step - 1) : navigate("/app/preventivi")}>
+        <Button variant="ghost" size="icon" onClick={handleBack}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-foreground">Nuovo Preventivo</h1>
-          <p className="text-sm text-muted-foreground">Step {step} di 3</p>
+          <p className="text-sm text-muted-foreground">Step {step + 1} di {STEPS.length} — {STEPS[step].label}</p>
         </div>
       </div>
 
       {/* Step indicator */}
-      <div className="flex gap-2">
-        {[1, 2, 3].map(s => (
-          <div key={s} className={`flex-1 h-1.5 rounded-full transition-colors ${s <= step ? "bg-primary" : "bg-muted"}`} />
+      <div className="flex gap-1.5">
+        {STEPS.map((s, i) => (
+          <button
+            key={s.key}
+            onClick={() => i < step && setStep(i)}
+            className={`flex-1 h-1.5 rounded-full transition-colors ${
+              i < step ? 'bg-primary' : i === step ? 'bg-primary/70' : 'bg-muted'
+            } ${i < step ? 'cursor-pointer' : 'cursor-default'}`}
+          />
         ))}
       </div>
 
-      {/* STEP 1 — Client Data */}
-      {step === 1 && (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader><CardTitle className="text-lg">👤 Dati Cliente</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Nome / Ragione Sociale *</Label>
-                  <Input placeholder="Mario Rossi" value={clienteNome} onChange={e => setClienteNome(e.target.value)} className={step1Errors.clienteNome ? "border-destructive" : ""} />
-                  {step1Errors.clienteNome && <p className="text-xs text-destructive">{step1Errors.clienteNome}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label>Telefono</Label>
-                  <Input placeholder="+39 333 1234567" value={clienteTelefono} onChange={e => setClienteTelefono(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Email</Label>
-                  <Input placeholder="mario@email.it" value={clienteEmail} onChange={e => setClienteEmail(e.target.value)} className={step1Errors.clienteEmail ? "border-destructive" : ""} />
-                  {step1Errors.clienteEmail && <p className="text-xs text-destructive">{step1Errors.clienteEmail}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label>Indirizzo</Label>
-                  <Input placeholder="Via Roma 15, Milano" value={clienteIndirizzo} onChange={e => setClienteIndirizzo(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>P.IVA (opzionale)</Label>
-                  <Input placeholder="IT12345678901" value={clientePiva} onChange={e => setClientePiva(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Codice Fiscale (opzionale)</Label>
-                  <Input placeholder="RSSMRA80A01H501Z" value={clienteCF} onChange={e => setClienteCF(e.target.value)} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+      {/* Step labels */}
+      <div className="hidden md:flex gap-1.5">
+        {STEPS.map((s, i) => (
+          <span key={s.key} className={`flex-1 text-center text-xs ${i <= step ? 'text-foreground' : 'text-muted-foreground'}`}>
+            {s.label}
+          </span>
+        ))}
+      </div>
 
-          <Card>
-            <CardHeader><CardTitle className="text-lg">📋 Dettagli Lavori</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Titolo Preventivo</Label>
-                <Input placeholder="es. Ristrutturazione completa bagno" value={titolo} onChange={e => setTitolo(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Oggetto lavori</Label>
-                <Textarea placeholder="Descrizione sintetica dei lavori..." value={oggetto} onChange={e => setOggetto(e.target.value)} rows={2} />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Luogo lavori</Label>
-                  <Input placeholder="Via Roma 15, Milano" value={luogoLavori} onChange={e => setLuogoLavori(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Cantiere (opzionale)</Label>
-                  <Select value={cantiereId} onValueChange={setCantiereId}>
-                    <SelectTrigger><SelectValue placeholder="Seleziona cantiere" /></SelectTrigger>
-                    <SelectContent>
-                      {(cantieri || []).map((c: any) => (
-                        <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Button
-            onClick={() => {
-              const errors: Record<string, string> = {};
-              if (!clienteNome.trim()) errors.clienteNome = "Il nome cliente è obbligatorio";
-              if (clienteEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clienteEmail)) errors.clienteEmail = "Formato email non valido";
-              setStep1Errors(errors);
-              if (Object.keys(errors).length === 0) setStep(2);
-            }}
-            className="w-full gap-2"
-            size="lg"
-          >
-            Avanti <ArrowRight className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-
-      {/* STEP 2 — Audio + Photos */}
-      {step === 2 && (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader><CardTitle className="text-lg">🎙️ Registra il Sopralluogo</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Descrivi a voce i lavori da fare, materiali, quantità e misure. L'AI estrarrà automaticamente le voci del preventivo.
-              </p>
-              <div className="flex gap-3">
-                {!recording ? (
-                  <Button onClick={startRecording} variant="outline" className="gap-2 flex-1" disabled={processing}>
-                    <Mic className="h-4 w-4" /> Avvia Registrazione
-                  </Button>
-                ) : (
-                  <Button onClick={stopRecording} variant="destructive" className="gap-2 flex-1">
-                    <Square className="h-4 w-4" /> Ferma
-                  </Button>
-                )}
-                <div className="relative flex-1">
-                  <input type="file" accept="audio/*" onChange={handleFileUpload} className="absolute inset-0 opacity-0 cursor-pointer" disabled={processing} />
-                  <Button variant="outline" className="gap-2 w-full" disabled={processing}>
-                    <Upload className="h-4 w-4" /> Carica File Audio
-                  </Button>
-                </div>
-              </div>
-              {audioBlob && (
-                <div className="bg-muted rounded-lg p-3">
-                  <audio controls src={URL.createObjectURL(audioBlob)} className="w-full" />
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader><CardTitle className="text-lg">📸 Foto Sopralluogo (opzionale)</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                La prima foto verrà usata come copertina del preventivo PDF.
-              </p>
-              <div className="relative">
-                <input type="file" accept="image/*" multiple onChange={handlePhotoUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
-                <Button variant="outline" className="gap-2 w-full">
-                  <Camera className="h-4 w-4" /> Aggiungi Foto
-                </Button>
-              </div>
-              {photosPreviews.length > 0 && (
-                <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
-                  {photosPreviews.map((url, i) => (
-                    <div key={i} className="relative group aspect-square rounded-lg overflow-hidden bg-muted">
-                      <img src={url} alt="" className="w-full h-full object-cover" />
-                      {i === 0 && (
-                        <Badge className="absolute top-1 left-1 text-[10px] bg-primary">Copertina</Badge>
-                      )}
-                      <button
-                        onClick={() => removePhoto(i)}
-                        className="absolute top-1 right-1 h-6 w-6 rounded-full bg-destructive/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Button onClick={processAudio} disabled={!audioBlob || processing} className="w-full gap-2" size="lg">
-            {processing ? (
-              <><Loader2 className="h-4 w-4 animate-spin" /> Elaborazione AI in corso...</>
-            ) : (
-              <>🤖 Elabora con AI <ArrowRight className="h-4 w-4" /></>
-            )}
-          </Button>
-        </div>
-      )}
-
-      {/* STEP 3 — Visual Editor */}
-      {step === 3 && (
-        <div className="space-y-6">
-          {/* Trascrizione collapsible */}
-          {trascrizione && (
-            <details className="group">
-              <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                📝 Vedi trascrizione originale
-              </summary>
-              <Card className="mt-2">
-                <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{trascrizione}</p>
-                </CardContent>
-              </Card>
-            </details>
+      {/* Steps content */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={step}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.2 }}
+        >
+          {step === 0 && <StepDatiCliente {...stepProps} />}
+          {step === 1 && <StepProgetto {...stepProps} onAudioProcessed={handleAudioProcessed} />}
+          {step === 2 && <StepSuperfici {...stepProps} analisi={analisi} onAnalisi={setAnalisi} />}
+          {step === 3 && (
+            <StepSezioni
+              {...stepProps}
+              sezioni={sezioni}
+              onSezioniChange={setSezioni}
+              sezioniContenuto={sezioniContenuto}
+              onContenutoChange={setSezioniContenuto}
+            />
           )}
+          {step === 4 && <StepVoci {...stepProps} />}
+          {step === 5 && (
+            <StepPDF
+              {...stepProps}
+              pdfData={pdfData}
+              pdfTemplate={pdfTemplate}
+              sezioniContenuto={sezioniContenuto}
+              sezioniTemplate={sezioni}
+              renderEntries={[]}
+            />
+          )}
+        </motion.div>
+      </AnimatePresence>
 
-          {/* Voci Editor by Category */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">📝 Voci Preventivo</CardTitle>
-                <Button variant="outline" size="sm" onClick={addVoce} className="gap-1">
-                  <Plus className="h-3 w-3" /> Aggiungi Voce
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {categories.map(cat => {
-                const catVoci = voci.filter(v => (v.categoria || "Generale") === cat);
-                const catTotal = catVoci.reduce((s, v) => s + v.totale, 0);
-                return (
-                  <div key={cat}>
-                    <div className="flex items-center justify-between bg-muted rounded-lg px-3 py-2 mb-2">
-                      <span className="text-sm font-semibold text-foreground">{cat}</span>
-                      <span className="text-xs font-mono text-muted-foreground">€{catTotal.toFixed(2)}</span>
-                    </div>
-                    <div className="space-y-3 pl-2">
-                      {catVoci.map((v, _ci) => {
-                        const globalIdx = voci.indexOf(v);
-                        return (
-                          <Card key={v.id} className={`border ${v.evidenziata ? "border-yellow-300 bg-yellow-50/50" : ""}`}>
-                            <CardContent className="p-3 space-y-3">
-                              <div className="flex items-start gap-2">
-                                <GripVertical className="h-4 w-4 text-muted-foreground mt-2 flex-shrink-0" />
-                                <div className="flex-1 space-y-2">
-                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                    <div className="md:col-span-2">
-                                      <Input
-                                        placeholder="Titolo voce"
-                                        value={v.titolo_voce}
-                                        onChange={e => updateVoce(globalIdx, "titolo_voce", e.target.value)}
-                                        className="font-medium"
-                                      />
-                                    </div>
-                                    <Input
-                                      placeholder="Categoria"
-                                      value={v.categoria}
-                                      onChange={e => updateVoce(globalIdx, "categoria", e.target.value)}
-                                    />
-                                  </div>
-                                  <Textarea
-                                    placeholder="Descrizione dettagliata..."
-                                    value={v.descrizione}
-                                    onChange={e => updateVoce(globalIdx, "descrizione", e.target.value)}
-                                    rows={2}
-                                    className="text-sm"
-                                  />
-                                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                                    <Select value={v.unita_misura} onValueChange={val => updateVoce(globalIdx, "unita_misura", val)}>
-                                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                                      <SelectContent>
-                                        {UNITS.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
-                                      </SelectContent>
-                                    </Select>
-                                    <Input
-                                      type="number"
-                                      placeholder="Q.tà"
-                                      value={v.quantita || ""}
-                                      onChange={e => updateVoce(globalIdx, "quantita", parseFloat(e.target.value) || 0)}
-                                      className="text-right h-9"
-                                    />
-                                    <Input
-                                      type="number"
-                                      placeholder="Prezzo €"
-                                      value={v.prezzo_unitario || ""}
-                                      onChange={e => updateVoce(globalIdx, "prezzo_unitario", parseFloat(e.target.value) || 0)}
-                                      className="text-right h-9"
-                                    />
-                                    <Input
-                                      type="number"
-                                      placeholder="Sconto %"
-                                      value={v.sconto_percentuale || ""}
-                                      onChange={e => updateVoce(globalIdx, "sconto_percentuale", parseFloat(e.target.value) || 0)}
-                                      className="text-right h-9"
-                                    />
-                                    <div className="flex items-center justify-end h-9 px-3 bg-muted rounded-md">
-                                      <span className="text-sm font-bold">€{v.totale.toFixed(2)}</span>
-                                    </div>
-                                  </div>
-                                  {v.note_voce && (
-                                    <p className="text-xs text-amber-600 italic">💡 {v.note_voce}</p>
-                                  )}
-                                </div>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => removeVoce(globalIdx)}>
-                                  <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-
-              {voci.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>Nessuna voce estratta. Aggiungi manualmente.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Totals */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="space-y-2 text-right">
-                <div className="flex justify-end gap-8 text-sm">
-                  <span className="text-muted-foreground">Subtotale lordo</span>
-                  <span className="w-24">€{subtotaleBruto.toFixed(2)}</span>
-                </div>
-                {scontoGlobalePerc > 0 && (
-                  <div className="flex justify-end gap-8 text-sm text-green-600">
-                    <span>Sconto {scontoGlobalePerc}%</span>
-                    <span className="w-24">-€{scontoGlobaleImporto.toFixed(2)}</span>
-                  </div>
-                )}
-                <div className="flex justify-end gap-8 text-sm">
-                  <span className="text-muted-foreground">Imponibile</span>
-                  <span className="w-24">€{subtotale.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-end gap-8 text-sm">
-                  <span className="text-muted-foreground">IVA ({ivaPercentuale}%)</span>
-                  <span className="w-24">€{ivaImporto.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-end gap-8 text-lg font-bold border-t pt-2">
-                  <span>Totale</span>
-                  <span className="w-24 flex items-center justify-end gap-1">
-                    <Euro className="h-4 w-4" />{totaleFinale.toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Notes, Tempi & Sconto */}
-          <Card>
-            <CardContent className="p-4 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Tempi di esecuzione</Label>
-                  <Input value={tempiEsecuzione} onChange={e => setTempiEsecuzione(e.target.value)} placeholder="es. 15-20 giorni lavorativi" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Sconto globale (%)</Label>
-                  <Input type="number" min={0} max={100} value={scontoGlobalePerc || ""} onChange={e => setScontoGlobalePerc(parseFloat(e.target.value) || 0)} placeholder="0" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Note generali</Label>
-                <Textarea value={noteGenerali} onChange={e => setNoteGenerali(e.target.value)} rows={2} />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Actions */}
-          <div className="flex gap-3">
-            {voci.length > 0 && (
-              <PDFDownloadLink
-                document={<PreventivoPDF data={pdfData} template={pdfTemplate} />}
-                fileName={`preventivo-${titolo || "anteprima"}.pdf`}
-              >
-                {({ loading }) => (
-                  <Button variant="outline" className="gap-2" disabled={loading}>
-                    <FileDown className="h-4 w-4" /> {loading ? "Generando..." : "Scarica PDF"}
-                  </Button>
-                )}
-              </PDFDownloadLink>
-            )}
-            <Button onClick={saveVoci} className="flex-1 gap-2" size="lg">
-              💾 Salva Preventivo
-            </Button>
-          </div>
+      {/* Navigation buttons */}
+      {step < STEPS.length - 1 && (
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={handleBack} className="gap-2">
+            <ArrowLeft className="h-4 w-4" /> Indietro
+          </Button>
+          <Button onClick={handleNext} className="flex-1 gap-2" size="lg">
+            {step === 0 ? 'Avanti' : 'Salva e Continua'} <ArrowRight className="h-4 w-4" />
+          </Button>
         </div>
       )}
     </div>
