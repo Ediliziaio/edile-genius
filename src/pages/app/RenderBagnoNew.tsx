@@ -575,6 +575,7 @@ export default function RenderBagnoNew() {
             ref={fileInputRef}
             type="file"
             accept="image/jpeg,image/png,image/webp,image/heic"
+            capture="environment"
             className="hidden"
             onChange={e => e.target.files?.[0] && handleFotoSelect(e.target.files[0])}
           />
