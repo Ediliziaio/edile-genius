@@ -251,7 +251,7 @@ export default function RenderTettoNew() {
   return (
     <div className="min-h-screen bg-muted/30">
       {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div className="sticky top-0 z-30 bg-card/95 backdrop-blur border-b border-border">
+      <div className="sticky top-14 md:top-0 z-30 bg-card/95 backdrop-blur border-b border-border">
         <div className="max-w-2xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-3">
             <button
