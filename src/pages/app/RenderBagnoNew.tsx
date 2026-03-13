@@ -520,7 +520,7 @@ export default function RenderBagnoNew() {
           ) : (
             <div className="space-y-4">
               <div className="relative rounded-2xl overflow-hidden">
-                <img src={fotoPreview} alt="Foto bagno" className="w-full max-h-[400px] object-contain bg-muted" />
+                <img src={fotoPreview} alt="Foto bagno" className="w-full max-h-[50vh] object-contain bg-muted" />
                 <button
                   onClick={() => { setFile(null); setFotoPreview(""); setAnalisi(null); }}
                   className="absolute top-3 right-3 bg-black/60 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/80 text-sm"
