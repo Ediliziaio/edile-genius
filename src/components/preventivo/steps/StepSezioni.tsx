@@ -7,7 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Sparkles, RefreshCw, Zap } from 'lucide-react';
 import { SEZIONI_DEFAULT, TIPO_SEZIONE_META } from '@/modules/preventivo/lib/defaultTemplate';
-import type { PreventivoSezione, SezioneContenuto } from '@/modules/preventivo/types';
+import type { PreventivoSezione } from '@/modules/preventivo/types';
+import type { SezioneContenuto } from '@/lib/preventivo-pdf';
 import type { StepProps } from './types';
 
 interface StepSezioniProps extends StepProps {
