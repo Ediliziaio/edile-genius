@@ -8,7 +8,7 @@ import {
   Building2, UserPlus, Users, FileText,
   BookUser, Megaphone, type LucideIcon,
   AlertTriangle, MessageCircle, Puzzle, Palette, HardHat, Bath, Home, Layers,
-  FileSignature, ShieldCheck, ClipboardList,
+  FileSignature, ShieldCheck, ClipboardList, Wand2,
   Coins, ChevronDown, Clock, Zap, Activity, CalendarClock,
 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -53,6 +53,7 @@ const companyNav: NavSection[] = [
     { label: "Render Facciata", icon: Home, href: "/app/render-facciata" },
     { label: "Render Persiane", icon: Layers, href: "/app/render-persiane" },
     { label: "Render Pavimento", icon: HardHat, href: "/app/render-pavimento" },
+    { label: "Render Stanza", icon: Wand2, href: "/app/render-stanza" },
   ]},
   { header: "IMPOSTAZIONI", items: [
     { label: "Crediti", icon: Coins, href: "/app/credits" },
