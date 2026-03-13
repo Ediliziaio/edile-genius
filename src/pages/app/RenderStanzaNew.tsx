@@ -644,25 +644,27 @@ export default function RenderStanzaNew() {
       );
       if (renderErr) throw renderErr;
 
-      setRenderUrl(renderData.result_url);
+      const renderPayload = unwrapEdge<{ result_url?: string; result_image_url?: string; result_base64?: string }>(renderData);
+      const finalUrl = renderPayload?.result_url || renderPayload?.result_image_url || renderPayload?.result_base64 || null;
+      setRenderUrl(finalUrl);
 
-      // Salva in gallery
+      // Salva in gallery (colonne corrette)
       await supabase.from('render_stanza_gallery' as any).insert({
         user_id: user.id,
         session_id: sessionId,
-        original_url: originalUrl || '',
-        result_url: renderData.result_url,
+        original_image_url: originalUrl || '',
+        result_image_url: finalUrl || '',
         tipo_stanza: config.tipo_stanza,
-        interventi_eseguiti: attivi,
-        config_json: configForPrompt,
+        interventi: attivi,
+        config_snapshot: configForPrompt,
       });
 
-      // Aggiorna stato sessione
+      // Aggiorna stato sessione (colonne corrette)
       await supabase
         .from('render_stanza_sessions' as any)
         .update({
           status: 'completed',
-          result_url: renderData.result_url,
+          result_image_url: finalUrl,
           interventi_selezionati: attivi,
           config_json: configForPrompt,
         })
