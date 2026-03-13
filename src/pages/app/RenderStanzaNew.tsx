@@ -535,11 +535,17 @@ export default function RenderStanzaNew() {
       );
       if (analyzeErr) throw analyzeErr;
 
-      setAnalisi(analyzeData.analisi);
-      setOriginalUrl(analyzeData.originalUrl || null);
+      const payload = unwrapEdge<{ analisi?: AnalisiStanza }>(analyzeData);
+      if (!payload?.analisi) {
+        toast.error('Analisi non riuscita: nessun dato ricevuto. Riprova.');
+        return;
+      }
+
+      setAnalisi(payload.analisi);
+      setOriginalUrl((payload as any).originalUrl || null);
 
       // Pre-fill config con dati analisi
-      prefillFromAnalisi(analyzeData.analisi);
+      prefillFromAnalisi(payload.analisi);
 
       // Avanza a step 2 (analisi)
       setStep(2);
