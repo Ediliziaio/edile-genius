@@ -9,6 +9,8 @@ import {
   pdf,
 } from "@react-pdf/renderer";
 
+import type { PreventivoSezione, RenderConfig } from '@/modules/preventivo/types';
+
 // Types
 export interface PreventivoVoce {
   id: string;
@@ -84,6 +86,19 @@ export interface TemplateConfig {
   company_address?: string;
   company_phone?: string;
   company_vat?: string;
+}
+
+// ── AI Section data passed from DB sezioni_json ──────────────────────────
+export interface SezioneContenuto {
+  testo: string;
+  chunks_usati?: string[];
+}
+
+// ── Render gallery entry ─────────────────────────────────────────────────
+export interface RenderEntry {
+  url: string;
+  titolo?: string;
+  tipo?: string;
 }
 
 // ✅ createStyles — dynamic colors, NO gap/objectFit/textTransform/shorthand
