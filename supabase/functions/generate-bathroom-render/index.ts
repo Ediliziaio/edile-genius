@@ -348,6 +348,7 @@ ${analisi.note_critiche ? `AI Notes: ${analisi.note_critiche}` : ""}`;
 
 function buildBlock_B(cfg: Record<string, any>): string {
   const s = cfg.sostituzione || {};
+  const san = cfg.sanitari || {};
   const toChange: string[] = [];
   const toKeep: string[] = [];
 
@@ -366,8 +367,14 @@ function buildBlock_B(cfg: Record<string, any>): string {
   const toModernize: string[] = [];
 
   for (const el of elements) {
-    if (s[el.key]) toChange.push(`✅ REPLACE: ${el.label} — full replacement per user specification`);
-    else toModernize.push(`🔄 MODERNIZE (keep type): ${el.label}`);
+    if (s[el.key]) {
+      toChange.push(`✅ REPLACE: ${el.label} — full replacement per user specification`);
+    } else if (el.key === "sanitari" && (san.wc_tipo || san.azione_bidet)) {
+      // User configured sanitari type without full replacement toggle
+      toChange.push(`🔄 UPGRADE TYPE: ${el.label} — upgrade to user-specified type while keeping position`);
+    } else {
+      toModernize.push(`🔄 MODERNIZE (keep type): ${el.label}`);
+    }
   }
 
   return `[BLOCK B – SELECTIVE REPLACEMENT DECLARATION]
@@ -378,6 +385,7 @@ ELEMENTS THAT SHOULD BE MODERNIZED BUT KEEP THEIR TYPE:
 ${toModernize.join("\n")}
 
 CRITICAL RULE: Elements marked "REPLACE" must be replaced entirely per the specifications below.
+Elements marked "UPGRADE TYPE" must be changed to the specified type/style while keeping their position.
 Elements marked "MODERNIZE" may be updated to a cleaner, more modern version that harmonizes
 with the new design — but the CATEGORY of object must NOT change.
 A toilet must remain a toilet. A bidet must remain a bidet. A bathtub must remain a bathtub.
@@ -547,25 +555,31 @@ ${mountingRules}
 
 function buildBlock_H(cfg: Record<string, any>): string {
   const s = cfg.sostituzione || {};
-  if (!s.sanitari) return `[BLOCK H – TOILET & BIDET — KEPT AS ORIGINAL]`;
-
   const san = cfg.sanitari || {};
   const wcTipo = san.wc_tipo || "sospeso";
   const colore = san.colore || "bianco";
+
+  // If no full replacement AND no user config, keep as original
+  if (!s.sanitari && !san.wc_tipo && !san.azione_bidet) {
+    return `[BLOCK H – TOILET & BIDET — KEPT AS ORIGINAL]`;
+  }
+
+  const upgradeNote = !s.sanitari ? " (upgrade to specified type, keep position)" : "";
 
   const toiletDesc = wcTipo === "sospeso" || wcTipo === "rimless_sospeso"
     ? "wall-hung toilet — the pan is mounted to the wall, floor below is completely clear, in-wall cistern concealed behind wall (not visible externally)"
     : "floor-standing toilet — the base rests on the floor, floor connection visible";
 
-  const bidetLine = san.azione_bidet !== "rimuovi"
-    ? `Bidet: ${san.azione_bidet === "sostituisci" ? "new " : ""}${wcTipo === "sospeso" ? "wall-hung bidet" : "floor-standing bidet"}, ${colore} ceramic, matching toilet style`
+  const bidetAction = san.azione_bidet || "mantieni";
+  const bidetLine = bidetAction !== "rimuovi"
+    ? `Bidet: ${bidetAction === "sostituisci" ? "new " : ""}${wcTipo === "sospeso" ? "wall-hung bidet" : "floor-standing bidet"}, ${colore} ceramic, matching toilet style`
     : "Bidet: REMOVE — show floor tiles where bidet was";
 
   const floorRule = wcTipo === "sospeso"
     ? "NO floor base visible — complete floor continuity under toilet pan"
     : "Floor contact: circular or rectangular base visible at floor level";
 
-  return `[BLOCK H – TOILET & BIDET SPECIFICATION]
+  return `[BLOCK H – TOILET & BIDET SPECIFICATION${upgradeNote}]
 Toilet type: ${toiletDesc}
 Toilet color: ${colore} ceramic
 ${bidetLine}
@@ -701,7 +715,7 @@ CRITICAL:
 const BATHROOM_SYSTEM_PROMPT = `SURGICAL INTERIOR DESIGN VISUALIZATION EDITOR
 You are performing a precise surgical replacement of bathroom interior elements in a real photograph.
 
-RULE 1: Replace ONLY what is explicitly listed in BLOCK B as "✅ REPLACE".
+RULE 1: Replace ONLY what is explicitly listed in BLOCK B as "✅ REPLACE" or "🔄 UPGRADE TYPE".
 RULE 2: Every other surface, object, and pixel must be photorealistic and identical to original.
 RULE 3: The result must be completely indistinguishable from a professional interior design photograph.
 RULE 4: Tile patterns must be geometrically correct — proper perspective, consistent joint width, no floating tiles.
