@@ -200,8 +200,9 @@ export default function RenderNew() {
         body: { image_url: signedData?.signedUrl || publicUrl },
       });
       if (error) throw error;
-      if (data?.analysis) {
-        setAnalysisData(data.analysis as FotoAnalisi);
+      const payload = (data?.data ?? data) as Record<string, unknown>;
+      if (payload?.analysis) {
+        setAnalysisData(payload.analysis as FotoAnalisi);
       }
     } catch (err: any) {
       setAnalysisError("Analisi non riuscita. Puoi comunque procedere manualmente.");

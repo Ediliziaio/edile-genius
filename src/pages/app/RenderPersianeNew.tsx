@@ -198,9 +198,10 @@ export default function RenderPersianeNew() {
       });
 
       if (error) throw error;
-      if (!data?.analisi) throw new Error("Analisi non ricevuta");
+      const payload = (data?.data ?? data) as Record<string, unknown>;
+      if (!payload?.analisi) throw new Error("Analisi non ricevuta");
 
-      const analisiData = data.analisi as AnalisiPersiana;
+      const analisiData = payload.analisi as AnalisiPersiana;
       setAnalisi(analisiData);
 
       // Pre-populate from analysis
@@ -318,9 +319,11 @@ export default function RenderPersianeNew() {
 
       clearInterval(interval);
       if (error) throw error;
-      if (!data?.result_url) throw new Error("URL risultato non ricevuto");
+      const renderPayload = (data?.data ?? data) as Record<string, unknown>;
+      const resultUrl = (renderPayload?.result_url || renderPayload?.result_image_url) as string;
+      if (!resultUrl) throw new Error("URL risultato non ricevuto");
 
-      setRenderUrl(data.result_url);
+      setRenderUrl(resultUrl);
 
       await (supabase.from("render_persiane_sessions") as any)
         .update({ result_image_url: data.result_url, status: "completed" })
