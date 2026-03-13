@@ -88,6 +88,7 @@ export default function RenderFacciataNew() {
   // Step 1: Upload
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+  const [originalStoragePath, setOriginalStoragePath] = useState<string | null>(null);
   const [fotoFile, setFotoFile] = useState<File | null>(null);
   const [imageNaturalWidth, setImageNaturalWidth] = useState(1024);
   const [imageNaturalHeight, setImageNaturalHeight] = useState(1024);

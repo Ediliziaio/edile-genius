@@ -526,7 +526,23 @@ Deno.serve(async (req) => {
     }
 
     const data = await response.json();
-    const imageData = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+
+    // Multi-format image extraction (matches pattern used in other render modules)
+    let imageData: string | null = null;
+    // Format 1: images array (legacy)
+    imageData = data.choices?.[0]?.message?.images?.[0]?.image_url?.url ?? null;
+    // Format 2: content array with image_url objects
+    if (!imageData) {
+      const content = data.choices?.[0]?.message?.content;
+      if (Array.isArray(content)) {
+        for (const part of content) {
+          if (part.type === "image_url" && part.image_url?.url) { imageData = part.image_url.url; break; }
+          if (typeof part === "string" && part.startsWith("data:image")) { imageData = part; break; }
+        }
+      } else if (typeof content === "string" && content.startsWith("data:image")) {
+        imageData = content;
+      }
+    }
     if (!imageData) throw new Error("No image returned from AI");
 
     const base64 = imageData.split(",")[1];

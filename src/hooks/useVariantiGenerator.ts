@@ -61,7 +61,8 @@ export function useVariantiGenerator({ sourceModulo, sourceSessionId }: UseVaria
         // Combine base prompt with variant-specific instructions
         const combinedPrompt = `${basePrompt}\n\n--- VARIANTE: ${v.nome} ---\n${v.prompt_extra}`;
 
-        const { data, error } = await supabase.functions.invoke('generate-room-render', {
+        const edgeFn = MODULE_EDGE_FUNCTION[sourceModulo] || 'generate-room-render';
+        const { data, error } = await supabase.functions.invoke(edgeFn, {
           body: {
             image_base64: imageBase64,
             mime_type: mimeType,

@@ -556,10 +556,10 @@ export default function RenderStanzaNew() {
 
       setAnalisi(payload.analisi);
 
-      // Build the public URL from storage path for gallery usage
+      // stanza-originals is a PRIVATE bucket — use signed URL instead of getPublicUrl (which returns 403)
       const origPath = `${user.id}/${(session as any).id}/original.${ext}`;
-      const { data: pubUrlData } = supabase.storage.from('stanza-originals').getPublicUrl(origPath);
-      setOriginalUrl(pubUrlData?.publicUrl || null);
+      const { data: signedData } = await supabase.storage.from('stanza-originals').createSignedUrl(origPath, 31536000); // 1 year
+      setOriginalUrl(signedData?.signedUrl || null);
 
       // Pre-fill config con dati analisi
       prefillFromAnalisi(payload.analisi);
