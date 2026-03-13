@@ -170,8 +170,15 @@ export default function RenderPavimentoNew() {
       setResultUrl(url);
       setStep(4);
     },
-    onError: (err) => {
-      toast({ title: "Errore render", description: String(err), variant: "destructive" });
+    onError: (err: any) => {
+      const msg = String(err?.message || err);
+      if (msg.includes('402') || msg.toLowerCase().includes('credit')) {
+        toast({ title: "Crediti esauriti", description: "Ricarica per continuare a generare render", variant: "destructive" });
+      } else if (msg.includes('429') || msg.toLowerCase().includes('rate')) {
+        toast({ title: "Troppi render in corso", description: "Riprova tra qualche secondo", variant: "destructive" });
+      } else {
+        toast({ title: "Errore render", description: msg, variant: "destructive" });
+      }
       setStep(2); // back to config
     },
   });
@@ -192,10 +199,24 @@ export default function RenderPavimentoNew() {
   const saveToGallery = async () => {
     if (!resultUrl || !user || !companyId) return;
     try {
+      // Generate signed URL for original image
+      let origUrl: string | null = null;
+      if (file) {
+        const ext = file.name.split(".").pop() ?? "jpg";
+        const origPath = `${user.id}/${sessionId ? sessionId : crypto.randomUUID()}.${ext}`;
+        // Try to find the actual uploaded path
+        const uploadedPath = `${user.id}/${sessionId}.${ext}`;
+        const { data: signedData } = await supabase.storage
+          .from("pavimento-originals")
+          .createSignedUrl(origPath, 31536000); // 1 year
+        origUrl = signedData?.signedUrl || null;
+      }
+
       await (supabase.from("render_pavimento_gallery") as any).insert({
         user_id: user.id,
         company_id: companyId,
         session_id: sessionId,
+        original_image_url: origUrl,
         result_image_url: resultUrl,
         tipo_operazione: tipoOperazione,
         tipo_pavimento: tipoPavimento,

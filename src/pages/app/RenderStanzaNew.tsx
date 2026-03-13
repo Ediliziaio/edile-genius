@@ -24,6 +24,8 @@ import {
   getInterventiAttivi,
   type ConfigurazioneStanza,
   type AnalisiStanza,
+  type TipoStanza,
+  type StileArredo,
   STANZA_STILI_PRONTI_FALLBACK,
 } from '@/modules/render-stanza/lib/stanzaPromptBuilder';
 import { unwrapEdge } from '@/lib/edgePayload';
@@ -41,9 +43,7 @@ const STEPS = [
   { id: 5, label: 'Risultato', icon: CheckCircle2 },
 ];
 
-type TipoStanza =
-  | 'soggiorno' | 'cucina' | 'camera_da_letto' | 'bagno'
-  | 'studio' | 'sala_da_pranzo' | 'corridoio' | 'altro';
+// TipoStanza imported from stanzaPromptBuilder above
 
 const TIPO_STANZA_OPTIONS: { value: TipoStanza; label: string; emoji: string }[] = [
   { value: 'soggiorno',      label: 'Soggiorno',       emoji: '🛋️' },
@@ -85,15 +85,19 @@ const INTERVENTO_META: Record<
   restyling_bagno:    { label: 'Restyling bagno',        desc: 'Rivestimenti, sanitari, rubinetteria',        icon: Bath,            color: 'teal',   onlyFor: ['bagno'] },
 };
 
-const STILI_TARGET = [
+const STILI_TARGET: { value: StileArredo | 'nessuno'; label: string; emoji: string }[] = [
   { value: 'moderno',      label: 'Moderno',      emoji: '⬛' },
   { value: 'scandinavo',   label: 'Scandinavo',   emoji: '🪵' },
   { value: 'industriale',  label: 'Industriale',  emoji: '⚙️' },
   { value: 'classico',     label: 'Classico',     emoji: '🏛️' },
+  { value: 'rustico',      label: 'Rustico',      emoji: '🏡' },
   { value: 'minimalista',  label: 'Minimalista',  emoji: '⬜' },
   { value: 'mediterraneo', label: 'Mediterraneo', emoji: '🌊' },
+  { value: 'art_deco',     label: 'Art Déco',     emoji: '🎭' },
   { value: 'luxe_contemporaneo', label: 'Lusso',  emoji: '💎' },
   { value: 'giapponese',   label: 'Japandi',      emoji: '🎋' },
+  { value: 'provenzale',   label: 'Provenzale',   emoji: '🌻' },
+  { value: 'eclettico',    label: 'Eclettico',    emoji: '🎨' },
   { value: 'nessuno',      label: 'Mantieni stile attuale', emoji: '✋' },
 ];
 
@@ -531,8 +535,8 @@ export default function RenderStanzaNew() {
 
       // Note: render_stanza_sessions may not have these columns — skip update to avoid silent failures
 
-      // 3. Chiama edge function analyze-room-photo
-      const base64 = await fileToBase64(foto);
+      // 3. Chiama edge function analyze-room-photo — use cached base64
+      const base64 = imageBase64 || await fileToBase64(foto);
       const { data: analyzeData, error: analyzeErr } = await supabase.functions.invoke(
         'analyze-room-photo',
         {
@@ -660,7 +664,7 @@ export default function RenderStanzaNew() {
     try {
       const { userPrompt, systemPrompt } = buildStanzaPrompt(analisi ?? null, configForPrompt);
 
-      const base64 = await fileToBase64(foto);
+      const base64 = imageBase64 || await fileToBase64(foto);
       const { data: renderData, error: renderErr } = await supabase.functions.invoke(
         'generate-room-render',
         {
@@ -717,10 +721,17 @@ export default function RenderStanzaNew() {
         .eq('id', sessionId);
 
       setStep(5);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error('Errore durante la generazione del render');
-      setDebug(String(err));
+      const msg = String(err?.message || err);
+      if (msg.includes('402') || msg.toLowerCase().includes('credit')) {
+        toast.error('Crediti esauriti — ricarica per continuare a generare render');
+      } else if (msg.includes('429') || msg.toLowerCase().includes('rate')) {
+        toast.error('Troppi render in corso — riprova tra qualche secondo');
+      } else {
+        toast.error('Errore durante la generazione del render');
+      }
+      setDebug(msg);
       setStep(3);
     } finally {
       setRendering(false);
@@ -730,6 +741,7 @@ export default function RenderStanzaNew() {
   const handleReset = () => {
     setStep(1);
     setFoto(null);
+    if (fotoPreview) URL.revokeObjectURL(fotoPreview);
     setFotoPreview(null);
     setSessionId(null);
     setOriginalUrl(null);
@@ -888,6 +900,7 @@ export default function RenderStanzaNew() {
                   <img src={fotoPreview} alt="Foto stanza" className="w-full max-h-80 object-cover" />
                   <button
                     onClick={() => {
+                      if (fotoPreview) URL.revokeObjectURL(fotoPreview);
                       setFoto(null);
                       setFotoPreview(null);
                     }}
