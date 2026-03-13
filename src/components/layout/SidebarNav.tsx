@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Bot, BarChart3, Settings,
   Building2, UserPlus, Users, FileText,
   BookUser, Megaphone, type LucideIcon,
-  AlertTriangle, MessageCircle, Puzzle, Palette, HardHat, Bath,
+  AlertTriangle, MessageCircle, Puzzle, Palette, HardHat, Bath, Home,
   FileSignature, ShieldCheck, ClipboardList,
   Coins, ChevronDown, Clock, Zap, Activity, CalendarClock,
 } from "lucide-react";
@@ -50,6 +50,7 @@ const companyNav: NavSection[] = [
   { header: "STRUMENTI AI", collapsible: true, defaultOpen: false, visibilityKey: "render", items: [
     { label: "Render Infissi", icon: Palette, href: "/app/render" },
     { label: "Render Bagno", icon: Bath, href: "/app/render-bagno" },
+    { label: "Render Facciata", icon: Home, href: "/app/render-facciata" },
   ]},
   { header: "IMPOSTAZIONI", items: [
     { label: "Crediti", icon: Coins, href: "/app/credits" },

@@ -3333,6 +3333,179 @@ export type Database = {
           },
         ]
       }
+      render_facciata_gallery: {
+        Row: {
+          colore_name: string | null
+          company_id: string
+          created_at: string | null
+          id: string
+          is_favorite: boolean | null
+          original_url: string | null
+          render_url: string
+          session_id: string | null
+          tags: string[] | null
+          thumbnail_url: string | null
+          tipo_intervento: string | null
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          colore_name?: string | null
+          company_id: string
+          created_at?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          original_url?: string | null
+          render_url: string
+          session_id?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          tipo_intervento?: string | null
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          colore_name?: string | null
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          original_url?: string | null
+          render_url?: string
+          session_id?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          tipo_intervento?: string | null
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_facciata_gallery_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "render_facciata_gallery_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "render_facciata_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      render_facciata_presets: {
+        Row: {
+          category: string
+          hex_color: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          prompt_fragment: string | null
+          sort_order: number | null
+          value: string
+        }
+        Insert: {
+          category: string
+          hex_color?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          prompt_fragment?: string | null
+          sort_order?: number | null
+          value: string
+        }
+        Update: {
+          category?: string
+          hex_color?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          prompt_fragment?: string | null
+          sort_order?: number | null
+          value?: string
+        }
+        Relationships: []
+      }
+      render_facciata_sessions: {
+        Row: {
+          analisi: Json | null
+          company_id: string
+          configurazione: Json | null
+          created_at: string | null
+          credits_used: number | null
+          error_message: string | null
+          generation_ms: number | null
+          id: string
+          original_height: number | null
+          original_path: string | null
+          original_width: number | null
+          prompt_used: string | null
+          prompt_version: string | null
+          render_path: string | null
+          render_url: string | null
+          status: string | null
+          tipo_intervento: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          analisi?: Json | null
+          company_id: string
+          configurazione?: Json | null
+          created_at?: string | null
+          credits_used?: number | null
+          error_message?: string | null
+          generation_ms?: number | null
+          id?: string
+          original_height?: number | null
+          original_path?: string | null
+          original_width?: number | null
+          prompt_used?: string | null
+          prompt_version?: string | null
+          render_path?: string | null
+          render_url?: string | null
+          status?: string | null
+          tipo_intervento?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          analisi?: Json | null
+          company_id?: string
+          configurazione?: Json | null
+          created_at?: string | null
+          credits_used?: number | null
+          error_message?: string | null
+          generation_ms?: number | null
+          id?: string
+          original_height?: number | null
+          original_path?: string | null
+          original_width?: number | null
+          prompt_used?: string | null
+          prompt_version?: string | null
+          render_path?: string | null
+          render_url?: string | null
+          status?: string | null
+          tipo_intervento?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_facciata_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       render_gallery: {
         Row: {
           company_id: string
