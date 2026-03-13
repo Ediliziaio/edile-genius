@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { UserPermissionsModal } from './UserPermissionsModal';
 import { InvitaUtenteModal } from './InvitaUtenteModal';
-import { Users, UserPlus, Shield, Settings2, Trash2, Search, Crown, Mail, Clock, XCircle } from 'lucide-react';
+import { Users, UserPlus, Shield, Settings2, Trash2, Search, Crown, Mail, Clock, XCircle, Building2 } from 'lucide-react';
 
 const RUOLO_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
   owner: { label: 'Proprietario', color: 'bg-amber-100 text-amber-700', icon: Crown },
@@ -23,17 +23,35 @@ const RUOLO_CONFIG: Record<string, { label: string; color: string; icon: any }> 
 };
 
 export function TabUtenti() {
-  const { user, roles } = useAuth();
+  const { user, roles, profile } = useAuth();
   const companyId = useCompanyId();
   const { toast } = useToast();
   const qc = useQueryClient();
-  const { membri, invitaUtente, rimuoviMembro, cambiaRuolo } = useAziendaSettings(companyId!);
 
   const [search, setSearch] = useState('');
   const [permissionsUserId, setPermissionsUserId] = useState<string | null>(null);
   const [showInvitaModal, setShowInvitaModal] = useState(false);
 
   const isAdmin = roles.includes('company_admin') || roles.includes('superadmin');
+
+  // Guard: no company
+  if (!companyId) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <Building2 className="w-12 h-12 text-muted-foreground/20 mb-4" />
+        <h2 className="text-lg font-semibold text-foreground mb-1">Nessuna azienda associata</h2>
+        <p className="text-sm text-muted-foreground max-w-sm">
+          Il tuo account non è ancora collegato a un'azienda. Contatta un amministratore per ricevere un invito.
+        </p>
+      </div>
+    );
+  }
+
+  return <TabUtentiContent companyId={companyId} user={user} profile={profile} roles={roles} isAdmin={isAdmin} search={search} setSearch={setSearch} permissionsUserId={permissionsUserId} setPermissionsUserId={setPermissionsUserId} showInvitaModal={showInvitaModal} setShowInvitaModal={setShowInvitaModal} toast={toast} qc={qc} />;
+}
+
+function TabUtentiContent({ companyId, user, profile, roles, isAdmin, search, setSearch, permissionsUserId, setPermissionsUserId, showInvitaModal, setShowInvitaModal, toast, qc }: any) {
+  const { membri, invitaUtente, rimuoviMembro, cambiaRuolo } = useAziendaSettings(companyId);
 
   // Pending invitations
   const { data: invitiPendenti = [] } = useQuery({
@@ -64,7 +82,25 @@ export function TabUtenti() {
     onError: (err: any) => toast({ title: 'Errore', description: err.message, variant: 'destructive' }),
   });
 
-  const filtratiMembri = membri.filter((m: any) =>
+  // Ensure current user always appears in the list
+  const membriWithSelf = (() => {
+    if (!user) return membri;
+    const found = membri.find((m: any) => m.user_id === user.id);
+    if (found) return membri;
+    // Add current user as fallback
+    return [
+      {
+        user_id: user.id,
+        nome: profile?.full_name || user.email,
+        email: user.email,
+        avatar_url: profile?.avatar_url || null,
+        ruolo: roles.includes('company_admin') ? 'admin' : 'membro',
+      },
+      ...membri,
+    ];
+  })();
+
+  const filtratiMembri = membriWithSelf.filter((m: any) =>
     (m.nome || m.email || '').toLowerCase().includes(search.toLowerCase())
   );
 
@@ -85,11 +121,11 @@ export function TabUtenti() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         <Card><CardContent className="p-4 text-center">
-          <p className="text-2xl font-bold text-foreground">{membri.length}</p>
+          <p className="text-2xl font-bold text-foreground">{membriWithSelf.length}</p>
           <p className="text-xs text-muted-foreground">Utenti totali</p>
         </CardContent></Card>
         <Card><CardContent className="p-4 text-center">
-          <p className="text-2xl font-bold text-foreground">{membri.filter((m: any) => m.ruolo === 'admin').length}</p>
+          <p className="text-2xl font-bold text-foreground">{membriWithSelf.filter((m: any) => m.ruolo === 'admin').length}</p>
           <p className="text-xs text-muted-foreground">Admin</p>
         </CardContent></Card>
         <Card><CardContent className="p-4 text-center">
