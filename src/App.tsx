@@ -98,6 +98,8 @@ const RenderFacciataHub = lazy(() => import("./pages/app/RenderFacciataHub"));
 const RenderFacciataNew = lazy(() => import("./pages/app/RenderFacciataNew"));
 const RenderPersianeHub = lazy(() => import("./pages/app/RenderPersianeHub"));
 const RenderPersianeNew = lazy(() => import("./pages/app/RenderPersianeNew"));
+const RenderPavimentoHub = lazy(() => import("./pages/app/RenderPavimentoHub"));
+const RenderPavimentoNew = lazy(() => import("./pages/app/RenderPavimentoNew"));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-screen">
@@ -202,6 +204,8 @@ const App = () => (
                 <Route path="/app/render-facciata/new" element={<SafeRoute><RenderFacciataNew /></SafeRoute>} />
                 <Route path="/app/render-persiane" element={<SafeRoute><RenderPersianeHub /></SafeRoute>} />
                 <Route path="/app/render-persiane/new" element={<SafeRoute><RenderPersianeNew /></SafeRoute>} />
+                <Route path="/app/render-pavimento" element={<SafeRoute><RenderPavimentoHub /></SafeRoute>} />
+                <Route path="/app/render-pavimento/new" element={<SafeRoute><RenderPavimentoNew /></SafeRoute>} />
                 <Route path="/app/lists" element={<SafeRoute><ContactListsPage /></SafeRoute>} />
                 <Route path="/app/lists/:id" element={<SafeRoute><ContactListDetailPage /></SafeRoute>} />
                 <Route path="/app/campaigns" element={<SafeRoute><CampaignsPage /></SafeRoute>} />

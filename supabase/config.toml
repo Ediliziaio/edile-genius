@@ -182,3 +182,9 @@ verify_jwt = false
 
 [functions.generate-shutter-render]
 verify_jwt = false
+
+[functions.analyze-floor-photo]
+verify_jwt = false
+
+[functions.generate-floor-render]
+verify_jwt = false

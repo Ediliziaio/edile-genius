@@ -3651,6 +3651,221 @@ export type Database = {
           },
         ]
       }
+      render_pavimento_gallery: {
+        Row: {
+          colore_hex: string | null
+          colore_mode: string | null
+          colore_name: string | null
+          company_id: string
+          created_at: string | null
+          finitura: string | null
+          id: string
+          is_favorite: boolean | null
+          pattern_posa: string | null
+          result_image_url: string
+          session_id: string | null
+          sottotipo: string | null
+          tipo_operazione: string | null
+          tipo_pavimento: string | null
+          user_id: string
+          wood_name: string | null
+        }
+        Insert: {
+          colore_hex?: string | null
+          colore_mode?: string | null
+          colore_name?: string | null
+          company_id: string
+          created_at?: string | null
+          finitura?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          pattern_posa?: string | null
+          result_image_url: string
+          session_id?: string | null
+          sottotipo?: string | null
+          tipo_operazione?: string | null
+          tipo_pavimento?: string | null
+          user_id: string
+          wood_name?: string | null
+        }
+        Update: {
+          colore_hex?: string | null
+          colore_mode?: string | null
+          colore_name?: string | null
+          company_id?: string
+          created_at?: string | null
+          finitura?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          pattern_posa?: string | null
+          result_image_url?: string
+          session_id?: string | null
+          sottotipo?: string | null
+          tipo_operazione?: string | null
+          tipo_pavimento?: string | null
+          user_id?: string
+          wood_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_pavimento_gallery_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "render_pavimento_gallery_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "render_pavimento_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      render_pavimento_sessions: {
+        Row: {
+          analysis_result: Json | null
+          colore_fuga: string | null
+          colore_hex: string | null
+          colore_mode: string | null
+          colore_name: string | null
+          company_id: string
+          created_at: string | null
+          dimensione_piastrella: string | null
+          error_message: string | null
+          finitura: string | null
+          id: string
+          larghezza_fuga_mm: number | null
+          larghezza_listello_mm: number | null
+          lunghezza_listello_mm: number | null
+          original_height: number | null
+          original_image_path: string | null
+          original_image_url: string | null
+          original_width: number | null
+          pattern_posa: string | null
+          prompt_usato: string | null
+          result_image_url: string | null
+          sottotipo: string | null
+          status: string
+          system_prompt: string | null
+          tipo_operazione: string | null
+          tipo_pavimento: string | null
+          updated_at: string | null
+          user_id: string
+          user_prompt: string | null
+          wood_name: string | null
+        }
+        Insert: {
+          analysis_result?: Json | null
+          colore_fuga?: string | null
+          colore_hex?: string | null
+          colore_mode?: string | null
+          colore_name?: string | null
+          company_id: string
+          created_at?: string | null
+          dimensione_piastrella?: string | null
+          error_message?: string | null
+          finitura?: string | null
+          id?: string
+          larghezza_fuga_mm?: number | null
+          larghezza_listello_mm?: number | null
+          lunghezza_listello_mm?: number | null
+          original_height?: number | null
+          original_image_path?: string | null
+          original_image_url?: string | null
+          original_width?: number | null
+          pattern_posa?: string | null
+          prompt_usato?: string | null
+          result_image_url?: string | null
+          sottotipo?: string | null
+          status?: string
+          system_prompt?: string | null
+          tipo_operazione?: string | null
+          tipo_pavimento?: string | null
+          updated_at?: string | null
+          user_id: string
+          user_prompt?: string | null
+          wood_name?: string | null
+        }
+        Update: {
+          analysis_result?: Json | null
+          colore_fuga?: string | null
+          colore_hex?: string | null
+          colore_mode?: string | null
+          colore_name?: string | null
+          company_id?: string
+          created_at?: string | null
+          dimensione_piastrella?: string | null
+          error_message?: string | null
+          finitura?: string | null
+          id?: string
+          larghezza_fuga_mm?: number | null
+          larghezza_listello_mm?: number | null
+          lunghezza_listello_mm?: number | null
+          original_height?: number | null
+          original_image_path?: string | null
+          original_image_url?: string | null
+          original_width?: number | null
+          pattern_posa?: string | null
+          prompt_usato?: string | null
+          result_image_url?: string | null
+          sottotipo?: string | null
+          status?: string
+          system_prompt?: string | null
+          tipo_operazione?: string | null
+          tipo_pavimento?: string | null
+          updated_at?: string | null
+          user_id?: string
+          user_prompt?: string | null
+          wood_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_pavimento_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      render_pavimento_stili_pronti: {
+        Row: {
+          attivo: boolean | null
+          config: Json
+          created_at: string | null
+          descrizione: string | null
+          emoji: string | null
+          id: string
+          nome: string
+          ordine: number | null
+          preview_hex: string | null
+        }
+        Insert: {
+          attivo?: boolean | null
+          config?: Json
+          created_at?: string | null
+          descrizione?: string | null
+          emoji?: string | null
+          id?: string
+          nome: string
+          ordine?: number | null
+          preview_hex?: string | null
+        }
+        Update: {
+          attivo?: boolean | null
+          config?: Json
+          created_at?: string | null
+          descrizione?: string | null
+          emoji?: string | null
+          id?: string
+          nome?: string
+          ordine?: number | null
+          preview_hex?: string | null
+        }
+        Relationships: []
+      }
       render_persiane_gallery: {
         Row: {
           colore_mode: string | null
