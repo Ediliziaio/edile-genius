@@ -933,7 +933,6 @@ export default function RenderBagnoNew() {
                 </div>
               </CardContent>
             </Card>
-          )}
 
           {/* Rubinetteria */}
           {sostituzione.rubinetteria && (
