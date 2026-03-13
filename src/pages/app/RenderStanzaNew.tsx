@@ -25,6 +25,8 @@ import {
   type AnalisiStanza,
   STANZA_STILI_PRONTI_FALLBACK,
 } from '@/modules/render-stanza/lib/stanzaPromptBuilder';
+import { ConfigRiepilogo } from '@/modules/render-stanza/components/ConfigRiepilogo';
+import { InterventiSummaryBar } from '@/modules/render-stanza/components/InterventiSummaryBar';
 
 // ─── COSTANTI ────────────────────────────────────────────────────────────────
 
