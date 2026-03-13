@@ -97,14 +97,11 @@ const TIPO_PERSIANA_PROMPTS: Record<TipoPersoniana, string> = {
 };
 
 const MATERIALE_PROMPTS: Record<MaterialePersiana, string> = {
-  legno: "natural solid wood with visible grain texture",
   legno_naturale: "premium natural solid wood (larch, pine, iroko) with authentic visible grain texture, painted or natural finish",
   legno_composito: "wood-composite material (WPC) — wood fiber + PVC blend, high weather resistance with realistic wood-grain embossing",
   alluminio: "extruded aluminum with smooth powder-coated finish",
   pvc: "PVC/uPVC with smooth matte surface, low maintenance",
   acciaio: "galvanized steel with industrial finish",
-  ferro_battuto: "wrought iron with ornamental hand-forged details",
-  composito: "wood-composite material with realistic wood-grain embossing",
   fibra_vetro: "fiberglass composite — lightweight, non-conductive, ideal for extreme climates",
 };
 
