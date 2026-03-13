@@ -2163,6 +2163,17 @@ export default function RenderStanzaNew() {
         {/* ═══════════════════════════════════════════════════════════════════
             STEP 5 — RISULTATO BEFORE/AFTER
         ════════════════════════════════════════════════════════════════════ */}
+        {step === 5 && !renderUrl && (
+          <div className="text-center space-y-4 py-12">
+            <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
+            <h2 className="text-xl font-semibold">Render non disponibile</h2>
+            <p className="text-muted-foreground">La generazione è terminata ma l'immagine non è stata ricevuta.</p>
+            <div className="flex justify-center gap-4">
+              <Button variant="outline" onClick={() => setStep(3)}>Torna agli interventi</Button>
+              <Button onClick={handleStartRender}>Riprova render</Button>
+            </div>
+          </div>
+        )}
         {step === 5 && renderUrl && (
           <div className="space-y-6">
             <div className="text-center">
