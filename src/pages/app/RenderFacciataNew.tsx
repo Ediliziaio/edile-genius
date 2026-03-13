@@ -220,9 +220,11 @@ export default function RenderFacciataNew() {
       });
 
       if (error) throw new Error(error.message);
-      if (!data?.analysis) throw new Error("Analisi non ricevuta");
+      const payload = (data?.data ?? data) as Record<string, unknown>;
+      const analysisResult = payload?.analysis ?? payload?.analisi;
+      if (!analysisResult) throw new Error("Analisi non ricevuta");
 
-      setAnalisi(data.analysis as AnalysiFacciata);
+      setAnalisi(analysisResult as AnalysiFacciata);
       setAnalyzing(false);
       setStep(3);
     } catch (err: any) {
