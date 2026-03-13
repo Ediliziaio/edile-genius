@@ -587,10 +587,15 @@ export default function RenderStanzaNew() {
     key: K,
     partial: Partial<WizardConfig[K]>
   ) => {
-    setConfig(prev => ({
-      ...prev,
-      [key]: { ...(prev[key] as any), ...partial },
-    }));
+    setConfig(prev => {
+      const existing = prev[key];
+      return {
+        ...prev,
+        [key]: typeof existing === 'object' && existing !== null
+          ? { ...existing, ...partial }
+          : { ...partial },
+      };
+    });
   };
 
   const handleStartRender = async () => {
