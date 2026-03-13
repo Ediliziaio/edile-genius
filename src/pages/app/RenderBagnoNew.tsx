@@ -897,11 +897,12 @@ export default function RenderBagnoNew() {
             </Card>
           )}
 
-          {/* WC & Bidet */}
-          {sostituzione.sanitari && (
-            <Card>
-              <CardContent className="py-4 space-y-4">
-                <h3 className="font-semibold text-foreground">🚽 WC & Bidet</h3>
+          {/* WC & Bidet — sempre visibile */}
+          <Card>
+            <CardContent className="py-4 space-y-4">
+              <h3 className="font-semibold text-foreground">
+                🚽 WC & Bidet {!sostituzione.sanitari && <span className="text-xs font-normal text-muted-foreground">(personalizza stile)</span>}
+              </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="text-xs text-muted-foreground">Tipo WC</Label>
