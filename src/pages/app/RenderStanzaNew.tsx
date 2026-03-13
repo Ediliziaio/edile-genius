@@ -535,8 +535,8 @@ export default function RenderStanzaNew() {
 
       // Note: render_stanza_sessions may not have these columns — skip update to avoid silent failures
 
-      // 3. Chiama edge function analyze-room-photo
-      const base64 = await fileToBase64(foto);
+      // 3. Chiama edge function analyze-room-photo — use cached base64
+      const base64 = imageBase64 || await fileToBase64(foto);
       const { data: analyzeData, error: analyzeErr } = await supabase.functions.invoke(
         'analyze-room-photo',
         {
