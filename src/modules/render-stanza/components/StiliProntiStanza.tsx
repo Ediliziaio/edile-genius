@@ -29,20 +29,19 @@ export function StiliProntiStanza({ onApply, tipoStanza, className = '' }: Stili
   const { data: dbStili, isLoading } = useQuery({
     queryKey: ['render_stanza_stili', tipoStanza],
     queryFn: async () => {
-      let query = (supabase.from('render_stanza_stili_pronti') as any)
-        .select('*')
-        .eq('attivo', true)
-        .order('ordine', { ascending: true });
+      try {
+        const baseQuery = supabase.from('render_stanza_stili_pronti' as any).select('*');
+        let query = (baseQuery as any).eq('attivo', true).order('ordine', { ascending: true });
 
-      if (tipoStanza && tipoStanza !== 'altro') {
-        query = query.or(`tipo_stanza.eq.${tipoStanza},tipo_stanza.eq.universale`);
-      }
+        if (tipoStanza && tipoStanza !== 'altro') {
+          query = query.or(`tipo_stanza.eq.${tipoStanza},tipo_stanza.eq.universale`);
+        }
 
-      const { data, error } = await query;
-      if (error) throw error;
-      return (data || []).map((row: any) => ({
-        id: row.id,
-        nome: row.nome,
+        const { data, error } = await query;
+        if (error) return []; // table may not exist yet
+        return (data || []).map((row: any) => ({
+          id: row.id,
+          nome: row.nome,
         descrizione: row.descrizione || '',
         emoji: row.emoji || '✨',
         tags: row.tags || [],
