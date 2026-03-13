@@ -38,9 +38,11 @@ Deno.serve(async (req) => {
       .single();
     if (sessErr || !session) return jsonError("Session not found", "not_found", 404, rid);
 
-    // Verify user belongs to same company
+    // Verify user belongs to same company (superadmins bypass)
     const { data: profile } = await supabase.from("profiles").select("company_id").eq("id", user.id).single();
-    if (!profile || profile.company_id !== session.company_id) {
+    const { data: userRoles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+    const isSuperAdmin = userRoles?.some((r: { role: string }) => r.role === "superadmin" || r.role === "superadmin_user");
+    if (!isSuperAdmin && (!profile || profile.company_id !== session.company_id)) {
       return jsonError("Access denied", "auth_error", 403, rid);
     }
 
