@@ -519,6 +519,18 @@ export default function RenderFacciataNew() {
             </div>
           )}
 
+          {/* Stili pronti */}
+          <StiliProntiFacciata
+            onApply={(config) => {
+              if (config.tipo_intervento) setTipoIntervento(config.tipo_intervento);
+              if (config.colore_intonaco) setColoreIntonaco(config.colore_intonaco);
+              if (config.cappotto) setCappotto(config.cappotto);
+              if (config.rivestimento) setRivestimento(config.rivestimento as any);
+            }}
+          />
+
+          <hr className="border-border" />
+
           {/* Tipo intervento */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold">Tipo di intervento</Label>
