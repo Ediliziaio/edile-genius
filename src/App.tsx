@@ -147,6 +147,7 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<SafeRoute><ForgotPassword /></SafeRoute>} />
             <Route path="/reset-password" element={<SafeRoute><ResetPassword /></SafeRoute>} />
+            <Route path="/s/:token" element={<SafeRoute><PublicShareViewer /></SafeRoute>} />
 
             {/* SuperAdmin routes */}
             <Route element={<AuthGuard requiredRole="superadmin" />}>
