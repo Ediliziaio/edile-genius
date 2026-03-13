@@ -135,12 +135,12 @@ export default function RenderPersianeNew() {
     const previewUrl = URL.createObjectURL(file);
     setFotoPreview(previewUrl);
 
-    // Detect dimensions
+    // Detect dimensions — reuse existing previewUrl instead of creating a second blob URL
     const { w, h } = await new Promise<{ w: number; h: number }>((resolve) => {
       const img = new Image();
       img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
       img.onerror = () => resolve({ w: 1024, h: 1024 });
-      img.src = URL.createObjectURL(file);
+      img.src = previewUrl;
     });
     setImageNaturalWidth(w);
     setImageNaturalHeight(h);
@@ -326,7 +326,7 @@ export default function RenderPersianeNew() {
       setRenderUrl(resultUrl);
 
       await (supabase.from("render_persiane_sessions") as any)
-        .update({ result_image_url: data.result_url, status: "completed" })
+        .update({ result_image_url: resultUrl, status: "completed" })
         .eq("id", sessionId);
 
       toast({ title: "🎉 Render completato!", description: "La tua persiana virtuale è pronta" });

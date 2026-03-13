@@ -120,8 +120,33 @@ Deno.serve(async (req) => {
     }
 
     const data = await response.json();
-    const imageData = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-    if (!imageData) throw new Error("No image returned from AI");
+
+    // Extract image from response — check multiple possible locations:
+    // 1. images field (Nano banana format): data.choices[0].message.images[0].image_url.url
+    // 2. content as array: data.choices[0].message.content[].image_url.url or inlineData
+    // 3. content as string: data:image/...
+    let imageData: string | undefined;
+
+    const imagesField = data.choices?.[0]?.message?.images;
+    const contentField = data.choices?.[0]?.message?.content;
+
+    if (Array.isArray(imagesField) && imagesField.length > 0) {
+      imageData = imagesField[0]?.image_url?.url;
+    } else if (typeof contentField === "string" && contentField.startsWith("data:image")) {
+      imageData = contentField;
+    } else if (Array.isArray(contentField)) {
+      const imgPart = contentField.find((p: any) => p.type === "image_url" || p.inlineData);
+      if (imgPart?.image_url?.url) {
+        imageData = imgPart.image_url.url;
+      } else if (imgPart?.inlineData?.data) {
+        imageData = `data:image/png;base64,${imgPart.inlineData.data}`;
+      }
+    }
+
+    if (!imageData) {
+      log("error", "No image in AI response", { request_id: rid, fn: FN, keys: Object.keys(data.choices?.[0]?.message || {}) });
+      throw new Error("No image returned from AI");
+    }
 
     // Upload result
     const base64 = imageData.split(",")[1];

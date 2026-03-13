@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { useCompanyId } from '@/hooks/useCompanyId';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -429,6 +430,7 @@ function mapPresetToWizard(preset: Partial<ConfigurazioneStanza>, base: WizardCo
 export default function RenderStanzaNew() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const companyId = useCompanyId();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ── Step & navigation
@@ -506,10 +508,12 @@ export default function RenderStanzaNew() {
 
     try {
       // 1. Crea sessione DB
+      // 1. Crea sessione DB con company_id per isolamento multi-tenant
       const { data: session, error: sessErr } = await supabase
         .from('render_stanza_sessions' as any)
         .insert({
           user_id: user.id,
+          company_id: companyId,
           tipo_stanza: config.tipo_stanza,
           status: 'analyzing',
         })
@@ -550,7 +554,11 @@ export default function RenderStanzaNew() {
       }
 
       setAnalisi(payload.analisi);
-      setOriginalUrl((payload as any).originalUrl || null);
+
+      // Build the public URL from storage path for gallery usage
+      const origPath = `${user.id}/${(session as any).id}/original.${ext}`;
+      const { data: pubUrlData } = supabase.storage.from('stanza-originals').getPublicUrl(origPath);
+      setOriginalUrl(pubUrlData?.publicUrl || null);
 
       // Pre-fill config con dati analisi
       prefillFromAnalisi(payload.analisi);
@@ -659,6 +667,7 @@ export default function RenderStanzaNew() {
       // Salva in gallery (colonne corrette)
       await supabase.from('render_stanza_gallery' as any).insert({
         user_id: user.id,
+        company_id: companyId,
         session_id: sessionId,
         original_image_url: originalUrl || '',
         result_image_url: finalUrl || '',
