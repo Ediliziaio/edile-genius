@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Bot, BarChart3, Settings,
   Building2, UserPlus, Users, FileText,
   BookUser, Megaphone, type LucideIcon,
-  AlertTriangle, MessageCircle, Puzzle, Palette, HardHat, Bath, Home,
+  AlertTriangle, MessageCircle, Puzzle, Palette, HardHat, Bath, Home, Layers,
   FileSignature, ShieldCheck, ClipboardList,
   Coins, ChevronDown, Clock, Zap, Activity, CalendarClock,
 } from "lucide-react";
