@@ -358,6 +358,7 @@ export default function RenderBagnoNew() {
 
   const selectTipoIntervento = (val: TipoIntervento) => {
     setTipoIntervento(val);
+    setConfigLayout(prev => ({ ...prev, attivo: false }));
     if (val === "restyling_piastrelle") {
       setSostituzione({ piastrelle_parete: true, pavimento: true, doccia: false, vasca: false, mobile_bagno: false, sanitari: false, rubinetteria: false, parete_colore: false, illuminazione: false });
     } else if (val === "restyling_completo") {
