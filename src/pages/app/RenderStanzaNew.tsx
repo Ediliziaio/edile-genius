@@ -24,6 +24,8 @@ import {
   getInterventiAttivi,
   type ConfigurazioneStanza,
   type AnalisiStanza,
+  type TipoStanza,
+  type StileArredo,
   STANZA_STILI_PRONTI_FALLBACK,
 } from '@/modules/render-stanza/lib/stanzaPromptBuilder';
 import { unwrapEdge } from '@/lib/edgePayload';
