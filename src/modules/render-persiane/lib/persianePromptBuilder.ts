@@ -182,13 +182,16 @@ ${analisi.note_speciali ? `Special notes: ${analisi.note_speciali}` : ""}`);
       colorPrompt = config.colore.wood.prompt_fragment;
     }
 
+    const hasSlats = TIPI_CON_LAMELLE.has(config.tipo_persiana);
+    const slatLines = hasSlats
+      ? `\nSlat width: ${config.larghezza_lamella_mm}mm\nSlat aperture: ${APERTURA_LAMELLE_PROMPTS[config.apertura_lamelle]}`
+      : "";
+
     blocks.push(`[BLOCK C – SHUTTER SPECIFICATION]
 Type: ${TIPO_PERSIANA_PROMPTS[config.tipo_persiana]}
 Material: ${MATERIALE_PROMPTS[config.materiale]}
 Color/Finish: ${colorPrompt}
-Opening state: ${STATO_APERTURA_PROMPTS[config.stato_apertura]}
-Slat width: ${config.larghezza_lamella_mm}mm
-Slat aperture: ${APERTURA_LAMELLE_PROMPTS[config.apertura_lamelle]}
+Opening state: ${STATO_APERTURA_PROMPTS[config.stato_apertura]}${slatLines}
 ${config.aggiungi_a_tutte_finestre ? "Apply to ALL visible windows" : config.finestre_target || ""}`);
 
     // Block D — Profile color (optional)

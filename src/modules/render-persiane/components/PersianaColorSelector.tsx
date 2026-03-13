@@ -77,7 +77,7 @@ export function PersianaColorSelector({
   const [showAllWoods, setShowAllWoods] = useState(false);
   const [showFullRalPicker, setShowFullRalPicker] = useState(false);
 
-  const canUseLegno = materialePersiana !== "acciaio" && materialePersiana !== "ferro_battuto";
+  const canUseLegno = materialePersiana !== "acciaio";
   const suggestedWoodIds = WOOD_SUGGESTIONS[materialePersiana] ?? [];
   const displayedWoods = showAllWoods
     ? WOOD_EFFECTS_PERSIANE
