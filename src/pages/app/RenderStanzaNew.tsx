@@ -698,16 +698,16 @@ export default function RenderStanzaNew() {
     setConfig(mapped);
     // Sincronizza i toggle degli interventi
     const nuoviAttivi: InterventiState = {
-      verniciatura: mapped.verniciatura.attivo,
-      pavimento: mapped.pavimento.attivo,
-      arredo: mapped.arredo.attivo,
-      soffitto: mapped.soffitto.attivo,
-      illuminazione: mapped.illuminazione.attivo,
-      carta_da_parati: mapped.carta_da_parati.attivo,
-      rivestimento_pareti: mapped.rivestimento_pareti.attivo,
-      tende: mapped.tende.attivo,
-      restyling_cucina: mapped.restyling_cucina.attivo,
-      restyling_bagno: mapped.restyling_bagno.attivo,
+      verniciatura: mapped.verniciatura?.attivo ?? false,
+      pavimento: mapped.pavimento?.attivo ?? false,
+      arredo: mapped.arredo?.attivo ?? false,
+      soffitto: mapped.soffitto?.attivo ?? false,
+      illuminazione: mapped.illuminazione?.attivo ?? false,
+      carta_da_parati: mapped.carta_da_parati?.attivo ?? false,
+      rivestimento_pareti: mapped.rivestimento_pareti?.attivo ?? false,
+      tende: mapped.tende?.attivo ?? false,
+      restyling_cucina: mapped.restyling_cucina?.attivo ?? false,
+      restyling_bagno: mapped.restyling_bagno?.attivo ?? false,
     };
     setInterventiAttivi(nuoviAttivi);
     toast.success(`Stile "${stile.nome}" applicato`);
