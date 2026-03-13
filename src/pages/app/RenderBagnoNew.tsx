@@ -510,7 +510,7 @@ export default function RenderBagnoNew() {
               onDragOver={e => e.preventDefault()}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-border rounded-2xl p-12 text-center cursor-pointer hover:border-primary/50 hover:bg-accent/30 transition-all"
+              className="border-2 border-dashed border-border rounded-2xl p-6 md:p-12 text-center cursor-pointer hover:border-primary/50 hover:bg-accent/30 transition-all"
             >
               <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-40" />
               <p className="text-lg font-medium text-foreground">Carica foto bagno</p>
