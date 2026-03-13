@@ -85,6 +85,7 @@ export function useRenderTetto(options: UseRenderTettoOptions = {}) {
     if (!companyId) { toast.error('Company non trovata'); return; }
 
     setFoto(file);
+    if (fotoPreview) URL.revokeObjectURL(fotoPreview);
     setFotoPreview(URL.createObjectURL(file));
     setRenderUrl(null);
     setAnalisi(null);

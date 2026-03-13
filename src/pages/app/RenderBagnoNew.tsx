@@ -300,6 +300,7 @@ export default function RenderBagnoNew() {
       return;
     }
     setFile(f);
+    if (fotoPreview) URL.revokeObjectURL(fotoPreview);
     setFotoPreview(URL.createObjectURL(f));
     setAnalisi(null);
     setAnalyzing(true);

@@ -176,6 +176,7 @@ export default function RenderNew() {
     setImageNaturalWidth(dims.width);
     setImageNaturalHeight(dims.height);
     setFile(f);
+    if (preview) URL.revokeObjectURL(preview);
     setPreview(URL.createObjectURL(f));
   }, [toast]);
 
