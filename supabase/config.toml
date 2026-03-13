@@ -203,3 +203,9 @@ verify_jwt = false
 
 [functions.revoke-share-link]
 verify_jwt = false
+
+[functions.analyze-roof-photo]
+verify_jwt = false
+
+[functions.generate-roof-render]
+verify_jwt = false
