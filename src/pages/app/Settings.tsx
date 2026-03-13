@@ -71,6 +71,14 @@ function BillingTabContent({ companyId, navigate }: { companyId: string | null |
     },
     enabled: !!companyId, staleTime: 2 * 60 * 1000,
   });
+  const { data: company } = useQuery({
+    queryKey: ["billing-company", companyId],
+    queryFn: async () => {
+      const { data } = await supabase.from("companies").select("name, plan, created_at").eq("id", companyId!).single();
+      return data as { name: string; plan: string | null; created_at: string } | null;
+    },
+    enabled: !!companyId, staleTime: 5 * 60 * 1000,
+  });
   const { data: recentTopups = [] } = useQuery({
     queryKey: ["billing-topups", companyId],
     queryFn: async () => {
@@ -81,9 +89,33 @@ function BillingTabContent({ companyId, navigate }: { companyId: string | null |
     enabled: !!companyId, staleTime: 2 * 60 * 1000,
   });
   const balanceStatus = !billingCredits ? null : billingCredits.balance_eur < 10 ? "destructive" : billingCredits.balance_eur < 50 ? "secondary" : "default";
+  const planLabel = company?.plan || "Free";
+  const planBadgeVariant = planLabel.toLowerCase().includes("pro") ? "default" : planLabel.toLowerCase().includes("enterprise") ? "default" : "secondary";
 
   return (
-    <div className="space-y-4 max-w-lg">
+    <div className="space-y-6 max-w-lg">
+      <div>
+        <h2 className="text-lg font-semibold text-foreground">Fatturazione</h2>
+        <p className="text-sm text-muted-foreground">Gestisci il tuo piano, crediti e pagamenti</p>
+      </div>
+
+      {/* Current plan */}
+      <Card>
+        <CardContent className="p-6 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Piano corrente</p>
+              <p className="text-xl font-bold text-foreground">{planLabel}</p>
+            </div>
+            <Badge variant={planBadgeVariant as any} className="text-sm px-3 py-1">{planLabel.toLowerCase().includes("pro") ? "Attivo" : planLabel.toLowerCase().includes("enterprise") ? "Attivo" : "Base"}</Badge>
+          </div>
+          {company?.created_at && (
+            <p className="text-xs text-muted-foreground">Membro dal {new Date(company.created_at).toLocaleDateString("it-IT")}</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Credits */}
       <Card><CardHeader className="pb-3"><CardTitle className="text-base">Crediti conversazionali</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
@@ -94,6 +126,8 @@ function BillingTabContent({ companyId, navigate }: { companyId: string | null |
           <Button size="sm" variant="outline" onClick={() => navigate("/app/credits")} className="gap-2"><CreditCard className="h-4 w-4" /> Gestisci crediti</Button>
         </CardContent>
       </Card>
+
+      {/* Recent topups */}
       {recentTopups.length > 0 && (
         <Card><CardHeader className="pb-3"><CardTitle className="text-base">Ultime ricariche</CardTitle></CardHeader>
           <CardContent className="space-y-2">
