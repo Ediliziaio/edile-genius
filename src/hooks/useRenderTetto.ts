@@ -265,7 +265,7 @@ export function useRenderTetto(options: UseRenderTettoOptions = {}) {
     handleFotoChange,
     sessionId,
     analizzando, analisi, analizzaTetto,
-    tipoTetto, setTipoTetto, config, updateConfig, applyStile, countAttive,
+    tipoTetto, setTipoTetto, config, setConfig, updateConfig, applyStile, countAttive,
     rendering, renderUrl, generaRender,
     reset,
   };

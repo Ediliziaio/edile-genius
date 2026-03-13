@@ -213,18 +213,10 @@ export default function RenderTettoNew() {
     sessionId,
     analizzando, analisi, analizzaTetto,
     tipoTetto, setTipoTetto,
-    config, updateConfig, countAttive,
+    config, setConfig, updateConfig, countAttive,
     rendering, renderUrl, generaRender,
     reset,
   } = useRenderTetto();
-
-  // Helper for note_libere since it's a string, not a section object
-  const setNoteLibere = useCallback((val: string) => {
-    // We need direct config update for note_libere
-    // updateConfig expects section + partial updates for objects
-    // Use a workaround: cast
-    (updateConfig as any)('note_libere', val);
-  }, [updateConfig]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
