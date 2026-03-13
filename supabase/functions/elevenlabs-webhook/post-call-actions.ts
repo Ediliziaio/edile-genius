@@ -3,7 +3,7 @@ import { log } from "../_shared/utils.ts";
 /**
  * Post-Call Actions: Atomic pipeline using process_post_call_atomic RPC.
  * Single transaction: contact update + action log + campaign exclusion.
- * Also updates outbound_call_log and contacts via update_contact_after_call.
+ * Also updates outbound_call_log and contacts via update_contact_after_call (only when no AI outcome).
  */
 export async function runPostCallActions(
   sb: any,
@@ -124,25 +124,25 @@ export async function runPostCallActions(
       }
     }
 
-    // 5. CRM auto-update via outbound_call_log linkage
-    if (contactId) {
+    // 5. CRM auto-update via update_contact_after_call — ONLY when AI outcome was NOT available
+    //    This prevents the simpler duration-based logic from overwriting the AI classification.
+    if (contactId && !outcomeAi) {
       const sentiment = analyzeSentiment(transcript || []);
       const outcome = determineOutcome(callStatus, durationSeconds);
       const nextCallAt = suggestNextCallTime(outcome, sentiment);
 
-      // Update contact atomically
       try {
         await sb.rpc("update_contact_after_call", {
           p_contact_id: contactId,
           p_outcome: outcome,
           p_duration_sec: durationSeconds || 0,
           p_agent_id: agentId || null,
-          p_ai_summary: null, // summary is generated separately in the main webhook
+          p_ai_summary: null,
           p_next_call_at: nextCallAt?.toISOString() ?? null,
           p_sentiment: sentiment,
         });
 
-        log("info", "Contact CRM updated after call", {
+        log("info", "Contact CRM updated after call (fallback, no AI outcome)", {
           request_id: requestId,
           contact_id: contactId,
           outcome,
@@ -154,19 +154,22 @@ export async function runPostCallActions(
           error: (err as Error).message,
         });
       }
+    }
 
-      // Update outbound_call_log with outcome/sentiment if linked
-      if (conversationId) {
-        await sb
-          .from("outbound_call_log")
-          .update({
-            outcome,
-            sentiment,
-            duration_sec: durationSeconds || 0,
-            ended_at: new Date().toISOString(),
-          })
-          .eq("el_conversation_id", conversationId);
-      }
+    // 6. Update outbound_call_log with outcome/sentiment if linked
+    if (contactId && conversationId) {
+      const sentiment = analyzeSentiment(transcript || []);
+      const outcome = outcomeAi || determineOutcome(callStatus, durationSeconds);
+
+      await sb
+        .from("outbound_call_log")
+        .update({
+          outcome,
+          sentiment,
+          duration_sec: durationSeconds || 0,
+          ended_at: new Date().toISOString(),
+        })
+        .eq("el_conversation_id", conversationId);
     }
 
     if (!contactId) {

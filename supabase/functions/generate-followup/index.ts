@@ -1,9 +1,11 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { corsHeaders, generateRequestId, log, fetchWithTimeout, jsonOk, jsonError, errorResponse } from "../_shared/utils.ts";
+import { corsHeaders, generateRequestId, log, jsonOk, jsonError, errorResponse } from "../_shared/utils.ts";
+
+const AI_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
 /**
  * Generate a follow-up message suggestion for a contact or preventivo.
- * Uses OpenAI gpt-4o-mini to draft a WhatsApp/email message.
+ * Uses Lovable AI Gateway with google/gemini-2.5-flash.
  */
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -22,12 +24,10 @@ Deno.serve(async (req) => {
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     if (userError || !user) return jsonError("Unauthorized", "auth_error", 401, rid);
 
-    const openaiKey = Deno.env.get("OPENAI_API_KEY");
-    if (!openaiKey) return jsonError("OPENAI_API_KEY non configurata", "system_error", 500, rid);
+    const apiKey = Deno.env.get("LOVABLE_API_KEY");
+    if (!apiKey) return jsonError("LOVABLE_API_KEY non configurata", "system_error", 500, rid);
 
     const { context_type, context } = await req.json();
-    // context_type: "contact" | "preventivo"
-    // context: { name, last_conversation_summary, preventivo_titolo, preventivo_importo, days_since, ... }
 
     if (!context_type || !context) {
       return jsonError("context_type and context required", "validation_error", 400, rid);
@@ -58,14 +58,14 @@ Il messaggio deve essere breve (3-4 frasi), professionale e orientato a ottenere
       return jsonError("context_type must be 'contact' or 'preventivo'", "validation_error", 400, rid);
     }
 
-    const res = await fetchWithTimeout("https://api.openai.com/v1/chat/completions", {
+    const res = await fetch(AI_GATEWAY_URL, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${openaiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "google/gemini-2.5-flash",
         temperature: 0.7,
         max_tokens: 300,
         messages: [
@@ -73,10 +73,16 @@ Il messaggio deve essere breve (3-4 frasi), professionale e orientato a ottenere
           { role: "user", content: userPrompt },
         ],
       }),
-    }, 15_000);
+    });
 
     if (!res.ok) {
-      log("error", "OpenAI error", { request_id: rid, fn: FN, status: res.status });
+      if (res.status === 429) {
+        return jsonError("Troppi messaggi generati, riprova tra poco", "rate_limit", 429, rid);
+      }
+      if (res.status === 402) {
+        return jsonError("Crediti AI esauriti, ricarica il workspace", "payment_required", 402, rid);
+      }
+      log("error", "AI Gateway error", { request_id: rid, fn: FN, status: res.status });
       return jsonError("Errore generazione messaggio", "provider_error", 502, rid);
     }
 

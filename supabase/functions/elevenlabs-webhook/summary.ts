@@ -12,17 +12,19 @@ const VALID_OUTCOMES = [
   "voicemail", "no_answer", "wrong_number", "do_not_call",
 ];
 
+const AI_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+
 /**
  * Generate call analysis: summary, main_reason, outcome classification, next_step.
- * Uses OpenAI gpt-4o-mini. Returns nulls if OPENAI_API_KEY is not set.
+ * Uses Lovable AI Gateway with google/gemini-2.5-flash.
  */
 export async function generateCallAnalysis(
   transcript: any[],
   requestId: string,
 ): Promise<CallAnalysis> {
-  const apiKey = Deno.env.get("OPENAI_API_KEY");
+  const apiKey = Deno.env.get("LOVABLE_API_KEY");
   if (!apiKey) {
-    log("info", "OPENAI_API_KEY not set — skipping analysis", { request_id: requestId });
+    log("info", "LOVABLE_API_KEY not set — skipping analysis", { request_id: requestId });
     return { summary: null, main_reason: null, outcome_ai: null, next_step: null };
   }
 
@@ -39,17 +41,16 @@ export async function generateCallAnalysis(
     .slice(0, 6000);
 
   try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    const res = await fetch(AI_GATEWAY_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "google/gemini-2.5-flash",
         temperature: 0.3,
         max_tokens: 400,
-        response_format: { type: "json_object" },
         messages: [
           {
             role: "system",
@@ -68,7 +69,7 @@ export async function generateCallAnalysis(
     });
 
     if (!res.ok) {
-      log("warn", "OpenAI API error for analysis", { request_id: requestId, status: res.status });
+      log("warn", "AI Gateway error for analysis", { request_id: requestId, status: res.status });
       return { summary: null, main_reason: null, outcome_ai: null, next_step: null };
     }
 
@@ -77,7 +78,9 @@ export async function generateCallAnalysis(
     if (!content) return { summary: null, main_reason: null, outcome_ai: null, next_step: null };
 
     try {
-      const parsed = JSON.parse(content);
+      // Strip markdown code fences if present
+      const cleaned = content.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
+      const parsed = JSON.parse(cleaned);
       const summary = parsed.summary || null;
       const main_reason = parsed.main_reason || null;
       const outcome_ai = VALID_OUTCOMES.includes(parsed.outcome) ? parsed.outcome : null;
@@ -115,8 +118,8 @@ export async function generateItalianCallSummary(
   contactName: string,
   outcome: string,
 ): Promise<string> {
-  const openaiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!openaiKey || transcript.length === 0) return "";
+  const apiKey = Deno.env.get("LOVABLE_API_KEY");
+  if (!apiKey || transcript.length === 0) return "";
 
   const transcriptText = transcript
     .map((t) => `${t.role === "agent" ? "AI" : contactName}: ${t.message || t.text || ""}`)
@@ -132,11 +135,11 @@ export async function generateItalianCallSummary(
   };
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch(AI_GATEWAY_URL, {
       method: "POST",
-      headers: { Authorization: `Bearer ${openaiKey}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "google/gemini-2.5-flash",
         max_tokens: 200,
         temperature: 0.3,
         messages: [
