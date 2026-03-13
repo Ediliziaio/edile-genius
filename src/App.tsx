@@ -103,6 +103,7 @@ const RenderPavimentoHub = lazy(() => import("./pages/app/RenderPavimentoHub"));
 const RenderPavimentoNew = lazy(() => import("./pages/app/RenderPavimentoNew"));
 const RenderStanzaHub = lazy(() => import("./pages/app/RenderStanzaHub"));
 const RenderStanzaNew = lazy(() => import("./pages/app/RenderStanzaNew"));
+const RenderTettoHub = lazy(() => import("./pages/app/RenderTettoHub"));
 const RenderTettoNew = lazy(() => import("./pages/app/RenderTettoNew"));
 
 const PageLoader = () => (
@@ -213,6 +214,7 @@ const App = () => (
                 <Route path="/app/render-pavimento/new" element={<SafeRoute><RenderPavimentoNew /></SafeRoute>} />
                 <Route path="/app/render-stanza" element={<SafeRoute><RenderStanzaHub /></SafeRoute>} />
                 <Route path="/app/render-stanza/new" element={<SafeRoute><RenderStanzaNew /></SafeRoute>} />
+                <Route path="/app/render-tetto" element={<SafeRoute><RenderTettoHub /></SafeRoute>} />
                 <Route path="/app/render-tetto/new" element={<SafeRoute><RenderTettoNew /></SafeRoute>} />
                 <Route path="/app/lists" element={<SafeRoute><ContactListsPage /></SafeRoute>} />
                 <Route path="/app/lists/:id" element={<SafeRoute><ContactListDetailPage /></SafeRoute>} />
