@@ -370,8 +370,11 @@ function buildBlock_B(cfg: Record<string, any>): string {
     if (s[el.key]) {
       toChange.push(`✅ REPLACE: ${el.label} — full replacement per user specification`);
     } else if (el.key === "sanitari" && (san.wc_tipo || san.azione_bidet)) {
-      // User configured sanitari type without full replacement toggle
       toChange.push(`🔄 UPGRADE TYPE: ${el.label} — upgrade to user-specified type while keeping position`);
+    } else if (el.key === "doccia" && (cfg.doccia?.tipo || cfg.doccia?.box)) {
+      toChange.push(`🔄 UPGRADE TYPE: ${el.label} — upgrade to user-specified shower type while keeping position`);
+    } else if (el.key === "vasca" && (cfg.vasca?.tipo || cfg.vasca?.azione === "sostituisci" || cfg.vasca?.azione === "rimuovi")) {
+      toChange.push(`🔄 UPGRADE TYPE: ${el.label} — upgrade/change bathtub per user specification`);
     } else {
       toModernize.push(`🔄 MODERNIZE (keep type): ${el.label}`);
     }
