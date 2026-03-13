@@ -1270,6 +1270,95 @@ export type Database = {
           },
         ]
       }
+      azienda_features_sbloccate: {
+        Row: {
+          attivo: boolean | null
+          company_id: string
+          feature_id: string
+          id: string
+          limite_mensile: number | null
+          sbloccato_il: string | null
+          scade_il: string | null
+        }
+        Insert: {
+          attivo?: boolean | null
+          company_id: string
+          feature_id: string
+          id?: string
+          limite_mensile?: number | null
+          sbloccato_il?: string | null
+          scade_il?: string | null
+        }
+        Update: {
+          attivo?: boolean | null
+          company_id?: string
+          feature_id?: string
+          id?: string
+          limite_mensile?: number | null
+          sbloccato_il?: string | null
+          scade_il?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "azienda_features_sbloccate_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "azienda_features_sbloccate_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "piattaforma_features"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      azienda_inviti: {
+        Row: {
+          accettato: boolean | null
+          company_id: string
+          creato_il: string | null
+          email: string
+          id: string
+          invitato_da: string | null
+          ruolo: string | null
+          scade_il: string | null
+          token: string
+        }
+        Insert: {
+          accettato?: boolean | null
+          company_id: string
+          creato_il?: string | null
+          email: string
+          id?: string
+          invitato_da?: string | null
+          ruolo?: string | null
+          scade_il?: string | null
+          token?: string
+        }
+        Update: {
+          accettato?: boolean | null
+          company_id?: string
+          creato_il?: string | null
+          email?: string
+          id?: string
+          invitato_da?: string | null
+          ruolo?: string | null
+          scade_il?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "azienda_inviti_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_contacts: {
         Row: {
           attempts: number
@@ -2502,6 +2591,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      piattaforma_features: {
+        Row: {
+          categoria: string
+          crediti_per_uso: number | null
+          descrizione: string | null
+          icona: string | null
+          id: string
+          nome: string
+        }
+        Insert: {
+          categoria: string
+          crediti_per_uso?: number | null
+          descrizione?: string | null
+          icona?: string | null
+          id: string
+          nome: string
+        }
+        Update: {
+          categoria?: string
+          crediti_per_uso?: number | null
+          descrizione?: string | null
+          icona?: string | null
+          id?: string
+          nome?: string
+        }
+        Relationships: []
       }
       platform_config: {
         Row: {
@@ -5104,6 +5220,99 @@ export type Database = {
             columns: ["operaio_id"]
             isOneToOne: false
             referencedRelation: "cantiere_operai"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_feature_permissions: {
+        Row: {
+          abilitato: boolean | null
+          company_id: string
+          creato_il: string | null
+          feature_id: string
+          id: string
+          limite_giornaliero: number | null
+          limite_mensile: number | null
+          note_admin: string | null
+          user_id: string
+        }
+        Insert: {
+          abilitato?: boolean | null
+          company_id: string
+          creato_il?: string | null
+          feature_id: string
+          id?: string
+          limite_giornaliero?: number | null
+          limite_mensile?: number | null
+          note_admin?: string | null
+          user_id: string
+        }
+        Update: {
+          abilitato?: boolean | null
+          company_id?: string
+          creato_il?: string | null
+          feature_id?: string
+          id?: string
+          limite_giornaliero?: number | null
+          limite_mensile?: number | null
+          note_admin?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_feature_permissions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_feature_permissions_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "piattaforma_features"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_feature_usage: {
+        Row: {
+          company_id: string
+          dettagli: Json | null
+          feature_id: string
+          id: string
+          usato_il: string | null
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          dettagli?: Json | null
+          feature_id: string
+          id?: string
+          usato_il?: string | null
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          dettagli?: Json | null
+          feature_id?: string
+          id?: string
+          usato_il?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_feature_usage_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_feature_usage_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "piattaforma_features"
             referencedColumns: ["id"]
           },
         ]
