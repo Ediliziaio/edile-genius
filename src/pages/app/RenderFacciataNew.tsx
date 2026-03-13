@@ -31,6 +31,7 @@ import { ColoreIntonacoSelector } from "@/modules/render-facciata/components/Col
 import { RivestimentoPicker } from "@/modules/render-facciata/components/RivestimentoPicker";
 import { CappottoConfigurator } from "@/modules/render-facciata/components/CappottoConfigurator";
 import { ElementiArchitettoniciPanel } from "@/modules/render-facciata/components/ElementiArchitettoniciPanel";
+import { StiliProntiFacciata } from "@/modules/render-facciata/components/StiliProntiFacciata";
 
 // ── COSTANTI ────────────────────────────────────────────────────
 
@@ -517,6 +518,18 @@ export default function RenderFacciataNew() {
               </div>
             </div>
           )}
+
+          {/* Stili pronti */}
+          <StiliProntiFacciata
+            onApply={(config) => {
+              if (config.tipo_intervento) setTipoIntervento(config.tipo_intervento);
+              if (config.colore_intonaco) setColoreIntonaco(config.colore_intonaco);
+              if (config.cappotto) setCappotto(config.cappotto);
+              if (config.rivestimento) setRivestimento(config.rivestimento as any);
+            }}
+          />
+
+          <hr className="border-border" />
 
           {/* Tipo intervento */}
           <div className="space-y-2">
