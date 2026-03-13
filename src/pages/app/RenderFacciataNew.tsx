@@ -395,7 +395,7 @@ export default function RenderFacciataNew() {
             className="border-2 border-dashed border-border rounded-2xl p-6 md:p-12 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/20 transition-all"
           >
             {fotoPreview ? (
-              <img src={fotoPreview} alt="anteprima" className="w-full max-h-96 object-contain rounded-xl" />
+              <img src={fotoPreview} alt="anteprima" className="w-full max-h-[50vh] object-contain rounded-xl" />
             ) : (
               <div className="flex flex-col items-center gap-3">
                 <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center">
