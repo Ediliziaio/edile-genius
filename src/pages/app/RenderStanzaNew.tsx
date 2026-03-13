@@ -846,7 +846,7 @@ export default function RenderStanzaNew() {
                 <Label className="text-sm font-medium text-muted-foreground mb-3 block">
                   Che tipo di stanza è?
                 </Label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
                   {TIPO_STANZA_OPTIONS.map(t => (
                     <button
                       key={t.value}
