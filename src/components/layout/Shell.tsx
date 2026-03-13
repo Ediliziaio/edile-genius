@@ -34,7 +34,7 @@ export default function Shell() {
       <div className="flex-1 flex flex-col min-h-screen min-w-0">
         <ImpersonationBanner />
         <Topbar onMenuOpen={() => setMobileOpen(true)} />
-        <main className="flex-1 p-4 md:p-6 overflow-auto">
+        <main className="flex-1 p-4 md:p-6 pb-safe overflow-auto">
           <AppBreadcrumb />
           <Outlet />
         </main>

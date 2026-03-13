@@ -56,7 +56,7 @@ export default function AppBreadcrumb() {
   });
 
   return (
-    <Breadcrumb className="mb-4">
+    <Breadcrumb className="mb-4 hidden md:block">
       <BreadcrumbList>
         {crumbs.map((c, i) => (
           <BreadcrumbItem key={c.path}>
