@@ -145,7 +145,8 @@ export default function PreventivoTemplateBuilder() {
         descrizione,
         sezioni: sezioni as any,
         is_default: asDefault,
-        branding_json: { colore_primario: colore, piede_pagina: piede } as any,
+        colore_primario: colore,
+        piede_pagina: piede,
       };
 
       if (isNew) {

@@ -232,6 +232,9 @@ const App = () => (
                 <Route path="/app/call-monitor" element={<SafeRoute><CallMonitor /></SafeRoute>} />
                 <Route path="/app/scheduled-calls" element={<SafeRoute><ScheduledCalls /></SafeRoute>} />
                 <Route path="/app/preventivo-kb" element={<SafeRoute><KnowledgeBasePreventivo /></SafeRoute>} />
+                <Route path="/app/preventivi/templates" element={<SafeRoute><PreventivoTemplateList /></SafeRoute>} />
+                <Route path="/app/preventivi/templates/nuovo" element={<SafeRoute><PreventivoTemplateBuilder /></SafeRoute>} />
+                <Route path="/app/preventivi/templates/:id" element={<SafeRoute><PreventivoTemplateBuilder /></SafeRoute>} />
               </Route>
             </Route>
 
