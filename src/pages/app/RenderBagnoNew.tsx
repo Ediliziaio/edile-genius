@@ -393,6 +393,11 @@ export default function RenderBagnoNew() {
 
     const { userPrompt, systemPrompt } = buildBathroomPrompt(analisi, cfg);
 
+    // Save configuration to session BEFORE invoking edge function
+    await (supabase.from("render_bagno_sessions") as any)
+      .update({ configurazione: cfg, analisi_bagno: analisi, stato: "pending" })
+      .eq("id", sessionId);
+
     // Fake progress animation
     const interval = setInterval(() => {
       setRenderProgress(p => Math.min(p + 2, 90));
@@ -403,9 +408,6 @@ export default function RenderBagnoNew() {
         .invoke("generate-bathroom-render", {
           body: {
             session_id: sessionId,
-            original_storage_path: originalPath,
-            prompt_text: userPrompt,
-            system_prompt: systemPrompt,
           },
         });
 
@@ -430,13 +432,20 @@ export default function RenderBagnoNew() {
 
   const saveToGallery = async () => {
     if (!renderUrl || !sessionId || !companyId || !user) return;
+
+    // Get a permanent public URL for original photo instead of ephemeral blob URL
+    const { data: signedData } = await supabase.storage
+      .from("bagno-originals")
+      .createSignedUrl(originalPath, 60 * 60 * 24 * 365); // 1 year
+    const permanentOriginalUrl = signedData?.signedUrl || fotoPreview;
+
     const { error } = await (supabase.from("render_bagno_gallery") as any)
       .insert({
         company_id: companyId,
         created_by: user.id,
         session_id: sessionId,
         titolo: `Bagno ${new Date().toLocaleDateString("it-IT")}`,
-        originale_url: fotoPreview,
+        originale_url: permanentOriginalUrl,
         render_url: renderUrl,
         configurazione: { tipoIntervento, sostituzione },
       });

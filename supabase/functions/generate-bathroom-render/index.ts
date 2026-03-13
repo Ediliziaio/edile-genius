@@ -226,7 +226,7 @@ Taps finish: ${a.rubinetteria_finitura || "unknown"}
 Lighting: ${a.illuminazione_tipo || "unknown"}`;
 
   // Block C — Wall tiles configuration
-  const piastrelle = config.piastrelle || {};
+  const piastrelle = config.piastrelle_parete || config.piastrelle || {};
   if (piastrelle.effetto || piastrelle.formato || piastrelle.posa) {
     blocks.C = `[BLOCK C – WALL TILES SPECIFICATION]
 Effect/material: ${piastrelle.effetto_prompt || piastrelle.effetto || "keep existing"}
@@ -284,18 +284,32 @@ CRITICAL: ALL visible taps, faucets, shower heads, and fixtures MUST use this fi
   }
 
   // Block I — Walls
-  const pareti = config.pareti || {};
+  const pareti = config.parete || config.pareti || {};
   if (pareti.tipo) {
     blocks.I = `[BLOCK I – WALL TREATMENT]
 Type: ${pareti.tipo_prompt || pareti.tipo || "keep existing"}
 ${pareti.colore_tinta ? `Paint color: ${pareti.colore_tinta}` : ""}`;
   }
 
-  // Block J — Lighting
+  // Block J — Lighting (client sends illuminazione_tipo as string)
   const illuminazione = config.illuminazione || {};
-  if (illuminazione.tipo) {
+  const illuminazioneTipo = config.illuminazione_tipo || illuminazione.tipo;
+  if (illuminazioneTipo) {
     blocks.J = `[BLOCK J – LIGHTING]
-Type: ${illuminazione.tipo_prompt || illuminazione.tipo || "keep existing"}`;
+Type: ${illuminazione.tipo_prompt || illuminazioneTipo || "keep existing"}`;
+  }
+
+  // Block LAYOUT — for demolizione_completa
+  const layout = config.layout || {};
+  if (layout.attivo) {
+    blocks.LAYOUT = `[BLOCK LAYOUT – NEW BATHROOM LAYOUT]
+This is a FULL DEMOLITION renovation. The bathroom layout MUST be reconfigured as follows:
+Shower position: ${layout.posizione_doccia || "keep"}
+Bathtub position: ${layout.posizione_vasca || "none"}
+Vanity position: ${layout.posizione_vanity || "keep"}
+WC position: ${layout.posizione_wc || "keep"}
+Bidet position: ${layout.posizione_bidet || "keep"}
+${layout.note_layout ? `Layout notes: ${layout.note_layout}` : ""}`;
   }
 
   // Block K — Negative constraints
@@ -337,6 +351,7 @@ ${checklist.join("\n")}`;
   if (blocks.H) userParts.push(blocks.H);
   if (blocks.I) userParts.push(blocks.I);
   if (blocks.J) userParts.push(blocks.J);
+  if (blocks.LAYOUT) userParts.push(blocks.LAYOUT);
   userParts.push(blocks.K);
   userParts.push(blocks.L); // Last for recency bias
 
