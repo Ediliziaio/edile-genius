@@ -2,7 +2,12 @@
 // Render Persiane — Prompt Builder v1.1
 // ════════════════════════════════════════════════════════════════
 
-export const PERSIANE_PROMPT_VERSION = "1.1.0";
+export const PERSIANE_PROMPT_VERSION = "1.2.0";
+
+// Tipi con lamelle (usano slat width/aperture nel prompt)
+const TIPI_CON_LAMELLE: Set<string> = new Set([
+  "veneziana_classica", "veneziana_esterna", "gelosia", "brise_soleil",
+]);
 
 // ── Tipi ──────────────────────────────────────────────────────
 

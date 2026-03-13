@@ -2,7 +2,7 @@
 // Render Pavimento — Prompt Builder v1.0
 // ═══════════════════════════════════════════════════════════
 
-export type TipoOperazione = "sostituisci" | "aggiungi" | "cambia_colore";
+export type TipoOperazione = "sostituisci";
 
 export type TipoPavimento =
   | "parquet" | "laminato" | "ceramica" | "gres_porcellanato"
