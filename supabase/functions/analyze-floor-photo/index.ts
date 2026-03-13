@@ -83,11 +83,11 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Update session if provided
+    // Update session if provided — column is "analysis_result" per DB schema
     if (session_id) {
       const supa = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
       await supa.from("render_pavimento_sessions")
-        .update({ analisi_json: analisi, status: "analyzed" } as any)
+        .update({ analysis_result: analisi, status: "analyzed" })
         .eq("id", session_id);
     }
 
