@@ -692,12 +692,33 @@ export const PreventivoPDF: React.FC<Props> = ({
 };
 
 // Export utility functions
-export async function getPreventivoBlob(data: PreventivoData, template: TemplateConfig): Promise<Blob> {
-  return await pdf(<PreventivoPDF data={data} template={template} />).toBlob();
+export async function getPreventivoBlob(
+  data: PreventivoData,
+  template: TemplateConfig,
+  sezioniContenuto?: Record<string, SezioneContenuto>,
+  sezioniTemplate?: PreventivoSezione[],
+  renderEntries?: RenderEntry[],
+): Promise<Blob> {
+  return await pdf(
+    <PreventivoPDF
+      data={data}
+      template={template}
+      sezioniContenuto={sezioniContenuto}
+      sezioniTemplate={sezioniTemplate}
+      renderEntries={renderEntries}
+    />
+  ).toBlob();
 }
 
-export async function downloadPreventivoAsPdf(data: PreventivoData, template: TemplateConfig, filename?: string): Promise<void> {
-  const blob = await getPreventivoBlob(data, template);
+export async function downloadPreventivoAsPdf(
+  data: PreventivoData,
+  template: TemplateConfig,
+  filename?: string,
+  sezioniContenuto?: Record<string, SezioneContenuto>,
+  sezioniTemplate?: PreventivoSezione[],
+  renderEntries?: RenderEntry[],
+): Promise<void> {
+  const blob = await getPreventivoBlob(data, template, sezioniContenuto, sezioniTemplate, renderEntries);
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
