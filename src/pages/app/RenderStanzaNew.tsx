@@ -430,6 +430,7 @@ function mapPresetToWizard(preset: Partial<ConfigurazioneStanza>, base: WizardCo
 export default function RenderStanzaNew() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const companyId = useCompanyId();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ── Step & navigation
