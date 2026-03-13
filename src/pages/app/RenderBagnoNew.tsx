@@ -437,11 +437,11 @@ export default function RenderBagnoNew() {
   const saveToGallery = async () => {
     if (!renderUrl || !sessionId || !companyId || !user) return;
 
-    // Get a permanent public URL for original photo instead of ephemeral blob URL
-    const { data: signedData } = await supabase.storage
-      .from("bagno-originals")
-      .createSignedUrl(originalPath, 60 * 60 * 24 * 365); // 1 year
-    const permanentOriginalUrl = signedData?.signedUrl || fotoPreview;
+    // Get a permanent public URL for original photo using getPublicUrl (no expiry)
+    // bagno-originals is private, so use a long-lived signed URL as fallback
+    const { data: pubData } = supabase.storage.from("bagno-originals").getPublicUrl(originalPath);
+    // If bucket is private, getPublicUrl returns a URL that won't work — use path reference instead
+    const permanentOriginalUrl = `storage:/bagno-originals/${originalPath}`;
 
     const { error } = await (supabase.from("render_bagno_gallery") as any)
       .insert({

@@ -319,6 +319,7 @@ export default function RenderFacciataNew() {
       user_id: user.id,
       company_id: companyId,
       session_id: sessionId,
+      original_url: fotoPreview || '',
       render_url: renderUrl,
       title: `${tipoIntervento.replace(/_/g, " ")} — ${coloreLabel}`,
       tipo_intervento: tipoIntervento,

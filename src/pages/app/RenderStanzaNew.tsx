@@ -660,21 +660,28 @@ export default function RenderStanzaNew() {
 
       const renderPayload = unwrapEdge<{ result_url?: string; result_image_url?: string; result_base64?: string }>(renderData);
       const finalUrl = renderPayload?.result_url || renderPayload?.result_image_url || renderPayload?.result_base64 || null;
+      
+      // Don't mark as completed if no result URL
+      if (!finalUrl) {
+        toast.error('Render completato ma nessuna immagine ricevuta. Riprova.');
+        setStep(3);
+        return;
+      }
+      
       setRenderUrl(finalUrl);
 
-      // Salva in gallery (colonne corrette)
+      // Salva in gallery — render_stanza_gallery has NO company_id column
       await supabase.from('render_stanza_gallery' as any).insert({
         user_id: user.id,
-        company_id: companyId,
         session_id: sessionId,
         original_image_url: originalUrl || '',
-        result_image_url: finalUrl || '',
+        result_image_url: finalUrl,
         tipo_stanza: config.tipo_stanza,
         interventi: attivi,
         config_snapshot: configForPrompt,
       });
 
-      // Aggiorna stato sessione (colonne corrette)
+      // Aggiorna stato sessione
       await supabase
         .from('render_stanza_sessions' as any)
         .update({
