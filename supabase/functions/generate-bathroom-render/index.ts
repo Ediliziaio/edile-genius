@@ -493,7 +493,9 @@ ${showerRules}
 function buildBlock_F(cfg: Record<string, any>): string {
   const v = cfg.vasca || {};
 
-  if (v.azione === "mantieni" || !cfg.sostituzione?.vasca) return `[BLOCK F – BATHTUB — KEPT AS ORIGINAL]`;
+  // Show as original only if no toggle AND no user config
+  const hasVascaConfig = v.tipo || v.azione === "sostituisci" || v.azione === "rimuovi";
+  if (v.azione === "mantieni" && !cfg.sostituzione?.vasca && !hasVascaConfig) return `[BLOCK F – BATHTUB — KEPT AS ORIGINAL]`;
   if (v.azione === "rimuovi")
     return `[BLOCK F – BATHTUB — REMOVE: Remove bathtub entirely. Fill the floor area with matching floor tiles (BLOCK D). Tile the wall behind where bathtub was (BLOCK C).]`;
 

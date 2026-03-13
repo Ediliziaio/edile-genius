@@ -862,7 +862,6 @@ export default function RenderBagnoNew() {
                 )}
               </CardContent>
             </Card>
-          )}
 
           {/* Mobile Bagno */}
           {sostituzione.mobile_bagno && (
