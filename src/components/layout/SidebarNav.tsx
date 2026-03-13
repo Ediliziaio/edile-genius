@@ -61,7 +61,7 @@ const companyNav: NavSection[] = [
   { header: "IMPOSTAZIONI", items: [
     { label: "Crediti", icon: Coins, href: "/app/credits" },
     { label: "Integrazioni", icon: Puzzle, href: "/app/integrations" },
-    { label: "Account", icon: Settings, href: "/app/settings" },
+    { label: "Impostazioni", icon: Settings, href: "/app/settings" },
   ]},
 ];
 
