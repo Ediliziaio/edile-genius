@@ -83,10 +83,10 @@ Deno.serve(async (req) => {
       .single();
     if (!providerConfig) throw new Error("No active provider configured");
 
-    // Build prompt from session config
+    // Build prompt from session config using full prompt builder v2
     const config = session.configurazione || {};
     const analisi = session.analisi_bagno || {};
-    const { systemPrompt, userPrompt, blocks, promptVersion } = buildBathroomPrompt(config, analisi);
+    const { systemPrompt, userPrompt, promptVersion } = buildBathroomPromptV2(analisi, config);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
