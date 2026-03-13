@@ -146,6 +146,7 @@ export default function RenderFacciataNew() {
     setAnalyzeError(null);
     setFotoFile(file);
 
+    if (fotoPreview) URL.revokeObjectURL(fotoPreview);
     const previewUrl = URL.createObjectURL(file);
     setFotoPreview(previewUrl);
 

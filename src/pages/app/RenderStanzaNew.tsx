@@ -485,6 +485,7 @@ export default function RenderStanzaNew() {
     }
 
     setFoto(file);
+    if (fotoPreview) URL.revokeObjectURL(fotoPreview);
     const previewUrl = URL.createObjectURL(file);
     setFotoPreview(previewUrl);
 
