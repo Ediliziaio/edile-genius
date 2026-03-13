@@ -144,7 +144,6 @@ Deno.serve(async (req) => {
       render_result_path: resultPath,
       render_result_url: resultUrl,
       prompt_usato: userPrompt.substring(0, 10000),
-      prompt_blocks: blocks,
       prompt_version: promptVersion,
       provider_key: providerConfig.provider_key,
       cost_real: providerConfig.cost_real_per_render,
