@@ -291,11 +291,25 @@ Type: ${pareti.tipo_prompt || pareti.tipo || "keep existing"}
 ${pareti.colore_tinta ? `Paint color: ${pareti.colore_tinta}` : ""}`;
   }
 
-  // Block J — Lighting
+  // Block J — Lighting (client sends illuminazione_tipo as string)
   const illuminazione = config.illuminazione || {};
-  if (illuminazione.tipo) {
+  const illuminazioneTipo = config.illuminazione_tipo || illuminazione.tipo;
+  if (illuminazioneTipo) {
     blocks.J = `[BLOCK J – LIGHTING]
-Type: ${illuminazione.tipo_prompt || illuminazione.tipo || "keep existing"}`;
+Type: ${illuminazione.tipo_prompt || illuminazioneTipo || "keep existing"}`;
+  }
+
+  // Block LAYOUT — for demolizione_completa
+  const layout = config.layout || {};
+  if (layout.attivo) {
+    blocks.LAYOUT = `[BLOCK LAYOUT – NEW BATHROOM LAYOUT]
+This is a FULL DEMOLITION renovation. The bathroom layout MUST be reconfigured as follows:
+Shower position: ${layout.posizione_doccia || "keep"}
+Bathtub position: ${layout.posizione_vasca || "none"}
+Vanity position: ${layout.posizione_vanity || "keep"}
+WC position: ${layout.posizione_wc || "keep"}
+Bidet position: ${layout.posizione_bidet || "keep"}
+${layout.note_layout ? `Layout notes: ${layout.note_layout}` : ""}`;
   }
 
   // Block K — Negative constraints
