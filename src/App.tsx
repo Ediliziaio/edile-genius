@@ -96,6 +96,8 @@ const RenderBagnoHub = lazy(() => import("./pages/app/RenderBagnoHub"));
 const RenderBagnoNew = lazy(() => import("./pages/app/RenderBagnoNew"));
 const RenderFacciataHub = lazy(() => import("./pages/app/RenderFacciataHub"));
 const RenderFacciataNew = lazy(() => import("./pages/app/RenderFacciataNew"));
+const RenderPersianeHub = lazy(() => import("./pages/app/RenderPersianeHub"));
+const RenderPersianeNew = lazy(() => import("./pages/app/RenderPersianeNew"));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-screen">
