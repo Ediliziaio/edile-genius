@@ -318,11 +318,18 @@ export default function RenderFacciataNew() {
       tipoIntervento === "rivestimento" ? rivestimento?.tipo_name ?? "" :
       coloreIntonaco.colore_name;
 
+    // Get a long-lived signed URL for the original (facciata-originals is PRIVATE)
+    let originalUrlForGallery = '';
+    if (originalStoragePath) {
+      const { data: signedOrig } = await supabase.storage.from("facciata-originals").createSignedUrl(originalStoragePath, 31536000);
+      originalUrlForGallery = signedOrig?.signedUrl || '';
+    }
+
     const { error } = await supabase.from("render_facciata_gallery").insert({
       user_id: user.id,
       company_id: companyId,
       session_id: sessionId,
-      original_url: fotoPreview || '',
+      original_url: originalUrlForGallery,
       render_url: renderUrl,
       title: `${tipoIntervento.replace(/_/g, " ")} — ${coloreLabel}`,
       tipo_intervento: tipoIntervento,

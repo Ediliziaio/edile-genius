@@ -216,6 +216,7 @@ export default function RenderPavimentoNew() {
   const resetAll = () => {
     setStep(0);
     setFile(null);
+    if (preview) URL.revokeObjectURL(preview);
     setPreview(null);
     setSessionId(null);
     setAnalysis(null);
