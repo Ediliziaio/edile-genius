@@ -186,6 +186,7 @@ export default function RenderFacciataNew() {
         .from("facciata-originals")
         .upload(path, file, { contentType: file.type });
       if (uploadErr) throw new Error(`Upload fallito: ${uploadErr.message}`);
+      setOriginalStoragePath(path);
 
       // Update session with path
       await supabase.from("render_facciata_sessions")
