@@ -31,6 +31,7 @@ import { ColoreIntonacoSelector } from "@/modules/render-facciata/components/Col
 import { RivestimentoPicker } from "@/modules/render-facciata/components/RivestimentoPicker";
 import { CappottoConfigurator } from "@/modules/render-facciata/components/CappottoConfigurator";
 import { ElementiArchitettoniciPanel } from "@/modules/render-facciata/components/ElementiArchitettoniciPanel";
+import { StiliProntiFacciata } from "@/modules/render-facciata/components/StiliProntiFacciata";
 
 // ── COSTANTI ────────────────────────────────────────────────────
 
