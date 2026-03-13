@@ -4446,6 +4446,179 @@ export type Database = {
         }
         Relationships: []
       }
+      render_tetto_gallery: {
+        Row: {
+          company_id: string
+          config_snapshot: Json | null
+          created_at: string | null
+          id: string
+          is_favorite: boolean | null
+          note: string | null
+          original_image_url: string | null
+          result_image_url: string
+          session_id: string | null
+          tipo_tetto: string | null
+        }
+        Insert: {
+          company_id: string
+          config_snapshot?: Json | null
+          created_at?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          note?: string | null
+          original_image_url?: string | null
+          result_image_url: string
+          session_id?: string | null
+          tipo_tetto?: string | null
+        }
+        Update: {
+          company_id?: string
+          config_snapshot?: Json | null
+          created_at?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          note?: string | null
+          original_image_url?: string | null
+          result_image_url?: string
+          session_id?: string | null
+          tipo_tetto?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_tetto_gallery_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "render_tetto_gallery_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "render_tetto_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      render_tetto_sessions: {
+        Row: {
+          analisi_json: Json | null
+          company_id: string
+          config_json: Json | null
+          created_at: string | null
+          id: string
+          natural_height: number | null
+          natural_width: number | null
+          original_image_path: string | null
+          original_url: string | null
+          processing_ms: number | null
+          prompt_system: string | null
+          prompt_usato: string | null
+          prompt_user: string | null
+          prompt_version: string | null
+          result_url: string | null
+          session_note: string | null
+          status: string | null
+          tipo_tetto: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          analisi_json?: Json | null
+          company_id: string
+          config_json?: Json | null
+          created_at?: string | null
+          id?: string
+          natural_height?: number | null
+          natural_width?: number | null
+          original_image_path?: string | null
+          original_url?: string | null
+          processing_ms?: number | null
+          prompt_system?: string | null
+          prompt_usato?: string | null
+          prompt_user?: string | null
+          prompt_version?: string | null
+          result_url?: string | null
+          session_note?: string | null
+          status?: string | null
+          tipo_tetto?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          analisi_json?: Json | null
+          company_id?: string
+          config_json?: Json | null
+          created_at?: string | null
+          id?: string
+          natural_height?: number | null
+          natural_width?: number | null
+          original_image_path?: string | null
+          original_url?: string | null
+          processing_ms?: number | null
+          prompt_system?: string | null
+          prompt_usato?: string | null
+          prompt_user?: string | null
+          prompt_version?: string | null
+          result_url?: string | null
+          session_note?: string | null
+          status?: string | null
+          tipo_tetto?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_tetto_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      render_tetto_stili_pronti: {
+        Row: {
+          attivo: boolean | null
+          config: Json
+          descrizione: string | null
+          emoji: string | null
+          id: string
+          nome: string
+          ordine: number | null
+          preview_hex: string | null
+          preview_url: string | null
+          tags: string[] | null
+          tipo_tetto: string[] | null
+        }
+        Insert: {
+          attivo?: boolean | null
+          config: Json
+          descrizione?: string | null
+          emoji?: string | null
+          id?: string
+          nome: string
+          ordine?: number | null
+          preview_hex?: string | null
+          preview_url?: string | null
+          tags?: string[] | null
+          tipo_tetto?: string[] | null
+        }
+        Update: {
+          attivo?: boolean | null
+          config?: Json
+          descrizione?: string | null
+          emoji?: string | null
+          id?: string
+          nome?: string
+          ordine?: number | null
+          preview_hex?: string | null
+          preview_url?: string | null
+          tags?: string[] | null
+          tipo_tetto?: string[] | null
+        }
+        Relationships: []
+      }
       sal_milestones: {
         Row: {
           alert_ritardo_inviato: boolean | null
