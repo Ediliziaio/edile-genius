@@ -351,6 +351,7 @@ ${checklist.join("\n")}`;
   if (blocks.H) userParts.push(blocks.H);
   if (blocks.I) userParts.push(blocks.I);
   if (blocks.J) userParts.push(blocks.J);
+  if (blocks.LAYOUT) userParts.push(blocks.LAYOUT);
   userParts.push(blocks.K);
   userParts.push(blocks.L); // Last for recency bias
 
