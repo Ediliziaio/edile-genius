@@ -707,10 +707,7 @@ export default function RenderTettoNew() {
               <Label className="text-sm">Note aggiuntive (opzionale)</Label>
               <Textarea
                 value={config.note_libere || ''}
-                onChange={e => {
-                  // Direct state update since note_libere is a plain string
-                  updateConfig('manto', {}); // trigger re-render workaround - replaced below
-                }}
+                onChange={e => setConfig(prev => ({ ...prev, note_libere: e.target.value }))}
                 className="mt-2 text-sm resize-none"
                 rows={2}
                 placeholder="es. mantieni i comignoli in mattoni, aggiungi pannelli solari…"
