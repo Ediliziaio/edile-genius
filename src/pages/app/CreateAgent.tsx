@@ -434,6 +434,10 @@ function TemplateHubCard({ template: t }: { template: HubTemplate }) {
     if (t.disabled) return;
     if (t.fromDb) {
       navigate(`/app/templates/${t.slug}/setup`);
+    } else if (t.slug === "render-infissi") {
+      navigate("/app/render/new");
+    } else if (t.slug === "render-bagno") {
+      navigate("/app/render-bagno/new");
     } else if (t.channel?.includes("whatsapp")) {
       navigate("/app/whatsapp");
     } else {
