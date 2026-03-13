@@ -209,3 +209,12 @@ verify_jwt = false
 
 [functions.generate-roof-render]
 verify_jwt = false
+
+[functions.extract-document-text]
+verify_jwt = false
+
+[functions.chunk-and-embed]
+verify_jwt = false
+
+[functions.embed-query]
+verify_jwt = false

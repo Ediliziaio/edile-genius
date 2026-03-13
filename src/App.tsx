@@ -105,6 +105,7 @@ const RenderStanzaHub = lazy(() => import("./pages/app/RenderStanzaHub"));
 const RenderStanzaNew = lazy(() => import("./pages/app/RenderStanzaNew"));
 const RenderTettoHub = lazy(() => import("./pages/app/RenderTettoHub"));
 const RenderTettoNew = lazy(() => import("./pages/app/RenderTettoNew"));
+const KnowledgeBasePreventivo = lazy(() => import("./pages/app/KnowledgeBasePreventivo"));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-screen">
@@ -228,6 +229,7 @@ const App = () => (
                 <Route path="/app/automations" element={<SafeRoute><Automations /></SafeRoute>} />
                 <Route path="/app/call-monitor" element={<SafeRoute><CallMonitor /></SafeRoute>} />
                 <Route path="/app/scheduled-calls" element={<SafeRoute><ScheduledCalls /></SafeRoute>} />
+                <Route path="/app/preventivo-kb" element={<SafeRoute><KnowledgeBasePreventivo /></SafeRoute>} />
               </Route>
             </Route>
 
