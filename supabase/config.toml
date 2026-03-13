@@ -230,3 +230,6 @@ verify_jwt = false
 
 [functions.invia-preventivo-email]
 verify_jwt = false
+
+[functions.invita-membro]
+verify_jwt = false
