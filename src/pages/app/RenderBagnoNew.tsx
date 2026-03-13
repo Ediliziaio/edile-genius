@@ -23,6 +23,8 @@ import type {
   TipoIntervento,
 } from "@/modules/render-bagno/lib/bathroomPromptBuilder";
 import { buildBathroomPrompt } from "@/modules/render-bagno/lib/bathroomPromptBuilder";
+import { BathroomLayoutPlanner } from "@/components/render-bagno/BathroomLayoutPlanner";
+import { StiliProntiPicker } from "@/components/render-bagno/StiliProntiPicker";
 
 // ── Preset type from DB ──────────────────────────────────────────
 interface BagnoPreset {
