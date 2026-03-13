@@ -552,7 +552,11 @@ export default function RenderStanzaNew() {
       }
 
       setAnalisi(payload.analisi);
-      setOriginalUrl((payload as any).originalUrl || null);
+
+      // Build the public URL from storage path for gallery usage
+      const storagePath = `${user.id}/${(session as any).id}/original.${ext}`;
+      const { data: pubUrlData } = supabase.storage.from('stanza-originals').getPublicUrl(storagePath);
+      setOriginalUrl(pubUrlData?.publicUrl || null);
 
       // Pre-fill config con dati analisi
       prefillFromAnalisi(payload.analisi);
