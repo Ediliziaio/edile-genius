@@ -630,12 +630,13 @@ export default function RenderPersianeNew() {
                   {tipoOperazione === "cambia_colore" ? "Nuovo colore" : "Colore persiana"}
                 </Label>
                 <PersianaColorSelector
-                  coloreMode={coloreMode}
-                  onColoreModeChange={setColoreMode}
-                  ralSelezionato={ralSelezionato}
+                  mode={coloreMode}
+                  onModeChange={setColoreMode}
+                  ralValue={ralSelezionato}
                   onRalChange={setRalSelezionato}
-                  woodSelezionato={woodSelezionato}
+                  woodValue={woodSelezionato}
                   onWoodChange={setWoodSelezionato}
+                  materialePersiana={materialePersiana}
                 />
               </div>
 
