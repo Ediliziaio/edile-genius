@@ -2232,6 +2232,19 @@ export default function RenderStanzaNew() {
               </button>
             </div>
 
+            {/* Genera varianti */}
+            {imageBase64 && (
+              <div className="flex justify-center">
+                <button
+                  onClick={() => setShowVarianti(true)}
+                  className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 font-medium py-2 px-3 hover:bg-primary/5 rounded-xl transition-colors"
+                >
+                  <Layers className="w-4 h-4" />
+                  Genera varianti di confronto
+                </button>
+              </div>
+            )}
+
             {/* Riepilogo interventi eseguiti */}
             <Card className="border-violet-200">
               <CardContent className="pt-4">
