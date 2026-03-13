@@ -319,7 +319,9 @@ export default function RenderPersianeNew() {
 
       clearInterval(interval);
       if (error) throw error;
-      if (!data?.result_url) throw new Error("URL risultato non ricevuto");
+      const renderPayload = (data?.data ?? data) as Record<string, unknown>;
+      const resultUrl = (renderPayload?.result_url || renderPayload?.result_image_url) as string;
+      if (!resultUrl) throw new Error("URL risultato non ricevuto");
 
       setRenderUrl(data.result_url);
 
