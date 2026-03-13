@@ -1,13 +1,62 @@
 import type { MaterialePersiana, TipoPersoniana } from "../lib/persianePromptBuilder";
+import { Check, AlertTriangle } from "lucide-react";
 
-const MATERIALS: { value: MaterialePersiana; label: string; emoji: string }[] = [
-  { value: "legno", label: "Legno", emoji: "🪵" },
-  { value: "alluminio", label: "Alluminio", emoji: "🔩" },
-  { value: "pvc", label: "PVC", emoji: "🧱" },
-  { value: "acciaio", label: "Acciaio", emoji: "⚙️" },
-  { value: "ferro_battuto", label: "Ferro Battuto", emoji: "🔨" },
-  { value: "composito", label: "Composito", emoji: "🧩" },
+interface MaterialeOption {
+  value: MaterialePersiana;
+  label: string;
+  emoji: string;
+  desc: string;
+  compatibleWith: TipoPersoniana[] | "all";
+  proLabel: string;
+}
+
+const MATERIALI: MaterialeOption[] = [
+  {
+    value: "legno_naturale", label: "Legno naturale", emoji: "🪵",
+    desc: "Essenze pregiate (larice, pino, iroko), verniciato o naturale",
+    compatibleWith: ["veneziana_classica", "gelosia", "scuro_pieno", "scuro_cornice", "scuro_dogato", "a_libro", "alla_romana"],
+    proLabel: "Tradizionale",
+  },
+  {
+    value: "legno_composito", label: "Legno composito", emoji: "🟫",
+    desc: "Fibra di legno + PVC, alta resistenza alle intemperie",
+    compatibleWith: ["veneziana_classica", "veneziana_esterna", "gelosia", "scuro_pieno", "scuro_cornice", "scuro_dogato", "a_libro", "alla_romana"],
+    proLabel: "Durabile",
+  },
+  {
+    value: "pvc", label: "PVC", emoji: "⬜",
+    desc: "Policloruro di vinile, economico e facile manutenzione",
+    compatibleWith: ["veneziana_classica", "veneziana_esterna", "scuro_pieno", "avvolgibile_esterno", "a_libro", "persiana_scorrevole"],
+    proLabel: "Economico",
+  },
+  {
+    value: "alluminio", label: "Alluminio", emoji: "🔘",
+    desc: "Lega di alluminio anodizzato o verniciato a polvere",
+    compatibleWith: "all",
+    proLabel: "Tecnico",
+  },
+  {
+    value: "acciaio", label: "Acciaio", emoji: "⚙️",
+    desc: "Acciaio galvanizzato, massima resistenza e sicurezza",
+    compatibleWith: ["griglia_sicurezza", "veneziana_esterna", "brise_soleil", "frangisole"],
+    proLabel: "Resistente",
+  },
+  {
+    value: "fibra_vetro", label: "Fibra di vetro", emoji: "💎",
+    desc: "Composito leggero, non conduce calore, ideale per climi estremi",
+    compatibleWith: ["veneziana_classica", "veneziana_esterna", "brise_soleil", "frangisole"],
+    proLabel: "Premium",
+  },
 ];
+
+const PRO_COLORS: Record<string, string> = {
+  Tradizionale: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  Durabile: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+  Economico: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  Tecnico: "bg-muted text-muted-foreground",
+  Resistente: "bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-400",
+  Premium: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400",
+};
 
 interface Props {
   value: MaterialePersiana;
@@ -15,23 +64,48 @@ interface Props {
   tipoPersiana: TipoPersoniana;
 }
 
-export function MaterialePicker({ value, onChange }: Props) {
+export function MaterialePicker({ value, onChange, tipoPersiana }: Props) {
+  const available = MATERIALI.filter(
+    (m) => m.compatibleWith === "all" || m.compatibleWith.includes(tipoPersiana)
+  );
+  const currentIsCompatible = available.some((m) => m.value === value);
+
   return (
-    <div className="grid grid-cols-3 gap-2">
-      {MATERIALS.map((m) => (
-        <button
-          key={m.value}
-          onClick={() => onChange(m.value)}
-          className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 text-center transition-all ${
-            value === m.value
-              ? "border-primary bg-primary/5 ring-1 ring-primary/30"
-              : "border-border hover:border-primary/30"
-          }`}
-        >
-          <span className="text-lg">{m.emoji}</span>
-          <span className="text-xs font-medium text-foreground">{m.label}</span>
-        </button>
-      ))}
+    <div className="space-y-2">
+      {!currentIsCompatible && (
+        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+          <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+          <p className="text-xs text-amber-700 dark:text-amber-300">
+            Il materiale selezionato non è compatibile con questo tipo di persiana. Seleziona un'alternativa.
+          </p>
+        </div>
+      )}
+      <div className="grid grid-cols-2 gap-2">
+        {available.map((mat) => {
+          const isSelected = value === mat.value;
+          return (
+            <button
+              key={mat.value}
+              onClick={() => onChange(mat.value)}
+              className={`flex flex-col items-start p-3 rounded-xl border-2 text-left transition-all ${
+                isSelected
+                  ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                  : "border-border hover:border-primary/30"
+              }`}
+            >
+              <div className="flex items-center gap-2 w-full">
+                <span className="text-lg">{mat.emoji}</span>
+                <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${PRO_COLORS[mat.proLabel] || "bg-muted text-muted-foreground"}`}>
+                  {mat.proLabel}
+                </span>
+                {isSelected && <Check className="w-3.5 h-3.5 text-primary ml-auto" />}
+              </div>
+              <p className="text-sm font-medium text-foreground mt-1.5">{mat.label}</p>
+              <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">{mat.desc}</p>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
