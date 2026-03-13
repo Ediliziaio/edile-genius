@@ -698,12 +698,14 @@ export default function RenderPersianeNew() {
                 <div className="space-y-2 pl-2 border-l-2 border-primary/20">
                   <p className="text-xs text-muted-foreground">Colore del profilo/cornice della persiana (diverso dal colore delle lamelle)</p>
                   <PersianaColorSelector
-                    coloreMode={coloreProfiloMode}
-                    onColoreModeChange={setColoreProfiloMode}
-                    ralSelezionato={ralProfilo}
+                    mode={coloreProfiloMode}
+                    onModeChange={setColoreProfiloMode}
+                    ralValue={ralProfilo}
                     onRalChange={setRalProfilo}
-                    woodSelezionato={woodProfilo}
+                    woodValue={woodProfilo}
                     onWoodChange={setWoodProfilo}
+                    materialePersiana={materialePersiana}
+                    label="Colore profilo/cornice"
                   />
                 </div>
               )}
