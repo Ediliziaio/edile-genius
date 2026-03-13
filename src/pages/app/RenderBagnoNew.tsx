@@ -580,6 +580,30 @@ export default function RenderBagnoNew() {
           ══════════════════════════════════════════════════════════ */}
       {step === 1 && (
         <div className="space-y-6">
+          {/* Stili Pronti */}
+          <StiliProntiPicker onApply={(cfg) => {
+            if (cfg.piastrelle_parete) setPiastrelleParete(prev => ({ ...prev, ...cfg.piastrelle_parete }));
+            if (cfg.pavimento) setPavimento(prev => ({ ...prev, ...cfg.pavimento }));
+            if (cfg.doccia) setConfigDoccia(prev => ({ ...prev, ...cfg.doccia }));
+            if (cfg.vasca) setConfigVasca(prev => ({ ...prev, ...cfg.vasca }));
+            if (cfg.vanity) setConfigVanity(prev => ({ ...prev, ...cfg.vanity }));
+            if (cfg.rubinetteria) setConfigRubinetteria(prev => ({ ...prev, ...cfg.rubinetteria }));
+            if (cfg.parete) setConfigParete(prev => ({ ...prev, ...cfg.parete }));
+            if (cfg.sanitari) setConfigSanitari(prev => ({ ...prev, ...cfg.sanitari }));
+            setSostituzione(prev => ({
+              ...prev,
+              piastrelle_parete: !!cfg.piastrelle_parete,
+              pavimento: !!cfg.pavimento,
+              doccia: !!cfg.doccia,
+              vasca: !!cfg.vasca,
+              mobile_bagno: !!cfg.vanity,
+              rubinetteria: !!cfg.rubinetteria,
+              parete_colore: !!cfg.parete,
+              sanitari: !!cfg.sanitari,
+            }));
+            toast({ title: "Stile applicato", description: "Puoi personalizzare ogni elemento nel passo successivo" });
+          }} />
+
           <h1 className="text-2xl font-bold text-foreground">Tipo di intervento</h1>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
