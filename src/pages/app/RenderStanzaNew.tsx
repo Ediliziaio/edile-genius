@@ -14,8 +14,8 @@ import { toast } from 'sonner';
 import {
   Upload, Camera, Sparkles, ChevronLeft, ChevronRight,
   Eye, EyeOff, Download, Loader2, CheckCircle2, AlertCircle,
-  Wand2, Home, Sofa, Lightbulb, Layers as LayersIcon, LayoutGrid,
-  Paintbrush, Wallpaper, BookOpen, UtensilsCrossed, Bath, Layers,
+  Wand2, Home, Sofa, Lightbulb, Layers, LayoutGrid,
+  Paintbrush, Wallpaper, BookOpen, UtensilsCrossed, Bath,
   RotateCcw, Settings2
 } from 'lucide-react';
 import {
