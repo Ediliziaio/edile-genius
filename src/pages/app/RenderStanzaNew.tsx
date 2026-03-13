@@ -895,6 +895,23 @@ export default function RenderStanzaNew() {
         {/* ═══════════════════════════════════════════════════════════════════
             STEP 2 — RISULTATI ANALISI AI
         ════════════════════════════════════════════════════════════════════ */}
+        {step === 2 && !analisi && (
+          <div className="text-center space-y-4 py-12">
+            <AlertCircle className="w-12 h-12 text-destructive mx-auto" />
+            <h2 className="text-xl font-bold text-foreground">Analisi non disponibile</h2>
+            <p className="text-muted-foreground">Non è stato possibile recuperare i dati dell'analisi. Riprova.</p>
+            <div className="flex gap-3 justify-center">
+              <Button variant="outline" onClick={() => setStep(1)}>
+                <ChevronLeft className="w-4 h-4 mr-1" /> Torna alla foto
+              </Button>
+              <Button onClick={handleAnalyzeRoom} disabled={analizzando} className="bg-violet-600 hover:bg-violet-700 text-white">
+                {analizzando ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RotateCcw className="w-4 h-4 mr-2" />}
+                Riprova analisi
+              </Button>
+            </div>
+          </div>
+        )}
+
         {step === 2 && analisi && (
           <div className="space-y-6">
             <div className="text-center">
