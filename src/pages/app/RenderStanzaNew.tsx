@@ -28,6 +28,7 @@ import {
 import { unwrapEdge } from '@/lib/edgePayload';
 import { ConfigRiepilogo } from '@/modules/render-stanza/components/ConfigRiepilogo';
 import { InterventiSummaryBar } from '@/modules/render-stanza/components/InterventiSummaryBar';
+import { VariantiModal } from '@/components/varianti/VariantiModal';
 
 // ─── COSTANTI ────────────────────────────────────────────────────────────────
 
@@ -460,6 +461,8 @@ export default function RenderStanzaNew() {
   const [rendering, setRendering] = useState(false);
   const [renderUrl, setRenderUrl] = useState<string | null>(null);
   const [showOriginal, setShowOriginal] = useState(false);
+  const [imageBase64, setImageBase64] = useState<string>('');
+  const [showVarianti, setShowVarianti] = useState(false);
 
   // ── Note libere
   const [noteLibere, setNoteLibere] = useState('');
@@ -482,6 +485,11 @@ export default function RenderStanzaNew() {
     setFoto(file);
     const previewUrl = URL.createObjectURL(file);
     setFotoPreview(previewUrl);
+
+    // Capture base64 for varianti
+    const reader = new FileReader();
+    reader.onload = (e) => setImageBase64((e.target?.result as string).split(',')[1]);
+    reader.readAsDataURL(file);
 
     // Rileva dimensioni naturali
     const img = new Image();
@@ -2224,6 +2232,19 @@ export default function RenderStanzaNew() {
               </button>
             </div>
 
+            {/* Genera varianti */}
+            {imageBase64 && (
+              <div className="flex justify-center">
+                <button
+                  onClick={() => setShowVarianti(true)}
+                  className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 font-medium py-2 px-3 hover:bg-primary/5 rounded-xl transition-colors"
+                >
+                  <Layers className="w-4 h-4" />
+                  Genera varianti di confronto
+                </button>
+              </div>
+            )}
+
             {/* Riepilogo interventi eseguiti */}
             <Card className="border-violet-200">
               <CardContent className="pt-4">
@@ -2273,6 +2294,22 @@ export default function RenderStanzaNew() {
               Vai alla galleria
             </Button>
           </div>
+        )}
+
+        {/* Modal varianti */}
+        {showVarianti && renderUrl && imageBase64 && (
+          <VariantiModal
+            imageBase64={imageBase64}
+            mimeType={foto?.type || 'image/jpeg'}
+            originalUrl={fotoPreview || ''}
+            basePrompt={buildStanzaPrompt(analisi ?? null, mapWizardToConfig(config, noteLibere)).userPrompt}
+            systemPrompt={buildStanzaPrompt(analisi ?? null, mapWizardToConfig(config, noteLibere)).systemPrompt}
+            naturalWidth={imageNaturalWidth}
+            naturalHeight={imageNaturalHeight}
+            sourceModulo="stanza"
+            sourceSessionId={sessionId || undefined}
+            onClose={() => setShowVarianti(false)}
+          />
         )}
 
       </div>
