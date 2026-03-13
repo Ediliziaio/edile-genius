@@ -415,14 +415,16 @@ export default function RenderBagnoNew() {
 
       clearInterval(interval);
 
-      if (error || !result?.result_url) {
-        setRenderError(error?.message || "Render non riuscito");
+      // Normalize envelope: new format { ok, data: { result_url } } vs legacy { result_url }
+      const payload = result?.data ?? result;
+      if (error || !payload?.result_url) {
+        setRenderError(error?.message || payload?.error || "Render non riuscito");
         setRendering(false);
         return;
       }
 
       setRenderProgress(100);
-      setRenderUrl(result.result_url);
+      setRenderUrl(payload.result_url);
       setStep(4);
     } catch {
       clearInterval(interval);
