@@ -892,6 +892,7 @@ export default function RenderStanzaNew() {
                   <img src={fotoPreview} alt="Foto stanza" className="w-full max-h-80 object-cover" />
                   <button
                     onClick={() => {
+                      if (fotoPreview) URL.revokeObjectURL(fotoPreview);
                       setFoto(null);
                       setFotoPreview(null);
                     }}
