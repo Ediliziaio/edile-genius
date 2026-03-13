@@ -302,13 +302,7 @@ export default function PreventivoTemplateBuilder() {
                     <input value={sezione.titolo} onChange={e => updateSezioneConfig(sezione.id, { titolo: e.target.value })}
                       className="flex-1 text-sm font-medium text-foreground bg-transparent border-0 outline-none min-w-0" />
 
-                    <Badge variant="outline" className={cn('text-xs flex-shrink-0', {
-                      'border-primary/30 text-primary': sezione.sorgente === 'ai_generated',
-                      'border-blue-400/30 text-blue-600': sezione.sorgente === 'kb_document',
-                      'border-indigo-400/30 text-indigo-600': sezione.sorgente === 'renders',
-                      'border-green-400/30 text-green-600': sezione.sorgente === 'tabella',
-                      'border-border text-muted-foreground': sezione.sorgente === 'manuale',
-                    })}>
+                    <Badge variant="outline" className="text-xs flex-shrink-0">
                       {sezione.sorgente === 'ai_generated' && '✨ AI'}
                       {sezione.sorgente === 'kb_document' && '📚 KB'}
                       {sezione.sorgente === 'renders' && '🖼️ Render'}
