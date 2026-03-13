@@ -302,7 +302,7 @@ export default function RenderPavimentoNew() {
               </div>
             </div>
           )}
-          <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); }} />
+          <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); }} />
 
           <StiliProntiPavimento onApply={handleApplyStile} />
         </div>

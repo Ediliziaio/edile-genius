@@ -373,6 +373,7 @@ export default function RenderFacciataNew() {
               }`}>
                 <Icon className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">{s.label}</span>
+                <span className="sm:hidden text-[10px]">{s.label}</span>
               </div>
               {i < STEP_LABELS.length - 1 && (
                 <div className={`w-4 sm:w-8 h-px mx-0.5 ${isDone ? "bg-primary" : "bg-border"}`} />
