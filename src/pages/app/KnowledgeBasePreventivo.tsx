@@ -255,7 +255,7 @@ export default function KnowledgeBasePreventivo() {
                   {doc.stato === 'errore' && (
                     <button
                       onClick={() => reIndicizza(doc)}
-                      className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-lg"
+                      className="p-1.5 text-amber-500 hover:bg-accent rounded-lg"
                       title="Re-indicizza"
                     >
                       <RefreshCw className="h-3.5 w-3.5" />

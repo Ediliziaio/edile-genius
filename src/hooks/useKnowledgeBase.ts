@@ -68,9 +68,7 @@ export function useKnowledgeBase() {
 
       // 2. DB record
       setUploadProgress(prev => ({ ...prev, [tempId]: 40 }));
-      const { data: doc, error: dbErr } = await supabase
-        .from('preventivo_kb_documenti')
-        .insert({
+      const insertPayload = {
           company_id: companyId,
           nome: nome || file.name.replace(/\.[^/.]+$/, ''),
           descrizione,
@@ -80,7 +78,10 @@ export function useKnowledgeBase() {
           categoria,
           stato: 'caricato',
           tags: tags || [],
-        } as Record<string, unknown>)
+        };
+      const { data: doc, error: dbErr } = await supabase
+        .from('preventivo_kb_documenti')
+        .insert(insertPayload as any)
         .select()
         .single();
       if (dbErr) throw dbErr;
