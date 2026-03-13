@@ -138,10 +138,14 @@ export function PavimentoColorSelector({ value, onChange, tipoPavimento }: Props
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-2">
             <RalColorPicker
-              value={value.ral_code ? { ral: value.ral_code, name: value.name ?? "", hex: value.hex ?? "#fff", group: "" } : null}
-              onChange={(ral: RalColor | null) => {
-                if (ral) onChange({ mode: "ral", ral_code: ral.ral, name: ral.name, hex: ral.hex });
+              colorMode="ral"
+              onColorModeChange={() => {}}
+              ralValue={value.ral_code ?? null}
+              onRalChange={(ral: RalColor) => {
+                onChange({ mode: "ral", ral_code: ral.ral, name: ral.name, hex: ral.hex });
               }}
+              woodValue={null}
+              onWoodChange={() => {}}
             />
           </CollapsibleContent>
         </Collapsible>
