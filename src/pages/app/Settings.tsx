@@ -420,7 +420,21 @@ export default function Settings() {
                       <Switch checked={wh.is_active} onCheckedChange={v => toggleWebhook(wh.id, v)} />
                       <Button variant="ghost" size="icon" onClick={() => testWebhook(wh)} disabled={testingWh === wh.id}>{testingWh === wh.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}</Button>
                       <Button variant="ghost" size="icon" onClick={() => openLogs(wh.id)}><History className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteWebhook(wh.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Eliminare questo webhook?</AlertDialogTitle>
+                            <AlertDialogDescription>Il webhook {wh.url} verrà eliminato definitivamente. Questa azione non può essere annullata.</AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Annulla</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deleteWebhook(wh.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Elimina</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </CardContent></Card>
                 ))}
