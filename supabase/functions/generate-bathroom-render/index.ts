@@ -363,20 +363,25 @@ function buildBlock_B(cfg: Record<string, any>): string {
     { key: "illuminazione", label: "LIGHTING" },
   ];
 
+  const toModernize: string[] = [];
+
   for (const el of elements) {
-    if (s[el.key]) toChange.push(`✅ REPLACE: ${el.label}`);
-    else toKeep.push(`🚫 KEEP EXACTLY: ${el.label}`);
+    if (s[el.key]) toChange.push(`✅ REPLACE: ${el.label} — full replacement per user specification`);
+    else toModernize.push(`🔄 MODERNIZE (keep type): ${el.label}`);
   }
 
   return `[BLOCK B – SELECTIVE REPLACEMENT DECLARATION]
-ELEMENTS TO CHANGE IN THIS RENDER:
+ELEMENTS TO FULLY REPLACE IN THIS RENDER:
 ${toChange.join("\n")}
 
-ELEMENTS THAT MUST REMAIN IDENTICAL TO ORIGINAL PHOTO:
-${toKeep.join("\n")}
+ELEMENTS THAT SHOULD BE MODERNIZED BUT KEEP THEIR TYPE:
+${toModernize.join("\n")}
 
-CRITICAL: Only replace what is listed as "REPLACE". Every other surface, object, and pixel
-outside the replacement zones must remain photorealistic and identical to the original photo.`;
+CRITICAL RULE: Elements marked "REPLACE" must be replaced entirely per the specifications below.
+Elements marked "MODERNIZE" may be updated to a cleaner, more modern version that harmonizes
+with the new design — but the CATEGORY of object must NOT change.
+A toilet must remain a toilet. A bidet must remain a bidet. A bathtub must remain a bathtub.
+Do NOT add, remove, or swap fixture types. Only improve their aesthetic appearance.`;
 }
 
 function buildBlock_C(cfg: Record<string, any>): string {
