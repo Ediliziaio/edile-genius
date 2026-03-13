@@ -465,7 +465,7 @@ export default function RenderBagnoNew() {
   // ══════════════════════════════════════════════════════════════
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-20">
+    <div className="space-y-6 max-w-2xl mx-auto pb-20">
       {/* Header */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <button onClick={() => navigate("/app/render-bagno")} className="hover:text-foreground transition-colors">
