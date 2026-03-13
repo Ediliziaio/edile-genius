@@ -8,7 +8,7 @@ import {
   Building2, UserPlus, Users, FileText,
   BookUser, Megaphone, type LucideIcon,
   AlertTriangle, MessageCircle, Puzzle, Palette, HardHat, Bath, Home, Layers,
-  FileSignature, ShieldCheck, ClipboardList,
+  FileSignature, ShieldCheck, ClipboardList, Wand2,
   Coins, ChevronDown, Clock, Zap, Activity, CalendarClock,
 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
