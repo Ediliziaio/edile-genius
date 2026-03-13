@@ -92,6 +92,8 @@ const Automations = lazy(() => import("./pages/app/Automations"));
 const OnboardingPage = lazy(() => import("./pages/app/Onboarding"));
 const CallMonitor = lazy(() => import("./pages/app/CallMonitor"));
 const ScheduledCalls = lazy(() => import("./pages/app/ScheduledCalls"));
+const RenderBagnoHub = lazy(() => import("./pages/app/RenderBagnoHub"));
+const RenderBagnoNew = lazy(() => import("./pages/app/RenderBagnoNew"));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-screen">
@@ -190,6 +192,8 @@ const App = () => (
                 <Route path="/app/render/new" element={<SafeRoute><RenderNew /></SafeRoute>} />
                 <Route path="/app/render/gallery" element={<SafeRoute><RenderGallery /></SafeRoute>} />
                 <Route path="/app/render/gallery/:id" element={<SafeRoute><RenderGalleryDetail /></SafeRoute>} />
+                <Route path="/app/render-bagno" element={<SafeRoute><RenderBagnoHub /></SafeRoute>} />
+                <Route path="/app/render-bagno/new" element={<SafeRoute><RenderBagnoNew /></SafeRoute>} />
                 <Route path="/app/lists" element={<SafeRoute><ContactListsPage /></SafeRoute>} />
                 <Route path="/app/lists/:id" element={<SafeRoute><ContactListDetailPage /></SafeRoute>} />
                 <Route path="/app/campaigns" element={<SafeRoute><CampaignsPage /></SafeRoute>} />

@@ -3071,6 +3071,197 @@ export type Database = {
           },
         ]
       }
+      render_bagno_gallery: {
+        Row: {
+          company_id: string
+          configurazione: Json | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_public: boolean | null
+          likes: number | null
+          originale_url: string | null
+          render_url: string
+          session_id: string | null
+          share_token: string | null
+          thumbnail_url: string | null
+          titolo: string | null
+        }
+        Insert: {
+          company_id: string
+          configurazione?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_public?: boolean | null
+          likes?: number | null
+          originale_url?: string | null
+          render_url: string
+          session_id?: string | null
+          share_token?: string | null
+          thumbnail_url?: string | null
+          titolo?: string | null
+        }
+        Update: {
+          company_id?: string
+          configurazione?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_public?: boolean | null
+          likes?: number | null
+          originale_url?: string | null
+          render_url?: string
+          session_id?: string | null
+          share_token?: string | null
+          thumbnail_url?: string | null
+          titolo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_bagno_gallery_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "render_bagno_gallery_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "render_bagno_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      render_bagno_presets: {
+        Row: {
+          category: string
+          created_at: string | null
+          hex: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          prompt_fragment: string | null
+          sort_order: number | null
+          value: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          hex?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          prompt_fragment?: string | null
+          sort_order?: number | null
+          value: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          hex?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          prompt_fragment?: string | null
+          sort_order?: number | null
+          value?: string
+        }
+        Relationships: []
+      }
+      render_bagno_sessions: {
+        Row: {
+          analisi_bagno: Json | null
+          company_id: string
+          configurazione: Json | null
+          cost_billed: number | null
+          cost_real: number | null
+          created_at: string | null
+          created_by: string | null
+          crediti_usati: number | null
+          error_message: string | null
+          foto_originale_path: string | null
+          foto_originale_url: string | null
+          id: string
+          metadata: Json | null
+          processing_completed_at: string | null
+          processing_started_at: string | null
+          prompt_blocks: Json | null
+          prompt_usato: string | null
+          prompt_version: string | null
+          provider_key: string | null
+          render_result_path: string | null
+          render_result_url: string | null
+          stato: string | null
+          tipo_intervento: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          analisi_bagno?: Json | null
+          company_id: string
+          configurazione?: Json | null
+          cost_billed?: number | null
+          cost_real?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          crediti_usati?: number | null
+          error_message?: string | null
+          foto_originale_path?: string | null
+          foto_originale_url?: string | null
+          id?: string
+          metadata?: Json | null
+          processing_completed_at?: string | null
+          processing_started_at?: string | null
+          prompt_blocks?: Json | null
+          prompt_usato?: string | null
+          prompt_version?: string | null
+          provider_key?: string | null
+          render_result_path?: string | null
+          render_result_url?: string | null
+          stato?: string | null
+          tipo_intervento?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          analisi_bagno?: Json | null
+          company_id?: string
+          configurazione?: Json | null
+          cost_billed?: number | null
+          cost_real?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          crediti_usati?: number | null
+          error_message?: string | null
+          foto_originale_path?: string | null
+          foto_originale_url?: string | null
+          id?: string
+          metadata?: Json | null
+          processing_completed_at?: string | null
+          processing_started_at?: string | null
+          prompt_blocks?: Json | null
+          prompt_usato?: string | null
+          prompt_version?: string | null
+          provider_key?: string | null
+          render_result_path?: string | null
+          render_result_url?: string | null
+          stato?: string | null
+          tipo_intervento?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_bagno_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       render_credits: {
         Row: {
           balance: number | null
