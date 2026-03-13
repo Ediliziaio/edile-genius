@@ -28,6 +28,7 @@ import {
 import { unwrapEdge } from '@/lib/edgePayload';
 import { ConfigRiepilogo } from '@/modules/render-stanza/components/ConfigRiepilogo';
 import { InterventiSummaryBar } from '@/modules/render-stanza/components/InterventiSummaryBar';
+import { VariantiModal } from '@/components/varianti/VariantiModal';
 
 // ─── COSTANTI ────────────────────────────────────────────────────────────────
 
