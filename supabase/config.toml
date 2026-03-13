@@ -170,3 +170,9 @@ verify_jwt = false
 
 [functions.generate-bathroom-render]
 verify_jwt = false
+
+[functions.analyze-facade-photo]
+verify_jwt = false
+
+[functions.generate-facade-render]
+verify_jwt = false
