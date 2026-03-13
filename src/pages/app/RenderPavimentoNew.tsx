@@ -161,8 +161,9 @@ export default function RenderPavimentoNew() {
 
       if (error) throw error;
       const payload = data?.data ?? data;
-      if (!payload?.result_image_url) throw new Error(payload?.error ?? "Render non riuscito");
-      return payload.result_image_url as string;
+      const resultImageUrl = payload?.result_image_url || payload?.result_url;
+      if (!resultImageUrl) throw new Error(payload?.error ?? "Render non riuscito");
+      return resultImageUrl as string;
     },
     onSuccess: (url) => {
       setResultUrl(url);

@@ -665,6 +665,7 @@ export default function RenderStanzaNew() {
       // Salva in gallery (colonne corrette)
       await supabase.from('render_stanza_gallery' as any).insert({
         user_id: user.id,
+        company_id: companyId,
         session_id: sessionId,
         original_image_url: originalUrl || '',
         result_image_url: finalUrl || '',

@@ -149,12 +149,12 @@ export default function RenderFacciataNew() {
     const previewUrl = URL.createObjectURL(file);
     setFotoPreview(previewUrl);
 
-    // Detect dimensions
+    // Detect dimensions — reuse existing previewUrl instead of creating a second blob URL
     const { w, h } = await new Promise<{ w: number; h: number }>((resolve) => {
       const img = new Image();
       img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
       img.onerror = () => resolve({ w: 1024, h: 1024 });
-      img.src = URL.createObjectURL(file);
+      img.src = previewUrl;
     });
     setImageNaturalWidth(w);
     setImageNaturalHeight(h);

@@ -139,7 +139,8 @@ export function useRenderTetto(options: UseRenderTettoOptions = {}) {
       const result = await supabase.functions.invoke('analyze-roof-photo', {
         body: { image_base64: imageBase64, mime_type: 'image/jpeg', session_id: sessionId },
       });
-      const { analisi: a } = unwrapEdge<{ analisi: AnalisiTetto }>(result);
+      if (result.error) throw new Error(result.error.message || 'Errore analisi');
+      const { analisi: a } = unwrapEdge<{ analisi: AnalisiTetto }>(result.data);
       setAnalisi(a);
       setTipoTetto(a.tipo_tetto);
 
