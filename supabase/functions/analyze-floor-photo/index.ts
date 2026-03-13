@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
       confidence: 0.85,
     };
 
-    return jsonOk({ ok: true, data: stubAnalysis }, requestId);
+    return jsonOk(stubAnalysis, requestId);
   } catch (err) {
     return errorResponse(err, requestId, "analyze-floor-photo");
   }

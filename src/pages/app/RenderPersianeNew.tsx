@@ -323,7 +323,7 @@ export default function RenderPersianeNew() {
       const resultUrl = (renderPayload?.result_url || renderPayload?.result_image_url) as string;
       if (!resultUrl) throw new Error("URL risultato non ricevuto");
 
-      setRenderUrl(data.result_url);
+      setRenderUrl(resultUrl);
 
       await (supabase.from("render_persiane_sessions") as any)
         .update({ result_image_url: data.result_url, status: "completed" })

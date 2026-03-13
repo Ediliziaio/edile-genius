@@ -289,9 +289,11 @@ export default function RenderFacciataNew() {
       clearInterval(interval);
 
       if (error) throw new Error(error.message);
-      if (!data?.result_url) throw new Error("Render URL non ricevuto");
+      const renderPayload = (data?.data ?? data) as Record<string, unknown>;
+      const resultUrl = renderPayload?.result_url || renderPayload?.render_url;
+      if (!resultUrl) throw new Error("Render URL non ricevuto");
 
-      setRenderUrl(data.result_url);
+      setRenderUrl(resultUrl as string);
       setRendering(false);
       setStep(5);
     } catch (err: any) {
