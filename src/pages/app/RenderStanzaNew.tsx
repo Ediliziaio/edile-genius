@@ -876,7 +876,7 @@ export default function RenderStanzaNew() {
                   const file = e.dataTransfer.files[0];
                   if (file) handleFotoSelect(file);
                 }}
-                className="border-2 border-dashed border-violet-300 rounded-2xl p-12 text-center cursor-pointer hover:border-violet-500 hover:bg-violet-50 transition-all"
+                className="border-2 border-dashed border-violet-300 rounded-2xl p-6 md:p-12 text-center cursor-pointer hover:border-violet-500 hover:bg-violet-50 transition-all"
               >
                 <div className="w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Upload className="w-8 h-8 text-violet-600" />
