@@ -19,6 +19,7 @@ import {
 import { useSearchParams, useNavigate } from "react-router-dom";
 import type { Json } from "@/integrations/supabase/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
@@ -70,6 +71,14 @@ function BillingTabContent({ companyId, navigate }: { companyId: string | null |
     },
     enabled: !!companyId, staleTime: 2 * 60 * 1000,
   });
+  const { data: company } = useQuery({
+    queryKey: ["billing-company", companyId],
+    queryFn: async () => {
+      const { data } = await supabase.from("companies").select("name, plan, created_at").eq("id", companyId!).single();
+      return data as { name: string; plan: string | null; created_at: string } | null;
+    },
+    enabled: !!companyId, staleTime: 5 * 60 * 1000,
+  });
   const { data: recentTopups = [] } = useQuery({
     queryKey: ["billing-topups", companyId],
     queryFn: async () => {
@@ -80,9 +89,33 @@ function BillingTabContent({ companyId, navigate }: { companyId: string | null |
     enabled: !!companyId, staleTime: 2 * 60 * 1000,
   });
   const balanceStatus = !billingCredits ? null : billingCredits.balance_eur < 10 ? "destructive" : billingCredits.balance_eur < 50 ? "secondary" : "default";
+  const planLabel = company?.plan || "Free";
+  const planBadgeVariant = planLabel.toLowerCase().includes("pro") ? "default" : planLabel.toLowerCase().includes("enterprise") ? "default" : "secondary";
 
   return (
-    <div className="space-y-4 max-w-lg">
+    <div className="space-y-6 max-w-lg">
+      <div>
+        <h2 className="text-lg font-semibold text-foreground">Fatturazione</h2>
+        <p className="text-sm text-muted-foreground">Gestisci il tuo piano, crediti e pagamenti</p>
+      </div>
+
+      {/* Current plan */}
+      <Card>
+        <CardContent className="p-6 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Piano corrente</p>
+              <p className="text-xl font-bold text-foreground">{planLabel}</p>
+            </div>
+            <Badge variant={planBadgeVariant as any} className="text-sm px-3 py-1">{planLabel.toLowerCase().includes("pro") ? "Attivo" : planLabel.toLowerCase().includes("enterprise") ? "Attivo" : "Base"}</Badge>
+          </div>
+          {company?.created_at && (
+            <p className="text-xs text-muted-foreground">Membro dal {new Date(company.created_at).toLocaleDateString("it-IT")}</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Credits */}
       <Card><CardHeader className="pb-3"><CardTitle className="text-base">Crediti conversazionali</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
@@ -93,6 +126,8 @@ function BillingTabContent({ companyId, navigate }: { companyId: string | null |
           <Button size="sm" variant="outline" onClick={() => navigate("/app/credits")} className="gap-2"><CreditCard className="h-4 w-4" /> Gestisci crediti</Button>
         </CardContent>
       </Card>
+
+      {/* Recent topups */}
       {recentTopups.length > 0 && (
         <Card><CardHeader className="pb-3"><CardTitle className="text-base">Ultime ricariche</CardTitle></CardHeader>
           <CardContent className="space-y-2">
@@ -122,11 +157,9 @@ export default function Settings() {
   const currentTab = TABS.find(t => t.id === activeTab)!;
 
   const [loading, setLoading] = useState(true);
-  const [savingProfile, setSavingProfile] = useState(false);
   const [savingNotif, setSavingNotif] = useState(false);
   const [testing, setTesting] = useState(false);
-  const [fullName, setFullName] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
+  const [deleteWhId, setDeleteWhId] = useState<string | null>(null);
   const [notif, setNotif] = useState<NotifSettings>({ new_conversation: true, daily_report: false, weekly_report: true });
 
   // Webhooks
@@ -158,8 +191,6 @@ export default function Settings() {
 
   useEffect(() => {
     if (!profile) return;
-    setFullName(profile.full_name || "");
-    setAvatarUrl(profile.avatar_url || "");
     if (companyId) {
       Promise.all([
         supabase.from("companies").select("settings").eq("id", companyId).single(),
@@ -182,13 +213,7 @@ export default function Settings() {
     setLoadingWebhooks(false);
   };
 
-  const saveProfile = async () => {
-    if (!user) return;
-    setSavingProfile(true);
-    const { error } = await supabase.from("profiles").update({ full_name: fullName, avatar_url: avatarUrl || null }).eq("id", user.id);
-    setSavingProfile(false);
-    toast(error ? { title: "Errore", description: error.message, variant: "destructive" } : { title: "Profilo aggiornato" });
-  };
+  // (Profile saving moved to TabProfilo)
 
   const testConnection = async () => {
     if (!companyId) return;
@@ -272,34 +297,7 @@ export default function Settings() {
     finally { setCrmSyncing(null); }
   };
 
-  // Password change
-  function PasswordChangeForm() {
-    const [newPassword, setNewPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [saving, setSaving] = useState(false);
-    const [pwError, setPwError] = useState("");
-    const handleChangePassword = async () => {
-      setPwError("");
-      if (newPassword.length < 8) { setPwError("Minimo 8 caratteri"); return; }
-      if (newPassword !== confirmPassword) { setPwError("Le password non corrispondono"); return; }
-      setSaving(true);
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      setSaving(false);
-      if (error) { toast({ title: "Errore", description: error.message, variant: "destructive" }); }
-      else { toast({ title: "Password aggiornata" }); setNewPassword(""); setConfirmPassword(""); }
-    };
-    return (
-      <div className="space-y-3">
-        <h4 className="text-sm font-semibold text-foreground">Cambia password</h4>
-        <div className="space-y-2"><Label className="text-muted-foreground">Nuova password</Label><Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Minimo 8 caratteri" autoComplete="new-password" /></div>
-        <div className="space-y-2"><Label className="text-muted-foreground">Conferma password</Label><Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Ripeti la password" autoComplete="new-password" /></div>
-        {pwError && <p className="text-sm text-destructive">{pwError}</p>}
-        <Button onClick={handleChangePassword} disabled={saving || !newPassword} variant="outline">
-          {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}Aggiorna password
-        </Button>
-      </div>
-    );
-  }
+  // (Password change moved to TabProfilo)
 
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
@@ -456,7 +454,21 @@ export default function Settings() {
                       <Switch checked={wh.is_active} onCheckedChange={v => toggleWebhook(wh.id, v)} />
                       <Button variant="ghost" size="icon" onClick={() => testWebhook(wh)} disabled={testingWh === wh.id}>{testingWh === wh.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}</Button>
                       <Button variant="ghost" size="icon" onClick={() => openLogs(wh.id)}><History className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteWebhook(wh.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Eliminare questo webhook?</AlertDialogTitle>
+                            <AlertDialogDescription>Il webhook {wh.url} verrà eliminato definitivamente. Questa azione non può essere annullata.</AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Annulla</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deleteWebhook(wh.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Elimina</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </CardContent></Card>
                 ))}
@@ -495,17 +507,6 @@ export default function Settings() {
                 </div>
               ))}
               <Button onClick={saveNotif} disabled={savingNotif}>{savingNotif ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}Salva preferenze</Button>
-            </CardContent></Card>
-
-            <Separator />
-            <Card><CardContent className="p-6 space-y-4">
-              <h3 className="text-base font-semibold text-foreground">Profilo utente</h3>
-              <div className="space-y-2"><Label>Email</Label><Input value={profile?.email || ""} disabled className="opacity-60" /></div>
-              <div className="space-y-2"><Label>Nome completo</Label><Input value={fullName} onChange={e => setFullName(e.target.value)} /></div>
-              <div className="space-y-2"><Label>Avatar URL</Label><Input value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)} placeholder="https://..." /></div>
-              <Button onClick={saveProfile} disabled={savingProfile}>{savingProfile ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}Salva profilo</Button>
-              <Separator className="my-4" />
-              <PasswordChangeForm />
             </CardContent></Card>
           </div>
         )}
