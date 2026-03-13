@@ -393,6 +393,11 @@ export default function RenderBagnoNew() {
 
     const { userPrompt, systemPrompt } = buildBathroomPrompt(analisi, cfg);
 
+    // Save configuration to session BEFORE invoking edge function
+    await (supabase.from("render_bagno_sessions") as any)
+      .update({ configurazione: cfg, analisi_bagno: analisi, stato: "pending" })
+      .eq("id", sessionId);
+
     // Fake progress animation
     const interval = setInterval(() => {
       setRenderProgress(p => Math.min(p + 2, 90));
@@ -403,9 +408,6 @@ export default function RenderBagnoNew() {
         .invoke("generate-bathroom-render", {
           body: {
             session_id: sessionId,
-            original_storage_path: originalPath,
-            prompt_text: userPrompt,
-            system_prompt: systemPrompt,
           },
         });
 
