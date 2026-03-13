@@ -506,10 +506,12 @@ export default function RenderStanzaNew() {
 
     try {
       // 1. Crea sessione DB
+      const currentCompanyId = (await import('@/hooks/useCompanyId')).useCompanyId ? companyId : null;
       const { data: session, error: sessErr } = await supabase
         .from('render_stanza_sessions' as any)
         .insert({
           user_id: user.id,
+          company_id: companyId,
           tipo_stanza: config.tipo_stanza,
           status: 'analyzing',
         })
