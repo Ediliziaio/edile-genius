@@ -157,8 +157,6 @@ export default function Settings() {
 
   useEffect(() => {
     if (!profile) return;
-    setFullName(profile.full_name || "");
-    setAvatarUrl(profile.avatar_url || "");
     if (companyId) {
       Promise.all([
         supabase.from("companies").select("settings").eq("id", companyId).single(),
