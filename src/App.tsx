@@ -94,6 +94,8 @@ const CallMonitor = lazy(() => import("./pages/app/CallMonitor"));
 const ScheduledCalls = lazy(() => import("./pages/app/ScheduledCalls"));
 const RenderBagnoHub = lazy(() => import("./pages/app/RenderBagnoHub"));
 const RenderBagnoNew = lazy(() => import("./pages/app/RenderBagnoNew"));
+const RenderFacciataHub = lazy(() => import("./pages/app/RenderFacciataHub"));
+const RenderFacciataNew = lazy(() => import("./pages/app/RenderFacciataNew"));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-screen">
