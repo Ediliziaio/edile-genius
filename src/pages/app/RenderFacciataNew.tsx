@@ -411,6 +411,7 @@ export default function RenderFacciataNew() {
             ref={fileInputRef}
             type="file"
             accept="image/jpeg,image/png,image/webp"
+            capture="environment"
             className="hidden"
             onChange={(e) => e.target.files?.[0] && handleFotoSelect(e.target.files[0])}
           />
