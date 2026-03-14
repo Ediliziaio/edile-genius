@@ -130,11 +130,9 @@ export default function SidebarNav({ onNavigate }: SidebarNavProps) {
       const sector = company?.sector?.toLowerCase() || "";
       const isEdile = ["edilizia", "costruzioni", "impresa_edile", "ristrutturazione"].some(s => sector.includes(s));
       const isSerramenti = ["serramenti", "infissi", "finestre", "showroom"].some(s => sector.includes(s));
-      const hasRenderCredits = (renderRes.data as any)?.balance > 0;
 
       setSectionVisibility({
         cantieri: hasCantieri || isEdile,
-        render: isSerramenti || hasRenderCredits,
         preventivi: hasPreventivi || isEdile || isSerramenti,
       });
     };
