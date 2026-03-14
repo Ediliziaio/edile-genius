@@ -3,7 +3,7 @@ import { useCompanyId } from "@/hooks/useCompanyId";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { Plus, Search, RotateCcw } from "lucide-react";
+import { Plus, Search, RotateCcw, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AgentCard from "@/components/agents/AgentCard";
