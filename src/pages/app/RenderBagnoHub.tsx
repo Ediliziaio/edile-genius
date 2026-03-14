@@ -34,7 +34,7 @@ export default function RenderBagnoHub() {
       .select("id, titolo, render_url, originale_url, created_at")
       .eq("company_id", companyId)
       .order("created_at", { ascending: false })
-      .limit(20)
+      .limit(200)
       .then(({ data }: any) => { if (data) setGalleryItems(data); });
   }, [companyId]);
 
