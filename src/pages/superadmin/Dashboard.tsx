@@ -213,17 +213,19 @@ export default function SuperAdminDashboard() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-ink-900">Dashboard</h1>
           <p className="text-sm text-ink-500 mt-1">Panoramica globale della piattaforma</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => navigate("/superadmin/companies")} className="border-ink-200 text-ink-700">
-            Gestisci Aziende <ArrowRight className="ml-2 h-4 w-4" />
+            <span className="hidden sm:inline">Gestisci Aziende</span>
+            <span className="sm:hidden">Aziende</span>
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
           <Button onClick={() => navigate("/superadmin/companies/new")} className="bg-brand hover:bg-brand-hover text-white">
-            <Plus className="mr-2 h-4 w-4" /> Nuova Azienda
+            <Plus className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">Nuova Azienda</span><span className="sm:hidden">Nuova</span>
           </Button>
         </div>
       </div>
