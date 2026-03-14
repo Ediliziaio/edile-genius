@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { RenderTettoResultCard } from '@/modules/render-tetto/components/RenderTettoResultCard';
+import { VirtualGalleryGrid } from "@/components/ui/VirtualGalleryGrid";
 import type { ConfigurazioneTetto } from '@/modules/render-tetto/types';
 
 // ─── Costanti ─────────────────────────────────────────────────────────────────
