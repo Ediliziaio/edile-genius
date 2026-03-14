@@ -49,15 +49,6 @@ const companyNav: NavSection[] = [
     { label: "Documenti", icon: ShieldCheck, href: "/app/documenti" },
     { label: "Presenze", icon: ClipboardList, href: "/app/presenze" },
   ]},
-  { header: "STRUMENTI AI", collapsible: true, defaultOpen: false, visibilityKey: "render", items: [
-    { label: "Render Infissi", icon: Palette, href: "/app/render" },
-    { label: "Render Bagno", icon: Bath, href: "/app/render-bagno" },
-    { label: "Render Facciata", icon: Home, href: "/app/render-facciata" },
-    { label: "Render Persiane", icon: Layers, href: "/app/render-persiane" },
-    { label: "Render Pavimento", icon: HardHat, href: "/app/render-pavimento" },
-    { label: "Render Stanza", icon: Wand2, href: "/app/render-stanza" },
-    { label: "Render Tetto", icon: Home, href: "/app/render-tetto" },
-  ]},
   { header: "IMPOSTAZIONI", items: [
     { label: "Crediti", icon: Coins, href: "/app/credits" },
     { label: "Integrazioni", icon: Puzzle, href: "/app/integrations" },
@@ -117,10 +108,9 @@ export default function SidebarNav({ onNavigate }: SidebarNavProps) {
       if (!profile?.company_id) return;
       const companyId = profile.company_id;
 
-      const [creditsRes, cantieriRes, renderRes, companyRes, preventiviRes] = await Promise.all([
+      const [creditsRes, cantieriRes, companyRes, preventiviRes] = await Promise.all([
         supabase.from("ai_credits").select("balance_eur, total_recharged_eur, total_spent_eur, calls_blocked, alert_threshold_eur").eq("company_id", companyId).single(),
         supabase.from("cantieri").select("id", { count: "exact", head: true }).eq("company_id", companyId),
-        supabase.from("render_credits" as any).select("balance", { count: "exact", head: true }).eq("company_id", companyId),
         supabase.from("companies").select("sector, plan, trial_ends_at").eq("id", companyId).single(),
         supabase.from("preventivi" as any).select("id", { count: "exact", head: true }).eq("company_id", companyId),
       ]);
@@ -139,11 +129,9 @@ export default function SidebarNav({ onNavigate }: SidebarNavProps) {
       const sector = company?.sector?.toLowerCase() || "";
       const isEdile = ["edilizia", "costruzioni", "impresa_edile", "ristrutturazione"].some(s => sector.includes(s));
       const isSerramenti = ["serramenti", "infissi", "finestre", "showroom"].some(s => sector.includes(s));
-      const hasRenderCredits = (renderRes.data as any)?.balance > 0;
 
       setSectionVisibility({
         cantieri: hasCantieri || isEdile,
-        render: isSerramenti || hasRenderCredits,
         preventivi: hasPreventivi || isEdile || isSerramenti,
       });
     };
