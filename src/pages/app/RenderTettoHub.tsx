@@ -51,7 +51,7 @@ export default function RenderTettoHub() {
         .select('id, result_url, original_url, config_json, session_note, created_at')
         .not('result_url', 'is', null)
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(200);
       if (error) throw error;
       return (data || []) as unknown as Array<{
         id: string;
