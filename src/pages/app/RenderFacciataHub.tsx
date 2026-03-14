@@ -12,6 +12,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { VirtualGalleryGrid } from "@/components/ui/VirtualGalleryGrid";
 
 interface GalleryItem {
   id: string;
