@@ -25,7 +25,7 @@ export default function RenderPersianeHub() {
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
-        .limit(24);
+        .limit(200);
       return data || [];
     },
     enabled: !!user && activeTab === "galleria",
