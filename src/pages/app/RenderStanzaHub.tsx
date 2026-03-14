@@ -254,8 +254,11 @@ export default function RenderStanzaHub() {
                   Nuovo
                 </Button>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {gallery.map((item: any) => (
+              <VirtualGalleryGrid
+                items={gallery}
+                gridClassName="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+                rowHeight={340}
+                renderItem={(item: any) => (
                   <RenderStanzaResultCard
                     key={item.id}
                     originalUrl={item.original_image_url || item.result_image_url}
@@ -266,8 +269,8 @@ export default function RenderStanzaHub() {
                     isFavorite={item.is_favorite}
                     onToggleFavorite={() => handleToggleFavorite(item)}
                   />
-                ))}
-              </div>
+                )}
+              />
             </>
           )}
         </TabsContent>

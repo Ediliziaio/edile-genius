@@ -128,8 +128,11 @@ export default function RenderPersianeHub() {
               <Button onClick={() => navigate("/app/render-persiane/new")}>Inizia ora</Button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
-              {gallery.map((item: any) => (
+            <VirtualGalleryGrid
+              items={gallery}
+              gridClassName="grid grid-cols-2 gap-3"
+              rowHeight={320}
+              renderItem={(item: any) => (
                 <div key={item.id} className="relative group rounded-xl overflow-hidden border border-border">
                   <img src={item.result_image_url} alt="render" loading="lazy" decoding="async" className="w-full aspect-[4/3] object-cover" />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
@@ -144,8 +147,8 @@ export default function RenderPersianeHub() {
                     </p>
                   </div>
                 </div>
-              ))}
-            </div>
+              )}
+            />
           )}
         </div>
       )}
