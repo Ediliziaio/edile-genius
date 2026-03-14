@@ -212,9 +212,9 @@ export default function GlobalAnalyticsPage() {
             a.href = url; a.download = "analytics-export.csv"; a.click();
             URL.revokeObjectURL(url);
           }}
-          className="flex items-center gap-2 px-4 py-2 rounded-btn text-sm font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 transition-colors"
+          className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-btn text-sm font-medium bg-ink-100 text-ink-600 hover:bg-ink-200 transition-colors"
         >
-          <Download className="w-4 h-4" /> Esporta CSV
+          <Download className="w-4 h-4" /> <span className="hidden sm:inline">Esporta CSV</span>
         </button>
       </div>
 
