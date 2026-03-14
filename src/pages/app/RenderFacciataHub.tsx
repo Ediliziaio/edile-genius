@@ -54,7 +54,7 @@ export default function RenderFacciataHub() {
         .select("id, title, render_url, original_url, created_at")
         .eq("company_id", companyId)
         .order("created_at", { ascending: false })
-        .limit(24);
+        .limit(200);
       return (data || []) as GalleryItem[];
     },
     enabled: !!companyId && activeTab === "galleria",
