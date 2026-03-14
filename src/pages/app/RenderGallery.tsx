@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Download, Trash2, Image as ImageIcon, ChevronLeft, Share2 } from "lucide-react";
 import { ShareModal, type ShareableItem } from "@/components/share/ShareModal";
+import { VirtualGalleryGrid } from "@/components/ui/VirtualGalleryGrid";
 
 export default function RenderGallery() {
   const companyId = useCompanyId();
@@ -131,8 +132,12 @@ export default function RenderGallery() {
         </Card>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filtered.map((item) => (
+      <VirtualGalleryGrid
+        items={filtered}
+        gridClassName="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+        rowHeight={320}
+        threshold={18}
+        renderItem={(item) => (
           <Card key={item.id} className={`overflow-hidden group ${selecting && selectedIds.has(item.id) ? 'ring-2 ring-primary' : ''}`}>
             <div className="relative">
               {selecting && (
@@ -166,8 +171,8 @@ export default function RenderGallery() {
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
+        )}
+      />
 
       {showShareModal && companyId && (
         <ShareModal

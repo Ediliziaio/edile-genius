@@ -14,6 +14,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { RenderStanzaResultCard } from '@/modules/render-stanza/components/RenderStanzaResultCard';
+import { VirtualGalleryGrid } from "@/components/ui/VirtualGalleryGrid";
 
 // ─── COSTANTI ────────────────────────────────────────────────────────────────
 
@@ -66,7 +67,7 @@ export default function RenderStanzaHub() {
           .select('*')
           .eq('user_id', user!.id)
           .order('created_at', { ascending: false })
-          .limit(40) as any);
+          .limit(200) as any);
         if (error) return [];
         return (data || []) as any[];
       } catch {
@@ -253,8 +254,11 @@ export default function RenderStanzaHub() {
                   Nuovo
                 </Button>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {gallery.map((item: any) => (
+              <VirtualGalleryGrid
+                items={gallery}
+                gridClassName="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+                rowHeight={340}
+                renderItem={(item: any) => (
                   <RenderStanzaResultCard
                     key={item.id}
                     originalUrl={item.original_image_url || item.result_image_url}
@@ -265,8 +269,8 @@ export default function RenderStanzaHub() {
                     isFavorite={item.is_favorite}
                     onToggleFavorite={() => handleToggleFavorite(item)}
                   />
-                ))}
-              </div>
+                )}
+              />
             </>
           )}
         </TabsContent>

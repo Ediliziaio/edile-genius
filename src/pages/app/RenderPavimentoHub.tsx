@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Download, Heart, HeartOff, Info, Image as ImageIcon, Grid3X3 } from "lucide-react";
+import { VirtualGalleryGrid } from "@/components/ui/VirtualGalleryGrid";
 import { useToast } from "@/hooks/use-toast";
 
 interface GalleryItem {
@@ -198,8 +199,11 @@ export default function RenderPavimentoHub() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {gallery.map((item) => (
+            <VirtualGalleryGrid
+              items={gallery}
+              gridClassName="grid grid-cols-2 md:grid-cols-3 gap-3"
+              rowHeight={340}
+              renderItem={(item) => (
                 <div key={item.id} className="relative group rounded-xl overflow-hidden border border-border bg-card">
                   <img src={item.result_image_url} alt="render" loading="lazy" decoding="async" className="w-full aspect-[4/3] object-cover" />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
@@ -226,8 +230,8 @@ export default function RenderPavimentoHub() {
                     <p className="text-[10px] text-muted-foreground">{new Date(item.created_at).toLocaleDateString("it-IT", { day: "2-digit", month: "short" })}</p>
                   </div>
                 </div>
-              ))}
-            </div>
+              )}
+            />
           )}
         </div>
       )}

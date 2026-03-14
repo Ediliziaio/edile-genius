@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bath, Sparkles, Plus, Coins, Camera, Settings, Image, Download, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { VirtualGalleryGrid } from "@/components/ui/VirtualGalleryGrid";
 
 interface GalleryItem {
   id: string;
@@ -33,7 +34,7 @@ export default function RenderBagnoHub() {
       .select("id, titolo, render_url, originale_url, created_at")
       .eq("company_id", companyId)
       .order("created_at", { ascending: false })
-      .limit(20)
+      .limit(200)
       .then(({ data }: any) => { if (data) setGalleryItems(data); });
   }, [companyId]);
 
@@ -111,8 +112,11 @@ export default function RenderBagnoHub() {
       {galleryItems.length > 0 ? (
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-foreground">I tuoi render</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {galleryItems.map(item => (
+          <VirtualGalleryGrid
+            items={galleryItems}
+            gridClassName="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+            rowHeight={300}
+            renderItem={(item) => (
               <div key={item.id} className="group relative rounded-xl overflow-hidden border bg-card">
                 <img
                   src={item.render_url}
@@ -127,27 +131,18 @@ export default function RenderBagnoHub() {
                       {item.titolo || new Date(item.created_at).toLocaleDateString("it-IT")}
                     </p>
                     <div className="flex gap-2 mt-2">
-                      <a
-                        href={item.render_url}
-                        download
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-1.5 rounded-lg bg-white/20 hover:bg-white/40 transition-colors"
-                      >
+                      <a href={item.render_url} download target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg bg-white/20 hover:bg-white/40 transition-colors">
                         <Download className="h-4 w-4 text-white" />
                       </a>
-                      <button
-                        onClick={() => deleteGalleryItem(item.id)}
-                        className="p-1.5 rounded-lg bg-white/20 hover:bg-destructive/80 transition-colors"
-                      >
+                      <button onClick={() => deleteGalleryItem(item.id)} className="p-1.5 rounded-lg bg-white/20 hover:bg-destructive/80 transition-colors">
                         <Trash2 className="h-4 w-4 text-white" />
                       </button>
                     </div>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+            )}
+          />
         </div>
       ) : (
         <Card>
