@@ -1,9 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useCallback, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCompanyId } from "@/hooks/useCompanyId";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Loader2, AlertCircle } from "lucide-react";
+import { ArrowLeft, Loader2, AlertCircle, ShieldAlert } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -150,6 +151,7 @@ export default function AgentTemplateWizard() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const companyId = useCompanyId();
 
   const [step, setStep] = useState(0);
@@ -245,7 +247,10 @@ export default function AgentTemplateWizard() {
   });
 
   const handleSubmit = async () => {
-    if (!companyId) return;
+    if (!companyId) {
+      toast({ title: "Nessuna azienda selezionata", description: "Devi impersonare un'azienda prima di creare un agente.", variant: "destructive" });
+      return;
+    }
     setSubmitting(true);
     try {
       const body = {
@@ -275,6 +280,7 @@ export default function AgentTemplateWizard() {
       }
 
       toast({ title: "Agente creato! 🎉", description: `${form.name} è pronto.` });
+      await queryClient.invalidateQueries({ queryKey: ["company-agents"] });
       const newAgentId = data?.agent?.id;
       navigate(newAgentId ? `/app/agents/${newAgentId}` : "/app/agents");
     } catch (e: any) {
@@ -285,6 +291,10 @@ export default function AgentTemplateWizard() {
   };
 
   const handleCreateDraft = async (): Promise<string | null> => {
+    if (!companyId) {
+      toast({ title: "Nessuna azienda selezionata", description: "Devi impersonare un'azienda prima di creare un agente.", variant: "destructive" });
+      return null;
+    }
     try {
       const body = {
         company_id: companyId, name: form.name, description: form.description,
@@ -328,6 +338,17 @@ export default function AgentTemplateWizard() {
           <span className="text-sm text-foreground/80">Template: {getTemplateLabel(slug || "")}</span>
           <span className="text-xs text-foreground/50 ml-auto hidden sm:inline">Puoi modificare tutto durante la configurazione</span>
         </div>
+
+        {/* Missing company warning for superadmins */}
+        {!companyId && (
+          <div className="flex items-center gap-3 px-4 py-3 mb-4 rounded-lg border border-destructive/30 bg-destructive/5 text-destructive">
+            <ShieldAlert className="w-5 h-5 shrink-0" />
+            <div className="text-sm">
+              <strong>Nessuna azienda selezionata.</strong>{" "}
+              <span className="text-destructive/80">Devi impersonare un'azienda dalla sezione SuperAdmin prima di poter creare un agente.</span>
+            </div>
+          </div>
+        )}
 
         <div className="flex items-center justify-between">
           <div>
