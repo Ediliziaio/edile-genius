@@ -337,30 +337,32 @@ export default function SuperAdminDashboard() {
             <div className="px-5 py-3 border-b border-border">
               <h3 className="text-sm font-semibold text-foreground">Revenue per Azienda</h3>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted">
-                  <TableHead className="text-xs">Azienda</TableHead>
-                  <TableHead className="text-xs text-right">Ricavi €</TableHead>
-                  <TableHead className="text-xs text-right">Costi €</TableHead>
-                  <TableHead className="text-xs text-right">Margine €</TableHead>
-                  <TableHead className="text-xs text-right">Conv.</TableHead>
-                  <TableHead className="text-xs text-right">Minuti</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {companyRevenue.map(r => (
-                  <TableRow key={r.name}>
-                    <TableCell className="text-sm font-medium">{r.name}</TableCell>
-                    <TableCell className="text-right font-mono text-sm text-brand font-semibold">€{r.ricavi}</TableCell>
-                    <TableCell className="text-right font-mono text-sm text-muted-foreground">€{r.costi}</TableCell>
-                    <TableCell className="text-right font-mono text-sm font-semibold text-status-success">€{r.margine}</TableCell>
-                    <TableCell className="text-right text-sm text-muted-foreground">{r.conversazioni}</TableCell>
-                    <TableCell className="text-right text-sm text-muted-foreground">{r.minuti}</TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted">
+                    <TableHead className="text-xs">Azienda</TableHead>
+                    <TableHead className="text-xs text-right">Ricavi €</TableHead>
+                    <TableHead className="text-xs text-right hidden md:table-cell">Costi €</TableHead>
+                    <TableHead className="text-xs text-right">Margine €</TableHead>
+                    <TableHead className="text-xs text-right hidden md:table-cell">Conv.</TableHead>
+                    <TableHead className="text-xs text-right hidden md:table-cell">Minuti</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {companyRevenue.map(r => (
+                    <TableRow key={r.name}>
+                      <TableCell className="text-sm font-medium">{r.name}</TableCell>
+                      <TableCell className="text-right font-mono text-sm text-brand font-semibold">€{r.ricavi}</TableCell>
+                      <TableCell className="text-right font-mono text-sm text-muted-foreground hidden md:table-cell">€{r.costi}</TableCell>
+                      <TableCell className="text-right font-mono text-sm font-semibold text-status-success">€{r.margine}</TableCell>
+                      <TableCell className="text-right text-sm text-muted-foreground hidden md:table-cell">{r.conversazioni}</TableCell>
+                      <TableCell className="text-right text-sm text-muted-foreground hidden md:table-cell">{r.minuti}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         )}
       </div>
