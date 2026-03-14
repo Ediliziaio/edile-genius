@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Download, Heart, HeartOff, Info, Image as ImageIcon, Grid3X3 } from "lucide-react";
+import { VirtualGalleryGrid } from "@/components/ui/VirtualGalleryGrid";
 import { useToast } from "@/hooks/use-toast";
 
 interface GalleryItem {
