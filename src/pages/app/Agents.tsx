@@ -11,6 +11,16 @@ import { computeAgentScore } from "@/lib/agent-score";
 
 type StatusFilter = "all" | "active" | "incomplete" | "draft";
 
+const RENDER_SHORTCUTS = [
+  { name: "Infissi", icon: "🪟", route: "/app/render/new", desc: "Serramenti e finestre" },
+  { name: "Bagno", icon: "🛁", route: "/app/render-bagno/new", desc: "Ristrutturazione bagno" },
+  { name: "Facciata", icon: "🏢", route: "/app/render-facciata/new", desc: "Cappotto e intonaco" },
+  { name: "Persiane", icon: "🪞", route: "/app/render-persiane/new", desc: "Stili e materiali" },
+  { name: "Pavimento", icon: "🧱", route: "/app/render-pavimento/new", desc: "Posa e finiture" },
+  { name: "Stanza", icon: "🛋️", route: "/app/render-stanza/new", desc: "Interior design" },
+  { name: "Tetto", icon: "🏠", route: "/app/render-tetto/new", desc: "Coperture e manti" },
+];
+
 const STATUS_PILLS: { value: StatusFilter; label: string }[] = [
   { value: "all", label: "Tutti" },
   { value: "active", label: "Attivi" },
