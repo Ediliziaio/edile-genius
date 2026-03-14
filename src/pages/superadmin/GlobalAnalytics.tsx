@@ -303,12 +303,12 @@ export default function GlobalAnalyticsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-ink-50/50 text-left">
-                <th className="px-5 py-3 font-medium text-ink-500">Azienda</th>
-                <th className="px-5 py-3 font-medium text-ink-500 text-right">Saldo €</th>
-                <th className="px-5 py-3 font-medium text-ink-500 text-right">Speso €</th>
-                <th className="px-5 py-3 font-medium text-ink-500 text-right">Conversazioni</th>
-                <th className="px-5 py-3 font-medium text-ink-500 text-right">Agenti</th>
-                <th className="px-5 py-3 font-medium text-ink-500">Stato</th>
+                <th className="px-4 md:px-5 py-3 font-medium text-ink-500">Azienda</th>
+                <th className="px-4 md:px-5 py-3 font-medium text-ink-500 text-right">Saldo €</th>
+                <th className="px-4 md:px-5 py-3 font-medium text-ink-500 text-right">Speso €</th>
+                <th className="px-4 md:px-5 py-3 font-medium text-ink-500 text-right hidden md:table-cell">Conversazioni</th>
+                <th className="px-4 md:px-5 py-3 font-medium text-ink-500 text-right hidden md:table-cell">Agenti</th>
+                <th className="px-4 md:px-5 py-3 font-medium text-ink-500 hidden sm:table-cell">Stato</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
