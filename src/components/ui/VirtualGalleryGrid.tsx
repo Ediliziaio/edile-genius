@@ -1,4 +1,4 @@
-import { ReactNode, useMemo } from "react";
+import { ReactNode } from "react";
 import { useVirtualGrid } from "@/hooks/useVirtualGrid";
 
 interface VirtualGalleryGridProps<T> {
@@ -26,9 +26,7 @@ export function VirtualGalleryGrid<T>({
   gridClassName = "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4",
   threshold = 20,
 }: VirtualGalleryGridProps<T>) {
-  const shouldVirtualize = items.length >= threshold;
-
-  if (!shouldVirtualize) {
+  if (items.length < threshold) {
     return (
       <div className={gridClassName}>
         {items.map((item, i) => renderItem(item, i))}
@@ -47,42 +45,38 @@ export function VirtualGalleryGrid<T>({
   );
 }
 
-/** Inner component to avoid hook call when not virtualizing */
 function VirtualizedInner<T>({
   items,
   renderItem,
   rowHeight,
   overscan,
   gridClassName,
-}: Required<Pick<VirtualGalleryGridProps<T>, "items" | "renderItem" | "rowHeight" | "overscan" | "gridClassName">>) {
+}: {
+  items: T[];
+  renderItem: (item: T, index: number) => ReactNode;
+  rowHeight: number;
+  overscan: number;
+  gridClassName: string;
+}) {
   const { containerRef, virtualItems, totalHeight, columns } = useVirtualGrid({
     totalItems: items.length,
     rowHeight,
     overscan,
   });
 
-  // Build a Set of visible indices for O(1) lookup
-  const visibleIndices = useMemo(
-    () => new Set(virtualItems.map((v) => v.index)),
-    [virtualItems]
-  );
-
-  // Calculate spacer heights
-  const firstVisibleRow = virtualItems.length > 0 ? Math.floor(virtualItems[0].index / columns) : 0;
-  const lastVisibleRow =
-    virtualItems.length > 0
-      ? Math.floor(virtualItems[virtualItems.length - 1].index / columns)
-      : 0;
-  const topSpacer = firstVisibleRow * rowHeight;
-  const bottomSpacer = totalHeight - (lastVisibleRow + 1) * rowHeight;
+  const firstRow = virtualItems.length > 0 ? Math.floor(virtualItems[0].index / columns) : 0;
+  const lastRow = virtualItems.length > 0 ? Math.floor(virtualItems[virtualItems.length - 1].index / columns) : 0;
+  const totalRows = Math.ceil(items.length / columns);
+  const topSpacer = firstRow * rowHeight;
+  const bottomSpacer = Math.max(0, (totalRows - lastRow - 1) * rowHeight);
 
   return (
     <div>
       {topSpacer > 0 && <div style={{ height: topSpacer }} aria-hidden />}
       <div ref={containerRef as any} className={gridClassName}>
-        {items.map((item, i) =>
-          visibleIndices.has(i) ? renderItem(item, i) : null
-        )}
+        {virtualItems.map((vi) => (
+          <div key={vi.index}>{renderItem(items[vi.index], vi.index)}</div>
+        ))}
       </div>
       {bottomSpacer > 0 && <div style={{ height: bottomSpacer }} aria-hidden />}
     </div>
