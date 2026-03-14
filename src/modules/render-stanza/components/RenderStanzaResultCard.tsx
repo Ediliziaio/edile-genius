@@ -63,6 +63,8 @@ export function RenderStanzaResultCard({
         <img
           src={showOriginal ? originalUrl : resultUrl}
           alt={showOriginal ? 'Prima' : 'Dopo'}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover transition-all duration-300"
         />
 

@@ -82,6 +82,8 @@ export function RenderTettoResultCard({
         <img
           src={showOriginal && originalUrl ? originalUrl : resultUrl}
           alt={titoloSessione || 'Render tetto'}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover transition-transform duration-300"
           style={{ transform: hovered ? 'scale(1.03)' : 'scale(1)' }}
         />

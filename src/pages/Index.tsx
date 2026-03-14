@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { usePageSEO } from "@/hooks/usePageSEO";
 import AnnouncementBar from "@/components/sections/AnnouncementBar";
 import Navbar from "@/components/sections/Navbar";
@@ -5,20 +6,22 @@ import ScrollProgress from "@/components/custom/ScrollProgress";
 import CustomCursor from "@/components/custom/CustomCursor";
 import Hero from "@/components/sections/Hero";
 import StickyMobileCTA from "@/components/sections/StickyMobileCTA";
-import LogoBar from "@/components/sections/LogoBar";
-import PainSection from "@/components/sections/PainSection";
-import SolutionSection from "@/components/sections/SolutionSection";
-import UseCasesGrid from "@/components/sections/UseCasesGrid";
-import ROISection from "@/components/sections/ROISection";
-import CostCalculator from "@/components/sections/CostCalculator";
-import HowItWorks from "@/components/sections/HowItWorks";
-import Results from "@/components/sections/Results";
-import WhyUs from "@/components/sections/WhyUs";
-import WhyDifferent from "@/components/sections/WhyDifferent";
-import Pricing from "@/components/sections/Pricing";
-import Guarantee from "@/components/sections/Guarantee";
-import FinalCTA from "@/components/sections/FinalCTA";
-import Footer from "@/components/sections/Footer";
+
+// Lazy-load below-the-fold sections
+const LogoBar = lazy(() => import("@/components/sections/LogoBar"));
+const PainSection = lazy(() => import("@/components/sections/PainSection"));
+const SolutionSection = lazy(() => import("@/components/sections/SolutionSection"));
+const UseCasesGrid = lazy(() => import("@/components/sections/UseCasesGrid"));
+const ROISection = lazy(() => import("@/components/sections/ROISection"));
+const CostCalculator = lazy(() => import("@/components/sections/CostCalculator"));
+const HowItWorks = lazy(() => import("@/components/sections/HowItWorks"));
+const Results = lazy(() => import("@/components/sections/Results"));
+const WhyUs = lazy(() => import("@/components/sections/WhyUs"));
+const WhyDifferent = lazy(() => import("@/components/sections/WhyDifferent"));
+const Pricing = lazy(() => import("@/components/sections/Pricing"));
+const Guarantee = lazy(() => import("@/components/sections/Guarantee"));
+const FinalCTA = lazy(() => import("@/components/sections/FinalCTA"));
+const Footer = lazy(() => import("@/components/sections/Footer"));
 
 const Index = () => {
   usePageSEO({
@@ -35,21 +38,25 @@ const Index = () => {
       <ScrollProgress />
       <main>
         <Hero />
-        <LogoBar />
-        <PainSection />
-        <SolutionSection />
-        <UseCasesGrid />
-        <ROISection />
-        <CostCalculator />
-        <HowItWorks />
-        <Results />
-        <WhyUs />
-        <WhyDifferent />
-        <Pricing />
-        <Guarantee />
-        <FinalCTA />
+        <Suspense fallback={null}>
+          <LogoBar />
+          <PainSection />
+          <SolutionSection />
+          <UseCasesGrid />
+          <ROISection />
+          <CostCalculator />
+          <HowItWorks />
+          <Results />
+          <WhyUs />
+          <WhyDifferent />
+          <Pricing />
+          <Guarantee />
+          <FinalCTA />
+        </Suspense>
       </main>
-      <Footer />
+      <Suspense fallback={null}>
+        <Footer />
+      </Suspense>
       <StickyMobileCTA />
     </div>
   );

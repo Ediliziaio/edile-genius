@@ -145,7 +145,7 @@ export default function RenderGallery() {
               )}
               <Link to={selecting ? '#' : `/app/render/gallery/${item.id}`} onClick={e => { if (selecting) { e.preventDefault(); toggleSelect(item.id); } }}>
                 <div className="aspect-video relative overflow-hidden">
-                  <img src={item.render_url} alt={item.title || "Render"} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                  <img src={item.render_url} alt={item.title || "Render"} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                 </div>
               </Link>
             </div>

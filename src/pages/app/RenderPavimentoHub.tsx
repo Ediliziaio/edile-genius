@@ -201,7 +201,7 @@ export default function RenderPavimentoHub() {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {gallery.map((item) => (
                 <div key={item.id} className="relative group rounded-xl overflow-hidden border border-border bg-card">
-                  <img src={item.result_image_url} alt="render" className="w-full aspect-[4/3] object-cover" />
+                  <img src={item.result_image_url} alt="render" loading="lazy" decoding="async" className="w-full aspect-[4/3] object-cover" />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                     <a href={item.result_image_url} download className="w-9 h-9 bg-white/90 rounded-full flex items-center justify-center hover:bg-white">
                       <Download className="w-4 h-4 text-foreground" />
