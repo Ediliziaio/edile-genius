@@ -187,18 +187,12 @@ export default function RenderNew() {
   }, [handleFile]);
 
   // Run photo analysis after upload to storage
-  const runPhotoAnalysis = async (publicUrl: string) => {
+  const runPhotoAnalysis = async (signedUrl: string) => {
     setAnalysisLoading(true);
     setAnalysisError("");
     try {
-      const bucketPrefix = "/storage/v1/object/public/render-originals/";
-      const pathIndex = publicUrl.indexOf(bucketPrefix);
-      if (pathIndex === -1) throw new Error("Invalid URL");
-      const filePath = publicUrl.substring(pathIndex + bucketPrefix.length);
-      const { data: signedData } = await supabase.storage.from("render-originals").createSignedUrl(filePath, 3600);
-      
       const { data, error } = await supabase.functions.invoke("analyze-window-photo", {
-        body: { image_url: signedData?.signedUrl || publicUrl },
+        body: { image_url: signedUrl },
       });
       if (error) throw error;
       const payload = (data?.data ?? data) as Record<string, unknown>;
