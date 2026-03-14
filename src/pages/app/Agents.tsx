@@ -3,13 +3,23 @@ import { useCompanyId } from "@/hooks/useCompanyId";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { Plus, Search, RotateCcw } from "lucide-react";
+import { Plus, Search, RotateCcw, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AgentCard from "@/components/agents/AgentCard";
 import { computeAgentScore } from "@/lib/agent-score";
 
 type StatusFilter = "all" | "active" | "incomplete" | "draft";
+
+const RENDER_SHORTCUTS = [
+  { name: "Infissi", icon: "🪟", route: "/app/render/new", desc: "Serramenti e finestre" },
+  { name: "Bagno", icon: "🛁", route: "/app/render-bagno/new", desc: "Ristrutturazione bagno" },
+  { name: "Facciata", icon: "🏢", route: "/app/render-facciata/new", desc: "Cappotto e intonaco" },
+  { name: "Persiane", icon: "🪞", route: "/app/render-persiane/new", desc: "Stili e materiali" },
+  { name: "Pavimento", icon: "🧱", route: "/app/render-pavimento/new", desc: "Posa e finiture" },
+  { name: "Stanza", icon: "🛋️", route: "/app/render-stanza/new", desc: "Interior design" },
+  { name: "Tetto", icon: "🏠", route: "/app/render-tetto/new", desc: "Coperture e manti" },
+];
 
 const STATUS_PILLS: { value: StatusFilter; label: string }[] = [
   { value: "all", label: "Tutti" },
@@ -168,6 +178,32 @@ export default function AgentsPage() {
           ))}
         </div>
       )}
+
+      {/* Render AI Shortcuts */}
+      <div className="pt-2">
+        <div className="mb-3">
+          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+            🎨 Strumenti Render AI
+          </h2>
+          <p className="text-sm text-muted-foreground mt-0.5">Genera render fotorealistici per i tuoi clienti</p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {RENDER_SHORTCUTS.map((r) => (
+            <button
+              key={r.name}
+              onClick={() => navigate(r.route)}
+              className="group flex items-center gap-3 p-3 rounded-card border border-border bg-card hover:border-brand/40 hover:shadow-md transition-all text-left"
+            >
+              <span className="text-2xl shrink-0">{r.icon}</span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-foreground truncate">{r.name}</p>
+                <p className="text-xs text-muted-foreground truncate">{r.desc}</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-brand transition-colors shrink-0" />
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
