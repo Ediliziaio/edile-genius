@@ -14,6 +14,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { RenderStanzaResultCard } from '@/modules/render-stanza/components/RenderStanzaResultCard';
+import { VirtualGalleryGrid } from "@/components/ui/VirtualGalleryGrid";
 
 // ─── COSTANTI ────────────────────────────────────────────────────────────────
 
