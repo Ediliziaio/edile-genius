@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +21,8 @@ interface GalleryItem {
 
 export default function RenderBagnoHub() {
   const companyId = useCompanyId();
+  const isAdmin = useIsAdmin();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [credits, setCredits] = useState<{ balance: number; total_used: number } | null>(null);
   const [recentCount, setRecentCount] = useState(0);
@@ -30,13 +34,14 @@ export default function RenderBagnoHub() {
       .then(({ data }) => { if (data) setCredits(data as any); });
     (supabase.from("render_bagno_sessions") as any).select("id", { count: "exact", head: true }).eq("company_id", companyId).eq("stato", "completato")
       .then(({ count }: any) => { setRecentCount(count ?? 0); });
-    (supabase.from("render_bagno_gallery") as any)
+    let q = (supabase.from("render_bagno_gallery") as any)
       .select("id, titolo, render_url, originale_url, created_at")
-      .eq("company_id", companyId)
-      .order("created_at", { ascending: false })
+      .eq("company_id", companyId);
+    if (!isAdmin && user?.id) q = q.eq("user_id", user.id);
+    q.order("created_at", { ascending: false })
       .limit(200)
       .then(({ data }: any) => { if (data) setGalleryItems(data); });
-  }, [companyId]);
+  }, [companyId, isAdmin, user?.id]);
 
   const deleteGalleryItem = async (id: string) => {
     const { error } = await (supabase.from("render_bagno_gallery") as any).delete().eq("id", id);

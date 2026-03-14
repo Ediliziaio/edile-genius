@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +15,8 @@ import { VirtualGalleryGrid } from "@/components/ui/VirtualGalleryGrid";
 
 export default function RenderGallery() {
   const companyId = useCompanyId();
+  const isAdmin = useIsAdmin();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [items, setItems] = useState<any[]>([]);
   const [search, setSearch] = useState("");
@@ -24,11 +28,9 @@ export default function RenderGallery() {
   const fetchGallery = async () => {
     if (!companyId) return;
     setLoading(true);
-    const { data } = await supabase
-      .from("render_gallery")
-      .select("*")
-      .eq("company_id", companyId)
-      .order("created_at", { ascending: false });
+    let q = supabase.from("render_gallery").select("*").eq("company_id", companyId);
+    if (!isAdmin && user?.id) q = q.eq("created_by", user.id);
+    const { data } = await q.order("created_at", { ascending: false });
     if (data) setItems(data);
     setLoading(false);
   };

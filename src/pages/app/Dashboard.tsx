@@ -1,5 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { useCompanyId } from "@/hooks/useCompanyId";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useQuery } from "@tanstack/react-query";
 import { SMART_ACTIONS_DEFAULTS } from "@/lib/automation-defaults";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +32,7 @@ interface BriefingData {
 export default function AppDashboard() {
   const { profile, user } = useAuth();
   const companyId = useCompanyId();
+  const isAdmin = useIsAdmin();
 
   // Check onboarding status
   const { data: onboardingProfile, isLoading: onboardingLoading } = useQuery({
@@ -44,10 +46,12 @@ export default function AppDashboard() {
 
   // ── Agents ──
   const { data: agents } = useQuery({
-    queryKey: ["company-agents", companyId],
+    queryKey: ["company-agents", companyId, isAdmin, user?.id],
     enabled: !!companyId,
     queryFn: async () => {
-      const { data } = await supabase.from("agents").select("*").eq("company_id", companyId!);
+      let q = supabase.from("agents").select("*").eq("company_id", companyId!);
+      if (!isAdmin && user?.id) q = q.eq("created_by", user.id);
+      const { data } = await q;
       return data || [];
     },
   });
