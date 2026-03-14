@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bath, Sparkles, Plus, Coins, Camera, Settings, Image, Download, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { VirtualGalleryGrid } from "@/components/ui/VirtualGalleryGrid";
 
 interface GalleryItem {
   id: string;
