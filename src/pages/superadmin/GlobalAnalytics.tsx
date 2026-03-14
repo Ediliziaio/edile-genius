@@ -227,7 +227,7 @@ export default function GlobalAnalyticsPage() {
       </div>
 
       {/* Secondary KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
         <KPICard icon={Palette} label="Render AI" value={fmtInt(kpi.renderSessions)} sub={`€${fmt(kpi.renderRevenue)} ricavi`} color="text-amber-600" small />
         <KPICard icon={Clock} label="Minuti Totali" value={fmt(kpi.totalMinutes)} sub="Vocale + WA" color="text-ink-500" small />
         <KPICard icon={Users} label="Media per Azienda" value={`€${fmt(kpi.avgRevenuePerCompany)}`} sub="Ricavo medio" color="text-ink-500" small />
