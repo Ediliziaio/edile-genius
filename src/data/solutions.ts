@@ -1,4 +1,4 @@
-export type Settore = 'infissi' | 'fotovoltaico' | 'ristrutturazioni' | 'edilizia';
+export type Settore = 'infissi' | 'fotovoltaico' | 'ristrutturazioni' | 'edilizia' | 'render';
 export type TipoAI = 'vocale' | 'operativo' | 'misto';
 
 export interface Solution {
