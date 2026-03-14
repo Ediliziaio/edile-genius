@@ -142,34 +142,36 @@ export default function RenderTettoHub() {
                 ))}
               </div>
             ) : sessions && sessions.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <Link
-                  to="/app/render-tetto/new"
-                  className="flex flex-col items-center justify-center gap-3 aspect-video rounded-xl border-2 border-dashed border-amber-300 bg-amber-50/50 hover:bg-amber-100/50 transition-colors"
-                >
-                  <div className="p-3 rounded-full bg-amber-100">
-                    <Plus className="w-6 h-6 text-amber-600" />
-                  </div>
-                  <span className="text-sm font-medium text-amber-700">Nuovo render</span>
-                </Link>
-              </div>
-              <VirtualGalleryGrid
-                items={sessions}
-                gridClassName="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-                rowHeight={280}
-                renderItem={(session) => (
-                  <RenderTettoResultCard
-                    key={session.id}
-                    id={session.id}
-                    resultUrl={session.result_url}
-                    originalUrl={session.original_url}
-                    titoloSessione={session.session_note}
-                    configJson={session.config_json}
-                    createdAt={session.created_at}
-                    onClick={() => navigate(`/app/render-tetto/new?session=${session.id}`)}
-                  />
-                )}
-              />
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                  <Link
+                    to="/app/render-tetto/new"
+                    className="flex flex-col items-center justify-center gap-3 aspect-video rounded-xl border-2 border-dashed border-amber-300 bg-amber-50/50 hover:bg-amber-100/50 transition-colors"
+                  >
+                    <div className="p-3 rounded-full bg-amber-100">
+                      <Plus className="w-6 h-6 text-amber-600" />
+                    </div>
+                    <span className="text-sm font-medium text-amber-700">Nuovo render</span>
+                  </Link>
+                </div>
+                <VirtualGalleryGrid
+                  items={sessions}
+                  gridClassName="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                  rowHeight={280}
+                  renderItem={(session) => (
+                    <RenderTettoResultCard
+                      key={session.id}
+                      id={session.id}
+                      resultUrl={session.result_url}
+                      originalUrl={session.original_url}
+                      titoloSessione={session.session_note}
+                      configJson={session.config_json}
+                      createdAt={session.created_at}
+                      onClick={() => navigate(`/app/render-tetto/new?session=${session.id}`)}
+                    />
+                  )}
+                />
+              </>
             ) : (
               <EmptyState />
             )}
