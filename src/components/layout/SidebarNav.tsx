@@ -111,7 +111,7 @@ export default function SidebarNav({ onNavigate }: SidebarNavProps) {
       const [creditsRes, cantieriRes, renderRes, companyRes, preventiviRes] = await Promise.all([
         supabase.from("ai_credits").select("balance_eur, total_recharged_eur, total_spent_eur, calls_blocked, alert_threshold_eur").eq("company_id", companyId).single(),
         supabase.from("cantieri").select("id", { count: "exact", head: true }).eq("company_id", companyId),
-        supabase.from("render_credits" as any).select("balance", { count: "exact", head: true }).eq("company_id", companyId),
+        
         supabase.from("companies").select("sector, plan, trial_ends_at").eq("id", companyId).single(),
         supabase.from("preventivi" as any).select("id", { count: "exact", head: true }).eq("company_id", companyId),
       ]);
