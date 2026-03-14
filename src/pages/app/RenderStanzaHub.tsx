@@ -67,7 +67,7 @@ export default function RenderStanzaHub() {
           .select('*')
           .eq('user_id', user!.id)
           .order('created_at', { ascending: false })
-          .limit(40) as any);
+          .limit(200) as any);
         if (error) return [];
         return (data || []) as any[];
       } catch {
