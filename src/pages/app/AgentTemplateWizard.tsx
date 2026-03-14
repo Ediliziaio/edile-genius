@@ -291,6 +291,10 @@ export default function AgentTemplateWizard() {
   };
 
   const handleCreateDraft = async (): Promise<string | null> => {
+    if (!companyId) {
+      toast({ title: "Nessuna azienda selezionata", description: "Devi impersonare un'azienda prima di creare un agente.", variant: "destructive" });
+      return null;
+    }
     try {
       const body = {
         company_id: companyId, name: form.name, description: form.description,
