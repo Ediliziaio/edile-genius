@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Download, Trash2, Image as ImageIcon, ChevronLeft, Share2 } from "lucide-react";
 import { ShareModal, type ShareableItem } from "@/components/share/ShareModal";
+import { VirtualGalleryGrid } from "@/components/ui/VirtualGalleryGrid";
 
 export default function RenderGallery() {
   const companyId = useCompanyId();
