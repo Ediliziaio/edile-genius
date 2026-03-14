@@ -49,15 +49,6 @@ const companyNav: NavSection[] = [
     { label: "Documenti", icon: ShieldCheck, href: "/app/documenti" },
     { label: "Presenze", icon: ClipboardList, href: "/app/presenze" },
   ]},
-  { header: "STRUMENTI AI", collapsible: true, defaultOpen: false, visibilityKey: "render", items: [
-    { label: "Render Infissi", icon: Palette, href: "/app/render" },
-    { label: "Render Bagno", icon: Bath, href: "/app/render-bagno" },
-    { label: "Render Facciata", icon: Home, href: "/app/render-facciata" },
-    { label: "Render Persiane", icon: Layers, href: "/app/render-persiane" },
-    { label: "Render Pavimento", icon: HardHat, href: "/app/render-pavimento" },
-    { label: "Render Stanza", icon: Wand2, href: "/app/render-stanza" },
-    { label: "Render Tetto", icon: Home, href: "/app/render-tetto" },
-  ]},
   { header: "IMPOSTAZIONI", items: [
     { label: "Crediti", icon: Coins, href: "/app/credits" },
     { label: "Integrazioni", icon: Puzzle, href: "/app/integrations" },
