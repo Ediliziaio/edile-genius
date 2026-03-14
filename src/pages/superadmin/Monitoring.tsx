@@ -253,33 +253,33 @@ export default function Monitoring() {
         {loadingReports ? (
           <Skeleton className="h-64 rounded-lg" />
         ) : weeklyReports && weeklyReports.length > 0 ? (
-          <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
+          <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted">
                   <TableHead className="text-xs">Azienda</TableHead>
-                  <TableHead className="text-xs">Settimana</TableHead>
+                  <TableHead className="text-xs hidden md:table-cell">Settimana</TableHead>
                   <TableHead className="text-xs">Stato</TableHead>
-                  <TableHead className="text-xs">Inviato il</TableHead>
-                  <TableHead className="text-xs text-right">Tentativi</TableHead>
-                  <TableHead className="text-xs">Errore</TableHead>
+                  <TableHead className="text-xs hidden sm:table-cell">Inviato il</TableHead>
+                  <TableHead className="text-xs text-right hidden md:table-cell">Tentativi</TableHead>
+                  <TableHead className="text-xs hidden lg:table-cell">Errore</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {weeklyReports.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell className="text-sm font-medium">{nameMap[r.company_id] || r.company_id.slice(0, 8)}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{r.week_start}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground hidden md:table-cell">{r.week_start}</TableCell>
                     <TableCell>
                       {r.status === "sent" && <Badge className="bg-emerald-100 text-emerald-700 border-none text-xs gap-1"><CheckCircle2 className="h-3 w-3" /> Inviato</Badge>}
                       {r.status === "failed" && <Badge variant="destructive" className="text-xs gap-1"><XCircle className="h-3 w-3" /> Fallito</Badge>}
                       {r.status === "pending" && <Badge variant="secondary" className="text-xs gap-1"><Clock className="h-3 w-3" /> In attesa</Badge>}
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
+                    <TableCell className="text-sm text-muted-foreground hidden sm:table-cell">
                       {r.sent_at ? format(parseISO(r.sent_at), "dd MMM HH:mm", { locale: it }) : "—"}
                     </TableCell>
-                    <TableCell className="text-right font-mono text-sm">{r.retry_count}</TableCell>
-                    <TableCell className="text-xs text-destructive max-w-[200px] truncate" title={r.error_message || undefined}>
+                    <TableCell className="text-right font-mono text-sm hidden md:table-cell">{r.retry_count}</TableCell>
+                    <TableCell className="text-xs text-destructive max-w-[200px] truncate hidden lg:table-cell" title={r.error_message || undefined}>
                       {sanitizeErrorMessage(r.error_message)}
                     </TableCell>
                   </TableRow>
@@ -365,7 +365,7 @@ export default function Monitoring() {
         {loadingCredits ? (
           <Skeleton className="h-48 rounded-lg" />
         ) : reservedCredits.length > 0 ? (
-          <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
+          <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted">

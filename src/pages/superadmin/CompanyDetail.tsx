@@ -76,17 +76,19 @@ export default function CompanyDetail() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/superadmin/companies")} className="text-ink-500 hover:text-ink-900 hover:bg-ink-50"><ArrowLeft className="h-5 w-5" /></Button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-ink-900">{company.name}</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/superadmin/companies")} className="text-ink-500 hover:text-ink-900 hover:bg-ink-50 self-start"><ArrowLeft className="h-5 w-5" /></Button>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-ink-900 truncate">{company.name}</h1>
           <p className="text-sm text-ink-500">{company.slug}</p>
         </div>
-        <Badge className={statusColors[company.status || "active"]}>{company.status || "active"}</Badge>
-        <Badge variant="outline" className="border-ink-200 text-ink-500">{planLabels[company.plan || "starter"] || company.plan}</Badge>
-        <Button variant="outline" size="sm" className="border-accent-blue text-accent-blue hover:bg-status-info-light" onClick={() => { startImpersonation(company.id, company.name); navigate("/app"); }}>
-          <UserCheck className="w-4 h-4 mr-1" /> Impersona
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Badge className={statusColors[company.status || "active"]}>{company.status || "active"}</Badge>
+          <Badge variant="outline" className="border-ink-200 text-ink-500">{planLabels[company.plan || "starter"] || company.plan}</Badge>
+          <Button variant="outline" size="sm" className="border-accent-blue text-accent-blue hover:bg-status-info-light" onClick={() => { startImpersonation(company.id, company.name); navigate("/app"); }}>
+            <UserCheck className="w-4 h-4 mr-1" /> Impersona
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -97,7 +99,7 @@ export default function CompanyDetail() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="bg-ink-100 border-none">
+        <TabsList className="bg-ink-100 border-none w-full sm:w-auto overflow-x-auto">
           <TabsTrigger value="overview">Panoramica</TabsTrigger>
           <TabsTrigger value="agents">Agenti</TabsTrigger>
           <TabsTrigger value="config">Configurazione</TabsTrigger>

@@ -1,84 +1,215 @@
 
+# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro + AI Avanzata
 
-# Ottimizzazione Superadmin per Visibilità Completa
+## ✅ Completato in questo blocco
 
-L'area superadmin deve mostrare tutti i dati in modo leggibile su qualsiasi schermo. I problemi principali sono: tabelle con troppe colonne che traboccano su mobile, grafici che si comprimono, sidebar superadmin con troppe voci senza raggruppamento logico, e pagine placeholder (Team, SystemLogs) inutili nella navigazione.
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
----
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
-## Problemi Identificati
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-1. **CompanyTable (7 colonne + azioni)** — impossibile da leggere su mobile, nessun `overflow-x-auto` o layout alternativo
-2. **Dashboard tabelle (Revenue per Azienda, Credit Health)** — 6-7 colonne, stessa problematica
-3. **Monitoring tabelle (Weekly Reports 6 col, Reserved Credits 4 col)** — overflow su schermi < 768px
-4. **GlobalAnalytics tabella breakdown** — usa `<table>` nativo senza responsive wrapper
-5. **StatsCard `text-3xl`** — troppo grande su mobile, testo lungo (es. `€1.234,56`) trabocca
-6. **CompanyDetail header** — badges + button "Impersona" inline, si sovrappone su mobile
-7. **PlatformSettings TabsList** — 6+ tab orizzontali, overflow su mobile senza scroll
-8. **Topbar `pageTitleMap`** — mancano le pagine superadmin (Dashboard, Aziende, Analytics, ecc.)
-9. **Sidebar superadmin** — la voce "Nuova Azienda" non è necessaria nella nav (è un'azione, non una pagina), e mancano link a pagine esistenti come API Keys e SA Settings
-10. **Companies.tsx filtri** — 4 filtri inline traboccano su mobile
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
----
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
-## Piano di Implementazione
+## ✅ Blocco 3-5 — Agent Templates System
 
-### 1. StatsCard.tsx — Responsive sizing
-- Ridurre `text-3xl` a `text-2xl md:text-3xl`
-- Ridurre `p-6` a `p-4 md:p-6`
-- Icon container da `h-10 w-10` a `h-8 w-8 md:h-10 md:w-10`
+### Database
+- agent_templates + agent_template_instances + agent_reports + company_channels
+- RLS policies PERMISSIVE (fix da RESTRICTIVE)
+- Funzione DB `increment_installs_count(tpl_id UUID)`
+- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
 
-### 2. CompanyTable.tsx — Mobile card layout
-- Su mobile (`md:hidden`): rendere ogni company come una card compatta con nome, stato, piano e azioni
-- Su desktop (`hidden md:block`): mantenere la tabella attuale
-- Nascondere colonne secondarie (Settore, Agenti, Chiamate/mese, Data) su mobile
+### Edge Functions (CORS headers completi)
+- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
+- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
+- save-report: salva report in DB + aggiorna contatori istanza
 
-### 3. Dashboard.tsx — Responsive tables + grids
-- Wrappare tutte le tabelle in `overflow-x-auto`
-- Revenue table: nascondere colonne Costi/Minuti su mobile (`hidden md:table-cell`)
-- Credit Health table: nascondere Ricaricato/Auto-Ricarica su mobile
-- Header buttons: stack verticale su mobile
-- Economics KPI grid: `grid-cols-2` su mobile (già ok) ma ridurre font
+### Frontend — Wizard 5 Step (TemplateSetup.tsx)
+- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
+- Step 2 Operai: lista card + importa CSV con template scaricabile
+- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
+- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
 
-### 4. Monitoring.tsx — Table responsive
-- Weekly Reports: nascondere colonne Settimana/Tentativi/Errore su mobile
-- Reserved Credits: già 4 colonne, wrappare in `overflow-x-auto`
+### SuperAdmin
+- /superadmin/templates: CRUD completo con JSON editor per config_schema
 
-### 5. GlobalAnalytics.tsx — Table + KPI fixes
-- Wrappare breakdown table in `overflow-x-auto`
-- KPI grid: già `grid-cols-2` ma i sub-KPI `grid-cols-3` vanno a `grid-cols-2 lg:grid-cols-3`
-- Export button: icona sola su mobile
+## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
 
-### 6. CompanyDetail.tsx — Header responsive
-- Stack header verticale su mobile: nome + badges su una riga, bottoni sotto
-- Tab triggers: aggiungere `overflow-x-auto` se servono
+### Database (5 tabelle)
+- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
+- RLS PERMISSIVE per tutte le tabelle
+- Trigger set_updated_at + init_render_credits su companies
+- Funzione deduct_render_credit
+- Storage buckets: render-originals (privato), render-results (pubblico)
 
-### 7. Companies.tsx — Filter responsive
-- Filtri: stack a `grid grid-cols-2` su mobile invece di `flex-wrap`
-- Search full-width sopra i filtri
+### Edge Functions
+- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
+- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
 
-### 8. PlatformSettings.tsx — TabsList scroll
-- TabsList: aggiungere `overflow-x-auto flex-nowrap` per scroll orizzontale su mobile
+### Frontend
+- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
+- RenderConfig (/superadmin/render-config)
+- BeforeAfterSlider, promptBuilder.ts
 
-### 9. Topbar.tsx — Aggiungere titoli superadmin
-- Aggiungere al `pageTitleMap`: superadmin, companies, analytics, monitoring, platform-settings, render-config, logs, team, whatsapp, templates
+## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
 
-### 10. SidebarNav.tsx — Pulizia navigazione superadmin
-- Rimuovere "Nuova Azienda" (è un'azione, non una pagina)
-- Aggiungere "API Keys" (`/superadmin/api-keys`) sotto PIATTAFORMA
-- Riorganizzare in 4 sezioni chiare: Principale, Gestione, Report, Piattaforma
+### Database
+- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
+- Estensione `preventivi` con +26 colonne
+- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
+- Storage buckets: preventivi-media (privato), template-assets (pubblico)
+- RLS company-scoped + superadmin
 
----
+### Edge Functions
+- `process-preventivo-audio` RISCRITTO
 
-### File da modificare
-- `src/components/superadmin/StatsCard.tsx`
-- `src/components/superadmin/CompanyTable.tsx`
-- `src/pages/superadmin/Dashboard.tsx`
-- `src/pages/superadmin/Monitoring.tsx`
-- `src/pages/superadmin/GlobalAnalytics.tsx`
-- `src/pages/superadmin/CompanyDetail.tsx`
-- `src/pages/superadmin/Companies.tsx`
-- `src/pages/superadmin/PlatformSettings.tsx`
-- `src/components/layout/Topbar.tsx`
-- `src/components/layout/SidebarNav.tsx`
+### PDF Client-side (@react-pdf/renderer)
+- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4
 
+### Frontend
+- NuovoPreventivo.tsx, PreventivoDetail.tsx, PreventiviList.tsx, TemplatePreventivo.tsx
+
+## ✅ Blocco 8 — AI Avanzata P1 (Smart Actions + Lead Score + Timeline)
+
+### Smart Actions Engine (Dashboard)
+- Espanso da 3 regole hardcoded a 10+ regole basate su dati reali:
+  - Crediti in esaurimento (danger)
+  - Agenti in bozza (warning)
+  - Agenti senza numero telefono (warning)
+  - Agenti inattivi >7 giorni (info)
+  - Contatti da richiamare con next_call_at scaduto (warning)
+  - Preventivi in bozza da >7 giorni (warning)
+  - Preventivi inviati senza risposta da >10 giorni (warning)
+  - Documenti in scadenza entro 15 giorni (warning)
+  - Campagne con tasso appuntamenti <5% (info)
+- Query Supabase dedicate per ogni regola
+- Stato "Tutto in ordine" quando nessuna azione è necessaria
+- Mostra summary delle conversazioni recenti nella tabella attività
+
+### Lead Score Automatico
+- `src/lib/lead-score.ts`: motore di scoring 0-100 senza LLM
+  - +30 outcome qualified/appointment
+  - +20 sentiment positivo
+  - +15 preventivo associato
+  - +10 contatto completo (tel+email)
+  - +10 callback attempts
+  - +5 fonte inbound
+  - -10 inattivo >30 giorni
+  - -20 not_interested
+  - -30 do_not_call/invalid
+- `src/components/contacts/LeadScoreBadge.tsx`: badge con tooltip fattori
+  - Compact mode per tabella (emoji + score numerico)
+  - Full mode per scheda contatto (con lista fattori)
+  - Colori: 🔴 Caldo (>60), 🟠 Tiepido (30-60), 🔵 Freddo (<30)
+- Badge integrato nella tabella contatti (nuova colonna "Score")
+- Badge integrato nell'header della scheda contatto
+
+### Timeline Unificata del Contatto
+- `ContactDetailPanel.tsx` completamente refactorato:
+  - Tab "Timeline" come default (al posto di "Info")
+  - Cronologia verticale con linea e pallini colorati per tipo:
+    - 🔵 Conversazioni (con summary, outcome, sentiment, durata)
+    - 🟡 Note manuali
+    - 🟢 Preventivi collegati (stato, importo, numero)
+    - ⚪ Eventi (contatto creato)
+  - Query preventivi per nome/telefono contatto
+  - Lead Score full display nell'header della scheda
+
+## ✅ Blocco 8 — P1-C: Call Summary Automatico
+
+### Backend
+- `supabase/functions/elevenlabs-webhook/summary.ts`: modulo separato per generazione summary
+  - Chiama OpenAI gpt-4o-mini con prompt minimale in italiano
+  - Non-blocking: se OPENAI_API_KEY non è configurata, salta silenziosamente
+  - Cap transcript a 6000 chars per contenere i costi (~$0.001/call)
+- `elevenlabs-webhook/index.ts`: importa e chiama `generateCallSummary()` dopo step 7
+  - Popola `conversations.summary` solo se la generazione ha successo
+
+### Frontend (già predisposto)
+- Dashboard "Attività recente": mostra `c.summary` sotto il nome agente
+- Conversazioni: mostra summary nella tabella e nel dialog dettaglio
+- Timeline contatto: mostra summary nelle conversazioni
+
+### Requisito SuperAdmin
+- Aggiungere OPENAI_API_KEY come Supabase Secret (da configurare via SuperAdmin)
+
+## ✅ Blocco 9 — Audit Finale & Hardening
+
+### Sicurezza Edge Functions
+- Validazione JWT (getClaims) aggiunta a: generate-render, crm-sync, deploy-template-instance, process-preventivo-audio, generate-preventivo-pdf
+- Verifica tenant (company_id cross-check) aggiunta a tutte le funzioni interne
+- Funzioni webhook esterne (elevenlabs-webhook, whatsapp-webhook, telegram-cantiere-webhook) lasciate senza JWT (corretto)
+
+### Atomicità Crediti
+- Creata RPC `topup_credits(_company_id, _amount_eur)` con UPDATE atomico
+- topup-credits edge function refactorato per usare RPC
+
+### UX — Progressive Disclosure Sidebar
+- Sezioni OPERATIVITÀ e STRUMENTI AI visibili solo se il settore è rilevante o se esistono dati
+- Campi vuoti nelle conversazioni nascosti (eval_score, minutes_billed, cost_billed_eur)
+
+### UX — Dead-End Fix
+- Card CRM e Webhooks in Integrazioni: badge "Prossimamente" + bottoni disabilitati
+
+### Signup Self-Service
+- Pagina /signup con form registrazione
+- Edge function self-service-signup: crea company (trial 14gg) + profilo + ruolo company_admin
+
+### AI Avanzata P2
+- Follow-up Generator: edge function generate-followup (GPT-4o-mini) + bottone in ContactDetailPanel
+- Opportunity Recovery: Smart Actions per lead qualificati dormenti >5 giorni
+- Campi conversazione vuoti nascosti per UX più pulita
+
+## ✅ Blocco 10 — Criticità Pre-Lancio Risolte
+
+### Database
+- Rimossi RLS duplicati su `ai_credits` (2 policy rimossi: `company_ai_credits_select`, `superadmin_ai_credits`)
+- Rimosso indice duplicato `idx_topups_stripe_session` su `ai_credit_topups`
+- `topup_credits` RPC riscritta con `FOR UPDATE` lock (come `deduct_call_credits`)
+- Aggiunta funzione `reset_agents_calls_month()` per cron mensile
+
+### Auth Edge Functions (25 file corretti)
+- Sostituito `supabase.auth.getClaims(token)` (non-standard) con `supabase.auth.getUser(token)` in tutte le Edge Functions
+- Aggiornato helper condiviso `_shared/utils.ts` → `authenticateRequest()`
+
+### Frontend
+- `Credits.tsx`: aggiunto `companyId` come dipendenza del useEffect per il polling post-pagamento Stripe
+
+### Stripe Webhook
+- Insert topup record: aggiunto error handling per violazione unique constraint
+- Documentato comportamento auto-recharge (crediti senza addebito Stripe)
+
+### Secrets da configurare (azione manuale)
+- `STRIPE_SECRET_KEY` — per pagamenti
+- `STRIPE_WEBHOOK_SECRET` — per webhook Stripe
+- `OPENAI_API_KEY` — per AI summary e follow-up
+- `META_ENCRYPTION_KEY` — per cifratura token WhatsApp
+- `RESEND_API_KEY` — per invio email
+
+## 🔜 Prossimi Step
+
+### P3 — Avanzato / successivo
+- Personalizzazione regole Smart Actions per admin
+- Report settimanale automatico via email al titolare
+- Trend predittivo su tasso conversione
+- Auto-recharge con addebito Stripe reale (attualmente wallet-based)

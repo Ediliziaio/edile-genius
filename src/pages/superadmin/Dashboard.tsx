@@ -213,17 +213,19 @@ export default function SuperAdminDashboard() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-ink-900">Dashboard</h1>
           <p className="text-sm text-ink-500 mt-1">Panoramica globale della piattaforma</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => navigate("/superadmin/companies")} className="border-ink-200 text-ink-700">
-            Gestisci Aziende <ArrowRight className="ml-2 h-4 w-4" />
+            <span className="hidden sm:inline">Gestisci Aziende</span>
+            <span className="sm:hidden">Aziende</span>
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
           <Button onClick={() => navigate("/superadmin/companies/new")} className="bg-brand hover:bg-brand-hover text-white">
-            <Plus className="mr-2 h-4 w-4" /> Nuova Azienda
+            <Plus className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">Nuova Azienda</span><span className="sm:hidden">Nuova</span>
           </Button>
         </div>
       </div>
@@ -335,30 +337,32 @@ export default function SuperAdminDashboard() {
             <div className="px-5 py-3 border-b border-border">
               <h3 className="text-sm font-semibold text-foreground">Revenue per Azienda</h3>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted">
-                  <TableHead className="text-xs">Azienda</TableHead>
-                  <TableHead className="text-xs text-right">Ricavi €</TableHead>
-                  <TableHead className="text-xs text-right">Costi €</TableHead>
-                  <TableHead className="text-xs text-right">Margine €</TableHead>
-                  <TableHead className="text-xs text-right">Conv.</TableHead>
-                  <TableHead className="text-xs text-right">Minuti</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {companyRevenue.map(r => (
-                  <TableRow key={r.name}>
-                    <TableCell className="text-sm font-medium">{r.name}</TableCell>
-                    <TableCell className="text-right font-mono text-sm text-brand font-semibold">€{r.ricavi}</TableCell>
-                    <TableCell className="text-right font-mono text-sm text-muted-foreground">€{r.costi}</TableCell>
-                    <TableCell className="text-right font-mono text-sm font-semibold text-status-success">€{r.margine}</TableCell>
-                    <TableCell className="text-right text-sm text-muted-foreground">{r.conversazioni}</TableCell>
-                    <TableCell className="text-right text-sm text-muted-foreground">{r.minuti}</TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted">
+                    <TableHead className="text-xs">Azienda</TableHead>
+                    <TableHead className="text-xs text-right">Ricavi €</TableHead>
+                    <TableHead className="text-xs text-right hidden md:table-cell">Costi €</TableHead>
+                    <TableHead className="text-xs text-right">Margine €</TableHead>
+                    <TableHead className="text-xs text-right hidden md:table-cell">Conv.</TableHead>
+                    <TableHead className="text-xs text-right hidden md:table-cell">Minuti</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {companyRevenue.map(r => (
+                    <TableRow key={r.name}>
+                      <TableCell className="text-sm font-medium">{r.name}</TableCell>
+                      <TableCell className="text-right font-mono text-sm text-brand font-semibold">€{r.ricavi}</TableCell>
+                      <TableCell className="text-right font-mono text-sm text-muted-foreground hidden md:table-cell">€{r.costi}</TableCell>
+                      <TableCell className="text-right font-mono text-sm font-semibold text-status-success">€{r.margine}</TableCell>
+                      <TableCell className="text-right text-sm text-muted-foreground hidden md:table-cell">{r.conversazioni}</TableCell>
+                      <TableCell className="text-right text-sm text-muted-foreground hidden md:table-cell">{r.minuti}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         )}
       </div>
@@ -437,51 +441,53 @@ export default function SuperAdminDashboard() {
             </Button>
           </div>
           <div className="rounded-card border border-border bg-card shadow-card overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted">
-                  <TableHead className="text-xs">Azienda</TableHead>
-                  <TableHead className="text-xs text-right">Saldo €</TableHead>
-                  <TableHead className="text-xs text-right">Speso €</TableHead>
-                  <TableHead className="text-xs text-right">Ricaricato €</TableHead>
-                  <TableHead className="text-xs">Stato</TableHead>
-                  <TableHead className="text-xs">Auto-Ricarica</TableHead>
-                  <TableHead className="text-xs text-right">Azione</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedCredits.map((cr) => (
-                  <TableRow key={cr.company_id}>
-                    <TableCell className="font-medium text-sm">{cr.companyName}</TableCell>
-                    <TableCell className={`text-right font-mono text-sm font-semibold ${cr.calls_blocked ? "text-destructive" : (cr.balance_eur || 0) <= 5 ? "text-yellow-600" : "text-foreground"}`}>
-                      €{(cr.balance_eur || 0).toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-sm text-muted-foreground">€{(cr.total_spent_eur || 0).toFixed(2)}</TableCell>
-                    <TableCell className="text-right font-mono text-sm text-muted-foreground">€{(cr.total_recharged_eur || 0).toFixed(2)}</TableCell>
-                    <TableCell>
-                      {cr.calls_blocked ? (
-                        <Badge variant="destructive" className="text-xs">🚫 Bloccato</Badge>
-                      ) : (cr.balance_eur || 0) <= 5 ? (
-                        <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300 text-xs">⚠ Basso</Badge>
-                      ) : (
-                        <Badge className="bg-status-success-light text-status-success border-none text-xs">✓ OK</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{cr.auto_recharge_enabled ? "✅" : "—"}</TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        variant={cr.calls_blocked ? "destructive" : "outline"}
-                        className="text-xs"
-                        onClick={() => setUnlockModal({ companyId: cr.company_id, companyName: cr.companyName })}
-                      >
-                        {cr.calls_blocked ? "Sblocca" : "+ Crediti"}
-                      </Button>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted">
+                    <TableHead className="text-xs">Azienda</TableHead>
+                    <TableHead className="text-xs text-right">Saldo €</TableHead>
+                    <TableHead className="text-xs text-right hidden md:table-cell">Speso €</TableHead>
+                    <TableHead className="text-xs text-right hidden lg:table-cell">Ricaricato €</TableHead>
+                    <TableHead className="text-xs">Stato</TableHead>
+                    <TableHead className="text-xs hidden lg:table-cell">Auto-Ricarica</TableHead>
+                    <TableHead className="text-xs text-right">Azione</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {sortedCredits.map((cr) => (
+                    <TableRow key={cr.company_id}>
+                      <TableCell className="font-medium text-sm">{cr.companyName}</TableCell>
+                      <TableCell className={`text-right font-mono text-sm font-semibold ${cr.calls_blocked ? "text-destructive" : (cr.balance_eur || 0) <= 5 ? "text-yellow-600" : "text-foreground"}`}>
+                        €{(cr.balance_eur || 0).toFixed(2)}
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-sm text-muted-foreground hidden md:table-cell">€{(cr.total_spent_eur || 0).toFixed(2)}</TableCell>
+                      <TableCell className="text-right font-mono text-sm text-muted-foreground hidden lg:table-cell">€{(cr.total_recharged_eur || 0).toFixed(2)}</TableCell>
+                      <TableCell>
+                        {cr.calls_blocked ? (
+                          <Badge variant="destructive" className="text-xs">🚫 Bloccato</Badge>
+                        ) : (cr.balance_eur || 0) <= 5 ? (
+                          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300 text-xs">⚠ Basso</Badge>
+                        ) : (
+                          <Badge className="bg-status-success-light text-status-success border-none text-xs">✓ OK</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground hidden lg:table-cell">{cr.auto_recharge_enabled ? "✅" : "—"}</TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          variant={cr.calls_blocked ? "destructive" : "outline"}
+                          className="text-xs"
+                          onClick={() => setUnlockModal({ companyId: cr.company_id, companyName: cr.companyName })}
+                        >
+                          {cr.calls_blocked ? "Sblocca" : "+ Crediti"}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </div>
       )}
