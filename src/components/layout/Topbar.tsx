@@ -37,6 +37,16 @@ const pageTitleMap: Record<string, string> = {
   "phone-numbers": "Telefono",
   "knowledge-base": "Knowledge Base",
   automations: "Automazioni",
+  // Superadmin
+  superadmin: "Dashboard SA",
+  companies: "Aziende",
+  "platform-settings": "Impostazioni",
+  "render-config": "Config Render",
+  logs: "Log Sistema",
+  team: "Team",
+  whatsapp: "WhatsApp",
+  monitoring: "Monitoraggio",
+  "api-keys": "API Keys",
 };
 
 export default function Topbar({ onMenuOpen }: TopbarProps) {

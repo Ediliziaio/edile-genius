@@ -363,13 +363,13 @@ export default function PlatformSettings() {
       </div>
 
       <Tabs defaultValue="api" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="api" className="gap-2"><Zap className="h-4 w-4" /> ElevenLabs</TabsTrigger>
-          <TabsTrigger value="llm" className="gap-2"><Brain className="h-4 w-4" /> LLM</TabsTrigger>
-          <TabsTrigger value="pricing" className="gap-2"><DollarSign className="h-4 w-4" /> Prezzi</TabsTrigger>
-          <TabsTrigger value="packages" className="gap-2"><Package className="h-4 w-4" /> Pacchetti</TabsTrigger>
-          <TabsTrigger value="whatsapp" className="gap-2"><MessageSquare className="h-4 w-4" /> WhatsApp</TabsTrigger>
-          <TabsTrigger value="n8n" className="gap-2"><Workflow className="h-4 w-4" /> N8N</TabsTrigger>
+        <TabsList className="flex w-full overflow-x-auto flex-nowrap">
+          <TabsTrigger value="api" className="gap-2 flex-shrink-0"><Zap className="h-4 w-4" /> <span className="hidden sm:inline">ElevenLabs</span><span className="sm:hidden">EL</span></TabsTrigger>
+          <TabsTrigger value="llm" className="gap-2 flex-shrink-0"><Brain className="h-4 w-4" /> LLM</TabsTrigger>
+          <TabsTrigger value="pricing" className="gap-2 flex-shrink-0"><DollarSign className="h-4 w-4" /> Prezzi</TabsTrigger>
+          <TabsTrigger value="packages" className="gap-2 flex-shrink-0"><Package className="h-4 w-4" /> <span className="hidden sm:inline">Pacchetti</span><span className="sm:hidden">Pkg</span></TabsTrigger>
+          <TabsTrigger value="whatsapp" className="gap-2 flex-shrink-0"><MessageSquare className="h-4 w-4" /> <span className="hidden sm:inline">WhatsApp</span><span className="sm:hidden">WA</span></TabsTrigger>
+          <TabsTrigger value="n8n" className="gap-2 flex-shrink-0"><Workflow className="h-4 w-4" /> N8N</TabsTrigger>
         </TabsList>
 
         {/* TAB: ElevenLabs API */}

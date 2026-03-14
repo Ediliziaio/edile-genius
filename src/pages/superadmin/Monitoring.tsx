@@ -365,7 +365,7 @@ export default function Monitoring() {
         {loadingCredits ? (
           <Skeleton className="h-48 rounded-lg" />
         ) : reservedCredits.length > 0 ? (
-          <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
+          <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted">

@@ -441,51 +441,53 @@ export default function SuperAdminDashboard() {
             </Button>
           </div>
           <div className="rounded-card border border-border bg-card shadow-card overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted">
-                  <TableHead className="text-xs">Azienda</TableHead>
-                  <TableHead className="text-xs text-right">Saldo €</TableHead>
-                  <TableHead className="text-xs text-right">Speso €</TableHead>
-                  <TableHead className="text-xs text-right">Ricaricato €</TableHead>
-                  <TableHead className="text-xs">Stato</TableHead>
-                  <TableHead className="text-xs">Auto-Ricarica</TableHead>
-                  <TableHead className="text-xs text-right">Azione</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedCredits.map((cr) => (
-                  <TableRow key={cr.company_id}>
-                    <TableCell className="font-medium text-sm">{cr.companyName}</TableCell>
-                    <TableCell className={`text-right font-mono text-sm font-semibold ${cr.calls_blocked ? "text-destructive" : (cr.balance_eur || 0) <= 5 ? "text-yellow-600" : "text-foreground"}`}>
-                      €{(cr.balance_eur || 0).toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-sm text-muted-foreground">€{(cr.total_spent_eur || 0).toFixed(2)}</TableCell>
-                    <TableCell className="text-right font-mono text-sm text-muted-foreground">€{(cr.total_recharged_eur || 0).toFixed(2)}</TableCell>
-                    <TableCell>
-                      {cr.calls_blocked ? (
-                        <Badge variant="destructive" className="text-xs">🚫 Bloccato</Badge>
-                      ) : (cr.balance_eur || 0) <= 5 ? (
-                        <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300 text-xs">⚠ Basso</Badge>
-                      ) : (
-                        <Badge className="bg-status-success-light text-status-success border-none text-xs">✓ OK</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{cr.auto_recharge_enabled ? "✅" : "—"}</TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        variant={cr.calls_blocked ? "destructive" : "outline"}
-                        className="text-xs"
-                        onClick={() => setUnlockModal({ companyId: cr.company_id, companyName: cr.companyName })}
-                      >
-                        {cr.calls_blocked ? "Sblocca" : "+ Crediti"}
-                      </Button>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted">
+                    <TableHead className="text-xs">Azienda</TableHead>
+                    <TableHead className="text-xs text-right">Saldo €</TableHead>
+                    <TableHead className="text-xs text-right hidden md:table-cell">Speso €</TableHead>
+                    <TableHead className="text-xs text-right hidden lg:table-cell">Ricaricato €</TableHead>
+                    <TableHead className="text-xs">Stato</TableHead>
+                    <TableHead className="text-xs hidden lg:table-cell">Auto-Ricarica</TableHead>
+                    <TableHead className="text-xs text-right">Azione</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {sortedCredits.map((cr) => (
+                    <TableRow key={cr.company_id}>
+                      <TableCell className="font-medium text-sm">{cr.companyName}</TableCell>
+                      <TableCell className={`text-right font-mono text-sm font-semibold ${cr.calls_blocked ? "text-destructive" : (cr.balance_eur || 0) <= 5 ? "text-yellow-600" : "text-foreground"}`}>
+                        €{(cr.balance_eur || 0).toFixed(2)}
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-sm text-muted-foreground hidden md:table-cell">€{(cr.total_spent_eur || 0).toFixed(2)}</TableCell>
+                      <TableCell className="text-right font-mono text-sm text-muted-foreground hidden lg:table-cell">€{(cr.total_recharged_eur || 0).toFixed(2)}</TableCell>
+                      <TableCell>
+                        {cr.calls_blocked ? (
+                          <Badge variant="destructive" className="text-xs">🚫 Bloccato</Badge>
+                        ) : (cr.balance_eur || 0) <= 5 ? (
+                          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300 text-xs">⚠ Basso</Badge>
+                        ) : (
+                          <Badge className="bg-status-success-light text-status-success border-none text-xs">✓ OK</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground hidden lg:table-cell">{cr.auto_recharge_enabled ? "✅" : "—"}</TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          variant={cr.calls_blocked ? "destructive" : "outline"}
+                          className="text-xs"
+                          onClick={() => setUnlockModal({ companyId: cr.company_id, companyName: cr.companyName })}
+                        >
+                          {cr.calls_blocked ? "Sblocca" : "+ Crediti"}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </div>
       )}

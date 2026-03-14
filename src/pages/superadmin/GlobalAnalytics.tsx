@@ -317,14 +317,14 @@ export default function GlobalAnalyticsPage() {
               ) : (
                 companies.map(co => (
                   <tr key={co.company_id} className="hover:bg-ink-50/40 transition-colors">
-                    <td className="px-5 py-3 font-medium text-ink-800">{co.company_name}</td>
-                    <td className={`px-5 py-3 text-right font-mono text-xs ${co.balance_eur <= 5 ? "text-destructive font-semibold" : "text-ink-600"}`}>
+                    <td className="px-4 md:px-5 py-3 font-medium text-ink-800">{co.company_name}</td>
+                    <td className={`px-4 md:px-5 py-3 text-right font-mono text-xs ${co.balance_eur <= 5 ? "text-destructive font-semibold" : "text-ink-600"}`}>
                       €{fmt(co.balance_eur)}
                     </td>
-                    <td className="px-5 py-3 text-right font-mono text-xs text-ink-600">€{fmt(co.total_spent)}</td>
-                    <td className="px-5 py-3 text-right text-ink-600">{fmtInt(co.conversations)}</td>
-                    <td className="px-5 py-3 text-right text-ink-600">{co.agents}</td>
-                    <td className="px-5 py-3">
+                    <td className="px-4 md:px-5 py-3 text-right font-mono text-xs text-ink-600">€{fmt(co.total_spent)}</td>
+                    <td className="px-4 md:px-5 py-3 text-right text-ink-600 hidden md:table-cell">{fmtInt(co.conversations)}</td>
+                    <td className="px-4 md:px-5 py-3 text-right text-ink-600 hidden md:table-cell">{co.agents}</td>
+                    <td className="px-4 md:px-5 py-3 hidden sm:table-cell">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                         co.status === "active" ? "bg-emerald-50 text-emerald-700" :
                         co.status === "trial" ? "bg-amber-50 text-amber-700" :

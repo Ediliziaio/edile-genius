@@ -99,7 +99,7 @@ export default function CompanyDetail() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="bg-ink-100 border-none">
+        <TabsList className="bg-ink-100 border-none w-full sm:w-auto overflow-x-auto">
           <TabsTrigger value="overview">Panoramica</TabsTrigger>
           <TabsTrigger value="agents">Agenti</TabsTrigger>
           <TabsTrigger value="config">Configurazione</TabsTrigger>

@@ -65,23 +65,25 @@ export default function Companies() {
         </Button>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
+      <div className="space-y-3">
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-400" />
           <Input placeholder="Cerca per nome..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(0); }} className="pl-10 bg-white border-ink-200 text-ink-900 placeholder:text-ink-300" />
         </div>
-        <Select value={sectorFilter} onValueChange={(v) => { setSectorFilter(v); setPage(0); }}>
-          <SelectTrigger className="w-[160px] bg-white border-ink-200 text-ink-900"><SelectValue placeholder="Settore" /></SelectTrigger>
-          <SelectContent><SelectItem value="all">Tutti i settori</SelectItem>{sectors.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-        </Select>
-        <Select value={planFilter} onValueChange={(v) => { setPlanFilter(v); setPage(0); }}>
-          <SelectTrigger className="w-[160px] bg-white border-ink-200 text-ink-900"><SelectValue placeholder="Piano" /></SelectTrigger>
-          <SelectContent><SelectItem value="all">Tutti i piani</SelectItem><SelectItem value="starter">Starter</SelectItem><SelectItem value="professional">Professional</SelectItem><SelectItem value="enterprise">Enterprise</SelectItem></SelectContent>
-        </Select>
-        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(0); }}>
-          <SelectTrigger className="w-[160px] bg-white border-ink-200 text-ink-900"><SelectValue placeholder="Stato" /></SelectTrigger>
-          <SelectContent><SelectItem value="all">Tutti gli stati</SelectItem><SelectItem value="active">Attivo</SelectItem><SelectItem value="trial">Trial</SelectItem><SelectItem value="suspended">Sospeso</SelectItem></SelectContent>
-        </Select>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
+          <Select value={sectorFilter} onValueChange={(v) => { setSectorFilter(v); setPage(0); }}>
+            <SelectTrigger className="bg-white border-ink-200 text-ink-900"><SelectValue placeholder="Settore" /></SelectTrigger>
+            <SelectContent><SelectItem value="all">Tutti i settori</SelectItem>{sectors.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+          </Select>
+          <Select value={planFilter} onValueChange={(v) => { setPlanFilter(v); setPage(0); }}>
+            <SelectTrigger className="bg-white border-ink-200 text-ink-900"><SelectValue placeholder="Piano" /></SelectTrigger>
+            <SelectContent><SelectItem value="all">Tutti i piani</SelectItem><SelectItem value="starter">Starter</SelectItem><SelectItem value="professional">Professional</SelectItem><SelectItem value="enterprise">Enterprise</SelectItem></SelectContent>
+          </Select>
+          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(0); }}>
+            <SelectTrigger className="bg-white border-ink-200 text-ink-900 col-span-2 md:col-span-1"><SelectValue placeholder="Stato" /></SelectTrigger>
+            <SelectContent><SelectItem value="all">Tutti gli stati</SelectItem><SelectItem value="active">Attivo</SelectItem><SelectItem value="trial">Trial</SelectItem><SelectItem value="suspended">Sospeso</SelectItem></SelectContent>
+          </Select>
+        </div>
       </div>
 
       <CompanyTable companies={paged} loading={loading} />

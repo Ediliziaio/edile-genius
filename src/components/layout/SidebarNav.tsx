@@ -69,23 +69,20 @@ const superadminNav: NavSection[] = [
   { header: "PRINCIPALE", items: [
     { label: "Dashboard", icon: LayoutDashboard, href: "/superadmin" },
     { label: "Aziende", icon: Building2, href: "/superadmin/companies" },
-    { label: "Nuova Azienda", icon: UserPlus, href: "/superadmin/companies/new" },
     { label: "WhatsApp", icon: MessageCircle, href: "/superadmin/whatsapp" },
     { label: "Team SuperAdmin", icon: Users, href: "/superadmin/team" },
   ]},
-  { header: "AUTOMAZIONI", items: [
+  { header: "GESTIONE", items: [
     { label: "Template Agenti", icon: Puzzle, href: "/superadmin/templates" },
+    { label: "Config Render AI", icon: Palette, href: "/superadmin/render-config" },
   ]},
   { header: "REPORT", items: [
     { label: "Analytics Globali", icon: BarChart3, href: "/superadmin/analytics" },
     { label: "Monitoraggio", icon: AlertTriangle, href: "/superadmin/monitoring" },
+    { label: "Log Sistema", icon: FileText, href: "/superadmin/logs" },
   ]},
   { header: "PIATTAFORMA", items: [
-    { label: "Config Render AI", icon: Palette, href: "/superadmin/render-config" },
-  ]},
-  { header: "ACCOUNT", items: [
-    { label: "Impostazioni Piattaforma", icon: Settings, href: "/superadmin/platform-settings" },
-    { label: "Log Sistema", icon: FileText, href: "/superadmin/logs" },
+    { label: "Impostazioni", icon: Settings, href: "/superadmin/platform-settings" },
   ]},
 ];
 
