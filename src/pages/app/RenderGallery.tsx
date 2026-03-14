@@ -15,6 +15,8 @@ import { VirtualGalleryGrid } from "@/components/ui/VirtualGalleryGrid";
 
 export default function RenderGallery() {
   const companyId = useCompanyId();
+  const isAdmin = useIsAdmin();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [items, setItems] = useState<any[]>([]);
   const [search, setSearch] = useState("");
