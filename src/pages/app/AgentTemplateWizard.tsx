@@ -339,6 +339,17 @@ export default function AgentTemplateWizard() {
           <span className="text-xs text-foreground/50 ml-auto hidden sm:inline">Puoi modificare tutto durante la configurazione</span>
         </div>
 
+        {/* Missing company warning for superadmins */}
+        {!companyId && (
+          <div className="flex items-center gap-3 px-4 py-3 mb-4 rounded-lg border border-destructive/30 bg-destructive/5 text-destructive">
+            <ShieldAlert className="w-5 h-5 shrink-0" />
+            <div className="text-sm">
+              <strong>Nessuna azienda selezionata.</strong>{" "}
+              <span className="text-destructive/80">Devi impersonare un'azienda dalla sezione SuperAdmin prima di poter creare un agente.</span>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-ink-900">Configura il tuo agente</h1>
