@@ -1,5 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { useCompanyId } from "@/hooks/useCompanyId";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useQuery } from "@tanstack/react-query";
 import { SMART_ACTIONS_DEFAULTS } from "@/lib/automation-defaults";
 import { supabase } from "@/integrations/supabase/client";
