@@ -28,6 +28,8 @@ interface GalleryItem {
 
 export default function RenderFacciataHub() {
   const companyId = useCompanyId();
+  const isAdmin = useIsAdmin();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"come_funziona" | "galleria">("come_funziona");
 
