@@ -280,6 +280,7 @@ export default function AgentTemplateWizard() {
       }
 
       toast({ title: "Agente creato! 🎉", description: `${form.name} è pronto.` });
+      await queryClient.invalidateQueries({ queryKey: ["company-agents"] });
       const newAgentId = data?.agent?.id;
       navigate(newAgentId ? `/app/agents/${newAgentId}` : "/app/agents");
     } catch (e: any) {
