@@ -195,6 +195,8 @@ export default function RenderFacciataHub() {
                   <img
                     src={item.render_url}
                     alt={item.title || "Render facciata"}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full aspect-square object-cover"
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-end">

@@ -103,7 +103,7 @@ export default function RenderHub() {
               <Link key={r.id} to={`/app/render/gallery/${r.id}`}>
                 <Card className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
                   <div className="aspect-video relative">
-                    <img src={r.render_url} alt={r.title || "Render"} className="w-full h-full object-cover" />
+                    <img src={r.render_url} alt={r.title || "Render"} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                   </div>
                   <CardContent className="p-3">
                     <p className="font-medium text-sm text-foreground truncate">{r.title || "Render senza titolo"}</p>
