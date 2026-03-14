@@ -32,16 +32,20 @@ const STATUS_PILLS: { value: StatusFilter; label: string }[] = [
 
 export default function AgentsPage() {
   const companyId = useCompanyId();
+  const isAdmin = useIsAdmin();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
   const { data: agents, isLoading } = useQuery({
-    queryKey: ["company-agents", companyId],
+    queryKey: ["company-agents", companyId, isAdmin, user?.id],
     enabled: !!companyId,
     queryFn: async () => {
-      const { data } = await supabase.from("agents").select("*").eq("company_id", companyId!).order("created_at", { ascending: false });
+      let q = supabase.from("agents").select("*").eq("company_id", companyId!);
+      if (!isAdmin && user?.id) q = q.eq("created_by", user.id);
+      const { data } = await q.order("created_at", { ascending: false });
       return data || [];
     },
   });

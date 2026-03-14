@@ -54,11 +54,11 @@ export default function RenderFacciataHub() {
     queryKey: ["render-facciata-gallery", companyId],
     queryFn: async () => {
       if (!companyId) return [];
-      const { data } = await (supabase.from("render_facciata_gallery" as any) as any)
+      let q = (supabase.from("render_facciata_gallery" as any) as any)
         .select("id, title, render_url, original_url, created_at")
-        .eq("company_id", companyId)
-        .order("created_at", { ascending: false })
-        .limit(200);
+        .eq("company_id", companyId);
+      if (!isAdmin && user?.id) q = q.eq("user_id", user.id);
+      const { data } = await q.order("created_at", { ascending: false }).limit(200);
       return (data || []) as GalleryItem[];
     },
     enabled: !!companyId && activeTab === "galleria",

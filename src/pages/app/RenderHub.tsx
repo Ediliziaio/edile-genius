@@ -12,6 +12,8 @@ import BeforeAfterSlider from "@/components/render/BeforeAfterSlider";
 
 export default function RenderHub() {
   const companyId = useCompanyId();
+  const isAdmin = useIsAdmin();
+  const { user } = useAuth();
   const [credits, setCredits] = useState<{ balance: number; total_used: number } | null>(null);
   const [recentRenders, setRecentRenders] = useState<any[]>([]);
 
@@ -19,9 +21,11 @@ export default function RenderHub() {
     if (!companyId) return;
     supabase.from("render_credits").select("balance, total_used").eq("company_id", companyId).single()
       .then(({ data }) => { if (data) setCredits(data as any); });
-    supabase.from("render_gallery").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).limit(6)
+    let q = supabase.from("render_gallery").select("*").eq("company_id", companyId);
+    if (!isAdmin && user?.id) q = q.eq("created_by", user.id);
+    q.order("created_at", { ascending: false }).limit(6)
       .then(({ data }) => { if (data) setRecentRenders(data); });
-  }, [companyId]);
+  }, [companyId, isAdmin, user?.id]);
 
   const steps = [
     { icon: Camera, title: "Scatta o Carica", desc: "Fotografa la finestra esistente dal cantiere o carica un'immagine" },

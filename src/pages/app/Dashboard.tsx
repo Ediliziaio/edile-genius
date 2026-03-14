@@ -46,10 +46,12 @@ export default function AppDashboard() {
 
   // ── Agents ──
   const { data: agents } = useQuery({
-    queryKey: ["company-agents", companyId],
+    queryKey: ["company-agents", companyId, isAdmin, user?.id],
     enabled: !!companyId,
     queryFn: async () => {
-      const { data } = await supabase.from("agents").select("*").eq("company_id", companyId!);
+      let q = supabase.from("agents").select("*").eq("company_id", companyId!);
+      if (!isAdmin && user?.id) q = q.eq("created_by", user.id);
+      const { data } = await q;
       return data || [];
     },
   });
