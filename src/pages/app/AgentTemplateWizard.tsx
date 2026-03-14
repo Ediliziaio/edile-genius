@@ -151,6 +151,7 @@ export default function AgentTemplateWizard() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const companyId = useCompanyId();
 
   const [step, setStep] = useState(0);
