@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Plus, Image, Zap, Layers, Palette, Download, Trash2,
 } from "lucide-react";
+import { VirtualGalleryGrid } from "@/components/ui/VirtualGalleryGrid";
 
 export default function RenderPersianeHub() {
   const navigate = useNavigate();
