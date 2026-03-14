@@ -22,6 +22,7 @@ export const settoreConfig: Record<Settore, { label: string; emoji: string; colo
   fotovoltaico: { label: 'Fotovoltaico', emoji: '☀️', color: '#F59E0B', colorBg: '#FFFBEB', colorDark: '#B45309' },
   ristrutturazioni: { label: 'Ristrutturazioni', emoji: '🏠', color: '#8B5CF6', colorBg: '#F5F3FF', colorDark: '#6D28D9' },
   edilizia: { label: 'Edilizia', emoji: '🏢', color: '#3ECF6E', colorBg: '#E8FAF0', colorDark: '#1A9E4A' },
+  render: { label: 'Render AI', emoji: '🎨', color: '#EC4899', colorBg: '#FDF2F8', colorDark: '#BE185D' },
 };
 
 export const tipoAIConfig: Record<TipoAI, { label: string; color: string }> = {
