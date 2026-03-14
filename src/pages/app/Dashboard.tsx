@@ -32,6 +32,7 @@ interface BriefingData {
 export default function AppDashboard() {
   const { profile, user } = useAuth();
   const companyId = useCompanyId();
+  const isAdmin = useIsAdmin();
 
   // Check onboarding status
   const { data: onboardingProfile, isLoading: onboardingLoading } = useQuery({
