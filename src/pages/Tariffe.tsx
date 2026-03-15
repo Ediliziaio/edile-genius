@@ -360,7 +360,7 @@ const Tariffe = () => {
         <div className="max-w-6xl mx-auto px-6">
           <motion.div variants={item} className="text-center mb-12 space-y-3">
             <h2 className="font-display text-[26px] md:text-4xl font-extrabold text-foreground">
-              Quanto risparmi con Edil Genius?
+              Quanto risparmi con Edilizia.io?
             </h2>
             <p className="text-muted-foreground text-base max-w-[560px] mx-auto">
               Confronta il costo di un dipendente tradizionale con il tuo Agente AI.
