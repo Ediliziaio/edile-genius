@@ -35,11 +35,19 @@ const Hero = () => {
               </span>
             </motion.h1>
 
-            <motion.p variants={item} className="text-base sm:text-lg text-neutral-500 max-w-[540px] leading-relaxed">
-              Edilizia.io è l'agenzia che sostituisce segretarie, commerciali improduttivi
-              e addetti alla reportistica con Agenti AI che costano 10x meno e lavorano
-              10x meglio. 24/7, 365 giorni l'anno. Senza ferie, malattie o dimissioni.
-            </motion.p>
+            <motion.div variants={item} className="space-y-4 text-base sm:text-lg text-neutral-500 max-w-[540px] leading-relaxed">
+              <p>
+                Mentre la tua impresa edile paga stipendi fissi a figure improduttive, le aziende più avanzate del settore sono già tra le prime ad aver sostituito segreterie, commerciali e back-office con Agenti AI che lavorano 24/7 senza mai fermarsi — chiudono più lavori, tagliano i costi fissi e portano a casa margini che prima non vedevano.
+              </p>
+              <p>
+                Edilizia.io è l'unica azienda che entra nella tua impresa, individua le figure che ti costano senza renderti, e le sostituisce con Agenti AI specializzati per il settore edile.
+              </p>
+              <div className="space-y-2">
+                <p>Segretarie che filtrano male i lead. Commerciali che non chiudono. Addetti alla reportistica che ti mandano file Excel alle 18:00.</p>
+                <p className="font-semibold text-neutral-900">Sostituiti. Con agenti che costano 10 volte meno e lavorano 10 volte meglio.</p>
+                <p>24 ore su 24. 365 giorni l'anno. Senza ferie, malattie, permessi, dimissioni o buonuscite.</p>
+              </div>
+            </motion.div>
 
             <motion.div variants={item} className="flex flex-col sm:flex-row gap-4">
               <a
