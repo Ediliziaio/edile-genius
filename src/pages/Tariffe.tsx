@@ -201,8 +201,8 @@ const Section = ({ children, className = "", id }: { children: React.ReactNode; 
 /* ═══════════════ PAGE ═══════════════ */
 const Tariffe = () => {
   usePageSEO({
-    title: "Prezzi e Tariffe — Edil Genius | AI per Imprese Edili",
-    description: "Scopri i prezzi di Edil Genius: agenti vocali AI, render, preventivi automatici per imprese edili. Da €37/mese. Prenota una demo gratuita.",
+    title: "Prezzi e Tariffe — Edilizia.io | AI per Imprese Edili",
+    description: "Scopri i prezzi di Edilizia.io: agenti vocali AI, render, preventivi automatici per imprese edili. Da €37/mese. Prenota una demo gratuita.",
     canonical: "/tariffe",
   });
 
@@ -215,10 +215,10 @@ const Tariffe = () => {
 
   const roi = useMemo(() => {
     const costoDipendente = 2500;
-    const costoEdilGenius = leads <= 100 ? 297 : leads <= 250 ? 497 : 997;
-    const risparmioAnnuo = (costoDipendente - costoEdilGenius) * 12;
+    const costoEdiliziaIo = leads <= 100 ? 297 : leads <= 250 ? 497 : 997;
+    const risparmioAnnuo = (costoDipendente - costoEdiliziaIo) * 12;
     const opportunita = missedCalls * 20 * contractValue * 0.05;
-    return { costoDipendente, costoEdilGenius, risparmioAnnuo, opportunita, piano: leads <= 100 ? "Essenziale" : leads <= 250 ? "Crescita" : "Dominio" };
+    return { costoDipendente, costoEdiliziaIo, risparmioAnnuo, opportunita, piano: leads <= 100 ? "Essenziale" : leads <= 250 ? "Crescita" : "Dominio" };
   }, [leads, missedCalls, contractValue]);
 
   return (
@@ -233,7 +233,7 @@ const Tariffe = () => {
             <span className="text-primary">Ottieni un'azienda che lavora 24 ore su 24.</span>
           </motion.h1>
           <motion.p variants={item} className="text-muted-foreground text-lg md:text-xl max-w-[680px] mx-auto leading-relaxed">
-            Ogni servizio AI di Edil Genius funziona a crediti. Scegli solo quello che ti serve — un agente vocale, i render, i preventivi — oppure prendi tutto nel pacchetto completo e risparmia.
+            Ogni servizio AI di Edilizia.io funziona a crediti. Scegli solo quello che ti serve — un agente vocale, i render, i preventivi — oppure prendi tutto nel pacchetto completo e risparmia.
           </motion.p>
           <motion.div variants={item} className="flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground">
             {["Nessun vincolo", "Disdici quando vuoi", "Setup in 48 ore"].map((t) => (
@@ -360,7 +360,7 @@ const Tariffe = () => {
         <div className="max-w-6xl mx-auto px-6">
           <motion.div variants={item} className="text-center mb-12 space-y-3">
             <h2 className="font-display text-[26px] md:text-4xl font-extrabold text-foreground">
-              Quanto risparmi con Edil Genius?
+              Quanto risparmi con Edilizia.io?
             </h2>
             <p className="text-muted-foreground text-base max-w-[560px] mx-auto">
               Confronta il costo di un dipendente tradizionale con il tuo Agente AI.
@@ -399,13 +399,13 @@ const Tariffe = () => {
                   </div>
                   <span className="font-display text-xl font-extrabold text-foreground">€ 2.500</span>
                 </div>
-                {/* Edil Genius */}
+                {/* Edilizia.io */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Check size={18} className="text-primary" />
-                    <span className="text-sm text-muted-foreground">Costo Edil Genius ({roi.piano})</span>
+                    <span className="text-sm text-muted-foreground">Costo Edilizia.io ({roi.piano})</span>
                   </div>
-                  <span className="font-display text-xl font-extrabold text-primary">€ {roi.costoEdilGenius}</span>
+                  <span className="font-display text-xl font-extrabold text-primary">€ {roi.costoEdiliziaIo}</span>
                 </div>
 
                 <div className="border-t border-border pt-5">
