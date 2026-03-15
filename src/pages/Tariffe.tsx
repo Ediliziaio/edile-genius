@@ -233,7 +233,7 @@ const Tariffe = () => {
             <span className="text-primary">Ottieni un'azienda che lavora 24 ore su 24.</span>
           </motion.h1>
           <motion.p variants={item} className="text-muted-foreground text-lg md:text-xl max-w-[680px] mx-auto leading-relaxed">
-            Ogni servizio AI di Edil Genius funziona a crediti. Scegli solo quello che ti serve — un agente vocale, i render, i preventivi — oppure prendi tutto nel pacchetto completo e risparmia.
+            Ogni servizio AI di Edilizia.io funziona a crediti. Scegli solo quello che ti serve — un agente vocale, i render, i preventivi — oppure prendi tutto nel pacchetto completo e risparmia.
           </motion.p>
           <motion.div variants={item} className="flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground">
             {["Nessun vincolo", "Disdici quando vuoi", "Setup in 48 ore"].map((t) => (
