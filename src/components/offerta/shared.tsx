@@ -431,61 +431,14 @@ export function LogoBarMini() {
   );
 }
 
-/* ── OfferSectionNav ── */
+/* ── Imports for cards ── */
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Gift } from "lucide-react";
 
-interface NavLink { label: string; href: string }
-
-export function OfferSectionNav({ links }: { links: NavLink[] }) {
-  const [active, setActive] = useState("");
-
-  useEffect(() => {
-    const ids = links.map((l) => l.href.replace("#", ""));
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) setActive(e.target.id);
-        });
-      },
-      { rootMargin: "-120px 0px -60% 0px", threshold: 0 }
-    );
-    ids.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-    return () => observer.disconnect();
-  }, [links]);
-
-  return (
-    <nav className="sticky top-16 z-40 border-b border-border/50 bg-background/90 backdrop-blur-md">
-      <div className="container mx-auto px-4 overflow-x-auto scrollbar-hide">
-        <div className="flex items-center gap-1 py-2 min-w-max">
-          {links.map((link) => {
-            const isActive = active === link.href.replace("#", "");
-            return (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.querySelector(link.href)?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
-                  isActive
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                {link.label}
-              </a>
-            );
-          })}
-        </div>
-      </div>
-    </nav>
-  );
+/* ── OfferSectionNav (DEPRECATED — nav is now integrated into OfferHeader) ── */
+export function OfferSectionNav({ links: _links }: { links: { label: string; href: string }[] }) {
+  return null;
 }
 
 /* ── SetupFreeBanner ── */
