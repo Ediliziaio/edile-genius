@@ -323,10 +323,7 @@ const OffertaUnica = () => {
               <Card className="text-center hover:border-primary/30 transition-colors">
                 <CardContent className="pt-6 pb-5">
                   <r.icon className="h-6 w-6 text-primary mx-auto mb-2" />
-                  <div className="text-2xl md:text-3xl font-extrabold font-mono">
-                    <CounterStat end={r.value} prefix={r.prefix} suffix={r.suffix} />
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1 font-medium">{r.label}</p>
+                  <CounterStat value={r.value} prefix={r.prefix} suffix={r.suffix} label={r.label} className="text-2xl md:text-3xl font-extrabold font-mono" />
                 </CardContent>
               </Card>
             </motion.div>
