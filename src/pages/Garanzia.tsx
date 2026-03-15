@@ -43,7 +43,7 @@ const faqs = [
   },
   {
     q: "\"E se il mio settore è diverso?\"",
-    a: "Lavoriamo esclusivamente con il settore edile: serramenti, infissi, fotovoltaico, ristrutturazioni, impianti. Non siamo un'agenzia generica che fa tutto per tutti. Ogni script, ogni flusso, ogni obiezione gestita è calibrata su come parla, pensa e decide il tuo cliente tipo.",
+    a: "Lavoriamo esclusivamente con il settore edile: serramenti, infissi, fotovoltaico, ristrutturazioni, impianti. Non siamo un'azienda generica che fa tutto per tutti. Ogni script, ogni flusso, ogni obiezione gestita è calibrata su come parla, pensa e decide il tuo cliente tipo.",
   },
   {
     q: "\"Non ho tempo per implementare qualcosa di nuovo.\"",
