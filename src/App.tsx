@@ -35,6 +35,7 @@ const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const OffertaAgenteVocale = lazy(() => import("./pages/offerta/AgentiVocale"));
 const OffertaRenderAI = lazy(() => import("./pages/offerta/RenderAI"));
+const OffertaPreventivatoreAI = lazy(() => import("./pages/offerta/PreventivatoreAI"));
 
 // Lazy-loaded SuperAdmin pages
 const SuperAdminDashboard = lazy(() => import("./pages/superadmin/Dashboard"));
@@ -158,6 +159,7 @@ const App = () => (
             <Route path="/s/:token" element={<SafeRoute><PublicShareViewer /></SafeRoute>} />
             <Route path="/offerta/agente-vocale" element={<SafeRoute><OffertaAgenteVocale /></SafeRoute>} />
             <Route path="/offerta/render-ai" element={<SafeRoute><OffertaRenderAI /></SafeRoute>} />
+            <Route path="/offerta/preventivatore-ai" element={<SafeRoute><OffertaPreventivatoreAI /></SafeRoute>} />
 
             {/* SuperAdmin routes */}
             <Route element={<AuthGuard requiredRole="superadmin" />}>
