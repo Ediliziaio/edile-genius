@@ -269,21 +269,48 @@ export function OfferCountdown({ countdown, variant = "dark" }: OfferCountdownPr
   );
 }
 
-/* ── OfferGuarantee ── */
+/* ── OfferGuarantee (strong version — matches homepage Guarantee) ── */
 interface OfferGuaranteeProps {
-  title: string;
+  title?: string;
   children: ReactNode;
 }
 
 export function OfferGuarantee({ title, children }: OfferGuaranteeProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+
   return (
-    <div className="mx-auto max-w-2xl rounded-2xl border-2 border-primary/30 bg-primary/5 p-8 text-center shadow-[0_0_40px_-10px_hsl(var(--primary)/0.15)]">
-      <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-        <Shield className="h-8 w-8 text-primary" />
-      </div>
-      <h2 className="text-2xl font-bold font-display">{title}</h2>
-      <div className="mt-4 text-muted-foreground leading-relaxed">{children}</div>
-    </div>
+    <motion.div
+      ref={ref}
+      className="mx-auto max-w-2xl rounded-3xl border-2 border-primary/40 bg-background p-10 md:p-14 text-center"
+      style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.06), 0 0 60px hsl(var(--primary) / 0.12)" }}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={inView ? { opacity: 1, scale: 1 } : {}}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.div
+        className="mx-auto w-[120px] h-[120px] rounded-full bg-primary/10 flex items-center justify-center text-7xl mb-6"
+        initial={{ rotateY: 0 }}
+        animate={inView ? { rotateY: 360 } : {}}
+        transition={{ duration: 0.9 }}
+      >
+        🛡️
+      </motion.div>
+
+      <h2 className="font-display text-[28px] md:text-4xl font-extrabold leading-tight mb-2">
+        GARANZIA RIMBORSO<br />
+        <span className="text-primary">30 GIORNI</span>
+      </h2>
+      {title && <p className="text-sm text-muted-foreground mt-1 mb-4">{title}</p>}
+
+      <div className="mt-4 text-lg text-muted-foreground leading-relaxed">{children}</div>
+
+      <p className="mt-6 text-base leading-relaxed">
+        <span className="font-bold text-foreground">
+          Guadagniamo bene solo quando tu risparmi. Questo è il nostro patto con ogni azienda edile.
+        </span>
+      </p>
+    </motion.div>
   );
 }
 
