@@ -201,8 +201,8 @@ const Section = ({ children, className = "", id }: { children: React.ReactNode; 
 /* ═══════════════ PAGE ═══════════════ */
 const Tariffe = () => {
   usePageSEO({
-    title: "Prezzi e Tariffe — Edil Genius | AI per Imprese Edili",
-    description: "Scopri i prezzi di Edil Genius: agenti vocali AI, render, preventivi automatici per imprese edili. Da €37/mese. Prenota una demo gratuita.",
+    title: "Prezzi e Tariffe — Edilizia.io | AI per Imprese Edili",
+    description: "Scopri i prezzi di Edilizia.io: agenti vocali AI, render, preventivi automatici per imprese edili. Da €37/mese. Prenota una demo gratuita.",
     canonical: "/tariffe",
   });
 
