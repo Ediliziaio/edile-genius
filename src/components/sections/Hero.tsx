@@ -25,14 +25,10 @@ const Hero = () => {
               </AnimatedBadge>
             </motion.div>
 
-            <motion.h1 variants={item} className="font-display text-[32px] sm:text-[32px] sm:text-[32px] sm:text-[44px] md:text-[72px] font-extrabold leading-[1.05] text-neutral-900">
-              Licenzia i Costi.{" "}
-              <span className="text-primary">Assumi l'AI.</span>{" "}
-              Fai Esplodere la tua{" "}
-              <span className="relative inline-block">
-                <span className="relative z-10">Azienda Edile.</span>
-                <span className="absolute bottom-1 left-0 w-full h-3 bg-primary-light rounded-sm -z-0" />
-              </span>
+            <motion.h1 variants={item} className="font-display text-[22px] sm:text-[28px] md:text-[40px] font-extrabold leading-[1.15] text-neutral-900">
+              Mentre la tua impresa edile paga stipendi fissi a figure improduttive, le aziende più avanzate del settore sono già tra le prime ad aver sostituito segreterie, commerciali e back-office con{" "}
+              <span className="text-primary">Agenti AI che lavorano 24/7</span>{" "}
+              senza mai fermarsi — chiudono più lavori, tagliano i costi fissi e portano a casa margini che prima non vedevano.
             </motion.h1>
 
             <motion.div variants={item} className="space-y-4 text-base sm:text-lg text-neutral-500 max-w-[540px] leading-relaxed">
