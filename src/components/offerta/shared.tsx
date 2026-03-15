@@ -441,7 +441,7 @@ export function OfferSectionNav({ links: _links }: { links: { label: string; hre
   return null;
 }
 
-/* ── SetupFreeBanner ── */
+/* ── SetupFreeBanner (high-impact version) ── */
 interface SetupFreeBannerProps {
   setupCost: string;
   expired: boolean;
@@ -450,15 +450,32 @@ interface SetupFreeBannerProps {
 export function SetupFreeBanner({ setupCost, expired }: SetupFreeBannerProps) {
   if (expired) return null;
   return (
-    <div className="bg-primary/10 border border-primary/30 rounded-xl p-4 text-center shadow-[0_0_20px_-8px_hsl(var(--primary)/0.2)]">
-      <div className="flex items-center justify-center gap-2">
-        <Gift className="h-5 w-5 text-primary" />
-        <p className="text-sm font-bold">
-          🎁 Setup <span className="line-through text-muted-foreground">{setupCost}</span>{" "}
-          <span className="text-primary text-lg">GRATIS</span> — se attivi entro 7 giorni!
+    <motion.div
+      className="relative bg-gradient-to-r from-primary/15 via-primary/10 to-primary/15 border-2 border-primary/40 rounded-2xl p-5 md:p-6 text-center overflow-hidden"
+      style={{ boxShadow: "0 0 30px -5px hsl(var(--primary) / 0.2)" }}
+      animate={{ borderColor: ["hsl(var(--primary) / 0.4)", "hsl(var(--primary) / 0.7)", "hsl(var(--primary) / 0.4)"] }}
+      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+    >
+      {/* Shimmer effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent animate-[shimmer_3s_ease-in-out_infinite] pointer-events-none" />
+      <div className="relative z-10 flex flex-col items-center gap-2">
+        <motion.div
+          animate={{ rotate: [0, -10, 10, -10, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 3 }}
+        >
+          <Gift className="h-8 w-8 text-primary" />
+        </motion.div>
+        <p className="text-base md:text-lg font-bold">
+          🎁 Setup <span className="line-through text-muted-foreground text-sm">{setupCost}</span>
+        </p>
+        <span className="text-primary text-3xl md:text-4xl font-extrabold font-display tracking-tight">
+          GRATIS
+        </span>
+        <p className="text-xs text-muted-foreground font-medium">
+          Se attivi entro 7 giorni dalla ricezione di questa offerta
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
