@@ -215,10 +215,10 @@ const Tariffe = () => {
 
   const roi = useMemo(() => {
     const costoDipendente = 2500;
-    const costoEdilGenius = leads <= 100 ? 297 : leads <= 250 ? 497 : 997;
-    const risparmioAnnuo = (costoDipendente - costoEdilGenius) * 12;
+    const costoEdiliziaIo = leads <= 100 ? 297 : leads <= 250 ? 497 : 997;
+    const risparmioAnnuo = (costoDipendente - costoEdiliziaIo) * 12;
     const opportunita = missedCalls * 20 * contractValue * 0.05;
-    return { costoDipendente, costoEdilGenius, risparmioAnnuo, opportunita, piano: leads <= 100 ? "Essenziale" : leads <= 250 ? "Crescita" : "Dominio" };
+    return { costoDipendente, costoEdiliziaIo, risparmioAnnuo, opportunita, piano: leads <= 100 ? "Essenziale" : leads <= 250 ? "Crescita" : "Dominio" };
   }, [leads, missedCalls, contractValue]);
 
   return (
