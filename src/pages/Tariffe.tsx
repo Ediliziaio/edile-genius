@@ -399,13 +399,13 @@ const Tariffe = () => {
                   </div>
                   <span className="font-display text-xl font-extrabold text-foreground">€ 2.500</span>
                 </div>
-                {/* Edil Genius */}
+                {/* Edilizia.io */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Check size={18} className="text-primary" />
-                    <span className="text-sm text-muted-foreground">Costo Edil Genius ({roi.piano})</span>
+                    <span className="text-sm text-muted-foreground">Costo Edilizia.io ({roi.piano})</span>
                   </div>
-                  <span className="font-display text-xl font-extrabold text-primary">€ {roi.costoEdilGenius}</span>
+                  <span className="font-display text-xl font-extrabold text-primary">€ {roi.costoEdiliziaIo}</span>
                 </div>
 
                 <div className="border-t border-border pt-5">
