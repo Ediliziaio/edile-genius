@@ -33,7 +33,7 @@ const Hero = () => {
 
             <motion.div variants={item} className="space-y-4 text-base sm:text-lg text-neutral-500 max-w-[540px] leading-relaxed">
               <p>
-                Mentre la tua impresa edile paga stipendi fissi a figure improduttive, le aziende più avanzate del settore sono già tra le prime ad aver sostituito segreterie, commerciali e back-office con Agenti AI che lavorano 24/7 senza mai fermarsi — chiudono più lavori, tagliano i costi fissi e portano a casa margini che prima non vedevano.
+                Licenzia i Costi. Assumi l'AI. Fai Esplodere la tua Azienda Edile.
               </p>
               <p>
                 Edilizia.io è l'unica azienda che entra nella tua impresa, individua le figure che ti costano senza renderti, e le sostituisce con Agenti AI specializzati per il settore edile.
