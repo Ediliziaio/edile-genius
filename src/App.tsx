@@ -163,6 +163,7 @@ const App = () => (
             <Route path="/offerta/render-ai" element={<SafeRoute><OffertaRenderAI /></SafeRoute>} />
             <Route path="/offerta/preventivatore-ai" element={<SafeRoute><OffertaPreventivatoreAI /></SafeRoute>} />
             <Route path="/offerta/pacchetto-completo" element={<SafeRoute><OffertaPacchettoCompleto /></SafeRoute>} />
+            <Route path="/offerta-unica" element={<SafeRoute><OffertaUnica /></SafeRoute>} />
 
             {/* SuperAdmin routes */}
             <Route element={<AuthGuard requiredRole="superadmin" />}>
