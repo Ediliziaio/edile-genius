@@ -13,10 +13,20 @@ import CounterStat from "@/components/custom/CounterStat";
 import {
   AnimatedSection, OfferHeader, OfferBadge, OfferGuarantee, OfferCTABanner,
   LogoBarMini, PricingCard, SectionDivider, HeroBlob, DotPattern,
+  OfferSectionNav, SetupFreeBanner,
   useCountdown, useNoIndex, staggerContainer, staggerItem, StarRating,
 } from "@/components/offerta/shared";
 
 const scrollToCta = () => document.getElementById("cta-finale")?.scrollIntoView({ behavior: "smooth" });
+
+const navLinks = [
+  { label: "Before/After", href: "#before-after" },
+  { label: "Il Problema", href: "#problema" },
+  { label: "Come Funziona", href: "#come-funziona" },
+  { label: "Caso Studio", href: "#caso-studio" },
+  { label: "Prezzi", href: "#prezzi" },
+  { label: "FAQ", href: "#faq" },
+];
 
 const beforeAfterPairs = [
   { before: "Foto finestra vecchia in alluminio", after: "Render fotorealistico con infisso nuovo in PVC effetto legno, tapparella, davanzale", caption: "Render infisso PVC effetto rovere — generato in 8 secondi" },
@@ -25,10 +35,10 @@ const beforeAfterPairs = [
 ];
 
 const plans = [
-  { name: "Starter", price: "€67", period: "/mese", setup: "€97 una tantum", extra: "Extra render: €2,50 cad.", features: ["30 render/mese", "Render infissi e stanze", "Galleria render salvati", "Esportazione PDF", "Supporto email"] },
+  { name: "Starter", price: "€67", period: "/mese", setup: "€197 una tantum", extra: "Extra render: €2,50 cad.", features: ["30 render/mese", "Render infissi e stanze", "Galleria render salvati", "Esportazione PDF", "Supporto email"] },
   { name: "Professional", price: "€127", period: "/mese", setup: "€197 una tantum", extra: "Extra render: €2,00 cad.", badge: "⭐ Più scelto", features: ["80 render/mese", "Render infissi, stanze ed esterni", "Galleria con condivisione cliente", "PDF brandizzato per preventivi", "Before/After automatico", "Supporto prioritario"], highlighted: true },
-  { name: "Business", price: "€247", period: "/mese", setup: "€297 una tantum", extra: "Extra render: €1,80 cad.", features: ["200 render/mese", "Tutti i tipi di render", "Alta risoluzione (1536px)", "Galleria condivisa team", "Integrazione preventivatore", "Ottimizzazione stili mensile", "5 utenti"] },
-  { name: "Unlimited", price: "€447", period: "/mese", setup: "€397 una tantum", extra: "Extra render: €1,50 cad.", features: ["500 render/mese", "Tutto Business +", "Render prioritari (coda dedicata)", "Stili custom per brand", "10 utenti", "Account Manager"] },
+  { name: "Business", price: "€247", period: "/mese", setup: "€197 una tantum", extra: "Extra render: €1,80 cad.", features: ["200 render/mese", "Tutti i tipi di render", "Alta risoluzione (1536px)", "Galleria condivisa team", "Integrazione preventivatore", "Ottimizzazione stili mensile", "5 utenti"] },
+  { name: "Unlimited", price: "€447", period: "/mese", setup: "€197 una tantum", extra: "Extra render: €1,50 cad.", features: ["500 render/mese", "Tutto Business +", "Render prioritari (coda dedicata)", "Stili custom per brand", "10 utenti", "Account Manager"] },
 ];
 
 const faqs = [
@@ -47,6 +57,7 @@ export default function OffertaRenderAI() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <OfferHeader ctaText="Attiva Render AI" onCtaClick={scrollToCta} />
+      <OfferSectionNav links={navLinks} />
 
       {/* ===== HERO ===== */}
       <AnimatedSection className="relative py-20 md:py-28 overflow-hidden" stagger>
@@ -66,6 +77,10 @@ export default function OffertaRenderAI() {
           <motion.p variants={staggerItem} className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
             Render fotorealistici di infissi, bagni, facciate e stanze complete. In 10 secondi. Senza renderista, senza software 3D, senza aspettare 2 settimane.
           </motion.p>
+
+          <motion.div variants={staggerItem} className="mt-6">
+            <SetupFreeBanner setupCost="€197" expired={countdown.expired} />
+          </motion.div>
 
           <motion.div variants={staggerItem} className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-8">
             {[
@@ -94,7 +109,7 @@ export default function OffertaRenderAI() {
       <LogoBarMini />
 
       {/* ===== BEFORE/AFTER ===== */}
-      <AnimatedSection className="py-20 md:py-28 bg-muted/40">
+      <AnimatedSection id="before-after" className="py-20 md:py-28 bg-muted/40">
         <div className="container mx-auto px-4">
           <h2 className="text-center text-2xl font-bold font-display md:text-4xl">Da una foto del cantiere al render del risultato finale</h2>
 
@@ -136,7 +151,7 @@ export default function OffertaRenderAI() {
       </AnimatedSection>
 
       {/* ===== IL PROBLEMA ===== */}
-      <AnimatedSection className="py-20 md:py-28" stagger>
+      <AnimatedSection id="problema" className="py-20 md:py-28" stagger>
         <div className="container mx-auto px-4">
           <motion.h2 variants={staggerItem} className="text-center text-2xl font-bold font-display md:text-4xl">
             Il tuo cliente non compra quello che non può immaginare
@@ -172,14 +187,13 @@ export default function OffertaRenderAI() {
       <SectionDivider />
 
       {/* ===== COME FUNZIONA ===== */}
-      <AnimatedSection className="py-20 md:py-28 bg-muted/40" stagger>
+      <AnimatedSection id="come-funziona" className="py-20 md:py-28 bg-muted/40" stagger>
         <div className="container mx-auto px-4">
           <motion.h2 variants={staggerItem} className="text-center text-2xl font-bold font-display md:text-4xl">
             3 click. 10 secondi. Un render che chiude la vendita.
           </motion.h2>
 
           <div className="mt-12 grid gap-8 md:grid-cols-3 relative">
-            {/* Connecting line */}
             <div className="hidden md:block absolute top-8 left-[16.66%] right-[16.66%] h-0.5 bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20" />
             {[
               { icon: Camera, step: "1", title: "SCATTA", text: "Scatta una foto dell'ambiente attuale con lo smartphone. La finestra da sostituire, il bagno da ristrutturare, la facciata da rifare." },
@@ -200,7 +214,7 @@ export default function OffertaRenderAI() {
       </AnimatedSection>
 
       {/* ===== CASO STUDIO ===== */}
-      <AnimatedSection className="py-20 md:py-28">
+      <AnimatedSection id="caso-studio" className="py-20 md:py-28">
         <div className="container mx-auto px-4">
           <h2 className="text-center text-2xl font-bold font-display md:text-4xl">"Da quando uso i render, chiudo il 35% in più."</h2>
 
@@ -235,13 +249,17 @@ export default function OffertaRenderAI() {
       <SectionDivider />
 
       {/* ===== PRICING ===== */}
-      <AnimatedSection className="py-20 md:py-28 bg-muted/40">
+      <AnimatedSection id="prezzi" className="py-20 md:py-28 bg-muted/40">
         <div className="container mx-auto px-4">
           <h2 className="text-center text-2xl font-bold font-display md:text-4xl">Meno di un caffè a render. Più vendite a fine mese.</h2>
 
+          <div className="mx-auto mt-6 max-w-xl">
+            <SetupFreeBanner setupCost="€197" expired={countdown.expired} />
+          </div>
+
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {plans.map((plan) => (
-              <PricingCard key={plan.name} {...plan} onCta={scrollToCta} />
+              <PricingCard key={plan.name} {...plan} setupFree={!countdown.expired} onCta={scrollToCta} />
             ))}
           </div>
 
@@ -254,7 +272,7 @@ export default function OffertaRenderAI() {
       </AnimatedSection>
 
       {/* ===== FAQ ===== */}
-      <AnimatedSection className="py-20 md:py-28">
+      <AnimatedSection id="faq" className="py-20 md:py-28">
         <div className="container mx-auto max-w-3xl px-4">
           <h2 className="text-center text-2xl font-bold font-display md:text-4xl">Domande frequenti</h2>
           <Accordion type="single" collapsible className="mt-10">

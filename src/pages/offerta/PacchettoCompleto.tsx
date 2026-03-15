@@ -1,27 +1,36 @@
 import { usePageSEO } from "@/hooks/usePageSEO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
 import { motion } from "framer-motion";
 import {
   Phone, Camera, HardHat, BarChart3, CheckCircle2, ArrowRight,
-  ArrowDown, XCircle, Shield, Star,
+  ArrowDown, XCircle, Shield,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import Footer from "@/components/sections/Footer";
 import CounterStat from "@/components/custom/CounterStat";
 import {
-  AnimatedSection, OfferHeader, OfferBadge, OfferGuarantee, OfferCTABanner,
+  AnimatedSection, OfferHeader, OfferBadge, OfferCTABanner,
   OfferCountdown, LogoBarMini, PricingCard, SectionDivider, HeroBlob, DotPattern,
+  OfferSectionNav, SetupFreeBanner,
   useCountdown, useNoIndex, staggerContainer, staggerItem, StarRating,
 } from "@/components/offerta/shared";
 
 const WA_LINK = "https://wa.me/3901onal?text=Ciao%2C%20sono%20interessato%20al%20pacchetto%20completo%20Edil%20Genius.%20Vorrei%20maggiori%20informazioni.";
 
 const scrollToPricing = () => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
+
+const navLinks = [
+  { label: "Confronto", href: "#confronto" },
+  { label: "Integrazione", href: "#integrazione" },
+  { label: "Pacchetti", href: "#pricing" },
+  { label: "Testimonianze", href: "#testimonianze" },
+  { label: "FAQ", href: "#faq" },
+  { label: "Garanzia", href: "#garanzia" },
+];
 
 const singleModules = [
   { name: "Agente Vocale Professional", price: "€297" },
@@ -102,6 +111,7 @@ export default function PacchettoCompleto() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <OfferHeader ctaText="Scopri i Pacchetti" onCtaClick={scrollToPricing} />
+      <OfferSectionNav links={navLinks} />
 
       {/* ══════ HERO ══════ */}
       <AnimatedSection className="relative py-20 md:py-28 overflow-hidden" stagger>
@@ -119,6 +129,10 @@ export default function PacchettoCompleto() {
             Agente Vocale + Render AI + Preventivatore + Rapportini + WhatsApp AI + CRM.
             Tutto in un'unica piattaforma. Un unico prezzo. E risparmi fino al 40% rispetto ai singoli moduli.
           </motion.p>
+
+          <motion.div variants={staggerItem} className="mt-6 max-w-xl mx-auto">
+            <SetupFreeBanner setupCost="€497–€1.497" expired={countdown.expired} />
+          </motion.div>
 
           <motion.div variants={staggerItem} className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto mt-8">
             {[
@@ -149,11 +163,10 @@ export default function PacchettoCompleto() {
       <LogoBarMini />
 
       {/* ══════ CONFRONTO KILLER ══════ */}
-      <AnimatedSection className="py-20 md:py-28 bg-muted/30">
+      <AnimatedSection id="confronto" className="py-20 md:py-28 bg-muted/30">
         <div className="max-w-4xl mx-auto px-4 space-y-8">
           <h2 className="text-2xl md:text-4xl font-bold font-display text-center">Quanto spendi comprando tutto separatamente?</h2>
 
-          {/* Singoli - rosso */}
           <Card className="border-2 border-destructive/40 bg-destructive/5 shadow-lg">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2 font-display">
@@ -188,7 +201,6 @@ export default function PacchettoCompleto() {
             </motion.div>
           </div>
 
-          {/* Pacchetto - verde */}
           <Card className="border-2 border-primary/40 bg-primary/5 ring-2 ring-primary/20 shadow-xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2 font-display">
@@ -208,7 +220,7 @@ export default function PacchettoCompleto() {
                 <span className="text-primary">€497/mese</span>
               </div>
               <div className="text-sm text-muted-foreground space-y-1 pt-2">
-                <p>+ 1 solo setup = <strong>€997 una tantum</strong></p>
+                <p>+ 1 solo setup = <strong className="line-through">€997 una tantum</strong> {!countdown.expired && <span className="text-primary font-bold">→ GRATIS</span>}</p>
                 <p>+ TUTTO integrato in un'unica piattaforma</p>
                 <p>+ Il render si allega al preventivo con 1 click</p>
                 <p>+ L'agente vocale alimenta il CRM in automatico</p>
@@ -230,7 +242,7 @@ export default function PacchettoCompleto() {
       </AnimatedSection>
 
       {/* ══════ WORKFLOW INTEGRAZIONE ══════ */}
-      <AnimatedSection className="py-20 md:py-28" stagger>
+      <AnimatedSection id="integrazione" className="py-20 md:py-28" stagger>
         <div className="max-w-4xl mx-auto px-4 space-y-10">
           <motion.div variants={staggerItem} className="text-center space-y-2">
             <h2 className="text-2xl md:text-4xl font-bold font-display">
@@ -240,12 +252,10 @@ export default function PacchettoCompleto() {
           </motion.div>
 
           <div className="relative">
-            {/* Timeline line */}
             <div className="hidden md:block absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/40 via-primary/20 to-primary/40" />
 
             {workflows.map((w, i) => (
               <motion.div key={i} variants={staggerItem} className="relative mb-8 last:mb-0">
-                {/* Timeline dot */}
                 <div className="hidden md:flex absolute left-0 top-6 w-12 h-12 rounded-full bg-primary/10 border-2 border-primary/30 items-center justify-center z-10">
                   <span className="text-sm font-bold text-primary">{i + 1}</span>
                 </div>
@@ -289,9 +299,13 @@ export default function PacchettoCompleto() {
         <div className="max-w-5xl mx-auto px-4 space-y-10">
           <h2 className="text-2xl md:text-4xl font-bold font-display text-center">Scegli il pacchetto che fa crescere la tua impresa</h2>
 
+          <div className="mx-auto max-w-xl">
+            <SetupFreeBanner setupCost="€497–€1.497" expired={countdown.expired} />
+          </div>
+
           <div className="grid md:grid-cols-3 gap-6">
             {plans.map((plan) => (
-              <PricingCard key={plan.name} {...plan} onCta={() => window.open(WA_LINK, "_blank")} />
+              <PricingCard key={plan.name} {...plan} setupFree={!countdown.expired} onCta={() => window.open(WA_LINK, "_blank")} />
             ))}
           </div>
 
@@ -307,7 +321,7 @@ export default function PacchettoCompleto() {
       </AnimatedSection>
 
       {/* ══════ TESTIMONIAL ══════ */}
-      <AnimatedSection className="py-20 md:py-28" stagger>
+      <AnimatedSection id="testimonianze" className="py-20 md:py-28" stagger>
         <div className="max-w-5xl mx-auto px-4 space-y-8">
           <motion.h2 variants={staggerItem} className="text-2xl md:text-4xl font-bold font-display text-center">
             Chi ha scelto il pacchetto completo non torna più indietro
@@ -337,7 +351,7 @@ export default function PacchettoCompleto() {
       <SectionDivider />
 
       {/* ══════ FAQ ══════ */}
-      <AnimatedSection className="py-20 md:py-28 bg-muted/30">
+      <AnimatedSection id="faq" className="py-20 md:py-28 bg-muted/30">
         <div className="max-w-3xl mx-auto px-4 space-y-8">
           <h2 className="text-2xl md:text-4xl font-bold font-display text-center">Domande Frequenti</h2>
           <Accordion type="single" collapsible className="w-full">
@@ -352,7 +366,7 @@ export default function PacchettoCompleto() {
       </AnimatedSection>
 
       {/* ══════ GARANZIA DOPPIA ══════ */}
-      <AnimatedSection className="py-20 md:py-28">
+      <AnimatedSection id="garanzia" className="py-20 md:py-28">
         <div className="max-w-3xl mx-auto px-4">
           <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-8 shadow-[0_0_40px_-10px_hsl(var(--primary)/0.15)]">
             <div className="text-center">
