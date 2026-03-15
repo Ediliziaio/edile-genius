@@ -37,6 +37,7 @@ const OffertaAgenteVocale = lazy(() => import("./pages/offerta/AgentiVocale"));
 const OffertaRenderAI = lazy(() => import("./pages/offerta/RenderAI"));
 const OffertaPreventivatoreAI = lazy(() => import("./pages/offerta/PreventivatoreAI"));
 const OffertaPacchettoCompleto = lazy(() => import("./pages/offerta/PacchettoCompleto"));
+const OffertaUnica = lazy(() => import("./pages/OffertaUnica"));
 
 // Lazy-loaded SuperAdmin pages
 const SuperAdminDashboard = lazy(() => import("./pages/superadmin/Dashboard"));
@@ -162,6 +163,7 @@ const App = () => (
             <Route path="/offerta/render-ai" element={<SafeRoute><OffertaRenderAI /></SafeRoute>} />
             <Route path="/offerta/preventivatore-ai" element={<SafeRoute><OffertaPreventivatoreAI /></SafeRoute>} />
             <Route path="/offerta/pacchetto-completo" element={<SafeRoute><OffertaPacchettoCompleto /></SafeRoute>} />
+            <Route path="/offerta-unica" element={<SafeRoute><OffertaUnica /></SafeRoute>} />
 
             {/* SuperAdmin routes */}
             <Route element={<AuthGuard requiredRole="superadmin" />}>
