@@ -26,7 +26,12 @@ const Hero = () => {
             </motion.div>
 
             <motion.h1 variants={item} className="font-display text-[22px] sm:text-[28px] md:text-[40px] font-extrabold leading-[1.15] text-neutral-900">
-              Le imprese edili più avanzate hanno già <span className="text-primary">integrato l'AI</span> nella loro struttura. Hanno eliminato i costi fissi. Sostituito le figure improduttive. I margini e guadagni sono cresciuti.
+              Le imprese edili più avanzate hanno già{" "}
+              <span className="text-primary">integrato l'AI</span>{" "}
+              nella loro struttura. Hanno{" "}
+              <span className="text-primary">eliminato i costi fissi</span>.{" "}
+              Sostituito le figure improduttive.{" "}
+              I <span className="text-primary">margini e guadagni sono cresciuti</span>.
             </motion.h1>
 
             <motion.div variants={item} className="space-y-4 text-base sm:text-lg text-neutral-500 max-w-[540px] leading-relaxed">
