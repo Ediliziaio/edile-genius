@@ -317,11 +317,85 @@ export function LogoBarMini() {
   );
 }
 
-/* ── PricingCard ── */
+/* ── OfferSectionNav ── */
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Gift } from "lucide-react";
 
+interface NavLink { label: string; href: string }
+
+export function OfferSectionNav({ links }: { links: NavLink[] }) {
+  const [active, setActive] = useState("");
+
+  useEffect(() => {
+    const ids = links.map((l) => l.href.replace("#", ""));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive(e.target.id);
+        });
+      },
+      { rootMargin: "-120px 0px -60% 0px", threshold: 0 }
+    );
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [links]);
+
+  return (
+    <nav className="sticky top-16 z-40 border-b border-border/50 bg-background/90 backdrop-blur-md">
+      <div className="container mx-auto px-4 overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-1 py-2 min-w-max">
+          {links.map((link) => {
+            const isActive = active === link.href.replace("#", "");
+            return (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.querySelector(link.href)?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+              >
+                {link.label}
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+/* ── SetupFreeBanner ── */
+interface SetupFreeBannerProps {
+  setupCost: string;
+  expired: boolean;
+}
+
+export function SetupFreeBanner({ setupCost, expired }: SetupFreeBannerProps) {
+  if (expired) return null;
+  return (
+    <div className="bg-primary/10 border border-primary/30 rounded-xl p-4 text-center shadow-[0_0_20px_-8px_hsl(var(--primary)/0.2)]">
+      <div className="flex items-center justify-center gap-2">
+        <Gift className="h-5 w-5 text-primary" />
+        <p className="text-sm font-bold">
+          🎁 Setup <span className="line-through text-muted-foreground">{setupCost}</span>{" "}
+          <span className="text-primary text-lg">GRATIS</span> — se attivi entro 7 giorni!
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ── PricingCard ── */
 interface PricingCardProps {
   name: string;
   price: string;
@@ -334,10 +408,11 @@ interface PricingCardProps {
   target?: string;
   saving?: string;
   ctaText?: string;
+  setupFree?: boolean;
   onCta: () => void;
 }
 
-export function PricingCard({ name, price, period, setup, features, highlighted, badge, extra, target, saving, ctaText, onCta }: PricingCardProps) {
+export function PricingCard({ name, price, period, setup, features, highlighted, badge, extra, target, saving, ctaText, setupFree, onCta }: PricingCardProps) {
   return (
     <Card
       className={`relative flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${
@@ -358,7 +433,14 @@ export function PricingCard({ name, price, period, setup, features, highlighted,
           <span className="text-4xl font-extrabold">{price}</span>
           <span className="text-muted-foreground">{period}</span>
         </div>
-        <p className="text-xs text-muted-foreground">Setup: {setup}</p>
+        {setupFree ? (
+          <div className="flex items-center justify-center gap-2 mt-1">
+            <p className="text-xs text-muted-foreground line-through">Setup: {setup}</p>
+            <Badge className="bg-primary text-primary-foreground text-[10px] px-2 py-0.5 shadow-sm">GRATIS</Badge>
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground">Setup: {setup}</p>
+        )}
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-4">
         <ul className="flex-1 space-y-2.5 text-sm">

@@ -10,17 +10,28 @@ import {
 import { motion } from "framer-motion";
 import {
   Zap, Target, FileText, CheckCircle2, XCircle, ArrowRight, Calculator,
-  BarChart3, RefreshCw, Landmark, Send, Settings2, Search, Shield,
+  BarChart3, RefreshCw, Landmark, Send, Settings2, Search,
 } from "lucide-react";
 import Footer from "@/components/sections/Footer";
 import CounterStat from "@/components/custom/CounterStat";
 import {
   AnimatedSection, OfferHeader, OfferBadge, OfferGuarantee, OfferCTABanner,
   LogoBarMini, PricingCard, SectionDivider, HeroBlob, DotPattern,
+  OfferSectionNav, SetupFreeBanner,
   useCountdown, useNoIndex, staggerContainer, staggerItem, StarRating,
 } from "@/components/offerta/shared";
 
 const scrollToCta = () => document.getElementById("cta-finale")?.scrollIntoView({ behavior: "smooth" });
+
+const navLinks = [
+  { label: "Il Problema", href: "#problema" },
+  { label: "Soluzione", href: "#soluzione" },
+  { label: "Come Funziona", href: "#come-funziona" },
+  { label: "Confronto", href: "#confronto" },
+  { label: "Caso Studio", href: "#caso-studio" },
+  { label: "Prezzi", href: "#prezzi" },
+  { label: "FAQ", href: "#faq" },
+];
 
 const features = [
   { icon: Zap, title: "Calcolo Istantaneo", text: "Seleziona prodotto, misure, varianti → preventivo calcolato in automatico con prezzi aggiornati, ricariche e sconti personalizzati." },
@@ -32,10 +43,10 @@ const features = [
 ];
 
 const plans = [
-  { name: "Starter", price: "€47", period: "/mese", setup: "€97 una tantum", extra: "Extra: €0,80/preventivo", features: ["50 preventivi/mese", "Calcolo varianti automatico", "IVA e detrazioni AI", "PDF base con logo", "1 utente"] },
-  { name: "Professional", price: "€97", period: "/mese", setup: "€197 una tantum", extra: "Extra: €0,60/preventivo", badge: "⭐ Più scelto", features: ["150 preventivi/mese", "Tutto Starter +", "PDF professionale personalizzabile", "Varianti e alternative con 1 click", "Analytics base", "3 utenti"], highlighted: true },
+  { name: "Starter", price: "€47", period: "/mese", setup: "€297 una tantum", extra: "Extra: €0,80/preventivo", features: ["50 preventivi/mese", "Calcolo varianti automatico", "IVA e detrazioni AI", "PDF base con logo", "1 utente"] },
+  { name: "Professional", price: "€97", period: "/mese", setup: "€297 una tantum", extra: "Extra: €0,60/preventivo", badge: "⭐ Più scelto", features: ["150 preventivi/mese", "Tutto Starter +", "PDF professionale personalizzabile", "Varianti e alternative con 1 click", "Analytics base", "3 utenti"], highlighted: true },
   { name: "Business", price: "€197", period: "/mese", setup: "€297 una tantum", extra: "Extra: €0,50/preventivo", features: ["400 preventivi/mese", "Tutto Professional +", "Dashboard analytics completa", "Integrazione Render AI", "Gestione multi-fornitore", "5 utenti"] },
-  { name: "Unlimited", price: "€347", period: "/mese", setup: "€397 una tantum", extra: "Extra: €0,40/preventivo", features: ["1.000 preventivi/mese", "Tutto Business +", "Utenti illimitati", "Listini multi-brand", "Report marginalità avanzato", "Supporto dedicato"] },
+  { name: "Unlimited", price: "€347", period: "/mese", setup: "€297 una tantum", extra: "Extra: €0,40/preventivo", features: ["1.000 preventivi/mese", "Tutto Business +", "Utenti illimitati", "Listini multi-brand", "Report marginalità avanzato", "Supporto dedicato"] },
 ];
 
 const faqs = [
@@ -64,6 +75,7 @@ export default function OffertaPreventivatoreAI() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <OfferHeader ctaText="Attiva il Preventivatore AI" onCtaClick={scrollToCta} />
+      <OfferSectionNav links={navLinks} />
 
       {/* ===== HERO ===== */}
       <AnimatedSection className="relative py-20 md:py-28 overflow-hidden" stagger>
@@ -81,6 +93,10 @@ export default function OffertaPreventivatoreAI() {
           <motion.p variants={staggerItem} className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
             Preventivi professionali con calcolo automatico di varianti, detrazioni fiscali, IVA agevolata e PDF brandizzato con il tuo logo. Il cliente riceve un documento perfetto — tu risparmi mezza giornata.
           </motion.p>
+
+          <motion.div variants={staggerItem} className="mt-6">
+            <SetupFreeBanner setupCost="€297" expired={countdown.expired} />
+          </motion.div>
 
           <motion.div variants={staggerItem} className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-8">
             {[
@@ -107,7 +123,7 @@ export default function OffertaPreventivatoreAI() {
       <LogoBarMini />
 
       {/* ===== IL PROBLEMA ===== */}
-      <AnimatedSection className="py-20 md:py-28 bg-muted/40">
+      <AnimatedSection id="problema" className="py-20 md:py-28 bg-muted/40">
         <div className="container mx-auto px-4">
           <h2 className="text-center text-2xl font-bold font-display md:text-4xl">Quante ore butti via ogni settimana in preventivi?</h2>
           <div className="mx-auto mt-12 max-w-3xl space-y-6 text-base leading-relaxed text-muted-foreground">
@@ -129,7 +145,7 @@ export default function OffertaPreventivatoreAI() {
       </AnimatedSection>
 
       {/* ===== LA SOLUZIONE ===== */}
-      <AnimatedSection className="py-20 md:py-28" stagger>
+      <AnimatedSection id="soluzione" className="py-20 md:py-28" stagger>
         <div className="container mx-auto px-4">
           <motion.h2 variants={staggerItem} className="text-center text-2xl font-bold font-display md:text-4xl">
             Il Preventivatore AI che lavora come il tuo miglior commerciale
@@ -153,7 +169,7 @@ export default function OffertaPreventivatoreAI() {
       <SectionDivider />
 
       {/* ===== COME FUNZIONA ===== */}
-      <AnimatedSection className="py-20 md:py-28 bg-muted/40" stagger>
+      <AnimatedSection id="come-funziona" className="py-20 md:py-28 bg-muted/40" stagger>
         <div className="container mx-auto px-4">
           <motion.h2 variants={staggerItem} className="text-center text-2xl font-bold font-display md:text-4xl">Da richiesta a preventivo inviato: 30 secondi.</motion.h2>
           <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 relative">
@@ -178,7 +194,7 @@ export default function OffertaPreventivatoreAI() {
       </AnimatedSection>
 
       {/* ===== CONFRONTO MERCATO ===== */}
-      <AnimatedSection className="py-20 md:py-28">
+      <AnimatedSection id="confronto" className="py-20 md:py-28">
         <div className="container mx-auto px-4">
           <h2 className="text-center text-2xl font-bold font-display md:text-4xl">Quanto paghi oggi per fare preventivi?</h2>
           <div className="mx-auto mt-12 max-w-4xl overflow-hidden rounded-xl border shadow-lg">
@@ -209,7 +225,7 @@ export default function OffertaPreventivatoreAI() {
       <SectionDivider />
 
       {/* ===== CASO STUDIO ===== */}
-      <AnimatedSection className="py-20 md:py-28 bg-muted/40">
+      <AnimatedSection id="caso-studio" className="py-20 md:py-28 bg-muted/40">
         <div className="container mx-auto px-4">
           <h2 className="text-center text-2xl font-bold font-display md:text-4xl">"Prima facevamo 15 preventivi a settimana. Adesso 15 al giorno."</h2>
           <Card className="mx-auto mt-12 max-w-3xl shadow-lg">
@@ -237,14 +253,20 @@ export default function OffertaPreventivatoreAI() {
       </AnimatedSection>
 
       {/* ===== PRICING ===== */}
-      <AnimatedSection className="py-20 md:py-28">
+      <AnimatedSection id="prezzi" className="py-20 md:py-28">
         <div className="container mx-auto px-4">
           <h2 className="text-center text-2xl font-bold font-display md:text-4xl">Quanto costa fare preventivi perfetti?</h2>
+
+          <div className="mx-auto mt-6 max-w-xl">
+            <SetupFreeBanner setupCost="€297" expired={countdown.expired} />
+          </div>
+
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {plans.map((plan) => (
               <PricingCard
                 key={plan.name}
                 {...plan}
+                setupFree={!countdown.expired}
                 onCta={() => window.open(`https://wa.me/3900000000?text=${encodeURIComponent(`Ciao, vorrei attivare il piano ${plan.name} del Preventivatore AI di Edilizia.io`)}`, "_blank")}
               />
             ))}
@@ -258,7 +280,7 @@ export default function OffertaPreventivatoreAI() {
       <SectionDivider />
 
       {/* ===== FAQ ===== */}
-      <AnimatedSection className="py-20 md:py-28 bg-muted/40">
+      <AnimatedSection id="faq" className="py-20 md:py-28 bg-muted/40">
         <div className="container mx-auto px-4">
           <h2 className="text-center text-2xl font-bold font-display md:text-4xl mb-12">Domande frequenti</h2>
           <Accordion type="single" collapsible className="mx-auto max-w-3xl">

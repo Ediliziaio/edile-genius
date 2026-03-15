@@ -13,27 +13,37 @@ import CounterStat from "@/components/custom/CounterStat";
 import {
   AnimatedSection, OfferHeader, OfferBadge, OfferGuarantee, OfferCTABanner,
   OfferCountdown, LogoBarMini, PricingCard, SectionDivider, HeroBlob, DotPattern,
+  OfferSectionNav, SetupFreeBanner,
   useCountdown, useNoIndex, staggerContainer, staggerItem,
 } from "@/components/offerta/shared";
 
 const scrollToCta = () => document.getElementById("cta-finale")?.scrollIntoView({ behavior: "smooth" });
 
+const navLinks = [
+  { label: "Soluzione", href: "#soluzione" },
+  { label: "Come Funziona", href: "#come-funziona" },
+  { label: "Caso Studio", href: "#caso-studio" },
+  { label: "Prezzi", href: "#prezzi" },
+  { label: "FAQ", href: "#faq" },
+  { label: "Garanzia", href: "#garanzia" },
+];
+
 const plans = [
   {
-    name: "Starter", price: "€147", period: "/mese", setup: "€197 una tantum",
+    name: "Starter", price: "€147", period: "/mese", setup: "€997 una tantum",
     features: ["200 minuti/mese", "1 agente vocale", "Integrazione calendario", "Trascrizioni chiamate", "Report base", "Supporto email"],
   },
   {
-    name: "Professional", price: "€297", period: "/mese", setup: "€397 una tantum", badge: "⭐ Più scelto",
+    name: "Professional", price: "€297", period: "/mese", setup: "€997 una tantum", badge: "⭐ Più scelto",
     features: ["500 minuti/mese", "1 agente vocale", "Integrazione CRM + calendario", "Qualificazione lead con scoring", "WhatsApp conferma automatica", "Report settimanale AI", "Supporto prioritario"],
     highlighted: true,
   },
   {
-    name: "Business", price: "€497", period: "/mese", setup: "€697 una tantum",
+    name: "Business", price: "€497", period: "/mese", setup: "€997 una tantum",
     features: ["1.000 minuti/mese", "2 agenti vocali (inbound + outbound)", "Integrazione completa CRM", "Lead scoring avanzato", "Recall automatico lead freddi", "Dashboard KPI real-time", "Ottimizzazione script mensile", "Supporto WhatsApp diretto"],
   },
   {
-    name: "Enterprise", price: "da €997", period: "/mese", setup: "Su misura",
+    name: "Enterprise", price: "da €997", period: "/mese", setup: "€997 una tantum",
     features: ["2.500+ minuti/mese", "Agenti illimitati", "Voice Cloning personalizzato", "Multi-sede", "Integrazioni custom", "Account Manager dedicato", "SLA garantito"],
   },
 ];
@@ -66,6 +76,7 @@ export default function OffertaAgenteVocale() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <OfferHeader ctaText="Attiva il Tuo Agente Vocale" onCtaClick={scrollToCta} />
+      <OfferSectionNav links={navLinks} />
 
       {/* ===== HERO ===== */}
       <AnimatedSection className="relative py-20 md:py-28 overflow-hidden" stagger>
@@ -85,6 +96,10 @@ export default function OffertaAgenteVocale() {
           <motion.p variants={staggerItem} className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
             Il tuo Agente Vocale AI risponde al telefono, qualifica i lead e fissa appuntamenti — 24 ore su 24, 7 giorni su 7. Per meno della metà del costo di un dipendente part-time.
           </motion.p>
+
+          <motion.div variants={staggerItem} className="mt-6">
+            <SetupFreeBanner setupCost="€997" expired={countdown.expired} />
+          </motion.div>
 
           <motion.div variants={staggerItem} className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-8">
             {[
@@ -113,7 +128,7 @@ export default function OffertaAgenteVocale() {
       <LogoBarMini />
 
       {/* ===== IL PROBLEMA ===== */}
-      <AnimatedSection className="py-20 md:py-28 bg-muted/40" stagger>
+      <AnimatedSection id="soluzione" className="py-20 md:py-28 bg-muted/40" stagger>
         <div className="container mx-auto px-4">
           <motion.h2 variants={staggerItem} className="text-center text-2xl font-bold font-display md:text-4xl">
             Quanti clienti stai perdendo ogni giorno?
@@ -146,7 +161,7 @@ export default function OffertaAgenteVocale() {
       <SectionDivider />
 
       {/* ===== LA SOLUZIONE ===== */}
-      <AnimatedSection className="py-20 md:py-28">
+      <AnimatedSection id="come-funziona" className="py-20 md:py-28">
         <div className="container mx-auto px-4">
           <h2 className="text-center text-2xl font-bold font-display md:text-4xl">Ecco cosa fa il tuo Agente Vocale AI</h2>
 
@@ -180,7 +195,7 @@ export default function OffertaAgenteVocale() {
       <SectionDivider />
 
       {/* ===== CASO STUDIO ===== */}
-      <AnimatedSection className="py-20 md:py-28 bg-muted/40">
+      <AnimatedSection id="caso-studio" className="py-20 md:py-28 bg-muted/40">
         <div className="container mx-auto px-4">
           <h2 className="text-center text-2xl font-bold font-display md:text-4xl">
             Come un'impresa edile ha raddoppiato gli appuntamenti in 30 giorni
@@ -221,15 +236,20 @@ export default function OffertaAgenteVocale() {
       </AnimatedSection>
 
       {/* ===== PRICING ===== */}
-      <AnimatedSection className="py-20 md:py-28">
+      <AnimatedSection id="prezzi" className="py-20 md:py-28">
         <div className="container mx-auto px-4">
           <h2 className="text-center text-2xl font-bold font-display md:text-4xl">Scegli il pacchetto giusto per la tua azienda</h2>
+
+          <div className="mx-auto mt-6 max-w-xl">
+            <SetupFreeBanner setupCost="€997" expired={countdown.expired} />
+          </div>
 
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {plans.map((plan) => (
               <PricingCard
                 key={plan.name}
                 {...plan}
+                setupFree={!countdown.expired}
                 ctaText={plan.name === "Enterprise" ? "Contattaci" : undefined}
                 onCta={scrollToCta}
               />
@@ -246,7 +266,7 @@ export default function OffertaAgenteVocale() {
       <SectionDivider />
 
       {/* ===== FAQ ===== */}
-      <AnimatedSection className="py-20 md:py-28 bg-muted/40">
+      <AnimatedSection id="faq" className="py-20 md:py-28 bg-muted/40">
         <div className="container mx-auto max-w-3xl px-4">
           <h2 className="text-center text-2xl font-bold font-display md:text-4xl">Le domande che ci fanno tutti (prima di attivarlo)</h2>
           <Accordion type="single" collapsible className="mt-10">
@@ -261,7 +281,7 @@ export default function OffertaAgenteVocale() {
       </AnimatedSection>
 
       {/* ===== GARANZIA ===== */}
-      <AnimatedSection className="py-20 md:py-28">
+      <AnimatedSection id="garanzia" className="py-20 md:py-28">
         <div className="container mx-auto px-4">
           <OfferGuarantee title="Garanzia Soddisfatto o Rimborsato — 30 Giorni">
             <p>
