@@ -37,7 +37,7 @@ const differentiators = [
 const milestones = [
   { icon: Building2, phase: "Origine", title: "I-Profili S.r.l.", desc: "Azienda serramenti in Lombardia. Il laboratorio dove abbiamo testato ogni strumento su noi stessi.", highlight: false },
   { icon: TrendingUp, phase: "Fase 2", title: "Prima automazione interna", desc: "Ordini digitali, controllo margini, previsionale di cassa. Applicato prima su di noi, poi offerto ad altri.", highlight: false },
-  { icon: Target, phase: "Fase 3", title: "Marketing Edile", desc: "Agenzia marketing per il settore edile. Centinaia di imprenditori come clienti. Stessi problemi, ogni volta.", highlight: false },
+  { icon: Target, phase: "Fase 3", title: "Marketing Edile", desc: "Azienda marketing per il settore edile. Centinaia di imprenditori come clienti. Stessi problemi, ogni volta.", highlight: false },
   { icon: FlaskConical, phase: "Fase 4", title: "Agenti AI vocali", desc: "Prima integrazione di agenti vocali AI nel settore serramenti in Italia. Il nostro commerciale ha smesso di rispondere a chiamate inutili.", highlight: false },
   { icon: Rocket, phase: "Oggi", title: "Edilizia.io", desc: "Il sistema completo — testato, perfezionato, disponibile per ogni imprenditore del settore costruzioni.", highlight: true },
 ];
@@ -50,8 +50,8 @@ const values = [
 
 const ChiSiamo = () => {
   usePageSEO({
-    title: "Chi Siamo — La Prima Agenzia AI per l'Edilizia | Edilizia.io",
-    description: "Nati in cantiere, non in ufficio. Scopri il team dietro Edilizia.io: la prima agenzia AI specializzata per serramenti, fotovoltaico e ristrutturazioni in Italia.",
+    title: "Chi Siamo — La Prima Azienda AI per l'Edilizia | Edilizia.io",
+    description: "Nati in cantiere, non in ufficio. Scopri il team dietro Edilizia.io: la prima azienda AI specializzata per serramenti, fotovoltaico e ristrutturazioni in Italia.",
     canonical: "/chi-siamo",
   });
 
@@ -186,7 +186,7 @@ const ChiSiamo = () => {
             </motion.p>
 
             <motion.p variants={fadeUp}>
-              Poi abbiamo aperto Marketing Edile — un'agenzia per aziende del settore costruzioni. Centinaia di imprenditori come clienti. <span className="text-white font-semibold">Gli stessi problemi ripetuti ogni singola volta.</span>
+              Poi abbiamo aperto Marketing Edile — un'azienda per aziende del settore costruzioni. Centinaia di imprenditori come clienti. <span className="text-white font-semibold">Gli stessi problemi ripetuti ogni singola volta.</span>
             </motion.p>
 
             <motion.div variants={fadeUp} className="pt-4 border-t border-[hsl(var(--neutral-700))]">

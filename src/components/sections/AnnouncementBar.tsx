@@ -1,5 +1,5 @@
 const AnnouncementBar = () => {
-  const text = "🔥 La 1ª Agenzia di Licenziamento AI per l'Edilizia  •  Sostituisci dipendenti improduttivi con Agenti AI  •  -60% costi del personale garantito  •  Setup in 7 giorni  •  Garanzia rimborso 30 giorni  •  ";
+  const text = "🔥 La 1ª Azienda di Licenziamento AI per l'Edilizia  •  Sostituisci dipendenti improduttivi con Agenti AI  •  -60% costi del personale garantito  •  Setup in 7 giorni  •  Garanzia rimborso 30 giorni  •  ";
 
   return (
     <div className="bg-primary h-11 flex items-center overflow-hidden relative">

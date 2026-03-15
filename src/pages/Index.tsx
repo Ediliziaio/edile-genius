@@ -26,7 +26,7 @@ const Footer = lazy(() => import("@/components/sections/Footer"));
 const Index = () => {
   usePageSEO({
     title: "Edilizia.io — Agenti Vocali AI per il Settore Edile | Italia",
-    description: "La prima agenzia AI specializzata per serramenti, infissi, fotovoltaico e ristrutturazioni. Agenti Vocali AI 24/7, riduzione costi operativi -60%, setup in 7 giorni.",
+    description: "La prima azienda AI specializzata per serramenti, infissi, fotovoltaico e ristrutturazioni. Agenti Vocali AI 24/7, riduzione costi operativi -60%, setup in 7 giorni.",
     canonical: "/",
   });
 

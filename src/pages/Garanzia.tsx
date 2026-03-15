@@ -43,7 +43,7 @@ const faqs = [
   },
   {
     q: "\"E se il mio settore è diverso?\"",
-    a: "Lavoriamo esclusivamente con il settore edile: serramenti, infissi, fotovoltaico, ristrutturazioni, impianti. Non siamo un'agenzia generica che fa tutto per tutti. Ogni script, ogni flusso, ogni obiezione gestita è calibrata su come parla, pensa e decide il tuo cliente tipo.",
+    a: "Lavoriamo esclusivamente con il settore edile: serramenti, infissi, fotovoltaico, ristrutturazioni, impianti. Non siamo un'azienda generica che fa tutto per tutti. Ogni script, ogni flusso, ogni obiezione gestita è calibrata su come parla, pensa e decide il tuo cliente tipo.",
   },
   {
     q: "\"Non ho tempo per implementare qualcosa di nuovo.\"",
@@ -186,7 +186,7 @@ const Garanzia = () => {
               <p>
                 Questo significa una cosa sola: i risultati sono <em>prevedibili</em>.
                 Non è una scommessa. È un sistema che funziona quando è costruito da chi conosce
-                il tuo settore — non da un'agenzia generica che ieri faceva siti web e domani farà crypto.
+                il tuo settore — non da un'azienda generica che ieri faceva siti web e domani farà crypto.
               </p>
               <p className="font-semibold text-foreground text-lg md:text-xl">
                 Ecco perché la garanzia non è un rischio per noi. È una dichiarazione di certezza.

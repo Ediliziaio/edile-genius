@@ -6,7 +6,7 @@ const cards = [
   {
     icon: "🏗️",
     title: "Specializzati nel Sostituire Figure Edili",
-    text: "Non siamo un'agenzia AI generalista. Esistiamo esclusivamente per serramenti, infissi, fotovoltaico, ristrutturazioni e impianti. Sappiamo esattamente quali figure puoi sostituire, come farlo e quanto risparmierai. Questa specializzazione vale +30% di efficacia rispetto a soluzioni generiche.",
+    text: "Non siamo un'azienda AI generalista. Esistiamo esclusivamente per serramenti, infissi, fotovoltaico, ristrutturazioni e impianti. Sappiamo esattamente quali figure puoi sostituire, come farlo e quanto risparmierai. Questa specializzazione vale +30% di efficacia rispetto a soluzioni generiche.",
   },
   {
     icon: "🎙️",
@@ -40,7 +40,7 @@ const WhyUs = forwardRef<HTMLElement>(function WhyUs(_, _ref) {
         <div className="text-center mb-12 space-y-4">
           <AnimatedBadge variant="verde">IL NOSTRO VANTAGGIO</AnimatedBadge>
           <h2 className="font-display text-[32px] md:text-5xl font-extrabold text-neutral-900 leading-tight">
-            L'Agenzia che{" "}
+            L'Azienda che{" "}
             <span className="text-primary">Licenzia<br />i Tuoi Costi.</span>{" "}
             Non per Tutti.
           </h2>

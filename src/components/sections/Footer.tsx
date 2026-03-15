@@ -37,7 +37,7 @@ const Footer = () => {
               edilizia<span className="text-primary">.io</span>
             </span>
             <p className="text-sm text-neutral-500 leading-relaxed">
-              La prima agenzia AI specializzata esclusivamente per il settore edile italiano.
+              La prima azienda AI specializzata esclusivamente per il settore edile italiano.
             </p>
             <p className="font-mono text-[11px] text-neutral-600">
               © 2025 Edilizia.io — P.IVA [da inserire]
