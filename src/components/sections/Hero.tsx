@@ -31,9 +31,6 @@ const Hero = () => {
 
             <motion.div variants={item} className="space-y-4 text-base sm:text-lg text-neutral-500 max-w-[540px] leading-relaxed">
               <p>
-                Licenzia i Costi. Assumi l'AI. Fai Esplodere la tua Azienda Edile.
-              </p>
-              <p>
                 Edilizia.io è l'unica azienda che entra nella tua impresa, individua le figure che ti costano senza renderti, e le sostituisce con Agenti AI specializzati per il settore edile.
               </p>
               <div className="space-y-2">
