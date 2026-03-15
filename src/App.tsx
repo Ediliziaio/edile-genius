@@ -33,6 +33,7 @@ const PerChiE = lazy(() => import("./pages/PerChiE"));
 const PerChiEDetail = lazy(() => import("./pages/PerChiEDetail"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
+const OffertaAgenteVocale = lazy(() => import("./pages/offerta/AgentiVocale"));
 
 // Lazy-loaded SuperAdmin pages
 const SuperAdminDashboard = lazy(() => import("./pages/superadmin/Dashboard"));
