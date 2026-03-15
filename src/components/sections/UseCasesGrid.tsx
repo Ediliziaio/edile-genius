@@ -9,6 +9,8 @@ const useCases = [
   { icon: "👷", title: "Reportistica Operai & Cantieri", text: "Raccoglie automaticamente dati di avanzamento lavori, ore operai, materiali utilizzati e stato cantieri. Report giornalieri e settimanali generati in autonomia.", tag: "Agente AI" },
   { icon: "🔧", title: "Gestione Assistenze Post-Vendita", text: "Riceve le richieste di assistenza, le classifica per urgenza e tipologia, smista agli operatori tecnici giusti e tiene aggiornato il cliente in tempo reale.", tag: "Agente AI + Vocale" },
   { icon: "🎧", title: "Call Center & Customer Care AI", text: "Gestisce l'intero volume di chiamate e messaggi in entrata: domande tecniche, aggiornamenti preventivi, stato cantieri. Escalation intelligente solo quando necessario.", tag: "Agente Vocale + AI" },
+  { icon: "🖼️", title: "Render AI Fotorealistici", text: "7 moduli specializzati per infissi, facciate, bagni, pavimenti, persiane, stanze e tetti. Carica una foto, configura materiali e colori, ottieni render professionali prima/dopo per convincere il cliente prima ancora di iniziare i lavori.", tag: "Render AI" },
+  { icon: "📄", title: "Preventivazione Automatica AI", text: "Dall'analisi delle foto al computo metrico estimativo: l'AI stima superfici, genera descrizioni tecniche, crea offerte complete con prezzi e condizioni. Preventivi professionali in 10 minuti invece che ore di lavoro manuale.", tag: "Preventivi AI" },
 ];
 
 const item = {
