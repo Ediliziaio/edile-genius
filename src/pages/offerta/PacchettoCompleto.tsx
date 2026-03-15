@@ -110,8 +110,7 @@ export default function PacchettoCompleto() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <OfferHeader ctaText="Scopri i Pacchetti" onCtaClick={scrollToPricing} />
-      <OfferSectionNav links={navLinks} />
+      <OfferHeader ctaText="Scopri i Pacchetti" onCtaClick={scrollToPricing} navLinks={navLinks} />
 
       {/* ══════ HERO ══════ */}
       <AnimatedSection className="relative py-20 md:py-28 overflow-hidden" stagger>

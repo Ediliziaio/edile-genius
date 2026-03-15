@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, ReactNode } from "react";
 import { motion, useInView } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Shield, ArrowRight, Star } from "lucide-react";
+import { Shield, ArrowRight, Star, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
 
@@ -124,23 +124,110 @@ export function DotPattern({ className = "" }: { className?: string }) {
   );
 }
 
-/* ── OfferHeader ── */
+/* ── OfferHeader (with integrated section nav) ── */
+interface NavLink { label: string; href: string }
+
 interface OfferHeaderProps {
   ctaText: string;
   onCtaClick: () => void;
+  navLinks?: NavLink[];
 }
 
-export function OfferHeader({ ctaText, onCtaClick }: OfferHeaderProps) {
+export function OfferHeader({ ctaText, onCtaClick, navLinks = [] }: OfferHeaderProps) {
+  const [active, setActive] = useState("");
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    if (!navLinks.length) return;
+    const ids = navLinks.map((l) => l.href.replace("#", ""));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive(e.target.id);
+        });
+      },
+      { rootMargin: "-120px 0px -60% 0px", threshold: 0 }
+    );
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [navLinks]);
+
+  const scrollTo = (href: string) => {
+    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+    setMobileOpen(false);
+  };
+
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link to="/" className="text-xl font-bold font-display text-primary">
-          Edilizia.io
+      <div className="container mx-auto flex h-[68px] items-center justify-between px-4 gap-4">
+        {/* Logo — matches homepage Navbar exactly */}
+        <Link to="/" className="flex flex-col shrink-0">
+          <span className="font-display text-[22px] font-extrabold text-foreground">
+            edilizia<span className="text-primary">.io</span>
+          </span>
+          <span className="font-mono text-[10px] uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5 rounded-full -mt-0.5 w-fit">
+            AI per l'Edilizia
+          </span>
         </Link>
-        <Button onClick={onCtaClick} size="lg" className="shadow-button-green hover:-translate-y-0.5 transition-all">
-          {ctaText} <ArrowRight className="ml-1 h-4 w-4" />
-        </Button>
+
+        {/* Desktop section nav links */}
+        {navLinks.length > 0 && (
+          <nav className="hidden lg:flex items-center gap-1 overflow-x-auto scrollbar-hide">
+            {navLinks.map((link) => {
+              const isActive = active === link.href.replace("#", "");
+              return (
+                <button
+                  key={link.href}
+                  onClick={() => scrollTo(link.href)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  {link.label}
+                </button>
+              );
+            })}
+          </nav>
+        )}
+
+        <div className="flex items-center gap-2">
+          <Button onClick={onCtaClick} size="sm" className="shadow-button-green hover:-translate-y-0.5 transition-all text-xs sm:text-sm">
+            {ctaText} <ArrowRight className="ml-1 h-3 w-3 sm:h-4 sm:w-4" />
+          </Button>
+          {navLinks.length > 0 && (
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden p-2 rounded-md hover:bg-muted transition-colors">
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Mobile nav dropdown */}
+      {mobileOpen && navLinks.length > 0 && (
+        <div className="lg:hidden border-t border-border/50 bg-background/95 backdrop-blur-lg px-4 py-3 flex flex-wrap gap-2">
+          {navLinks.map((link) => {
+            const isActive = active === link.href.replace("#", "");
+            return (
+              <button
+                key={link.href}
+                onClick={() => scrollTo(link.href)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+              >
+                {link.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </header>
   );
 }
@@ -182,21 +269,48 @@ export function OfferCountdown({ countdown, variant = "dark" }: OfferCountdownPr
   );
 }
 
-/* ── OfferGuarantee ── */
+/* ── OfferGuarantee (strong version — matches homepage Guarantee) ── */
 interface OfferGuaranteeProps {
-  title: string;
+  title?: string;
   children: ReactNode;
 }
 
 export function OfferGuarantee({ title, children }: OfferGuaranteeProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+
   return (
-    <div className="mx-auto max-w-2xl rounded-2xl border-2 border-primary/30 bg-primary/5 p-8 text-center shadow-[0_0_40px_-10px_hsl(var(--primary)/0.15)]">
-      <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-        <Shield className="h-8 w-8 text-primary" />
-      </div>
-      <h2 className="text-2xl font-bold font-display">{title}</h2>
-      <div className="mt-4 text-muted-foreground leading-relaxed">{children}</div>
-    </div>
+    <motion.div
+      ref={ref}
+      className="mx-auto max-w-2xl rounded-3xl border-2 border-primary/40 bg-background p-10 md:p-14 text-center"
+      style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.06), 0 0 60px hsl(var(--primary) / 0.12)" }}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={inView ? { opacity: 1, scale: 1 } : {}}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.div
+        className="mx-auto w-[120px] h-[120px] rounded-full bg-primary/10 flex items-center justify-center text-7xl mb-6"
+        initial={{ rotateY: 0 }}
+        animate={inView ? { rotateY: 360 } : {}}
+        transition={{ duration: 0.9 }}
+      >
+        🛡️
+      </motion.div>
+
+      <h2 className="font-display text-[28px] md:text-4xl font-extrabold leading-tight mb-2">
+        GARANZIA RIMBORSO<br />
+        <span className="text-primary">30 GIORNI</span>
+      </h2>
+      {title && <p className="text-sm text-muted-foreground mt-1 mb-4">{title}</p>}
+
+      <div className="mt-4 text-lg text-muted-foreground leading-relaxed">{children}</div>
+
+      <p className="mt-6 text-base leading-relaxed">
+        <span className="font-bold text-foreground">
+          Guadagniamo bene solo quando tu risparmi. Questo è il nostro patto con ogni azienda edile.
+        </span>
+      </p>
+    </motion.div>
   );
 }
 
@@ -317,64 +431,17 @@ export function LogoBarMini() {
   );
 }
 
-/* ── OfferSectionNav ── */
+/* ── Imports for cards ── */
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Gift } from "lucide-react";
 
-interface NavLink { label: string; href: string }
-
-export function OfferSectionNav({ links }: { links: NavLink[] }) {
-  const [active, setActive] = useState("");
-
-  useEffect(() => {
-    const ids = links.map((l) => l.href.replace("#", ""));
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) setActive(e.target.id);
-        });
-      },
-      { rootMargin: "-120px 0px -60% 0px", threshold: 0 }
-    );
-    ids.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-    return () => observer.disconnect();
-  }, [links]);
-
-  return (
-    <nav className="sticky top-16 z-40 border-b border-border/50 bg-background/90 backdrop-blur-md">
-      <div className="container mx-auto px-4 overflow-x-auto scrollbar-hide">
-        <div className="flex items-center gap-1 py-2 min-w-max">
-          {links.map((link) => {
-            const isActive = active === link.href.replace("#", "");
-            return (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.querySelector(link.href)?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
-                  isActive
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                {link.label}
-              </a>
-            );
-          })}
-        </div>
-      </div>
-    </nav>
-  );
+/* ── OfferSectionNav (DEPRECATED — nav is now integrated into OfferHeader) ── */
+export function OfferSectionNav({ links: _links }: { links: { label: string; href: string }[] }) {
+  return null;
 }
 
-/* ── SetupFreeBanner ── */
+/* ── SetupFreeBanner (high-impact version) ── */
 interface SetupFreeBannerProps {
   setupCost: string;
   expired: boolean;
@@ -383,15 +450,32 @@ interface SetupFreeBannerProps {
 export function SetupFreeBanner({ setupCost, expired }: SetupFreeBannerProps) {
   if (expired) return null;
   return (
-    <div className="bg-primary/10 border border-primary/30 rounded-xl p-4 text-center shadow-[0_0_20px_-8px_hsl(var(--primary)/0.2)]">
-      <div className="flex items-center justify-center gap-2">
-        <Gift className="h-5 w-5 text-primary" />
-        <p className="text-sm font-bold">
-          🎁 Setup <span className="line-through text-muted-foreground">{setupCost}</span>{" "}
-          <span className="text-primary text-lg">GRATIS</span> — se attivi entro 7 giorni!
+    <motion.div
+      className="relative bg-gradient-to-r from-primary/15 via-primary/10 to-primary/15 border-2 border-primary/40 rounded-2xl p-5 md:p-6 text-center overflow-hidden"
+      style={{ boxShadow: "0 0 30px -5px hsl(var(--primary) / 0.2)" }}
+      animate={{ borderColor: ["hsl(var(--primary) / 0.4)", "hsl(var(--primary) / 0.7)", "hsl(var(--primary) / 0.4)"] }}
+      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+    >
+      {/* Shimmer effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent animate-[shimmer_3s_ease-in-out_infinite] pointer-events-none" />
+      <div className="relative z-10 flex flex-col items-center gap-2">
+        <motion.div
+          animate={{ rotate: [0, -10, 10, -10, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 3 }}
+        >
+          <Gift className="h-8 w-8 text-primary" />
+        </motion.div>
+        <p className="text-base md:text-lg font-bold">
+          🎁 Setup <span className="line-through text-muted-foreground text-sm">{setupCost}</span>
+        </p>
+        <span className="text-primary text-3xl md:text-4xl font-extrabold font-display tracking-tight">
+          GRATIS
+        </span>
+        <p className="text-xs text-muted-foreground font-medium">
+          Se attivi entro 7 giorni dalla ricezione di questa offerta
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
