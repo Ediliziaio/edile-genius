@@ -1,13 +1,18 @@
 import { forwardRef } from "react";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
-import { Check } from "lucide-react";
+import { Check, TrendingUp, TrendingDown, Calendar } from "lucide-react";
 
 const plans = [
   {
     badge: "1 SOSTITUZIONE",
     badgeVariant: "neutral" as const,
     name: "Starter",
-    price: "Su Richiesta",
+    stats: [
+      { icon: Calendar, value: "+15", label: "appuntamenti/mese" },
+      { icon: TrendingDown, value: "−€2.200", label: "costi/mese" },
+      { icon: TrendingUp, value: "+30%", label: "lead qualificati" },
+    ],
+    saving: "Risparmio stimato: €26.400/anno",
     sub: "Sostituisci 1 figura operativa",
     features: [
       "1 Agente AI configurato (vocale o operativo)",
@@ -17,7 +22,7 @@ const plans = [
       "Setup dedicato (7 giorni)",
       "Supporto email",
     ],
-    cta: "Richiedi Preventivo",
+    cta: "Prenota Demo Gratuita 15 Min",
     ctaStyle: "border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground",
     featured: false,
   },
@@ -25,7 +30,12 @@ const plans = [
     badge: "TEAM SOSTITUZIONE",
     badgeVariant: "verde" as const,
     name: "Professional",
-    price: "Su Richiesta",
+    stats: [
+      { icon: Calendar, value: "+40", label: "appuntamenti/mese" },
+      { icon: TrendingDown, value: "−€6.600", label: "costi/mese" },
+      { icon: TrendingUp, value: "+€180K", label: "fatturato/anno recuperato" },
+    ],
+    saving: "Risparmio stimato: €79.200/anno",
     sub: "Sostituisci 2-3 figure operative",
     features: [
       "2 Agenti AI (Vocale + Operativo)",
@@ -38,7 +48,7 @@ const plans = [
       "Supporto WhatsApp dedicato",
       "Review mensile performance",
     ],
-    cta: "Prenota Demo Gratuita",
+    cta: "Prenota Demo Gratuita 15 Min",
     ctaStyle: "bg-primary text-primary-foreground shadow-button-green hover:bg-primary-dark",
     featured: true,
   },
@@ -46,7 +56,10 @@ const plans = [
     badge: "SOSTITUZIONE TOTALE",
     badgeVariant: "neutral" as const,
     name: "Enterprise",
-    price: "Custom",
+    stats: [
+      { icon: TrendingUp, value: "Custom", label: "risultati su misura" },
+    ],
+    saving: "ROI personalizzato per la tua azienda",
     sub: "Sostituisci l'intero reparto operativo",
     features: [
       "Agenti AI illimitati",
@@ -58,7 +71,7 @@ const plans = [
       "Account manager dedicato",
       "API e integrazioni custom",
     ],
-    cta: "Contattaci",
+    cta: "Prenota Demo Gratuita 15 Min",
     ctaStyle: "bg-neutral-900 text-white hover:bg-neutral-800",
     featured: false,
   },
@@ -69,12 +82,12 @@ const Pricing = forwardRef<HTMLElement>(function Pricing(_, _ref) {
     <section id="pricing" className="bg-background py-16 md:py-24">
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-4 space-y-4">
-          <AnimatedBadge variant="verde">PIANI E PREZZI</AnimatedBadge>
+          <AnimatedBadge variant="verde">QUANTO PUOI GUADAGNARE</AnimatedBadge>
           <h2 className="font-display text-[32px] md:text-5xl font-extrabold text-neutral-900 leading-tight">
-            Scegli Quanti Dipendenti<br />
-            <span className="text-primary">Vuoi Sostituire.</span>
+            Scopri Quanto Puoi<br />
+            <span className="text-primary">Risparmiare e Guadagnare.</span>
           </h2>
-          <p className="text-neutral-500 text-base">
+          <p className="text-neutral-500 text-base max-w-[600px] mx-auto">
             Tutti i piani includono setup, training, ottimizzazione continua e garanzia rimborso 30 giorni.
           </p>
         </div>
@@ -104,8 +117,22 @@ const Pricing = forwardRef<HTMLElement>(function Pricing(_, _ref) {
               {plan.featured && <div className="mb-4" />}
 
               <h3 className="font-display text-2xl font-extrabold text-neutral-900 mb-1">{plan.name}</h3>
-              <p className="font-display text-3xl font-extrabold text-neutral-900 mb-1">{plan.price}</p>
-              <p className="text-sm text-neutral-500 mb-6">{plan.sub}</p>
+              <p className="text-sm text-neutral-500 mb-4">{plan.sub}</p>
+
+              {/* Stats instead of price */}
+              <div className="space-y-2 mb-5">
+                {plan.stats.map((s) => (
+                  <div key={s.label} className="flex items-center gap-2">
+                    <s.icon size={16} className="text-primary flex-shrink-0" />
+                    <span className="font-display text-lg font-extrabold text-neutral-900">{s.value}</span>
+                    <span className="text-xs text-neutral-500">{s.label}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-primary-light rounded-lg px-3 py-2 mb-5">
+                <p className="text-xs font-bold text-primary-dark">{plan.saving}</p>
+              </div>
 
               <ul className="space-y-3 mb-8">
                 {plan.features.map((f) => (
