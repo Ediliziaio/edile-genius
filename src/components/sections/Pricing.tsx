@@ -1,161 +1,55 @@
 import { forwardRef } from "react";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
-import { Check, TrendingUp, TrendingDown, Calendar } from "lucide-react";
+import { Calendar, TrendingDown, TrendingUp, Clock, Users, PiggyBank } from "lucide-react";
 
-const plans = [
-  {
-    badge: "1 SOSTITUZIONE",
-    badgeVariant: "neutral" as const,
-    name: "Starter",
-    stats: [
-      { icon: Calendar, value: "+15", label: "appuntamenti/mese" },
-      { icon: TrendingDown, value: "−€2.200", label: "costi/mese" },
-      { icon: TrendingUp, value: "+30%", label: "lead qualificati" },
-    ],
-    saving: "Risparmio stimato: €26.400/anno",
-    sub: "Sostituisci 1 figura operativa",
-    features: [
-      "1 Agente AI configurato (vocale o operativo)",
-      "Fino a 500 interazioni/mese gestite",
-      "Qualifica inbound + calendario",
-      "Dashboard reportistica base",
-      "Setup dedicato (7 giorni)",
-      "Supporto email",
-    ],
-    cta: "Prenota Demo Gratuita 15 Min",
-    ctaStyle: "border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground",
-    featured: false,
-  },
-  {
-    badge: "TEAM SOSTITUZIONE",
-    badgeVariant: "verde" as const,
-    name: "Professional",
-    stats: [
-      { icon: Calendar, value: "+40", label: "appuntamenti/mese" },
-      { icon: TrendingDown, value: "−€6.600", label: "costi/mese" },
-      { icon: TrendingUp, value: "+€180K", label: "fatturato/anno recuperato" },
-    ],
-    saving: "Risparmio stimato: €79.200/anno",
-    sub: "Sostituisci 2-3 figure operative",
-    features: [
-      "2 Agenti AI (Vocale + Operativo)",
-      "Interazioni illimitate",
-      "Riattivazione database lead",
-      "Agente AI per reportistica/analisi",
-      "Integrazione CRM",
-      "Analytics avanzata",
-      "Setup prioritario (5 giorni)",
-      "Supporto WhatsApp dedicato",
-      "Review mensile performance",
-    ],
-    cta: "Prenota Demo Gratuita 15 Min",
-    ctaStyle: "bg-primary text-primary-foreground shadow-button-green hover:bg-primary-dark",
-    featured: true,
-  },
-  {
-    badge: "SOSTITUZIONE TOTALE",
-    badgeVariant: "neutral" as const,
-    name: "Enterprise",
-    stats: [
-      { icon: TrendingUp, value: "Custom", label: "risultati su misura" },
-    ],
-    saving: "ROI personalizzato per la tua azienda",
-    sub: "Sostituisci l'intero reparto operativo",
-    features: [
-      "Agenti AI illimitati",
-      "Architettura multi-sede",
-      "Agenti AI custom per processi specifici",
-      "Voce brandizzata proprietaria",
-      "Training su dati aziendali interni",
-      "SLA garantito",
-      "Account manager dedicato",
-      "API e integrazioni custom",
-    ],
-    cta: "Prenota Demo Gratuita 15 Min",
-    ctaStyle: "bg-neutral-900 text-white hover:bg-neutral-800",
-    featured: false,
-  },
+const stats = [
+  { icon: Calendar, value: "+40", label: "appuntamenti / mese", color: "text-primary" },
+  { icon: TrendingDown, value: "−€6.600", label: "costi / mese", color: "text-primary" },
+  { icon: TrendingUp, value: "+€180K", label: "fatturato / anno", color: "text-primary" },
+  { icon: Users, value: "+30%", label: "lead qualificati", color: "text-primary" },
+  { icon: Clock, value: "−70%", label: "tempi di gestione", color: "text-primary" },
+  { icon: PiggyBank, value: "€79.200", label: "risparmio / anno", color: "text-primary" },
 ];
 
 const Pricing = forwardRef<HTMLElement>(function Pricing(_, _ref) {
   return (
     <section id="pricing" className="bg-background py-16 md:py-24">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-4 space-y-4">
+      <div className="max-w-4xl mx-auto px-6">
+        <div className="text-center mb-12 space-y-4">
           <AnimatedBadge variant="verde">QUANTO PUOI GUADAGNARE</AnimatedBadge>
-          <h2 className="font-display text-[32px] md:text-5xl font-extrabold text-neutral-900 leading-tight">
+          <h2 className="font-display text-[32px] md:text-5xl font-extrabold text-foreground leading-tight">
             Scopri Quanto Puoi<br />
             <span className="text-primary">Risparmiare e Guadagnare.</span>
           </h2>
-          <p className="text-neutral-500 text-base max-w-[600px] mx-auto">
-            Tutti i piani includono setup, training, ottimizzazione continua e garanzia rimborso 30 giorni.
-          </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-5 mt-12 items-start">
-          {plans.map((plan) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+          {stats.map((s) => (
             <div
-              key={plan.name}
-              className={`relative bg-background rounded-3xl p-8 border transition-all ${
-                plan.featured
-                  ? "border-2 border-primary shadow-card-green md:scale-[1.03] z-10"
-                  : "border-neutral-200 shadow-card"
-              }`}
+              key={s.label}
+              className="bg-card border border-border rounded-2xl p-6 text-center space-y-2 shadow-sm hover:shadow-md transition-shadow"
             >
-              {plan.featured && (
-                <div className="absolute -top-3 right-6 rotate-[15deg]">
-                  <span className="bg-primary text-primary-foreground font-mono text-[10px] uppercase tracking-wider px-3 py-1 rounded-full font-bold">
-                    PIÙ SCELTO
-                  </span>
-                </div>
-              )}
-              {!plan.featured && (
-                <div className="mb-4">
-                  <AnimatedBadge variant={plan.badgeVariant}>{plan.badge}</AnimatedBadge>
-                </div>
-              )}
-              {plan.featured && <div className="mb-4" />}
-
-              <h3 className="font-display text-2xl font-extrabold text-neutral-900 mb-1">{plan.name}</h3>
-              <p className="text-sm text-neutral-500 mb-4">{plan.sub}</p>
-
-              {/* Stats instead of price */}
-              <div className="space-y-2 mb-5">
-                {plan.stats.map((s) => (
-                  <div key={s.label} className="flex items-center gap-2">
-                    <s.icon size={16} className="text-primary flex-shrink-0" />
-                    <span className="font-display text-lg font-extrabold text-neutral-900">{s.value}</span>
-                    <span className="text-xs text-neutral-500">{s.label}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="bg-primary-light rounded-lg px-3 py-2 mb-5">
-                <p className="text-xs font-bold text-primary-dark">{plan.saving}</p>
-              </div>
-
-              <ul className="space-y-3 mb-8">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-neutral-700">
-                    <Check size={16} className="text-primary flex-shrink-0 mt-0.5" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-
-              <a
-                href="#cta-finale"
-                className={`block text-center w-full py-3 rounded-xl font-bold text-sm transition-all ${plan.ctaStyle}`}
-              >
-                {plan.cta}
-              </a>
+              <s.icon size={24} className="text-primary mx-auto" />
+              <p className="font-display text-3xl md:text-4xl font-extrabold text-foreground">{s.value}</p>
+              <p className="text-sm text-muted-foreground">{s.label}</p>
             </div>
           ))}
         </div>
 
-        <p className="text-center font-mono text-[11px] text-neutral-500 mt-8">
-          Tutti i piani: setup incluso · aggiornamenti continui · garanzia rimborso 30 giorni · GDPR compliant
-        </p>
+        <div className="text-center mt-12 space-y-5">
+          <p className="text-muted-foreground text-base max-w-lg mx-auto">
+            Ti mostriamo i numeri reali per la tua azienda in soli 15 minuti.
+          </p>
+          <a
+            href="#cta-finale"
+            className="inline-block bg-primary text-primary-foreground font-bold text-base px-8 py-4 rounded-xl shadow-button-green hover:bg-primary/90 transition-all"
+          >
+            Prenota Demo Gratuita 15 Min
+          </a>
+          <p className="font-mono text-[11px] text-muted-foreground">
+            Setup incluso · Aggiornamenti continui · Garanzia rimborso 30 giorni · GDPR compliant
+          </p>
+        </div>
       </div>
     </section>
   );
