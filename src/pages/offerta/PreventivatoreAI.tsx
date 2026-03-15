@@ -43,11 +43,12 @@ import Footer from "@/components/sections/Footer";
 
 /* ---------- helpers ---------- */
 
-function AnimatedSection({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function AnimatedSection({ children, className = "", id }: { children: React.ReactNode; className?: string; id?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
   return (
     <motion.section
+      id={id}
       ref={ref}
       initial={{ opacity: 0, y: 32 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
