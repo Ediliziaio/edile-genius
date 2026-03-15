@@ -21,7 +21,7 @@ const Hero = () => {
           <motion.div variants={container} initial="hidden" animate="visible" className="space-y-8">
             <motion.div variants={item}>
               <AnimatedBadge variant="verde">
-                🔥 La 1ª Agenzia di Licenziamento AI per l'Edilizia Italiana
+                🔥 La 1ª Azienda di Licenziamento AI per l'Edilizia Italiana
               </AnimatedBadge>
             </motion.div>
 
