@@ -75,8 +75,7 @@ export default function OffertaAgenteVocale() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <OfferHeader ctaText="Attiva il Tuo Agente Vocale" onCtaClick={scrollToCta} />
-      <OfferSectionNav links={navLinks} />
+      <OfferHeader ctaText="Attiva il Tuo Agente Vocale" onCtaClick={scrollToCta} navLinks={navLinks} />
 
       {/* ===== HERO ===== */}
       <AnimatedSection className="relative py-20 md:py-28 overflow-hidden" stagger>
