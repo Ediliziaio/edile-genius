@@ -3,7 +3,7 @@ import { motion, useInView, AnimatePresence } from "framer-motion";
 import { usePageSEO } from "@/hooks/usePageSEO";
 import {
   Check, Minus, Phone, Image, FileText, ClipboardList, MessageCircle,
-  ArrowRight, Shield, Zap, Calculator, TrendingUp, X as XIcon
+  ArrowRight, Shield, Zap, Calculator, TrendingUp, TrendingDown, Calendar, X as XIcon
 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -28,9 +28,13 @@ const item = {
 const pacchetti = [
   {
     name: "Essenziale",
-    price: "€297",
-    period: "/mese",
     sub: "Per il serramentista o artigiano che vuole iniziare con l'AI",
+    stats: [
+      { icon: Calendar, value: "+15", label: "appuntamenti/mese" },
+      { icon: TrendingDown, value: "−€2.200", label: "costi/mese" },
+      { icon: TrendingUp, value: "+30%", label: "lead qualificati" },
+    ],
+    saving: "Risparmio stimato: €26.400/anno",
     features: [
       "1 Agente Vocale AI (300 min/mese)",
       "30 Render AI al mese",
@@ -40,16 +44,20 @@ const pacchetti = [
       "2 utenti",
       "Supporto email",
     ],
-    cta: "Prenota una Demo",
+    cta: "Prenota Demo Gratuita 15 Min",
     style: "border-border",
     ctaCls: "border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground",
     featured: false,
   },
   {
     name: "Crescita",
-    price: "€497",
-    period: "/mese",
     sub: "Per l'impresa che vuole crescere e automatizzare",
+    stats: [
+      { icon: Calendar, value: "+40", label: "appuntamenti/mese" },
+      { icon: TrendingDown, value: "−€6.600", label: "costi/mese" },
+      { icon: TrendingUp, value: "+€180K", label: "fatturato/anno recuperato" },
+    ],
+    saving: "Risparmio stimato: €79.200/anno",
     features: [
       "2 Agenti Vocali AI (750 min/mese)",
       "80 Render AI al mese",
@@ -61,16 +69,20 @@ const pacchetti = [
       "5 utenti",
       "Supporto prioritario",
     ],
-    cta: "Prenota una Demo",
+    cta: "Prenota Demo Gratuita 15 Min",
     style: "border-2 border-primary shadow-card-green",
     ctaCls: "bg-primary text-primary-foreground shadow-button-green hover:bg-primary-dark",
     featured: true,
   },
   {
     name: "Dominio",
-    price: "€997",
-    period: "/mese",
     sub: "Per l'azienda strutturata che vuole dominare il mercato",
+    stats: [
+      { icon: Calendar, value: "+80", label: "appuntamenti/mese" },
+      { icon: TrendingDown, value: "−€12.000", label: "costi/mese" },
+      { icon: TrendingUp, value: "+€350K", label: "fatturato/anno recuperato" },
+    ],
+    saving: "Risparmio stimato: €144.000/anno",
     features: [
       "3+ Agenti Vocali AI (2.000 min/mese)",
       "250 Render AI al mese",
@@ -83,16 +95,18 @@ const pacchetti = [
       "15 utenti",
       "Account Manager dedicato",
     ],
-    cta: "Prenota una Demo",
+    cta: "Prenota Demo Gratuita 15 Min",
     style: "border-border",
     ctaCls: "border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground",
     featured: false,
   },
   {
     name: "Enterprise",
-    price: "Su Misura",
-    period: "",
     sub: "Per gruppi, franchising e aziende con esigenze specifiche",
+    stats: [
+      { icon: TrendingUp, value: "Custom", label: "risultati su misura" },
+    ],
+    saving: "ROI personalizzato per la tua azienda",
     features: [
       "Agenti Vocali illimitati",
       "Tutti i moduli AI illimitati",
@@ -101,7 +115,7 @@ const pacchetti = [
       "SLA garantito",
       "Team dedicato",
     ],
-    cta: "Contattaci",
+    cta: "Prenota Demo Gratuita 15 Min",
     style: "border-border",
     ctaCls: "bg-[hsl(var(--neutral-900))] text-white hover:bg-[hsl(var(--neutral-800))]",
     featured: false,
@@ -112,35 +126,35 @@ const moduli = [
   {
     icon: Phone,
     name: "Agente Vocale AI",
-    price: "€147",
+    benefit: "Fino a 40 appuntamenti/mese in più",
     desc: "Il tuo dipendente AI che risponde al telefono, qualifica i lead e fissa appuntamenti. 24/7.",
     includes: "200 minuti/mese · 1 agente · Integrazione calendario · Trascrizioni",
   },
   {
     icon: Image,
     name: "Render AI",
-    price: "€67",
+    benefit: "+65% tasso di chiusura preventivi",
     desc: "Mostra ai tuoi clienti come staranno i nuovi infissi, il bagno o la facciata. Render fotorealistici in 10 secondi.",
     includes: "30 render/mese · Infissi, stanze, esterni · PDF · Galleria",
   },
   {
     icon: FileText,
     name: "Preventivatore AI",
-    price: "€47",
+    benefit: "Da 2 ore a 30 secondi per preventivo",
     desc: "Preventivi professionali in 30 secondi. Calcola varianti, detrazioni, IVA e genera il PDF brandizzato.",
     includes: "50 preventivi/mese · Calcolo automatico · PDF · Listini",
   },
   {
     icon: ClipboardList,
     name: "Rapportini AI",
-    price: "€37",
+    benefit: "−3 ore/giorno di burocrazia cantiere",
     desc: "Report cantiere da input vocale o foto. Il tuo capo cantiere parla, l'AI scrive il rapportino.",
     includes: "30 report/mese · Input vocale e foto · PDF/Excel · Dashboard",
   },
   {
     icon: MessageCircle,
     name: "WhatsApp AI",
-    price: "€47",
+    benefit: "+25% lead riattivati automaticamente",
     desc: "Follow-up automatici via WhatsApp. Ricorda appuntamenti, invia preventivi, coltiva i lead.",
     includes: "300 messaggi/mese · Follow-up · Reminder · CRM",
   },
@@ -168,7 +182,7 @@ const faqs = [
   { q: "L'agente vocale parla davvero come una persona?", a: "Sì. Utilizziamo la tecnologia vocale più avanzata al mondo (ElevenLabs). L'agente parla in italiano naturale, gestisce interruzioni, e si adatta al tono della conversazione. I clienti dei nostri partner non si accorgono di parlare con un'AI." },
   { q: "Posso disdire quando voglio?", a: "Sì, zero vincoli. Puoi disdire in qualsiasi momento dalla dashboard. Il servizio resta attivo fino alla fine del periodo pagato." },
   { q: "I miei dati sono al sicuro?", a: "I dati sono ospitati su server europei (Supabase EU), crittografati e conformi al GDPR. Ogni azienda ha un ambiente completamente isolato." },
-  { q: "C'è un costo di setup?", a: "Per i Pacchetti Completi è previsto un setup una tantum (da €497 a €1.497 in base al piano) che copre la configurazione degli agenti, l'integrazione con i tuoi sistemi e la sessione di onboarding. Per i moduli singoli il setup parte da €197." },
+  { q: "C'è un costo di setup?", a: "Il costo di setup dipende dal piano scelto e viene discusso durante la demo gratuita. In ogni caso è un investimento una tantum che copre configurazione degli agenti, integrazione con i tuoi sistemi e sessione di onboarding personalizzata." },
 ];
 
 const proofStats = [
@@ -201,8 +215,8 @@ const Section = ({ children, className = "", id }: { children: React.ReactNode; 
 /* ═══════════════ PAGE ═══════════════ */
 const Tariffe = () => {
   usePageSEO({
-    title: "Prezzi e Tariffe — Edilizia.io | AI per Imprese Edili",
-    description: "Scopri i prezzi di Edilizia.io: agenti vocali AI, render, preventivi automatici per imprese edili. Da €37/mese. Prenota una demo gratuita.",
+    title: "Quanto Puoi Risparmiare — Edilizia.io | AI per Imprese Edili",
+    description: "Scopri quanto puoi risparmiare e guadagnare con l'AI di Edilizia.io: più appuntamenti, meno costi, margini maggiori. Prenota una demo gratuita di 15 minuti.",
     canonical: "/tariffe",
   });
 
@@ -229,11 +243,11 @@ const Tariffe = () => {
       <Section className="pt-20 pb-12 md:pt-28 md:pb-16 bg-gradient-to-b from-primary-bg to-background">
         <div className="max-w-5xl mx-auto px-6 text-center space-y-6">
           <motion.h1 variants={item} className="font-display text-[32px] md:text-[52px] font-extrabold text-foreground leading-[1.1] tracking-tight">
-            Investi meno di un dipendente part-time.<br />
-            <span className="text-primary">Ottieni un'azienda che lavora 24 ore su 24.</span>
+            Scopri Quanto la Tua Azienda Può<br />
+            <span className="text-primary">Risparmiare e Guadagnare con l'AI.</span>
           </motion.h1>
           <motion.p variants={item} className="text-muted-foreground text-lg md:text-xl max-w-[680px] mx-auto leading-relaxed">
-            Ogni servizio AI di Edilizia.io funziona a crediti. Scegli solo quello che ti serve — un agente vocale, i render, i preventivi — oppure prendi tutto nel pacchetto completo e risparmia.
+            Più appuntamenti, meno costi operativi, margini più alti. Scegli il piano giusto per la tua azienda e prenota una dimostrazione gratuita di 15 minuti.
           </motion.p>
           <motion.div variants={item} className="flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground">
             {["Nessun vincolo", "Disdici quando vuoi", "Setup in 48 ore"].map((t) => (
@@ -269,11 +283,23 @@ const Tariffe = () => {
                         </div>
                       )}
                       <h3 className="font-display text-xl font-extrabold text-foreground mb-1">{p.name}</h3>
-                      <div className="flex items-baseline gap-1 mb-1">
-                        <span className="font-display text-3xl font-extrabold text-foreground">{p.price}</span>
-                        {p.period && <span className="text-muted-foreground text-sm">{p.period}</span>}
+                      <p className="text-sm text-muted-foreground mb-4">{p.sub}</p>
+
+                      {/* Stats instead of price */}
+                      <div className="space-y-2 mb-4">
+                        {p.stats.map((s) => (
+                          <div key={s.label} className="flex items-center gap-2">
+                            <s.icon size={15} className="text-primary flex-shrink-0" />
+                            <span className="font-display text-base font-extrabold text-foreground">{s.value}</span>
+                            <span className="text-xs text-muted-foreground">{s.label}</span>
+                          </div>
+                        ))}
                       </div>
-                      <p className="text-sm text-muted-foreground mb-5">{p.sub}</p>
+
+                      <div className="bg-primary-light rounded-lg px-3 py-2 mb-5">
+                        <p className="text-xs font-bold text-primary-dark">{p.saving}</p>
+                      </div>
+
                       <ul className="space-y-2.5 mb-7">
                         {p.features.map((f) => (
                           <li key={f} className="flex items-start gap-2 text-sm text-foreground/80">
@@ -297,10 +323,9 @@ const Tariffe = () => {
                         <m.icon className="w-5 h-5 text-primary" />
                       </div>
                       <h3 className="font-display text-lg font-extrabold text-foreground mb-0.5">{m.name}</h3>
-                      <div className="flex items-baseline gap-1 mb-2">
-                        <span className="text-xs text-muted-foreground">da</span>
-                        <span className="font-display text-2xl font-extrabold text-foreground">{m.price}</span>
-                        <span className="text-muted-foreground text-xs">/mese</span>
+                      <div className="flex items-center gap-2 mb-2">
+                        <TrendingUp size={14} className="text-primary" />
+                        <span className="font-display text-sm font-extrabold text-primary">{m.benefit}</span>
                       </div>
                       <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{m.desc}</p>
                       <p className="text-xs text-muted-foreground mb-5">{m.includes}</p>
@@ -333,7 +358,7 @@ const Tariffe = () => {
               <thead>
                 <tr className="border-b border-border">
                   <th className="text-left p-4 font-bold text-foreground sticky left-0 bg-background z-10">Feature</th>
-                  {["Essenziale €297", "Crescita €497", "Dominio €997", "Enterprise"].map((h, i) => (
+                  {["Essenziale", "Crescita", "Dominio", "Enterprise"].map((h, i) => (
                     <th key={h} className={`p-4 text-center font-bold text-foreground ${i === 1 ? "bg-primary/5" : ""}`}>{h}</th>
                   ))}
                 </tr>
@@ -391,31 +416,14 @@ const Tariffe = () => {
 
             <motion.div variants={item} className="space-y-4">
               <div className="rounded-2xl border-2 border-primary/30 bg-background p-6 shadow-card-green space-y-6">
-                {/* Dipendente */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <XIcon size={18} className="text-destructive" />
-                    <span className="text-sm text-muted-foreground">Costo dipendente/mese</span>
-                  </div>
-                  <span className="font-display text-xl font-extrabold text-foreground">€ 2.500</span>
-                </div>
-                {/* Edilizia.io */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Check size={18} className="text-primary" />
-                    <span className="text-sm text-muted-foreground">Costo Edilizia.io ({roi.piano})</span>
-                  </div>
-                  <span className="font-display text-xl font-extrabold text-primary">€ {roi.costoEdiliziaIo}</span>
-                </div>
-
-                <div className="border-t border-border pt-5">
+                <div className="border-b border-border pb-5">
                   <div className="text-sm text-muted-foreground mb-1">Risparmio annuo stimato</div>
                   <div className="font-display text-[36px] md:text-[44px] font-extrabold text-primary leading-none">
                     {fmt(roi.risparmioAnnuo)}
                   </div>
                 </div>
 
-                <div className="border-t border-border pt-5">
+                <div className="border-b border-border pb-5">
                   <div className="text-sm text-muted-foreground mb-1">Opportunità recuperate/anno</div>
                   <div className="font-display text-[28px] font-extrabold text-foreground leading-none">
                     {fmt(roi.opportunita)}
@@ -424,10 +432,15 @@ const Tariffe = () => {
                     {missedCalls} chiamate perse × 20 gg × {fmt(contractValue)} × 5% conversione
                   </div>
                 </div>
+
+                <div>
+                  <div className="text-sm text-muted-foreground mb-1">Piano consigliato</div>
+                  <div className="font-display text-xl font-extrabold text-foreground">{roi.piano}</div>
+                </div>
               </div>
 
               <a href="#cta-finale" className="flex items-center justify-center gap-2 w-full bg-primary text-primary-foreground py-4 rounded-xl font-bold text-base shadow-button-green hover:bg-primary-dark hover:scale-[1.01] transition-all">
-                Prenota una Demo e Verifica i Numeri <ArrowRight size={16} />
+                Prenota Demo 15 Min e Verifica i Numeri <ArrowRight size={16} />
               </a>
             </motion.div>
           </div>
@@ -476,20 +489,20 @@ const Tariffe = () => {
             <span className="font-mono text-xs text-primary font-bold uppercase tracking-wider">Nessun Impegno</span>
           </div>
           <h2 className="font-display text-[28px] md:text-[44px] font-extrabold text-white leading-tight">
-            Pronto a far lavorare l'AI<br />
-            <span className="text-primary">per la tua impresa?</span>
+            Prenota una Dimostrazione<br />
+            <span className="text-primary">Gratuita di 15 Minuti.</span>
           </h2>
           <p className="text-[hsl(var(--neutral-300))] text-base max-w-[520px] mx-auto">
-            Prenota una demo gratuita di 30 minuti. Ti mostriamo l'Agente Vocale in azione sul tuo caso specifico.
+            Ti mostriamo i numeri reali per la tua azienda in soli 15 minuti. L'Agente Vocale AI in azione sul tuo caso specifico.
           </p>
           <Link
             to="/soluzioni"
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-xl font-bold text-base shadow-button-green hover:bg-primary-dark hover:scale-[1.02] transition-all"
           >
-            Prenota la Tua Demo Gratuita <ArrowRight size={16} />
+            Prenota la Tua Demo Gratuita 15 Min <ArrowRight size={16} />
           </Link>
           <p className="font-mono text-[11px] text-[hsl(var(--neutral-500))]">
-            Nessun impegno. Nessuna carta di credito. Solo 30 minuti per vedere cosa può fare l'AI per il tuo business.
+            Nessun impegno. Nessuna carta di credito. Solo 15 minuti per vedere cosa può fare l'AI per il tuo business.
           </p>
         </div>
       </section>
