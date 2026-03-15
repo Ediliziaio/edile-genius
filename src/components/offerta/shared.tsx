@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, ReactNode } from "react";
 import { motion, useInView } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Shield, ArrowRight, Star } from "lucide-react";
+import { Shield, ArrowRight, Star, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
 
