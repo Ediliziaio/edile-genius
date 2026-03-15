@@ -35,6 +35,7 @@ const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const OffertaAgenteVocale = lazy(() => import("./pages/offerta/AgentiVocale"));
 const OffertaRenderAI = lazy(() => import("./pages/offerta/RenderAI"));
+const OffertaPreventivatoreAI = lazy(() => import("./pages/offerta/PreventivatoreAI"));
 
 // Lazy-loaded SuperAdmin pages
 const SuperAdminDashboard = lazy(() => import("./pages/superadmin/Dashboard"));
