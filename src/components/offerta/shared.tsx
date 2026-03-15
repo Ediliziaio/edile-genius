@@ -124,23 +124,110 @@ export function DotPattern({ className = "" }: { className?: string }) {
   );
 }
 
-/* ── OfferHeader ── */
+/* ── OfferHeader (with integrated section nav) ── */
+interface NavLink { label: string; href: string }
+
 interface OfferHeaderProps {
   ctaText: string;
   onCtaClick: () => void;
+  navLinks?: NavLink[];
 }
 
-export function OfferHeader({ ctaText, onCtaClick }: OfferHeaderProps) {
+export function OfferHeader({ ctaText, onCtaClick, navLinks = [] }: OfferHeaderProps) {
+  const [active, setActive] = useState("");
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    if (!navLinks.length) return;
+    const ids = navLinks.map((l) => l.href.replace("#", ""));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive(e.target.id);
+        });
+      },
+      { rootMargin: "-120px 0px -60% 0px", threshold: 0 }
+    );
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [navLinks]);
+
+  const scrollTo = (href: string) => {
+    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+    setMobileOpen(false);
+  };
+
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link to="/" className="text-xl font-bold font-display text-primary">
-          Edilizia.io
+      <div className="container mx-auto flex h-[68px] items-center justify-between px-4 gap-4">
+        {/* Logo — matches homepage Navbar exactly */}
+        <Link to="/" className="flex flex-col shrink-0">
+          <span className="font-display text-[22px] font-extrabold text-foreground">
+            edilizia<span className="text-primary">.io</span>
+          </span>
+          <span className="font-mono text-[10px] uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5 rounded-full -mt-0.5 w-fit">
+            AI per l'Edilizia
+          </span>
         </Link>
-        <Button onClick={onCtaClick} size="lg" className="shadow-button-green hover:-translate-y-0.5 transition-all">
-          {ctaText} <ArrowRight className="ml-1 h-4 w-4" />
-        </Button>
+
+        {/* Desktop section nav links */}
+        {navLinks.length > 0 && (
+          <nav className="hidden lg:flex items-center gap-1 overflow-x-auto scrollbar-hide">
+            {navLinks.map((link) => {
+              const isActive = active === link.href.replace("#", "");
+              return (
+                <button
+                  key={link.href}
+                  onClick={() => scrollTo(link.href)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  {link.label}
+                </button>
+              );
+            })}
+          </nav>
+        )}
+
+        <div className="flex items-center gap-2">
+          <Button onClick={onCtaClick} size="sm" className="shadow-button-green hover:-translate-y-0.5 transition-all text-xs sm:text-sm">
+            {ctaText} <ArrowRight className="ml-1 h-3 w-3 sm:h-4 sm:w-4" />
+          </Button>
+          {navLinks.length > 0 && (
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden p-2 rounded-md hover:bg-muted transition-colors">
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Mobile nav dropdown */}
+      {mobileOpen && navLinks.length > 0 && (
+        <div className="lg:hidden border-t border-border/50 bg-background/95 backdrop-blur-lg px-4 py-3 flex flex-wrap gap-2">
+          {navLinks.map((link) => {
+            const isActive = active === link.href.replace("#", "");
+            return (
+              <button
+                key={link.href}
+                onClick={() => scrollTo(link.href)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+              >
+                {link.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </header>
   );
 }
