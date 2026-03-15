@@ -6,7 +6,7 @@ const cards = [
   {
     icon: "🏗️",
     title: "Specializzati nel Sostituire Figure Edili",
-    text: "Non siamo un'agenzia AI generalista. Esistiamo esclusivamente per serramenti, infissi, fotovoltaico, ristrutturazioni e impianti. Sappiamo esattamente quali figure puoi sostituire, come farlo e quanto risparmierai. Questa specializzazione vale +30% di efficacia rispetto a soluzioni generiche.",
+    text: "Non siamo un'azienda AI generalista. Esistiamo esclusivamente per serramenti, infissi, fotovoltaico, ristrutturazioni e impianti. Sappiamo esattamente quali figure puoi sostituire, come farlo e quanto risparmierai. Questa specializzazione vale +30% di efficacia rispetto a soluzioni generiche.",
   },
   {
     icon: "🎙️",
