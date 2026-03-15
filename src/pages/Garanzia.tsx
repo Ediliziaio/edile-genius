@@ -186,7 +186,7 @@ const Garanzia = () => {
               <p>
                 Questo significa una cosa sola: i risultati sono <em>prevedibili</em>.
                 Non è una scommessa. È un sistema che funziona quando è costruito da chi conosce
-                il tuo settore — non da un'agenzia generica che ieri faceva siti web e domani farà crypto.
+                il tuo settore — non da un'azienda generica che ieri faceva siti web e domani farà crypto.
               </p>
               <p className="font-semibold text-foreground text-lg md:text-xl">
                 Ecco perché la garanzia non è un rischio per noi. È una dichiarazione di certezza.

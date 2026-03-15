@@ -186,7 +186,7 @@ const ChiSiamo = () => {
             </motion.p>
 
             <motion.p variants={fadeUp}>
-              Poi abbiamo aperto Marketing Edile — un'agenzia per aziende del settore costruzioni. Centinaia di imprenditori come clienti. <span className="text-white font-semibold">Gli stessi problemi ripetuti ogni singola volta.</span>
+              Poi abbiamo aperto Marketing Edile — un'azienda per aziende del settore costruzioni. Centinaia di imprenditori come clienti. <span className="text-white font-semibold">Gli stessi problemi ripetuti ogni singola volta.</span>
             </motion.p>
 
             <motion.div variants={fadeUp} className="pt-4 border-t border-[hsl(var(--neutral-700))]">
