@@ -15,16 +15,9 @@ import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { useCompanyId } from '@/hooks/useCompanyId';
 import type { CategoriaKB, KBDocumento } from '@/modules/preventivo/types';
 
-const CATEGORIA_META: Record<CategoriaKB, { label: string; emoji: string; desc: string }> = {
-  presentazione_azienda:   { label: 'Presentazione',  emoji: '🏢', desc: 'Chi siamo, storia, valori' },
-  catalogo_prodotti:       { label: 'Catalogo',        emoji: '📦', desc: 'Catalogo prodotti generale' },
-  scheda_tecnica:          { label: 'Schede tecniche', emoji: '📋', desc: 'Specifiche tecniche prodotti' },
-  listino_prezzi:          { label: 'Listino prezzi',  emoji: '💶', desc: 'Prezzi e tariffe' },
-  condizioni_contrattuali: { label: 'Condizioni',      emoji: '📜', desc: 'T&C, garanzie, note legali' },
-  portfolio:               { label: 'Portfolio',        emoji: '🖼️', desc: 'Lavori precedenti e referenze' },
-  certificazioni:          { label: 'Certificazioni',  emoji: '🏅', desc: 'ISO, attestati, qualifiche' },
-  altro:                   { label: 'Altro',            emoji: '📄', desc: 'Documenti vari' },
-};
+import { CATEGORIA_KB_META } from '@/modules/preventivo/lib/defaultTemplate';
+
+const CATEGORIA_META = CATEGORIA_KB_META;
 
 const STATO_META: Record<string, { label: string; icon: typeof Clock; colore: string }> = {
   caricato:     { label: 'In attesa',    icon: Clock,        colore: 'text-amber-500' },
