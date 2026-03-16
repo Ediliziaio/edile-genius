@@ -1,215 +1,57 @@
 
-# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro + AI Avanzata
 
-## ✅ Completato in questo blocco
+# Doc 1/7: Architettura DB, Tipi & Costanti — Piano di Implementazione
 
-### Database Migration
-- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
-- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
-- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
-- RLS policies per tutte le nuove tabelle
+## Analisi dello Stato Attuale
 
-## ✅ Blocco 2 — Sistema Crediti Euro-based
+Il progetto ha gia le fondamenta del sistema preventivo:
 
-### Database
-- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
-- ai_credit_topups (ricariche manual/auto/promo/adjustment)
-- ai_credit_usage (consumo per conversazione con margini)
-- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
-- monthly_billing_summary view (security_invoker)
+- **DB**: Le tabelle `preventivi`, `preventivo_kb_documenti`, `preventivo_kb_chunks`, `preventivo_templates` esistono gia in Supabase con `company_id` (non `azienda_id` come nel doc).
+- **Tipi TS**: `src/modules/preventivo/types.ts` ha gia tipi per `PreventivoSezione`, `PreventivoVoce`, `KBDocumento`, `AnalisiSuperfici`, `Preventivo`, `PreventivoTemplate`.
+- **Costanti**: `src/modules/preventivo/lib/defaultTemplate.ts` ha gia `SEZIONI_DEFAULT` e `TIPO_SEZIONE_META`.
+- **Storage**: Bucket `preventivi-media` esiste gia; il doc chiede `preventivo-kb` e `preventivi-pdf`.
 
-### Edge Functions
-- check-credits-before-call: verifica saldo pre-chiamata
-- topup-credits: ricarica manuale con fattura
-- elevenlabs-webhook: post-call billing, auto-recharge, blocco
-- platform-config: +apply_global_markup action
+## Cosa Manca (da implementare)
 
-### Frontend
-- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
-- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
-- Sidebar: footer saldo crediti con barra e alert
-- VoiceTestPanel: check crediti pre-chiamata con blocco UI
+### 1. Migrazione SQL: funzione `search_kb_chunks`
+La funzione PL/pgSQL per similarity search via pgvector non esiste ancora. Serve per la ricerca semantica nei chunks KB.
 
-## ✅ Blocco 3-5 — Agent Templates System
+### 2. Migrazione SQL: trigger `genera_numero_preventivo`
+Il trigger per numerazione automatica `YYYY-NNNN` potrebbe non esistere (la colonna `numero_preventivo` esiste ma il trigger auto va verificato/aggiunto).
 
-### Database
-- agent_templates + agent_template_instances + agent_reports + company_channels
-- RLS policies PERMISSIVE (fix da RESTRICTIVE)
-- Funzione DB `increment_installs_count(tpl_id UUID)`
-- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
+### 3. Migrazione SQL: trigger `update_updated_at`
+Trigger generico per aggiornare `updated_at` su tutte le tabelle preventivo.
 
-### Edge Functions (CORS headers completi)
-- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
-- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
-- save-report: salva report in DB + aggiorna contatori istanza
+### 4. Storage bucket `preventivo-kb`
+Bucket dedicato per documenti KB (PDF/DOCX) separato da `preventivi-media`.
 
-### Frontend — Wizard 5 Step (TemplateSetup.tsx)
-- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
-- Step 2 Operai: lista card + importa CSV con template scaricabile
-- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
-- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
-- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
+### 5. Allineare tipi TS al doc
+Aggiornare `src/modules/preventivo/types.ts` aggiungendo i tipi mancanti dal doc:
+- `StatoPreventivo`, `StatoKBDocumento`, `CategoriaKB`, `ConfidenzaAnalisi` come type alias
+- `ConfigCopertina`, `ConfigTestoLibero`, `ConfigRenderGallery`, `ConfigSchedeProdotti`, `ConfigTabellaPrezzi`, `ConfigFirmaCliente` (alcune gia presenti con nomi diversi)
+- Tipo `garanzie` e `firma_cliente` e `superfici_computo` in `TipoSezione`
 
-### SuperAdmin
-- /superadmin/templates: CRUD completo con JSON editor per config_schema
+### 6. Allineare costanti al doc
+Aggiornare `src/modules/preventivo/lib/defaultTemplate.ts`:
+- Aggiungere `CATEGORIA_KB_META`, `STATO_PREVENTIVO_CONFIG`
+- Aggiungere costanti: `IVA_OPTIONS`, `VALIDITA_PRESETS`, `KB_CHUNK_SIZE`, `KB_CHUNK_OVERLAP`, `KB_EMBEDDING_PAUSE_MS`
+- Aggiungere sezioni mancanti a `SEZIONI_DEFAULT`: `garanzie`, `firma_cliente`, `superfici_computo`
 
-## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
+## Approccio: Adattare il Doc al Progetto Esistente
 
-### Database (5 tabelle)
-- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
-- RLS PERMISSIVE per tutte le tabelle
-- Trigger set_updated_at + init_render_credits su companies
-- Funzione deduct_render_credit
-- Storage buckets: render-originals (privato), render-results (pubblico)
+Il doc usa `azienda_id` ovunque ma il DB reale usa `company_id`. **Non creeremo nuove tabelle** — adatteremo tipi e costanti per riflettere lo schema DB esistente, aggiungendo solo cio che manca.
 
-### Edge Functions
-- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
-- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
+## File da Modificare
 
-### Frontend
-- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
-- RenderConfig (/superadmin/render-config)
-- BeforeAfterSlider, promptBuilder.ts
+| File | Azione |
+|------|--------|
+| `src/modules/preventivo/types.ts` | Aggiungere type alias mancanti, nuovi tipi sezione (`garanzie`, `firma_cliente`, `superfici_computo`), config interfaces mancanti |
+| `src/modules/preventivo/lib/defaultTemplate.ts` | Aggiungere `CATEGORIA_KB_META`, `STATO_PREVENTIVO_CONFIG`, costanti KB, sezioni mancanti in `SEZIONI_DEFAULT` |
+| Migrazione SQL (via Supabase) | `search_kb_chunks` function, `genera_numero_preventivo` trigger, `update_updated_at` trigger, bucket `preventivo-kb` |
 
-## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
+## Note
 
-### Database
-- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
-- Estensione `preventivi` con +26 colonne
-- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
-- Storage buckets: preventivi-media (privato), template-assets (pubblico)
-- RLS company-scoped + superadmin
+- **Non** creiamo `src/types/preventivo.ts` e `src/constants/preventivo.ts` separati: i file esistono gia in `src/modules/preventivo/` e sono importati ovunque. Duplicarli creerebbe conflitti.
+- Le migrazioni SQL vanno eseguite tramite il tool Supabase.
+- I tipi in `src/integrations/supabase/types.ts` si aggiornano automaticamente dopo le migrazioni.
 
-### Edge Functions
-- `process-preventivo-audio` RISCRITTO
-
-### PDF Client-side (@react-pdf/renderer)
-- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4
-
-### Frontend
-- NuovoPreventivo.tsx, PreventivoDetail.tsx, PreventiviList.tsx, TemplatePreventivo.tsx
-
-## ✅ Blocco 8 — AI Avanzata P1 (Smart Actions + Lead Score + Timeline)
-
-### Smart Actions Engine (Dashboard)
-- Espanso da 3 regole hardcoded a 10+ regole basate su dati reali:
-  - Crediti in esaurimento (danger)
-  - Agenti in bozza (warning)
-  - Agenti senza numero telefono (warning)
-  - Agenti inattivi >7 giorni (info)
-  - Contatti da richiamare con next_call_at scaduto (warning)
-  - Preventivi in bozza da >7 giorni (warning)
-  - Preventivi inviati senza risposta da >10 giorni (warning)
-  - Documenti in scadenza entro 15 giorni (warning)
-  - Campagne con tasso appuntamenti <5% (info)
-- Query Supabase dedicate per ogni regola
-- Stato "Tutto in ordine" quando nessuna azione è necessaria
-- Mostra summary delle conversazioni recenti nella tabella attività
-
-### Lead Score Automatico
-- `src/lib/lead-score.ts`: motore di scoring 0-100 senza LLM
-  - +30 outcome qualified/appointment
-  - +20 sentiment positivo
-  - +15 preventivo associato
-  - +10 contatto completo (tel+email)
-  - +10 callback attempts
-  - +5 fonte inbound
-  - -10 inattivo >30 giorni
-  - -20 not_interested
-  - -30 do_not_call/invalid
-- `src/components/contacts/LeadScoreBadge.tsx`: badge con tooltip fattori
-  - Compact mode per tabella (emoji + score numerico)
-  - Full mode per scheda contatto (con lista fattori)
-  - Colori: 🔴 Caldo (>60), 🟠 Tiepido (30-60), 🔵 Freddo (<30)
-- Badge integrato nella tabella contatti (nuova colonna "Score")
-- Badge integrato nell'header della scheda contatto
-
-### Timeline Unificata del Contatto
-- `ContactDetailPanel.tsx` completamente refactorato:
-  - Tab "Timeline" come default (al posto di "Info")
-  - Cronologia verticale con linea e pallini colorati per tipo:
-    - 🔵 Conversazioni (con summary, outcome, sentiment, durata)
-    - 🟡 Note manuali
-    - 🟢 Preventivi collegati (stato, importo, numero)
-    - ⚪ Eventi (contatto creato)
-  - Query preventivi per nome/telefono contatto
-  - Lead Score full display nell'header della scheda
-
-## ✅ Blocco 8 — P1-C: Call Summary Automatico
-
-### Backend
-- `supabase/functions/elevenlabs-webhook/summary.ts`: modulo separato per generazione summary
-  - Chiama OpenAI gpt-4o-mini con prompt minimale in italiano
-  - Non-blocking: se OPENAI_API_KEY non è configurata, salta silenziosamente
-  - Cap transcript a 6000 chars per contenere i costi (~$0.001/call)
-- `elevenlabs-webhook/index.ts`: importa e chiama `generateCallSummary()` dopo step 7
-  - Popola `conversations.summary` solo se la generazione ha successo
-
-### Frontend (già predisposto)
-- Dashboard "Attività recente": mostra `c.summary` sotto il nome agente
-- Conversazioni: mostra summary nella tabella e nel dialog dettaglio
-- Timeline contatto: mostra summary nelle conversazioni
-
-### Requisito SuperAdmin
-- Aggiungere OPENAI_API_KEY come Supabase Secret (da configurare via SuperAdmin)
-
-## ✅ Blocco 9 — Audit Finale & Hardening
-
-### Sicurezza Edge Functions
-- Validazione JWT (getClaims) aggiunta a: generate-render, crm-sync, deploy-template-instance, process-preventivo-audio, generate-preventivo-pdf
-- Verifica tenant (company_id cross-check) aggiunta a tutte le funzioni interne
-- Funzioni webhook esterne (elevenlabs-webhook, whatsapp-webhook, telegram-cantiere-webhook) lasciate senza JWT (corretto)
-
-### Atomicità Crediti
-- Creata RPC `topup_credits(_company_id, _amount_eur)` con UPDATE atomico
-- topup-credits edge function refactorato per usare RPC
-
-### UX — Progressive Disclosure Sidebar
-- Sezioni OPERATIVITÀ e STRUMENTI AI visibili solo se il settore è rilevante o se esistono dati
-- Campi vuoti nelle conversazioni nascosti (eval_score, minutes_billed, cost_billed_eur)
-
-### UX — Dead-End Fix
-- Card CRM e Webhooks in Integrazioni: badge "Prossimamente" + bottoni disabilitati
-
-### Signup Self-Service
-- Pagina /signup con form registrazione
-- Edge function self-service-signup: crea company (trial 14gg) + profilo + ruolo company_admin
-
-### AI Avanzata P2
-- Follow-up Generator: edge function generate-followup (GPT-4o-mini) + bottone in ContactDetailPanel
-- Opportunity Recovery: Smart Actions per lead qualificati dormenti >5 giorni
-- Campi conversazione vuoti nascosti per UX più pulita
-
-## ✅ Blocco 10 — Criticità Pre-Lancio Risolte
-
-### Database
-- Rimossi RLS duplicati su `ai_credits` (2 policy rimossi: `company_ai_credits_select`, `superadmin_ai_credits`)
-- Rimosso indice duplicato `idx_topups_stripe_session` su `ai_credit_topups`
-- `topup_credits` RPC riscritta con `FOR UPDATE` lock (come `deduct_call_credits`)
-- Aggiunta funzione `reset_agents_calls_month()` per cron mensile
-
-### Auth Edge Functions (25 file corretti)
-- Sostituito `supabase.auth.getClaims(token)` (non-standard) con `supabase.auth.getUser(token)` in tutte le Edge Functions
-- Aggiornato helper condiviso `_shared/utils.ts` → `authenticateRequest()`
-
-### Frontend
-- `Credits.tsx`: aggiunto `companyId` come dipendenza del useEffect per il polling post-pagamento Stripe
-
-### Stripe Webhook
-- Insert topup record: aggiunto error handling per violazione unique constraint
-- Documentato comportamento auto-recharge (crediti senza addebito Stripe)
-
-### Secrets da configurare (azione manuale)
-- `STRIPE_SECRET_KEY` — per pagamenti
-- `STRIPE_WEBHOOK_SECRET` — per webhook Stripe
-- `OPENAI_API_KEY` — per AI summary e follow-up
-- `META_ENCRYPTION_KEY` — per cifratura token WhatsApp
-- `RESEND_API_KEY` — per invio email
-
-## 🔜 Prossimi Step
-
-### P3 — Avanzato / successivo
-- Personalizzazione regole Smart Actions per admin
-- Report settimanale automatico via email al titolare
-- Trend predittivo su tasso conversione
-- Auto-recharge con addebito Stripe reale (attualmente wallet-based)
