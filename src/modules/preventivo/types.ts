@@ -1,3 +1,21 @@
+// ─── Type Aliases ─────────────────────────────────────────────────────────────
+
+export type StatoPreventivo =
+  | 'bozza'
+  | 'generazione'
+  | 'pronto'
+  | 'inviato'
+  | 'accettato'
+  | 'rifiutato';
+
+export type StatoKBDocumento =
+  | 'caricato'
+  | 'elaborazione'
+  | 'indicizzato'
+  | 'errore';
+
+export type ConfidenzaAnalisi = 'bassa' | 'media' | 'alta';
+
 // ─── Sezioni del preventivo ───────────────────────────────────────────────────
 
 export type TipoSezione =
@@ -12,7 +30,10 @@ export type TipoSezione =
   | 'condizioni_contrattuali'
   | 'note_finali'
   | 'portfolio_riferimenti'
-  | 'certificazioni';
+  | 'certificazioni'
+  | 'garanzie'
+  | 'firma_cliente'
+  | 'superfici_computo';
 
 export interface PreventivoSezione {
   id: string;
@@ -33,7 +54,10 @@ export type SectionConfig =
   | ComputoConfig
   | OffertaConfig
   | KBSectionConfig
-  | AIGeneratedConfig;
+  | AIGeneratedConfig
+  | TestoLiberoConfig
+  | FirmaClienteConfig
+  | SuperficiComputoConfig;
 
 export interface CopertinaConfig {
   tipo: 'copertina';
@@ -71,7 +95,7 @@ export interface OffertaConfig {
 }
 
 export interface KBSectionConfig {
-  tipo: 'schede_prodotti' | 'condizioni_contrattuali' | 'certificazioni' | 'portfolio_riferimenti';
+  tipo: 'schede_prodotti' | 'condizioni_contrattuali' | 'certificazioni' | 'portfolio_riferimenti' | 'garanzie';
   categoria_kb: string;
   max_prodotti?: number;
   query_hint?: string;
@@ -84,6 +108,24 @@ export interface AIGeneratedConfig {
   lunghezza: 'breve' | 'media' | 'dettagliata';
   tono: 'formale' | 'professionale' | 'tecnico';
   istruzioni_custom?: string;
+}
+
+export interface TestoLiberoConfig {
+  tipo: 'testo_libero';
+  contenuto_html?: string;
+}
+
+export interface FirmaClienteConfig {
+  tipo: 'firma_cliente';
+  mostra_data: boolean;
+  mostra_timbro: boolean;
+  testo_accettazione?: string;
+}
+
+export interface SuperficiComputoConfig {
+  tipo: 'superfici_computo';
+  usa_stime_ai: boolean;
+  mostra_confidenza: boolean;
 }
 
 // ─── Voci preventivo ─────────────────────────────────────────────────────────
@@ -110,6 +152,7 @@ export type CategoriaKB =
   | 'condizioni_contrattuali'
   | 'portfolio'
   | 'certificazioni'
+  | 'garanzie'
   | 'altro';
 
 export interface KBDocumento {
@@ -122,7 +165,7 @@ export interface KBDocumento {
   file_size_kb: number;
   pagine?: number;
   categoria: CategoriaKB;
-  stato: 'caricato' | 'elaborazione' | 'indicizzato' | 'errore';
+  stato: StatoKBDocumento;
   errore_msg?: string;
   indicizzato_at?: string;
   chunks_count: number;
@@ -137,7 +180,7 @@ export interface KBDocumento {
 export interface SuperficieStimata {
   elemento: string;
   mq_stimati: number;
-  confidenza: 'bassa' | 'media' | 'alta';
+  confidenza: ConfidenzaAnalisi;
   note: string;
   foto_ref?: string;
 }
@@ -162,7 +205,7 @@ export interface Preventivo {
   template_id?: string;
   numero_preventivo: string;
   titolo?: string;
-  stato: 'bozza' | 'generazione' | 'pronto' | 'inviato' | 'accettato' | 'rifiutato';
+  stato: StatoPreventivo;
 
   cliente_nome?: string;
   cliente_email?: string;
