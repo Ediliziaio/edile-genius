@@ -59,14 +59,21 @@ Deno.serve(async (req) => {
     let pagineTesto: Array<{ pagina: number; testo: string }> = [];
     let totalePagine = 0;
 
-    if (doc.file_type === "pdf") {
-      // Use Gemini Vision for PDF text extraction
+    const fileType = (doc.file_type || "").toLowerCase();
+
+    if (fileType === "pdf" || fileType === "docx") {
+      // Use Gemini Vision for PDF and DOCX text extraction
       const uint8 = new Uint8Array(arrayBuffer);
       let binary = "";
       for (let i = 0; i < uint8.length; i++) {
         binary += String.fromCharCode(uint8[i]);
       }
       const base64 = btoa(binary);
+
+      const mimeType =
+        fileType === "pdf"
+          ? "application/pdf"
+          : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
       const geminiRes = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${Deno.env.get("GEMINI_API_KEY")}`,
@@ -80,12 +87,12 @@ Deno.serve(async (req) => {
                 parts: [
                   {
                     inline_data: {
-                      mime_type: "application/pdf",
+                      mime_type: mimeType,
                       data: base64,
                     },
                   },
                   {
-                    text: `Estrai tutto il testo da questo documento PDF mantenendo la struttura logica (titoli, paragrafi, liste, tabelle).
+                    text: `Estrai tutto il testo da questo documento mantenendo la struttura logica (titoli, paragrafi, liste, tabelle).
 Restituisci un JSON con questa struttura:
 {
   "pagine": [
@@ -123,7 +130,7 @@ Restituisci SOLO il JSON valido, senza markdown.`,
         pagineTesto = [{ pagina: 1, testo: rawText }];
         totalePagine = 1;
       }
-    } else if (doc.file_type === "txt") {
+    } else if (fileType === "txt") {
       const testo = new TextDecoder().decode(arrayBuffer);
       pagineTesto = [{ pagina: 1, testo }];
       totalePagine = 1;
