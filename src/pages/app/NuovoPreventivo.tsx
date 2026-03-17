@@ -154,19 +154,28 @@ export default function NuovoPreventivo() {
   }, [companyId, state, sezioniContenuto, preventivoId, templateConfig]);
 
   const handleNext = async () => {
-    // Validate step 0
     if (step === 0 && !state.clienteNome.trim()) {
       toast.error('Il nome cliente è obbligatorio');
       return;
     }
-    // Auto-save on transition
     await saveToDb();
+    setDirection(1);
     setStep(s => Math.min(s + 1, STEPS.length - 1));
   };
 
   const handleBack = () => {
     if (step === 0) navigate('/app/preventivi');
-    else setStep(s => s - 1);
+    else {
+      setDirection(-1);
+      setStep(s => s - 1);
+    }
+  };
+
+  const handleStepClick = (i: number) => {
+    if (i < step) {
+      setDirection(-1);
+      setStep(i);
+    }
   };
 
   const handleAudioProcessed = (result: any) => {
