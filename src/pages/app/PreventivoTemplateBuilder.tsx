@@ -1,10 +1,11 @@
 import { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import {
   GripVertical, Plus, Trash2, Eye, Save,
   ChevronDown, ChevronUp, CheckCircle2, Palette,
-  Star, ArrowUp, ArrowDown
+  Star
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +31,7 @@ const SEZIONI_AGGIUNGIBILI: TipoSezione[] = [
   'copertina', 'presentazione_azienda', 'analisi_progetto', 'render_visivi',
   'schede_prodotti', 'descrizione_lavori', 'computo_metrico', 'offerta_economica',
   'condizioni_contrattuali', 'note_finali', 'portfolio_riferimenti', 'certificazioni',
+  'garanzie', 'firma_cliente', 'superfici_computo',
 ];
 
 function newSezione(tipo: TipoSezione): PreventivoSezione {
@@ -55,10 +57,16 @@ function newSezione(tipo: TipoSezione): PreventivoSezione {
       return { ...base, sorgente: 'kb_document', config: { tipo, categoria_kb: 'portfolio' } };
     case 'certificazioni':
       return { ...base, sorgente: 'kb_document', config: { tipo, categoria_kb: 'certificazioni' } };
+    case 'garanzie':
+      return { ...base, sorgente: 'kb_document', config: { tipo, categoria_kb: 'garanzie', query_hint: '' } };
     case 'computo_metrico':
       return { ...base, sorgente: 'tabella', config: { tipo, usa_stime_ai: true, voce_manuale: true } };
     case 'offerta_economica':
       return { ...base, sorgente: 'tabella', config: { tipo, mostra_prezzi_unitari: true, mostra_sconto: false, mostra_iva: true, valuta: 'EUR' } };
+    case 'firma_cliente':
+      return { ...base, sorgente: 'manuale', config: { tipo: 'firma_cliente', mostra_data: true, mostra_timbro: false, testo_accettazione: 'Il sottoscritto dichiara di accettare il presente preventivo nelle condizioni sopra descritte.' } };
+    case 'superfici_computo':
+      return { ...base, sorgente: 'ai_generated', config: { tipo: 'superfici_computo', usa_stime_ai: true, mostra_confidenza: true } };
     default:
       return { ...base, sorgente: 'manuale', config: { tipo } as any };
   }
@@ -83,6 +91,15 @@ export default function PreventivoTemplateBuilder() {
   const [saving, setSaving] = useState(false);
   const [colore, setColore] = useState('#6D28D9');
   const [piede, setPiede] = useState('');
+  const [isDirty, setIsDirty] = useState(false);
+
+  // Track dirty state helpers
+  const markDirty = useCallback(() => setIsDirty(true), []);
+
+  const setNomeDirty = useCallback((v: string) => { setNome(v); markDirty(); }, [markDirty]);
+  const setDescrizioneDirty = useCallback((v: string) => { setDescrizione(v); markDirty(); }, [markDirty]);
+  const setColoreDirty = useCallback((v: string) => { setColore(v); markDirty(); }, [markDirty]);
+  const setPiedeDirty = useCallback((v: string) => { setPiede(v); markDirty(); }, [markDirty]);
 
   useQuery({
     queryKey: ['template', id],
@@ -100,27 +117,35 @@ export default function PreventivoTemplateBuilder() {
         if (Array.isArray(sezioniData)) setSezioni(sezioniData as PreventivoSezione[]);
         setColore(data.colore_primario || '#6D28D9');
         setPiede(data.piede_pagina || '');
+        setIsDirty(false);
       }
       return data;
     },
   });
 
-  // ── Reorder ──
-  const moveSezione = useCallback((index: number, direction: -1 | 1) => {
+  // ── DnD reorder ──
+  const onDragEnd = useCallback((result: DropResult) => {
+    if (!result.destination) return;
+    const startIdx = result.source.index;
+    const endIdx = result.destination.index;
+    if (startIdx === endIdx) return;
     setSezioni(prev => {
       const items = [...prev];
-      const [moved] = items.splice(index, 1);
-      items.splice(index + direction, 0, moved);
+      const [moved] = items.splice(startIdx, 1);
+      items.splice(endIdx, 0, moved);
       return items.map((s, i) => ({ ...s, ordine: i }));
     });
-  }, []);
+    markDirty();
+  }, [markDirty]);
 
   const toggleSezione = (sid: string) => {
     setSezioni(prev => prev.map(s => s.id === sid ? { ...s, attiva: !s.attiva } : s));
+    markDirty();
   };
 
   const removeSezione = (sid: string) => {
     setSezioni(prev => prev.filter(s => s.id !== sid));
+    markDirty();
   };
 
   const addSezione = (tipo: TipoSezione) => {
@@ -129,10 +154,12 @@ export default function PreventivoTemplateBuilder() {
     setSezioni(prev => [...prev, nuova]);
     setExpandedId(nuova.id);
     setShowAddMenu(false);
+    markDirty();
   };
 
   const updateSezioneConfig = (sid: string, updates: Partial<PreventivoSezione>) => {
     setSezioni(prev => prev.map(s => s.id === sid ? { ...s, ...updates } : s));
+    markDirty();
   };
 
   const handleSave = async (asDefault = false) => {
@@ -166,6 +193,7 @@ export default function PreventivoTemplateBuilder() {
         if (error) throw error;
         toast.success('Template salvato!');
       }
+      setIsDirty(false);
       queryClient.invalidateQueries({ queryKey: ['preventivo_templates'] });
     } catch (err: any) {
       toast.error('Errore: ' + err.message);
@@ -186,12 +214,17 @@ export default function PreventivoTemplateBuilder() {
             <div className="min-w-0">
               <input
                 value={nome}
-                onChange={e => setNome(e.target.value)}
+                onChange={e => setNomeDirty(e.target.value)}
                 className="font-bold text-foreground bg-transparent border-0 outline-none text-base w-full max-w-sm"
                 placeholder="Nome template"
               />
               <p className="text-xs text-muted-foreground">{sezioniAttive} sezioni attive</p>
             </div>
+            {isDirty && (
+              <Badge variant="outline" className="text-xs text-amber-600 border-amber-400 bg-amber-50 dark:bg-amber-950/30 flex-shrink-0">
+                Non salvato
+              </Badge>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Button size="sm" onClick={() => handleSave(false)} disabled={saving}>
@@ -217,14 +250,14 @@ export default function PreventivoTemplateBuilder() {
                   <Label className="text-xs text-muted-foreground">Colore primario</Label>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="relative w-9 h-9 rounded-lg border border-border overflow-hidden flex-shrink-0" style={{ backgroundColor: colore }}>
-                      <input type="color" value={colore} onChange={e => setColore(e.target.value)} className="opacity-0 w-full h-full cursor-pointer" />
+                      <input type="color" value={colore} onChange={e => setColoreDirty(e.target.value)} className="opacity-0 w-full h-full cursor-pointer" />
                     </div>
-                    <Input value={colore} onChange={e => setColore(e.target.value)} className="h-9 text-xs font-mono" />
+                    <Input value={colore} onChange={e => setColoreDirty(e.target.value)} className="h-9 text-xs font-mono" />
                   </div>
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground">Piede di pagina</Label>
-                  <Textarea value={piede} onChange={e => setPiede(e.target.value)} className="mt-1 text-xs resize-none" rows={2} placeholder="es. P.IVA 01234567890 — Via Roma 1, Milano" />
+                  <Textarea value={piede} onChange={e => setPiedeDirty(e.target.value)} className="mt-1 text-xs resize-none" rows={2} placeholder="es. P.IVA 01234567890 — Via Roma 1, Milano" />
                 </div>
               </div>
             </div>
@@ -249,7 +282,7 @@ export default function PreventivoTemplateBuilder() {
             </div>
           </div>
 
-          {/* ── Main: Sections list ── */}
+          {/* ── Main: Sections list with DnD ── */}
           <div className="lg:col-span-2 space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold text-foreground">Sezioni del preventivo</h2>
@@ -281,51 +314,70 @@ export default function PreventivoTemplateBuilder() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              {sezioni.map((sezione, index) => (
-                <div key={sezione.id} className={cn('bg-card rounded-2xl border-2 transition-all overflow-hidden', sezione.attiva ? 'border-border' : 'border-border/50 opacity-60')}>
-                  <div className="flex items-center gap-2 px-3 py-2.5">
-                    <GripVertical className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            <DragDropContext onDragEnd={onDragEnd}>
+              <Droppable droppableId="sezioni-list">
+                {(provided) => (
+                  <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className="space-y-2"
+                  >
+                    {sezioni.map((sezione, index) => (
+                      <Draggable key={sezione.id} draggableId={sezione.id} index={index}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            className={cn(
+                              'bg-card rounded-2xl border-2 transition-all overflow-hidden',
+                              sezione.attiva ? 'border-border' : 'border-border/50 opacity-60',
+                              snapshot.isDragging && 'shadow-lg ring-2 ring-primary/30 border-primary/40'
+                            )}
+                          >
+                            <div className="flex items-center gap-2 px-3 py-2.5">
+                              {/* Drag handle */}
+                              <div
+                                {...provided.dragHandleProps}
+                                className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-0.5"
+                              >
+                                <GripVertical className="w-4 h-4" />
+                              </div>
 
-                    {/* Move buttons */}
-                    <div className="flex flex-col gap-0.5 flex-shrink-0">
-                      <button onClick={() => moveSezione(index, -1)} disabled={index === 0} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30">
-                        <ArrowUp className="w-3 h-3" />
-                      </button>
-                      <button onClick={() => moveSezione(index, 1)} disabled={index === sezioni.length - 1} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30">
-                        <ArrowDown className="w-3 h-3" />
-                      </button>
-                    </div>
+                              <Switch checked={sezione.attiva} onCheckedChange={() => toggleSezione(sezione.id)} className="flex-shrink-0" />
+                              <span className="text-base">{TIPO_SEZIONE_META[sezione.tipo]?.emoji}</span>
+                              <input value={sezione.titolo} onChange={e => updateSezioneConfig(sezione.id, { titolo: e.target.value })}
+                                className="flex-1 text-sm font-medium text-foreground bg-transparent border-0 outline-none min-w-0" />
 
-                    <Switch checked={sezione.attiva} onCheckedChange={() => toggleSezione(sezione.id)} className="flex-shrink-0" />
-                    <span className="text-base">{TIPO_SEZIONE_META[sezione.tipo]?.emoji}</span>
-                    <input value={sezione.titolo} onChange={e => updateSezioneConfig(sezione.id, { titolo: e.target.value })}
-                      className="flex-1 text-sm font-medium text-foreground bg-transparent border-0 outline-none min-w-0" />
+                              <Badge variant="outline" className="text-xs flex-shrink-0">
+                                {sezione.sorgente === 'ai_generated' && '✨ AI'}
+                                {sezione.sorgente === 'kb_document' && '📚 KB'}
+                                {sezione.sorgente === 'renders' && '🖼️ Render'}
+                                {sezione.sorgente === 'tabella' && '📊 Tabella'}
+                                {sezione.sorgente === 'manuale' && '✏️ Manuale'}
+                              </Badge>
 
-                    <Badge variant="outline" className="text-xs flex-shrink-0">
-                      {sezione.sorgente === 'ai_generated' && '✨ AI'}
-                      {sezione.sorgente === 'kb_document' && '📚 KB'}
-                      {sezione.sorgente === 'renders' && '🖼️ Render'}
-                      {sezione.sorgente === 'tabella' && '📊 Tabella'}
-                      {sezione.sorgente === 'manuale' && '✏️ Manuale'}
-                    </Badge>
+                              <button onClick={() => setExpandedId(expandedId === sezione.id ? null : sezione.id)} className="p-1 text-muted-foreground hover:text-foreground rounded-lg">
+                                {expandedId === sezione.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                              </button>
+                              <button onClick={() => removeSezione(sezione.id)} className="p-1 text-destructive/50 hover:text-destructive rounded-lg">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
 
-                    <button onClick={() => setExpandedId(expandedId === sezione.id ? null : sezione.id)} className="p-1 text-muted-foreground hover:text-foreground rounded-lg">
-                      {expandedId === sezione.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    </button>
-                    <button onClick={() => removeSezione(sezione.id)} className="p-1 text-destructive/50 hover:text-destructive rounded-lg">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                            {expandedId === sezione.id && (
+                              <div className="px-4 pb-4 pt-1 border-t border-border bg-muted/30">
+                                <SezioneConfigPanel sezione={sezione} onChange={updates => updateSezioneConfig(sezione.id, updates)} />
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
                   </div>
-
-                  {expandedId === sezione.id && (
-                    <div className="px-4 pb-4 pt-1 border-t border-border bg-muted/30">
-                      <SezioneConfigPanel sezione={sezione} onChange={updates => updateSezioneConfig(sezione.id, updates)} />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+                )}
+              </Droppable>
+            </DragDropContext>
           </div>
         </div>
       </div>
@@ -429,6 +481,7 @@ function SezioneConfigPanel({ sezione, onChange }: { sezione: PreventivoSezione;
     case 'condizioni_contrattuali':
     case 'portfolio_riferimenti':
     case 'certificazioni':
+    case 'garanzie':
       return (
         <div className="space-y-2.5">
           <div>
@@ -455,6 +508,30 @@ function SezioneConfigPanel({ sezione, onChange }: { sezione: PreventivoSezione;
           <SwitchRow label="Mostra prezzi unitari" checked={cfg.mostra_prezzi_unitari} onChange={v => update('mostra_prezzi_unitari', v)} />
           <SwitchRow label="Mostra riga sconto" checked={cfg.mostra_sconto} onChange={v => update('mostra_sconto', v)} />
           <SwitchRow label="Mostra IVA separata" checked={cfg.mostra_iva} onChange={v => update('mostra_iva', v)} />
+        </div>
+      );
+    case 'firma_cliente':
+      return (
+        <div className="space-y-2.5">
+          <div>
+            <Label className="text-xs text-muted-foreground">Testo di accettazione</Label>
+            <Textarea
+              value={cfg.testo_accettazione || ''}
+              onChange={e => update('testo_accettazione', e.target.value)}
+              className="mt-1 text-xs resize-none"
+              rows={3}
+              placeholder="Il sottoscritto dichiara di accettare..."
+            />
+          </div>
+          <SwitchRow label="Mostra data firma" checked={cfg.mostra_data ?? true} onChange={v => update('mostra_data', v)} />
+          <SwitchRow label="Mostra timbro aziendale" checked={cfg.mostra_timbro ?? false} onChange={v => update('mostra_timbro', v)} />
+        </div>
+      );
+    case 'superfici_computo':
+      return (
+        <div className="space-y-2.5">
+          <SwitchRow label="Usa stime AI per le superfici" checked={cfg.usa_stime_ai ?? true} onChange={v => update('usa_stime_ai', v)} />
+          <SwitchRow label="Mostra livello di confidenza" checked={cfg.mostra_confidenza ?? true} onChange={v => update('mostra_confidenza', v)} />
         </div>
       );
     default:

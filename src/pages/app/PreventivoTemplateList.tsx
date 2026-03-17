@@ -1,11 +1,16 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Plus, Settings, Star, Copy, FileText } from 'lucide-react';
+import { Plus, Settings, Star, Copy, FileText, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useCompanyId } from '@/hooks/useCompanyId';
 import { toast } from 'sonner';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export default function PreventivoTemplateList() {
   const companyId = useCompanyId();
@@ -32,6 +37,24 @@ export default function PreventivoTemplateList() {
       .insert({ ...rest, company_id: companyId, nome: `${template.nome} (copia)`, is_default: false });
     if (error) { toast.error('Errore duplicazione'); return; }
     toast.success('Template duplicato!');
+    queryClient.invalidateQueries({ queryKey: ['preventivo_templates'] });
+  };
+
+  const deleteTemplate = async (id: string) => {
+    const { error } = await supabase.from('preventivo_templates').delete().eq('id', id);
+    if (error) { toast.error('Errore eliminazione'); return; }
+    toast.success('Template eliminato');
+    queryClient.invalidateQueries({ queryKey: ['preventivo_templates'] });
+  };
+
+  const setAsDefault = async (id: string) => {
+    if (!companyId) return;
+    // Remove default from all
+    await supabase.from('preventivo_templates').update({ is_default: false }).eq('company_id', companyId);
+    // Set this one
+    const { error } = await supabase.from('preventivo_templates').update({ is_default: true }).eq('id', id);
+    if (error) { toast.error('Errore'); return; }
+    toast.success('Template impostato come predefinito');
     queryClient.invalidateQueries({ queryKey: ['preventivo_templates'] });
   };
 
@@ -73,9 +96,39 @@ export default function PreventivoTemplateList() {
               </p>
             </div>
             <div className="flex items-center gap-1.5 flex-shrink-0">
+              {!t.is_default && (
+                <button
+                  onClick={() => setAsDefault(t.id)}
+                  className="p-1.5 text-muted-foreground hover:text-amber-500 hover:bg-accent rounded-lg"
+                  title="Imposta come default"
+                >
+                  <Star className="w-4 h-4" />
+                </button>
+              )}
               <button onClick={() => duplicateTemplate(t)} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg" title="Duplica">
                 <Copy className="w-4 h-4" />
               </button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-accent rounded-lg" title="Elimina">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Elimina template?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Il template "{t.nome}" verrà eliminato definitivamente. I preventivi già generati con questo template non saranno modificati.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Annulla</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => deleteTemplate(t.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      Elimina
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
               <Button asChild size="sm" variant="outline">
                 <Link to={`/app/preventivi/templates/${t.id}`}>
                   <Settings className="w-4 h-4 mr-1" /> Modifica
