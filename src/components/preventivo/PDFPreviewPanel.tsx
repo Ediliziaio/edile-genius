@@ -24,6 +24,10 @@ export function PDFPreviewPanel({
   const { generando, progresso, scaricaPDF, apriAnteprima, salvaStorage } = useGeneraPDF();
   const [iframeUrl, setIframeUrl] = useState<string | null>(null);
 
+  useEffect(() => {
+    return () => { if (iframeUrl) URL.revokeObjectURL(iframeUrl); };
+  }, [iframeUrl]);
+
   const input = { data, template, sezioniContenuto, sezioniTemplate, renderEntries };
 
   const handlePreview = async () => {

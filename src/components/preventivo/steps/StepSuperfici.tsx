@@ -20,6 +20,10 @@ export function StepSuperfici({ state, setState, companyId, preventivoId, analis
   const [previews, setPreviews] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
 
+  useEffect(() => {
+    return () => { previews.forEach(url => URL.revokeObjectURL(url)); };
+  }, [previews]);
+
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []).slice(0, 5 - photos.length);
     setPhotos(prev => [...prev, ...files]);
