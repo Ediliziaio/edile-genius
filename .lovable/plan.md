@@ -1,106 +1,215 @@
 
+# Stato Implementazione — Blocco 1-5 + Render AI + Preventivi Pro + AI Avanzata
 
-# Audit Codice Edil Genius — Piano di Intervento
+## ✅ Completato in questo blocco
 
-## Analisi Eseguita
+### Database Migration
+- Aggiunto 17 colonne ad `agents` (voice_stability, tts_model, llm_model, llm_backup_enabled, post_call_summary, voicemail_detection, etc.)
+- Aggiunto 6 colonne a `conversations` (minutes_billed, collected_data, eval_score, eval_notes, etc.)
+- Creato tabelle: ai_phone_numbers, ai_knowledge_docs, ai_agent_workflows, ai_agent_tools
+- RLS policies per tutte le nuove tabelle
 
-Ho analizzato il documento di audit a 7 fasi e verificato il codebase reale. Ecco i risultati e le azioni concrete da implementare, raggruppate per priorità.
+## ✅ Blocco 2 — Sistema Crediti Euro-based
 
----
+### Database
+- platform_pricing (8 combo LLM+TTS con costi reali/fatturati)
+- ai_credit_topups (ricariche manual/auto/promo/adjustment)
+- ai_credit_usage (consumo per conversazione con margini)
+- ai_credits: +12 colonne euro (balance_eur, auto_recharge, calls_blocked, etc.)
+- monthly_billing_summary view (security_invoker)
 
-## Risultati Security Scan
+### Edge Functions
+- check-credits-before-call: verifica saldo pre-chiamata
+- topup-credits: ricarica manuale con fattura
+- elevenlabs-webhook: post-call billing, auto-recharge, blocco
+- platform-config: +apply_global_markup action
 
-La scansione di sicurezza ha trovato **3 warning**:
-1. **Extension pgvector in public schema** — bassa priorità, comune con pgvector
-2. **Leaked Password Protection disabilitata** — da abilitare in Supabase Auth settings
-3. **`monthly_billing_summary` senza RLS** — vista con dati finanziari cross-company esposta
+### Frontend
+- Credits page: saldo euro, ricarica manuale €10/20/50/100, auto-recharge toggle, utilizzo per agente, storico
+- PlatformSettings: tab Prezzi & Markup con tabella pricing editabile
+- Sidebar: footer saldo crediti con barra e alert
+- VoiceTestPanel: check crediti pre-chiamata con blocco UI
 
----
+## ✅ Blocco 3-5 — Agent Templates System
 
-## CRITICO (Fix immediati)
+### Database
+- agent_templates + agent_template_instances + agent_reports + company_channels
+- RLS policies PERMISSIVE (fix da RESTRICTIVE)
+- Funzione DB `increment_installs_count(tpl_id UUID)`
+- Seed template "Reportistica Serale Cantiere" con n8n_workflow_json completo
 
-### C1. `monthly_billing_summary` senza RLS
-Vista con dati finanziari di tutte le aziende leggibile da chiunque sia autenticato. Serve policy che limiti l'accesso ai superadmin.
+### Edge Functions (CORS headers completi)
+- deploy-template-instance: crea agente ElevenLabs + workflow n8n + audit log
+- generate-report: estrae dati strutturati da trascrizione + genera HTML/summary
+- save-report: salva report in DB + aggiorna contatori istanza
 
-### C2. `PDFPreviewPanel` — URL.createObjectURL senza cleanup
-Linea 32: `URL.createObjectURL(blob)` assegnato a `iframeUrl` ma mai rilasciato con `revokeObjectURL`. Memory leak a ogni preview.
+### Frontend — Wizard 5 Step (TemplateSetup.tsx)
+- Step 1 Personalizza: form dinamico da config_schema, anteprima messaggio live
+- Step 2 Operai: lista card + importa CSV con template scaricabile
+- Step 3 Manager: canali multi-checkbox + anteprima email mockup HTML
+- Step 4 Canali: WA status check + Telegram con salvataggio in company_channels + link condivisione bot
+- Step 5 Attiva: riepilogo 4 card + stima costi giornaliera/mensile + crediti disponibili + 4 deploy steps visibili + salva bozza
 
-### C3. Pagina `/accetta-invito` mancante
-Il sistema inviti (`azienda_inviti` + edge function `invita-membro`) genera link con token, ma **non esiste la pagina** per accettare l'invito. Il link nell'email porta a un 404.
+### SuperAdmin
+- /superadmin/templates: CRUD completo con JSON editor per config_schema
 
----
+## ✅ Blocco 6 — Modulo Render AI (Visualizzatore Infissi)
 
-## IMPORTANTE (Fix necessari)
+### Database (5 tabelle)
+- render_provider_config, render_infissi_presets, render_sessions, render_gallery, render_credits
+- RLS PERMISSIVE per tutte le tabelle
+- Trigger set_updated_at + init_render_credits su companies
+- Funzione deduct_render_credit
+- Storage buckets: render-originals (privato), render-results (pubblico)
 
-### I1. `StepSuperfici` — URL.createObjectURL senza cleanup su unmount
-Le preview delle foto caricate non vengono rilasciate quando il componente viene smontato. Solo `removePhoto` fa cleanup.
+### Edge Functions
+- generate-render: auth + crediti + AI gateway (Gemini Flash Image) + storage + audit log
+- analyze-window-photo: analisi AI della foto (tipo finestra, materiale, dimensioni, stile)
 
-### I2. `RenderPersianeNew` — setInterval senza cleanup nel blocco catch
-Linea 248: `setInterval` per messaggi di stato. Se il rendering fallisce con un'eccezione non gestita prima di `clearInterval`, l'intervallo continua a girare.
+### Frontend
+- RenderHub, RenderNew, RenderGallery, RenderGalleryDetail
+- RenderConfig (/superadmin/render-config)
+- BeforeAfterSlider, promptBuilder.ts
 
-### I3. `as any` pervasivo (73 file, 1151 occorrenze)
-Molti `as any` sono dovuti a tabelle non presenti in `types.ts` (es. `render_bagno_sessions`, `azienda_features_sbloccate`, `render_stanza_stili_pronti`). Non sono bug di sicurezza ma impediscono il type-checking. Non risolvibili senza rigenerare i tipi Supabase — documentare per ora.
+## ✅ Blocco 7 — Preventivi Professionali (Audio + Foto → PDF Branded)
 
-### I4. Nessuna validazione input strutturata nelle Edge Functions
-Le edge functions accettano body JSON senza validazione schema (no Zod). Input malformati possono causare errori 500 non informativi.
+### Database
+- Nuova tabella `preventivo_templates` (branding, colori, testi standard, layout toggles)
+- Estensione `preventivi` con +26 colonne
+- Sequenza `preventivo_seq` per numerazione PV-YYYY-NNN
+- Storage buckets: preventivi-media (privato), template-assets (pubblico)
+- RLS company-scoped + superadmin
 
----
+### Edge Functions
+- `process-preventivo-audio` RISCRITTO
 
-## MINORE (Miglioramenti)
+### PDF Client-side (@react-pdf/renderer)
+- `src/lib/preventivo-pdf.tsx`: template PDF professionale A4
 
-### M1. `useGeneraPDF` — setTimeout senza cleanup (linea 42)
-`setTimeout(() => { setGenerando(false); }, 500)` senza `clearTimeout` nel cleanup. Basso impatto ma pattern scorretto.
+### Frontend
+- NuovoPreventivo.tsx, PreventivoDetail.tsx, PreventiviList.tsx, TemplatePreventivo.tsx
 
-### M2. Diversi `URL.createObjectURL` per download immediato
-Pattern `createObjectURL → click → revokeObjectURL` è corretto in tutti i file di download (Contacts, Analytics, FoglioPresenze). Nessun leak qui.
+## ✅ Blocco 8 — AI Avanzata P1 (Smart Actions + Lead Score + Timeline)
 
-### M3. Realtime subscriptions — tutte con cleanup
-Tutti i `supabase.channel()` trovati hanno `removeChannel` nel return del useEffect. Nessun leak.
+### Smart Actions Engine (Dashboard)
+- Espanso da 3 regole hardcoded a 10+ regole basate su dati reali:
+  - Crediti in esaurimento (danger)
+  - Agenti in bozza (warning)
+  - Agenti senza numero telefono (warning)
+  - Agenti inattivi >7 giorni (info)
+  - Contatti da richiamare con next_call_at scaduto (warning)
+  - Preventivi in bozza da >7 giorni (warning)
+  - Preventivi inviati senza risposta da >10 giorni (warning)
+  - Documenti in scadenza entro 15 giorni (warning)
+  - Campagne con tasso appuntamenti <5% (info)
+- Query Supabase dedicate per ogni regola
+- Stato "Tutto in ordine" quando nessuna azione è necessaria
+- Mostra summary delle conversazioni recenti nella tabella attività
 
----
+### Lead Score Automatico
+- `src/lib/lead-score.ts`: motore di scoring 0-100 senza LLM
+  - +30 outcome qualified/appointment
+  - +20 sentiment positivo
+  - +15 preventivo associato
+  - +10 contatto completo (tel+email)
+  - +10 callback attempts
+  - +5 fonte inbound
+  - -10 inattivo >30 giorni
+  - -20 not_interested
+  - -30 do_not_call/invalid
+- `src/components/contacts/LeadScoreBadge.tsx`: badge con tooltip fattori
+  - Compact mode per tabella (emoji + score numerico)
+  - Full mode per scheda contatto (con lista fattori)
+  - Colori: 🔴 Caldo (>60), 🟠 Tiepido (30-60), 🔵 Freddo (<30)
+- Badge integrato nella tabella contatti (nuova colonna "Score")
+- Badge integrato nell'header della scheda contatto
 
-## Piano di Implementazione
+### Timeline Unificata del Contatto
+- `ContactDetailPanel.tsx` completamente refactorato:
+  - Tab "Timeline" come default (al posto di "Info")
+  - Cronologia verticale con linea e pallini colorati per tipo:
+    - 🔵 Conversazioni (con summary, outcome, sentiment, durata)
+    - 🟡 Note manuali
+    - 🟢 Preventivi collegati (stato, importo, numero)
+    - ⚪ Eventi (contatto creato)
+  - Query preventivi per nome/telefono contatto
+  - Lead Score full display nell'header della scheda
 
-### Fase 1 — Fix critici (3 task)
+## ✅ Blocco 8 — P1-C: Call Summary Automatico
 
-1. **RLS su `monthly_billing_summary`**: Migration SQL per aggiungere policy superadmin-only sulla vista.
+### Backend
+- `supabase/functions/elevenlabs-webhook/summary.ts`: modulo separato per generazione summary
+  - Chiama OpenAI gpt-4o-mini con prompt minimale in italiano
+  - Non-blocking: se OPENAI_API_KEY non è configurata, salta silenziosamente
+  - Cap transcript a 6000 chars per contenere i costi (~$0.001/call)
+- `elevenlabs-webhook/index.ts`: importa e chiama `generateCallSummary()` dopo step 7
+  - Popola `conversations.summary` solo se la generazione ha successo
 
-2. **Memory leak PDFPreviewPanel**: Aggiungere `useEffect` cleanup per `revokeObjectURL` quando `iframeUrl` cambia o il componente si smonta.
+### Frontend (già predisposto)
+- Dashboard "Attività recente": mostra `c.summary` sotto il nome agente
+- Conversazioni: mostra summary nella tabella e nel dialog dettaglio
+- Timeline contatto: mostra summary nelle conversazioni
 
-3. **Pagina AccettaInvito**: Creare `src/pages/AccettaInvito.tsx` che:
-   - Legge `?token=xxx` dalla URL
-   - Verifica il token contro `azienda_inviti` (non scaduto, non usato)
-   - Se utente non loggato → redirect a signup con token in state
-   - Se utente loggato → aggiorna `profiles.company_id`, assegna ruolo, marca invito come usato
-   - Aggiungere route in `App.tsx`
+### Requisito SuperAdmin
+- Aggiungere OPENAI_API_KEY come Supabase Secret (da configurare via SuperAdmin)
 
-### Fase 2 — Fix importanti (2 task)
+## ✅ Blocco 9 — Audit Finale & Hardening
 
-4. **Cleanup `StepSuperfici`**: Aggiungere `useEffect` return che fa `revokeObjectURL` su tutte le preview.
+### Sicurezza Edge Functions
+- Validazione JWT (getClaims) aggiunta a: generate-render, crm-sync, deploy-template-instance, process-preventivo-audio, generate-preventivo-pdf
+- Verifica tenant (company_id cross-check) aggiunta a tutte le funzioni interne
+- Funzioni webhook esterne (elevenlabs-webhook, whatsapp-webhook, telegram-cantiere-webhook) lasciate senza JWT (corretto)
 
-5. **Cleanup interval `RenderPersianeNew`** e simili: Assicurarsi che `clearInterval` sia chiamato anche nel catch, non solo nel try. Stesso pattern in `RenderBagnoNew` e `RenderFacciataNew`.
+### Atomicità Crediti
+- Creata RPC `topup_credits(_company_id, _amount_eur)` con UPDATE atomico
+- topup-credits edge function refactorato per usare RPC
 
-### Fase 3 — Miglioramenti (1 task)
+### UX — Progressive Disclosure Sidebar
+- Sezioni OPERATIVITÀ e STRUMENTI AI visibili solo se il settore è rilevante o se esistono dati
+- Campi vuoti nelle conversazioni nascosti (eval_score, minutes_billed, cost_billed_eur)
 
-6. **Abilitare Leaked Password Protection**: Istruzione per l'utente di attivarlo in Supabase Dashboard → Auth → Settings.
+### UX — Dead-End Fix
+- Card CRM e Webhooks in Integrazioni: badge "Prossimamente" + bottoni disabilitati
 
-### Cosa NON implementare
+### Signup Self-Service
+- Pagina /signup con form registrazione
+- Edge function self-service-signup: crea company (trial 14gg) + profilo + ruolo company_admin
 
-- **CORS restrictivo per produzione**: Prematura — il progetto non è ancora in produzione con dominio custom.
-- **Rate limiting via DB**: Complessità eccessiva per lo stato attuale. Il sistema crediti già limita l'uso.
-- **Zod in tutte le edge functions**: Scope troppo ampio per un singolo intervento. Raccomandato come task separato futuro.
-- **Refactoring `as any`**: Richiede rigenerazione tipi Supabase che non possiamo fare qui.
+### AI Avanzata P2
+- Follow-up Generator: edge function generate-followup (GPT-4o-mini) + bottone in ContactDetailPanel
+- Opportunity Recovery: Smart Actions per lead qualificati dormenti >5 giorni
+- Campi conversazione vuoti nascosti per UX più pulita
 
----
+## ✅ Blocco 10 — Criticità Pre-Lancio Risolte
 
-## Stima Effort
+### Database
+- Rimossi RLS duplicati su `ai_credits` (2 policy rimossi: `company_ai_credits_select`, `superadmin_ai_credits`)
+- Rimosso indice duplicato `idx_topups_stripe_session` su `ai_credit_topups`
+- `topup_credits` RPC riscritta con `FOR UPDATE` lock (come `deduct_call_credits`)
+- Aggiunta funzione `reset_agents_calls_month()` per cron mensile
 
-| Task | Effort |
-|------|--------|
-| C1. RLS monthly_billing_summary | 5 min (SQL) |
-| C2. Fix PDFPreviewPanel leak | 5 min |
-| C3. Pagina AccettaInvito | 30 min |
-| I1. Fix StepSuperfici cleanup | 5 min |
-| I2. Fix interval cleanup render pages | 10 min |
-| **Totale** | **~55 min** |
+### Auth Edge Functions (25 file corretti)
+- Sostituito `supabase.auth.getClaims(token)` (non-standard) con `supabase.auth.getUser(token)` in tutte le Edge Functions
+- Aggiornato helper condiviso `_shared/utils.ts` → `authenticateRequest()`
 
+### Frontend
+- `Credits.tsx`: aggiunto `companyId` come dipendenza del useEffect per il polling post-pagamento Stripe
+
+### Stripe Webhook
+- Insert topup record: aggiunto error handling per violazione unique constraint
+- Documentato comportamento auto-recharge (crediti senza addebito Stripe)
+
+### Secrets da configurare (azione manuale)
+- `STRIPE_SECRET_KEY` — per pagamenti
+- `STRIPE_WEBHOOK_SECRET` — per webhook Stripe
+- `OPENAI_API_KEY` — per AI summary e follow-up
+- `META_ENCRYPTION_KEY` — per cifratura token WhatsApp
+- `RESEND_API_KEY` — per invio email
+
+## 🔜 Prossimi Step
+
+### P3 — Avanzato / successivo
+- Personalizzazione regole Smart Actions per admin
+- Report settimanale automatico via email al titolare
+- Trend predittivo su tasso conversione
+- Auto-recharge con addebito Stripe reale (attualmente wallet-based)

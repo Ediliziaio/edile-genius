@@ -22,6 +22,7 @@ import Shell from "./components/layout/Shell";
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PublicShareViewer = lazy(() => import("./pages/public/PublicShareViewer"));
+const AccettaInvito = lazy(() => import("./pages/AccettaInvito"));
 
 // Lazy-loaded marketing pages
 const Solutions = lazy(() => import("./pages/Solutions"));
@@ -164,6 +165,7 @@ const App = () => (
             <Route path="/offerta/preventivatore-ai" element={<SafeRoute><OffertaPreventivatoreAI /></SafeRoute>} />
             <Route path="/offerta/pacchetto-completo" element={<SafeRoute><OffertaPacchettoCompleto /></SafeRoute>} />
             <Route path="/offerta-unica" element={<SafeRoute><OffertaUnica /></SafeRoute>} />
+            <Route path="/accetta-invito" element={<SafeRoute><AccettaInvito /></SafeRoute>} />
 
             {/* SuperAdmin routes */}
             <Route element={<AuthGuard requiredRole="superadmin" />}>

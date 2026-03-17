@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGeneraPDF } from '@/hooks/useGeneraPDF';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -23,6 +23,10 @@ export function PDFPreviewPanel({
 }: PDFPreviewPanelProps) {
   const { generando, progresso, scaricaPDF, apriAnteprima, salvaStorage } = useGeneraPDF();
   const [iframeUrl, setIframeUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => { if (iframeUrl) URL.revokeObjectURL(iframeUrl); };
+  }, [iframeUrl]);
 
   const input = { data, template, sezioniContenuto, sezioniTemplate, renderEntries };
 
