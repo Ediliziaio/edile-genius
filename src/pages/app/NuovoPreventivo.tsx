@@ -264,26 +264,37 @@ export default function NuovoPreventivo() {
         </div>
       </div>
 
-      {/* Step indicator */}
-      <div className="flex gap-1.5">
-        {STEPS.map((s, i) => (
-          <button
-            key={s.key}
-            onClick={() => i < step && setStep(i)}
-            className={`flex-1 h-1.5 rounded-full transition-colors ${
-              i < step ? 'bg-primary' : i === step ? 'bg-primary/70' : 'bg-muted'
-            } ${i < step ? 'cursor-pointer' : 'cursor-default'}`}
-          />
-        ))}
-      </div>
-
-      {/* Step labels */}
-      <div className="hidden md:flex gap-1.5">
-        {STEPS.map((s, i) => (
-          <span key={s.key} className={`flex-1 text-center text-xs ${i <= step ? 'text-foreground' : 'text-muted-foreground'}`}>
-            {s.label}
-          </span>
-        ))}
+      {/* Step indicator — numbered circles */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          {STEPS.map((s, i) => {
+            const isCompleted = i < step;
+            const isCurrent = i === step;
+            return (
+              <div key={s.key} className="flex flex-col items-center flex-1 gap-1">
+                <button
+                  onClick={() => handleStepClick(i)}
+                  disabled={i >= step}
+                  className={`
+                    h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold transition-all
+                    ${isCompleted
+                      ? 'bg-primary text-primary-foreground cursor-pointer hover:opacity-80'
+                      : isCurrent
+                        ? 'bg-primary/20 text-primary ring-2 ring-primary ring-offset-2 ring-offset-background'
+                        : 'bg-muted text-muted-foreground cursor-default'
+                    }
+                  `}
+                >
+                  {isCompleted ? <Check className="h-4 w-4" /> : i + 1}
+                </button>
+                <span className={`hidden md:block text-[10px] text-center leading-tight ${isCurrent ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                  {s.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        <Progress value={((step) / (STEPS.length - 1)) * 100} className="h-1.5" />
       </div>
 
       {/* Steps content */}
