@@ -1,33 +1,47 @@
 
 
-# Doc 7/7: Hub + Integration + Test — Gap Analysis & Plan
+# Impostazioni Azienda + Sistema Permessi — Gap Analysis
 
 ## Already Implemented
 
-Everything Doc 7 proposes is already in place:
+All database tables, hooks, components, and edge functions described in this prompt already exist:
 
-- **PreventivoHub page** (`src/pages/app/PreventivoHub.tsx`) — Full hub with hero, KPIs, onboarding steps, tabs (overview/KB/template), recent preventivi list, quick actions. Working.
-- **Routes** — All routes exist in `src/App.tsx`: `/app/preventivo-hub`, `/app/preventivi`, `/app/preventivi/nuovo`, `/app/preventivi/:id`, `/app/preventivo-kb`, `/app/preventivi/templates`, `/app/preventivi/templates/nuovo`, `/app/preventivi/templates/:id`.
-- **Sidebar navigation** — "VENDITE AVANZATE" section in `SidebarNav.tsx` with Hub Preventivi, Tutti i Preventivi, Knowledge Base, Template links.
-- **Email edge function** (`supabase/functions/invia-preventivo-email/index.ts`) — Already enhanced in Doc 5 with PDF base64 attachment + HTML fallback link.
-- **Storage buckets** — `preventivo-kb` and `preventivi-pdf` already exist.
-- **DB function** — `genera_numero_preventivo()` trigger exists, `search_kb_chunks()` RPC exists.
+### Database (confirmed in types.ts)
+- **`piattaforma_features`** — Feature catalog with `id`, `nome`, `descrizione`, `categoria`, `icona`, `crediti_per_uso`. Uses `company_id` referencing `companies`.
+- **`azienda_features_sbloccate`** — Company feature unlocks with `company_id`, `feature_id`, `limite_mensile`, `attivo`, `sbloccato_il`, `scade_il`.
+- **`user_feature_permissions`** — Per-user permissions with `company_id`, `user_id`, `feature_id`, `abilitato`, `limite_mensile`, `limite_giornaliero`.
+- **`user_feature_usage`** — Usage tracking with `company_id`, `user_id`, `feature_id`, `usato_il`, `dettagli`.
+- **`azienda_inviti`** — Invite system with `company_id`, `email`, `ruolo`, `token`, `scade_il`, `accettato`.
 
-## What Doc 7 Proposes vs What Exists
+### Hooks
+- **`useAziendaSettings`** (`src/hooks/useAziendaSettings.ts`) — Feature queries, member management, invite, remove, role change mutations.
+- **`useCheckPermesso`** (`src/hooks/useCheckPermesso.ts`) — 3-level permission check (company feature → user permission → monthly usage limit) + `registraUtilizzo` utility.
 
-Doc 7 references `azienda_id`, `azienda_members`, and `aziende` tables — none of these exist. The project uses `company_id` / `companies` / `profiles.company_id`. The doc's SQL migrations would fail. The RLS policies it proposes are incompatible with the actual schema.
+### Components
+- **`TabProfilo`** — Company + personal profile management.
+- **`TabPiano`** — Plan display with feature catalog, usage progress bars, category grouping.
+- **`TabUtenti`** — Team member list, role management, invite/remove with confirmation dialogs.
+- **`UserPermissionsModal`** — Per-user feature toggle + monthly/daily limits + usage progress bars.
+- **`InvitaUtenteModal`** — Email + role selection (admin/membro).
+- **Settings page** (`src/pages/app/Settings.tsx`) — Hub with 7-tab sidebar navigation.
 
-The doc also proposes installing `jspdf`, `html2canvas`, `@hello-pangea/dnd` — unnecessary since the project uses `@react-pdf/renderer` for PDF and already has drag-and-drop in the template builder.
+### Edge Function
+- **`invita-membro`** — Creates invite record, sends email via Resend with accept link.
 
-## Gaps
+### Routes & Navigation
+- Routes configured in `App.tsx` under `/app/settings`.
+- Sidebar navigation includes settings link.
 
-**None.** All functionality described in Doc 7 is already implemented and working. The hub page, routes, sidebar navigation, email function, storage, and database functions are all in place.
+## Incompatibilities in the Prompt
 
-The only pending items from earlier docs remain:
-- `GEMINI_API_KEY` — not configured (deferred by user)
-- `RESEND_API_KEY` — not configured (deferred by user)
+The prompt uses `azienda_id` referencing `auth.users(id)` and references non-existent tables (`team_members`, `profiles.ruolo`, `profiles.nome_azienda`). The actual schema uses:
+- `company_id` referencing `companies(id)`
+- Members tracked via `profiles.company_id` (no `team_members` table)
+- Roles in `user_roles` table (not `profiles.ruolo`)
 
-## Recommendation
+The prompt's SQL would create duplicate/conflicting tables and break the existing system.
 
-No code changes needed. Doc 7/7 is complete. The full Generatore Preventivo AI system (Docs 1-7) is implemented.
+## Conclusion
+
+**No changes needed.** The entire permissions system described in this prompt is already fully implemented and working with the correct schema conventions (`company_id` / `companies` / `profiles`).
 
