@@ -27,8 +27,20 @@ export function usePreventivo(preventivoId?: string) {
       return data as unknown as Preventivo;
     },
     refetchInterval: (query) => {
-      const p = query.state.data;
-      return (p as Preventivo | undefined)?.stato === 'generazione' ? 2000 : false;
+      const p = query.state.data as Preventivo | undefined;
+      if (p?.stato !== 'generazione') return false;
+      // Timeout: if stuck in 'generazione' for >10 min, reset to 'bozza'
+      const updatedAt = (p as any)?.updated_at;
+      if (updatedAt) {
+        const elapsed = Date.now() - new Date(updatedAt).getTime();
+        if (elapsed > 10 * 60 * 1000) {
+          supabase.from('preventivi')
+            .update({ stato: 'bozza' } as any)
+            .eq('id', preventivoId!);
+          return false;
+        }
+      }
+      return 2000;
     },
   });
 
