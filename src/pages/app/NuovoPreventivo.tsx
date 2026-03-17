@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useCompanyId } from '@/hooks/useCompanyId';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { StepDatiCliente } from '@/components/preventivo/steps/StepDatiCliente';
@@ -35,6 +36,7 @@ export default function NuovoPreventivo() {
   const [searchParams] = useSearchParams();
 
   const [step, setStep] = useState(0);
+  const [direction, setDirection] = useState(1);
   const [state, setState] = useState<PreventivoLocalState>(INITIAL_STATE);
   const [preventivoId, setPreventivoId] = useState<string | null>(null);
   const [sezioni, setSezioni] = useState<PreventivoSezione[]>(() => SEZIONI_DEFAULT.map(s => ({ ...s, id: crypto.randomUUID() })));
@@ -152,19 +154,28 @@ export default function NuovoPreventivo() {
   }, [companyId, state, sezioniContenuto, preventivoId, templateConfig]);
 
   const handleNext = async () => {
-    // Validate step 0
     if (step === 0 && !state.clienteNome.trim()) {
       toast.error('Il nome cliente è obbligatorio');
       return;
     }
-    // Auto-save on transition
     await saveToDb();
+    setDirection(1);
     setStep(s => Math.min(s + 1, STEPS.length - 1));
   };
 
   const handleBack = () => {
     if (step === 0) navigate('/app/preventivi');
-    else setStep(s => s - 1);
+    else {
+      setDirection(-1);
+      setStep(s => s - 1);
+    }
+  };
+
+  const handleStepClick = (i: number) => {
+    if (i < step) {
+      setDirection(-1);
+      setStep(i);
+    }
   };
 
   const handleAudioProcessed = (result: any) => {
@@ -253,35 +264,47 @@ export default function NuovoPreventivo() {
         </div>
       </div>
 
-      {/* Step indicator */}
-      <div className="flex gap-1.5">
-        {STEPS.map((s, i) => (
-          <button
-            key={s.key}
-            onClick={() => i < step && setStep(i)}
-            className={`flex-1 h-1.5 rounded-full transition-colors ${
-              i < step ? 'bg-primary' : i === step ? 'bg-primary/70' : 'bg-muted'
-            } ${i < step ? 'cursor-pointer' : 'cursor-default'}`}
-          />
-        ))}
-      </div>
-
-      {/* Step labels */}
-      <div className="hidden md:flex gap-1.5">
-        {STEPS.map((s, i) => (
-          <span key={s.key} className={`flex-1 text-center text-xs ${i <= step ? 'text-foreground' : 'text-muted-foreground'}`}>
-            {s.label}
-          </span>
-        ))}
+      {/* Step indicator — numbered circles */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          {STEPS.map((s, i) => {
+            const isCompleted = i < step;
+            const isCurrent = i === step;
+            return (
+              <div key={s.key} className="flex flex-col items-center flex-1 gap-1">
+                <button
+                  onClick={() => handleStepClick(i)}
+                  disabled={i >= step}
+                  className={`
+                    h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold transition-all
+                    ${isCompleted
+                      ? 'bg-primary text-primary-foreground cursor-pointer hover:opacity-80'
+                      : isCurrent
+                        ? 'bg-primary/20 text-primary ring-2 ring-primary ring-offset-2 ring-offset-background'
+                        : 'bg-muted text-muted-foreground cursor-default'
+                    }
+                  `}
+                >
+                  {isCompleted ? <Check className="h-4 w-4" /> : i + 1}
+                </button>
+                <span className={`hidden md:block text-[10px] text-center leading-tight ${isCurrent ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                  {s.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        <Progress value={((step) / (STEPS.length - 1)) * 100} className="h-1.5" />
       </div>
 
       {/* Steps content */}
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" custom={direction}>
         <motion.div
           key={step}
-          initial={{ opacity: 0, x: 20 }}
+          custom={direction}
+          initial={{ opacity: 0, x: direction * 40 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
+          exit={{ opacity: 0, x: direction * -40 }}
           transition={{ duration: 0.2 }}
         >
           {step === 0 && <StepDatiCliente {...stepProps} />}

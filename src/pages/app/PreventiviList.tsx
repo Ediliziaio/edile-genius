@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, FileText, Mic, Euro, CheckCircle, XCircle, Send, Clock } from "lucide-react";
+import { Plus, Search, FileText, Mic, Euro, CheckCircle, XCircle, Send, Clock, TrendingUp } from "lucide-react";
 
 const statoBadge: Record<string, { class: string; icon: React.ReactNode }> = {
   bozza: { class: "bg-yellow-100 text-yellow-800", icon: <Clock className="h-3 w-3" /> },
@@ -52,6 +52,9 @@ export default function PreventiviList() {
   const totaleInAttesa = all.filter((p: any) => p.stato === "inviato").length;
   const valoreAccettati = all.filter((p: any) => p.stato === "accettato").reduce((s: number, p: any) => s + (p.totale_finale || p.totale || 0), 0);
   const totaleValore = all.reduce((s: number, p: any) => s + (p.totale_finale || p.totale || 0), 0);
+  const totaleAccettati = all.filter((p: any) => p.stato === "accettato").length;
+  const totaleDecisi = all.filter((p: any) => ["accettato", "rifiutato", "inviato"].includes(p.stato)).length;
+  const tassoConversione = totaleDecisi > 0 ? Math.round((totaleAccettati / totaleDecisi) * 100) : 0;
 
   return (
     <div className="space-y-6">
@@ -66,7 +69,7 @@ export default function PreventiviList() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-foreground">{all.length}</p>
@@ -89,6 +92,15 @@ export default function PreventiviList() {
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-green-600">€{valoreAccettati.toFixed(0)}</p>
             <p className="text-xs text-muted-foreground">Valore accettati</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="flex items-center justify-center gap-1">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              <p className="text-2xl font-bold text-primary">{tassoConversione}%</p>
+            </div>
+            <p className="text-xs text-muted-foreground">Conversione</p>
           </CardContent>
         </Card>
       </div>
