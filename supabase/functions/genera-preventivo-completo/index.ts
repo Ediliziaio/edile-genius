@@ -41,11 +41,28 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Update stato to generazione
-    await supabase
+    // Idempotency guard: reject if already generating
+    if (prev.stato === "generazione") {
+      return new Response(
+        JSON.stringify({ error: "Generazione già in corso", code: "ALREADY_GENERATING" }),
+        { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Conditional update: only if stato hasn't changed (optimistic lock)
+    const { data: lockResult } = await supabase
       .from("preventivi")
       .update({ stato: "generazione" })
-      .eq("id", preventivoId);
+      .eq("id", preventivoId)
+      .neq("stato", "generazione")
+      .select("id");
+
+    if (!lockResult || lockResult.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Generazione già in corso", code: "ALREADY_GENERATING" }),
+        { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const contesto = {
       clienteNome: prev.cliente_nome,
