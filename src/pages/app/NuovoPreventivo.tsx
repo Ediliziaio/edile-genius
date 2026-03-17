@@ -37,6 +37,7 @@ export default function NuovoPreventivo() {
 
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
+  const [state, setState] = useState<PreventivoLocalState>(INITIAL_STATE);
   const [preventivoId, setPreventivoId] = useState<string | null>(null);
   const [sezioni, setSezioni] = useState<PreventivoSezione[]>(() => SEZIONI_DEFAULT.map(s => ({ ...s, id: crypto.randomUUID() })));
   const [sezioniContenuto, setSezioniContenuto] = useState<Record<string, SezioneContenuto>>({});
