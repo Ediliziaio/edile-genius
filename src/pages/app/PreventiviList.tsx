@@ -52,6 +52,9 @@ export default function PreventiviList() {
   const totaleInAttesa = all.filter((p: any) => p.stato === "inviato").length;
   const valoreAccettati = all.filter((p: any) => p.stato === "accettato").reduce((s: number, p: any) => s + (p.totale_finale || p.totale || 0), 0);
   const totaleValore = all.reduce((s: number, p: any) => s + (p.totale_finale || p.totale || 0), 0);
+  const totaleAccettati = all.filter((p: any) => p.stato === "accettato").length;
+  const totaleDecisi = all.filter((p: any) => ["accettato", "rifiutato", "inviato"].includes(p.stato)).length;
+  const tassoConversione = totaleDecisi > 0 ? Math.round((totaleAccettati / totaleDecisi) * 100) : 0;
 
   return (
     <div className="space-y-6">
