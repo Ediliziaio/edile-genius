@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, FileText, Mic, Euro, CheckCircle, XCircle, Send, Clock } from "lucide-react";
+import { Plus, Search, FileText, Mic, Euro, CheckCircle, XCircle, Send, Clock, TrendingUp } from "lucide-react";
 
 const statoBadge: Record<string, { class: string; icon: React.ReactNode }> = {
   bozza: { class: "bg-yellow-100 text-yellow-800", icon: <Clock className="h-3 w-3" /> },
