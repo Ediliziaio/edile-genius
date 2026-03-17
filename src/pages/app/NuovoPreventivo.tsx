@@ -5,7 +5,8 @@ import { useCompanyId } from '@/hooks/useCompanyId';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { StepDatiCliente } from '@/components/preventivo/steps/StepDatiCliente';
