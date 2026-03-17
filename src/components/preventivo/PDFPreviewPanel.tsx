@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGeneraPDF } from '@/hooks/useGeneraPDF';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
