@@ -237,6 +237,52 @@ Includi una call-to-action professionale.
 ${istruzioniCustom}`;
         break;
 
+      case "condizioni_contrattuali":
+        promptSpecifico = `Scrivi la sezione "Condizioni Contrattuali" per un preventivo edilizio.
+${kbContesto ? `\nUsa ESCLUSIVAMENTE queste informazioni contrattuali dalla knowledge base aziendale:\n${kbContesto}\nNON inventare clausole, modalità di pagamento o tempistiche non presenti.` : "\nNessuna informazione contrattuale specifica disponibile nella knowledge base. Scrivi condizioni standard di settore."}
+
+Includi se disponibili: modalità di pagamento, tempistiche lavori, clausole standard, gestione varianti in corso d'opera, validità del preventivo.
+Se le informazioni non sono nella KB, usa formule generiche come "da concordare" o "secondo accordi".
+
+Contesto progetto:
+- Cliente: ${contesto.clienteNome || "non specificato"}
+- Lavori: ${contesto.oggettoLavori || "ristrutturazione"}
+
+Usa ${tono}, ${lunghezza}.
+${istruzioniCustom}`;
+        break;
+
+      case "garanzie":
+        promptSpecifico = `Scrivi la sezione "Garanzie e Assistenza Post-Vendita" per un preventivo edilizio.
+${kbContesto ? `\nUsa ESCLUSIVAMENTE queste informazioni sulle garanzie dalla knowledge base aziendale:\n${kbContesto}\nNON inventare durate, coperture o certificazioni non presenti.` : "\nNessuna garanzia specifica nella knowledge base. Usa le garanzie standard di settore: garanzia biennale per difetti di conformità (D.Lgs 206/2005), garanzia decennale per vizi strutturali (art. 1669 c.c.)."}
+
+Includi: garanzia sui lavori eseguiti, garanzia sui materiali, assistenza post-vendita, modalità di segnalazione difetti.
+
+Usa ${tono}, ${lunghezza}.
+${istruzioniCustom}`;
+        break;
+
+      case "superfici_computo": {
+        const superficiData = contesto.superficiStimate?.superfici?.length
+          ? `Superfici analizzate da AI:\n${contesto.superficiStimate.superfici.map((s) => `- ${s.elemento}: ~${s.mq_stimati} mq (confidenza: ${s.confidenza})`).join("\n")}`
+          : "Nessuna superficie analizzata disponibile.";
+        promptSpecifico = `Scrivi la sezione "Analisi Superfici e Computo Metrico" per un preventivo edilizio.
+
+${superficiData}
+
+Cantiere: ${contesto.indirizzoCantiere || "non specificato"}
+Lavori previsti: ${contesto.oggettoLavori || "ristrutturazione"}
+${kbContesto ? `\nRiferimenti tecnici dalla knowledge base:\n${kbContesto}` : ""}
+
+Presenta le superfici stimate in modo chiaro e professionale.
+Se disponibili, indica il livello di confidenza delle stime (alta ±10%, media ±25%, bassa ±40%).
+NON inventare metrature non fornite nei dati sopra.
+
+Usa ${tono}, ${lunghezza}.
+${istruzioniCustom}`;
+        break;
+      }
+
       default:
         promptSpecifico = `Scrivi la sezione "${titoloSezione}" per un preventivo di ristrutturazione.
 ${kbContesto ? `\nRiferito a questi contenuti aziendali:\n${kbContesto}` : ""}
