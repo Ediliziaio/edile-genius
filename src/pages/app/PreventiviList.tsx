@@ -69,7 +69,7 @@ export default function PreventiviList() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-foreground">{all.length}</p>
@@ -92,6 +92,15 @@ export default function PreventiviList() {
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-green-600">€{valoreAccettati.toFixed(0)}</p>
             <p className="text-xs text-muted-foreground">Valore accettati</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="flex items-center justify-center gap-1">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              <p className="text-2xl font-bold text-primary">{tassoConversione}%</p>
+            </div>
+            <p className="text-xs text-muted-foreground">Conversione</p>
           </CardContent>
         </Card>
       </div>

@@ -298,12 +298,13 @@ export default function NuovoPreventivo() {
       </div>
 
       {/* Steps content */}
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" custom={direction}>
         <motion.div
           key={step}
-          initial={{ opacity: 0, x: 20 }}
+          custom={direction}
+          initial={{ opacity: 0, x: direction * 40 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
+          exit={{ opacity: 0, x: direction * -40 }}
           transition={{ duration: 0.2 }}
         >
           {step === 0 && <StepDatiCliente {...stepProps} />}
