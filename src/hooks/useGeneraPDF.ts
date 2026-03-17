@@ -16,6 +16,15 @@ export function useGeneraPDF() {
   const [progresso, setProgresso] = useState(0);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
+  // Cleanup object URLs to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (pdfUrl && pdfUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    };
+  }, [pdfUrl]);
+
   const generaPDF = useCallback(async (input: GeneraPDFInput): Promise<Blob | null> => {
     setGenerando(true);
     setProgresso(10);
