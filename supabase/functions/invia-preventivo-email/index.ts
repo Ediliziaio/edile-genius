@@ -74,6 +74,31 @@ Deno.serve(async (req: Request) => {
     );
   }
 
+  // Try to download PDF from storage for attachment
+  let pdfAttachment: { filename: string; content: string } | null = null;
+  const pdfPath = (preventivo as Record<string, unknown>).pdf_path as string | undefined;
+
+  if (pdfPath) {
+    try {
+      const { data: pdfFile } = await supabase.storage
+        .from("preventivi-pdf")
+        .download(pdfPath);
+      if (pdfFile) {
+        const pdfBytes = await pdfFile.arrayBuffer();
+        const pdfBase64 = btoa(
+          String.fromCharCode(...new Uint8Array(pdfBytes))
+        );
+        pdfAttachment = {
+          filename: `Preventivo_${preventivo.numero_preventivo || preventivo_id}.pdf`,
+          content: pdfBase64,
+        };
+      }
+    } catch {
+      // If download fails, fall back to link-only
+      console.warn("Could not download PDF for attachment, using link only");
+    }
+  }
+
   // Build HTML email
   const brandColor = "#2563EB";
   const totalFormatted = preventivo.totale_lordo
@@ -96,6 +121,19 @@ Deno.serve(async (req: Request) => {
     ? `<p style="margin:16px 0;color:#334155">${messaggio_personalizzato}</p>`
     : "";
 
+  const downloadUrl = pdf_url || (preventivo as Record<string, unknown>).pdf_url as string || "";
+  const downloadButtonHtml = downloadUrl
+    ? `<div style="text-align:center;margin:24px 0">
+        <a href="${downloadUrl}" style="background:${brandColor};color:white;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
+          📥 Scarica il Preventivo PDF
+        </a>
+      </div>`
+    : "";
+
+  const attachmentNote = pdfAttachment
+    ? `<p style="font-size:13px;color:#64748b;text-align:center">Il preventivo è anche allegato a questa email.</p>`
+    : "";
+
   const emailHtml = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"/></head>
 <body style="margin:0;padding:0;background:#f1f5f9;font-family:system-ui,sans-serif">
@@ -111,11 +149,8 @@ Deno.serve(async (req: Request) => {
       <strong>Importo totale: € ${totalFormatted}</strong>
       ${validitaHtml}
     </div>
-    <div style="text-align:center;margin:24px 0">
-      <a href="${pdf_url}" style="background:${brandColor};color:white;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">
-        📥 Scarica il Preventivo PDF
-      </a>
-    </div>
+    ${downloadButtonHtml}
+    ${attachmentNote}
     <p style="font-size:13px;color:#64748b;text-align:center">
       Per accettare l'offerta o richiedere modifiche, rispondi direttamente a questa email.
     </p>
@@ -140,18 +175,24 @@ Deno.serve(async (req: Request) => {
     );
   }
 
+  const emailPayload: Record<string, unknown> = {
+    from: `${companyName || "Preventivo"} <noreply@resend.dev>`,
+    to: [preventivo.cliente_email],
+    subject: `Preventivo N° ${preventivo.numero_preventivo || ""} — ${companyName}`,
+    html: emailHtml,
+  };
+
+  if (pdfAttachment) {
+    emailPayload.attachments = [pdfAttachment];
+  }
+
   const emailRes = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${RESEND_KEY}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      from: `${companyName || "Preventivo"} <noreply@resend.dev>`,
-      to: [preventivo.cliente_email],
-      subject: `Preventivo N° ${preventivo.numero_preventivo || ""} — ${companyName}`,
-      html: emailHtml,
-    }),
+    body: JSON.stringify(emailPayload),
   });
 
   if (!emailRes.ok) {

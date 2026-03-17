@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useGeneraPDF } from '@/hooks/useGeneraPDF';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Download, Eye, ExternalLink, FileText, Loader2 } from 'lucide-react';
+import { Download, Eye, ExternalLink, FileText, Loader2, Send } from 'lucide-react';
 import type { PreventivoData, TemplateConfig, SezioneContenuto, RenderEntry } from '@/lib/preventivo-pdf';
 import type { PreventivoSezione } from '@/modules/preventivo/types';
 
@@ -14,11 +14,12 @@ interface PDFPreviewPanelProps {
   renderEntries?: RenderEntry[];
   preventivoId?: string;
   companyId?: string;
+  onInvia?: () => void;
 }
 
 export function PDFPreviewPanel({
   data, template, sezioniContenuto, sezioniTemplate, renderEntries,
-  preventivoId, companyId,
+  preventivoId, companyId, onInvia,
 }: PDFPreviewPanelProps) {
   const { generando, progresso, scaricaPDF, apriAnteprima, salvaStorage } = useGeneraPDF();
   const [iframeUrl, setIframeUrl] = useState<string | null>(null);
@@ -26,8 +27,6 @@ export function PDFPreviewPanel({
   const input = { data, template, sezioniContenuto, sezioniTemplate, renderEntries };
 
   const handlePreview = async () => {
-    const { generaPDF } = await import('@/hooks/useGeneraPDF').then(() => ({ generaPDF: null }));
-    // Use inline generation for iframe
     const { getPreventivoBlob } = await import('@/lib/preventivo-pdf');
     const blob = await getPreventivoBlob(data, template, sezioniContenuto, sezioniTemplate, renderEntries);
     const url = URL.createObjectURL(blob);
@@ -75,6 +74,18 @@ export function PDFPreviewPanel({
           >
             <FileText className="w-4 h-4" />
             Salva e Genera PDF
+          </Button>
+        )}
+        {onInvia && (
+          <Button
+            size="sm"
+            variant="default"
+            className="gap-2"
+            onClick={onInvia}
+            disabled={generando}
+          >
+            <Send className="w-4 h-4" />
+            Invia al Cliente
           </Button>
         )}
       </div>
