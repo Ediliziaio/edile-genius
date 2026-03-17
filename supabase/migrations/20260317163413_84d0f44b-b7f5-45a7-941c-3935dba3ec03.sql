@@ -1,0 +1,1 @@
+CREATE POLICY "pricing_read" ON public.platform_pricing FOR SELECT TO authenticated USING (true);
