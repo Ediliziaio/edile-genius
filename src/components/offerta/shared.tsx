@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Shield, ArrowRight, Star, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
+import logoGreen from "@/assets/logo-green.png";
 
 /* ── Framer variants ── */
 export const staggerContainer = {
