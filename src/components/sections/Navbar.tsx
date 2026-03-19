@@ -82,7 +82,7 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
     >
       <div className="max-w-6xl mx-auto px-6 h-[68px] flex items-center justify-between">
         <Link to="/">
-          <img src={isDark ? logoWhite : logoGreen} alt="Edilizia.io" className="h-8 w-auto" />
+          <img src={isDark ? logoWhite : logoGreen} alt="Edilizia.io" className="h-10 w-auto" />
         </Link>
 
         {/* Desktop Links */}
