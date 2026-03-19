@@ -80,9 +80,9 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
       animate={{ y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
-      <div className="max-w-6xl mx-auto px-6 h-[68px] flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-6 h-[76px] flex items-center justify-between">
         <Link to="/">
-          <img src={isDark ? logoWhite : logoGreen} alt="Edilizia.io" className="h-10 w-auto" />
+          <img src={isDark ? logoWhite : logoGreen} alt="Edilizia.io" className="h-14 w-auto" />
         </Link>
 
         {/* Desktop Links */}
