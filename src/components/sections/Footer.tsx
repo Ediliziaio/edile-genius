@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import logoWhite from "@/assets/logo-white.png";
 
 type FooterLink = string | { label: string; href: string };
 
