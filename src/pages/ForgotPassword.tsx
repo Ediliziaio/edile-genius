@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ArrowLeft, Mail } from "lucide-react";
+import logoGreen from "@/assets/logo-green.png";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -39,9 +40,7 @@ export default function ForgotPassword() {
 
       <div className="relative z-10 w-full max-w-[400px]">
         <div className="mb-8 text-center">
-          <span className="text-[22px] font-bold text-ink-900">
-            edilizia<span className="text-brand">.io</span>
-          </span>
+          <img src={logoGreen} alt="Edilizia.io" className="h-8 w-auto" />
         </div>
 
         <div className="w-full rounded-card p-10 bg-white border border-ink-200 shadow-card">

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Shield, ArrowRight, Star, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
+import logoGreen from "@/assets/logo-green.png";
 
 /* ── Framer variants ── */
 export const staggerContainer = {
@@ -165,9 +166,7 @@ export function OfferHeader({ ctaText, onCtaClick, navLinks = [] }: OfferHeaderP
       <div className="container mx-auto flex h-[68px] items-center justify-between px-4 gap-4">
         {/* Logo — matches homepage Navbar exactly */}
         <Link to="/" className="flex flex-col shrink-0">
-          <span className="font-display text-[22px] font-extrabold text-foreground">
-            edilizia<span className="text-primary">.io</span>
-          </span>
+          <img src={logoGreen} alt="Edilizia.io" className="h-7 w-auto" />
           <span className="font-mono text-[10px] uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5 rounded-full -mt-0.5 w-fit">
             AI per l'Edilizia
           </span>

@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import logoGreen from "@/assets/logo-green.png";
+import logoWhite from "@/assets/logo-white.png";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown, Wrench, Building, Building2, Factory, DoorOpen, Sun, Hammer, HardHat, Grid3x3, Umbrella, Droplets, Zap, PaintBucket, Compass } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
@@ -80,9 +82,7 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
     >
       <div className="max-w-6xl mx-auto px-6 h-[68px] flex items-center justify-between">
         <Link to="/" className="flex flex-col">
-          <span className={`font-display text-[22px] font-extrabold ${isDark ? "text-white" : "text-neutral-900"}`}>
-            edilizia<span className="text-primary">.io</span>
-          </span>
+          <img src={isDark ? logoWhite : logoGreen} alt="Edilizia.io" className="h-8 w-auto" />
           <span className="font-mono text-[10px] uppercase tracking-wider bg-primary-light text-primary-dark px-2 py-0.5 rounded-full -mt-0.5 w-fit">
             AI per l'Edilizia
           </span>

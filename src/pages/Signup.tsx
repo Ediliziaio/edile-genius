@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useEffect } from "react";
+import logoGreen from "@/assets/logo-green.png";
 
 export default function Signup() {
   const [fullName, setFullName] = useState("");
@@ -86,9 +87,7 @@ export default function Signup() {
 
       <div className="relative z-10 w-full max-w-[420px]">
         <div className="mb-8 text-center">
-          <span className="text-[22px] font-bold text-ink-900">
-            edilizia<span className="text-brand">.io</span>
-          </span>
+          <img src={logoGreen} alt="Edilizia.io" className="h-8 w-auto" />
         </div>
 
         <div className="w-full rounded-card p-10 bg-white border border-ink-200 shadow-card">

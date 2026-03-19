@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useEffect } from "react";
+import logoGreen from "@/assets/logo-green.png";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -58,9 +59,7 @@ export default function Login() {
       <div className="relative z-10 w-full max-w-[400px]">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <span className="text-[22px] font-bold text-ink-900">
-            edilizia<span className="text-brand">.io</span>
-          </span>
+          <img src={logoGreen} alt="Edilizia.io" className="h-8 w-auto" />
         </div>
 
         {/* Login Card */}
