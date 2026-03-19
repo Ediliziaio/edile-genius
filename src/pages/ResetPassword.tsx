@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import logoGreen from "@/assets/logo-green.png";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
