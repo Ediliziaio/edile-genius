@@ -34,9 +34,7 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8 md:gap-10 mb-10">
           {/* Logo col */}
           <div className="space-y-4">
-            <span className="font-display text-[22px] font-extrabold text-white">
-              edilizia<span className="text-primary">.io</span>
-            </span>
+            <img src={logoWhite} alt="Edilizia.io" className="h-7 w-auto" />
             <p className="text-sm text-neutral-500 leading-relaxed">
               La prima azienda AI specializzata esclusivamente per il settore edile italiano.
             </p>

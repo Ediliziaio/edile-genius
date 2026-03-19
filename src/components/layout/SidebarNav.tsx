@@ -189,9 +189,7 @@ export default function SidebarNav({ onNavigate }: SidebarNavProps) {
   return (
     <div className="flex flex-col h-full">
       <div className="p-5">
-        <span className="text-lg font-bold text-foreground">
-          edilizia<span className="text-primary">.io</span>
-        </span>
+        <img src={logoGreen} alt="Edilizia.io" className="h-7 w-auto" />
       </div>
 
       <nav className="flex-1 px-3 py-2 overflow-auto space-y-5">
