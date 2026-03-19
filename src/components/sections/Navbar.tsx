@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import logoGreen from "@/assets/logo-green.png";
+import logoWhite from "@/assets/logo-white.png";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown, Wrench, Building, Building2, Factory, DoorOpen, Sun, Hammer, HardHat, Grid3x3, Umbrella, Droplets, Zap, PaintBucket, Compass } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
