@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useEffect } from "react";
+import logoGreen from "@/assets/logo-green.png";
 
 export default function Signup() {
   const [fullName, setFullName] = useState("");
