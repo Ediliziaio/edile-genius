@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import logoGreen from "@/assets/logo-green.png";
 import { useAuth } from "@/context/AuthContext";
 import { useImpersonation } from "@/context/ImpersonationContext";
 import { useEffect, useState } from "react";
