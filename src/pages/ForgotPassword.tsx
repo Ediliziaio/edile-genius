@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ArrowLeft, Mail } from "lucide-react";
+import logoGreen from "@/assets/logo-green.png";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
