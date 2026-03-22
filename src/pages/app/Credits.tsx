@@ -262,36 +262,50 @@ export default function CreditsPage() {
             <h2 className="text-lg font-bold text-foreground">Pacchetti Crediti</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {packages.map((pkg) => (
-              <Card
-                key={pkg.id}
-                className={`relative cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 ${pkg.badge ? "border-primary/30 shadow-md" : ""}`}
-                onClick={() => setConfirmPackage(pkg)}
-              >
-                {pkg.badge && (
-                  <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-3">
-                    <Sparkles className="h-3 w-3 mr-1" />
-                    {pkg.badge}
-                  </Badge>
-                )}
-                <CardContent className="p-6 text-center space-y-3 pt-6">
-                  <p className="text-sm font-semibold text-muted-foreground">{pkg.name}</p>
-                  <p className="text-4xl font-extrabold text-foreground">
-                    {Number(pkg.credits_eur) > 0 ? Number(pkg.credits_eur).toFixed(0) : "—"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">crediti conversazionali</p>
-                  {Number(pkg.credits_eur) > 0 && Number(pkg.price_eur) > 0 && (
-                    <p className="text-xs text-primary font-medium">
-                      {(Number(pkg.credits_eur) / Number(pkg.price_eur)).toFixed(1)} crediti/€
-                    </p>
-                  )}
-                  <p className="text-lg font-bold text-primary">€{Number(pkg.price_eur).toFixed(0)}</p>
-                  <Button className="w-full" variant={pkg.badge ? "default" : "outline"} size="sm">
-                    Acquista
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+            {(() => {
+              // Tasso base = primo pacchetto attivo (sort_order più basso)
+              const baseRate = packages.length > 0 && Number(packages[0].price_eur) > 0
+                ? Number(packages[0].credits_eur) / Number(packages[0].price_eur)
+                : 0;
+              return packages.map((pkg) => {
+                const pkgRate = Number(pkg.price_eur) > 0 ? Number(pkg.credits_eur) / Number(pkg.price_eur) : 0;
+                const savingPct = baseRate > 0 && pkgRate > baseRate
+                  ? Math.round(((pkgRate - baseRate) / baseRate) * 100)
+                  : 0;
+                return (
+                  <Card
+                    key={pkg.id}
+                    className={`relative cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 ${pkg.badge ? "border-primary/30 shadow-md" : ""}`}
+                    onClick={() => setConfirmPackage(pkg)}
+                  >
+                    {pkg.badge && (
+                      <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-3">
+                        <Sparkles className="h-3 w-3 mr-1" />
+                        {pkg.badge}
+                      </Badge>
+                    )}
+                    <CardContent className="p-6 text-center space-y-3 pt-6">
+                      <p className="text-sm font-semibold text-muted-foreground">{pkg.name}</p>
+                      <p className="text-4xl font-extrabold text-foreground">
+                        {Number(pkg.credits_eur) > 0 ? Number(pkg.credits_eur).toFixed(0) : "—"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">crediti conversazionali</p>
+                      {savingPct > 0 ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-bold dark:bg-green-900/40 dark:text-green-400">
+                          🎉 RISPARMIO {savingPct}%
+                        </span>
+                      ) : (
+                        <span className="inline-block h-5" />
+                      )}
+                      <p className="text-lg font-bold text-primary">€{Number(pkg.price_eur).toFixed(0)}</p>
+                      <Button className="w-full" variant={pkg.badge ? "default" : "outline"} size="sm">
+                        Acquista
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              });
+            })()}
           </div>
           <p className="text-xs text-muted-foreground mt-3 flex items-center justify-center gap-1">
             <Lock className="w-3 h-3" />
