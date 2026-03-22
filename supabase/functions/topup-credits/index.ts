@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { companyId, amountEur, packageId, paymentMethod, paymentRef, type } = await req.json();
+    const { companyId, amountEur, creditsToAdd: clientCreditsToAdd, packageId, paymentMethod, paymentRef, type } = await req.json();
 
     if (!companyId) {
       return new Response(JSON.stringify({ error: "companyId richiesto" }), { status: 400, headers: corsHeaders });
@@ -85,7 +85,20 @@ Deno.serve(async (req) => {
         );
       }
       finalAmountEur = amountEur;
-      finalCreditsEur = amountEur; // 1:1 for free topups
+
+      // Se il frontend ha già calcolato i crediti (con il tasso configurato), usali.
+      // Altrimenti leggi il tasso da platform_config.
+      if (typeof clientCreditsToAdd === "number" && clientCreditsToAdd > 0) {
+        finalCreditsEur = clientCreditsToAdd;
+      } else {
+        const { data: platformCfg } = await sb
+          .from("platform_config")
+          .select("crediti_per_euro")
+          .limit(1)
+          .single();
+        const rate = Number(platformCfg?.crediti_per_euro ?? 10);
+        finalCreditsEur = Math.round(amountEur * rate);
+      }
 
     } else {
       return new Response(

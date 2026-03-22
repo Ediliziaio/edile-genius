@@ -54,6 +54,10 @@ interface CreditPackage {
   sort_order: number;
 }
 
+interface PlatformConfig {
+  crediti_per_euro: number;
+}
+
 const ERROR_MESSAGES: Record<string, string> = {
   stripe_auth_error: "Problema di configurazione pagamenti. Contatta il supporto.",
   stripe_unavailable: "Pagamenti temporaneamente non disponibili. Riprova tra qualche minuto.",
@@ -71,6 +75,7 @@ export default function CreditsPage() {
   const [usage, setUsage] = useState<UsageRow[]>([]);
   const [agentNames, setAgentNames] = useState<Record<string, string>>({});
   const [packages, setPackages] = useState<CreditPackage[]>([]);
+  const [creditRate, setCreditRate] = useState<number>(10); // default 10 crediti per €1
   const [loading, setLoading] = useState(true);
   const [selectedAmount, setSelectedAmount] = useState<number | null>(20);
   const [customAmount, setCustomAmount] = useState("");
@@ -80,12 +85,13 @@ export default function CreditsPage() {
 
   const fetchAll = useCallback(async () => {
     if (!companyId) return;
-    const [creditsRes, topupsRes, usageRes, agentsRes, packagesRes] = await Promise.all([
+    const [creditsRes, topupsRes, usageRes, agentsRes, packagesRes, platformRes] = await Promise.all([
       supabase.from("ai_credits").select("*").eq("company_id", companyId).single(),
       supabase.from("ai_credit_topups").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).limit(20),
       supabase.from("ai_credit_usage").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).limit(30),
       supabase.from("agents").select("id, name").eq("company_id", companyId),
       supabase.from("ai_credit_packages").select("*").eq("is_active", true).order("sort_order"),
+      supabase.from("platform_config").select("crediti_per_euro").limit(1).single(),
     ]);
 
     if (creditsRes.data) setCredits(creditsRes.data as unknown as Credits);
@@ -97,6 +103,7 @@ export default function CreditsPage() {
       setAgentNames(map);
     }
     if (packagesRes.data) setPackages(packagesRes.data as unknown as CreditPackage[]);
+    if (platformRes.data?.crediti_per_euro) setCreditRate(Number(platformRes.data.crediti_per_euro));
     setLoading(false);
   }, [companyId]);
 
@@ -158,12 +165,14 @@ export default function CreditsPage() {
 
   const topupAmount = selectedAmount ?? (parseFloat(customAmount) || 0);
 
+  const creditsToAdd = Math.round(topupAmount * creditRate);
+
   const handleTopup = async () => {
     if (topupAmount < 5) { toast({ variant: "destructive", title: "Minimo €5" }); return; }
     setProcessing(true);
     try {
       const { data, error } = await supabase.functions.invoke("topup-credits", {
-        body: { companyId, amountEur: topupAmount, paymentMethod: "manual", type: "manual" },
+        body: { companyId, amountEur: topupAmount, creditsToAdd, paymentMethod: "manual", type: "manual" },
       });
       if (error || data?.error) throw new Error(data?.error || error?.message);
       toast({ title: "Ricarica completata", description: `Nuovo saldo: ${Math.round(Number(data.new_balance_eur))} crediti` });
@@ -277,6 +286,7 @@ export default function CreditsPage() {
         onSelectAmount={setSelectedAmount}
         onCustomAmountChange={setCustomAmount}
         onConfirm={() => setConfirmModal(true)}
+        creditRate={creditRate}
       />
 
       <CreditsUsageTabs usage={usage} topups={topups} agentNames={agentNames} />
@@ -286,9 +296,10 @@ export default function CreditsPage() {
         <DialogContent>
           <DialogHeader><DialogTitle>Conferma Ricarica</DialogTitle></DialogHeader>
           <Card className="bg-muted/50"><CardContent className="p-5 space-y-2">
-            <div className="flex justify-between"><span className="text-sm text-muted-foreground">Importo:</span><span className="font-bold">€{topupAmount.toFixed(2)}</span></div>
+            <div className="flex justify-between"><span className="text-sm text-muted-foreground">Importo pagato:</span><span className="font-bold">€{topupAmount.toFixed(2)}</span></div>
+            <div className="flex justify-between"><span className="text-sm text-muted-foreground">Crediti aggiunti:</span><span className="font-bold text-primary">+{creditsToAdd} crediti</span></div>
             <div className="flex justify-between"><span className="text-sm text-muted-foreground">Saldo attuale:</span><span className="font-mono">{Math.round(credits.balance_eur)} crediti</span></div>
-            <div className="flex justify-between border-t pt-2"><span className="text-sm font-semibold">Saldo dopo ricarica:</span><span className="font-bold text-primary">{Math.round(credits.balance_eur + topupAmount)} crediti</span></div>
+            <div className="flex justify-between border-t pt-2"><span className="text-sm font-semibold">Saldo dopo ricarica:</span><span className="font-bold text-primary">{Math.round(credits.balance_eur) + creditsToAdd} crediti</span></div>
           </CardContent></Card>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmModal(false)}>Annulla</Button>

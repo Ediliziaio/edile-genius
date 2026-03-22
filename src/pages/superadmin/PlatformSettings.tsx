@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import {
   CheckCircle, XCircle, RefreshCw, Cpu, DollarSign, Package,
   Loader2, Plus, Pencil, Trash2, Zap, Clock, Brain, Save,
-  MessageSquare, Eye, EyeOff, Workflow
+  MessageSquare, Eye, EyeOff, Workflow, Coins
 } from "lucide-react";
 
 interface PlatformConfig {
@@ -25,6 +25,7 @@ interface PlatformConfig {
   el_default_llm: string;
   el_default_voice_id: string | null;
   credit_markup: number;
+  crediti_per_euro: number;
   cost_per_min_real: number;
   cost_per_min_billed: number;
   updated_at: string;
@@ -73,6 +74,8 @@ export default function PlatformSettings() {
   const [saving, setSaving] = useState(false);
   const [selectedLlm, setSelectedLlm] = useState("");
   const [globalMarkup, setGlobalMarkup] = useState("2.0");
+  const [creditiPerEuro, setCreditiPerEuro] = useState("10");
+  const [savingCreditRate, setSavingCreditRate] = useState(false);
   const [pkgModal, setPkgModal] = useState(false);
   const [editingPkg, setEditingPkg] = useState<CreditPackage | null>(null);
   const [pkgForm, setPkgForm] = useState({ name: "", minutes: "", price_eur: "", badge: "", sort_order: "" });
@@ -103,8 +106,26 @@ export default function PlatformSettings() {
     if (data?.config) {
       setConfig(data.config);
       setSelectedLlm(data.config.el_default_llm);
+      if (data.config.crediti_per_euro) setCreditiPerEuro(String(data.config.crediti_per_euro));
     }
   }, []);
+
+  const saveCreditiPerEuro = async () => {
+    const rate = parseFloat(creditiPerEuro);
+    if (isNaN(rate) || rate <= 0) {
+      toast({ variant: "destructive", title: "Valore non valido" });
+      return;
+    }
+    setSavingCreditRate(true);
+    try {
+      await supabase.from("platform_config").update({ crediti_per_euro: rate } as any).not("id", "is", null);
+      toast({ title: "✅ Tasso crediti salvato", description: `1€ = ${rate} crediti` });
+    } catch {
+      toast({ variant: "destructive", title: "Errore nel salvataggio" });
+    } finally {
+      setSavingCreditRate(false);
+    }
+  };
 
   const fetchPricing = useCallback(async () => {
     const { data } = await supabase.from("platform_pricing").select("*").order("cost_real_per_min");
@@ -441,6 +462,47 @@ export default function PlatformSettings() {
 
         {/* TAB: Pricing — NEW with platform_pricing table */}
         <TabsContent value="pricing" className="space-y-6">
+
+          {/* Tasso Crediti per Euro */}
+          <Card className="border-yellow-400/40 bg-yellow-50/40 dark:bg-yellow-950/10">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Coins className="h-5 w-5 text-yellow-600" />
+                Tasso Crediti per Euro
+              </CardTitle>
+              <CardDescription>
+                Quanti crediti riceve un'azienda per ogni €1 pagato (ricarica manuale).
+                I pacchetti hanno il proprio tasso configurato separatamente.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div>
+                  <Label className="text-xs text-muted-foreground">Crediti per €1</Label>
+                  <Input
+                    type="number"
+                    step="1"
+                    min="1"
+                    value={creditiPerEuro}
+                    onChange={(e) => setCreditiPerEuro(e.target.value)}
+                    className="w-28 text-center text-lg font-mono mt-1"
+                  />
+                </div>
+                <Button onClick={saveCreditiPerEuro} disabled={savingCreditRate} size="sm" variant="outline">
+                  {savingCreditRate ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Save className="h-4 w-4 mr-1" />}
+                  Salva
+                </Button>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-muted-foreground bg-background border rounded-lg px-4 py-2.5">
+                <span>Esempio: €10 →</span>
+                <span className="font-bold text-primary text-lg">{Math.round(10 * (parseFloat(creditiPerEuro) || 10))} crediti</span>
+                <span className="mx-2">·</span>
+                <span>€100 →</span>
+                <span className="font-bold text-primary text-lg">{Math.round(100 * (parseFloat(creditiPerEuro) || 10))} crediti</span>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Global Markup */}
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader>
