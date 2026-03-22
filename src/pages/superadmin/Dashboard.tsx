@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   Building2, Bot, Phone, DollarSign, ArrowRight, Plus, Users,
-  AlertTriangle, TrendingUp, Coins, Image, BarChart3, Cpu, ArrowUpDown,
+  AlertTriangle, TrendingUp, Coins, Image, ArrowUpDown,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";

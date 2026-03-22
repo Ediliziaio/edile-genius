@@ -13,7 +13,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  ArrowLeft, ArrowRight, CheckCircle, FileText, Upload,
+  ArrowLeft, ArrowRight, CheckCircle, FileText,
   Zap, MessageSquare, Loader2, ExternalLink, BookOpen,
   Settings2, Sparkles, Palette, Building2, Info,
 } from "lucide-react";
@@ -149,17 +149,19 @@ export default function PreventivoAgentSetup() {
   /* ── Precarica dati azienda esistenti ── */
   useEffect(() => {
     if (!companyId) return;
+    // Usa select("*") per includere colonne non ancora nel tipo generato (brand_color, email)
     supabase
       .from("companies")
-      .select("name, logo_url, brand_color, phone, email, website")
+      .select("*")
       .eq("id", companyId)
       .single()
       .then(({ data }) => {
         if (!data) return;
-        if (data.name)                         setNomeImpresa(data.name);
-        if (data.logo_url)                     setLogoUrl(data.logo_url);
-        if ((data as any).brand_color)         setBrandColor((data as any).brand_color);
-        if ((data as any).email)               setEmailFirma((data as any).email);
+        const d = data as any;
+        if (d.name)        setNomeImpresa(d.name);
+        if (d.logo_url)    setLogoUrl(d.logo_url);
+        if (d.brand_color) setBrandColor(d.brand_color);
+        if (d.email)       setEmailFirma(d.email);
       });
   }, [companyId]);
 
