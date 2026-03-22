@@ -79,26 +79,31 @@ Deno.serve(async (req) => {
 
     } else if (typeof clientCreditsToAdd === "number" && clientCreditsToAdd > 0) {
       // Superadmin aggiunge crediti diretti (senza passare per €)
-      finalAmountEur = 0;
+      finalAmountEur = clientCreditsToAdd; // registrato come importo per compatibilità
       finalCreditsEur = clientCreditsToAdd;
 
     } else if (amountEur) {
-      if (typeof amountEur !== "number" || amountEur < 5 || amountEur > 2000) {
+      if (typeof amountEur !== "number" || amountEur < 1 || amountEur > 100000) {
         return new Response(
-          JSON.stringify({ error: "Importo non valido. Min €5, Max €2.000." }),
+          JSON.stringify({ error: "Importo non valido." }),
           { status: 400, headers: corsHeaders }
         );
       }
       finalAmountEur = amountEur;
 
-      // Leggi il tasso da platform_config e applica la conversione
-      const { data: platformCfg } = await sb
-        .from("platform_config")
-        .select("crediti_per_euro")
-        .limit(1)
-        .single();
-      const rate = Number(platformCfg?.crediti_per_euro ?? 10);
-      finalCreditsEur = Math.round(amountEur * rate);
+      // Adjustment da superadmin → 1:1 senza conversione tasso
+      if (type === "adjustment") {
+        finalCreditsEur = amountEur;
+      } else {
+        // Acquisto normale → applica tasso configurato
+        const { data: platformCfg } = await sb
+          .from("platform_config")
+          .select("crediti_per_euro")
+          .limit(1)
+          .single();
+        const rate = Number(platformCfg?.crediti_per_euro ?? 10);
+        finalCreditsEur = Math.round(amountEur * rate);
+      }
 
     } else {
       return new Response(

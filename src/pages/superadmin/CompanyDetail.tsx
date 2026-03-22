@@ -133,8 +133,8 @@ export default function CompanyDetail() {
       const { data, error } = await supabase.functions.invoke("topup-credits", {
         body: {
           companyId: id,
-          amountEur: 0,
-          creditsToAdd: amt,
+          amountEur: amt,   // 1:1 → amt crediti aggiunti al saldo
+          creditsToAdd: amt, // usato dalla versione aggiornata della edge function
           paymentMethod: "manual_admin",
           type: "adjustment",
           paymentRef: creditNote || null,
