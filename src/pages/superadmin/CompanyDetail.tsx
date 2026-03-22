@@ -11,7 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import StatsCard from "@/components/superadmin/StatsCard";
-import { ArrowLeft, Bot, Phone, MessageSquare, Save, Loader2, UserCheck, Lock, Unlock } from "lucide-react";
+import { ArrowLeft, Bot, Phone, MessageSquare, Save, Loader2, UserCheck, Lock, Unlock, Coins, Gift, RefreshCw } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
 import { useImpersonation } from "@/context/ImpersonationContext";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -41,6 +43,13 @@ export default function CompanyDetail() {
   const [conversationsCount, setConversationsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  // Crediti
+  const [creditBalance, setCreditBalance] = useState<number | null>(null);
+  const [creditTopups, setCreditTopups] = useState<any[]>([]);
+  const [creditAmount, setCreditAmount] = useState("100");
+  const [creditNote, setCreditNote] = useState("");
+  const [addingCredits, setAddingCredits] = useState(false);
 
   const [editName, setEditName] = useState("");
   const [editSector, setEditSector] = useState("");
@@ -72,14 +81,18 @@ export default function CompanyDetail() {
   useEffect(() => {
     if (!id) return;
     const load = async () => {
-      const [compRes, agentsRes, convsRes] = await Promise.all([
+      const [compRes, agentsRes, convsRes, creditsRes, topupsRes] = await Promise.all([
         supabase.from("companies").select("*").eq("id", id).single(),
         supabase.from("agents").select("*").eq("company_id", id),
         supabase.from("conversations").select("id", { count: "exact", head: true }).eq("company_id", id),
+        supabase.from("ai_credits").select("balance_eur").eq("company_id", id).maybeSingle(),
+        supabase.from("ai_credit_topups").select("amount_eur, type, created_at, notes, invoice_number").eq("company_id", id).order("created_at", { ascending: false }).limit(5),
       ]);
       if (compRes.data) { setCompany(compRes.data); setEditName(compRes.data.name); setEditSector(compRes.data.sector || ""); setEditPlan(compRes.data.plan || "starter"); setEditStatus(compRes.data.status || "active"); }
       setAgents(agentsRes.data || []);
       setConversationsCount(convsRes.count || 0);
+      if (creditsRes.data) setCreditBalance(Number(creditsRes.data.balance_eur));
+      if (topupsRes.data) setCreditTopups(topupsRes.data);
       setLoading(false);
     };
     load();
@@ -109,6 +122,37 @@ export default function CompanyDetail() {
     setSaving(false);
     if (error) toast({ title: "Errore", description: error.message, variant: "destructive" });
     else { toast({ title: "Salvato", description: "Azienda aggiornata con successo." }); setCompany((prev) => prev ? { ...prev, name: editName, sector: editSector || null, plan: editPlan, status: editStatus } : prev); }
+  };
+
+  const handleAddCredits = async () => {
+    if (!id) return;
+    const amt = parseInt(creditAmount);
+    if (!amt || amt <= 0) { toast({ variant: "destructive", title: "Inserisci un numero di crediti valido" }); return; }
+    setAddingCredits(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("topup-credits", {
+        body: {
+          companyId: id,
+          amountEur: 0,
+          creditsToAdd: amt,
+          paymentMethod: "manual_admin",
+          type: "adjustment",
+          paymentRef: creditNote || null,
+        },
+      });
+      if (error || data?.error) throw new Error(data?.error || error?.message);
+      toast({ title: "✅ Crediti aggiunti", description: `${amt} crediti aggiunti a ${company?.name}` });
+      setCreditBalance(prev => (prev ?? 0) + amt);
+      setCreditAmount("100");
+      setCreditNote("");
+      // Ricarica topups
+      const { data: newTopups } = await supabase.from("ai_credit_topups").select("amount_eur, type, created_at, notes, invoice_number").eq("company_id", id).order("created_at", { ascending: false }).limit(5);
+      if (newTopups) setCreditTopups(newTopups);
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Errore", description: err.message });
+    } finally {
+      setAddingCredits(false);
+    }
   };
 
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-brand" /></div>;
@@ -243,7 +287,97 @@ export default function CompanyDetail() {
           </div>
         </TabsContent>
 
-        <TabsContent value="config">
+        <TabsContent value="config" className="space-y-4">
+
+          {/* ── SEZIONE CREDITI ───────────────────────── */}
+          <div className="rounded-card border border-ink-200 bg-white p-6 space-y-5 shadow-card">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Coins className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold text-ink-900">Crediti</h3>
+              </div>
+              {creditBalance !== null && (
+                <div className="text-right">
+                  <p className="text-2xl font-extrabold text-primary">{Math.round(creditBalance)}</p>
+                  <p className="text-xs text-muted-foreground">crediti disponibili</p>
+                </div>
+              )}
+            </div>
+
+            {/* Form ricarica */}
+            <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 space-y-4">
+              <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+                <Gift className="h-4 w-4" />
+                Aggiungi crediti gratuiti
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-xs text-ink-600">Crediti da aggiungere</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={creditAmount}
+                    onChange={e => setCreditAmount(e.target.value)}
+                    placeholder="Es. 100"
+                    className="text-lg font-bold"
+                  />
+                </div>
+                <div className="flex gap-2 items-end">
+                  {[100, 250, 500, 1000].map(n => (
+                    <Button key={n} variant="outline" size="sm" className="flex-1 text-xs" onClick={() => setCreditAmount(String(n))}>
+                      {n}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-ink-600">Nota interna (opzionale)</Label>
+                <Textarea
+                  value={creditNote}
+                  onChange={e => setCreditNote(e.target.value)}
+                  placeholder="Es. Credito promozionale onboarding, rimborso, ecc."
+                  rows={2}
+                  className="resize-none text-sm"
+                />
+              </div>
+              <Button
+                onClick={handleAddCredits}
+                disabled={addingCredits || !creditAmount || parseInt(creditAmount) <= 0}
+                className="w-full"
+              >
+                {addingCredits
+                  ? <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  : <Gift className="h-4 w-4 mr-2" />}
+                Aggiungi {creditAmount || "0"} crediti a {company?.name}
+              </Button>
+            </div>
+
+            {/* Ultimi movimenti */}
+            {creditTopups.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+                  <RefreshCw className="h-3 w-3" /> Ultime ricariche
+                </p>
+                <div className="space-y-1.5">
+                  {creditTopups.map((t, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs py-1.5 border-b last:border-0">
+                      <div>
+                        <span className="font-mono font-semibold">+{Math.round(t.amount_eur)} cr</span>
+                        {t.notes && <span className="text-muted-foreground ml-2">— {t.notes}</span>}
+                      </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <span className="capitalize">{t.type}</span>
+                        <span>{new Date(t.created_at).toLocaleDateString("it-IT")}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── MODIFICA AZIENDA ─────────────────────── */}
           <div className="rounded-card border border-ink-200 bg-white p-6 space-y-5 shadow-card">
             <h3 className="text-lg font-semibold text-ink-900">Modifica Azienda</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -259,6 +393,7 @@ export default function CompanyDetail() {
               Salva modifiche
             </Button>
           </div>
+
         </TabsContent>
       </Tabs>
     </div>
