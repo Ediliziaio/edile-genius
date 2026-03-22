@@ -10,7 +10,7 @@ import {
   BookUser, Megaphone, type LucideIcon,
   AlertTriangle, MessageCircle, Puzzle, Palette, HardHat, Bath, Home, Layers, BookOpen,
   FileSignature, ShieldCheck, ClipboardList, Wand2,
-  Coins, ChevronDown, Clock, Zap, Activity, CalendarClock,
+  Coins, ChevronDown, Clock, Zap, Activity, CalendarClock, Key,
 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { differenceInDays } from "date-fns";
@@ -75,6 +75,7 @@ const superadminNav: NavSection[] = [
   ]},
   { header: "PIATTAFORMA", items: [
     { label: "Impostazioni", icon: Settings, href: "/superadmin/platform-settings" },
+    { label: "API Keys", icon: Key, href: "/superadmin/api-keys" },
   ]},
 ];
 
