@@ -47,6 +47,7 @@ interface CreditPackage {
   name: string;
   minutes: number;
   price_eur: number;
+  credits_eur: number;
   price_per_min: number;
   badge: string | null;
   is_active: boolean;
@@ -78,7 +79,7 @@ export default function PlatformSettings() {
   const [savingCreditRate, setSavingCreditRate] = useState(false);
   const [pkgModal, setPkgModal] = useState(false);
   const [editingPkg, setEditingPkg] = useState<CreditPackage | null>(null);
-  const [pkgForm, setPkgForm] = useState({ name: "", minutes: "", price_eur: "", badge: "", sort_order: "" });
+  const [pkgForm, setPkgForm] = useState({ name: "", credits_eur: "", price_eur: "", badge: "", sort_order: "" });
 
   // WhatsApp API state
   const [waConfig, setWaConfig] = useState<any>(null);
@@ -273,16 +274,30 @@ export default function PlatformSettings() {
   const openPkgModal = (pkg?: CreditPackage) => {
     if (pkg) {
       setEditingPkg(pkg);
-      setPkgForm({ name: pkg.name, minutes: String(pkg.minutes), price_eur: String(pkg.price_eur), badge: pkg.badge || "", sort_order: String(pkg.sort_order) });
+      setPkgForm({
+        name: pkg.name,
+        credits_eur: String(pkg.credits_eur || pkg.minutes || ""),
+        price_eur: String(pkg.price_eur),
+        badge: pkg.badge || "",
+        sort_order: String(pkg.sort_order),
+      });
     } else {
       setEditingPkg(null);
-      setPkgForm({ name: "", minutes: "", price_eur: "", badge: "", sort_order: String(packages.length + 1) });
+      setPkgForm({ name: "", credits_eur: "", price_eur: "", badge: "", sort_order: String(packages.length + 1) });
     }
     setPkgModal(true);
   };
 
   const savePkg = async () => {
-    const row = { name: pkgForm.name, minutes: parseInt(pkgForm.minutes), price_eur: parseFloat(pkgForm.price_eur), badge: pkgForm.badge || null, sort_order: parseInt(pkgForm.sort_order) || 0 };
+    const credits = parseFloat(pkgForm.credits_eur);
+    const price = parseFloat(pkgForm.price_eur);
+    const row = {
+      name: pkgForm.name,
+      credits_eur: credits,
+      price_eur: price,
+      badge: pkgForm.badge || null,
+      sort_order: parseInt(pkgForm.sort_order) || 0,
+    };
     if (editingPkg) {
       await supabase.from("ai_credit_packages").update(row).eq("id", editingPkg.id);
     } else {
@@ -290,6 +305,7 @@ export default function PlatformSettings() {
     }
     setPkgModal(false);
     fetchPackages();
+    toast({ title: "✅ Pacchetto salvato", description: `€${price} → ${credits} crediti` });
   };
 
   const saveWaConfig = async () => {
@@ -627,8 +643,8 @@ export default function PlatformSettings() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>Pacchetti Crediti (Legacy)</CardTitle>
-                <CardDescription>Pacchetti minuti — il nuovo sistema usa saldi in Euro</CardDescription>
+                <CardTitle>Pacchetti Crediti</CardTitle>
+                <CardDescription>Configura i pacchetti acquistabili dalle aziende. Ogni pacchetto definisce il prezzo in € e i crediti ricevuti.</CardDescription>
               </div>
               <Button onClick={() => openPkgModal()} size="sm"><Plus className="h-4 w-4 mr-1" /> Aggiungi</Button>
             </CardHeader>
@@ -642,7 +658,10 @@ export default function PlatformSettings() {
                           <p className="font-medium text-foreground">{pkg.name}</p>
                           {pkg.badge && <Badge variant="secondary">{pkg.badge}</Badge>}
                         </div>
-                        <p className="text-sm text-muted-foreground">{pkg.minutes} min · €{pkg.price_eur} · €{pkg.price_per_min?.toFixed(4)}/min</p>
+                        <p className="text-sm text-muted-foreground">
+                          €{pkg.price_eur} → <strong>{pkg.credits_eur ?? pkg.minutes ?? "?"} crediti</strong>
+                          {pkg.credits_eur && pkg.price_eur ? <span className="text-primary ml-1">({(pkg.credits_eur / pkg.price_eur).toFixed(1)} crediti/€)</span> : null}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -873,19 +892,44 @@ export default function PlatformSettings() {
         <DialogContent>
           <DialogHeader><DialogTitle>{editingPkg ? "Modifica Pacchetto" : "Nuovo Pacchetto"}</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2"><Label>Nome</Label><Input value={pkgForm.name} onChange={(e) => setPkgForm({ ...pkgForm, name: e.target.value })} /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Minuti</Label><Input type="number" value={pkgForm.minutes} onChange={(e) => setPkgForm({ ...pkgForm, minutes: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Prezzo (€)</Label><Input type="number" step="0.01" value={pkgForm.price_eur} onChange={(e) => setPkgForm({ ...pkgForm, price_eur: e.target.value })} /></div>
+            <div className="space-y-2">
+              <Label>Nome pacchetto</Label>
+              <Input value={pkgForm.name} onChange={(e) => setPkgForm({ ...pkgForm, name: e.target.value })} placeholder="Es. Starter, Pro, Business" />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Badge</Label><Input value={pkgForm.badge} onChange={(e) => setPkgForm({ ...pkgForm, badge: e.target.value })} placeholder="Es. Popolare" /></div>
-              <div className="space-y-2"><Label>Ordine</Label><Input type="number" value={pkgForm.sort_order} onChange={(e) => setPkgForm({ ...pkgForm, sort_order: e.target.value })} /></div>
+              <div className="space-y-2">
+                <Label>Prezzo (€)</Label>
+                <Input type="number" step="1" min="1" value={pkgForm.price_eur} onChange={(e) => setPkgForm({ ...pkgForm, price_eur: e.target.value })} placeholder="49" />
+                <p className="text-xs text-muted-foreground">Quanto paga l'azienda</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Crediti ricevuti</Label>
+                <Input type="number" step="1" min="1" value={pkgForm.credits_eur} onChange={(e) => setPkgForm({ ...pkgForm, credits_eur: e.target.value })} placeholder="500" />
+                <p className="text-xs text-muted-foreground">Aggiunti al saldo</p>
+              </div>
+            </div>
+            {pkgForm.price_eur && pkgForm.credits_eur && (
+              <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 text-sm text-center">
+                <span className="text-muted-foreground">Tasso pacchetto: </span>
+                <span className="font-bold text-primary">
+                  {(parseFloat(pkgForm.credits_eur) / parseFloat(pkgForm.price_eur)).toFixed(1)} crediti per €1
+                </span>
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Badge (opzionale)</Label>
+                <Input value={pkgForm.badge} onChange={(e) => setPkgForm({ ...pkgForm, badge: e.target.value })} placeholder="Es. Più Popolare" />
+              </div>
+              <div className="space-y-2">
+                <Label>Ordine</Label>
+                <Input type="number" value={pkgForm.sort_order} onChange={(e) => setPkgForm({ ...pkgForm, sort_order: e.target.value })} />
+              </div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setPkgModal(false)}>Annulla</Button>
-            <Button onClick={savePkg} disabled={!pkgForm.name || !pkgForm.minutes || !pkgForm.price_eur}>Salva</Button>
+            <Button onClick={savePkg} disabled={!pkgForm.name || !pkgForm.credits_eur || !pkgForm.price_eur}>Salva Pacchetto</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

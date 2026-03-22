@@ -102,8 +102,21 @@ export default function CreditsPage() {
       agentsRes.data.forEach((a: any) => { map[a.id] = a.name; });
       setAgentNames(map);
     }
-    if (packagesRes.data) setPackages(packagesRes.data as unknown as CreditPackage[]);
-    if (platformRes.data?.crediti_per_euro) setCreditRate(Number(platformRes.data.crediti_per_euro));
+    const pkgs = packagesRes.data as unknown as CreditPackage[] ?? [];
+    if (pkgs.length > 0) setPackages(pkgs);
+
+    // Deriva il tasso dalla platform_config. Se non configurato,
+    // usa il tasso del pacchetto più economico come riferimento.
+    const platformRate = platformRes.data?.crediti_per_euro ? Number(platformRes.data.crediti_per_euro) : null;
+    if (platformRate && platformRate > 0) {
+      setCreditRate(platformRate);
+    } else if (pkgs.length > 0) {
+      // Usa il tasso del primo pacchetto attivo (order by sort_order)
+      const basePkg = pkgs[0];
+      if (basePkg.price_eur > 0 && basePkg.credits_eur > 0) {
+        setCreditRate(basePkg.credits_eur / basePkg.price_eur);
+      }
+    }
     setLoading(false);
   }, [companyId]);
 
@@ -263,8 +276,15 @@ export default function CreditsPage() {
                 )}
                 <CardContent className="p-6 text-center space-y-3 pt-6">
                   <p className="text-sm font-semibold text-muted-foreground">{pkg.name}</p>
-                  <p className="text-4xl font-extrabold text-foreground">{Number(pkg.credits_eur).toFixed(0)}</p>
+                  <p className="text-4xl font-extrabold text-foreground">
+                    {Number(pkg.credits_eur) > 0 ? Number(pkg.credits_eur).toFixed(0) : "—"}
+                  </p>
                   <p className="text-xs text-muted-foreground">crediti conversazionali</p>
+                  {Number(pkg.credits_eur) > 0 && Number(pkg.price_eur) > 0 && (
+                    <p className="text-xs text-primary font-medium">
+                      {(Number(pkg.credits_eur) / Number(pkg.price_eur)).toFixed(1)} crediti/€
+                    </p>
+                  )}
                   <p className="text-lg font-bold text-primary">€{Number(pkg.price_eur).toFixed(0)}</p>
                   <Button className="w-full" variant={pkg.badge ? "default" : "outline"} size="sm">
                     Acquista
