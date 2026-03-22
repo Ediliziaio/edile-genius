@@ -240,6 +240,16 @@ const STATIC_TEMPLATES: HubTemplate[] = [
     result: "→ Sai sempre cosa è successo in cantiere senza chiamare nessuno",
   },
 
+  // ── 📄 Preventivo AI ──
+  {
+    slug: "preventivo-ai", name: "Preventivo AI",
+    description: "Manda un vocale o un testo descrivendo il lavoro. L'AI analizza tutto, consulta il tuo listino e genera un preventivo dettagliato e personalizzato in pochi secondi.",
+    icon: "📄", category: "preventivi", channel: ["whatsapp", "telegram"], difficulty: "facile",
+    estimated_setup_min: 15, installs_count: 0, is_featured: true, badge: "🆕 NUOVO",
+    settore: "tutti", kpi: "Preventivo in <30 sec",
+    result: "→ Preventivi precisi senza perdere tempo a calcolarlo a mano",
+  },
+
   // ── 🕐 Prossimamente ──
   {
     slug: "render-coperture", name: "Render Coperture AI",
@@ -487,6 +497,8 @@ function TemplateHubCard({ template: t }: { template: HubTemplate }) {
     if (t.disabled) return;
     if (t.fromDb) {
       navigate(`/app/templates/${t.slug}/setup`);
+    } else if (t.slug === "preventivo-ai") {
+      navigate("/app/agente-preventivo-setup");
     } else if (RENDER_ROUTES[t.slug]) {
       navigate(RENDER_ROUTES[t.slug]);
     } else if (t.channel?.includes("whatsapp")) {

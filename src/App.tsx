@@ -116,6 +116,7 @@ const KnowledgeBasePreventivo = lazy(() => import("./pages/app/KnowledgeBasePrev
 const PreventivoTemplateList = lazy(() => import("./pages/app/PreventivoTemplateList"));
 const PreventivoTemplateBuilder = lazy(() => import("./pages/app/PreventivoTemplateBuilder"));
 const PreventivoHub = lazy(() => import("./pages/app/PreventivoHub"));
+const PreventivoAgentSetup = lazy(() => import("./pages/app/PreventivoAgentSetup"));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-screen">
@@ -219,6 +220,7 @@ const App = () => (
                 <Route path="/app/preventivi/nuovo" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><NuovoPreventivo /></FeatureGate></SafeRoute>} />
                 <Route path="/app/preventivi/:id" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoDetail /></FeatureGate></SafeRoute>} />
                 <Route path="/app/preventivo-hub" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoHub /></FeatureGate></SafeRoute>} />
+                <Route path="/app/agente-preventivo-setup" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoAgentSetup /></FeatureGate></SafeRoute>} />
                 <Route path="/app/preventivo-kb" element={<SafeRoute><FeatureGate featureId="knowledge_base"><KnowledgeBasePreventivo /></FeatureGate></SafeRoute>} />
                 <Route path="/app/preventivi/templates" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoTemplateList /></FeatureGate></SafeRoute>} />
                 <Route path="/app/preventivi/templates/nuovo" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoTemplateBuilder /></FeatureGate></SafeRoute>} />
