@@ -17,7 +17,7 @@ import {
   Zap, MessageSquare, Loader2, ExternalLink, BookOpen,
   Settings2, Sparkles, Palette, Building2, Info,
 } from "lucide-react";
-import KnowledgeBaseManager from "@/components/preventivo/KnowledgeBaseManager";
+import { KnowledgeBaseManager } from "@/components/preventivo/KnowledgeBaseManager";
 
 /* ─── Constants ─────────────────────────────────────── */
 
@@ -543,14 +543,16 @@ Regole:
                     <div className="flex items-center gap-2">
                       <span className="text-2xl">{ch.emoji}</span>
                       <p className="font-semibold">{ch.label}</p>
-                      {ch.badge && (
-                        <Badge className={`${ch.badgeCls} border text-xs ml-auto`} variant="outline">
-                          {ch.badge}
-                        </Badge>
-                      )}
-                      {canale === ch.id && (
-                        <CheckCircle className="h-4 w-4 text-primary ml-auto" />
-                      )}
+                      <div className="ml-auto flex items-center gap-1.5">
+                        {ch.badge && (
+                          <Badge className={`${ch.badgeCls} border text-xs`} variant="outline">
+                            {ch.badge}
+                          </Badge>
+                        )}
+                        {canale === ch.id && (
+                          <CheckCircle className="h-4 w-4 text-primary" />
+                        )}
+                      </div>
                     </div>
                     <p className="text-sm text-muted-foreground">{ch.desc}</p>
                   </CardContent>
