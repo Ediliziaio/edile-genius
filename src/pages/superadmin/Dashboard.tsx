@@ -184,13 +184,13 @@ export default function SuperAdminDashboard() {
 
   const handleUnlock = async () => {
     if (!unlockModal) return;
-    const amt = parseFloat(unlockAmount);
+    const amt = parseInt(unlockAmount);
     if (amt <= 0) return;
     try {
       await supabase.functions.invoke("topup-credits", {
-        body: { companyId: unlockModal.companyId, amountEur: amt, paymentMethod: "manual_admin", type: "adjustment" },
+        body: { companyId: unlockModal.companyId, amountEur: 0, creditsToAdd: amt, paymentMethod: "manual_admin", type: "adjustment" },
       });
-      toast({ title: "Crediti accreditati", description: `€${amt} aggiunti a ${unlockModal.companyName}` });
+      toast({ title: "Crediti accreditati", description: `${amt} crediti aggiunti a ${unlockModal.companyName}` });
       setUnlockModal(null);
       setUnlockAmount("10");
       setUnlockNotes("");
@@ -446,9 +446,9 @@ export default function SuperAdminDashboard() {
                 <TableHeader>
                   <TableRow className="bg-muted">
                     <TableHead className="text-xs">Azienda</TableHead>
-                    <TableHead className="text-xs text-right">Saldo €</TableHead>
-                    <TableHead className="text-xs text-right hidden md:table-cell">Speso €</TableHead>
-                    <TableHead className="text-xs text-right hidden lg:table-cell">Ricaricato €</TableHead>
+                    <TableHead className="text-xs text-right">Saldo crediti</TableHead>
+                    <TableHead className="text-xs text-right hidden md:table-cell">Usati</TableHead>
+                    <TableHead className="text-xs text-right hidden lg:table-cell">Ricaricati</TableHead>
                     <TableHead className="text-xs">Stato</TableHead>
                     <TableHead className="text-xs hidden lg:table-cell">Auto-Ricarica</TableHead>
                     <TableHead className="text-xs text-right">Azione</TableHead>
@@ -458,15 +458,15 @@ export default function SuperAdminDashboard() {
                   {sortedCredits.map((cr) => (
                     <TableRow key={cr.company_id}>
                       <TableCell className="font-medium text-sm">{cr.companyName}</TableCell>
-                      <TableCell className={`text-right font-mono text-sm font-semibold ${cr.calls_blocked ? "text-destructive" : (cr.balance_eur || 0) <= 5 ? "text-yellow-600" : "text-foreground"}`}>
-                        €{(cr.balance_eur || 0).toFixed(2)}
+                      <TableCell className={`text-right font-mono text-sm font-semibold ${cr.calls_blocked ? "text-destructive" : (cr.balance_eur || 0) <= 50 ? "text-yellow-600" : "text-foreground"}`}>
+                        {Math.round(cr.balance_eur || 0)} cr
                       </TableCell>
-                      <TableCell className="text-right font-mono text-sm text-muted-foreground hidden md:table-cell">€{(cr.total_spent_eur || 0).toFixed(2)}</TableCell>
-                      <TableCell className="text-right font-mono text-sm text-muted-foreground hidden lg:table-cell">€{(cr.total_recharged_eur || 0).toFixed(2)}</TableCell>
+                      <TableCell className="text-right font-mono text-sm text-muted-foreground hidden md:table-cell">{Math.round(cr.total_spent_eur || 0)} cr</TableCell>
+                      <TableCell className="text-right font-mono text-sm text-muted-foreground hidden lg:table-cell">{Math.round(cr.total_recharged_eur || 0)} cr</TableCell>
                       <TableCell>
                         {cr.calls_blocked ? (
                           <Badge variant="destructive" className="text-xs">🚫 Bloccato</Badge>
-                        ) : (cr.balance_eur || 0) <= 5 ? (
+                        ) : (cr.balance_eur || 0) <= 50 ? (
                           <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300 text-xs">⚠ Basso</Badge>
                         ) : (
                           <Badge className="bg-status-success-light text-status-success border-none text-xs">✓ OK</Badge>
@@ -498,8 +498,8 @@ export default function SuperAdminDashboard() {
           <DialogHeader><DialogTitle>Aggiungi crediti a {unlockModal?.companyName}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Importo (€)</Label>
-              <Input type="number" min="1" value={unlockAmount} onChange={e => setUnlockAmount(e.target.value)} />
+              <Label>Crediti da aggiungere</Label>
+              <Input type="number" min="1" step="1" value={unlockAmount} onChange={e => setUnlockAmount(e.target.value)} placeholder="Es. 100" />
             </div>
             <div className="space-y-2">
               <Label>Note interne</Label>

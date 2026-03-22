@@ -77,6 +77,11 @@ Deno.serve(async (req) => {
       finalCreditsEur = Number(pkg.credits_eur || pkg.price_eur);
       packageName = pkg.name;
 
+    } else if (typeof clientCreditsToAdd === "number" && clientCreditsToAdd > 0) {
+      // Superadmin aggiunge crediti diretti (senza passare per €)
+      finalAmountEur = 0;
+      finalCreditsEur = clientCreditsToAdd;
+
     } else if (amountEur) {
       if (typeof amountEur !== "number" || amountEur < 5 || amountEur > 2000) {
         return new Response(
@@ -86,23 +91,18 @@ Deno.serve(async (req) => {
       }
       finalAmountEur = amountEur;
 
-      // Se il frontend ha già calcolato i crediti (con il tasso configurato), usali.
-      // Altrimenti leggi il tasso da platform_config.
-      if (typeof clientCreditsToAdd === "number" && clientCreditsToAdd > 0) {
-        finalCreditsEur = clientCreditsToAdd;
-      } else {
-        const { data: platformCfg } = await sb
-          .from("platform_config")
-          .select("crediti_per_euro")
-          .limit(1)
-          .single();
-        const rate = Number(platformCfg?.crediti_per_euro ?? 10);
-        finalCreditsEur = Math.round(amountEur * rate);
-      }
+      // Leggi il tasso da platform_config e applica la conversione
+      const { data: platformCfg } = await sb
+        .from("platform_config")
+        .select("crediti_per_euro")
+        .limit(1)
+        .single();
+      const rate = Number(platformCfg?.crediti_per_euro ?? 10);
+      finalCreditsEur = Math.round(amountEur * rate);
 
     } else {
       return new Response(
-        JSON.stringify({ error: "Specifica packageId oppure amountEur" }),
+        JSON.stringify({ error: "Specifica packageId, creditsToAdd oppure amountEur" }),
         { status: 400, headers: corsHeaders }
       );
     }
