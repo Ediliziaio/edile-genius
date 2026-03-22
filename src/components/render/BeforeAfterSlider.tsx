@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 
 interface BeforeAfterSliderProps {
-  beforeSrc: string;
+  beforeSrc: string | null | undefined;
   afterSrc: string;
   beforeLabel?: string;
   afterLabel?: string;
@@ -28,7 +28,7 @@ export default function BeforeAfterSlider({
 
   const handlePointerDown = (e: React.PointerEvent) => {
     isDragging.current = true;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    e.currentTarget.setPointerCapture(e.pointerId);
     updatePosition(e.clientX);
   };
 
@@ -51,21 +51,30 @@ export default function BeforeAfterSlider({
       style={{ touchAction: "pan-y" }}
     >
       {/* After image (full) */}
-      <img src={afterSrc} alt={afterLabel} className="block w-full h-full object-cover" draggable={false} />
+      <img
+        src={afterSrc}
+        alt={afterLabel}
+        className="block w-full h-full object-cover"
+        draggable={false}
+        onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = "hidden"; }}
+      />
 
       {/* Before image (clipped) */}
-      <div
-        className="absolute inset-0 overflow-hidden"
-        style={{ width: `${position}%` }}
-      >
-        <img
-          src={beforeSrc}
-          alt={beforeLabel}
-          className="block w-full h-full object-cover"
-          style={{ width: containerRef.current?.offsetWidth || "100%", maxWidth: "none" }}
-          draggable={false}
-        />
-      </div>
+      {beforeSrc && (
+        <div
+          className="absolute inset-0 overflow-hidden"
+          style={{ width: `${position}%` }}
+        >
+          <img
+            src={beforeSrc}
+            alt={beforeLabel}
+            className="block w-full h-full object-cover"
+            style={{ width: containerRef.current?.offsetWidth || "100%", maxWidth: "none" }}
+            draggable={false}
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = "hidden"; }}
+          />
+        </div>
+      )}
 
       {/* Divider line */}
       <div

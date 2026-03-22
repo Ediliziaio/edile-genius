@@ -204,8 +204,13 @@ export default function AgentDetail() {
   const [initializedForId, setInitializedForId] = useState<string | null>(null);
 
   const update = useCallback(<K extends keyof ConfigState>(key: K, value: ConfigState[K]) => {
-    setCfg(prev => prev ? { ...prev, [key]: value } : prev);
-    setDirty(true);
+    setCfg(prev => {
+      if (!prev) return prev;
+      // Skip update and dirty flag if value hasn't changed (avoids unnecessary re-renders)
+      if (prev[key] === value) return prev;
+      setDirty(true);
+      return { ...prev, [key]: value };
+    });
   }, []);
 
   const { data: agent, isLoading } = useQuery({

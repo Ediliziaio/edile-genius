@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Download, Star, Eye, EyeOff, Droplets, Sun } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -38,17 +38,27 @@ export function RenderTettoResultCard({
 }: RenderTettoResultCardProps) {
   const [showOriginal, setShowOriginal] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
 
   const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const res = await fetch(resultUrl);
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `render-tetto-${id.slice(0, 8)}.jpg`;
-    a.click();
-    URL.revokeObjectURL(url);
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
+    try {
+      const res = await fetch(resultUrl, { signal: abortRef.current.signal });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `render-tetto-${id.slice(0, 8)}.jpg`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        console.error('Download failed:', err);
+      }
+    }
   };
 
   const chips: Array<{ icon: React.ReactNode; label: string; color: string }> = [];

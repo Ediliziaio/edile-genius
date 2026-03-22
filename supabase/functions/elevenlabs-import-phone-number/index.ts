@@ -32,14 +32,24 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "phone_number, twilio_sid, twilio_token richiesti" }), { status: 400, headers: corsHeaders });
     }
 
+    // Validate E.164 format before touching ElevenLabs or the DB
+    const normalizedPhone = phone_number.replace(/\s/g, "");
+    const e164Regex = /^\+[1-9]\d{7,14}$/;
+    if (!e164Regex.test(normalizedPhone)) {
+      return new Response(
+        JSON.stringify({ error: "Numero di telefono non valido. Usa il formato E.164 (es. +393331234567)" }),
+        { status: 400, headers: corsHeaders },
+      );
+    }
+
     const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
     if (!apiKey) return new Response(JSON.stringify({ error: "ELEVENLABS_API_KEY non configurata" }), { status: 500, headers: corsHeaders });
 
     // Build EL request
     const elBody: Record<string, unknown> = {
       provider: "twilio",
-      phone_number: phone_number.replace(/\s/g, ""),
-      label: label || phone_number,
+      phone_number: normalizedPhone,
+      label: label || normalizedPhone,
       sid: twilio_sid,
       token: twilio_token,
     };
@@ -69,7 +79,7 @@ Deno.serve(async (req) => {
 
     const { data: savedNumber, error: dbErr } = await sb.from("ai_phone_numbers").insert({
       company_id,
-      phone_number: phone_number.replace(/\s/g, ""),
+      phone_number: normalizedPhone,
       label: label || null,
       agent_id: agent_id || null,
       el_phone_number_id,

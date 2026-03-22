@@ -54,10 +54,10 @@ export default function VoiceTestPanel({ elevenlabsAgentId, companyId, agentId }
         return false;
       }
 
-      if (error && !creditInfo.allowed) {
-        // Generic error (not a 402 with structured data) — allow call
-        setCreditBlocked({ blocked: false });
-        return true;
+      if (error && creditInfo.allowed !== true) {
+        // Unrecognised error structure — block the call to be safe
+        setCreditBlocked({ blocked: true, reason: "check_failed" });
+        return false;
       }
 
       setCreditBlocked({ blocked: false });
@@ -75,14 +75,28 @@ export default function VoiceTestPanel({ elevenlabsAgentId, companyId, agentId }
     if (!ok) return;
 
     setIsConnecting(true);
+    const tokenAbort = new AbortController();
+    const tokenTimeout = setTimeout(() => tokenAbort.abort(), 15_000);
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
-      const { data, error } = await supabase.functions.invoke("elevenlabs-conversation-token", { body: { agent_id: elevenlabsAgentId, company_id: companyId } });
+      const { data, error } = await supabase.functions.invoke("elevenlabs-conversation-token", {
+        body: { agent_id: elevenlabsAgentId, company_id: companyId },
+        signal: tokenAbort.signal,
+      });
       if (error || !data?.token) throw new Error("Token non ricevuto");
       setTranscript([]);
       await conversation.startSession({ conversationToken: data.token, connectionType: "webrtc" });
-    } catch (err: any) { toast({ variant: "destructive", title: "Errore", description: err.message || "Impossibile avviare la conversazione." }); }
-    finally { setIsConnecting(false); }
+    } catch (err: any) {
+      const isTimeout = err?.name === "AbortError" || err?.message?.includes("aborted");
+      toast({
+        variant: "destructive",
+        title: isTimeout ? "Timeout connessione" : "Errore",
+        description: isTimeout ? "Il server ha impiegato troppo tempo. Riprova." : (err.message || "Impossibile avviare la conversazione."),
+      });
+    } finally {
+      clearTimeout(tokenTimeout);
+      setIsConnecting(false);
+    }
   }, [conversation, elevenlabsAgentId, companyId, toast, checkCredits]);
 
   const stopConversation = useCallback(async () => { await conversation.endSession(); }, [conversation]);

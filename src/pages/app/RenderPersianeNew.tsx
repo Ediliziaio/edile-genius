@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
@@ -70,6 +70,18 @@ export default function RenderPersianeNew() {
   const companyId = useCompanyId();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => { if (fotoPreview) URL.revokeObjectURL(fotoPreview); };
+  }, [fotoPreview]);
 
   // Step
   const [step, setStep] = useState(1);
@@ -234,6 +246,20 @@ export default function RenderPersianeNew() {
 
   const startRender = async () => {
     if (!analisi || !sessionId || !foto) return;
+
+    // Pre-flight credit check
+    if (companyId) {
+      const { data: creditsData } = await supabase
+        .from("render_credits")
+        .select("balance")
+        .eq("company_id", companyId)
+        .single();
+      if (!creditsData || creditsData.balance <= 0) {
+        toast({ title: "Crediti esauriti", description: "Ricarica i crediti per generare nuovi render.", variant: "destructive" });
+        return;
+      }
+    }
+
     setRendering(true);
     setStep(4);
 
@@ -245,7 +271,7 @@ export default function RenderPersianeNew() {
     ];
     let idx = 0;
     setRenderStatusMsg(msgs[0]);
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       idx = (idx + 1) % msgs.length;
       setRenderStatusMsg(msgs[idx]);
     }, 4000);
@@ -318,7 +344,7 @@ export default function RenderPersianeNew() {
         },
       });
 
-      clearInterval(interval);
+      if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
       if (error) throw error;
       const renderPayload = (data?.data ?? data) as Record<string, unknown>;
       const resultUrl = (renderPayload?.result_url || renderPayload?.result_image_url) as string;
@@ -334,7 +360,7 @@ export default function RenderPersianeNew() {
       setRendering(false);
       setStep(5);
     } catch (err: any) {
-      clearInterval(interval);
+      if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
       setRendering(false);
       toast({ title: "Errore generazione", description: String(err), variant: "destructive" });
       setStep(3);

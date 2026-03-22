@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useCompanyId } from '@/hooks/useCompanyId';
@@ -443,6 +443,9 @@ export default function RenderStanzaNew() {
   // ── Foto
   const [foto, setFoto] = useState<File | null>(null);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+  useEffect(() => {
+    return () => { if (fotoPreview) URL.revokeObjectURL(fotoPreview); };
+  }, [fotoPreview]);
   const [imageNaturalWidth, setImageNaturalWidth] = useState(0);
   const [imageNaturalHeight, setImageNaturalHeight] = useState(0);
   const [sessionId, setSessionId] = useState<string | null>(null);

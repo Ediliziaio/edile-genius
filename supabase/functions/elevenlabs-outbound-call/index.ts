@@ -25,6 +25,18 @@ Deno.serve(async (req) => {
 
     if (!agent_id || !to_number) return jsonError("agent_id e to_number richiesti", "validation_error", 400, rid);
 
+    // E.164 phone number validation
+    const normalizedNumber = to_number.replace(/\s/g, "");
+    const e164Regex = /^\+[1-9]\d{7,14}$/;
+    if (!e164Regex.test(normalizedNumber)) {
+      return jsonError(
+        "Numero di telefono non valido. Usa il formato E.164 (es. +393331234567)",
+        "validation_error",
+        400,
+        rid,
+      );
+    }
+
     // Resolve caller's company_id for tenant isolation
     const { data: callerProfile } = await sb
       .from("profiles")
@@ -50,6 +62,18 @@ Deno.serve(async (req) => {
           rid,
         );
       }
+
+      // Concurrent call protection — prevent duplicate calls to same contact
+      const { data: activeCall } = await sb
+        .from("outbound_call_log")
+        .select("id")
+        .eq("contact_id", contact_id)
+        .in("status", ["initiated", "ringing", "in_progress"])
+        .maybeSingle();
+      if (activeCall) {
+        log("warn", "Contact already in active call", { request_id: rid, contact_id });
+        return jsonError("Contatto già in chiamata attiva", "conflict", 409, rid);
+      }
     }
 
     log("info", "Outbound call requested", { request_id: rid, agent_id, to_number: to_number.replace(/\d(?=\d{4})/g, "*") });
@@ -66,22 +90,23 @@ Deno.serve(async (req) => {
     if (!agent.outbound_enabled) return jsonError("Chiamate outbound non abilitate", "forbidden", 403, rid);
     if (!agent.el_phone_number_id) return jsonError("Nessun numero ElevenLabs associato", "validation_error", 400, rid);
 
-    const { data: credits } = await sb.from("ai_credits").select("balance_eur, calls_blocked").eq("company_id", agent.company_id).single();
-    if (credits?.calls_blocked || (Number(credits?.balance_eur) || 0) < 0.04) {
-      log("warn", "Insufficient credits for outbound call", { request_id: rid, company_id: agent.company_id, balance: credits?.balance_eur });
-      return jsonError("Crediti insufficienti", "insufficient_credits", 402, rid);
-    }
-
     const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
     if (!apiKey) return jsonError("Configurazione API mancante", "system_error", 500, rid);
 
     const callBody: Record<string, unknown> = {
       agent_id: agent.el_agent_id,
       agent_phone_number_id: agent.el_phone_number_id,
-      to_number: to_number.replace(/\s/g, ""),
+      to_number: normalizedNumber,
     };
     if (dynamic_variables && Object.keys(dynamic_variables).length) {
       callBody.conversation_initiation_client_data = { dynamic_variables };
+    }
+
+    // Credit check immediately before the call to minimize race-condition window
+    const { data: credits } = await sb.from("ai_credits").select("balance_eur, calls_blocked").eq("company_id", agent.company_id).single();
+    if (credits?.calls_blocked || (Number(credits?.balance_eur) || 0) < 0.04) {
+      log("warn", "Insufficient credits for outbound call", { request_id: rid, company_id: agent.company_id, balance: credits?.balance_eur });
+      return jsonError("Crediti insufficienti", "insufficient_credits", 402, rid);
     }
 
     // 15s timeout, NO retry (not idempotent — initiates real phone call)
@@ -98,6 +123,17 @@ Deno.serve(async (req) => {
     if (!elRes.ok) {
       const errText = await elRes.text();
       log("error", "EL outbound call error", { request_id: rid, status: elRes.status, detail: errText.slice(0, 500) });
+      // Log the failed attempt for audit trail — always record, even on provider error
+      await sb.from("outbound_call_log").insert({
+        company_id: agent.company_id,
+        agent_id,
+        contact_id: contact_id || null,
+        to_number: normalizedNumber,
+        dynamic_variables: dynamic_variables || {},
+        status: "failed",
+        started_at: new Date().toISOString(),
+        ended_at: new Date().toISOString(),
+      }).select("id").single();
       return jsonError("Errore avvio chiamata", "provider_error", 502, rid);
     }
 
@@ -107,7 +143,7 @@ Deno.serve(async (req) => {
       company_id: agent.company_id,
       agent_id,
       contact_id: contact_id || null,
-      to_number: to_number.replace(/\s/g, ""),
+      to_number: normalizedNumber,
       el_call_id: elData.call_sid || null,
       el_conversation_id: elData.conversation_id || null,
       dynamic_variables: dynamic_variables || {},

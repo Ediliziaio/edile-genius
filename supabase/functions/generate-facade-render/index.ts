@@ -62,13 +62,13 @@ Deno.serve(async (req) => {
     if (signedErr || !signedData?.signedUrl) throw new Error("Failed to create signed URL");
     const imageUrl = signedData.signedUrl;
 
-    // Check credits
-    const { data: credits } = await supabase
+    // Pre-flight credit check (avoids wasting AI quota on zero-balance)
+    const { data: preCheck } = await supabase
       .from("render_credits")
       .select("balance")
       .eq("company_id", session.company_id)
       .single();
-    if (!credits || credits.balance <= 0) {
+    if (!preCheck || preCheck.balance <= 0) {
       await supabase.from("render_facciata_sessions")
         .update({ status: "error", error_message: "Crediti render esauriti" })
         .eq("id", sessionId);
@@ -162,8 +162,12 @@ Deno.serve(async (req) => {
     const { data: urlData } = supabase.storage.from("facciata-results").getPublicUrl(resultPath);
     const resultUrl = urlData.publicUrl;
 
-    // Deduct credit AFTER success
-    await supabase.rpc("deduct_render_credit", { _company_id: session.company_id });
+    // Atomic deduction with FOR UPDATE lock — handles race condition
+    const { data: deductResult } = await supabase.rpc("deduct_render_credit", { _company_id: session.company_id });
+    if (deductResult === "insufficient") {
+      await supabase.from("render_facciata_sessions").update({ status: "error", error_message: "Crediti render esauriti" }).eq("id", sessionId);
+      return jsonError("No render credits", "insufficient_credits", 402, rid);
+    }
 
     // Update session
     await supabase.from("render_facciata_sessions").update({

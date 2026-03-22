@@ -15,8 +15,11 @@ export default function RenderGalleryDetail() {
 
   useEffect(() => {
     if (!id) return;
+    let cancelled = false;
     supabase.from("render_gallery").select("*").eq("id", id).single()
-      .then(({ data }) => { if (data) setItem(data); });
+      .then(({ data }) => { if (!cancelled && data) setItem(data); })
+      .catch(() => {});
+    return () => { cancelled = true; };
   }, [id]);
 
   const toggleFavorite = async () => {
@@ -61,11 +64,17 @@ export default function RenderGalleryDetail() {
         </div>
       </div>
 
-      <BeforeAfterSlider
-        beforeSrc={item.original_url}
-        afterSrc={item.render_url}
-        className="aspect-[4/3] rounded-xl"
-      />
+      {item.original_url ? (
+        <BeforeAfterSlider
+          beforeSrc={item.original_url}
+          afterSrc={item.render_url}
+          className="aspect-[4/3] rounded-xl"
+        />
+      ) : (
+        <div className="aspect-[4/3] rounded-xl overflow-hidden">
+          <img src={item.render_url} alt={item.title || "Render"} className="w-full h-full object-cover" />
+        </div>
+      )}
 
       {Object.keys(configSummary).length > 0 && (
         <Card>

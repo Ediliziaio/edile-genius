@@ -100,16 +100,19 @@ export function BulkCallModal({ open, onClose, contactIds, onSuccess }: BulkCall
   });
 
   useEffect(() => {
-    if (!open) {
+    if (!open && !launchMutation.isPending) {
       setResult(null);
       setSelectedAgentId("");
       setScheduleMode(false);
       setScheduledAt("");
       setNotes("");
     }
-  }, [open]);
+  }, [open, launchMutation.isPending]);
 
   const minDateTime = new Date(Date.now() + 5 * 60 * 1000).toISOString().slice(0, 16);
+  // Detect browser timezone for display — scheduling inputs are local time,
+  // backend stores UTC (new Date(scheduledAt).toISOString() handles conversion correctly).
+  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   // Result screen
   if (result) {
@@ -227,7 +230,9 @@ export function BulkCallModal({ open, onClose, contactIds, onSuccess }: BulkCall
                 onChange={(e) => setScheduledAt(e.target.value)}
                 className="bg-white border-ink-200"
               />
-              <p className="text-xs text-ink-400">Le chiamate verranno distribuite al ritmo di 1 al minuto</p>
+              <p className="text-xs text-ink-400">
+                Le chiamate verranno distribuite al ritmo di 1 al minuto · Fuso orario: {userTimezone}
+              </p>
             </div>
           )}
 

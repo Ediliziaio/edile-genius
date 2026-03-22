@@ -21,9 +21,19 @@ Deno.serve(async (req) => {
     // Read body as text for HMAC verification
     const bodyText = await req.text();
 
-    // Verify HMAC signature if configured
+    // Verify HMAC signature — secret is always required in production.
+    // If ELEVENLABS_WEBHOOK_SECRET is not set, block all requests to prevent
+    // unauthenticated callers from forging events and manipulating credits/contacts.
     const signature = req.headers.get("ElevenLabs-Signature");
     const webhookSecret = Deno.env.get("ELEVENLABS_WEBHOOK_SECRET");
+    if (!webhookSecret) {
+      log("error", "ELEVENLABS_WEBHOOK_SECRET not configured — rejecting all webhook requests", { request_id: rid });
+      return new Response("Webhook secret not configured", { status: 503 });
+    }
+    if (!signature) {
+      log("error", "Missing webhook signature", { request_id: rid });
+      return new Response("Missing signature", { status: 401 });
+    }
     if (signature && webhookSecret) {
       const parts = signature.split(",");
       const timestamp = parts.find((p: string) => p.startsWith("t="))?.replace("t=", "") || "";
@@ -205,35 +215,17 @@ Deno.serve(async (req) => {
       log("warn", "Balance zero — calls blocked", { request_id: rid, company_id: agent.company_id });
     }
     
-    // Auto-recharge if enabled and balance is low
-    // NOTE: This adds credits without charging Stripe. This is by design for prepaid
-    // wallet systems. For real billing, integrate Stripe PaymentIntents here.
-    if (!wasBlocked && credits?.auto_recharge_enabled && balanceAfter <= Number(credits?.auto_recharge_threshold || 5)) {
-      const rechargeAmount = Math.min(Math.max(Number(credits?.auto_recharge_amount || 20), 5), 500);
-      
-      // Dedup: check if auto-recharge already executed in last 5 minutes
-      const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-      const { count: recentAutoTopups } = await sb
-        .from("ai_credit_topups")
-        .select("*", { count: "exact", head: true })
-        .eq("company_id", agent.company_id)
-        .eq("type", "auto")
-        .gte("created_at", fiveMinAgo);
-
-      if (recentAutoTopups && recentAutoTopups > 0) {
-        log("info", "Auto-recharge skipped (dedup)", { request_id: rid, company_id: agent.company_id });
-      } else {
-        await sb.rpc("topup_credits", { _company_id: agent.company_id, _amount_eur: rechargeAmount });
-        await sb.from("ai_credit_topups").insert({
-          company_id: agent.company_id, amount_eur: rechargeAmount, type: "auto", status: "completed",
-          payment_method: credits?.auto_recharge_method || "card",
-          notes: `Ricarica automatica — saldo era €${balanceAfter.toFixed(2)}`,
-          processed_at: new Date().toISOString(),
-        });
-        log("info", "Auto-recharge triggered", { request_id: rid, company_id: agent.company_id, amount: rechargeAmount });
-      }
-    } else if (!wasBlocked && balanceAfter <= Number(credits?.alert_threshold_eur || 5)) {
+    // Low-balance alert — update timestamp so notification emails can be sent.
+    // NOTE: Auto-recharge via try_auto_recharge() was disabled because it added credits
+    // without making a Stripe charge (fraud vector). Re-enable only after integrating
+    // Stripe PaymentIntents with a saved customer payment method.
+    if (!wasBlocked && balanceAfter <= Number(credits?.alert_threshold_eur || 5)) {
       await sb.from("ai_credits").update({ alert_email_sent_at: new Date().toISOString() }).eq("company_id", agent.company_id);
+      if (credits?.auto_recharge_enabled) {
+        log("warn", "Auto-recharge is enabled but disabled at system level — Stripe PaymentIntents integration required", {
+          request_id: rid, company_id: agent.company_id, balance_after: balanceAfter,
+        });
+      }
     }
 
     log("info", "Webhook processed", {

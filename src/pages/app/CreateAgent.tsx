@@ -21,6 +21,7 @@ const CATEGORIES: Category[] = [
   { key: "lead", label: "Lead e Appuntamenti", emoji: "📞", stripColor: "bg-brand", iconBg: "bg-brand-light" },
   { key: "preventivi", label: "Preventivi e Trattative", emoji: "💰", stripColor: "bg-[hsl(45,90%,50%)]", iconBg: "bg-[hsl(45,90%,94%)]" },
   { key: "whatsapp", label: "WhatsApp e Assistenza", emoji: "💬", stripColor: "bg-[hsl(142,70%,49%)]", iconBg: "bg-[hsl(142,60%,94%)]" },
+  { key: "cantiere", label: "Gestione Cantiere", emoji: "🏗️", stripColor: "bg-[hsl(25,90%,50%)]", iconBg: "bg-[hsl(25,90%,94%)]" },
   { key: "postvendita", label: "Post-vendita", emoji: "⭐", stripColor: "bg-[hsl(280,70%,55%)]", iconBg: "bg-[hsl(280,60%,94%)]" },
   { key: "vendita", label: "Vendita Visiva", emoji: "🎨", stripColor: "bg-settore-ristr", iconBg: "bg-settore-ristr-bg" },
   { key: "prossimamente", label: "Prossimamente", emoji: "🕐", stripColor: "bg-ink-200", iconBg: "bg-ink-100" },
@@ -219,6 +220,24 @@ const STATIC_TEMPLATES: HubTemplate[] = [
     estimated_setup_min: 5, installs_count: 4, is_featured: true, badge: "NUOVO",
     settore: "ristrutturazioni", kpi: "Conversione +35%",
     result: "→ Il cliente si innamora del progetto e firma prima",
+  },
+
+  // ── 🏗️ Gestione Cantiere ──
+  {
+    slug: "assistente-qualifica-lead-edile", name: "Assistente & Qualifica Lead",
+    description: "Risponde alle chiamate in entrata quando il titolare è in cantiere. Accoglie il cliente, risponde alle domande sull'impresa e qualifica il lead raccogliendo tipo di lavoro, zona e tempistiche.",
+    icon: "📞", category: "cantiere", channel: ["vocale"], difficulty: "facile",
+    estimated_setup_min: 15, installs_count: 0, is_featured: true, badge: "EDILIZIA",
+    settore: "edilizia", kpi: "0 chiamate perse",
+    result: "→ Il cliente viene accolto anche quando sei in cantiere",
+  },
+  {
+    slug: "report-serale-cantiere", name: "Reportistica Serale Cantiere",
+    description: "Ogni sera raccoglie i report vocali o testuali degli operai su WhatsApp o Telegram, li analizza e manda un riepilogo strutturato al titolare. Chi non invia riceve un alert automatico.",
+    icon: "📋", category: "cantiere", channel: ["whatsapp", "telegram"], difficulty: "facile",
+    estimated_setup_min: 20, installs_count: 0, is_featured: true, badge: "OPERATIVO",
+    settore: "edilizia", kpi: "Report ogni sera alle 19:00",
+    result: "→ Sai sempre cosa è successo in cantiere senza chiamare nessuno",
   },
 
   // ── 🕐 Prossimamente ──
@@ -611,6 +630,6 @@ function mapDbCategory(category: string | null, channel: string[] | null): strin
   if (cat.includes("whatsapp") || cat.includes("chat") || cat.includes("assistenza")) return "whatsapp";
   if (cat.includes("post") || cat.includes("recension") || cat.includes("soddisfaz")) return "postvendita";
   if (cat.includes("vendita") || cat.includes("render") || cat.includes("visual")) return "vendita";
-  if (cat.includes("report")) return "lead";
+  if (cat.includes("cantiere") || cat.includes("operativ") || cat.includes("report")) return "cantiere";
   return "lead";
 }

@@ -36,14 +36,33 @@ Deno.serve(async (req) => {
     const { data: profile } = await serviceCheck.from("profiles").select("company_id").eq("id", userId).single();
     const { data: roleRow } = await serviceCheck.from("user_roles").select("role").eq("user_id", userId).single();
     const isSuperAdmin = roleRow?.role === "superadmin" || roleRow?.role === "superadmin_user";
-    if (!isSuperAdmin && profile?.company_id !== company_id) {
-      return jsonError("Access denied: cannot create agent for another company", "auth_error", 403, rid);
+    if (!profile) return jsonError("Profilo utente non trovato", "auth_error", 401, rid);
+    if (!isSuperAdmin && profile.company_id !== company_id) {
+      return jsonError("Accesso negato: impossibile creare agenti per un'altra azienda", "auth_error", 403, rid);
+    }
+
+    // Validate LLM and TTS models against known-good lists
+    const VALID_LLM_MODELS = [
+      "gemini-2.5-flash", "gemini-2.0-flash", "gpt-4o-mini", "gpt-4o",
+      "claude-3-5-sonnet", "claude-3-5-haiku",
+    ];
+    const VALID_TTS_MODELS = [
+      "eleven_turbo_v2_5", "eleven_multilingual_v2", "eleven_flash_v2_5", "eleven_v3_conversational",
+    ];
+    const llmModel = VALID_LLM_MODELS.includes(config.llm_model) ? config.llm_model : "gemini-2.5-flash";
+    const ttsModel = VALID_TTS_MODELS.includes(config.tts_model) ? config.tts_model : "eleven_turbo_v2_5";
+
+    // Validate dynamic_variables structure
+    if (config.dynamic_variables !== undefined && !Array.isArray(config.dynamic_variables)) {
+      return jsonError("dynamic_variables deve essere un array", "validation_error", 400, rid);
     }
 
     log("info", "Creating agent", { request_id: rid, company_id, name, type: agentType });
 
     const serviceClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
+    // Default voice from env so it can be changed without redeploying
+    const defaultVoiceId = Deno.env.get("ELEVENLABS_DEFAULT_VOICE_ID") || "cjVigY5qzO86Huf0OWal";
 
     let el_agent_id = null;
 
@@ -55,7 +74,7 @@ Deno.serve(async (req) => {
             language: language || "it",
             prompt: {
               prompt: system_prompt || "",
-              llm: config.llm_model || "gemini-2.5-flash",
+              llm: llmModel,
               temperature: config.temperature ?? 0,
               max_tokens: config.max_tokens ?? -1,
               ...(config.llm_backup_model ? { backup_llm_config: { llm: config.llm_backup_model } } : {}),
@@ -79,8 +98,8 @@ Deno.serve(async (req) => {
             } : {}),
           },
           tts: {
-            model_id: config.tts_model || "eleven_turbo_v2_5",
-            voice_id: voice_id || "cjVigY5qzO86Huf0OWal",
+            model_id: ttsModel,
+            voice_id: voice_id || defaultVoiceId,
             stability: config.voice_stability ?? 0.5,
             similarity_boost: config.voice_similarity ?? 0.75,
             speed: config.voice_speed ?? 1.0,
@@ -150,9 +169,18 @@ Deno.serve(async (req) => {
         } else {
           const errText = await elResponse.text();
           log("error", "ElevenLabs agent creation failed", { request_id: rid, status: elResponse.status, detail: errText.slice(0, 500) });
+          // Block DB insert: an agent without el_agent_id is non-functional (no voice, no calls)
+          return jsonError(
+            "Errore creazione agente ElevenLabs — riprova o controlla la configurazione API",
+            "provider_error", 502, rid
+          );
         }
       } catch (e) {
         log("error", "ElevenLabs API call exception", { request_id: rid, error: (e as Error).message });
+        return jsonError(
+          "Impossibile raggiungere ElevenLabs — riprova tra qualche istante",
+          "provider_error", 502, rid
+        );
       }
     }
 
@@ -168,8 +196,8 @@ Deno.serve(async (req) => {
       first_message: first_message || null,
       status: agentStatus || "draft",
       type: agentType,
-      llm_model: config.llm_model || "gemini-2.5-flash",
-      tts_model: config.tts_model || "eleven_turbo_v2_5",
+      llm_model: llmModel,
+      tts_model: ttsModel,
       llm_backup_model: config.llm_backup_model || null,
       asr_quality: config.asr_quality || "high",
       asr_keywords: config.asr_keywords || [],

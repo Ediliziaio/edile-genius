@@ -23,6 +23,23 @@ Deno.serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) return jsonError("LOVABLE_API_KEY not configured", "system_error", 500, rid);
 
+    // Pre-flight credit check — fetch company_id from session before calling AI
+    let sessionCompanyId: string | null = null;
+    if (session_id) {
+      const { data: sess } = await supabase.from("render_pavimento_sessions").select("company_id").eq("id", session_id).single() as any;
+      sessionCompanyId = sess?.company_id || null;
+    }
+    if (!sessionCompanyId) {
+      const { data: profile } = await supabase.from("profiles").select("company_id").eq("id", user.id).single();
+      sessionCompanyId = profile?.company_id || null;
+    }
+    if (sessionCompanyId) {
+      const { data: preCheck } = await supabase.from("render_credits").select("balance").eq("company_id", sessionCompanyId).single();
+      if (!preCheck || preCheck.balance <= 0) {
+        return jsonError("No render credits available", "insufficient_credits", 402, rid);
+      }
+    }
+
     log("info", "Generating floor render", { request_id: rid, fn: FN, session_id, prompt_length: prompt?.length });
 
     const response = await fetchWithTimeout("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -108,10 +125,12 @@ Deno.serve(async (req) => {
           .update({ result_image_url: resultUrl, prompt_usato: prompt, status: "completed" } as any)
           .eq("id", session_id);
 
-        // Deduct render credit
-        const { data: sess } = await supa.from("render_pavimento_sessions").select("company_id").eq("id", session_id).single() as any;
-        if (sess?.company_id) {
-          await supa.rpc("deduct_render_credit", { _company_id: sess.company_id });
+        // Atomic deduction with FOR UPDATE lock — uses company_id resolved at start
+        if (sessionCompanyId) {
+          const { data: deductResult } = await supabase.rpc("deduct_render_credit", { _company_id: sessionCompanyId });
+          if (deductResult === "insufficient") {
+            return jsonError("No render credits", "insufficient_credits", 402, rid);
+          }
         }
       }
     }

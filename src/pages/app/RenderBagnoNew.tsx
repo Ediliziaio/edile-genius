@@ -212,6 +212,18 @@ export default function RenderBagnoNew() {
   const { user } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => { if (fotoPreview) URL.revokeObjectURL(fotoPreview); };
+  }, [fotoPreview]);
 
   // ── Step ───────────────────────────────────────────────────────
   const [step, setStep] = useState(0); // 0-4
@@ -404,7 +416,7 @@ export default function RenderBagnoNew() {
       .eq("id", sessionId);
 
     // Fake progress animation
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       setRenderProgress(p => Math.min(p + 2, 90));
     }, 600);
 
@@ -416,7 +428,7 @@ export default function RenderBagnoNew() {
           },
         });
 
-      clearInterval(interval);
+      if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
 
       // Normalize envelope: new format { ok, data: { result_url } } vs legacy { result_url }
       const payload = result?.data ?? result;
@@ -430,7 +442,7 @@ export default function RenderBagnoNew() {
       setRenderUrl(payload.result_url);
       setStep(4);
     } catch {
-      clearInterval(interval);
+      if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
       setRenderError("Errore durante la generazione del render");
     } finally {
       setRendering(false);

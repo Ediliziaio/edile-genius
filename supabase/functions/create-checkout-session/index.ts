@@ -57,10 +57,10 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: corsHeaders });
     }
 
-    // Get package
+    // Get package (including render fields)
     const { data: pkg, error: pkgErr } = await sb
       .from("ai_credit_packages")
-      .select("*")
+      .select("id, name, price_eur, credits_eur, stripe_price_id, product_type, render_quantity")
       .eq("id", packageId)
       .eq("is_active", true)
       .single();
@@ -74,6 +74,8 @@ Deno.serve(async (req) => {
     // Use existing stripe_price_id or create one-time price
     let lineItem: Stripe.Checkout.SessionCreateParams.LineItem;
 
+    const isRenderPackage = pkg.product_type === "render_credits";
+
     if (pkg.stripe_price_id) {
       lineItem = { price: pkg.stripe_price_id, quantity: 1 };
     } else {
@@ -82,24 +84,35 @@ Deno.serve(async (req) => {
           currency: "eur",
           unit_amount: Math.round(Number(pkg.price_eur) * 100),
           product_data: {
-            name: `${pkg.name} — Crediti EdileGenius`,
-            description: `€${Number(pkg.credits_eur || pkg.price_eur).toFixed(0)} di crediti conversazionali`,
+            name: isRenderPackage
+              ? `${pkg.name} — Render EdileGenius`
+              : `${pkg.name} — Crediti EdileGenius`,
+            description: isRenderPackage
+              ? `${pkg.render_quantity} render AI inclusi`
+              : `€${Number(pkg.credits_eur || pkg.price_eur).toFixed(0)} di crediti conversazionali`,
           },
         },
         quantity: 1,
       };
     }
 
+    const metadata: Record<string, string> = {
+      company_id: companyId,
+      package_id: packageId,
+      user_id: userId,
+      package_name: pkg.name,
+      product_type: pkg.product_type || "ai_credits",
+    };
+    if (isRenderPackage) {
+      metadata.render_quantity = String(pkg.render_quantity || 0);
+    } else {
+      metadata.credits_eur = String(pkg.credits_eur || pkg.price_eur);
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [lineItem],
-      metadata: {
-        company_id: companyId,
-        package_id: packageId,
-        user_id: userId,
-        credits_eur: String(pkg.credits_eur || pkg.price_eur),
-        package_name: pkg.name,
-      },
+      metadata,
       success_url: successUrl || `${req.headers.get("origin")}/app/credits?payment=success`,
       cancel_url: cancelUrl || `${req.headers.get("origin")}/app/credits?payment=cancelled`,
     });

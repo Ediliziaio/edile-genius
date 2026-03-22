@@ -30,6 +30,10 @@ Deno.serve(async (req) => {
 
     const { fotoUrls, oggettoCantiere, preventivoId } = await req.json();
 
+    // Resolve company_id for credit deduction
+    const { data: profile } = await supabase.from("profiles").select("company_id").eq("id", user.id).single();
+    const companyId = profile?.company_id || null;
+
     // Download and convert photos to base64 (max 5)
     const foteParts: Array<{ inline_data: { mime_type: string; data: string } }> = [];
     for (const url of (fotoUrls as string[]).slice(0, 5)) {
@@ -137,6 +141,15 @@ REGOLE:
         .from("preventivi")
         .update({ superfici_stimate: analisi })
         .eq("id", preventivoId);
+    }
+
+    // Deduct AI credits: Gemini vision analysis €0.05 billed / €0.02 real
+    if (companyId && foteParts.length > 0) {
+      await supabase.rpc("deduct_call_credits", {
+        _company_id: companyId,
+        _cost_billed: 0.05,
+        _cost_real: 0.02,
+      });
     }
 
     return new Response(JSON.stringify({ ok: true, data: { analisi } }), {

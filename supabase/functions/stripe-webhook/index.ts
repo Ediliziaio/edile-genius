@@ -65,25 +65,74 @@ Deno.serve(async (req) => {
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
       );
 
-      // Idempotency check
-      const { data: existing } = await sb
-        .from("ai_credit_topups")
-        .select("id")
-        .eq("stripe_session_id", session.id)
-        .limit(1);
+      const companyId = meta.company_id;
+      const packageId = meta.package_id || null;
+      const userId = meta.user_id || null;
+      const packageName = meta.package_name || null;
+      const productType = meta.product_type || "ai_credits";
 
-      if (existing && existing.length > 0) {
-        console.log("[stripe-webhook] Already processed session:", session.id);
+      // Generate unique invoice number via DB sequence
+      const { data: invoiceData } = await sb.rpc("generate_invoice_number");
+      const invoiceNum = invoiceData || `EIO-${Date.now()}`;
+
+      // ── RENDER CREDITS purchase ─────────────────────────────────────
+      if (productType === "render_credits") {
+        let renderQty = parseInt(meta.render_quantity || "0", 10);
+        if (renderQty <= 0 && packageId) {
+          const { data: pkg } = await sb.from("ai_credit_packages")
+            .select("render_quantity").eq("id", packageId).single();
+          if (pkg) renderQty = Number(pkg.render_quantity);
+        }
+        if (renderQty <= 0) {
+          console.error("[stripe-webhook] Could not determine render quantity:", session.id);
+          return new Response("Invalid render quantity", { status: 400 });
+        }
+
+        const { data: renderResult, error: renderErr } = await sb.rpc("process_stripe_render_topup", {
+          _company_id: companyId,
+          _render_quantity: renderQty,
+          _price_paid_eur: (session.amount_total || 0) / 100,
+          _stripe_session_id: session.id,
+          _package_id: packageId,
+          _invoice_number: invoiceNum,
+          _triggered_by: userId,
+          _notes: packageName ? `Pacchetto: ${packageName} (Stripe)` : "Acquisto render Stripe",
+        });
+
+        if (renderErr) {
+          console.error("[stripe-webhook] process_stripe_render_topup FAILED:", { company_id: companyId, renderQty, error: renderErr.message, session_id: session.id });
+          return new Response("Render topup failed - will retry", { status: 500 });
+        }
+
+        const rr = Array.isArray(renderResult) ? renderResult[0] : renderResult;
+        if (rr?.already_processed) {
+          console.log("[stripe-webhook] Render topup already processed (idempotent):", session.id);
+          return new Response("OK", { status: 200 });
+        }
+
+        // Unlock features associated with this package
+        if (packageId) {
+          await sb.rpc("unlock_package_features", { _company_id: companyId, _package_id: packageId });
+        }
+
+        await sb.from("ai_audit_log").insert({
+          company_id: companyId, user_id: userId,
+          action: "render_credits_topup_stripe", entity_type: "render_credits",
+          details: { render_quantity: renderQty, new_balance: rr?.new_balance, invoice: rr?.invoice_number, package_id: packageId, stripe_session_id: session.id },
+        });
+
+        console.log("[stripe-webhook] Render credits added:", { company_id: companyId, render_quantity: renderQty, new_balance: rr?.new_balance });
         return new Response("OK", { status: 200 });
       }
 
+      // ── AI CREDITS purchase (default) ───────────────────────────────
       // Determine credits amount — fallback to package lookup
       let creditsEur = parseFloat(meta.credits_eur || "0");
-      if (creditsEur <= 0 && meta.package_id) {
+      if (creditsEur <= 0 && packageId) {
         const { data: pkg } = await sb
           .from("ai_credit_packages")
           .select("credits_eur")
-          .eq("id", meta.package_id)
+          .eq("id", packageId)
           .single();
         if (pkg) creditsEur = Number(pkg.credits_eur);
       }
@@ -93,19 +142,22 @@ Deno.serve(async (req) => {
         return new Response("Invalid credits amount", { status: 400 });
       }
 
-      const companyId = meta.company_id;
-      const packageId = meta.package_id || null;
-      const userId = meta.user_id || null;
-      const packageName = meta.package_name || null;
-
-      // Atomic credit topup
-      const { data: newBalanceRows, error: rpcError } = await sb.rpc("topup_credits", {
+      // Atomic: insert record + credit wallet in a single DB transaction.
+      // Idempotency is handled inside process_stripe_topup via stripe_session_id.
+      const { data: topupResult, error: rpcError } = await sb.rpc("process_stripe_topup", {
         _company_id: companyId,
-        _amount_eur: creditsEur,
+        _credits_eur: creditsEur,
+        _price_paid_eur: (session.amount_total || 0) / 100,
+        _stripe_session_id: session.id,
+        _payment_intent_id: session.payment_intent as string || null,
+        _package_id: packageId,
+        _invoice_number: invoiceNum,
+        _triggered_by: userId,
+        _notes: packageName ? `Pacchetto: ${packageName} (Stripe)` : "Pagamento Stripe",
       });
 
       if (rpcError) {
-        console.error("[stripe-webhook] RPC topup_credits FAILED:", {
+        console.error("[stripe-webhook] process_stripe_topup FAILED:", {
           company_id: companyId,
           amount: creditsEur,
           error: rpcError.message,
@@ -114,39 +166,21 @@ Deno.serve(async (req) => {
         return new Response("Credit topup failed - will retry", { status: 500 });
       }
 
-      const newBalance = Number(newBalanceRows);
+      const result = Array.isArray(topupResult) ? topupResult[0] : topupResult;
+      const newBalance = Number(result?.new_balance_eur ?? 0);
+      const finalInvoice = result?.invoice_number ?? invoiceNum;
 
-      // Generate unique invoice number via DB sequence
-      const { data: invoiceData } = await sb.rpc("generate_invoice_number");
-      const invoiceNum = invoiceData || `EIO-${Date.now()}`;
-
-      // Record topup — handle unique constraint violation gracefully
-      const { error: insertError } = await sb.from("ai_credit_topups").insert({
-        company_id: companyId,
-        amount_eur: creditsEur,
-        price_paid_eur: (session.amount_total || 0) / 100,
-        type: "stripe",
-        status: "completed",
-        payment_method: "stripe",
-        payment_ref: session.payment_intent as string || null,
-        stripe_session_id: session.id,
-        package_id: packageId,
-        invoice_number: invoiceNum,
-        triggered_by: userId,
-        notes: packageName ? `Pacchetto: ${packageName} (Stripe)` : "Pagamento Stripe",
-        processed_at: new Date().toISOString(),
-      });
-
-      if (insertError) {
-        // If unique constraint on stripe_session_id, credits were already added by RPC above
-        // This is a partial failure — log but don't retry (would double-add credits)
-        console.error("[stripe-webhook] Topup insert failed (credits already added via RPC):", {
-          session_id: session.id,
-          error: insertError.message,
-        });
+      if (result?.already_processed) {
+        console.log("[stripe-webhook] Already processed session (idempotent):", session.id);
+        return new Response("OK", { status: 200 });
       }
 
-      // Audit log
+      // Unlock features associated with this package
+      if (packageId) {
+        await sb.rpc("unlock_package_features", { _company_id: companyId, _package_id: packageId });
+      }
+
+      // Audit log (outside transaction — non-critical)
       await sb.from("ai_audit_log").insert({
         company_id: companyId,
         user_id: userId,
@@ -155,7 +189,7 @@ Deno.serve(async (req) => {
         details: {
           amount_eur: creditsEur,
           new_balance: newBalance,
-          invoice: invoiceNum,
+          invoice: finalInvoice,
           package_id: packageId,
           stripe_session_id: session.id,
         },
@@ -165,7 +199,7 @@ Deno.serve(async (req) => {
         company_id: companyId,
         amount_added: creditsEur,
         new_balance: newBalance,
-        invoice: invoiceNum,
+        invoice: finalInvoice,
       });
     }
 

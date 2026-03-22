@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Play, Pause, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Search, Play, Pause, Loader2, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
@@ -31,19 +32,41 @@ interface VoicePickerEnhancedProps {
 export default function VoicePickerEnhanced({ companyId, selected, onSelect, voiceSettings, onSettingsChange }: VoicePickerEnhancedProps) {
   const [voices, setVoices] = useState<Voice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [search, setSearch] = useState("");
   const [genderFilter, setGenderFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [playing, setPlaying] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
+    let cancelled = false;
+    setFetchError(false);
+    setVoices([]);
+    setLoading(true);
+
     (async () => {
-      setLoading(true);
-      const { data } = await supabase.functions.invoke("get-elevenlabs-voices", { body: { company_id: companyId } });
-      if (data?.voices) setVoices(data.voices);
-      setLoading(false);
+      try {
+        const { data, error } = await supabase.functions.invoke("get-elevenlabs-voices", { body: { company_id: companyId } });
+        if (cancelled) return;
+        if (error || !data?.voices) {
+          setFetchError(true);
+          toast({ variant: "destructive", title: "Errore", description: "Impossibile caricare le voci ElevenLabs." });
+        } else {
+          setVoices(data.voices);
+        }
+      } catch {
+        if (!cancelled) {
+          setFetchError(true);
+          toast({ variant: "destructive", title: "Errore", description: "Impossibile caricare le voci ElevenLabs." });
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     })();
+
+    return () => { cancelled = true; };
   }, [companyId]);
 
   const togglePlay = (voice: Voice) => {
@@ -51,10 +74,17 @@ export default function VoicePickerEnhanced({ companyId, selected, onSelect, voi
       audioRef.current?.pause();
       setPlaying(null);
     } else {
-      if (audioRef.current) audioRef.current.pause();
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
       const audio = new Audio(voice.preview_url);
       audio.onended = () => setPlaying(null);
-      audio.play();
+      audio.onerror = () => {
+        setPlaying(null);
+        toast({ variant: "destructive", title: "Errore riproduzione", description: "Impossibile riprodurre l'anteprima vocale." });
+      };
+      audio.play().catch(() => {
+        setPlaying(null);
+        toast({ variant: "destructive", title: "Errore riproduzione", description: "Impossibile riprodurre l'anteprima vocale." });
+      });
       audioRef.current = audio;
       setPlaying(voice.voice_id);
     }
@@ -105,6 +135,11 @@ export default function VoicePickerEnhanced({ companyId, selected, onSelect, voi
       {/* Voice Grid */}
       {loading ? (
         <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-brand" /></div>
+      ) : fetchError ? (
+        <div className="flex flex-col items-center gap-2 py-8 text-destructive">
+          <AlertCircle className="w-5 h-5" />
+          <p className="text-sm">Impossibile caricare le voci. Controlla la configurazione API ElevenLabs.</p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[320px] overflow-y-auto pr-1">
           {filtered.map(voice => {

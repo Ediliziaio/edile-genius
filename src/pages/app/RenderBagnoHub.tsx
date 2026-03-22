@@ -30,17 +30,22 @@ export default function RenderBagnoHub() {
 
   useEffect(() => {
     if (!companyId) return;
+    let cancelled = false;
     supabase.from("render_credits").select("balance, total_used").eq("company_id", companyId).single()
-      .then(({ data }) => { if (data) setCredits(data as any); });
+      .then(({ data }) => { if (!cancelled && data) setCredits(data as any); })
+      .catch(() => {});
     (supabase.from("render_bagno_sessions") as any).select("id", { count: "exact", head: true }).eq("company_id", companyId).eq("stato", "completato")
-      .then(({ count }: any) => { setRecentCount(count ?? 0); });
+      .then(({ count }: any) => { if (!cancelled) setRecentCount(count ?? 0); })
+      .catch(() => {});
     let q = (supabase.from("render_bagno_gallery") as any)
       .select("id, titolo, render_url, originale_url, created_at")
       .eq("company_id", companyId);
     if (!isAdmin && user?.id) q = q.eq("user_id", user.id);
     q.order("created_at", { ascending: false })
       .limit(200)
-      .then(({ data }: any) => { if (data) setGalleryItems(data); });
+      .then(({ data }: any) => { if (!cancelled && data) setGalleryItems(data); })
+      .catch(() => {});
+    return () => { cancelled = true; };
   }, [companyId, isAdmin, user?.id]);
 
   const deleteGalleryItem = async (id: string) => {

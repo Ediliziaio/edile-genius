@@ -377,7 +377,7 @@ export default function AppDashboard() {
       smartActions.push({
         type: "danger",
         label: `Crediti per ~${daysRemaining} giorn${daysRemaining === 1 ? "o" : "i"}`,
-        description: `Al ritmo attuale (€${burnRateDaily.toFixed(2)}/giorno) i crediti finiranno presto. Ricarica.`,
+        description: `Al ritmo attuale (${burnRateDaily.toFixed(1)} crediti/giorno) i crediti finiranno presto. Ricarica.`,
         href: "/app/credits",
         icon: CreditCard,
       });
@@ -385,7 +385,7 @@ export default function AppDashboard() {
       smartActions.push({
         type: "danger",
         label: "Crediti in esaurimento",
-        description: `Saldo sotto €${creditsLowThreshold}. Ricarica per evitare il blocco.`,
+        description: `Saldo sotto ${creditsLowThreshold} crediti. Ricarica per evitare il blocco.`,
         href: "/app/credits",
         icon: CreditCard,
       });
@@ -701,13 +701,13 @@ export default function AppDashboard() {
           <p className={`text-2xl font-bold ${
             balanceEur > 5 ? "text-primary" : balanceEur >= 1 ? "text-yellow-600" : "text-destructive"
           }`}>
-            €{balanceEur.toFixed(2)}
+            {Math.round(balanceEur)} <span className="text-sm font-medium">crediti</span>
           </p>
           {totalRecharged > 0 && (
             <div className="space-y-1">
               <Progress value={100 - creditUsagePercent} className="h-1.5" />
               <p className="text-[11px] text-muted-foreground">
-                €{totalSpent.toFixed(2)} spesi su €{totalRecharged.toFixed(2)} ricaricati
+                {Math.round(totalSpent)} usati su {Math.round(totalRecharged)} ricaricati
               </p>
             </div>
           )}

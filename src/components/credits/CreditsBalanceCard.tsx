@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Ban } from "lucide-react";
+import { Ban, AlertTriangle } from "lucide-react";
 
 interface Credits {
   balance_eur: number;
@@ -25,7 +25,7 @@ interface CreditsBalanceCardProps {
 
 export default function CreditsBalanceCard({ credits, onRechargeNow, onToggleAutoRecharge }: CreditsBalanceCardProps) {
   const usagePct = credits.total_recharged_eur > 0 ? (credits.total_spent_eur / credits.total_recharged_eur) * 100 : 0;
-  const balanceColor = credits.calls_blocked ? "text-destructive" : credits.balance_eur <= (credits.alert_threshold_eur || 5) ? "text-yellow-600" : "text-foreground";
+  const balanceColor = credits.calls_blocked ? "text-destructive" : credits.balance_eur <= (credits.alert_threshold_eur || 5) ? "text-yellow-600" : "text-primary";
   const barColor = usagePct > 80 ? "bg-destructive" : usagePct > 60 ? "bg-yellow-500" : "bg-primary";
 
   return (
@@ -34,11 +34,12 @@ export default function CreditsBalanceCard({ credits, onRechargeNow, onToggleAut
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
             <p className="text-sm font-semibold text-muted-foreground">Saldo Disponibile</p>
-            <p className={`text-5xl font-extrabold mt-1 ${balanceColor}`}>€{credits.balance_eur.toFixed(2)}</p>
+            <p className={`text-5xl font-extrabold mt-1 ${balanceColor}`}>{Math.round(credits.balance_eur)}</p>
+            <p className="text-sm text-muted-foreground -mt-1">crediti</p>
 
             <div className="mt-4">
               <p className="text-xs font-mono text-muted-foreground mb-1.5">
-                €{credits.total_spent_eur.toFixed(2)} spesi — €{credits.total_recharged_eur.toFixed(2)} ricaricati
+                {Math.round(credits.total_spent_eur)} usati — {Math.round(credits.total_recharged_eur)} ricaricati
               </p>
               <div className="w-full h-3 rounded-full bg-muted overflow-hidden">
                 <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${Math.min(usagePct, 100)}%` }} />
@@ -65,12 +66,16 @@ export default function CreditsBalanceCard({ credits, onRechargeNow, onToggleAut
               <Switch checked={credits.auto_recharge_enabled} onCheckedChange={onToggleAutoRecharge} />
             </div>
             {credits.auto_recharge_enabled ? (
-              <Card className="mt-3 border-primary/20 bg-primary/5">
+              <Card className="mt-3 border-yellow-400 bg-yellow-50 dark:bg-yellow-950/20">
                 <CardContent className="p-4 space-y-3">
-                  <p className="text-sm font-semibold text-primary">Ricarica automatica attiva ✅</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div><Label className="text-xs">Soglia (€)</Label><Input type="number" defaultValue={credits.auto_recharge_threshold} className="mt-1" readOnly /></div>
-                    <div><Label className="text-xs">Importo (€)</Label><Input type="number" defaultValue={credits.auto_recharge_amount} className="mt-1" readOnly /></div>
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-yellow-600 shrink-0" />
+                    <p className="text-sm font-semibold text-yellow-700 dark:text-yellow-400">Ricarica automatica temporaneamente disabilitata</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Il pagamento automatico via carta salvata è in fase di integrazione. Ricarica manualmente quando il saldo è basso.</p>
+                  <div className="grid grid-cols-2 gap-3 opacity-50">
+                    <div><Label className="text-xs">Soglia (crediti)</Label><Input type="number" defaultValue={credits.auto_recharge_threshold} className="mt-1" readOnly /></div>
+                    <div><Label className="text-xs">Importo (crediti)</Label><Input type="number" defaultValue={credits.auto_recharge_amount} className="mt-1" readOnly /></div>
                   </div>
                 </CardContent>
               </Card>

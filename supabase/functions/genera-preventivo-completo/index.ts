@@ -49,6 +49,28 @@ Deno.serve(async (req) => {
       );
     }
 
+    // ── Credit check ─────────────────────────────────────────────────────
+    // Each AI section costs €0.05 billed (€0.02 real). Check balance upfront.
+    const COST_PER_SEZIONE_BILLED = 0.05;
+    const COST_PER_SEZIONE_REAL   = 0.02;
+    const companyId = aziendaId || prev.company_id;
+
+    if (companyId) {
+      const { data: credits } = await supabase
+        .from("ai_credits").select("balance_eur, calls_blocked").eq("company_id", companyId).single();
+      const sezioniCount = ((templateSezioni as Array<unknown>) || []).filter((s: any) =>
+        s.attiva && ["ai_generated", "kb_document"].includes(s.sorgente) &&
+        !["copertina", "render_visivi", "computo_metrico", "offerta_economica"].includes(s.tipo)
+      ).length;
+      const estimatedCost = sezioniCount * COST_PER_SEZIONE_BILLED;
+      if (!credits || credits.calls_blocked || (credits.balance_eur < estimatedCost && credits.balance_eur <= 0)) {
+        return new Response(
+          JSON.stringify({ error: "Crediti AI insufficienti", code: "INSUFFICIENT_CREDITS" }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     // Conditional update: only if stato hasn't changed (optimistic lock)
     const { data: lockResult } = await supabase
       .from("preventivi")
@@ -131,6 +153,24 @@ Deno.serve(async (req) => {
       .from("preventivi")
       .update({ stato: "pronto" })
       .eq("id", preventivoId);
+
+    // ── Deduct credits for generated sections ─────────────────────────
+    if (companyId && successCount > 0) {
+      const costBilled = Number((successCount * COST_PER_SEZIONE_BILLED).toFixed(4));
+      const costReal   = Number((successCount * COST_PER_SEZIONE_REAL).toFixed(4));
+      await supabase.rpc("deduct_call_credits", {
+        _company_id: companyId,
+        _cost_billed: costBilled,
+        _cost_real: costReal,
+      });
+      await supabase.from("ai_audit_log").insert({
+        company_id: companyId,
+        user_id: user.id,
+        action: "preventivo_ai_deduction",
+        entity_type: "preventivo",
+        details: { preventivo_id: preventivoId, sezioni: successCount, cost_billed: costBilled, cost_real: costReal },
+      });
+    }
 
     return new Response(
       JSON.stringify({

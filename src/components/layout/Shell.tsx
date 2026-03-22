@@ -4,6 +4,7 @@ import Topbar from "./Topbar";
 import ImpersonationBanner from "./ImpersonationBanner";
 import AppBreadcrumb from "./AppBreadcrumb";
 import GlobalSearch from "./GlobalSearch";
+import CreditsBlockedBanner from "./CreditsBlockedBanner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -39,6 +40,9 @@ export default function Shell() {
           <Outlet />
         </main>
       </div>
+
+      {/* Full-page overlay when credits are exhausted */}
+      <CreditsBlockedBanner />
 
       <GlobalSearch />
     </div>

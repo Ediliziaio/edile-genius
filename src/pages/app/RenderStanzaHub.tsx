@@ -79,11 +79,11 @@ export default function RenderStanzaHub() {
   });
 
   const handleToggleFavorite = async (item: any) => {
-    await (supabase
+    const { error } = await (supabase
       .from('render_stanza_gallery' as any)
       .update({ is_favorite: !item.is_favorite } as any)
       .eq('id', item.id) as any);
-    refetchGallery();
+    if (!error) refetchGallery();
   };
 
   return (

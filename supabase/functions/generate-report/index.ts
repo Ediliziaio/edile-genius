@@ -78,6 +78,16 @@ Deno.serve(async (req) => {
 
     const reportSummary = `📋 Report ${cantiere || "Cantiere"} — ${reportDate}\n👷 Operai: ${extracted.operai_presenti?.length || "—"}\n📊 Avanzamento: ${extracted.avanzamento_percentuale || "—"}%\n${extracted.problemi?.length ? "⚠️ " + extracted.problemi.length + " problemi" : "✅ Nessun problema"}`;
 
+    // Deduct AI credits if a real AI call was made (GPT-4o-mini)
+    const instanceCompanyId = (instance as any)?.company_id;
+    if (openaiKey && transcriptText && extracted.report_completo && instanceCompanyId) {
+      await sb.rpc("deduct_call_credits", {
+        _company_id: instanceCompanyId,
+        _cost_billed: 0.02,
+        _cost_real: 0.008,
+      });
+    }
+
     log("info", "Report generated", { request_id: rid, fn: FN, instance_id: instanceId });
     return jsonOk({
       ...extracted, report_html: reportHtml, report_summary: reportSummary,

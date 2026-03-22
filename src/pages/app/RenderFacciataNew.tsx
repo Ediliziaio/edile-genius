@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
@@ -87,6 +87,18 @@ export default function RenderFacciataNew() {
 
   // Step 1: Upload
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Cleanup on unmount: clear interval and revoke blob URL
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => { if (fotoPreview) URL.revokeObjectURL(fotoPreview); };
+  }, [fotoPreview]);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
   const [originalStoragePath, setOriginalStoragePath] = useState<string | null>(null);
   const [fotoFile, setFotoFile] = useState<File | null>(null);
@@ -222,7 +234,7 @@ export default function RenderFacciataNew() {
         body: { image_url: signedData.signedUrl },
       });
 
-      if (error) throw new Error(error.message);
+      if (error) throw new Error(error.message || String(error));
       const payload = (data?.data ?? data) as Record<string, unknown>;
       const analysisResult = payload?.analysis ?? payload?.analisi;
       if (!analysisResult) throw new Error("Analisi non ricevuta");
@@ -243,6 +255,19 @@ export default function RenderFacciataNew() {
   const startRender = async () => {
     if (!analisi || !sessionId) return;
 
+    // Pre-flight credit check
+    if (companyId) {
+      const { data: creditsData } = await supabase
+        .from("render_credits")
+        .select("balance")
+        .eq("company_id", companyId)
+        .single();
+      if (!creditsData || creditsData.balance <= 0) {
+        toast({ title: "Crediti esauriti", description: "Ricarica i crediti per generare nuovi render.", variant: "destructive" });
+        return;
+      }
+    }
+
     setRendering(true);
     setRenderError(null);
     setStep(4);
@@ -256,7 +281,7 @@ export default function RenderFacciataNew() {
     ];
     let idx = 0;
     setRenderStatusMsg(msgs[0]);
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       idx = (idx + 1) % msgs.length;
       setRenderStatusMsg(msgs[idx]);
     }, 4000);
@@ -289,9 +314,9 @@ export default function RenderFacciataNew() {
         },
       });
 
-      clearInterval(interval);
+      if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
 
-      if (error) throw new Error(error.message);
+      if (error) throw new Error(error.message || String(error));
       const renderPayload = (data?.data ?? data) as Record<string, unknown>;
       const resultUrl = renderPayload?.result_url || renderPayload?.render_url;
       if (!resultUrl) throw new Error("Render URL non ricevuto");
@@ -300,7 +325,7 @@ export default function RenderFacciataNew() {
       setRendering(false);
       setStep(5);
     } catch (err: any) {
-      clearInterval(interval);
+      if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
       setRendering(false);
       setRenderError(err.message || String(err));
     }

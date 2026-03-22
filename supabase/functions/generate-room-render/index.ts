@@ -43,10 +43,10 @@ Deno.serve(async (req) => {
     const { data: profile } = await supa.from("profiles").select("company_id").eq("id", user.id).single();
     companyId = profile?.company_id || null;
 
-    // Check render credits
+    // Pre-flight credit check (avoids wasting AI quota on zero-balance)
     if (companyId) {
-      const { data: credits } = await supa.from("render_credits").select("balance").eq("company_id", companyId).single();
-      if (!credits || credits.balance <= 0) {
+      const { data: preCheck } = await supa.from("render_credits").select("balance").eq("company_id", companyId).single();
+      if (!preCheck || preCheck.balance <= 0) {
         return jsonError("No render credits available", "insufficient_credits", 402, rid);
       }
     }
@@ -145,9 +145,12 @@ Deno.serve(async (req) => {
         .eq("id", session_id);
     }
 
-    // Deduct render credit AFTER successful generation and upload
+    // Atomic deduction with FOR UPDATE lock — handles race condition
     if (companyId && (resultBase64 || resultUrl)) {
-      await supa.rpc("deduct_render_credit", { _company_id: companyId });
+      const { data: deductResult } = await supa.rpc("deduct_render_credit", { _company_id: companyId });
+      if (deductResult === "insufficient") {
+        return jsonError("No render credits", "insufficient_credits", 402, rid);
+      }
     }
 
     log("info", "Room render generated", { request_id: rid, fn: FN, has_result: !!(resultBase64 || resultUrl) });

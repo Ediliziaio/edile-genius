@@ -17,6 +17,7 @@ import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import AuthGuard from "./components/auth/AuthGuard";
 import Shell from "./components/layout/Shell";
+import FeatureGate from "./components/auth/FeatureGate";
 
 // Auth pages (lazy)
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
@@ -192,17 +193,65 @@ const App = () => (
               <Route element={<Shell />}>
                 <Route path="/app" element={<SafeRoute><AppDashboard /></SafeRoute>} />
                 <Route path="/app/onboarding" element={<SafeRoute><OnboardingPage /></SafeRoute>} />
-                <Route path="/app/agents" element={<SafeRoute><AgentsPage /></SafeRoute>} />
-                <Route path="/app/agents/new" element={<SafeRoute><CreateAgent /></SafeRoute>} />
-                <Route path="/app/agents/new/:slug" element={<SafeRoute><AgentTemplateWizard /></SafeRoute>} />
-                <Route path="/app/agents/:id" element={<SafeRoute><AgentDetail /></SafeRoute>} />
-                <Route path="/app/conversations" element={<SafeRoute><ConversationsPage /></SafeRoute>} />
-                <Route path="/app/contacts" element={<SafeRoute><ContactsPage /></SafeRoute>} />
-                <Route path="/app/contacts/import" element={<SafeRoute><ImportContactsPage /></SafeRoute>} />
-                <Route path="/app/contacts/:id" element={<SafeRoute><ContactDetailPage /></SafeRoute>} />
-                <Route path="/app/phone-numbers" element={<SafeRoute><PhoneNumbersPage /></SafeRoute>} />
-                <Route path="/app/phone-numbers/buy" element={<SafeRoute><BuyPhoneNumberPage /></SafeRoute>} />
-                <Route path="/app/knowledge-base" element={<SafeRoute><KnowledgeBasePage /></SafeRoute>} />
+                {/* ── Agenti AI ── */}
+                <Route path="/app/agents" element={<SafeRoute><FeatureGate featureId="agente_vendita"><AgentsPage /></FeatureGate></SafeRoute>} />
+                <Route path="/app/agents/new" element={<SafeRoute><FeatureGate featureId="agente_vendita"><CreateAgent /></FeatureGate></SafeRoute>} />
+                <Route path="/app/agents/new/:slug" element={<SafeRoute><FeatureGate featureId="agente_vendita"><AgentTemplateWizard /></FeatureGate></SafeRoute>} />
+                <Route path="/app/agents/:id" element={<SafeRoute><FeatureGate featureId="agente_vendita"><AgentDetail /></FeatureGate></SafeRoute>} />
+                <Route path="/app/conversations" element={<SafeRoute><FeatureGate featureId="agente_vendita"><ConversationsPage /></FeatureGate></SafeRoute>} />
+                <Route path="/app/campaigns" element={<SafeRoute><FeatureGate featureId="agente_vendita"><CampaignsPage /></FeatureGate></SafeRoute>} />
+                <Route path="/app/campaigns/new" element={<SafeRoute><FeatureGate featureId="agente_vendita"><CreateCampaignPage /></FeatureGate></SafeRoute>} />
+                <Route path="/app/campaigns/:id" element={<SafeRoute><FeatureGate featureId="agente_vendita"><CampaignDetailPage /></FeatureGate></SafeRoute>} />
+                <Route path="/app/scheduled-calls" element={<SafeRoute><FeatureGate featureId="agente_vendita"><ScheduledCalls /></FeatureGate></SafeRoute>} />
+                <Route path="/app/call-monitor" element={<SafeRoute><FeatureGate featureId="agente_vendita"><CallMonitor /></FeatureGate></SafeRoute>} />
+                <Route path="/app/phone-numbers" element={<SafeRoute><FeatureGate featureId="agente_vendita"><PhoneNumbersPage /></FeatureGate></SafeRoute>} />
+                <Route path="/app/phone-numbers/buy" element={<SafeRoute><FeatureGate featureId="agente_vendita"><BuyPhoneNumberPage /></FeatureGate></SafeRoute>} />
+
+                {/* ── CRM ── */}
+                <Route path="/app/contacts" element={<SafeRoute><FeatureGate featureId="crm_avanzato"><ContactsPage /></FeatureGate></SafeRoute>} />
+                <Route path="/app/contacts/import" element={<SafeRoute><FeatureGate featureId="crm_avanzato"><ImportContactsPage /></FeatureGate></SafeRoute>} />
+                <Route path="/app/contacts/:id" element={<SafeRoute><FeatureGate featureId="crm_avanzato"><ContactDetailPage /></FeatureGate></SafeRoute>} />
+                <Route path="/app/lists" element={<SafeRoute><FeatureGate featureId="crm_avanzato"><ContactListsPage /></FeatureGate></SafeRoute>} />
+                <Route path="/app/lists/:id" element={<SafeRoute><FeatureGate featureId="crm_avanzato"><ContactListDetailPage /></FeatureGate></SafeRoute>} />
+
+                {/* ── Preventivi ── */}
+                <Route path="/app/preventivi" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventiviList /></FeatureGate></SafeRoute>} />
+                <Route path="/app/preventivi/nuovo" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><NuovoPreventivo /></FeatureGate></SafeRoute>} />
+                <Route path="/app/preventivi/:id" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoDetail /></FeatureGate></SafeRoute>} />
+                <Route path="/app/preventivo-hub" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoHub /></FeatureGate></SafeRoute>} />
+                <Route path="/app/preventivo-kb" element={<SafeRoute><FeatureGate featureId="knowledge_base"><KnowledgeBasePreventivo /></FeatureGate></SafeRoute>} />
+                <Route path="/app/preventivi/templates" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoTemplateList /></FeatureGate></SafeRoute>} />
+                <Route path="/app/preventivi/templates/nuovo" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoTemplateBuilder /></FeatureGate></SafeRoute>} />
+                <Route path="/app/preventivi/templates/:id" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoTemplateBuilder /></FeatureGate></SafeRoute>} />
+                <Route path="/app/impostazioni/template-preventivo" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><TemplatePreventivo /></FeatureGate></SafeRoute>} />
+                <Route path="/app/knowledge-base" element={<SafeRoute><FeatureGate featureId="knowledge_base"><KnowledgeBasePage /></FeatureGate></SafeRoute>} />
+
+                {/* ── Render ── */}
+                <Route path="/app/render" element={<SafeRoute><FeatureGate featureId="render_infissi"><RenderHub /></FeatureGate></SafeRoute>} />
+                <Route path="/app/render/new" element={<SafeRoute><FeatureGate featureId="render_infissi"><RenderNew /></FeatureGate></SafeRoute>} />
+                <Route path="/app/render/gallery" element={<SafeRoute><FeatureGate featureId="render_infissi"><RenderGallery /></FeatureGate></SafeRoute>} />
+                <Route path="/app/render/gallery/:id" element={<SafeRoute><FeatureGate featureId="render_infissi"><RenderGalleryDetail /></FeatureGate></SafeRoute>} />
+                <Route path="/app/render-bagno" element={<SafeRoute><FeatureGate featureId="render_bagno"><RenderBagnoHub /></FeatureGate></SafeRoute>} />
+                <Route path="/app/render-bagno/new" element={<SafeRoute><FeatureGate featureId="render_bagno"><RenderBagnoNew /></FeatureGate></SafeRoute>} />
+                <Route path="/app/render-facciata" element={<SafeRoute><FeatureGate featureId="render_facciata"><RenderFacciataHub /></FeatureGate></SafeRoute>} />
+                <Route path="/app/render-facciata/new" element={<SafeRoute><FeatureGate featureId="render_facciata"><RenderFacciataNew /></FeatureGate></SafeRoute>} />
+                <Route path="/app/render-persiane" element={<SafeRoute><FeatureGate featureId="render_persiane"><RenderPersianeHub /></FeatureGate></SafeRoute>} />
+                <Route path="/app/render-persiane/new" element={<SafeRoute><FeatureGate featureId="render_persiane"><RenderPersianeNew /></FeatureGate></SafeRoute>} />
+                <Route path="/app/render-pavimento" element={<SafeRoute><FeatureGate featureId="render_pavimento"><RenderPavimentoHub /></FeatureGate></SafeRoute>} />
+                <Route path="/app/render-pavimento/new" element={<SafeRoute><FeatureGate featureId="render_pavimento"><RenderPavimentoNew /></FeatureGate></SafeRoute>} />
+                <Route path="/app/render-stanza" element={<SafeRoute><FeatureGate featureId="render_stanza"><RenderStanzaHub /></FeatureGate></SafeRoute>} />
+                <Route path="/app/render-stanza/new" element={<SafeRoute><FeatureGate featureId="render_stanza"><RenderStanzaNew /></FeatureGate></SafeRoute>} />
+                <Route path="/app/render-tetto" element={<SafeRoute><FeatureGate featureId="render_tetto"><RenderTettoHub /></FeatureGate></SafeRoute>} />
+                <Route path="/app/render-tetto/new" element={<SafeRoute><FeatureGate featureId="render_tetto"><RenderTettoNew /></FeatureGate></SafeRoute>} />
+
+                {/* ── Automazioni ── */}
+                <Route path="/app/automations" element={<SafeRoute><FeatureGate featureId="automazioni_ai"><Automations /></FeatureGate></SafeRoute>} />
+
+                {/* ── Libre (no feature gate needed) ── */}
+                <Route path="/app/analytics" element={<SafeRoute><AnalyticsPage /></SafeRoute>} />
+                <Route path="/app/credits" element={<SafeRoute><CreditsPage /></SafeRoute>} />
+                <Route path="/app/settings" element={<SafeRoute><SettingsPage /></SafeRoute>} />
+                <Route path="/app/integrations" element={<SafeRoute><Integrations /></SafeRoute>} />
                 <Route path="/app/templates" element={<SafeRoute><TemplatesPage /></SafeRoute>} />
                 <Route path="/app/templates/:slug" element={<SafeRoute><TemplateDetailPage /></SafeRoute>} />
                 <Route path="/app/templates/:slug/setup" element={<SafeRoute><TemplateSetupPage /></SafeRoute>} />
@@ -210,45 +259,8 @@ const App = () => (
                 <Route path="/app/cantieri" element={<SafeRoute><CantierePage /></SafeRoute>} />
                 <Route path="/app/cantieri/configurazione" element={<SafeRoute><CantiereConfig /></SafeRoute>} />
                 <Route path="/app/cantieri/:id" element={<SafeRoute><CantiereDetail /></SafeRoute>} />
-                <Route path="/app/preventivi" element={<SafeRoute><PreventiviList /></SafeRoute>} />
-                <Route path="/app/preventivi/nuovo" element={<SafeRoute><NuovoPreventivo /></SafeRoute>} />
-                <Route path="/app/preventivi/:id" element={<SafeRoute><PreventivoDetail /></SafeRoute>} />
                 <Route path="/app/documenti" element={<SafeRoute><DocumentiScadenze /></SafeRoute>} />
                 <Route path="/app/presenze" element={<SafeRoute><FoglioPresenze /></SafeRoute>} />
-                <Route path="/app/impostazioni/template-preventivo" element={<SafeRoute><TemplatePreventivo /></SafeRoute>} />
-                <Route path="/app/render" element={<SafeRoute><RenderHub /></SafeRoute>} />
-                <Route path="/app/render/new" element={<SafeRoute><RenderNew /></SafeRoute>} />
-                <Route path="/app/render/gallery" element={<SafeRoute><RenderGallery /></SafeRoute>} />
-                <Route path="/app/render/gallery/:id" element={<SafeRoute><RenderGalleryDetail /></SafeRoute>} />
-                <Route path="/app/render-bagno" element={<SafeRoute><RenderBagnoHub /></SafeRoute>} />
-                <Route path="/app/render-bagno/new" element={<SafeRoute><RenderBagnoNew /></SafeRoute>} />
-                <Route path="/app/render-facciata" element={<SafeRoute><RenderFacciataHub /></SafeRoute>} />
-                <Route path="/app/render-facciata/new" element={<SafeRoute><RenderFacciataNew /></SafeRoute>} />
-                <Route path="/app/render-persiane" element={<SafeRoute><RenderPersianeHub /></SafeRoute>} />
-                <Route path="/app/render-persiane/new" element={<SafeRoute><RenderPersianeNew /></SafeRoute>} />
-                <Route path="/app/render-pavimento" element={<SafeRoute><RenderPavimentoHub /></SafeRoute>} />
-                <Route path="/app/render-pavimento/new" element={<SafeRoute><RenderPavimentoNew /></SafeRoute>} />
-                <Route path="/app/render-stanza" element={<SafeRoute><RenderStanzaHub /></SafeRoute>} />
-                <Route path="/app/render-stanza/new" element={<SafeRoute><RenderStanzaNew /></SafeRoute>} />
-                <Route path="/app/render-tetto" element={<SafeRoute><RenderTettoHub /></SafeRoute>} />
-                <Route path="/app/render-tetto/new" element={<SafeRoute><RenderTettoNew /></SafeRoute>} />
-                <Route path="/app/lists" element={<SafeRoute><ContactListsPage /></SafeRoute>} />
-                <Route path="/app/lists/:id" element={<SafeRoute><ContactListDetailPage /></SafeRoute>} />
-                <Route path="/app/campaigns" element={<SafeRoute><CampaignsPage /></SafeRoute>} />
-                <Route path="/app/campaigns/new" element={<SafeRoute><CreateCampaignPage /></SafeRoute>} />
-                <Route path="/app/campaigns/:id" element={<SafeRoute><CampaignDetailPage /></SafeRoute>} />
-                <Route path="/app/analytics" element={<SafeRoute><AnalyticsPage /></SafeRoute>} />
-                <Route path="/app/credits" element={<SafeRoute><CreditsPage /></SafeRoute>} />
-                <Route path="/app/settings" element={<SafeRoute><SettingsPage /></SafeRoute>} />
-                <Route path="/app/integrations" element={<SafeRoute><Integrations /></SafeRoute>} />
-                <Route path="/app/automations" element={<SafeRoute><Automations /></SafeRoute>} />
-                <Route path="/app/call-monitor" element={<SafeRoute><CallMonitor /></SafeRoute>} />
-                <Route path="/app/scheduled-calls" element={<SafeRoute><ScheduledCalls /></SafeRoute>} />
-                <Route path="/app/preventivo-hub" element={<SafeRoute><PreventivoHub /></SafeRoute>} />
-                <Route path="/app/preventivo-kb" element={<SafeRoute><KnowledgeBasePreventivo /></SafeRoute>} />
-                <Route path="/app/preventivi/templates" element={<SafeRoute><PreventivoTemplateList /></SafeRoute>} />
-                <Route path="/app/preventivi/templates/nuovo" element={<SafeRoute><PreventivoTemplateBuilder /></SafeRoute>} />
-                <Route path="/app/preventivi/templates/:id" element={<SafeRoute><PreventivoTemplateBuilder /></SafeRoute>} />
               </Route>
             </Route>
 

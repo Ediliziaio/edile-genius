@@ -61,7 +61,7 @@ export default function CreditsUsageTabs({ usage, topups, agentNames }: CreditsU
             <Card><CardContent className="p-0">
               <Table>
                 <TableHeader><TableRow>
-                  <TableHead>Agente</TableHead><TableHead className="text-right">Chiamate</TableHead><TableHead className="text-right">Minuti</TableHead><TableHead className="text-right">Costo (€)</TableHead>
+                  <TableHead>Agente</TableHead><TableHead className="text-right">Chiamate</TableHead><TableHead className="text-right">Minuti</TableHead><TableHead className="text-right">Crediti usati</TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
                   {agentChartData.map((a, i) => (
@@ -69,7 +69,7 @@ export default function CreditsUsageTabs({ usage, topups, agentNames }: CreditsU
                       <TableCell className="font-medium flex items-center gap-2"><Bot className="h-4 w-4 text-muted-foreground" /> {a.name}</TableCell>
                       <TableCell className="text-right">{a.calls}</TableCell>
                       <TableCell className="text-right font-mono">{a.mins.toFixed(1)}</TableCell>
-                      <TableCell className="text-right font-mono font-semibold text-primary">€{a.cost.toFixed(4)}</TableCell>
+                      <TableCell className="text-right font-mono font-semibold text-primary">{a.cost.toFixed(1)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -78,9 +78,9 @@ export default function CreditsUsageTabs({ usage, topups, agentNames }: CreditsU
             <div className="h-[200px] mt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={agentChartData} layout="vertical" margin={{ left: 80 }}>
-                  <XAxis type="number" tickFormatter={(v) => `€${v.toFixed(2)}`} />
+                  <XAxis type="number" tickFormatter={(v) => `${v.toFixed(1)}`} />
                   <YAxis type="category" dataKey="name" width={80} tick={{ fontSize: 12 }} />
-                  <Tooltip formatter={(v: number) => `€${v.toFixed(4)}`} />
+                  <Tooltip formatter={(v: number) => [`${v.toFixed(1)} crediti`, "Crediti usati"]} />
                   <Bar dataKey="cost" radius={[0, 4, 4, 0]}>{agentChartData.map((_, i) => <Cell key={i} className="fill-primary" />)}</Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -93,7 +93,7 @@ export default function CreditsUsageTabs({ usage, topups, agentNames }: CreditsU
         <Card><CardContent className="p-0">
           <Table>
             <TableHeader><TableRow>
-              <TableHead>Data/Ora</TableHead><TableHead>Agente</TableHead><TableHead>Durata</TableHead><TableHead>LLM</TableHead><TableHead className="text-right">Costo €</TableHead><TableHead className="text-right">Saldo dopo</TableHead>
+              <TableHead>Data/Ora</TableHead><TableHead>Agente</TableHead><TableHead>Durata</TableHead><TableHead>LLM</TableHead><TableHead className="text-right">Crediti</TableHead><TableHead className="text-right">Saldo dopo</TableHead>
             </TableRow></TableHeader>
             <TableBody>
               {usage.length === 0 ? (
@@ -104,8 +104,8 @@ export default function CreditsUsageTabs({ usage, topups, agentNames }: CreditsU
                   <TableCell>{agentNames[u.agent_id || ""] || "—"}</TableCell>
                   <TableCell className="font-mono text-sm">{Math.floor(u.duration_sec / 60)}m {u.duration_sec % 60}s</TableCell>
                   <TableCell><Badge variant="secondary" className="text-xs">{u.llm_model}</Badge></TableCell>
-                  <TableCell className="text-right font-mono font-semibold text-primary">€{u.cost_billed_total.toFixed(4)}</TableCell>
-                  <TableCell className="text-right font-mono text-muted-foreground">€{u.balance_after.toFixed(2)}</TableCell>
+                  <TableCell className="text-right font-mono font-semibold text-primary">{u.cost_billed_total.toFixed(1)}</TableCell>
+                  <TableCell className="text-right font-mono text-muted-foreground">{Math.round(u.balance_after)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

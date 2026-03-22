@@ -116,7 +116,7 @@ export default function CreditsPage() {
         await fetchAll();
         toast({
           title: "✅ Crediti aggiunti!",
-          description: `Nuovo saldo: €${data.balance_eur.toFixed(2)}`,
+          description: `Nuovo saldo: ${Math.round(data.balance_eur)} crediti`,
         });
         return;
       }
@@ -166,7 +166,7 @@ export default function CreditsPage() {
         body: { companyId, amountEur: topupAmount, paymentMethod: "manual", type: "manual" },
       });
       if (error || data?.error) throw new Error(data?.error || error?.message);
-      toast({ title: "Ricarica completata", description: `Nuovo saldo: €${Number(data.new_balance_eur).toFixed(2)}` });
+      toast({ title: "Ricarica completata", description: `Nuovo saldo: ${Math.round(Number(data.new_balance_eur))} crediti` });
       setConfirmModal(false);
       fetchAll();
     } catch (err: any) {
@@ -254,8 +254,8 @@ export default function CreditsPage() {
                 )}
                 <CardContent className="p-6 text-center space-y-3 pt-6">
                   <p className="text-sm font-semibold text-muted-foreground">{pkg.name}</p>
-                  <p className="text-4xl font-extrabold text-foreground">€{Number(pkg.credits_eur).toFixed(0)}</p>
-                  <p className="text-xs text-muted-foreground">di crediti conversazionali</p>
+                  <p className="text-4xl font-extrabold text-foreground">{Number(pkg.credits_eur).toFixed(0)}</p>
+                  <p className="text-xs text-muted-foreground">crediti conversazionali</p>
                   <p className="text-lg font-bold text-primary">€{Number(pkg.price_eur).toFixed(0)}</p>
                   <Button className="w-full" variant={pkg.badge ? "default" : "outline"} size="sm">
                     Acquista
@@ -287,8 +287,8 @@ export default function CreditsPage() {
           <DialogHeader><DialogTitle>Conferma Ricarica</DialogTitle></DialogHeader>
           <Card className="bg-muted/50"><CardContent className="p-5 space-y-2">
             <div className="flex justify-between"><span className="text-sm text-muted-foreground">Importo:</span><span className="font-bold">€{topupAmount.toFixed(2)}</span></div>
-            <div className="flex justify-between"><span className="text-sm text-muted-foreground">Saldo attuale:</span><span className="font-mono">€{credits.balance_eur.toFixed(2)}</span></div>
-            <div className="flex justify-between border-t pt-2"><span className="text-sm font-semibold">Saldo dopo ricarica:</span><span className="font-bold text-primary">€{Number((credits.balance_eur + topupAmount).toFixed(2))}</span></div>
+            <div className="flex justify-between"><span className="text-sm text-muted-foreground">Saldo attuale:</span><span className="font-mono">{Math.round(credits.balance_eur)} crediti</span></div>
+            <div className="flex justify-between border-t pt-2"><span className="text-sm font-semibold">Saldo dopo ricarica:</span><span className="font-bold text-primary">{Math.round(credits.balance_eur + topupAmount)} crediti</span></div>
           </CardContent></Card>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmModal(false)}>Annulla</Button>
@@ -304,9 +304,9 @@ export default function CreditsPage() {
           {confirmPackage && (
             <Card className="bg-muted/50"><CardContent className="p-5 space-y-2">
               <div className="flex justify-between"><span className="text-sm text-muted-foreground">Pacchetto:</span><span className="font-bold">{confirmPackage.name}</span></div>
-              <div className="flex justify-between"><span className="text-sm text-muted-foreground">Crediti aggiunti:</span><span className="font-bold">€{Number(confirmPackage.credits_eur).toFixed(2)}</span></div>
+              <div className="flex justify-between"><span className="text-sm text-muted-foreground">Crediti aggiunti:</span><span className="font-bold">{Math.round(Number(confirmPackage.credits_eur))} crediti</span></div>
               <div className="flex justify-between"><span className="text-sm text-muted-foreground">Prezzo:</span><span className="font-bold text-primary">€{Number(confirmPackage.price_eur).toFixed(0)}</span></div>
-              <div className="flex justify-between border-t pt-2"><span className="text-sm font-semibold">Saldo dopo acquisto:</span><span className="font-bold text-primary">€{Number((credits.balance_eur + Number(confirmPackage.credits_eur)).toFixed(2))}</span></div>
+              <div className="flex justify-between border-t pt-2"><span className="text-sm font-semibold">Saldo dopo acquisto:</span><span className="font-bold text-primary">{Math.round(credits.balance_eur + Number(confirmPackage.credits_eur))} crediti</span></div>
             </CardContent></Card>
           )}
           <p className="text-xs text-muted-foreground flex items-center gap-1">

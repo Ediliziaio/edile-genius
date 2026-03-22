@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -8,11 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import StatsCard from "@/components/superadmin/StatsCard";
-import { ArrowLeft, Bot, Phone, MessageSquare, Save, Loader2, UserCheck } from "lucide-react";
+import { ArrowLeft, Bot, Phone, MessageSquare, Save, Loader2, UserCheck, Lock, Unlock } from "lucide-react";
 import { useImpersonation } from "@/context/ImpersonationContext";
 import type { Tables } from "@/integrations/supabase/types";
+
+const CATEGORIE_LABEL: Record<string, string> = {
+  render: "Render AI", preventivi: "Preventivi", agenti_ai: "Agenti AI",
+  automazioni: "Automazioni", crm: "CRM",
+};
 
 type Company = Tables<"companies">;
 type Agent = Tables<"agents">;
@@ -41,7 +47,27 @@ export default function CompanyDetail() {
   const [editPlan, setEditPlan] = useState("");
   const [editStatus, setEditStatus] = useState("");
 
+  // Feature management
+  const [allFeatures, setAllFeatures] = useState<any[]>([]);
+  const [unlockedFeatures, setUnlockedFeatures] = useState<Record<string, boolean>>({});
+  const [featuresLoading, setFeaturesLoading] = useState(false);
+  const [featuresSaving, setFeaturesSaving] = useState<Record<string, boolean>>({});
 
+
+
+  const loadFeatures = useCallback(async () => {
+    if (!id) return;
+    setFeaturesLoading(true);
+    const [allRes, unlockedRes] = await Promise.all([
+      (supabase as any).from("piattaforma_features").select("*").order("categoria").order("nome"),
+      (supabase as any).from("azienda_features_sbloccate").select("feature_id, attivo").eq("company_id", id),
+    ]);
+    setAllFeatures(allRes.data || []);
+    const map: Record<string, boolean> = {};
+    for (const f of (unlockedRes.data || [])) map[f.feature_id] = f.attivo;
+    setUnlockedFeatures(map);
+    setFeaturesLoading(false);
+  }, [id]);
 
   useEffect(() => {
     if (!id) return;
@@ -57,7 +83,21 @@ export default function CompanyDetail() {
       setLoading(false);
     };
     load();
-  }, [id]);
+    loadFeatures();
+  }, [id, loadFeatures]);
+
+  const toggleFeature = async (featureId: string, enabled: boolean) => {
+    if (!id) return;
+    setFeaturesSaving(prev => ({ ...prev, [featureId]: true }));
+    await (supabase as any).rpc("set_company_feature", {
+      _company_id: id,
+      _feature_id: featureId,
+      _attivo: enabled,
+    });
+    setUnlockedFeatures(prev => ({ ...prev, [featureId]: enabled }));
+    setFeaturesSaving(prev => ({ ...prev, [featureId]: false }));
+    toast({ title: enabled ? "Feature abilitata" : "Feature disabilitata", description: featureId });
+  };
 
   const activeAgents = agents.filter((a) => a.status === "active").length;
   const callsThisMonth = agents.reduce((s, a) => s + ((a as any).calls_month || 0), 0);
@@ -102,6 +142,7 @@ export default function CompanyDetail() {
         <TabsList className="bg-ink-100 border-none w-full sm:w-auto overflow-x-auto">
           <TabsTrigger value="overview">Panoramica</TabsTrigger>
           <TabsTrigger value="agents">Agenti</TabsTrigger>
+          <TabsTrigger value="features">Funzionalità</TabsTrigger>
           <TabsTrigger value="config">Configurazione</TabsTrigger>
         </TabsList>
 
@@ -146,6 +187,59 @@ export default function CompanyDetail() {
                 </TableBody>
               </Table>
             )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="features" className="space-y-4">
+          <div className="rounded-card border border-ink-200 bg-white p-6 shadow-card">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-ink-900">Gestione Funzionalità</h3>
+              {featuresLoading && <Loader2 className="h-4 w-4 animate-spin text-brand" />}
+            </div>
+            {Object.entries(
+              allFeatures.reduce((acc: Record<string, any[]>, f: any) => {
+                (acc[f.categoria] = acc[f.categoria] || []).push(f);
+                return acc;
+              }, {})
+            ).map(([cat, features]) => (
+              <div key={cat} className="mb-6">
+                <h4 className="text-sm font-semibold text-ink-500 uppercase tracking-wide mb-3">
+                  {CATEGORIE_LABEL[cat] || cat}
+                </h4>
+                <div className="space-y-2">
+                  {(features as any[]).map((f: any) => {
+                    const isOn = !!unlockedFeatures[f.id];
+                    const isSaving = !!featuresSaving[f.id];
+                    return (
+                      <div key={f.id} className="flex items-center justify-between p-3 rounded-lg border border-ink-100 hover:bg-ink-50">
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg">{f.icona}</span>
+                          <div>
+                            <p className="text-sm font-medium text-ink-900">{f.nome}</p>
+                            <p className="text-xs text-ink-400">{f.descrizione}</p>
+                          </div>
+                          {f.crediti_per_uso > 0 && (
+                            <Badge variant="outline" className="text-xs border-ink-200 text-ink-500 ml-2">
+                              {f.crediti_per_uso} credito/uso
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {isOn
+                            ? <Unlock className="h-4 w-4 text-status-success" />
+                            : <Lock className="h-4 w-4 text-ink-300" />
+                          }
+                          {isSaving
+                            ? <Loader2 className="h-4 w-4 animate-spin text-brand" />
+                            : <Switch checked={isOn} onCheckedChange={(v) => toggleFeature(f.id, v)} />
+                          }
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </TabsContent>
 

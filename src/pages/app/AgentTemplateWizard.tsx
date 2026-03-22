@@ -23,6 +23,7 @@ const VOCAL_SLUGS = [
   "vocale-custom", "richiama-lead-ads", "qualifica-serramenti", "qualifica-ristrutturazione",
   "qualifica-fotovoltaico", "conferma-appuntamenti", "recupera-preventivi", "recupera-noshow",
   "followup-sopralluogo", "raccolta-recensioni", "verifica-soddisfazione",
+  "assistente-qualifica-lead-edile",
   // legacy slugs
   "qualifica-infissi", "inbound-campagne", "conferma-sopralluogo",
   "recupero-preventivi", "recupero-noshow", "recensioni-post-lavoro",
@@ -30,7 +31,7 @@ const VOCAL_SLUGS = [
 const RENDER_SLUGS = ["render-infissi", "render-bagno", "render-facciate", "render-persiane", "render-pavimento", "render-stanza"];
 const WHATSAPP_SLUGS = [
   "primo-contatto-wa", "followup-preventivi-wa", "assistente-whatsapp",
-  "whatsapp-preventivi",
+  "whatsapp-preventivi", "report-serale-cantiere",
 ];
 
 function getAgentType(slug: string): string {
@@ -56,6 +57,8 @@ function getTemplateLabel(slug: string): string {
     "primo-contatto-wa": "Primo Contatto Lead WhatsApp",
     "raccolta-recensioni": "Raccolta Recensioni",
     "verifica-soddisfazione": "Verifica Soddisfazione Post-Lavoro",
+    "assistente-qualifica-lead-edile": "Assistente & Qualifica Lead — Impresa Edile",
+    "report-serale-cantiere": "Reportistica Serale Cantiere",
     "render-infissi": "Render Infissi AI",
     // legacy
     "qualifica-infissi": "Qualifica Lead Serramenti",

@@ -20,11 +20,13 @@ export default function RenderHub() {
   useEffect(() => {
     if (!companyId) return;
     supabase.from("render_credits").select("balance, total_used").eq("company_id", companyId).single()
-      .then(({ data }) => { if (data) setCredits(data as any); });
+      .then(({ data }) => { if (data) setCredits(data as any); })
+      .catch(() => {});
     let q = supabase.from("render_gallery").select("*").eq("company_id", companyId);
     if (!isAdmin && user?.id) q = q.eq("created_by", user.id);
     q.order("created_at", { ascending: false }).limit(6)
-      .then(({ data }) => { if (data) setRecentRenders(data); });
+      .then(({ data }) => { if (data) setRecentRenders(data); })
+      .catch(() => {});
   }, [companyId, isAdmin, user?.id]);
 
   const steps = [

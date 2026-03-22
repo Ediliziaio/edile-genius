@@ -26,7 +26,7 @@ export async function runPostCallActions(
   } = opts;
 
   if (!outcomeAi) {
-    log("info", "No AI outcome — skipping post-call actions", { request_id: requestId });
+    log("info", "No AI outcome — using sentiment-based fallback for contact update", { request_id: requestId });
   }
 
   try {
@@ -122,6 +122,21 @@ export async function runPostCallActions(
           campaigns_excluded: data.campaigns_excluded,
         });
       }
+
+      // Auto DNC: if customer explicitly requested no more calls, enforce it immediately
+      if (outcomeAi === "do_not_call") {
+        const { error: dncErr } = await sb
+          .from("contacts")
+          .update({ do_not_call: true, do_not_call_reason: "Richiesta durante chiamata AI" })
+          .eq("id", contactId)
+          .eq("do_not_call", false); // only update if not already flagged
+        if (!dncErr) {
+          log("info", "Contact auto-flagged as DNC from call outcome", {
+            request_id: requestId,
+            contact_id: contactId,
+          });
+        }
+      }
     }
 
     // 5. CRM auto-update via update_contact_after_call — ONLY when AI outcome was NOT available
@@ -132,13 +147,24 @@ export async function runPostCallActions(
       const nextCallAt = suggestNextCallTime(outcome, sentiment);
 
       try {
+        // Fetch current next_call_at to avoid overwriting a future date with an earlier one
+        const { data: currentContact } = await sb
+          .from("contacts")
+          .select("next_call_at")
+          .eq("id", contactId)
+          .single();
+        const existingNextCall = currentContact?.next_call_at ? new Date(currentContact.next_call_at) : null;
+        const safeNextCallAt = nextCallAt && existingNextCall && existingNextCall > nextCallAt
+          ? existingNextCall.toISOString()
+          : (nextCallAt?.toISOString() ?? null);
+
         await sb.rpc("update_contact_after_call", {
           p_contact_id: contactId,
           p_outcome: outcome,
           p_duration_sec: durationSeconds || 0,
           p_agent_id: agentId || null,
           p_ai_summary: null,
-          p_next_call_at: nextCallAt?.toISOString() ?? null,
+          p_next_call_at: safeNextCallAt,
           p_sentiment: sentiment,
         });
 
@@ -160,6 +186,7 @@ export async function runPostCallActions(
     if (contactId && conversationId) {
       const sentiment = analyzeSentiment(transcript || []);
       const outcome = outcomeAi || determineOutcome(callStatus, durationSeconds);
+      const isVoicemail = outcome === "voicemail";
 
       await sb
         .from("outbound_call_log")
@@ -168,8 +195,79 @@ export async function runPostCallActions(
           sentiment,
           duration_sec: durationSeconds || 0,
           ended_at: new Date().toISOString(),
+          is_voicemail: isVoicemail,
         })
         .eq("el_conversation_id", conversationId);
+
+      // 7. Voicemail tracking: increment counter; auto-pause after 3 consecutive voicemails
+      if (isVoicemail) {
+        const { data: contactData } = await sb
+          .from("contacts")
+          .select("voicemail_count")
+          .eq("id", contactId)
+          .single();
+
+        const newVoicemailCount = (contactData?.voicemail_count ?? 0) + 1;
+        const MAX_VOICEMAILS = 3;
+
+        const voicemailUpdate: Record<string, unknown> = {
+          voicemail_count: newVoicemailCount,
+          last_voicemail_at: new Date().toISOString(),
+        };
+
+        // After MAX_VOICEMAILS consecutive voicemails, block further outbound calls
+        if (newVoicemailCount >= MAX_VOICEMAILS) {
+          voicemailUpdate.do_not_call = true;
+          voicemailUpdate.do_not_call_reason = `Segreteria per ${MAX_VOICEMAILS} chiamate consecutive — sospeso automaticamente`;
+          log("warn", "Contact auto-paused: too many voicemails", {
+            request_id: requestId,
+            contact_id: contactId,
+            voicemail_count: newVoicemailCount,
+          });
+        }
+
+        await sb.from("contacts").update(voicemailUpdate).eq("id", contactId);
+      } else if (outcome === "answered" || outcome === "appointment" || outcome === "qualified") {
+        // Reset voicemail counter when contact actually answers
+        await sb.from("contacts").update({ voicemail_count: 0 }).eq("id", contactId);
+      }
+    }
+
+    // 8. Callback auto-scheduling: if a next_call_at was suggested and agent is known,
+    //    automatically create a pending scheduled_call so the cron picks it up.
+    if (contactId && agentId) {
+      const outcome = outcomeAi || determineOutcome(callStatus, durationSeconds);
+      const nextCallAt = suggestNextCallTime(outcome, analyzeSentiment(transcript || []));
+
+      if (nextCallAt && nextCallAt > new Date()) {
+        // Avoid duplicate scheduling: check no pending call already exists for this contact
+        const { count: existing } = await sb
+          .from("scheduled_calls")
+          .select("id", { count: "exact", head: true })
+          .eq("contact_id", contactId)
+          .eq("status", "pending")
+          .gte("scheduled_at", new Date().toISOString());
+
+        if (!existing || existing === 0) {
+          const { error: schedErr } = await sb.from("scheduled_calls").insert({
+            company_id: companyId,
+            contact_id: contactId,
+            agent_id: agentId,
+            scheduled_at: nextCallAt.toISOString(),
+            status: "pending",
+            notes: `Richiamata automatica — esito precedente: ${outcome}`,
+          });
+
+          if (!schedErr) {
+            log("info", "Callback auto-scheduled", {
+              request_id: requestId,
+              contact_id: contactId,
+              scheduled_at: nextCallAt.toISOString(),
+              outcome,
+            });
+          }
+        }
+      }
     }
 
     if (!contactId) {
@@ -188,14 +286,36 @@ export async function runPostCallActions(
 
 function analyzeSentiment(transcript: any[]): string {
   if (!transcript.length) return "unknown";
-  const positiveWords = ["sì", "perfetto", "ottimo", "interessato", "quando", "appuntamento", "grazie", "certo", "volentieri"];
-  const negativeWords = ["no", "non mi interessa", "lasci stare", "occupato", "non voglio", "basta"];
-  const text = transcript
+
+  // Multi-word negative phrases must be checked before single positive words
+  // to correctly handle negations like "non mi interessa", "non sono interessato"
+  const negationPrefixes = ["non ", "no ", "niente ", "neanche ", "mai "];
+  const positiveRoots = ["interessat", "perfetto", "ottimo", "quando", "appuntamento", "certo", "volentieri", "disponibil", "procediamo", "confermo"];
+  const strongNegatives = ["lasci stare", "non mi interessa", "non voglio", "basta così", "non sono interessato", "rimuovete", "non chiamate", "toglietemi"];
+
+  const userMessages = transcript
     .filter((t: any) => t.role === "user")
-    .map((t: any) => (t.message || t.text || "").toLowerCase())
-    .join(" ");
-  const posScore = positiveWords.filter((w) => text.includes(w)).length;
-  const negScore = negativeWords.filter((w) => text.includes(w)).length;
+    .map((t: any) => (t.message || t.text || "").toLowerCase());
+
+  const fullText = userMessages.join(" ");
+
+  // Count strong negatives first (multi-word, unambiguous)
+  let negScore = strongNegatives.filter((phrase) => fullText.includes(phrase)).length;
+
+  // Count positive roots — but discount if preceded by a negation within the same sentence
+  let posScore = 0;
+  for (const msg of userMessages) {
+    for (const root of positiveRoots) {
+      if (!msg.includes(root)) continue;
+      const preceded = negationPrefixes.some((neg) => {
+        const idx = msg.indexOf(root);
+        return idx > 0 && msg.slice(Math.max(0, idx - 20), idx).includes(neg);
+      });
+      if (preceded) negScore++;
+      else posScore++;
+    }
+  }
+
   if (posScore > negScore + 1) return "positive";
   if (negScore > posScore) return "negative";
   return "neutral";

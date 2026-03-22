@@ -28,11 +28,14 @@ export default function RenderGallery() {
   const fetchGallery = async () => {
     if (!companyId) return;
     setLoading(true);
-    let q = supabase.from("render_gallery").select("*").eq("company_id", companyId);
-    if (!isAdmin && user?.id) q = q.eq("created_by", user.id);
-    const { data } = await q.order("created_at", { ascending: false });
-    if (data) setItems(data);
-    setLoading(false);
+    try {
+      let q = supabase.from("render_gallery").select("*").eq("company_id", companyId);
+      if (!isAdmin && user?.id) q = q.eq("created_by", user.id);
+      const { data } = await q.order("created_at", { ascending: false });
+      if (data) setItems(data);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { fetchGallery(); }, [companyId]);

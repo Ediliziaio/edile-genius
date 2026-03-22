@@ -94,6 +94,44 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Rate limit: max 5 manual topups per company per hour
+    const { count: recentCount } = await sb
+      .from("ai_credit_topups")
+      .select("id", { count: "exact", head: true })
+      .eq("company_id", companyId)
+      .neq("type", "stripe")
+      .gte("created_at", new Date(Date.now() - 3_600_000).toISOString());
+
+    if ((recentCount ?? 0) >= 5) {
+      return new Response(
+        JSON.stringify({ error: "Troppe ricariche nell'ultima ora. Riprova tra qualche minuto." }),
+        { status: 429, headers: corsHeaders }
+      );
+    }
+
+    // Idempotency: reject duplicate topups with the same company + amount within 30s
+    // Prevents double-click / network retry from double-crediting.
+    const { data: recentDup } = await sb
+      .from("ai_credit_topups")
+      .select("id, invoice_number, amount_eur")
+      .eq("company_id", companyId)
+      .eq("amount_eur", finalCreditsEur)
+      .in("type", [type || (packageId ? "package" : "manual")])
+      .gte("created_at", new Date(Date.now() - 30_000).toISOString())
+      .limit(1)
+      .maybeSingle();
+
+    if (recentDup) {
+      // Return the cached result from the recent duplicate
+      return new Response(JSON.stringify({
+        success: true,
+        new_balance_eur: null, // balance unknown without re-querying
+        amount_added: Number(finalCreditsEur.toFixed(2)),
+        invoice_number: recentDup.invoice_number,
+        deduplicated: true,
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     // Atomic topup via RPC — use finalCreditsEur (credits to add)
     const { data: newBalanceRows, error: rpcError } = await sb.rpc("topup_credits", {
       _company_id: companyId,

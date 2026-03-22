@@ -36,7 +36,18 @@ export default function AgentOutboundTab({ agentId, companyId, outboundEnabled, 
     supabase.from("outbound_call_log").select("*").eq("agent_id", agentId)
       .order("started_at", { ascending: false })
       .range(page * CALLS_PER_PAGE, (page + 1) * CALLS_PER_PAGE - 1)
-      .then(({ data }) => { setCalls(prev => page === 0 ? (data || []) : [...prev, ...(data || [])]); setLoadingCalls(false); });
+      .then(({ data, error }) => {
+        if (error) {
+          toast({ variant: "destructive", title: "Errore", description: "Impossibile caricare le chiamate." });
+        } else {
+          setCalls(prev => page === 0 ? (data || []) : [...prev, ...(data || [])]);
+        }
+        setLoadingCalls(false);
+      })
+      .catch(() => {
+        toast({ variant: "destructive", title: "Errore", description: "Impossibile caricare le chiamate." });
+        setLoadingCalls(false);
+      });
   };
 
   useEffect(() => { loadCalls(0); }, [agentId]);
@@ -51,7 +62,8 @@ export default function AgentOutboundTab({ agentId, companyId, outboundEnabled, 
     finally { setToggling(false); }
   };
 
-  const validateE164 = (num: string): boolean => /^\+[1-9]\d{6,14}$/.test(num.replace(/\s/g, ""));
+  // E.164: +[country][number], 8-15 digits total — matches backend regex exactly
+  const validateE164 = (num: string): boolean => /^\+[1-9]\d{7,14}$/.test(num.replace(/\s/g, ""));
 
   const handleNumberChange = (val: string) => {
     setToNumber(val);
@@ -77,11 +89,22 @@ export default function AgentOutboundTab({ agentId, companyId, outboundEnabled, 
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast({ title: "Chiamata avviata!", description: `Chiamata a ${cleanNumber} in corso...` });
       setToNumber("");
       setPhoneError("");
-      // Refresh calls after short delay for DB propagation
-      await new Promise(r => setTimeout(r, 1000));
+      // Wait for DB propagation, then verify the call log entry exists
+      await new Promise(r => setTimeout(r, 1200));
+      const { data: newLog } = await supabase
+        .from("outbound_call_log")
+        .select("id, status")
+        .eq("agent_id", agentId)
+        .order("started_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (newLog) {
+        toast({ title: "Chiamata avviata!", description: `Chiamata a ${cleanNumber} in corso...` });
+      } else {
+        toast({ title: "Chiamata inviata", description: "Chiamata avviata — log in aggiornamento." });
+      }
       loadCalls(0);
       setCallPage(0);
     } catch (err: any) {
