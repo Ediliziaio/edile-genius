@@ -1,168 +1,274 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
+const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ok = (body: unknown) =>
-  new Response(JSON.stringify(body), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+function ok(body: unknown) {
+  return new Response(JSON.stringify(body), {
+    headers: { ...cors, "Content-Type": "application/json" },
+  });
+}
 
-// ── Crypto (inline) ────────────────────────────────────
-async function encryptToken(plaintext: string, keyHex: string): Promise<string> {
-  const keyBytes = new Uint8Array(keyHex.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
-  const key = await crypto.subtle.importKey("raw", keyBytes, "AES-GCM", false, ["encrypt"]);
+function err(msg: string, status = 200) {
+  return new Response(JSON.stringify({ error: msg }), {
+    status,
+    headers: { ...cors, "Content-Type": "application/json" },
+  });
+}
+
+/* ─── AES-256-GCM via Web Crypto (built-in Deno) ─── */
+function hexToBytes(hex: string): Uint8Array {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes[i / 2] = parseInt(hex.slice(i, i + 2), 16);
+  }
+  return bytes;
+}
+
+async function importKey(keyHex: string): Promise<CryptoKey> {
+  return crypto.subtle.importKey(
+    "raw",
+    hexToBytes(keyHex),
+    { name: "AES-GCM" },
+    false,
+    ["encrypt", "decrypt"],
+  );
+}
+
+async function encrypt(text: string, keyHex: string): Promise<string> {
+  const key = await importKey(keyHex);
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encoded = new TextEncoder().encode(plaintext);
-  const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoded);
-  const combined = new Uint8Array(iv.length + new Uint8Array(ciphertext).length);
-  combined.set(iv);
-  combined.set(new Uint8Array(ciphertext), iv.length);
-  return btoa(String.fromCharCode(...combined));
+  const encoded = new TextEncoder().encode(text);
+  const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoded);
+  const result = new Uint8Array(12 + encrypted.byteLength);
+  result.set(iv, 0);
+  result.set(new Uint8Array(encrypted), 12);
+  return btoa(String.fromCharCode(...result));
 }
 
-async function decryptToken(cipherB64: string, keyHex: string): Promise<string> {
-  const keyBytes = new Uint8Array(keyHex.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
-  const key = await crypto.subtle.importKey("raw", keyBytes, "AES-GCM", false, ["decrypt"]);
-  const combined = Uint8Array.from(atob(cipherB64), (c) => c.charCodeAt(0));
-  const iv = combined.slice(0, 12);
-  const ciphertext = combined.slice(12);
-  const plainBuf = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
-  return new TextDecoder().decode(plainBuf);
+async function decrypt(b64: string, keyHex: string): Promise<string> {
+  const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+  const key = await importKey(keyHex);
+  const iv = bytes.slice(0, 12);
+  const data = bytes.slice(12);
+  const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data);
+  return new TextDecoder().decode(decrypted);
 }
 
-function getEncKey(): string {
-  const key = Deno.env.get("META_ENCRYPTION_KEY") ?? "";
-  if (key.length !== 64) throw new Error("META_ENCRYPTION_KEY non configurata (deve essere 64 hex chars)");
-  return key;
-}
-
-function maskKey(value: string): string {
-  if (!value || value.length < 8) return "••••••••";
+function maskValue(value: string): string {
+  if (value.length <= 8) return "••••••••";
   return value.slice(0, 6) + "••••••••" + value.slice(-4);
 }
 
-// ── Test providers ─────────────────────────────────────
-async function testKey(keyName: string, value: string): Promise<string> {
-  if (keyName === "OPENAI_API_KEY") {
-    const r = await fetch("https://api.openai.com/v1/models", { headers: { Authorization: `Bearer ${value}` } });
-    if (!r.ok) throw new Error(`OpenAI HTTP ${r.status}`);
-    const d = await r.json();
-    return `OK — ${(d.data || []).length} modelli`;
+/* ─── Test connessione per ogni servizio ─── */
+async function testKey(keyName: string, plainValue: string): Promise<{ status: "ok" | "error"; message: string }> {
+  try {
+    if (keyName === "OPENAI_API_KEY") {
+      const r = await fetch("https://api.openai.com/v1/models", {
+        headers: { Authorization: `Bearer ${plainValue}` },
+      });
+      if (r.ok) return { status: "ok", message: "OpenAI: connessione OK" };
+      const j = await r.json().catch(() => ({}));
+      return { status: "error", message: `OpenAI: ${j?.error?.message ?? r.statusText}` };
+    }
+
+    if (keyName === "GEMINI_API_KEY") {
+      const r = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${plainValue}`,
+      );
+      if (r.ok) return { status: "ok", message: "Gemini: connessione OK" };
+      const j = await r.json().catch(() => ({}));
+      return { status: "error", message: `Gemini: ${j?.error?.message ?? r.statusText}` };
+    }
+
+    if (keyName === "ELEVENLABS_API_KEY") {
+      const r = await fetch("https://api.elevenlabs.io/v1/user/subscription", {
+        headers: { "xi-api-key": plainValue },
+      });
+      if (r.ok) return { status: "ok", message: "ElevenLabs: connessione OK" };
+      return { status: "error", message: `ElevenLabs: ${r.statusText}` };
+    }
+
+    if (keyName === "STRIPE_SECRET_KEY") {
+      const r = await fetch("https://api.stripe.com/v1/balance", {
+        headers: { Authorization: `Bearer ${plainValue}` },
+      });
+      if (r.ok) return { status: "ok", message: "Stripe: connessione OK" };
+      const j = await r.json().catch(() => ({}));
+      return { status: "error", message: `Stripe: ${j?.error?.message ?? r.statusText}` };
+    }
+
+    if (keyName === "RESEND_API_KEY") {
+      const r = await fetch("https://api.resend.com/domains", {
+        headers: { Authorization: `Bearer ${plainValue}` },
+      });
+      if (r.ok) return { status: "ok", message: "Resend: connessione OK" };
+      const j = await r.json().catch(() => ({}));
+      return { status: "error", message: `Resend: ${j?.message ?? r.statusText}` };
+    }
+
+    if (keyName === "FIRECRAWL_API_KEY") {
+      const r = await fetch("https://api.firecrawl.dev/v1/team/usage", {
+        headers: { Authorization: `Bearer ${plainValue}` },
+      });
+      if (r.ok) return { status: "ok", message: "Firecrawl: connessione OK" };
+      return { status: "error", message: `Firecrawl: ${r.statusText}` };
+    }
+
+    return { status: "error", message: "Test non disponibile per questa chiave" };
+  } catch (e: unknown) {
+    return { status: "error", message: `Errore di rete: ${(e as Error).message}` };
   }
-  if (keyName === "GEMINI_API_KEY") {
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1/models?key=${value}`);
-    if (!r.ok) throw new Error(`Gemini HTTP ${r.status}`);
-    const d = await r.json();
-    return `OK — ${(d.models || []).length} modelli`;
-  }
-  if (keyName === "ELEVENLABS_API_KEY") {
-    const r = await fetch("https://api.elevenlabs.io/v1/voices", { headers: { "xi-api-key": value } });
-    if (!r.ok) throw new Error(`ElevenLabs HTTP ${r.status}`);
-    const d = await r.json();
-    return `OK — ${(d.voices || []).length} voci`;
-  }
-  if (keyName === "STRIPE_SECRET_KEY") {
-    const r = await fetch("https://api.stripe.com/v1/balance", { headers: { Authorization: `Bearer ${value}` } });
-    if (!r.ok) throw new Error(`Stripe HTTP ${r.status}`);
-    return "OK — Stripe attivo";
-  }
-  if (keyName === "RESEND_API_KEY") {
-    const r = await fetch("https://api.resend.com/domains", { headers: { Authorization: `Bearer ${value}` } });
-    if (!r.ok) throw new Error(`Resend HTTP ${r.status}`);
-    const d = await r.json();
-    return `OK — ${(d.data || []).length} domini`;
-  }
-  if (keyName === "FIRECRAWL_API_KEY") {
-    const r = await fetch("https://api.firecrawl.dev/v1/team", { headers: { Authorization: `Bearer ${value}` } });
-    if (!r.ok) throw new Error(`Firecrawl HTTP ${r.status}`);
-    return "OK — Firecrawl attivo";
-  }
-  throw new Error("Provider non supportato");
 }
 
-// ── Handler ────────────────────────────────────────────
+/* ─── Handler principale ─── */
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
   try {
+    /* Auth */
     const authHeader = req.headers.get("Authorization") ?? "";
-    if (!authHeader.startsWith("Bearer ")) return ok({ error: "No auth token", keys: [] });
-
+    if (!authHeader.startsWith("Bearer ")) return err("Missing authorization header");
     const token = authHeader.slice(7);
+
     const serviceClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    // Verifica utente tramite service client (più affidabile)
-    const { data: userData, error: userErr } = await serviceClient.auth.admin.getUserById(
-      // Prima decodifica il JWT per ottenere l'user_id senza chiamate extra
-      JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).sub,
+    const anonClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } },
     );
-    if (userErr || !userData?.user) return ok({ error: `Auth error: ${userErr?.message}`, keys: [] });
 
-    const userId = userData.user.id;
+    const { data: { user }, error: ue } = await anonClient.auth.getUser(token);
+    if (!user || ue) return err("Unauthorized: " + (ue?.message ?? "no user"));
 
-    // Verifica ruolo superadmin
-    const { data: roleCheck, error: roleErr } = await serviceClient
+    /* Role check */
+    const { data: roles } = await serviceClient
       .from("user_roles")
       .select("role")
-      .eq("user_id", userId)
-      .in("role", ["superadmin", "superadmin_user"])
-      .limit(1);
+      .eq("user_id", user.id);
 
-    if (roleErr) return ok({ error: `Role DB error: ${roleErr.message}`, keys: [] });
-    if (!roleCheck || roleCheck.length === 0) return ok({ error: `Not superadmin (user: ${userId})`, keys: [] });
+    const isSuperAdmin = (roles ?? []).some((r: { role: string }) =>
+      r.role === "superadmin" || r.role === "superadmin_user"
+    );
+    if (!isSuperAdmin) return err("Forbidden: superadmin required");
 
-    const body = await req.json();
-    const { action, key_name, key_value } = body;
+    /* Encryption key */
+    const ENC_KEY = Deno.env.get("META_ENCRYPTION_KEY") ?? "";
+    const hasEncKey = ENC_KEY.length === 64; // 32 bytes hex
 
-    // ── LIST
+    /* Body */
+    const body = await req.json().catch(() => ({}));
+    const action: string = body.action ?? "list";
+
+    /* ── list ── */
     if (action === "list") {
-      const { data, error } = await serviceClient
+      const { data, error: dbErr } = await serviceClient
         .from("platform_api_keys")
-        .select("key_name, masked_value, is_configured, last_tested_at, last_test_status, last_test_message, description");
-      if (error) return ok({ error: `DB list error: ${error.message}`, keys: [] });
+        .select("key_name, masked_value, is_configured, last_tested_at, last_test_status, last_test_message, description")
+        .order("key_name");
+
+      if (dbErr) return err("DB error: " + dbErr.message);
       return ok({ keys: data ?? [] });
     }
 
-    // ── SAVE
+    /* ── save ── */
     if (action === "save") {
-      if (!key_name || !key_value) return ok({ error: "key_name e key_value richiesti" });
-      const encrypted = await encryptToken(key_value, getEncKey());
-      const masked = maskKey(key_value);
-      const { error } = await serviceClient
-        .from("platform_api_keys")
-        .upsert({ key_name, encrypted_value: encrypted, masked_value: masked, is_configured: true, updated_at: new Date().toISOString() }, { onConflict: "key_name" });
-      if (error) return ok({ error: `DB save error: ${error.message}` });
-      return ok({ success: true, masked_value: masked });
-    }
+      const keyName: string = body.key_name;
+      const keyValue: string = body.key_value;
+      if (!keyName || !keyValue) return err("key_name e key_value sono richiesti");
 
-    // ── TEST
-    if (action === "test") {
-      let valueToTest = key_value ?? "";
-      if (!valueToTest) {
-        const { data: row } = await serviceClient.from("platform_api_keys").select("encrypted_value, is_configured").eq("key_name", key_name).single();
-        if (!row?.is_configured || !row.encrypted_value) return ok({ error: "Chiave non configurata" });
-        valueToTest = await decryptToken(row.encrypted_value, getEncKey());
+      let encryptedValue: string | null = null;
+      if (hasEncKey) {
+        encryptedValue = await encrypt(keyValue, ENC_KEY);
       }
-      let status: "ok" | "error" = "ok";
-      let message = "";
-      try { message = await testKey(key_name, valueToTest); }
-      catch (e: any) { status = "error"; message = e.message; }
-      await serviceClient.from("platform_api_keys").update({ last_tested_at: new Date().toISOString(), last_test_status: status, last_test_message: message }).eq("key_name", key_name);
-      return ok({ success: status === "ok", status, message });
+
+      const masked = maskValue(keyValue);
+
+      const { error: dbErr } = await serviceClient
+        .from("platform_api_keys")
+        .update({
+          encrypted_value: encryptedValue,
+          masked_value: masked,
+          is_configured: true,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("key_name", keyName);
+
+      if (dbErr) return err("DB error: " + dbErr.message);
+      return ok({ saved: true });
     }
 
-    // ── DELETE
+    /* ── test ── */
+    if (action === "test") {
+      const keyName: string = body.key_name;
+      if (!keyName) return err("key_name è richiesto");
+
+      const { data: row, error: dbErr } = await serviceClient
+        .from("platform_api_keys")
+        .select("encrypted_value, is_configured")
+        .eq("key_name", keyName)
+        .single();
+
+      if (dbErr || !row) return err("Chiave non trovata");
+      if (!row.is_configured || !row.encrypted_value) {
+        return err("Chiave non configurata");
+      }
+
+      if (!hasEncKey) {
+        return err("META_ENCRYPTION_KEY non configurata — impossibile decifrare");
+      }
+
+      let plainValue: string;
+      try {
+        plainValue = await decrypt(row.encrypted_value, ENC_KEY);
+      } catch {
+        return err("Errore decifrazione — chiave di cifratura errata");
+      }
+
+      const result = await testKey(keyName, plainValue);
+
+      await serviceClient
+        .from("platform_api_keys")
+        .update({
+          last_tested_at: new Date().toISOString(),
+          last_test_status: result.status,
+          last_test_message: result.message,
+        })
+        .eq("key_name", keyName);
+
+      return ok(result);
+    }
+
+    /* ── delete ── */
     if (action === "delete") {
-      await serviceClient.from("platform_api_keys").update({ encrypted_value: null, masked_value: null, is_configured: false, last_tested_at: null, last_test_status: null, last_test_message: null, updated_at: new Date().toISOString() }).eq("key_name", key_name);
-      return ok({ success: true });
+      const keyName: string = body.key_name;
+      if (!keyName) return err("key_name è richiesto");
+
+      const { error: dbErr } = await serviceClient
+        .from("platform_api_keys")
+        .update({
+          encrypted_value: null,
+          masked_value: null,
+          is_configured: false,
+          last_tested_at: null,
+          last_test_status: null,
+          last_test_message: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("key_name", keyName);
+
+      if (dbErr) return err("DB error: " + dbErr.message);
+      return ok({ deleted: true });
     }
 
-    return ok({ error: "Azione non valida" });
-  } catch (e: any) {
-    return ok({ error: `Exception: ${e.message}`, keys: [] });
+    return err("Azione non riconosciuta: " + action);
+  } catch (e: unknown) {
+    return ok({ error: "Errore interno: " + (e as Error).message });
   }
 });
