@@ -12,30 +12,38 @@ export default function RenderGalleryDetail() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [item, setItem] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
+    setLoading(true);
     supabase.from("render_gallery").select("*").eq("id", id).single()
       .then(({ data }) => { if (!cancelled && data) setItem(data); })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [id]);
 
   const toggleFavorite = async () => {
     if (!item) return;
-    await supabase.from("render_gallery").update({ is_favorite: !item.is_favorite }).eq("id", item.id);
-    setItem({ ...item, is_favorite: !item.is_favorite });
+    const { error } = await supabase.from("render_gallery").update({ is_favorite: !item.is_favorite }).eq("id", item.id);
+    if (!error) setItem({ ...item, is_favorite: !item.is_favorite });
   };
 
   const handleDelete = async () => {
     if (!item) return;
-    await supabase.from("render_gallery").delete().eq("id", item.id);
+    const { error } = await supabase.from("render_gallery").delete().eq("id", item.id);
+    if (error) {
+      toast({ variant: "destructive", title: "Errore eliminazione", description: error.message });
+      return;
+    }
     toast({ title: "Eliminato" });
     navigate("/app/render/gallery");
   };
 
-  if (!item) return <div className="p-8 text-center text-muted-foreground">Caricamento...</div>;
+  if (loading) return <div className="flex items-center justify-center h-64 text-muted-foreground">Caricamento...</div>;
+  if (!item) return <div className="p-8 text-center text-muted-foreground">Render non trovato.</div>;
 
   const configSummary = item.config_summary || {};
 

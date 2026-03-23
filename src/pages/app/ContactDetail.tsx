@@ -57,10 +57,12 @@ export default function ContactDetail() {
 
   useEffect(() => {
     if (!id) return;
-    supabase.from("contacts").select("*").eq("id", id).single().then(({ data }) => {
-      if (data) setContact(data as unknown as Contact);
-      setLoading(false);
-    });
+    let cancelled = false;
+    supabase.from("contacts").select("*").eq("id", id).single()
+      .then(({ data }) => { if (!cancelled && data) setContact(data as unknown as Contact); })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [id]);
 
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
