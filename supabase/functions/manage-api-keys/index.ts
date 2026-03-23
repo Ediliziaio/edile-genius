@@ -162,6 +162,12 @@ Deno.serve(async (req) => {
     const ENC_KEY = Deno.env.get("META_ENCRYPTION_KEY") ?? "";
     const hasEncKey = ENC_KEY.length === 64; // 32 bytes hex
 
+    /* Allowed key names */
+    const ALLOWED_KEYS = [
+      "OPENAI_API_KEY", "GEMINI_API_KEY", "ELEVENLABS_API_KEY",
+      "STRIPE_SECRET_KEY", "RESEND_API_KEY", "FIRECRAWL_API_KEY",
+    ];
+
     /* Body */
     const body = await req.json().catch(() => ({}));
     const action: string = body.action ?? "list";
@@ -182,10 +188,14 @@ Deno.serve(async (req) => {
       const keyName: string = body.key_name;
       const keyValue: string = body.key_value;
       if (!keyName || !keyValue) return err("key_name e key_value sono richiesti");
+      if (!ALLOWED_KEYS.includes(keyName)) return err("key_name non valido");
+      if (!hasEncKey) return err("META_ENCRYPTION_KEY non configurata — impossibile cifrare");
 
-      let encryptedValue: string | null = null;
-      if (hasEncKey) {
+      let encryptedValue: string;
+      try {
         encryptedValue = await encrypt(keyValue, ENC_KEY);
+      } catch (e: unknown) {
+        return err("Errore cifratura: " + (e as Error).message);
       }
 
       const masked = maskValue(keyValue);
@@ -208,6 +218,7 @@ Deno.serve(async (req) => {
     if (action === "test") {
       const keyName: string = body.key_name;
       if (!keyName) return err("key_name è richiesto");
+      if (!ALLOWED_KEYS.includes(keyName)) return err("key_name non valido");
 
       const { data: row, error: dbErr } = await serviceClient
         .from("platform_api_keys")
@@ -249,6 +260,7 @@ Deno.serve(async (req) => {
     if (action === "delete") {
       const keyName: string = body.key_name;
       if (!keyName) return err("key_name è richiesto");
+      if (!ALLOWED_KEYS.includes(keyName)) return err("key_name non valido");
 
       const { error: dbErr } = await serviceClient
         .from("platform_api_keys")

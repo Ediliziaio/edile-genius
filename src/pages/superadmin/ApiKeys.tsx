@@ -109,23 +109,32 @@ function ApiKeyCard({
   const handleSave = async () => {
     if (!inputValue.trim()) return;
     setSaving(true);
-    await onSave(row.key_name, inputValue.trim());
-    setSaving(false);
-    setInputValue("");
-    setDialogOpen(false);
+    try {
+      await onSave(row.key_name, inputValue.trim());
+      setInputValue("");
+      setDialogOpen(false);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleTest = async () => {
     setTesting(true);
-    await onTest(row.key_name);
-    setTesting(false);
+    try {
+      await onTest(row.key_name);
+    } finally {
+      setTesting(false);
+    }
   };
 
   const handleDelete = async () => {
     if (!confirm(`Rimuovere la chiave ${cfg.label}?`)) return;
     setDeleting(true);
-    await onDelete(row.key_name);
-    setDeleting(false);
+    try {
+      await onDelete(row.key_name);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -236,7 +245,7 @@ function ApiKeyCard({
                   onChange={e => setInputValue(e.target.value)}
                   placeholder={cfg.placeholder}
                   className="pr-10 font-mono text-sm"
-                  onKeyDown={e => e.key === "Enter" && handleSave()}
+                  onKeyDown={e => { if (e.key === "Enter" && inputValue.trim()) { e.preventDefault(); handleSave(); } }}
                 />
                 <button
                   type="button"
@@ -325,11 +334,22 @@ export default function ApiKeysPage() {
   const handleTestAll = async () => {
     setTestingAll(true);
     const configured = keys.filter(k => k.is_configured);
+    const failed: string[] = [];
     for (const k of configured) {
-      await handleTest(k.key_name);
+      const { data, error } = await supabase.functions.invoke("manage-api-keys", {
+        body: { action: "test", key_name: k.key_name },
+      });
+      if (error || data?.error || data?.status === "error") {
+        failed.push(KEY_CONFIGS[k.key_name]?.label ?? k.key_name);
+      }
     }
+    await loadKeys();
     setTestingAll(false);
-    toast({ title: "Test completati", description: `${configured.length} chiavi testate` });
+    if (failed.length > 0) {
+      toast({ variant: "destructive", title: "Alcuni test falliti", description: failed.join(", ") });
+    } else {
+      toast({ title: "✅ Test completati", description: `${configured.length} chiav${configured.length === 1 ? "e" : "i"} testate con successo` });
+    }
   };
 
   /* Statistiche */
@@ -404,7 +424,7 @@ export default function ApiKeysPage() {
             <AlertTriangle className="h-5 w-5 text-yellow-600 shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-yellow-800">
-                {totalKeys - configuredKeys} chiave{totalKeys - configuredKeys !== 1 ? "" : ""} non configurata
+                {totalKeys - configuredKeys} {totalKeys - configuredKeys !== 1 ? "chiavi non configurate" : "chiave non configurata"}
               </p>
               <p className="text-xs text-yellow-700 mt-0.5">
                 Le funzionalità che dipendono da queste chiavi non funzioneranno correttamente.
