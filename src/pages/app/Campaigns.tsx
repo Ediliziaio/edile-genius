@@ -121,12 +121,12 @@ export default function CampaignsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-ink-900">Campagne</h1>
           <p className="text-sm text-ink-500 mt-1">Gestisci le tue campagne outbound</p>
         </div>
-        <Button asChild className="bg-brand hover:bg-brand-hover text-white">
+        <Button asChild className="bg-brand hover:bg-brand-hover text-white self-start sm:self-auto">
           <Link to="/app/campaigns/new"><Plus className="w-4 h-4 mr-2" /> Nuova Campagna</Link>
         </Button>
       </div>
@@ -157,6 +157,7 @@ export default function CampaignsPage() {
         </div>
       ) : (
         <div className="rounded-card border border-ink-200 bg-white overflow-hidden shadow-card">
+          <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow className="bg-ink-50">
@@ -197,6 +198,7 @@ export default function CampaignsPage() {
               })}
             </TableBody>
           </Table>
+          </div>
         </div>
       )}
 

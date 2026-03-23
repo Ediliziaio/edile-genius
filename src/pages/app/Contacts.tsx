@@ -438,22 +438,22 @@ export default function ContactsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-ink-900">Rubrica</h1>
           <p className="text-sm text-ink-500 mt-1">
             {contacts.length} contatti · {toCallCount} da chiamare · {qualifiedCount} qualificati
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button variant="outline" onClick={exportCSV} className="border-ink-200 text-ink-700">
-            <Download className="w-4 h-4 mr-2" /> Export CSV
+            <Download className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Export CSV</span>
           </Button>
           <Button variant="outline" asChild className="border-ink-200 text-ink-700">
-            <Link to="/app/contacts/import"><Upload className="w-4 h-4 mr-2" /> Importa</Link>
+            <Link to="/app/contacts/import"><Upload className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Importa</span></Link>
           </Button>
           <Button onClick={() => setShowCreate(true)} className="bg-brand hover:bg-brand-hover text-white">
-            <Plus className="w-4 h-4 mr-2" /> Nuovo Contatto
+            <Plus className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Nuovo Contatto</span>
           </Button>
         </div>
       </div>
@@ -462,11 +462,11 @@ export default function ContactsPage() {
       {someSelected && (
         <div className="flex items-center gap-3 p-3 rounded-lg bg-brand-light border border-brand/20">
           <span className="text-sm font-medium text-brand-text">{selectedIds.size} selezionati</span>
-          <div className="flex gap-2 ml-auto">
+          <div className="flex gap-2 ml-auto flex-wrap">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="border-ink-200 text-ink-700">
-                  <ArrowUpDown className="w-3.5 h-3.5 mr-1.5" /> Cambia Stato
+                  <ArrowUpDown className="w-3.5 h-3.5 sm:mr-1.5" /><span className="hidden sm:inline">Cambia Stato</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -480,7 +480,7 @@ export default function ContactsPage() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="border-ink-200 text-ink-700">
-                  <Bot className="w-3.5 h-3.5 mr-1.5" /> Assegna Agente
+                  <Bot className="w-3.5 h-3.5 sm:mr-1.5" /><span className="hidden sm:inline">Assegna Agente</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -492,43 +492,44 @@ export default function ContactsPage() {
               </DropdownMenuContent>
             </DropdownMenu>
             <Button variant="outline" size="sm" onClick={() => setShowBulkList(true)} className="border-ink-200 text-ink-700">
-              <ListChecks className="w-3.5 h-3.5 mr-1.5" /> Aggiungi a Lista
+              <ListChecks className="w-3.5 h-3.5 sm:mr-1.5" /><span className="hidden sm:inline">Aggiungi a Lista</span>
             </Button>
             <Button variant="outline" size="sm" onClick={() => { setScheduleContactId(null); setShowScheduleCall(true); }} className="border-ink-200 text-ink-700">
-              <CalendarClock className="w-3.5 h-3.5 mr-1.5" /> Pianifica Chiamata
+              <CalendarClock className="w-3.5 h-3.5 sm:mr-1.5" /><span className="hidden sm:inline">Pianifica</span>
             </Button>
             <Button size="sm" onClick={() => setShowBulkCallModal(true)} className="gap-1.5 bg-status-success hover:bg-status-success/90 text-white">
-              <Phone className="w-3.5 h-3.5" /> Chiama {selectedIds.size} contatti
+              <Phone className="w-3.5 h-3.5" /><span className="hidden sm:inline">Chiama</span> {selectedIds.size}
             </Button>
             <Button variant="outline" size="sm" onClick={() => setShowBulkDelete(true)} className="border-status-error text-status-error hover:bg-status-error hover:text-white">
-              <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Elimina
+              <Trash2 className="w-3.5 h-3.5" />
             </Button>
           </div>
         </div>
       )}
 
       {/* Filters + View Toggle */}
-      <div className="flex flex-wrap gap-3 items-center">
-        <div className="relative flex-1 min-w-[200px]">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-stretch sm:items-center">
+        <div className="relative flex-1 min-w-[180px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-400" />
-          <Input placeholder="Cerca per nome, email, telefono o azienda..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(0); }} className="pl-10 bg-white border-ink-200 text-ink-900 placeholder:text-ink-300" />
+          <Input placeholder="Cerca per nome, email, telefono o azienda..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(0); }} className="pl-10 bg-white border-ink-200 text-ink-900 placeholder:text-ink-300 w-full" />
         </div>
+        <div className="flex gap-2 flex-wrap">
         <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(0); }}>
-          <SelectTrigger className="w-[160px] bg-white border-ink-200 text-ink-900"><SelectValue placeholder="Stato" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[150px] bg-white border-ink-200 text-ink-900"><SelectValue placeholder="Stato" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tutti gli stati</SelectItem>
             {STATUS_OPTIONS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={priorityFilter} onValueChange={(v) => { setPriorityFilter(v); setPage(0); }}>
-          <SelectTrigger className="w-[140px] bg-white border-ink-200 text-ink-900"><SelectValue placeholder="Priorità" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[130px] bg-white border-ink-200 text-ink-900"><SelectValue placeholder="Priorità" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tutte le priorità</SelectItem>
             {PRIORITY_OPTIONS.map((p) => <SelectItem key={p.value} value={p.value}>{p.icon} {p.label}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={sectorFilter} onValueChange={(v) => { setSectorFilter(v); setPage(0); }}>
-          <SelectTrigger className="w-[160px] bg-white border-ink-200 text-ink-900"><SelectValue placeholder="Settore" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[150px] bg-white border-ink-200 text-ink-900"><SelectValue placeholder="Settore" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tutti i settori</SelectItem>
             {uniqueSectors.map((s) => <SelectItem key={s as string} value={s as string}>{s as string}</SelectItem>)}
@@ -536,7 +537,7 @@ export default function ContactsPage() {
         </Select>
         {viewMode === "table" && (
           <Select value={String(perPage)} onValueChange={(v) => { setPerPage(Number(v)); setPage(0); }}>
-            <SelectTrigger className="w-[90px] bg-white border-ink-200 text-ink-900"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-[80px] bg-white border-ink-200 text-ink-900"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="25">25</SelectItem>
               <SelectItem value="50">50</SelectItem>
@@ -544,8 +545,9 @@ export default function ContactsPage() {
             </SelectContent>
           </Select>
         )}
+        </div>
         {/* View Mode Toggle */}
-        <div className="flex border border-ink-200 rounded-md overflow-hidden">
+        <div className="flex border border-ink-200 rounded-md overflow-hidden self-start sm:self-auto">
           <button onClick={() => setViewMode("table")} className={cn("p-2 transition-colors", viewMode === "table" ? "bg-brand text-white" : "bg-white text-ink-500 hover:bg-ink-50")}>
             <LayoutList className="w-4 h-4" />
           </button>
@@ -575,6 +577,7 @@ export default function ContactsPage() {
       ) : (
         <>
           <div className="rounded-card border border-ink-200 bg-white overflow-hidden shadow-card">
+            <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="bg-ink-50">
@@ -645,6 +648,7 @@ export default function ContactsPage() {
                 ))}
               </TableBody>
             </Table>
+            </div>
           </div>
           {totalPages > 1 && (
             <div className="flex items-center justify-between text-sm text-ink-500">
@@ -681,7 +685,7 @@ export default function ContactsPage() {
               <Label className="text-ink-600">Nome completo *</Label>
               <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="bg-ink-50 border-ink-200 text-ink-900" placeholder="Mario Rossi" />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label className="text-ink-600">Telefono</Label>
                 <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="bg-ink-50 border-ink-200 text-ink-900" placeholder="+39 333..." />
@@ -695,7 +699,7 @@ export default function ContactsPage() {
               <Label className="text-ink-600">Email</Label>
               <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="bg-ink-50 border-ink-200 text-ink-900" placeholder="email@azienda.it" />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label className="text-ink-600">Azienda</Label>
                 <Input value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} className="bg-ink-50 border-ink-200 text-ink-900" placeholder="Nome azienda" />
@@ -705,7 +709,7 @@ export default function ContactsPage() {
                 <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="bg-ink-50 border-ink-200 text-ink-900" placeholder="Milano" />
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div className="space-y-1">
                 <Label className="text-ink-600">Stato</Label>
                 <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>

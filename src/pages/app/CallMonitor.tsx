@@ -204,6 +204,7 @@ export default function CallMonitorPage() {
           <p className="text-sm text-muted-foreground">Nessuna chiamata completata oggi</p>
         ) : (
           <Card>
+            <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -238,6 +239,7 @@ export default function CallMonitorPage() {
                 })}
               </TableBody>
             </Table>
+            </div>
           </Card>
         )}
       </div>
