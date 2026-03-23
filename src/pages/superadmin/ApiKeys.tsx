@@ -269,13 +269,15 @@ export default function ApiKeysPage() {
   const [testingAll, setTestingAll] = useState(false);
 
   const loadKeys = useCallback(async () => {
-    const { data, error } = await supabase.functions.invoke("manage-api-keys", {
-      body: { action: "list" },
-    });
-    if (error || data?.error) {
-      toast({ variant: "destructive", title: "Errore caricamento chiavi", description: data?.error || error?.message });
+    // Direct DB query — RLS ensures only superadmin can read
+    const { data, error } = await supabase
+      .from("platform_api_keys" as any)
+      .select("key_name, masked_value, is_configured, last_tested_at, last_test_status, last_test_message, description")
+      .order("key_name");
+    if (error) {
+      toast({ variant: "destructive", title: "Errore caricamento chiavi", description: error.message });
     } else {
-      setKeys(data.keys || []);
+      setKeys((data as any[]) ?? []);
     }
     setLoading(false);
   }, [toast]);
