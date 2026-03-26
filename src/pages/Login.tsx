@@ -17,19 +17,54 @@ export default function Login() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const host = typeof window !== "undefined" ? window.location.hostname : "";
+  const isAdminSubdomain = host === "admin.edilizia.io";
+  const isAppSubdomain = host === "app.edilizia.io";
+
   useEffect(() => {
     if (!loading && user) {
-      if (isSuperAdmin) navigate("/superadmin", { replace: true });
-      else if (isCompanyUser) navigate("/app", { replace: true });
+      if (isAdminSubdomain) {
+        // On admin subdomain: only superadmins allowed
+        if (isSuperAdmin) navigate("/superadmin", { replace: true });
+        else navigate("/login", { replace: true }); // company user → stay on login (will show error)
+      } else if (isAppSubdomain) {
+        // On app subdomain: always go to /app (even superadmins)
+        navigate("/app", { replace: true });
+      } else {
+        // edilizia.io: normal routing
+        if (isSuperAdmin) navigate("/superadmin", { replace: true });
+        else if (isCompanyUser) navigate("/app", { replace: true });
+      }
     }
-  }, [user, loading, isSuperAdmin, isCompanyUser, navigate]);
+  }, [user, loading, isSuperAdmin, isCompanyUser, navigate, isAdminSubdomain, isAppSubdomain]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setHasError(false);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+
+    // On admin subdomain, verify superadmin role after login
+    if (!error && data?.user && isAdminSubdomain) {
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", data.user.id)
+        .in("role", ["superadmin", "superadmin_user"])
+        .limit(1);
+      if (!roles || roles.length === 0) {
+        await supabase.auth.signOut();
+        setHasError(true);
+        setIsLoading(false);
+        toast({
+          title: "Accesso non autorizzato",
+          description: "Quest'area è riservata ai superadmin.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
 
     if (error) {
       setHasError(true);

@@ -8,6 +8,9 @@ interface AuthGuardProps {
 
 export default function AuthGuard({ requiredRole }: AuthGuardProps) {
   const { user, loading, isSuperAdmin, isCompanyUser } = useAuth();
+  const host = typeof window !== "undefined" ? window.location.hostname : "";
+  const isAdminSubdomain = host === "admin.edilizia.io";
+  const isAppSubdomain = host === "app.edilizia.io";
 
   if (loading) {
     return (
@@ -21,8 +24,18 @@ export default function AuthGuard({ requiredRole }: AuthGuardProps) {
     return <Navigate to="/login" replace />;
   }
 
+  // On app.edilizia.io: block access to superadmin routes entirely
+  if (isAppSubdomain && requiredRole === "superadmin") {
+    return <Navigate to="/app/dashboard" replace />;
+  }
+
+  // On admin.edilizia.io: block access to company routes for non-superadmins
+  if (isAdminSubdomain && requiredRole === "company" && !isSuperAdmin) {
+    return <Navigate to="/login" replace />;
+  }
+
   if (requiredRole === "superadmin" && !isSuperAdmin) {
-    return <Navigate to="/app" replace />;
+    return <Navigate to="/app/dashboard" replace />;
   }
 
   if (requiredRole === "company" && !isCompanyUser && !isSuperAdmin) {
