@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { ImpersonationProvider } from "@/context/ImpersonationContext";
 import ScrollToTop from "./components/ScrollToTop";
+import SubdomainRouter from "./components/SubdomainRouter";
 import { Loader2 } from "lucide-react";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
@@ -153,6 +154,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <SubdomainRouter />
         <AuthProvider>
           <ImpersonationProvider>
           <Suspense fallback={<PageLoader />}>

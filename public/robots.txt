@@ -1,16 +1,23 @@
+User-agent: *
+Allow: /
+Disallow: /app/
+Disallow: /superadmin/
+Disallow: /api/
+
 User-agent: Googlebot
 Allow: /
+Disallow: /app/
+Disallow: /superadmin/
 
 User-agent: Bingbot
 Allow: /
+Disallow: /app/
+Disallow: /superadmin/
 
 User-agent: Twitterbot
 Allow: /
 
 User-agent: facebookexternalhit
-Allow: /
-
-User-agent: *
 Allow: /
 
 Sitemap: https://edilizia.io/sitemap.xml
