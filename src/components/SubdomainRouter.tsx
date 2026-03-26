@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useImpersonation } from "@/context/ImpersonationContext";
 
 /**
  * Handles subdomain-based routing — full separation between areas:
@@ -11,7 +12,7 @@ import { useNavigate, useLocation } from "react-router-dom";
  *
  * admin.edilizia.io
  *   - Allowed: /superadmin/*, /login
- *   - /app/* → redirect to /superadmin/
+ *   - /app/* → redirect to /superadmin/ (UNLESS impersonating a company)
  *   - / or anything else → redirect to /superadmin/
  *
  * edilizia.io / localhost → no restrictions, full routing
@@ -19,6 +20,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 export default function SubdomainRouter() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { isImpersonating } = useImpersonation();
 
   useEffect(() => {
     const host = window.location.hostname;
@@ -36,7 +38,10 @@ export default function SubdomainRouter() {
         navigate("/login", { replace: true });
       }
     } else if (host === "admin.edilizia.io") {
-      // Block company area, allow only superadmin + login
+      // Allow /app/* when superadmin is impersonating a company
+      if (pathname.startsWith("/app") && isImpersonating) return;
+
+      // Block company area for non-impersonating access
       if (pathname.startsWith("/app")) {
         navigate("/superadmin/", { replace: true });
         return;
@@ -48,7 +53,7 @@ export default function SubdomainRouter() {
       }
     }
     // edilizia.io / localhost → no redirect, full routing
-  }, [pathname, navigate]);
+  }, [pathname, navigate, isImpersonating]);
 
   return null;
 }
