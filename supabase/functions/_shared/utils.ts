@@ -241,3 +241,52 @@ export async function authenticateRequest(
 
   return { auth: { userId: user.id as string, supabase } };
 }
+
+// ── Phone normalization ───────────────────────────────────────
+
+/**
+ * Validates and normalizes a phone number to E.164 format.
+ * Returns null if the number cannot be normalized.
+ *
+ * Handles common Italian formats:
+ *   "333 123 4567"   → "+39333123456 7" → "+393331234567"
+ *   "0039331234567"  → "+39331234567"
+ *   "+39331234567"   → "+39331234567" ✅
+ *   "331234567"      → null (ambiguous — cannot assume country)
+ */
+export function normalizePhoneE164(raw: string, defaultCountryCode = "+39"): string | null {
+  if (!raw || typeof raw !== "string") return null;
+
+  // Remove all whitespace
+  let phone = raw.replace(/\s/g, "");
+
+  // Remove common separators
+  phone = phone.replace(/[-().]/g, "");
+
+  // Handle 0039 prefix (international Italy)
+  if (phone.startsWith("0039")) {
+    phone = "+39" + phone.slice(4);
+  }
+
+  // If no + prefix but starts with country code digits (e.g. "39333...")
+  if (!phone.startsWith("+") && phone.startsWith("39") && phone.length >= 11) {
+    phone = "+" + phone;
+  }
+
+  // If still no + and looks like an Italian mobile (3xx/0xx format)
+  if (!phone.startsWith("+")) {
+    // Only auto-prefix if it looks like an Italian number (starts with 3 or 0)
+    if (phone.match(/^[03]\d{8,9}$/)) {
+      phone = defaultCountryCode + phone;
+    } else {
+      return null; // Cannot determine country — do not guess
+    }
+  }
+
+  // Final E.164 validation: + followed by 7-15 digits
+  if (!/^\+[1-9]\d{6,14}$/.test(phone)) {
+    return null;
+  }
+
+  return phone;
+}

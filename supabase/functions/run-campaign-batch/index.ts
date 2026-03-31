@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { corsHeaders, generateRequestId, log, jsonOk, jsonError, errorResponse } from "../_shared/utils.ts";
+import { corsHeaders, generateRequestId, log, jsonOk, jsonError, errorResponse, normalizePhoneE164 } from "../_shared/utils.ts";
 
 const FN = "run-campaign-batch";
 
@@ -190,11 +190,25 @@ async function handleRunBatch(sb: any, campaign: any, campaign_id: string, rid: 
       continue;
     }
 
+    // Validate E.164 before calling
+    const normalizedPhone = normalizePhoneE164(contact.phone);
+    if (!normalizedPhone) {
+      log("warn", "Invalid phone number format — skipping contact", {
+        request_id: rid,
+        contact_id: item.contact_id,
+        phone_raw: (contact.phone || "").slice(0, 4) + "****",
+      });
+      await sb.from("campaign_contacts").update({
+        status: "failed", error: "Invalid phone format (non-E.164)", updated_at: now,
+      }).eq("id", item.id);
+      continue;
+    }
+
     try {
       const callBody: Record<string, unknown> = {
         agent_id: agent.el_agent_id,
         agent_phone_number_id: agent.el_phone_number_id,
-        to_number: contact.phone.replace(/\s/g, ""),
+        to_number: normalizedPhone,
       };
 
       if (campaign.custom_first_msg || contact.full_name) {

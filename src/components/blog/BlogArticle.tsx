@@ -1,5 +1,6 @@
 import type { BlogSection } from "@/data/blogPosts";
 import { TrendingUp, Lightbulb } from "lucide-react";
+import DOMPurify from "dompurify";
 
 interface BlogArticleProps {
   sections: BlogSection[];
@@ -26,16 +27,24 @@ const CalloutBox = ({ text }: { text: string }) => (
   </div>
 );
 
-const RenderParagraph = ({ html }: { html: string }) => (
-  <p
-    className="text-muted-foreground leading-relaxed mb-4 text-[15px]"
-    dangerouslySetInnerHTML={{
-      __html: html
-        .replace(/\*\*(.*?)\*\*/g, "<strong class='text-foreground font-semibold'>$1</strong>")
-        .replace(/\n/g, "<br/>"),
-    }}
-  />
-);
+const RenderParagraph = ({ html }: { html: string }) => {
+  const rawHtml = html
+    .replace(/\*\*(.*?)\*\*/g, "<strong class='text-foreground font-semibold'>$1</strong>")
+    .replace(/\n/g, "<br/>");
+
+  // Sanitize to prevent XSS
+  const cleanHtml = DOMPurify.sanitize(rawHtml, {
+    ALLOWED_TAGS: ["strong", "em", "br", "a"],
+    ALLOWED_ATTR: ["href", "class", "target", "rel"],
+  });
+
+  return (
+    <p
+      className="text-muted-foreground leading-relaxed mb-4 text-[15px]"
+      dangerouslySetInnerHTML={{ __html: cleanHtml }}
+    />
+  );
+};
 
 const BlogArticle = ({ sections }: BlogArticleProps) => (
   <div className="space-y-10">

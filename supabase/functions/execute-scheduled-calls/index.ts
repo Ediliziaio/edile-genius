@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   corsHeaders, generateRequestId, log, jsonOk, jsonError, errorResponse,
-  fetchWithTimeout,
+  fetchWithTimeout, normalizePhoneE164,
 } from "../_shared/utils.ts";
 
 const FN = "execute-scheduled-calls";
@@ -20,7 +20,14 @@ Deno.serve(async (req) => {
   // Auth: require secret header (for pg_cron / internal invocation only)
   const cronSecret = Deno.env.get("CRON_SECRET");
   const providedSecret = req.headers.get("x-cron-secret");
-  if (cronSecret && providedSecret !== cronSecret) {
+
+  // CRITICAL: block all requests if secret is not configured
+  if (!cronSecret) {
+    log("error", "CRON_SECRET not configured — blocking all requests for safety", { request_id: rid });
+    return jsonError("Service not configured", "system_error", 503, rid);
+  }
+
+  if (providedSecret !== cronSecret) {
     log("warn", "Unauthorized execute-scheduled-calls attempt", { request_id: rid });
     return jsonError("Unauthorized", "auth_error", 401, rid);
   }
@@ -113,6 +120,22 @@ Deno.serve(async (req) => {
               return;
             }
 
+            // Validate E.164 before calling
+            const normalizedPhone = normalizePhoneE164(contact.phone);
+            if (!normalizedPhone) {
+              log("warn", "Invalid phone number format — skipping scheduled call", {
+                request_id: rid,
+                scheduled_call_id: scheduled.id,
+                phone_raw: (contact.phone || "").slice(0, 4) + "****",
+              });
+              await sb.from("scheduled_calls").update({
+                status: "failed",
+                last_error: "Invalid phone number format (non-E.164)",
+                executed_at: new Date().toISOString(),
+              }).eq("id", scheduled.id);
+              return;
+            }
+
             // Invoke outbound call — 20s timeout to prevent batch hang
             const callRes = await fetchWithTimeout(
               `${Deno.env.get("SUPABASE_URL")}/functions/v1/elevenlabs-outbound-call`,
@@ -124,7 +147,7 @@ Deno.serve(async (req) => {
                 },
                 body: JSON.stringify({
                   agent_id: scheduled.agent_id,
-                  to_number: contact.phone,
+                  to_number: normalizedPhone,
                   contact_id: scheduled.contact_id,
                   dynamic_variables: scheduled.dynamic_variables || {},
                 }),

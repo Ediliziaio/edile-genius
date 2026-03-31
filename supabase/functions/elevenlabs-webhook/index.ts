@@ -3,15 +3,14 @@ import { generateRequestId, log } from "../_shared/utils.ts";
 import { generateCallAnalysis } from "./summary.ts";
 import { runPostCallActions } from "./post-call-actions.ts";
 
+// Webhook server-to-server: nessun CORS necessario
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Content-Type": "application/json",
 };
 
 const FN = "elevenlabs-webhook";
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const rid = generateRequestId();
 

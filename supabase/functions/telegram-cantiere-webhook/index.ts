@@ -1,8 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+// Webhook server-to-server: nessun CORS necessario
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Content-Type": "application/json",
 };
 
 // ── Rate Limiting (in-memory, resets on cold start) ──
@@ -33,7 +33,6 @@ function timingSafeEqual(a: string, b: string): boolean {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: corsHeaders });
 
   try {
@@ -479,7 +478,7 @@ async function handleConfirmReport(sb: any, botToken: string, chatId: string, co
   if (reportErr) {
     await sendMessage(botToken, chatId, "❌ Errore nel salvataggio. Riprova.");
     console.error(reportErr);
-    return new Response("ok", { status: 200, headers: { "Access-Control-Allow-Origin": "*" } });
+    return new Response("ok", { status: 200, headers: corsHeaders });
   }
 
   // Send email
@@ -506,7 +505,7 @@ async function handleConfirmReport(sb: any, botToken: string, chatId: string, co
     (emailDestinatari.length > 0 ? `📧 Email inviata a ${emailDestinatari.join(", ")}\n` : "") +
     `\n📊 Vedi il report nella dashboard`
   );
-  return new Response("ok", { status: 200, headers: { "Access-Control-Allow-Origin": "*" } });
+  return new Response("ok", { status: 200, headers: corsHeaders });
 }
 
 async function structureReport(trascrizione: string, cantiere: string, openaiKey: string) {

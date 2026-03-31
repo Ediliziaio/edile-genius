@@ -61,6 +61,14 @@ export default function CreditsBalanceCard({ credits, onRechargeNow, onToggleAut
           </div>
 
           <div>
+            {/* WARNING: funzionalità non ancora attiva — payment integration pending */}
+            <div className="flex items-start gap-2 p-3 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/20 mb-3">
+              <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-700 dark:text-amber-300">
+                La ricarica automatica è temporaneamente disabilitata.
+                Riceverai una notifica email quando il saldo scende sotto la soglia impostata.
+              </p>
+            </div>
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold text-foreground">Ricarica Automatica</p>
               <Switch checked={credits.auto_recharge_enabled} onCheckedChange={onToggleAutoRecharge} />

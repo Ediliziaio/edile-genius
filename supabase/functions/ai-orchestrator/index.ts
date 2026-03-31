@@ -25,6 +25,24 @@ Deno.serve(async (req) => {
 
   const rid = generateRequestId();
 
+  // ── Auth: richiede cron secret OPPURE service role key ──────────────
+  const cronSecret = req.headers.get("x-cron-secret");
+  const authHeader = req.headers.get("Authorization");
+  const expectedCronSecret = Deno.env.get("INTERNAL_CRON_SECRET");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+  const isCron = expectedCronSecret && cronSecret === expectedCronSecret;
+  const isServiceRole = authHeader === `Bearer ${serviceRoleKey}`;
+
+  if (!isCron && !isServiceRole) {
+    log("warn", "ai-orchestrator unauthorized attempt", { request_id: rid });
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  // ────────────────────────────────────────────────────────────────────
+
   try {
     const sb = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -166,8 +184,11 @@ async function processCompany(sb: any, companyId: string, rid: string) {
     const totalUsage = usageData.reduce((s: number, u: any) => s + Number(u.cost_billed_total || 0), 0);
     const dates = usageData.map((u: any) => new Date(u.created_at).getTime());
     const daySpan = (Math.max(...dates) - Math.min(...dates)) / (24 * 60 * 60 * 1000);
-    const burnRate = daySpan > 0 ? totalUsage / daySpan : 0;
-    const daysLeft = burnRate > 0 ? Math.floor(balance / burnRate) : 999;
+    // Minimum 1 hour span to avoid division by zero on same-second records
+    const effectiveDaySpan = Math.max(daySpan, 1 / 24);
+    const burnRate = totalUsage / effectiveDaySpan;
+    // If burn rate is extremely low (< 1 cent/day), assume plenty of credits
+    const daysLeft = burnRate > 0.01 ? Math.floor(balance / burnRate) : 999;
 
     if (creditsRes.data?.calls_blocked || daysLeft <= 3) {
       events.push({

@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { generateRequestId, log } from "../_shared/utils.ts";
+import { generateRequestId, log, normalizePhoneE164 } from "../_shared/utils.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -117,7 +117,7 @@ async function processCompany(sb: any, companyId: string, rid: string): Promise<
 
   const { data: dormantContacts } = await sb
     .from("contacts")
-    .select("id, full_name, phone, assigned_agent, call_attempts")
+    .select("id, full_name, phone, assigned_agent, call_attempts, ai_actions_log")
     .eq("company_id", companyId)
     .eq("status", "qualified")
     .lt("last_contact_at", dormantDate)
@@ -185,10 +185,21 @@ async function processCompany(sb: any, companyId: string, rid: string): Promise<
           break;
         }
 
+        // Validate E.164 before calling
+        const normalizedPhone = normalizePhoneE164(contact.phone);
+        if (!normalizedPhone) {
+          log("warn", "Invalid phone number format — skipping contact", {
+            request_id: rid,
+            contact_id: contact.id,
+            phone_raw: (contact.phone || "").slice(0, 4) + "****",
+          });
+          continue;
+        }
+
         const callBody: Record<string, unknown> = {
           agent_id: agentData.el_agent_id,
           agent_phone_number_id: agentData.el_phone_number_id,
-          to_number: contact.phone.replace(/\s/g, ""),
+          to_number: normalizedPhone,
           conversation_initiation_client_data: {
             dynamic_variables: {
               nome_contatto: contact.full_name || "",
