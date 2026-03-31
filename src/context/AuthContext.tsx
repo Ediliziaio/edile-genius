@@ -60,22 +60,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(newSession?.user ?? null);
 
         if (newSession?.user) {
-          // Use setTimeout to avoid Supabase deadlock
-          setTimeout(() => fetchUserData(newSession.user.id), 0);
+          // Use setTimeout to avoid Supabase deadlock, but keep loading=true until data is ready
+          setTimeout(async () => {
+            await fetchUserData(newSession.user.id);
+            setLoading(false);
+          }, 0);
         } else {
           setProfile(null);
           setRoles([]);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
-    // THEN check existing session
-    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
+    // THEN check existing session — only set loading=false after roles are fetched
+    supabase.auth.getSession().then(async ({ data: { session: existingSession } }) => {
       setSession(existingSession);
       setUser(existingSession?.user ?? null);
       if (existingSession?.user) {
-        fetchUserData(existingSession.user.id);
+        await fetchUserData(existingSession.user.id);
       }
       setLoading(false);
     });
