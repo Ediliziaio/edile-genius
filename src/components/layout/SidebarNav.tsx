@@ -10,7 +10,7 @@ import {
   BookUser, Megaphone, type LucideIcon,
   AlertTriangle, MessageCircle, Puzzle, Palette, HardHat, Bath, Home, Layers, BookOpen,
   FileSignature, ShieldCheck, ClipboardList, Wand2,
-  Coins, ChevronDown, Clock, Zap, Activity, CalendarClock, Key,
+  Coins, ChevronDown, Clock, Zap, Activity, CalendarClock, Key, PhoneOutgoing, PhoneCall,
 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { differenceInDays } from "date-fns";
@@ -38,6 +38,10 @@ const companyNav: NavSection[] = [
     { label: "Campagne", icon: Megaphone, href: "/app/campaigns" },
     { label: "Monitor Chiamate", icon: Activity, href: "/app/call-monitor" },
     { label: "Chiamate Programmate", icon: CalendarClock, href: "/app/scheduled-calls" },
+  ]},
+  { header: "AREA VENDITE INTERNA", collapsible: true, defaultOpen: false, items: [
+    { label: "Campagne Voce", icon: PhoneOutgoing, href: "/app/vendite/campagne" },
+    { label: "Registro Chiamate", icon: PhoneCall, href: "/app/vendite/registro" },
   ]},
   { header: "VENDITE AVANZATE", collapsible: true, defaultOpen: false, visibilityKey: "preventivi", items: [
     { label: "Hub Preventivi", icon: FileSignature, href: "/app/preventivo-hub" },

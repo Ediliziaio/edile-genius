@@ -116,6 +116,8 @@ const RenderTettoHub = lazy(() => import("./pages/app/RenderTettoHub"));
 const RenderTettoNew = lazy(() => import("./pages/app/RenderTettoNew"));
 const KnowledgeBasePreventivo = lazy(() => import("./pages/app/KnowledgeBasePreventivo"));
 const ListinoVociManager = lazy(() => import("./pages/app/ListinoVociManager"));
+const InternalCampaignsPage = lazy(() => import("./modules/ai-agents-internal/pages/InternalCampaignsPage"));
+const InternalCallLogsPage = lazy(() => import("./modules/ai-agents-internal/pages/InternalCallLogsPage"));
 const PreventivoTemplateList = lazy(() => import("./pages/app/PreventivoTemplateList"));
 const PreventivoTemplateBuilder = lazy(() => import("./pages/app/PreventivoTemplateBuilder"));
 const PreventivoHub = lazy(() => import("./pages/app/PreventivoHub"));
@@ -279,6 +281,9 @@ const App = () => (
                 <Route path="/app/cantieri/:id" element={<SafeRoute><CantiereDetail /></SafeRoute>} />
                 <Route path="/app/documenti" element={<SafeRoute><DocumentiScadenze /></SafeRoute>} />
                 <Route path="/app/presenze" element={<SafeRoute><FoglioPresenze /></SafeRoute>} />
+                {/* Area Vendite — Campagne Voce Interne */}
+                <Route path="/app/vendite/campagne" element={<SafeRoute><InternalCampaignsPage /></SafeRoute>} />
+                <Route path="/app/vendite/registro" element={<SafeRoute><InternalCallLogsPage /></SafeRoute>} />
               </Route>
             </Route>
 
