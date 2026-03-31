@@ -26,7 +26,7 @@ export default function AuthGuard({ requiredRole }: AuthGuardProps) {
 
   // On app.edilizia.io: block access to superadmin routes entirely
   if (isAppSubdomain && requiredRole === "superadmin") {
-    return <Navigate to="/app/dashboard" replace />;
+    return <Navigate to="/app" replace />;
   }
 
   // On admin.edilizia.io: block access to company routes for non-superadmins
@@ -35,7 +35,7 @@ export default function AuthGuard({ requiredRole }: AuthGuardProps) {
   }
 
   if (requiredRole === "superadmin" && !isSuperAdmin) {
-    return <Navigate to="/app/dashboard" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   if (requiredRole === "company" && !isCompanyUser && !isSuperAdmin) {

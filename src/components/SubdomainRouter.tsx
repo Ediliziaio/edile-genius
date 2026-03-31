@@ -25,7 +25,7 @@ export default function SubdomainRouter() {
 
     if (host === "app.edilizia.io") {
       if (pathname.startsWith("/superadmin")) {
-        navigate("/app/dashboard", { replace: true });
+        navigate("/app", { replace: true });
         return;
       }
       const allowed = ["/app", "/login", "/signup", "/forgot-password", "/reset-password", "/invito", "/s/"];
