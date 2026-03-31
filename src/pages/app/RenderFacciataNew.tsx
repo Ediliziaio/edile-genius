@@ -253,7 +253,14 @@ export default function RenderFacciataNew() {
   // ════════════════════════════════════════════
 
   const startRender = async () => {
-    if (!analisi || !sessionId) return;
+    if (!sessionId) {
+      toast({ title: "Sessione non trovata", description: "Ricarica la pagina e riprova.", variant: "destructive" });
+      return;
+    }
+    if (!analisi) {
+      toast({ title: "Analisi non disponibile", description: "Riprova l'analisi della foto prima di generare il render.", variant: "destructive" });
+      return;
+    }
 
     // Pre-flight credit check
     if (companyId) {
@@ -652,7 +659,7 @@ export default function RenderFacciataNew() {
           </div>
 
           {/* Debug */}
-          {import.meta.env.DEV && (
+          {import.meta.env.VITE_ENABLE_DEBUG === 'true' && (
             <div className="border border-amber-200 rounded-xl overflow-hidden">
               <button
                 onClick={() => setShowDebugPrompt(!showDebugPrompt)}
@@ -670,6 +677,14 @@ export default function RenderFacciataNew() {
           )}
 
           {/* Genera */}
+          {!analisi && !analyzing && originalStoragePath && (
+            <div className="rounded-lg border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800 flex flex-col gap-2">
+              <p>⚠ Analisi foto non riuscita — configura manualmente e genera comunque.</p>
+              <button className="text-xs underline text-yellow-700 self-start" onClick={() => handleAnalyze(originalStoragePath, sessionId!)}>
+                Riprova analisi
+              </button>
+            </div>
+          )}
           <div className="flex gap-3 pt-2">
             <Button variant="outline" onClick={() => setStep(2)} className="flex-shrink-0">
               <ChevronLeft className="w-4 h-4" />
@@ -677,7 +692,7 @@ export default function RenderFacciataNew() {
             <Button
               className="flex-1 h-12 text-base font-semibold"
               onClick={startRender}
-              disabled={(tipoIntervento === "rivestimento" && !rivestimento) || rendering}
+              disabled={(tipoIntervento === "rivestimento" && !rivestimento) || rendering || analyzing}
             >
               <Sparkles className="w-5 h-5 mr-2" />
               Genera Render Facciata

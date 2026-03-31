@@ -68,6 +68,7 @@ export default function RenderNew() {
   const [sessionId, setSessionId] = useState<string>("");
   const [status, setStatus] = useState<string>("pending");
   const [resultUrls, setResultUrls] = useState<string[]>([]);
+  const [savedVariants, setSavedVariants] = useState<Set<number>>(new Set());
   const [uploading, setUploading] = useState(false);
   const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState<string>("");
   // V2 state
@@ -415,8 +416,9 @@ export default function RenderNew() {
   }, [step, sessionId, toast]);
 
   // Save to gallery
-  const saveToGallery = async (resultIndex: number) => {
+  const saveToGallery = async (resultIndex: number, redirectAfter = true) => {
     if (!companyId || !resultUrls[resultIndex]) return;
+    if (savedVariants.has(resultIndex)) return;
     const { error } = await supabase.from("render_gallery").insert({
       company_id: companyId,
       session_id: sessionId,
@@ -429,9 +431,17 @@ export default function RenderNew() {
     if (error) {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
     } else {
+      setSavedVariants(prev => new Set(prev).add(resultIndex));
       toast({ title: "Salvato!", description: "Render aggiunto alla galleria" });
-      navigate("/app/render/gallery");
+      if (redirectAfter) navigate("/app/render/gallery");
     }
+  };
+
+  const saveAllVariants = async () => {
+    for (let i = 0; i < resultUrls.length; i++) {
+      if (!savedVariants.has(i)) await saveToGallery(i, false);
+    }
+    navigate("/app/render/gallery");
   };
 
   const processingMessages = [
@@ -999,7 +1009,7 @@ export default function RenderNew() {
           </div>
 
           {/* v6: Debug Panel — visible only in development */}
-          {import.meta.env.DEV && (
+          {import.meta.env.VITE_ENABLE_DEBUG === 'true' && (
             <Card className="border-amber-200 bg-amber-50/50">
               <button
                 onClick={() => setShowDebugPrompt(!showDebugPrompt)}
@@ -1034,13 +1044,23 @@ export default function RenderNew() {
             <p className="text-sm text-destructive text-center">⚠ Seleziona almeno un elemento da sostituire</p>
           )}
           {!analysisData && !analysisLoading && analysisError && (
-            <p className="text-sm text-destructive text-center">⚠ L'analisi foto è necessaria per generare il render. Riprova l'analisi dalla sezione sopra.</p>
+            <div className="rounded-lg border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800 flex flex-col gap-2">
+              <p>⚠ Analisi foto non riuscita — la configurazione automatica non è disponibile. Puoi procedere configurando manualmente.</p>
+              {uploadedPhotoUrl && (
+                <button
+                  className="text-xs underline text-yellow-700 self-start"
+                  onClick={() => runPhotoAnalysis(uploadedPhotoUrl)}
+                >
+                  Riprova analisi
+                </button>
+              )}
+            </div>
           )}
           <Button
             className="w-full"
             size="lg"
             onClick={startRender}
-            disabled={nessunElementoSelezionato || analysisLoading || (!analysisData && !analysisLoading && !!analysisError)}
+            disabled={nessunElementoSelezionato || analysisLoading}
           >
             {analysisLoading ? (
               <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Analisi in corso...</>
@@ -1081,9 +1101,20 @@ export default function RenderNew() {
               <Label className="text-sm font-semibold mb-2 block">Varianti</Label>
               <div className="grid grid-cols-3 gap-2">
                 {resultUrls.map((url, i) => (
-                  <button key={i} className="rounded-lg overflow-hidden border-2 border-transparent hover:border-primary transition-colors">
-                    <img src={url} alt={`Variante ${i + 1}`} className="w-full aspect-square object-cover" />
-                  </button>
+                  <div key={i} className="space-y-1">
+                    <div className="rounded-lg overflow-hidden border-2 border-transparent hover:border-primary transition-colors">
+                      <img src={url} alt={`Variante ${i + 1}`} className="w-full aspect-square object-cover" />
+                    </div>
+                    <Button
+                      size="sm"
+                      variant={savedVariants.has(i) ? "outline" : "default"}
+                      className="w-full text-xs h-7"
+                      onClick={() => saveToGallery(i, false)}
+                      disabled={savedVariants.has(i)}
+                    >
+                      {savedVariants.has(i) ? <><Check className="h-3 w-3 mr-1" /> Salvata</> : "Salva"}
+                    </Button>
+                  </div>
                 ))}
               </div>
             </div>
@@ -1093,9 +1124,15 @@ export default function RenderNew() {
             <Button variant="outline" className="flex-1" onClick={() => navigate("/app/render/new")}>
               Nuovo Render
             </Button>
-            <Button className="flex-1" onClick={() => saveToGallery(0)}>
-              <Check className="h-4 w-4 mr-2" /> Salva in Galleria
-            </Button>
+            {resultUrls.length > 1 ? (
+              <Button className="flex-1" onClick={saveAllVariants}>
+                <Check className="h-4 w-4 mr-2" /> Salva tutte
+              </Button>
+            ) : (
+              <Button className="flex-1" onClick={() => saveToGallery(0)}>
+                <Check className="h-4 w-4 mr-2" /> Salva in Galleria
+              </Button>
+            )}
           </div>
         </div>
       )}

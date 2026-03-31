@@ -103,6 +103,7 @@ const CallMonitor = lazy(() => import("./pages/app/CallMonitor"));
 const ScheduledCalls = lazy(() => import("./pages/app/ScheduledCalls"));
 const RenderBagnoHub = lazy(() => import("./pages/app/RenderBagnoHub"));
 const RenderBagnoNew = lazy(() => import("./pages/app/RenderBagnoNew"));
+const RenderBagnoGalleryDetail = lazy(() => import("./pages/app/RenderBagnoGalleryDetail"));
 const RenderFacciataHub = lazy(() => import("./pages/app/RenderFacciataHub"));
 const RenderFacciataNew = lazy(() => import("./pages/app/RenderFacciataNew"));
 const RenderPersianeHub = lazy(() => import("./pages/app/RenderPersianeHub"));
@@ -247,6 +248,7 @@ const App = () => (
                 <Route path="/app/render/gallery/:id" element={<SafeRoute><FeatureGate featureId="render_infissi"><RenderGalleryDetail /></FeatureGate></SafeRoute>} />
                 <Route path="/app/render-bagno" element={<SafeRoute><FeatureGate featureId="render_bagno"><RenderBagnoHub /></FeatureGate></SafeRoute>} />
                 <Route path="/app/render-bagno/new" element={<SafeRoute><FeatureGate featureId="render_bagno"><RenderBagnoNew /></FeatureGate></SafeRoute>} />
+                <Route path="/app/render-bagno/gallery/:id" element={<SafeRoute><FeatureGate featureId="render_bagno"><RenderBagnoGalleryDetail /></FeatureGate></SafeRoute>} />
                 <Route path="/app/render-facciata" element={<SafeRoute><FeatureGate featureId="render_facciata"><RenderFacciataHub /></FeatureGate></SafeRoute>} />
                 <Route path="/app/render-facciata/new" element={<SafeRoute><FeatureGate featureId="render_facciata"><RenderFacciataNew /></FeatureGate></SafeRoute>} />
                 <Route path="/app/render-persiane" element={<SafeRoute><FeatureGate featureId="render_persiane"><RenderPersianeHub /></FeatureGate></SafeRoute>} />

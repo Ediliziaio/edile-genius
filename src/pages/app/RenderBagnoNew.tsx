@@ -386,8 +386,36 @@ export default function RenderBagnoNew() {
     }
   };
 
+  const retryAnalysis = async () => {
+    if (!originalPath) return;
+    setAnalyzing(true);
+    try {
+      const { data: signedData } = await supabase.storage.from("bagno-originals").createSignedUrl(originalPath, 3600);
+      if (!signedData?.signedUrl) throw new Error("URL non disponibile");
+      const { data: analysisData, error: analyzeErr } = await supabase.functions.invoke("analyze-bathroom-photo", {
+        body: { image_url: signedData.signedUrl },
+      });
+      if (analyzeErr) throw new Error("Analisi fallita");
+      const analysisPayload = analysisData?.data ?? analysisData;
+      const result = analysisPayload?.analysis ?? analysisPayload;
+      setAnalisi(result as AnalysiBagno);
+      toast({ title: "Analisi completata ✓" });
+    } catch (err: any) {
+      toast({ title: "Analisi fallita", description: err.message, variant: "destructive" });
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   const startRender = async () => {
-    if (!sessionId || !originalPath || !analisi) return;
+    if (!sessionId || !originalPath) {
+      toast({ title: "Sessione non trovata", description: "Ricarica la pagina e riprova.", variant: "destructive" });
+      return;
+    }
+    if (!analisi) {
+      toast({ title: "Analisi necessaria", description: "Torna allo step 1 e riprova l'analisi della foto.", variant: "destructive" });
+      return;
+    }
     setRendering(true);
     setRenderError("");
     setStep(3);
@@ -999,11 +1027,19 @@ export default function RenderBagnoNew() {
             </Card>
           )}
 
+          {!analisi && !analyzing && (
+            <div className="rounded-lg border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800 flex flex-col gap-2">
+              <p>⚠ Analisi foto non disponibile — il render potrebbe essere meno preciso.</p>
+              <button className="text-xs underline text-yellow-700 self-start" onClick={retryAnalysis}>
+                Rianalizza foto
+              </button>
+            </div>
+          )}
           <div className="flex gap-3">
             <Button variant="outline" onClick={() => setStep(1)} className="flex-1 rounded-xl">
               <ArrowLeft className="h-4 w-4 mr-2" /> Indietro
             </Button>
-            <Button onClick={startRender} className="flex-1 rounded-xl">
+            <Button onClick={startRender} disabled={analyzing} className="flex-1 rounded-xl">
               <Sparkles className="h-4 w-4 mr-2" /> Genera Render
             </Button>
           </div>

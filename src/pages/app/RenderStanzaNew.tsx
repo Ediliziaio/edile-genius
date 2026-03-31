@@ -515,11 +515,12 @@ export default function RenderStanzaNew() {
     setAnalizzando(true);
 
     try {
-      // 1. Crea sessione DB — render_stanza_sessions has NO company_id column
+      // 1. Crea sessione DB
       const { data: session, error: sessErr } = await supabase
         .from('render_stanza_sessions' as any)
         .insert({
           user_id: user.id,
+          company_id: companyId,
           tipo_stanza: config.tipo_stanza,
           status: 'analyzing',
         })
@@ -701,9 +702,10 @@ export default function RenderStanzaNew() {
       
       setRenderUrl(finalUrl);
 
-      // Salva in gallery — render_stanza_gallery has NO company_id column
+      // Salva in gallery
       await supabase.from('render_stanza_gallery' as any).insert({
         user_id: user.id,
+        company_id: companyId,
         session_id: sessionId,
         original_image_url: originalUrl || '',
         result_image_url: finalUrl,

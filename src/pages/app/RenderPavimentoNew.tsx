@@ -32,6 +32,7 @@ export default function RenderPavimentoNew() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [originalStoragePath, setOriginalStoragePath] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisData | null>(null);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [originalDimensions, setOriginalDimensions] = useState<{ w: number; h: number } | null>(null);
@@ -83,6 +84,7 @@ export default function RenderPavimentoNew() {
         .single();
       if (sErr) throw sErr;
       setSessionId(session.id);
+      setOriginalStoragePath(path);
 
       // Convert to base64
       const reader = new FileReader();
@@ -199,17 +201,16 @@ export default function RenderPavimentoNew() {
   const saveToGallery = async () => {
     if (!resultUrl || !user || !companyId) return;
     try {
-      // Generate signed URL for original image
+      // Generate signed URL for original image using the actual upload path saved during analyzeMutation
       let origUrl: string | null = null;
-      if (file) {
-        const ext = file.name.split(".").pop() ?? "jpg";
-        const origPath = `${user.id}/${sessionId ? sessionId : crypto.randomUUID()}.${ext}`;
-        // Try to find the actual uploaded path
-        const uploadedPath = `${user.id}/${sessionId}.${ext}`;
+      if (originalStoragePath) {
         const { data: signedData } = await supabase.storage
           .from("pavimento-originals")
-          .createSignedUrl(origPath, 31536000); // 1 year
-        origUrl = signedData?.signedUrl || null;
+          .createSignedUrl(originalStoragePath, 31536000); // 1 year
+        origUrl = signedData?.signedUrl ?? null;
+        if (!origUrl) {
+          toast({ title: "Avviso", description: "Immagine originale non disponibile nella gallery", variant: "default" });
+        }
       }
 
       await (supabase.from("render_pavimento_gallery") as any).insert({
@@ -401,7 +402,7 @@ export default function RenderPavimentoNew() {
           />
 
           {/* Debug (DEV) */}
-          {import.meta.env.DEV && (
+          {import.meta.env.VITE_ENABLE_DEBUG === 'true' && (
             <Collapsible>
               <CollapsibleTrigger className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
                 <ChevronDown className="w-3 h-3" /> Debug prompt
@@ -418,6 +419,14 @@ export default function RenderPavimentoNew() {
             </Collapsible>
           )}
 
+          {!analysis && !analyzeMutation.isPending && (
+            <div className="rounded-lg border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800 flex flex-col gap-2">
+              <p>⚠ Analisi foto non disponibile — la configurazione automatica non è attiva. Puoi comunque generare.</p>
+              <button className="text-xs underline text-yellow-700 self-start" onClick={() => analyzeMutation.mutate()}>
+                Riprova analisi
+              </button>
+            </div>
+          )}
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setStep(1)}><ArrowLeft className="w-4 h-4 mr-1" /> Indietro</Button>
             <Button className="flex-1 bg-amber-600 hover:bg-amber-700" onClick={() => { setStep(3); renderMutation.mutate(); }}>

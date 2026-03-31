@@ -200,11 +200,12 @@ export default function RenderPersianeNew() {
     setStep(2);
 
     try {
-      const arrayBuffer = await file.arrayBuffer();
-      const bytes = new Uint8Array(arrayBuffer);
-      let binary = "";
-      bytes.forEach((b) => (binary += String.fromCharCode(b)));
-      const base64 = btoa(binary);
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve((reader.result as string).split(",")[1]);
+        reader.onerror = () => reject(new Error("Errore lettura file"));
+        reader.readAsDataURL(file);
+      });
 
       const { data, error } = await supabase.functions.invoke("analyze-shutter-photo", {
         body: { image_base64: base64, mime_type: file.type, session_id: sid },
@@ -245,7 +246,18 @@ export default function RenderPersianeNew() {
   // ══════════ STEP 4 — Render ══════════
 
   const startRender = async () => {
-    if (!analisi || !sessionId || !foto) return;
+    if (!sessionId) {
+      toast({ title: "Sessione non trovata", description: "Ricarica la pagina e riprova.", variant: "destructive" });
+      return;
+    }
+    if (!foto) {
+      toast({ title: "Foto mancante", description: "Torna al passaggio 1 e carica una foto.", variant: "destructive" });
+      return;
+    }
+    if (!analisi) {
+      toast({ title: "Analisi non disponibile", description: "Riprova l'analisi prima di generare il render.", variant: "destructive" });
+      return;
+    }
 
     // Pre-flight credit check
     if (companyId) {
@@ -325,12 +337,13 @@ export default function RenderPersianeNew() {
         })
         .eq("id", sessionId);
 
-      // Convert photo to base64
-      const arrayBuffer = await foto.arrayBuffer();
-      const bytes = new Uint8Array(arrayBuffer);
-      let binary = "";
-      bytes.forEach((b) => (binary += String.fromCharCode(b)));
-      const base64 = btoa(binary);
+      // Convert photo to base64 (safe FileReader — avoids btoa RangeError on large files)
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve((reader.result as string).split(",")[1]);
+        reader.onerror = () => reject(new Error("Errore lettura file"));
+        reader.readAsDataURL(foto);
+      });
 
       const { data, error } = await supabase.functions.invoke("generate-shutter-render", {
         body: {
@@ -780,7 +793,7 @@ export default function RenderPersianeNew() {
           </div>
 
           {/* Debug panel */}
-          {import.meta.env.DEV && (
+          {import.meta.env.VITE_ENABLE_DEBUG === 'true' && (
             <div className="border border-amber-200 rounded-xl overflow-hidden">
               <button
                 onClick={() => {
@@ -828,6 +841,14 @@ export default function RenderPersianeNew() {
           )}
 
           {/* Action buttons */}
+          {!analisi && !analyzingPhoto && (
+            <div className="rounded-lg border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800 flex flex-col gap-2">
+              <p>⚠ Analisi foto non riuscita — torna al passaggio 1 per ritentare l'analisi.</p>
+              <button className="text-xs underline text-yellow-700 self-start" onClick={() => { setStep(1); setAnalyzeError(null); }}>
+                Torna all'analisi
+              </button>
+            </div>
+          )}
           <div className="flex gap-3 pt-2">
             <Button variant="outline" onClick={() => setStep(2)} className="flex-shrink-0">
               <ChevronLeft className="w-4 h-4" />
@@ -953,7 +974,7 @@ export default function RenderPersianeNew() {
           </div>
 
           {/* Debug in step 5 */}
-          {import.meta.env.DEV && debugPromptText && (
+          {import.meta.env.VITE_ENABLE_DEBUG === 'true' && debugPromptText && (
             <div className="border border-amber-200 rounded-xl overflow-hidden">
               <button
                 onClick={() => setShowDebugPrompt(!showDebugPrompt)}

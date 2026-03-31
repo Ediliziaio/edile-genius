@@ -128,15 +128,17 @@ export default function RenderBagnoHub() {
             rowHeight={300}
             renderItem={(item) => (
               <div key={item.id} className="group relative rounded-xl overflow-hidden border bg-card">
-                <img
-                  src={item.render_url}
-                  alt={item.titolo || "Render bagno"}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full aspect-square object-cover"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-end">
-                  <div className="w-full p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Link to={`/app/render-bagno/gallery/${item.id}`}>
+                  <img
+                    src={item.render_url}
+                    alt={item.titolo || "Render bagno"}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full aspect-square object-cover"
+                  />
+                </Link>
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-end pointer-events-none">
+                  <div className="w-full p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
                     <p className="text-white text-sm font-medium truncate">
                       {item.titolo || new Date(item.created_at).toLocaleDateString("it-IT")}
                     </p>
