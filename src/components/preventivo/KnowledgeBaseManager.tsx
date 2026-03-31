@@ -4,7 +4,7 @@ import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { CATEGORIA_KB_META } from '@/modules/preventivo/lib/defaultTemplate';
 import {
   Upload, FileText, CheckCircle2, AlertCircle, Loader2,
-  Trash2, RefreshCw, Eye, Clock, Zap, Search
+  Trash2, RefreshCw, Eye, Clock, Zap, Search, Tag, Check, X
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -101,6 +101,58 @@ function ChunkPreviewDialog({
         )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+/* ── Codice Prodotto Inline Edit ── */
+function CodiceProdottoEdit({ docId, current }: { docId: string; current: string | null }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(current || '');
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    setSaving(true);
+    await (supabase.from('preventivo_kb_documenti' as any).update({ codice_prodotto: value.trim().toUpperCase() || null }).eq('id', docId) as any);
+    setSaving(false);
+    setEditing(false);
+  };
+
+  const cancel = () => { setValue(current || ''); setEditing(false); };
+
+  if (editing) {
+    return (
+      <div className="flex items-center gap-1">
+        <Input
+          value={value}
+          onChange={e => setValue(e.target.value.toUpperCase())}
+          placeholder="ES. URBAN"
+          className="h-6 w-28 text-xs px-2 font-mono"
+          onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') cancel(); }}
+          autoFocus
+        />
+        {saving
+          ? <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+          : <>
+              <button onClick={save} className="p-0.5 text-green-500 hover:text-green-400"><Check className="h-3.5 w-3.5" /></button>
+              <button onClick={cancel} className="p-0.5 text-muted-foreground hover:text-foreground"><X className="h-3.5 w-3.5" /></button>
+            </>
+        }
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => setEditing(true)}
+      title="Imposta codice prodotto per abbinamento automatico"
+      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors group"
+    >
+      <Tag className="h-3 w-3" />
+      {current
+        ? <span className="font-mono text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">{current}</span>
+        : <span className="text-[10px] group-hover:underline">+ codice</span>
+      }
+    </button>
   );
 }
 
@@ -294,7 +346,10 @@ export function KnowledgeBaseManager() {
                 <span className="text-xl">{catMeta?.emoji || '📄'}</span>
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{doc.nome}</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-medium truncate">{doc.nome}</p>
+                    <CodiceProdottoEdit docId={doc.id} current={(doc as any).codice_prodotto ?? null} />
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     <Badge variant="outline" className="mr-1 text-[10px]">
                       {catMeta?.label || doc.categoria}

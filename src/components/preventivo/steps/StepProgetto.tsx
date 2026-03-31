@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Mic, Square, Upload, Loader2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Mic, Square, Upload, Loader2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import type { StepProps } from './types';
 
@@ -16,6 +17,7 @@ export function StepProgetto({ state, setState, companyId, onAudioProcessed }: S
   const [recording, setRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [processing, setProcessing] = useState(false);
+  const [smartAssembly, setSmartAssembly] = useState(true);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
 
@@ -58,6 +60,7 @@ export function StepProgetto({ state, setState, companyId, onAudioProcessed }: S
       if (state.cantiereId) formData.append('cantiere_id', state.cantiereId);
       if (state.clienteNome) formData.append('cliente_nome', state.clienteNome);
       if (state.oggetto) formData.append('oggetto', state.oggetto);
+      if (smartAssembly) formData.append('smart_assembly', 'true');
 
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-preventivo-audio`,
@@ -107,9 +110,27 @@ export function StepProgetto({ state, setState, companyId, onAudioProcessed }: S
             </div>
           )}
           {audioBlob && (
-            <Button onClick={processAudio} disabled={processing} className="w-full gap-2">
-              {processing ? <><Loader2 className="h-4 w-4 animate-spin" /> Elaborazione AI…</> : '🤖 Elabora con AI'}
-            </Button>
+            <div className="space-y-3">
+              {/* Smart Assembly toggle */}
+              <div className="flex items-center justify-between rounded-lg border bg-muted/40 px-4 py-3">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Sparkles className="h-3.5 w-3.5 text-primary" />
+                    Assembla PDF automaticamente
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Cerca schede tecniche e presentazione aziendale nella KB e assembla il PDF finale
+                  </p>
+                </div>
+                <Switch checked={smartAssembly} onCheckedChange={setSmartAssembly} />
+              </div>
+              <Button onClick={processAudio} disabled={processing} className="w-full gap-2">
+                {processing
+                  ? <><Loader2 className="h-4 w-4 animate-spin" /> {smartAssembly ? 'Elaborazione + ricerca prodotti…' : 'Elaborazione AI…'}</>
+                  : <><Sparkles className="h-4 w-4" /> {smartAssembly ? 'Elabora e assembla PDF' : 'Elabora con AI'}</>
+                }
+              </Button>
+            </div>
           )}
         </CardContent>
       </Card>

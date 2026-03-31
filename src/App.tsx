@@ -115,6 +115,7 @@ const RenderStanzaNew = lazy(() => import("./pages/app/RenderStanzaNew"));
 const RenderTettoHub = lazy(() => import("./pages/app/RenderTettoHub"));
 const RenderTettoNew = lazy(() => import("./pages/app/RenderTettoNew"));
 const KnowledgeBasePreventivo = lazy(() => import("./pages/app/KnowledgeBasePreventivo"));
+const ListinoVociManager = lazy(() => import("./pages/app/ListinoVociManager"));
 const PreventivoTemplateList = lazy(() => import("./pages/app/PreventivoTemplateList"));
 const PreventivoTemplateBuilder = lazy(() => import("./pages/app/PreventivoTemplateBuilder"));
 const PreventivoHub = lazy(() => import("./pages/app/PreventivoHub"));
@@ -235,6 +236,7 @@ const App = () => (
                 <Route path="/app/preventivo-hub" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoHub /></FeatureGate></SafeRoute>} />
                 <Route path="/app/agente-preventivo-setup" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoAgentSetup /></FeatureGate></SafeRoute>} />
                 <Route path="/app/preventivo-kb" element={<SafeRoute><FeatureGate featureId="knowledge_base"><KnowledgeBasePreventivo /></FeatureGate></SafeRoute>} />
+                <Route path="/app/preventivi/listino" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><ListinoVociManager /></FeatureGate></SafeRoute>} />
                 <Route path="/app/preventivi/templates" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoTemplateList /></FeatureGate></SafeRoute>} />
                 <Route path="/app/preventivi/templates/nuovo" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoTemplateBuilder /></FeatureGate></SafeRoute>} />
                 <Route path="/app/preventivi/templates/:id" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoTemplateBuilder /></FeatureGate></SafeRoute>} />

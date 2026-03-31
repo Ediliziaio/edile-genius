@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ArrowLeft, FileDown, Trash2, Save, Plus, Euro, Send, RotateCcw, CheckCircle, XCircle, Clock, Eye, Mail } from "lucide-react";
+import { ArrowLeft, FileDown, Trash2, Save, Plus, Euro, Send, RotateCcw, CheckCircle, XCircle, Clock, Eye, Mail, Sparkles, Download, FileText } from "lucide-react";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { PreventivoPDF, type PreventivoVoce, type PreventivoData, type TemplateConfig } from "@/lib/preventivo-pdf";
 import { PreventivoEditor } from "@/components/preventivo/PreventivoEditor";
@@ -205,8 +205,67 @@ export default function PreventivoDetail() {
     foto_copertina_url: prev.foto_copertina_url,
   };
 
+  // Smart assembly banner: show when assembla_config has blocks but pdf_finale_url not yet generated
+  const hasSmartConfig = Array.isArray(prev.assembla_config?.blocks) && prev.assembla_config.blocks.length > 0;
+  const hasFinalePdf = !!prev.pdf_finale_url;
+  const kbDocCount = (prev.assembla_config?.blocks || []).filter((b: any) => b.tipo === 'kb_doc').length;
+
   return (
     <div className="space-y-6">
+      {/* Smart Assembly Banner */}
+      {hasSmartConfig && !hasFinalePdf && (
+        <div className="flex items-center justify-between gap-4 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <Sparkles className="h-4 w-4 text-primary shrink-0" />
+            <div>
+              <p className="text-sm font-medium">
+                PDF assemblato pronto
+                {kbDocCount > 0 && ` · ${kbDocCount} documento${kbDocCount > 1 ? 'i' : ''} tecnico${kbDocCount > 1 ? 'i' : ''} abbinato${kbDocCount > 1 ? 'i' : ''}`}
+              </p>
+              <p className="text-xs text-muted-foreground">Clicca per generare il PDF finale con schede tecniche e presentazione aziendale</p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            className="gap-2 shrink-0"
+            onClick={async () => {
+              try {
+                const { data, error } = await supabase.functions.invoke('assemble-preventivo-pdf', {
+                  body: { preventivo_id: prev.id, company_id: prev.company_id, blocks: prev.assembla_config?.blocks || [] },
+                });
+                if (error) throw error;
+                qc.invalidateQueries({ queryKey: ["preventivo", id] });
+                if (data?.pdf_url) window.open(data.pdf_url, '_blank');
+              } catch (e: any) {
+                toast.error('Errore assemblaggio: ' + e.message);
+              }
+            }}
+          >
+            <Download className="h-3.5 w-3.5" /> Assembla e scarica PDF
+          </Button>
+        </div>
+      )}
+
+      {/* Final PDF banner */}
+      {hasFinalePdf && (
+        <div className="flex items-center justify-between gap-4 rounded-xl border border-green-500/30 bg-green-500/5 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <FileText className="h-4 w-4 text-green-500 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-green-700 dark:text-green-400">PDF finale assemblato</p>
+              <p className="text-xs text-muted-foreground">
+                Generato il {new Date(prev.pdf_finale_generato_at).toLocaleDateString('it-IT')}
+              </p>
+            </div>
+          </div>
+          <a href={prev.pdf_finale_url} target="_blank" rel="noopener noreferrer">
+            <Button variant="outline" size="sm" className="gap-2 border-green-500/40 text-green-600 hover:bg-green-500/10">
+              <Download className="h-3.5 w-3.5" /> Scarica PDF finale
+            </Button>
+          </a>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">

@@ -30,6 +30,7 @@ Deno.serve(async (req) => {
     const clienteCF = formData.get("cliente_codice_fiscale") as string | null;
     const oggetto = formData.get("oggetto") as string | null;
     const titolo = formData.get("titolo") as string | null;
+    const smartAssembly = formData.get("smart_assembly") === "true";
 
     if (!audioFile || !companyId) return jsonError("audio e company_id richiesti", "validation_error", 400, rid);
 
@@ -87,8 +88,15 @@ FORMATO OUTPUT (JSON puro):
   "intro_suggerita": "breve introduzione professionale",
   "voci": [{"id": "v1", "ordine": 1, "categoria": "Demolizioni", "titolo_voce": "Rimozione pavimento esistente", "descrizione": "Demolizione e rimozione...", "unita_misura": "mq", "quantita": 45, "prezzo_unitario": 18.00, "sconto_percentuale": 0, "totale": 810.00, "note_voce": "", "evidenziata": false}],
   "avvertenze": "Note importanti emerse dal sopralluogo",
-  "categorie_trovate": ["Demolizioni", "Muratura"]
+  "categorie_trovate": ["Demolizioni", "Muratura"],
+  "prodotti_menzionati": [{"codice": "URBAN", "tipo": "infisso", "quantita": 3, "dimensioni": "120x150"}, {"codice": "WALK-IN-X", "tipo": "doccia", "quantita": 1}]
 }
+
+REGOLE per prodotti_menzionati:
+- Estrai SOLO nomi/modelli di prodotti specifici menzionati (es. "URBAN", "Walk-in X", "Mapei Ultracolor", "Bosch Serie 6")
+- NON includere categorie generiche (es. NON "infissi", NON "pavimento")
+- codice: nome esatto del modello/brand come detto nell'audio, in MAIUSCOLO
+- Se nessun prodotto specifico menzionato: array vuoto []
 
 UNITÀ DI MISURA: mq, ml, mc, nr, ore, forfait, kg, cad`;
 
@@ -147,8 +155,161 @@ UNITÀ DI MISURA: mq, ml, mc, nr, ore, forfait, kg, cad`;
 
     if (insertErr) throw new Error(`Insert failed: ${insertErr.message}`);
 
-    log("info", "Preventivo audio processed", { request_id: rid, fn: FN, preventivo_id: prev?.id });
-    return jsonOk(prev, rid);
+    // ── SMART ASSEMBLY ────────────────────────────────────────────────────────
+    // Runs only when smart_assembly=true. Searches KB for matching product PDFs
+    // and builds assembla_config. Assembly (pdf-lib merge) is done client-side
+    // after this response to avoid timeout.
+    let assemblaConfig: { blocks: any[] } = { blocks: [] };
+    let smartMeta: { prodotti_trovati: string[]; docs_trovati: number; ha_presentazione: boolean } | null = null;
+
+    if (smartAssembly && prev?.id) {
+      try {
+        const prodottiMenzionati: Array<{ codice: string; tipo: string }> =
+          extracted.prodotti_menzionati || [];
+
+        const blocks: any[] = [];
+        const prodottiTrovati: string[] = [];
+        let docsTrovati = 0;
+
+        // 1. Company presentation PDF (categoria = 'presentazione')
+        const { data: prezPdf } = await adminClient
+          .from("preventivo_kb_documenti")
+          .select("id, nome")
+          .eq("company_id", companyId)
+          .eq("categoria", "presentazione")
+          .eq("visibile", true)
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+
+        const hasPresentazione = !!prezPdf;
+        if (prezPdf) {
+          blocks.push({ tipo: "kb_doc", doc_id: prezPdf.id, doc_nome: prezPdf.nome, include_copertina: false });
+          docsTrovati++;
+        }
+
+        // 2. Per ogni prodotto menzionato: cerca voce listino + PDF tecnico
+        // Also enrich voci prices if listino match found
+        const enrichedVoci = [...voci];
+        const seenDocIds = new Set<string>();
+
+        for (const prodotto of prodottiMenzionati) {
+          if (!prodotto.codice) continue;
+
+          // 2a. Enrich price from listino_voci
+          const { data: listinoMatches } = await adminClient
+            .rpc("cerca_listino", {
+              p_company_id: companyId,
+              p_query: prodotto.codice,
+              p_limit: 1,
+            });
+
+          if (listinoMatches && listinoMatches.length > 0) {
+            const lv = listinoMatches[0];
+            // Find the voce in voci that best matches this product
+            const idx = enrichedVoci.findIndex((v: any) =>
+              v.titolo_voce?.toUpperCase().includes(prodotto.codice.toUpperCase()) ||
+              v.categoria?.toUpperCase().includes((prodotto.tipo || "").toUpperCase())
+            );
+            if (idx >= 0) {
+              enrichedVoci[idx] = {
+                ...enrichedVoci[idx],
+                prezzo_unitario: lv.prezzo_unitario,
+                totale: Number((enrichedVoci[idx].quantita * lv.prezzo_unitario).toFixed(2)),
+                from_listino: true,
+              };
+            }
+
+            // Check if this listino voce has a linked KB doc
+            if (lv.kb_documento_id && !seenDocIds.has(lv.kb_documento_id)) {
+              const { data: linkedDoc } = await adminClient
+                .from("preventivo_kb_documenti")
+                .select("id, nome, file_type")
+                .eq("id", lv.kb_documento_id)
+                .maybeSingle();
+              if (linkedDoc) {
+                blocks.push({ tipo: "divider", testo: prodotto.codice });
+                blocks.push({ tipo: "kb_doc", doc_id: linkedDoc.id, doc_nome: linkedDoc.nome, include_copertina: true });
+                seenDocIds.add(lv.kb_documento_id);
+                prodottiTrovati.push(prodotto.codice);
+                docsTrovati++;
+              }
+            }
+          }
+
+          // 2b. Search KB by codice_prodotto (direct match)
+          const { data: kbByCode } = await adminClient
+            .from("preventivo_kb_documenti")
+            .select("id, nome, file_type")
+            .eq("company_id", companyId)
+            .ilike("codice_prodotto", prodotto.codice)
+            .eq("visibile", true)
+            .limit(1)
+            .maybeSingle();
+
+          if (kbByCode && !seenDocIds.has(kbByCode.id)) {
+            if (!prodottiTrovati.includes(prodotto.codice)) {
+              blocks.push({ tipo: "divider", testo: prodotto.codice });
+            }
+            blocks.push({ tipo: "kb_doc", doc_id: kbByCode.id, doc_nome: kbByCode.nome, include_copertina: !prodottiTrovati.includes(prodotto.codice) });
+            seenDocIds.add(kbByCode.id);
+            if (!prodottiTrovati.includes(prodotto.codice)) prodottiTrovati.push(prodotto.codice);
+            docsTrovati++;
+            continue;
+          }
+
+          // 2c. Fallback: search by nome ILIKE
+          const { data: kbByName } = await adminClient
+            .from("preventivo_kb_documenti")
+            .select("id, nome, file_type")
+            .eq("company_id", companyId)
+            .ilike("nome", `%${prodotto.codice}%`)
+            .eq("visibile", true)
+            .limit(1)
+            .maybeSingle();
+
+          if (kbByName && !seenDocIds.has(kbByName.id)) {
+            if (!prodottiTrovati.includes(prodotto.codice)) {
+              blocks.push({ tipo: "divider", testo: prodotto.codice });
+            }
+            blocks.push({ tipo: "kb_doc", doc_id: kbByName.id, doc_nome: kbByName.nome, include_copertina: true });
+            seenDocIds.add(kbByName.id);
+            if (!prodottiTrovati.includes(prodotto.codice)) prodottiTrovati.push(prodotto.codice);
+            docsTrovati++;
+          }
+        }
+
+        // 3. Preventivo voci (always last)
+        blocks.push({ tipo: "preventivo" });
+
+        assemblaConfig = { blocks };
+        smartMeta = { prodotti_trovati: prodottiTrovati, docs_trovati: docsTrovati, ha_presentazione: hasPresentazione };
+
+        // Recalculate totals if voci were enriched
+        const newSub = Number(enrichedVoci.reduce((s: number, v: any) => s + (v.totale || 0), 0).toFixed(2));
+        const newIva = Number((newSub * (ivaPerc / 100)).toFixed(2));
+        const newTot = Number((newSub + newIva).toFixed(2));
+
+        // Update preventivo with assembla_config and enriched voci
+        await adminClient.from("preventivi").update({
+          assembla_config: assemblaConfig,
+          voci: enrichedVoci,
+          subtotale: newSub,
+          imponibile: newSub,
+          iva_importo: newIva,
+          totale: newTot,
+          totale_finale: newTot,
+        }).eq("id", prev.id);
+
+      } catch (saErr) {
+        // Smart assembly errors are non-fatal — log and continue
+        log("error", "Smart assembly failed (non-fatal)", { request_id: rid, fn: FN, error: String(saErr) });
+      }
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
+    log("info", "Preventivo audio processed", { request_id: rid, fn: FN, preventivo_id: prev?.id, smart_assembly: smartAssembly });
+    return jsonOk({ ...prev, assembla_config: assemblaConfig, smart_meta: smartMeta }, rid);
   } catch (err) {
     return errorResponse(err, rid, FN);
   }
