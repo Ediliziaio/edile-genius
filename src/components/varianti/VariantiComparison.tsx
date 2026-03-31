@@ -29,6 +29,7 @@ export function VariantiComparison({
   const [viewMode, setViewMode] = useState<'grid' | 'focus'>('grid');
   const [focusIndice, setFocusIndice] = useState(0);
   const [saved, setSaved] = useState(false);
+  const [savedIndices, setSavedIndices] = useState<Set<number>>(new Set());
 
   const count = results.length;
 
@@ -41,6 +42,13 @@ export function VariantiComparison({
     if (selectedIndice === null) return;
     onSaveToProgetto?.(selectedIndice);
     setSaved(true);
+    setSavedIndices(prev => new Set(prev).add(selectedIndice));
+  };
+
+  const handleSaveVariant = async (indice: number) => {
+    if (savedIndices.has(indice)) return;
+    onSaveToProgetto?.(indice);
+    setSavedIndices(prev => new Set(prev).add(indice));
   };
 
   const openFocus = (indice: number) => {
@@ -113,10 +121,12 @@ export function VariantiComparison({
             results={results}
             selectedIndice={selectedIndice}
             showOriginal={showOriginal}
+            savedIndices={savedIndices}
             onToggleOriginal={(i) => setShowOriginal(showOriginal === i ? null : i)}
             onSelect={handleSelect}
             onFocus={openFocus}
             onDownload={handleDownload}
+            onSaveVariant={onSaveToProgetto ? handleSaveVariant : undefined}
           />
         ) : (
           <FocusView
@@ -175,15 +185,17 @@ interface GridViewProps {
   results: VarianteResult[];
   selectedIndice: number | null;
   showOriginal: number | null;
+  savedIndices?: Set<number>;
   onToggleOriginal: (i: number) => void;
   onSelect: (i: number) => void;
   onFocus: (i: number) => void;
   onDownload: (r: VarianteResult, i: number) => void;
+  onSaveVariant?: (i: number) => void;
 }
 
 function GridView({
   originalUrl, varianti, results, selectedIndice,
-  showOriginal, onToggleOriginal, onSelect, onFocus, onDownload
+  showOriginal, savedIndices = new Set(), onToggleOriginal, onSelect, onFocus, onDownload, onSaveVariant
 }: GridViewProps) {
   const count = results.length;
 
@@ -266,6 +278,20 @@ function GridView({
               >
                 {isSelected ? '✓ Scelta' : 'Scegli'}
               </button>
+              {onSaveVariant && (
+                <button
+                  onClick={() => onSaveVariant(i)}
+                  disabled={savedIndices.has(i)}
+                  className={cn(
+                    'text-xs px-2.5 py-1.5 rounded-lg font-medium transition-all',
+                    savedIndices.has(i)
+                      ? 'bg-green-600/30 text-green-400 cursor-default'
+                      : 'bg-white/10 text-white/80 hover:bg-green-600/40 hover:text-green-300'
+                  )}
+                >
+                  {savedIndices.has(i) ? '✓ Salvata' : 'Salva'}
+                </button>
+              )}
             </div>
           </div>
         );

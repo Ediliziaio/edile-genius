@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Upload, ArrowLeft, ArrowRight, Download, Save, RotateCcw, ChevronDown } from "lucide-react";
+import BeforeAfterSlider from "@/components/render/BeforeAfterSlider";
 import { TipoPavimentoPicker } from "@/modules/render-pavimento/components/TipoPavimentoPicker";
 import { PatternPosaPicker } from "@/modules/render-pavimento/components/PatternPosaPicker";
 import { FinituraSelector } from "@/modules/render-pavimento/components/FinituraSelector";
@@ -213,12 +214,20 @@ export default function RenderPavimentoNew() {
         }
       }
 
+      const pavColorLabel = colore.name || colore.wood_name || finitura;
+      const titoloGallery = [
+        tipoOperazione.replace(/_/g, " "),
+        tipoPavimento.replace(/_/g, " "),
+        sottotipo,
+        pavColorLabel,
+      ].filter(Boolean).join(" — ") || `Pavimento ${new Date().toLocaleDateString("it-IT")}`;
       await (supabase.from("render_pavimento_gallery") as any).insert({
         user_id: user.id,
         company_id: companyId,
         session_id: sessionId,
         original_image_url: origUrl,
         result_image_url: resultUrl,
+        titolo: titoloGallery,
         tipo_operazione: tipoOperazione,
         tipo_pavimento: tipoPavimento,
         sottotipo,
@@ -451,15 +460,17 @@ export default function RenderPavimentoNew() {
       {/* ═══ STEP 4: Result ═══ */}
       {step === 4 && resultUrl && (
         <div className="space-y-4">
-          <div className="rounded-2xl overflow-hidden border border-border">
-            <img src={showBefore ? preview! : resultUrl} alt="render result" className="w-full object-contain" />
-          </div>
-
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setShowBefore(!showBefore)}>
-              {showBefore ? "Dopo ✨" : "Prima 📷"}
-            </Button>
-          </div>
+          {preview ? (
+            <BeforeAfterSlider
+              beforeSrc={preview}
+              afterSrc={resultUrl}
+              className="aspect-[4/3] rounded-2xl"
+            />
+          ) : (
+            <div className="rounded-2xl overflow-hidden border border-border">
+              <img src={resultUrl} alt="render result" className="w-full object-contain" />
+            </div>
+          )}
 
           <div className="flex flex-wrap gap-2">
             <Badge variant="secondary">{tipoPavimento.replace(/_/g, " ")}</Badge>
@@ -476,6 +487,14 @@ export default function RenderPavimentoNew() {
               <Save className="w-4 h-4 mr-2" /> Salva in galleria
             </Button>
           </div>
+
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(`Guarda il render del nuovo pavimento: ${resultUrl || ""}`)}`}
+            target="_blank" rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-[#25D366] hover:bg-[#20bc5a] text-white text-sm font-medium transition-colors"
+          >
+            📱 Condividi su WhatsApp
+          </a>
 
           <Button variant="ghost" className="w-full" onClick={resetAll}>
             <RotateCcw className="w-4 h-4 mr-2" /> Nuovo render

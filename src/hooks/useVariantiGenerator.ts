@@ -19,6 +19,8 @@ interface UseVariantiGeneratorOptions {
   sourceModulo: string;
   sourceSessionId?: string;
   progettoId?: string;
+  userId?: string;
+  companyId?: string | null;
 }
 
 // Map source module to the correct edge function
@@ -32,7 +34,7 @@ const MODULE_EDGE_FUNCTION: Record<string, string> = {
   infissi: 'generate-render',
 };
 
-export function useVariantiGenerator({ sourceModulo, sourceSessionId }: UseVariantiGeneratorOptions) {
+export function useVariantiGenerator({ sourceModulo, sourceSessionId, userId, companyId }: UseVariantiGeneratorOptions) {
   const [generating, setGenerating] = useState(false);
   const [results, setResults] = useState<VarianteResult[]>([]);
   const [currentVariante, setCurrentVariante] = useState(0);
@@ -106,17 +108,20 @@ export function useVariantiGenerator({ sourceModulo, sourceSessionId }: UseVaria
     const result = results[indice];
     if (!result) return;
 
-    // Save preferred variant to gallery
+    // Save variant to gallery
     if (sourceSessionId) {
       await supabase.from('render_stanza_gallery' as any).insert({
+        user_id: userId,
+        company_id: companyId,
         session_id: sourceSessionId,
         result_image_url: result.result_url,
+        titolo: `Variante — ${result.nome}`,
         tipo_stanza: 'variante',
         interventi: [`variante_${result.nome}`],
         config_snapshot: { variante: result.nome, source_modulo: sourceModulo },
       });
     }
-  }, [results, sourceSessionId, sourceModulo]);
+  }, [results, sourceSessionId, sourceModulo, userId, companyId]);
 
   return {
     generating,

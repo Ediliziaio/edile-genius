@@ -18,17 +18,17 @@ export default function RenderPersianeHub() {
   const [activeTab, setActiveTab] = useState<"come_funziona" | "galleria">("come_funziona");
 
   const { data: gallery = [], isLoading: galleryLoading } = useQuery({
-    queryKey: ["render-persiane-gallery", user?.id],
+    queryKey: ["render-persiane-gallery", companyId],
     queryFn: async () => {
-      if (!user) return [];
+      if (!companyId) return [];
       const { data } = await (supabase.from("render_persiane_gallery") as any)
         .select("*")
-        .eq("user_id", user.id)
+        .eq("company_id", companyId)
         .order("created_at", { ascending: false })
         .limit(200);
       return data || [];
     },
-    enabled: !!user && activeTab === "galleria",
+    enabled: !!companyId && activeTab === "galleria",
     staleTime: 30_000,
   });
 

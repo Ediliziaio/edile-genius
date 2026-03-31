@@ -393,38 +393,66 @@ export default function RenderNew() {
     }
   };
 
-  // Poll status during step 2
+  // Poll status during step 2 — exponential backoff: 3s→5s→8s→12s→15s, max 120s
   useEffect(() => {
     if (step !== 2 || !sessionId) return;
-    const interval = setInterval(async () => {
+    const POLL_DELAYS = [3000, 5000, 8000, 12000, 15000];
+    const MAX_ELAPSED = 120_000;
+    let cancelled = false;
+    let attempt = 0;
+    const startedAt = Date.now();
+    let timeoutRef: ReturnType<typeof setTimeout> | null = null;
+
+    const scheduleNext = () => {
+      if (cancelled) return;
+      if (Date.now() - startedAt >= MAX_ELAPSED) {
+        toast({ title: "Timeout", description: "Il render sta impiegando troppo tempo. Riprova più tardi.", variant: "destructive" });
+        return;
+      }
+      const delay = POLL_DELAYS[Math.min(attempt, POLL_DELAYS.length - 1)];
+      attempt++;
+      timeoutRef = setTimeout(poll, delay);
+    };
+
+    const poll = async () => {
+      if (cancelled) return;
       const { data } = await supabase.from("render_sessions")
         .select("status, result_urls, error_message")
         .eq("id", sessionId).single();
-      if (!data) return;
+      if (cancelled) return;
+      if (!data) { scheduleNext(); return; }
       const d = data as any;
       setStatus(d.status);
       if (d.status === "completed" && d.result_urls) {
         setResultUrls(Array.isArray(d.result_urls) ? d.result_urls : []);
         setStep(3);
-        clearInterval(interval);
       } else if (d.status === "failed") {
         toast({ title: "Render fallito", description: d.error_message || "Errore sconosciuto", variant: "destructive" });
-        clearInterval(interval);
+      } else {
+        scheduleNext();
       }
-    }, 3000);
-    return () => clearInterval(interval);
+    };
+
+    timeoutRef = setTimeout(poll, POLL_DELAYS[0]);
+    return () => { cancelled = true; if (timeoutRef) clearTimeout(timeoutRef); };
   }, [step, sessionId, toast]);
 
   // Save to gallery
   const saveToGallery = async (resultIndex: number, redirectAfter = true) => {
     if (!companyId || !resultUrls[resultIndex]) return;
     if (savedVariants.has(resultIndex)) return;
+    const colorLabel = infissoColorMode === "ral"
+      ? (infissoRalColor?.name || `RAL ${infissoRalColor?.ral}`)
+      : (infissoWoodEffect?.name || "Effetto legno");
+    const titleParts = [config.materiale?.toUpperCase(), colorLabel].filter(Boolean);
+    const galleryTitle = titleParts.join(" — ") || `Infisso ${new Date().toLocaleDateString("it-IT")}`;
     const { error } = await supabase.from("render_gallery").insert({
       company_id: companyId,
       session_id: sessionId,
       original_url: uploadedPhotoUrl,
       render_url: resultUrls[resultIndex],
       config_summary: config,
+      title: galleryTitle,
       created_by: user?.id,
       share_token: crypto.randomUUID().slice(0, 12),
     });
@@ -1134,6 +1162,13 @@ export default function RenderNew() {
               </Button>
             )}
           </div>
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(`Guarda il render dei nuovi infissi: ${resultUrls[0] || ""}`)}`}
+            target="_blank" rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-[#25D366] hover:bg-[#20bc5a] text-white text-sm font-medium transition-colors"
+          >
+            📱 Condividi su WhatsApp
+          </a>
         </div>
       )}
     </div>

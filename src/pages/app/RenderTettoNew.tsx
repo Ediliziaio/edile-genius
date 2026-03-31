@@ -16,6 +16,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useRenderTetto } from '@/hooks/useRenderTetto';
 import type { TipoManto, MaterialeGrondaia, ConfigurazioneTetto } from '@/modules/render-tetto/types';
+import BeforeAfterSlider from '@/components/render/BeforeAfterSlider';
 
 // ─── Costanti ─────────────────────────────────────────────────────────────────
 
@@ -848,29 +849,17 @@ export default function RenderTettoNew() {
               <p className="text-muted-foreground text-sm mt-1">Il tuo tetto rinnovato</p>
             </div>
 
-            <div className="relative rounded-2xl overflow-hidden shadow-xl border border-amber-200">
-              <img
-                src={showOriginal ? (fotoPreview || '') : renderUrl}
-                alt={showOriginal ? 'Originale' : 'Render tetto'}
-                className="w-full object-cover"
-                style={{ maxHeight: '65vh' }}
+            {fotoPreview ? (
+              <BeforeAfterSlider
+                beforeSrc={fotoPreview}
+                afterSrc={renderUrl}
+                className="aspect-[4/3] rounded-2xl border border-amber-200"
               />
-              <button
-                onClick={() => setShowOriginal(!showOriginal)}
-                className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-4 py-2 rounded-full backdrop-blur-sm flex items-center gap-2 hover:bg-black/70 transition-colors"
-              >
-                {showOriginal ? (
-                  <><EyeOff className="w-3.5 h-3.5" /> Mostra render</>
-                ) : (
-                  <><Eye className="w-3.5 h-3.5" /> Mostra originale</>
-                )}
-              </button>
-              {!showOriginal && (
-                <div className="absolute top-3 right-3">
-                  <Badge className="bg-amber-500 text-white border-0 shadow">AI Render</Badge>
-                </div>
-              )}
-            </div>
+            ) : (
+              <div className="rounded-2xl overflow-hidden shadow-xl border border-amber-200">
+                <img src={renderUrl} alt="Render tetto" className="w-full object-cover" />
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3">
               <Button variant="outline" onClick={() => { setStep(3); setShowOriginal(false); }} className="gap-1.5">
@@ -881,6 +870,13 @@ export default function RenderTettoNew() {
               </Button>
             </div>
 
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(`Guarda il render del tetto rinnovato: ${renderUrl || ""}`)}`}
+              target="_blank" rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-[#25D366] hover:bg-[#20bc5a] text-white text-sm font-medium transition-colors"
+            >
+              📱 Condividi su WhatsApp
+            </a>
             <button
               onClick={() => { reset(); setStep(1); setShowOriginal(false); }}
               className="w-full text-center text-sm text-muted-foreground hover:text-foreground py-2 transition-colors"

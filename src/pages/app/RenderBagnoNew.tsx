@@ -443,10 +443,22 @@ export default function RenderBagnoNew() {
       .update({ configurazione: cfg, analisi_bagno: analisi, stato: "pending" })
       .eq("id", sessionId);
 
-    // Fake progress animation
-    intervalRef.current = setInterval(() => {
-      setRenderProgress(p => Math.min(p + 2, 90));
-    }, 600);
+    // Real progress polling on session stato every 5s
+    const STATO_PROGRESS: Record<string, number> = {
+      pending: 10, analizzando: 25, generando: 55,
+      processing: 55, ottimizzando: 80, completato: 95,
+    };
+    intervalRef.current = setInterval(async () => {
+      const { data: sessionData } = await (supabase.from("render_bagno_sessions") as any)
+        .select("stato")
+        .eq("id", sessionId)
+        .single();
+      if (sessionData?.stato && STATO_PROGRESS[sessionData.stato] !== undefined) {
+        setRenderProgress(STATO_PROGRESS[sessionData.stato]);
+      } else {
+        setRenderProgress(p => Math.min(p + 3, 90));
+      }
+    }, 5000);
 
     try {
       const { data: result, error } = await supabase.functions
@@ -489,7 +501,13 @@ export default function RenderBagnoNew() {
         company_id: companyId,
         created_by: user.id,
         session_id: sessionId,
-        titolo: `Bagno ${new Date().toLocaleDateString("it-IT")}`,
+        titolo: (() => {
+          const elementiAttivi = Object.entries(sostituzione as Record<string, boolean>)
+            .filter(([, v]) => v).map(([k]) => k.replace(/_/g, " ")).slice(0, 2).join(", ");
+          return tipoIntervento
+            ? `${tipoIntervento.replace(/_/g, " ")}${elementiAttivi ? ` — ${elementiAttivi}` : ""}`
+            : `Bagno ${new Date().toLocaleDateString("it-IT")}`;
+        })(),
         originale_url: permanentOriginalUrl,
         render_url: renderUrl,
         configurazione: { tipoIntervento, sostituzione },
@@ -1155,6 +1173,13 @@ export default function RenderBagnoNew() {
           >
             <RefreshCw className="h-4 w-4 mr-2" /> Rigenera (variante diversa)
           </Button>
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(`Guarda il render del bagno ristrutturato: ${renderUrl}`)}`}
+            target="_blank" rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-[#25D366] hover:bg-[#20bc5a] text-white text-sm font-medium transition-colors"
+          >
+            📱 Condividi su WhatsApp
+          </a>
         </div>
       )}
     </div>

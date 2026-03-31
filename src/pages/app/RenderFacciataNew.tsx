@@ -791,8 +791,15 @@ export default function RenderFacciataNew() {
             </button>
           </div>
 
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(`Guarda il render della facciata rinnovata: ${renderUrl || ""}`)}`}
+            target="_blank" rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-[#25D366] hover:bg-[#20bc5a] text-white text-sm font-medium transition-colors"
+          >
+            📱 Condividi su WhatsApp
+          </a>
           <div className="flex gap-3">
-            <Button variant="outline" className="flex-1" onClick={() => { setStep(3); setRenderUrl(null); }}>
+            <Button variant="outline" className="flex-1" onClick={() => { setStep(3); setRenderUrl(null); setRenderError(null); }}>
               <RotateCcw className="w-4 h-4 mr-2" />
               Rigenera con modifiche
             </Button>

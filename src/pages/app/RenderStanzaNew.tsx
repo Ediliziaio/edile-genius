@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
+import BeforeAfterSlider from '@/components/render/BeforeAfterSlider';
 import { toast } from 'sonner';
 import {
   Upload, Camera, Sparkles, ChevronLeft, ChevronRight,
@@ -703,12 +704,18 @@ export default function RenderStanzaNew() {
       setRenderUrl(finalUrl);
 
       // Salva in gallery
+      const tipoStanzaLabel = TIPO_STANZA_OPTIONS.find(o => o.value === config.tipo_stanza)?.label || config.tipo_stanza || "Stanza";
+      const interventiLabels = attivi.slice(0, 2)
+        .map(k => INTERVENTO_META[k as keyof typeof INTERVENTO_META]?.label || k)
+        .join(", ");
+      const titoloGallery = `${tipoStanzaLabel}${interventiLabels ? ` — ${interventiLabels}` : ""}`;
       await supabase.from('render_stanza_gallery' as any).insert({
         user_id: user.id,
         company_id: companyId,
         session_id: sessionId,
         original_image_url: originalUrl || '',
         result_image_url: finalUrl,
+        titolo: titoloGallery,
         tipo_stanza: config.tipo_stanza,
         interventi: attivi,
         config_snapshot: configForPrompt,
@@ -2251,43 +2258,18 @@ export default function RenderStanzaNew() {
               </p>
             </div>
 
-            {/* Toggle before/after */}
-            <div className="flex justify-center">
-              <div className="inline-flex rounded-full bg-muted p-1">
-                <button
-                  onClick={() => setShowOriginal(false)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${!showOriginal ? 'bg-background shadow text-violet-700' : 'text-muted-foreground'}`}
-                >
-                  Dopo
-                </button>
-                <button
-                  onClick={() => setShowOriginal(true)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${showOriginal ? 'bg-background shadow text-foreground' : 'text-muted-foreground'}`}
-                >
-                  Prima
-                </button>
-              </div>
-            </div>
-
-            {/* Immagine */}
-            <div className="relative rounded-2xl overflow-hidden shadow-xl">
-              <img
-                src={showOriginal ? (fotoPreview || '') : renderUrl}
-                alt={showOriginal ? 'Stanza originale' : 'Render trasformato'}
-                className="w-full transition-opacity duration-300"
+            {/* Before/After Slider */}
+            {fotoPreview ? (
+              <BeforeAfterSlider
+                beforeSrc={fotoPreview}
+                afterSrc={renderUrl}
+                className="aspect-[4/3] rounded-2xl"
               />
-              <div className="absolute top-3 left-3">
-                <Badge className={showOriginal ? 'bg-gray-700 text-white' : 'bg-violet-600 text-white'}>
-                  {showOriginal ? 'PRIMA' : 'DOPO'}
-                </Badge>
+            ) : (
+              <div className="rounded-2xl overflow-hidden shadow-xl">
+                <img src={renderUrl} alt="Render trasformato" className="w-full" />
               </div>
-              <button
-                onClick={() => setShowOriginal(prev => !prev)}
-                className="absolute bottom-3 right-3 bg-black/60 text-white rounded-full p-2 hover:bg-black/80 transition-colors"
-              >
-                {showOriginal ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-              </button>
-            </div>
+            )}
 
             {/* Genera varianti */}
             {imageBase64 && (
@@ -2343,6 +2325,13 @@ export default function RenderStanzaNew() {
               </Button>
             </div>
 
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(`Guarda il render della stanza rinnovata: ${renderUrl || ""}`)}`}
+              target="_blank" rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-[#25D366] hover:bg-[#20bc5a] text-white text-sm font-medium transition-colors"
+            >
+              📱 Condividi su WhatsApp
+            </a>
             <Button
               onClick={() => navigate('/app/render-stanza')}
               variant="ghost"
@@ -2365,6 +2354,8 @@ export default function RenderStanzaNew() {
             naturalHeight={imageNaturalHeight}
             sourceModulo="stanza"
             sourceSessionId={sessionId || undefined}
+            userId={user?.id}
+            companyId={companyId}
             onClose={() => setShowVarianti(false)}
           />
         )}

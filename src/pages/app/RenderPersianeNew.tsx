@@ -15,6 +15,7 @@ import {
   Zap, Sliders, Sparkles, Check, Download, RotateCcw, Eye, EyeOff,
   Layers, Plus, Repeat, Palette, Trash2, Copy, Heart,
 } from "lucide-react";
+import BeforeAfterSlider from "@/components/render/BeforeAfterSlider";
 
 import {
   buildPersianaPrompt,
@@ -394,12 +395,19 @@ export default function RenderPersianeNew() {
         .createSignedUrl(origPath, 31536000); // 1 year
       origUrl = signedData?.signedUrl || null;
 
+      const persianaColorLabel = coloreMode === "ral"
+        ? (ralSelezionato?.name || ralSelezionato?.ral || "")
+        : (woodSelezionato?.name || "Legno");
+      const operazioneLabel = TIPO_OPERAZIONE_OPTIONS.find(o => o.value === tipoOperazione)?.label || tipoOperazione;
+      const titoloGallery = [operazioneLabel, tipoPersiana.replace(/_/g, " "), persianaColorLabel]
+        .filter(Boolean).join(" — ");
       await (supabase.from("render_persiane_gallery") as any).insert({
         user_id: user.id,
         company_id: companyId,
         session_id: sessionId,
         original_image_url: origUrl,
         result_image_url: renderUrl,
+        titolo: titoloGallery,
         tipo_operazione: tipoOperazione,
         tipo_persiana: tipoPersiana,
         materiale: materialePersiana,
@@ -902,27 +910,17 @@ export default function RenderPersianeNew() {
             </p>
           </div>
 
-          <div className="relative rounded-2xl overflow-hidden border border-border shadow-lg">
-            <img
-              src={showOriginal ? fotoPreview! : renderUrl}
-              alt={showOriginal ? "Originale" : "Render"}
-              className="w-full object-contain"
+          {fotoPreview ? (
+            <BeforeAfterSlider
+              beforeSrc={fotoPreview}
+              afterSrc={renderUrl}
+              className="aspect-[4/3] rounded-2xl"
             />
-            <div className="absolute top-3 right-3">
-              <button
-                onClick={() => setShowOriginal(!showOriginal)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-black/60 text-white rounded-lg text-xs font-medium backdrop-blur-sm"
-              >
-                {showOriginal ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                {showOriginal ? "Render" : "Originale"}
-              </button>
+          ) : (
+            <div className="rounded-2xl overflow-hidden border border-border shadow-lg">
+              <img src={renderUrl} alt="Render" className="w-full object-contain" />
             </div>
-            <div className="absolute bottom-3 left-3">
-              <span className="px-2.5 py-1 bg-black/60 text-white rounded-lg text-xs backdrop-blur-sm">
-                {showOriginal ? "📷 Prima" : "✨ Dopo — Render AI"}
-              </span>
-            </div>
-          </div>
+          )}
 
           {/* Badges */}
           <div className="flex flex-wrap gap-1.5">
@@ -964,6 +962,13 @@ export default function RenderPersianeNew() {
             </button>
           </div>
 
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(`Guarda il render delle nuove persiane: ${renderUrl || ""}`)}`}
+            target="_blank" rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-[#25D366] hover:bg-[#20bc5a] text-white text-sm font-medium transition-colors"
+          >
+            📱 Condividi su WhatsApp
+          </a>
           <div className="flex gap-3">
             <Button variant="outline" className="flex-1" onClick={() => { setStep(3); setRenderUrl(null); }}>
               <RotateCcw className="w-4 h-4 mr-2" /> Nuovo render

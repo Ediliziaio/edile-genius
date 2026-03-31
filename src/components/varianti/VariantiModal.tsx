@@ -18,6 +18,8 @@ interface VariantiModalProps {
   sourceModulo: string;
   sourceSessionId?: string;
   progettoId?: string;
+  userId?: string;
+  companyId?: string | null;
   onClose: () => void;
   onSaveToProgetto?: (resultUrl: string, varianteName: string) => void;
 }
@@ -33,6 +35,8 @@ export function VariantiModal({
   sourceModulo,
   sourceSessionId,
   progettoId,
+  userId,
+  companyId,
   onClose,
   onSaveToProgetto,
 }: VariantiModalProps) {
@@ -45,7 +49,7 @@ export function VariantiModal({
     currentVariante,
     generateVariants,
     setVariantePreferita,
-  } = useVariantiGenerator({ sourceModulo, sourceSessionId, progettoId });
+  } = useVariantiGenerator({ sourceModulo, sourceSessionId, progettoId, userId, companyId });
 
   const handleGenerate = async (varianti: VarianteConfig[]) => {
     setConfiguredVarianti(varianti);
