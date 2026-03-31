@@ -13,6 +13,9 @@ import { toast } from "sonner";
 import { ArrowLeft, FileDown, Trash2, Save, Plus, Euro, Send, RotateCcw, CheckCircle, XCircle, Clock, Eye, Mail } from "lucide-react";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { PreventivoPDF, type PreventivoVoce, type PreventivoData, type TemplateConfig } from "@/lib/preventivo-pdf";
+import { PreventivoEditor } from "@/components/preventivo/PreventivoEditor";
+import { PdfAssembler } from "@/components/preventivo/PdfAssembler";
+import { useCompanyId } from "@/hooks/useCompanyId";
 
 const UNITS = ["mq", "ml", "mc", "nr", "ore", "forfait", "kg", "cad"];
 
@@ -27,6 +30,7 @@ export default function PreventivoDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const companyId = useCompanyId();
   const [editing, setEditing] = useState(false);
   const [voci, setVoci] = useState<PreventivoVoce[]>([]);
   const [note, setNote] = useState("");
@@ -310,9 +314,49 @@ export default function PreventivoDetail() {
       <Tabs defaultValue="dettaglio">
         <TabsList>
           <TabsTrigger value="dettaglio">Dettaglio</TabsTrigger>
+          <TabsTrigger value="editor">Editor Voci</TabsTrigger>
+          <TabsTrigger value="assembler">PDF Assembler</TabsTrigger>
           <TabsTrigger value="cronologia">Cronologia</TabsTrigger>
           <TabsTrigger value="tracking">Tracking</TabsTrigger>
         </TabsList>
+
+        {/* TAB: EDITOR VOCI */}
+        <TabsContent value="editor" className="pt-2">
+          {prev && (
+            <PreventivoEditor
+              preventivoId={prev.id}
+              initialVoci={voci}
+              initialIntroPrevio={prev.intro_testo ?? prev.intro ?? ''}
+              initialCondizioniPagamento={prev.condizioni_pagamento ?? prev.condizioni ?? ''}
+              initialNote={prev.note ?? ''}
+              ivaPercentuale={prev.iva_percentuale ?? 22}
+              companyId={companyId}
+              onSave={async (patch) => {
+                const totals = patch.voci.reduce((s, v) => s + v.totale, 0);
+                const iva = totals * ((prev.iva_percentuale ?? 22) / 100);
+                await (supabase.from("preventivi") as any).update({
+                  voci: patch.voci,
+                  note: patch.note,
+                  intro_testo: patch.intro_testo,
+                  condizioni_pagamento: patch.condizioni_pagamento,
+                  subtotale: totals,
+                  totale: Number((totals + iva).toFixed(2)),
+                }).eq("id", prev.id);
+                qc.invalidateQueries({ queryKey: ["preventivo", id] });
+              }}
+            />
+          )}
+        </TabsContent>
+
+        {/* TAB: PDF ASSEMBLER */}
+        <TabsContent value="assembler" className="pt-2">
+          {prev && (
+            <PdfAssembler
+              preventivoId={prev.id}
+              companyId={companyId}
+            />
+          )}
+        </TabsContent>
 
         {/* TAB: Dettaglio */}
         <TabsContent value="dettaglio" className="space-y-6">
