@@ -214,16 +214,25 @@ Deno.serve(async (req) => {
       log("warn", "Balance zero — calls blocked", { request_id: rid, company_id: agent.company_id });
     }
     
-    // Low-balance alert — update timestamp so notification emails can be sent.
-    // NOTE: Auto-recharge via try_auto_recharge() was disabled because it added credits
-    // without making a Stripe charge (fraud vector). Re-enable only after integrating
-    // Stripe PaymentIntents with a saved customer payment method.
+    // Low-balance alert — chiama send-credit-alert (non-blocking)
     if (!wasBlocked && balanceAfter <= Number(credits?.alert_threshold_eur || 5)) {
-      await sb.from("ai_credits").update({ alert_email_sent_at: new Date().toISOString() }).eq("company_id", agent.company_id);
-      if (credits?.auto_recharge_enabled) {
-        log("warn", "Auto-recharge is enabled but disabled at system level — Stripe PaymentIntents integration required", {
-          request_id: rid, company_id: agent.company_id, balance_after: balanceAfter,
-        });
+      sb.functions.invoke('send-credit-alert', {
+        body: {
+          company_id: agent.company_id,
+          balance_eur: balanceAfter,
+          threshold_pct: balanceAfter <= 0 ? 0 : 10,
+          days_left: null,
+        },
+      }).catch((e: Error) => log('warn', 'Alert invoke failed', { rid, error: e.message }));
+
+      // Auto-ricarica reale via Stripe PaymentIntents
+      if (credits?.auto_recharge_enabled && credits.stripe_payment_method_id) {
+        sb.functions.invoke('execute-auto-recharge', {
+          body: {
+            company_id: agent.company_id,
+            amount_eur: Number(credits.auto_recharge_amount ?? 20),
+          },
+        }).catch((e: Error) => log('warn', 'Auto-recharge invoke failed', { rid, error: e.message }));
       }
     }
 

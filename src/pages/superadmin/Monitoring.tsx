@@ -164,7 +164,7 @@ export default function Monitoring() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ai_credits")
-        .select("company_id, balance_eur, minutes_reserved, calls_blocked, total_spent_eur");
+        .select("company_id, balance_eur, minutes_reserved, calls_blocked, total_spent_eur, alert_threshold_eur, min_reserve_eur");
       if (error) throw error;
       return (data || []) as CreditRow[];
     },
@@ -177,7 +177,11 @@ export default function Monitoring() {
       totalBalance: credits.reduce((s, c) => s + (c.balance_eur || 0), 0),
       totalReserved: credits.reduce((s, c) => s + (c.minutes_reserved || 0), 0),
       blocked: credits.filter((c) => c.calls_blocked).length,
-      lowBalance: credits.filter((c) => (c.balance_eur || 0) > 0 && (c.balance_eur || 0) <= MONITORING_CONFIG.CREDITS_LOW_THRESHOLD).length,
+      // Fix 6.5: usa alert_threshold_eur per azienda invece di soglia hardcoded
+      lowBalance: credits.filter((c) =>
+        (c.balance_eur || 0) > 0 &&
+        (c.balance_eur || 0) <= ((c as Record<string, unknown>).alert_threshold_eur as number ?? MONITORING_CONFIG.CREDITS_LOW_THRESHOLD)
+      ).length,
     };
   }, [credits]);
 

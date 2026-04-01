@@ -142,7 +142,13 @@ export default function CompanyDetail() {
       });
       if (error || data?.error) throw new Error(data?.error || error?.message);
       toast({ title: "✅ Crediti aggiunti", description: `${amt} crediti aggiunti a ${company?.name}` });
-      setCreditBalance(prev => (prev ?? 0) + amt);
+      // Fix 6.1: ricarica saldo da DB (non ottimismo rischioso)
+      const { data: refreshed } = await supabase
+        .from('ai_credits')
+        .select('balance_eur')
+        .eq('company_id', id)
+        .single();
+      if (refreshed) setCreditBalance(Number(refreshed.balance_eur));
       setCreditAmount("100");
       setCreditNote("");
       // Ricarica topups
@@ -152,6 +158,25 @@ export default function CompanyDetail() {
       toast({ variant: "destructive", title: "Errore", description: err.message });
     } finally {
       setAddingCredits(false);
+    }
+  };
+
+  // Fix 6.3: sblocco temporaneo azienda (override SA)
+  const handleOverride = async (hours = 24) => {
+    if (!id) return;
+    const overrideUntil = new Date(Date.now() + hours * 3600000).toISOString();
+    const { error } = await supabase
+      .from('ai_credits')
+      .update({
+        override_until: overrideUntil,
+        override_reason: `SA override ${hours}h — ${new Date().toLocaleDateString('it-IT')}`,
+        calls_blocked: false,
+      } as Parameters<typeof supabase.from>[0] extends 'ai_credits' ? never : Record<string, unknown>)
+      .eq('company_id', id);
+    if (error) {
+      toast({ variant: 'destructive', title: 'Errore', description: error.message });
+    } else {
+      toast({ title: '✅ Override attivato', description: `${company?.name} sbloccata per ${hours}h` });
     }
   };
 
@@ -350,6 +375,14 @@ export default function CompanyDetail() {
                   ? <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   : <Gift className="h-4 w-4 mr-2" />}
                 Aggiungi {creditAmount || "0"} crediti a {company?.name}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleOverride(24)}
+                className="w-full border-amber-300 text-amber-700 hover:bg-amber-50"
+              >
+                🔓 Sblocca 24h
               </Button>
             </div>
 

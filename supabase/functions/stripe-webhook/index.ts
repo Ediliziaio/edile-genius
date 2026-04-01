@@ -200,6 +200,54 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Gestione abbonamenti modulari
+    const MODULE_PRICES: Record<string, { price_eur: number; monthly_units?: number; overage_rate_eur?: number }> = {
+      'vocal_s':    { price_eur: 79,  monthly_units: 100,  overage_rate_eur: 0.90 },
+      'vocal_m':    { price_eur: 197, monthly_units: 300,  overage_rate_eur: 0.75 },
+      'vocal_l':    { price_eur: 497, monthly_units: 1000, overage_rate_eur: 0.55 },
+      'preventivi': { price_eur: 29,  monthly_units: 0 },
+      'automazioni':{ price_eur: 49,  monthly_units: 0 },
+    };
+
+    if (event.type === 'customer.subscription.created' ||
+        event.type === 'customer.subscription.updated') {
+      const sub = event.data.object as Stripe.Subscription;
+      const meta = sub.metadata as Record<string, string>;
+      if (meta?.company_id && meta?.module) {
+        const planConfig = MODULE_PRICES[meta.plan_id || meta.module];
+        await sb.from('company_subscriptions').upsert({
+          company_id: meta.company_id,
+          module: meta.module,
+          plan_id: meta.plan_id || null,
+          stripe_sub_id: sub.id,
+          status: sub.status === 'active' ? 'active' : sub.status,
+          monthly_units: planConfig?.monthly_units ?? 0,
+          overage_rate_eur: planConfig?.overage_rate_eur ?? 0,
+          price_eur: planConfig?.price_eur ?? 0,
+          billing_cycle_start: new Date(sub.current_period_start * 1000).toISOString().slice(0,10),
+          next_billing_date: new Date(sub.current_period_end * 1000).toISOString().slice(0,10),
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'company_id,module' });
+      }
+      return new Response("OK", { status: 200 });
+    }
+
+    if (event.type === 'customer.subscription.deleted') {
+      const sub = event.data.object as Stripe.Subscription;
+      const meta = sub.metadata as Record<string, string>;
+      if (meta?.company_id && meta?.module) {
+        await sb.from('company_subscriptions')
+          .update({
+            status: 'cancelled',
+            cancelled_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('company_id', meta.company_id)
+          .eq('module', meta.module);
+      }
+      return new Response("OK", { status: 200 });
+    }
+
     return new Response("OK", { status: 200 });
   } catch (err) {
     console.error("[stripe-webhook] Unhandled error:", err);

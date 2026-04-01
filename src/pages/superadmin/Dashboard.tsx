@@ -88,8 +88,21 @@ export default function SuperAdminDashboard() {
           companies: comps.length,
           activeAgents: agents.filter((a) => a.status === "active").length,
           callsThisMonth: agents.reduce((sum, a) => sum + (a.calls_month || 0), 0),
-          estimatedMRR: comps.filter((c) => c.status === "active").reduce((sum, c) => sum + (planPricing[c.plan || "starter"] || 0), 0),
+          estimatedMRR: 0, // aggiornato sotto con spesa reale
         });
+
+        // Fix 6.4: MRR reale da topups mese corrente
+        const firstOfMonth = new Date();
+        firstOfMonth.setDate(1); firstOfMonth.setHours(0, 0, 0, 0);
+        const { data: monthlySpend } = await supabase
+          .from('ai_credit_topups')
+          .select('price_paid_eur')
+          .eq('status', 'completed')
+          .in('type', ['stripe', 'package'])
+          .gte('created_at', firstOfMonth.toISOString());
+        const realMRR = (monthlySpend || [])
+          .reduce((s, t) => s + Number((t as Record<string, unknown>).price_paid_eur || 0), 0);
+        setStats(prev => ({ ...prev, estimatedMRR: realMRR }));
 
         // Credits per company
         if (creditsRes.data) {
