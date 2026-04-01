@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyId } from "@/hooks/useCompanyId";
+import { useCredits } from "@/hooks/useCredits";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,9 @@ import { Loader2, RefreshCw, Package, Sparkles, Lock } from "lucide-react";
 import CreditsBalanceCard from "@/components/credits/CreditsBalanceCard";
 import TopupSelector from "@/components/credits/TopupSelector";
 import CreditsUsageTabs from "@/components/credits/CreditsUsageTabs";
+import { CreditBalanceBar } from "@/components/credits/CreditBalanceBar";
+import { ForecastWidget } from "@/components/credits/ForecastWidget";
+import { ModuleCard } from "@/components/credits/ModuleCard";
 
 interface Credits {
   balance_eur: number;
@@ -69,6 +73,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 export default function CreditsPage() {
   const companyId = useCompanyId();
   const { toast } = useToast();
+  const creditsModule = useCredits();
 
   const [credits, setCredits] = useState<Credits | null>(null);
   const [topups, setTopups] = useState<Topup[]>([]);
@@ -250,6 +255,33 @@ export default function CreditsPage() {
           <p className="text-sm text-muted-foreground mt-1">Gestisci il saldo, ricarica e monitora i consumi</p>
         </div>
         <Button variant="outline" size="sm" onClick={fetchAll}><RefreshCw className="h-4 w-4 mr-2" /> Aggiorna</Button>
+      </div>
+
+      {/* ── Sezione Moduli & Saldo Conversazioni ── */}
+      <CreditBalanceBar
+        balanceConv={creditsModule.balance_conv}
+        balanceEur={creditsModule.balance_eur}
+        isBlocked={creditsModule.calls_blocked}
+        forecastDays={creditsModule.forecast_days_left}
+        vocalSub={creditsModule.vocal_sub}
+        onRecharge={() => setConfirmModal(true)}
+      />
+
+      <ForecastWidget
+        balanceConv={creditsModule.balance_conv}
+        forecastDays={creditsModule.forecast_days_left}
+        renderCredits={creditsModule.render_credits}
+      />
+
+      {/* Moduli attivi */}
+      <div>
+        <h2 className="text-lg font-bold mb-3">Moduli</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <ModuleCard module="vocal" sub={creditsModule.vocal_sub} />
+          <ModuleCard module="render" balance={creditsModule.render_credits} />
+          <ModuleCard module="preventivi" active={creditsModule.preventivi_active} />
+          <ModuleCard module="automazioni" active={creditsModule.automazioni_active} />
+        </div>
       </div>
 
       <CreditsBalanceCard credits={credits} onRechargeNow={() => setConfirmModal(true)} onToggleAutoRecharge={toggleAutoRecharge} />
