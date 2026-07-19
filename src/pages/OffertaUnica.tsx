@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { MetaPixel } from "@/lib/metaPixel";
 import { motion } from "framer-motion";
 import { usePageSEO } from "@/hooks/usePageSEO";
 import {
@@ -255,7 +256,7 @@ const HOW_IT_WORKS = [
 const FAQ_ITEMS = [
   { q: "Quanto costa davvero il servizio?", a: "I piani partono da €197/mese — meno di 1/10 del costo di un dipendente. Il setup è gratuito se attivi entro 7 giorni." },
   { q: "Funziona anche per la mia nicchia edile?", a: "Sì. Abbiamo agenti specializzati per serramenti, fotovoltaico, ristrutturazioni, impiantistica, edilizia generale e coperture." },
-  { q: "I clienti si accorgono che parlano con un AI?", a: "La nostra tecnologia vocale è indistinguibile da un operatore umano. Il 94% dei chiamanti non nota la differenza." },
+  { q: "I clienti si accorgono che parlano con un AI?", a: "La nostra tecnologia vocale è naturale e fluida. Nella maggior parte dei casi il chiamante non nota la differenza con un operatore umano." },
   { q: "Quanto tempo serve per essere operativi?", a: "7 giorni lavorativi dal kick-off. Include configurazione, test e go-live con monitoraggio dedicato." },
   { q: "Posso provare senza rischi?", a: "Assolutamente. Offriamo garanzia soddisfatti o rimborsati entro 30 giorni. Se non vedi risultati, ti restituiamo tutto." },
   { q: "Come si integra con il mio CRM o gestionale?", a: "Ci integriamo con i principali CRM (Salesforce, HubSpot, Zoho) e con qualsiasi tool tramite webhook e API. Setup incluso." },
@@ -264,15 +265,17 @@ const FAQ_ITEMS = [
 
 /* ── PAGE COMPONENT ── */
 const OffertaUnica = () => {
-  usePageSEO({
+  const seoTags = usePageSEO({
     title: "Offerta Esclusiva — AI per Imprese Edili | Edilizia.io",
     description:
       "Riduci i costi del personale del 60% e triplica gli appuntamenti con Agenti Vocali AI specializzati per l'edilizia. Analisi gratuita di 15 minuti.",
     canonical: "/offerta-unica",
+    noindex: true,
   });
   useNoIndex();
   const countdown = useCountdown("offerta_unica_first_visit");
   const [callsPerMonth, setCallsPerMonth] = useState(100);
+  useEffect(() => { MetaPixel.viewContent({ content_name: "Offerta Unica", content_category: "offerta" }); }, []);
 
   const missedCalls = Math.round(callsPerMonth * 0.4);
   const lostRevenue = missedCalls * 450;
@@ -280,6 +283,7 @@ const OffertaUnica = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {seoTags}
       <OfferHeader ctaText="Prenota Analisi Gratuita" onCtaClick={scrollToCta} navLinks={NAV_LINKS} />
 
       {/* ═══════════════════ HERO ═══════════════════ */}
@@ -442,7 +446,7 @@ const OffertaUnica = () => {
 
           <div className="text-center mt-10">
             <p className="text-lg font-bold text-foreground mb-4">
-              Totale perdita potenziale: <span className="text-destructive text-2xl">€222.900/anno</span>
+              Perdita potenziale stimata: <span className="text-destructive text-2xl">fino a €200.000+/anno</span>
             </p>
             <Button size="lg" onClick={scrollToCta} className="shadow-button-green">
               Ferma le Perdite — Analisi Gratuita <ArrowRight className="ml-2 h-5 w-5" />
@@ -875,6 +879,7 @@ const OffertaUnica = () => {
         subtitle="Scopri esattamente quanto puoi risparmiare e quanti appuntamenti in più puoi generare. Zero impegno."
         ctaText="Prenota Ora — È Gratis"
         ctaHref="https://calendly.com/edilizia-io/analisi-gratuita"
+        ctaOnClick={() => MetaPixel.lead({ content_name: "Calendly — Analisi Gratuita 15 min", content_category: "demo" })}
         countdown={countdown}
         footerLink={{ label: "← Torna al sito principale", to: "/" }}
       />

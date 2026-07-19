@@ -42,6 +42,10 @@ export interface BlogPost {
   tags: string[];
   heroImage: string;
   heroImageAlt: string;
+  /** TL;DR estraibile dagli answer engine (AEO): 2-3 frasi, soggetto nominato. */
+  summary?: string;
+  /** 3-5 punti chiave sintetici (AEO / featured snippet). */
+  keyTakeaways?: string[];
   sections: BlogSection[];
   faqs?: BlogFAQ[];
 }
@@ -50,6 +54,14 @@ export const blogPosts: BlogPost[] = [
   // ─── ARTICOLO 1: AGENTI VOCALI AI EDILIZIA ───────────────────────────
   {
     slug: "agenti-vocali-ai-edilizia",
+    summary: "Un agente vocale AI per l'edilizia risponde a ogni chiamata in meno di 1 secondo, 24 ore su 24, qualifica il lead e fissa il sopralluogo in autonomia. Nel settore edile il 38% delle chiamate va perso e chi risponde per primo vince il preventivo nel 78% dei casi: le imprese che lo usano chiudono in media 3,8 contratti in più al mese.",
+    keyTakeaways: [
+      "Il 38% delle chiamate alle imprese edili italiane va perso, e chi risponde per primo si aggiudica il preventivo nel 78% dei casi.",
+      "L'agente vocale AI risponde in meno di 1 secondo, 24 ore su 24, contro un tempo medio di richiamata umano nel settore edile di 4,2 ore.",
+      "Su oltre 200 imprese edili l'agente ha portato +42% di lead qualificati e -65% di tempo speso al telefono.",
+      "Costruzioni Bianchi (Torino) è passata da 12 a 31 contratti al mese in 90 giorni, con un costo dell'agente di €297 al mese.",
+      "Il setup richiede 20-30 minuti e l'agente è operativo entro 24 ore, senza bisogno di competenze tecniche."
+    ],
     title: "Agenti Vocali AI per l'Edilizia: Come Non Perdere Mai Più una Chiamata (e Chiudere il 40% in Più)",
     description: "Scopri come gli agenti vocali AI stanno rivoluzionando le imprese edili italiane: zero chiamate perse, lead qualificati in automatico e +40% di contratti chiusi. Guida completa con casi reali e numeri verificati.",
     date: "2025-06-15",
@@ -145,6 +157,8 @@ export const blogPosts: BlogPost[] = [
       }
     ],
     faqs: [
+      { question: "L'agente vocale AI può gestire più chiamate nello stesso momento?", answer: "Sì. A differenza di una persona o di un centralino, l'agente gestisce chiamate simultanee illimitate senza mettere nessuno in attesa. Se arrivano 10 chiamate nello stesso momento — tipico del sabato mattina — rispondono tutte, ognuna con la stessa qualità di qualificazione. Nessun cliente sente il tono occupato." },
+      { question: "L'agente AI riesce a fissare da solo il sopralluogo nel mio calendario?", answer: "Sì. L'agente accede al calendario reale del team (Google Calendar o Outlook), controlla le disponibilità e propone al cliente gli slot liberi del tecnico giusto per zona e competenza, prenotando senza conflitti. Al titolare arriva su WhatsApp un report con nome, indirizzo, tipo lavoro e data del sopralluogo già fissato." },
       { question: "Quanto costa un agente vocale AI per un'impresa edile?", answer: "I piani partono da €149/mese per l'agente base con gestione chiamate 24/7 e qualificazione lead. Il ROI medio è 10x: per ogni euro investito, le imprese recuperano circa €10 in contratti che altrimenti sarebbero andati persi. Prova gratuita di 30 giorni senza carta di credito." },
       { question: "L'agente vocale AI sostituisce la segretaria?", answer: "No, la potenzia. L'agente gestisce il primo contatto, qualifica il lead e fissa appuntamenti. La segretaria si concentra su attività ad alto valore: gestione clienti acquisiti, coordinamento cantieri, amministrazione. Il risultato è più efficienza per tutti." },
       { question: "Funziona anche fuori orario e nei weekend?", answer: "Sì, l'agente vocale AI risponde 24 ore su 24, 7 giorni su 7, festivi inclusi. Le chiamate del sabato mattina e della sera — i momenti in cui i privati cercano imprese edili — vengono gestite automaticamente con la stessa qualità delle ore lavorative." },
@@ -156,6 +170,14 @@ export const blogPosts: BlogPost[] = [
   // ─── ARTICOLO 2: AI PER SERRAMENTISTI ─────────────────────────────────
   {
     slug: "intelligenza-artificiale-serramenti",
+    summary: "L'intelligenza artificiale per serramentisti risponde a ogni chiamata in meno di 1 secondo e raccoglie tipo di infisso, materiale, misure e budget in una conversazione di 3-4 minuti. Le aziende di infissi perdono in media il 35-45% delle richieste per problemi organizzativi: con l'agente AI, Serramenti Bresciani è passata da 12 a 47 preventivi a settimana in 90 giorni.",
+    keyTakeaways: [
+      "Le aziende di infissi perdono in media il 35-45% delle richieste per problemi organizzativi, non di competenza, e ogni richiesta vale tra €3.000 e €25.000.",
+      "L'agente vocale AI raccoglie tipo di infisso, materiale (PVC, alluminio, legno-alluminio), misure e budget in 3-4 minuti, padroneggiando la terminologia tecnica come la trasmittanza Uw.",
+      "Serramenti Bresciani (Brescia) è passata da 12 a 47 preventivi a settimana (+292%) e dal 22% al 34% di conversione in 90 giorni.",
+      "La riattivazione del database dei clienti dormienti recupera in media il 12-18% dei contatti fermi da anni.",
+      "Basta recuperare un solo lead al mese per un ROI del 750-6.150%, contro un costo del servizio di €200-400 al mese."
+    ],
     title: "Intelligenza Artificiale per Serramentisti: Come Triplicare i Preventivi Senza Assumere Nessuno",
     description: "Guida definitiva all'AI per serramentisti e aziende di infissi: dalla risposta automatica alla preventivazione intelligente. Case study reali con dati verificati.",
     date: "2025-06-10",
@@ -232,6 +254,8 @@ export const blogPosts: BlogPost[] = [
       }
     ],
     faqs: [
+      { question: "Quanto costa l'AI per un'azienda di serramenti e quando si ripaga?", answer: "Il costo è di €200-400 al mese. Considerando che una singola richiesta persa nel settore serramenti vale tra €3.000 e €25.000, basta recuperare un solo lead al mese per coprire l'intero anno di servizio. In pratica l'AI si ripaga già dal primo cliente intercettato fuori orario." },
+      { question: "L'AI fa il follow-up dei preventivi a cui il cliente non ha ancora risposto?", answer: "Sì. Dopo l'invio, l'agente richiama il cliente a 48 ore, manda un WhatsApp a 5 giorni e richiama a 10 giorni, gestendo le obiezioni standard come \"ci devo pensare\" o \"ho ricevuto un prezzo più basso\". È proprio il follow-up automatico che ha aiutato Serramenti Bresciani a salire dal 22% al 34% di conversione." },
       { question: "L'AI per serramentisti funziona con tutti i tipi di infissi?", answer: "Sì, il sistema gestisce preventivi per finestre, porte-finestre, portoncini, persiane, zanzariere, tende da sole e facciate continue. Supporta tutti i materiali: PVC, alluminio, legno, legno-alluminio e acciaio. Le configurazioni si personalizzano in base al tuo catalogo prodotti." },
       { question: "Posso integrare l'AI con il mio gestionale serramenti?", answer: "Assolutamente. Ci integriamo con i principali gestionali del settore: Windor, Orgadata, LogiKal, Sez Soft e software personalizzati. L'integrazione avviene via API e il nostro team tecnico la configura gratuitamente durante il setup." },
       { question: "Quanti preventivi può gestire l'AI al giorno?", answer: "Non c'è limite. L'agente vocale può gestire chiamate simultanee illimitate e generare preventivi in tempo reale. Un nostro cliente serramentista gestisce 85 richieste al giorno con un solo agente AI, contro le 12-15 che gestiva manualmente prima." },
@@ -242,6 +266,14 @@ export const blogPosts: BlogPost[] = [
   // ─── ARTICOLO 3: AUTOMAZIONE PREVENTIVI ───────────────────────────────
   {
     slug: "automazione-preventivi-edilizia",
+    summary: "L'automazione dei preventivi in edilizia con AI riduce il tempo per preventivo da 3-5 ore a 30-45 minuti e alza il tasso di chiusura dal 15-20% al 28-35%. Un titolare edile medio spende 8-12 ore a settimana in preventivazione: automatizzando libera fino a 232 ore al mese e recupera i lead persi grazie al follow-up automatico.",
+    keyTakeaways: [
+      "Un titolare edile medio spende 8-12 ore a settimana in preventivi, circa 480 ore l'anno e €24.000 di costo-opportunità.",
+      "L'AI abbassa il tempo per preventivo da 3-5 ore a 30-45 minuti e porta il tasso di conversione dal 15-20% al 28-35%.",
+      "Il solo follow-up automatico aumenta la conversione del 40-60%, perché il 60% dei preventivi viene accettato dopo il 2° o 3° contatto.",
+      "Impresa Verdi (Milano) è passata da 8 a 22 contratti al mese e ha ridotto le ore lavorate da 60 a 42 a settimana.",
+      "La precisione del preventivo automatico è del 92% rispetto al definitivo post-sopralluogo, usando preziari regionali e storico dei lavori."
+    ],
     title: "Automazione Preventivi Edilizia: Come Risparmiare 10 Ore a Settimana e Chiudere l'87% in Più di Contratti",
     description: "Guida pratica all'automazione della preventivazione nell'edilizia con AI: riduci i tempi del 70%, aumenta il tasso di chiusura dell'87% e libera 10 ore/settimana. Dati reali e strategie operative.",
     date: "2025-06-05",
@@ -324,6 +356,8 @@ export const blogPosts: BlogPost[] = [
       }
     ],
     faqs: [
+      { question: "Quanto costa automatizzare i preventivi e in quanto tempo rientro della spesa?", answer: "L'agente AI costa circa €300 al mese. Su un'impresa che gestisce 80 preventivi mensili, l'automazione libera 232 ore e intercetta lead che prima si perdevano, con un fatturato incrementale stimato di oltre €229.000 al mese. Il ritorno si vede già dal primo contratto recuperato fuori orario." },
+      { question: "Come fa l'AI a raccogliere i dati per compilare il preventivo?", answer: "L'agente vocale risponde alla chiamata e in circa 4 minuti raccoglie tipo di lavoro, dimensioni, materiali, budget, urgenza e indirizzo in una conversazione naturale. Quando il preventivo arriva al commerciale, ha già l'80% delle informazioni pronte, e i dati si esportano verso software di computo come PriMus, STR Vision e TeamSystem." },
       { question: "L'automazione preventivi funziona per lavori complessi come ristrutturazioni complete?", answer: "Sì. Il sistema gestisce preventivi per qualsiasi tipo di lavoro: dal semplice rifacimento bagno alla ristrutturazione integrale. Per lavori complessi, genera un preventivo preliminare basato sui parametri raccolti, che il tecnico può poi raffinare con dati di sopralluogo." },
       { question: "I preventivi automatici sono accurati?", answer: "L'accuratezza media è del 92% rispetto al preventivo definitivo post-sopralluogo. Il sistema usa preziari regionali aggiornati, listini fornitori e lo storico dei tuoi lavori precedenti per calibrare le stime. Più lo usi, più diventa preciso." },
       { question: "Posso personalizzare il template del preventivo con il mio logo e i miei termini?", answer: "Completamente. Il preventivo viene generato con il tuo brand: logo, colori, intestazione, condizioni di pagamento, tempi di validità, clausole contrattuali. Puoi creare template diversi per tipo di lavoro e modificarli in qualsiasi momento." },
@@ -334,6 +368,14 @@ export const blogPosts: BlogPost[] = [
   // ─── ARTICOLO 4: AI FOTOVOLTAICO ──────────────────────────────────────
   {
     slug: "ai-fotovoltaico-vendite",
+    summary: "L'AI per installatori fotovoltaici risponde alle chiamate in meno di 1 secondo H24, qualifica il lead in 3-4 minuti e gestisce il follow-up automatico, portando in media +40% di contratti chiusi in 90 giorni. Nel caso SolarTech Verona gli impianti a trimestre sono passati da 27 a 39 (+44%) e il costo di acquisizione cliente è sceso del 55%.",
+    keyTakeaways: [
+      "Nel fotovoltaico il 78% dei clienti firma con il primo installatore che li ricontatta con informazioni utili: vince la velocità, non il prezzo.",
+      "Rispondere entro 5 minuti aumenta la conversione fino a 21 volte, ma il tempo medio di risposta del settore è di 4,2 ore.",
+      "Il template Fotovoltaico di Edilizia.io, ottimizzato su oltre 150 installatori, si configura in 30-40 minuti e costa €200-400 al mese.",
+      "Il 62% dei contratti fotovoltaici si chiude dopo il 2° o 3° contatto: senza follow-up automatico quel 62% va perso.",
+      "SolarTech Verona ha portato la conversione sopralluogo-contratto dal 42% al 58% e il fatturato trimestrale da €391.500 a €592.800 (+€201.300)."
+    ],
     title: "AI per Installatori Fotovoltaico: +40% di Vendite in 90 Giorni (Metodo Testato su 150+ Aziende)",
     description: "Come l'intelligenza artificiale sta rivoluzionando le vendite nel fotovoltaico: qualificazione lead automatica, preventivi istantanei e +40% di contratti chiusi in 3 mesi. Strategia completa con caso studio reale.",
     date: "2025-05-28",
@@ -410,6 +452,8 @@ export const blogPosts: BlogPost[] = [
       }
     ],
     faqs: [
+      { question: "Quanto costa un agente AI per un installatore fotovoltaico?", answer: "L'abbonamento va da €200 a €400 al mese. Con un valore medio di contratto intorno ai €15.000, un solo impianto in più ripaga l'AI per circa 3 anni. C'è la garanzia 30 giorni soddisfatti o rimborsati, quindi il rischio iniziale è zero." },
+      { question: "L'AI risponde ai clienti fotovoltaico anche di sera e nei weekend?", answer: "Sì, l'agente vocale è attivo 24/7/365 e risponde in meno di 1 secondo a qualsiasi ora. È esattamente la fascia in cui il cliente tipo chiama dopo aver guardato un video sul fotovoltaico: senza copertura H24 quelle richieste finiscono al concorrente che risponde per primo." },
       { question: "L'AI per fotovoltaico funziona anche per pompe di calore e storage?", answer: "Sì, il sistema gestisce l'intero ecosistema energetico: fotovoltaico, accumulo, pompe di calore, wallbox e sistemi ibridi. L'agente vocale qualifica il lead per tutti i prodotti e genera preventivi combinati con calcolo del risparmio energetico totale." },
       { question: "Come calcola l'AI la dimensione dell'impianto fotovoltaico?", answer: "L'agente raccoglie consumo annuo in kWh, superficie disponibile (tetto o terreno), orientamento e inclinazione, zona climatica. Con questi dati genera una stima di dimensionamento accurata al 90%, che il tecnico valida al sopralluogo. Integrazione con Google Solar API disponibile." },
       { question: "Funziona con il Superbonus e le detrazioni fiscali?", answer: "Assolutamente. Il sistema è aggiornato con tutte le detrazioni vigenti: Superbonus, Ecobonus 50%/65%, Bonus Ristrutturazione. Genera preventivi con calcolo automatico della detrazione, rata mensile effettiva e payback period. Si aggiorna automaticamente alle normative." },
@@ -420,6 +464,14 @@ export const blogPosts: BlogPost[] = [
   // ─── ARTICOLO 5: RIDURRE COSTI OPERATIVI ──────────────────────────────
   {
     slug: "ridurre-costi-operativi-impresa-edile",
+    summary: "Ridurre i costi operativi di un'impresa edile con l'AI significa agire su 5 fronti — chiamate perse, sopralluoghi inutili, follow-up dei preventivi, rapportini di cantiere e assistenza post-vendita — per un risparmio medio di €45.000 l'anno a fronte di €300 al mese di costo. Edil Costruzioni di Bergamo ha alzato il margine netto dal 22% al 29% in 90 giorni.",
+    keyTakeaways: [
+      "Nell'impresa edile il 15-25% del fatturato se ne va in costi invisibili: chiamate perse, sopralluoghi inutili e preventivi mai seguiti.",
+      "Eliminare le chiamate perse vale €18.000-€25.000 l'anno: una segretaria copre il 35% delle ore e perde il 35% delle chiamate, l'AI copre il 100% e ne perde lo 0%.",
+      "Il 60% delle vendite avviene dopo il 2° o 3° contatto, ma l'80% dei preventivi non riceve mai un follow-up strutturato.",
+      "Sommando i 5 interventi il risparmio netto conservativo è €42.400-€68.400 l'anno, con un ROI tra il 1.178% e il 1.900%.",
+      "Edil Costruzioni (Bergamo, 22 dipendenti) ha portato i costi operativi dal 78% al 71% del fatturato e la conversione dei preventivi dal 17% al 28% in 90 giorni."
+    ],
     title: "5 Modi Concreti per Tagliare i Costi Operativi della Tua Impresa Edile del 30% con l'AI",
     description: "Guida pratica ai 5 modi per ridurre i costi operativi della tua impresa edile usando l'AI: dal taglio delle chiamate perse al follow-up automatizzato. Risparmio medio di €45.000/anno con casi reali.",
     date: "2025-05-20",
@@ -521,6 +573,8 @@ export const blogPosts: BlogPost[] = [
       }
     ],
     faqs: [
+      { question: "Quanto perde ogni giorno un'impresa edile che non usa l'AI?", answer: "Circa €180 al giorno. Il risparmio medio annuo stimato in modo conservativo è €45.000, che diviso 250 giorni lavorativi fa €180 al giorno di inefficienze operative. Il costo dell'agente AI è di circa €10 al giorno: il divario si ripaga da solo." },
+      { question: "L'agente AI può sostituire la segretaria di un'impresa edile?", answer: "Non la sostituisce, la libera dalle attività a zero valore. Una segretaria costa €29.000-€40.500 l'anno e copre il 35% delle ore; l'AI gestisce chiamate, qualifica lead e follow-up 24/7 a €300 al mese. Come nel caso Edil Costruzioni, una risorsa può essere riassegnata alla gestione cantieri con €28.000 di risparmio annuo." },
       { question: "Quali sono i costi operativi che l'AI taglia per primi?", answer: "I primi tre costi che si riducono sono: gestione chiamate (fino a -75%), tempo di preventivazione (-70%) e follow-up commerciale (-80%). Questi tre interventi da soli generano un risparmio medio di €35.000-€50.000 annui per un'impresa con 10-30 dipendenti." },
       { question: "Quanto tempo serve per vedere il ROI dell'investimento in AI?", answer: "Il breakeven si raggiunge mediamente in 45-60 giorni. Le imprese che implementano l'agente vocale vedono i primi risultati dalla prima settimana: chiamate gestite, lead qualificati, appuntamenti fissati. Il ROI completo a 12 mesi è in media 8-12x l'investimento." },
       { question: "L'AI funziona anche per le piccole imprese edili?", answer: "Sì, anzi è proprio dove genera il maggior impatto relativo. Un'impresa con 3-5 dipendenti che perde 5 chiamate al giorno recupera €80.000-€120.000 di fatturato potenziale. Il costo dell'AI (da €149/mese) si ripaga con un solo contratto acquisito in più." },
@@ -531,6 +585,14 @@ export const blogPosts: BlogPost[] = [
   // ─── ARTICOLO 6: CALL CENTER AI RISTRUTTURAZIONI ──────────────────────
   {
     slug: "call-center-ai-ristrutturazioni",
+    summary: "Un call center AI per imprese di ristrutturazione risponde a ogni chiamata in 1 secondo, 24/7, qualifica il lead e fissa il sopralluogo in circa 4 minuti, recuperando il 42% di chiamate che in media il settore perde. Ristrutturazioni Roma Sud è passata da 8 a 19 sopralluoghi a settimana e da 6 a 14 contratti al mese, a un costo di €200-400 mensili contro i €3.000 di un call center tradizionale.",
+    keyTakeaways: [
+      "Le imprese di ristrutturazione perdono in media il 42% delle chiamate, e il 67% di chi non trova risposta chiama un concorrente entro 10 minuti.",
+      "Il 78% dei contratti va al primo che risponde con informazioni utili, su un valore medio di ristrutturazione di €25.000-€80.000.",
+      "Il 28% delle richieste arriva la sera e nel weekend: senza copertura H24 si perde quasi un terzo del potenziale di mercato.",
+      "Il call center AI costa €200-400 al mese contro i €3.000 di un call center tradizionale, con chiamate simultanee illimitate ed errori di trascrizione sotto il 2%.",
+      "Ristrutturazioni Roma Sud ha aumentato sopralluoghi e contratti del 133% e ridotto le ore al telefono del titolare da 4 al giorno a 30 minuti."
+    ],
     title: "Call Center AI per Ristrutturazioni: Come Non Perdere Mai Più una Chiamata e Raddoppiare i Sopralluoghi",
     description: "Guida completa al call center AI per imprese di ristrutturazione: gestione chiamate 24/7, qualificazione lead automatica, booking sopralluoghi e +120% di richieste gestite. Case study e confronto costi.",
     date: "2025-05-12",
@@ -618,6 +680,8 @@ export const blogPosts: BlogPost[] = [
       }
     ],
     faqs: [
+      { question: "Quanto costa un call center AI per un'impresa di ristrutturazioni?", answer: "Tra €200 e €400 al mese, circa €10 al giorno: l'85-90% in meno di un call center esterno tradizionale (€2.000-€4.000/mese) o di una segretaria dedicata (€2.200-€3.000/mese). Con un valore medio di contratto tra €25.000 e €80.000, basta un solo lavoro recuperato per ripagarlo per anni." },
+      { question: "I clienti si accorgono di parlare con un'AI al telefono?", answer: "Nella maggior parte dei casi no: il 91% dei chiamanti non si accorge di parlare con un'AI, e di quell'8% che se ne accorge l'88% giudica l'esperienza buona o eccellente. La comprensione resta superiore al 95% anche con accenti regionali, dialetti e interlocutori anziani." },
       { question: "Un call center AI può gestire anche le emergenze dei clienti?", answer: "Sì. L'agente vocale riconosce le situazioni urgenti (infiltrazioni, rotture, danni strutturali) e attiva il protocollo emergenze: notifica immediata al tecnico reperibile, SMS al cliente con conferma presa in carico, escalation automatica se non c'è risposta entro 15 minuti." },
       { question: "Quante chiamate contemporanee gestisce il call center AI?", answer: "Non c'è limite. A differenza di un call center umano con 2-3 linee, l'agente AI gestisce chiamate simultanee illimitate. Anche nei momenti di picco (lunedì mattina, dopo una campagna pubblicitaria), nessun cliente trova la linea occupata." },
       { question: "Il call center AI può fissare appuntamenti direttamente nel mio calendario?", answer: "Sì, si integra con Google Calendar, Outlook, Calendly e i principali sistemi di prenotazione. L'agente verifica la disponibilità in tempo reale, propone slot al cliente e conferma l'appuntamento con promemoria automatico via SMS 24 ore prima." },
@@ -628,6 +692,14 @@ export const blogPosts: BlogPost[] = [
   // ─── ARTICOLO 7: BONUS EDILIZI AI ──────────────────────────────────
   {
     slug: "bonus-edilizi-ai-gestione",
+    summary: "La gestione AI dei bonus edilizi automatizza raccolta documenti, pratiche ENEA, asseverazioni e scadenzario fiscale, portando una pratica completa da 38 ore a circa 8 e riducendo gli errori documentali del 94%. Costa da 149 euro al mese contro i 47.000 euro medi che un'impresa disorganizzata perde ogni anno tra pratiche rifiutate e scadenze mancate.",
+    keyTakeaways: [
+      "Le imprese edili che gestiscono i bonus in modo disorganizzato perdono in media 47.000 euro all'anno tra pratiche rifiutate, scadenze mancate ed errori documentali.",
+      "Con la gestione AI una pratica bonus completa passa da 38 ore a 8 ore di lavoro, con errori documentali ridotti del 94% e zero scadenze mancate.",
+      "Chi usa ancora Excel per i bonus ha un tasso di errore documentale del 23%, contro l'1,4% dei sistemi AI dedicati.",
+      "EdilPiemonte Srl di Torino è passata da 40 a 127 pratiche gestite (+197% di fatturato bonus) e da 3 pratiche rifiutate a zero dopo l'adozione dell'AI.",
+      "Il sistema monitora ogni scadenza critica (90 giorni ENEA, cessione credito, validità APE) con alert automatici a 30, 15 e 7 giorni prima."
+    ],
     title: "Bonus Edilizi e AI: Come Gestire Pratiche, Documenti e Scadenze Senza Impazzire",
     description: "La gestione dei bonus edilizi sta paralizzando la tua impresa? Scopri come l'intelligenza artificiale automatizza pratiche ENEA, asseverazioni e scadenze fiscali. Guida completa con template, checklist e casi reali di imprese italiane.",
     date: "2025-07-10",
@@ -716,6 +788,8 @@ export const blogPosts: BlogPost[] = [
       }
     ],
     faqs: [
+      { question: "Quanto costa un software AI per gestire i bonus edilizi?", answer: "Un sistema AI per la gestione dei bonus edilizi costa tra 149 e 300 euro al mese, con i primi 30 giorni gratuiti. È una cifra ridicola se paragonata al costo di una singola pratica rifiutata (3.000-10.000 euro) o di una scadenza ENEA mancata, che ti fa perdere l'intero bonus. Il setup richiede mezza giornata con assistenza dedicata." },
+      { question: "Serve saper usare il computer per gestire i bonus con l'AI?", answer: "No. Se sai usare WhatsApp, sai usare il sistema. Il cliente carica i documenti dal telefono, l'AI li classifica e verifica in automatico, e le competenze IT richieste sono zero. Il setup iniziale dura circa 2 ore con assistenza guidata, dopodiché la gestione è più semplice di un foglio Excel." },
       { question: "L'AI può gestire le pratiche per il Superbonus 110%?", answer: "Sì. Il sistema gestisce l'intero flusso del Superbonus: dalla verifica requisiti alla compilazione automatica delle pratiche ENEA, dalla generazione delle asseverazioni al monitoraggio delle scadenze. Riduce gli errori del 94% e i tempi di preparazione del 70%." },
       { question: "Come funziona il monitoraggio automatico delle scadenze fiscali?", answer: "Il sistema traccia ogni scadenza per ogni pratica: SAL, asseverazioni, comunicazioni ENEA, cessioni del credito, opzioni di sconto in fattura. Invia alert automatici 30, 15 e 7 giorni prima della scadenza a te e al commercialista. Zero pratiche scadute." },
       { question: "L'AI si aggiorna automaticamente con le nuove normative?", answer: "Sì, il database normativo viene aggiornato settimanalmente dal nostro team legale-fiscale. Ogni modifica a decreti, circolari AdE, FAQ ENEA viene recepita e applicata automaticamente. Ricevi notifiche sulle novità rilevanti per le tue pratiche in corso." },
@@ -726,6 +800,14 @@ export const blogPosts: BlogPost[] = [
   // ─── ARTICOLO 8: GESTIONE CANTIERE DIGITALE ─────────────────────────
   {
     slug: "gestione-cantiere-digitale",
+    summary: "La gestione cantiere digitale con AI centralizza dashboard in tempo reale, cronoprogramma, controllo materiali e SAL automatici, riducendo i ritardi in media del 67%, gli sprechi di materiale del 45% e liberando 22 ore a settimana. Contro un ritardo medio di 47 giorni che costa 1.200 euro al giorno per cantiere, il sistema parte da 200 euro al mese con 30 giorni di prova gratuita.",
+    keyTakeaways: [
+      "Il 78% dei cantieri italiani finisce in ritardo, con una media di 47 giorni che a 1.200 euro al giorno equivale a 56.400 euro persi per cantiere.",
+      "La gestione cantiere digitale AI riduce i ritardi del 67%, gli sprechi di materiale del 45% e fa risparmiare 22 ore a settimana.",
+      "CostruiSud Srl di Napoli è passata da 12 a 18 cantieri gestiti senza nuovo personale, tagliando i ritardi dell'82% con una spesa di 380 euro al mese.",
+      "Le cause reali dei ritardi sono comunicazione frammentata (34%), errori di pianificazione (28%) e gestione materiali inefficiente (22%), non il maltempo.",
+      "Su 156 imprese analizzate il ROI medio è 11x nel primo anno e il 94% rinnova dopo la prova gratuita."
+    ],
     title: "Gestione Cantiere Digitale: Come l'AI Elimina Ritardi, Errori e Sprechi dal Tuo Cantiere",
     description: "Il tuo cantiere è fuori controllo? Scopri come la gestione cantiere digitale con intelligenza artificiale riduce i ritardi del 67%, gli sprechi del 45% e ti fa risparmiare 22 ore a settimana. Casi studio, confronti e guida pratica.",
     date: "2025-07-15",
@@ -809,6 +891,8 @@ export const blogPosts: BlogPost[] = [
       }
     ],
     faqs: [
+      { question: "Quanto costa un software di gestione cantiere digitale con AI?", answer: "Per un'impresa con 3-5 cantieri attivi il costo è tra 200 e 400 euro al mese, con i primi 30 giorni gratuiti. Basta un singolo giorno di ritardo evitato, che vale in media 1.200 euro, per ripagare l'intero mese. Il setup richiede circa 2 ore e dal primo giorno risparmi 4 ore al giorno di gestione." },
+      { question: "I miei capocantiere riescono a usarlo se non sono pratici di tecnologia?", answer: "Sì. Se sanno mandare una foto su WhatsApp, sanno usare il sistema: l'AI geolocalizza e cataloga le foto, trascrive i vocali nel diario cantiere e aggiorna l'inventario con un tap. L'età media dei capocantiere che lo usano è 52 anni, quindi non servono nativi digitali ma uno strumento pensato per chi lavora in cantiere." },
       { question: "Il software di gestione cantiere funziona offline?", answer: "Sì. L'app mobile funziona in modalità offline per le operazioni in cantiere dove la connessione è limitata. I dati si sincronizzano automaticamente quando torni online. Foto, checklist e rapportini vengono salvati localmente e caricati appena disponibile la rete." },
       { question: "Posso collegare il sistema alla mia contabilità di cantiere?", answer: "Sì, ci integriamo con i principali software di contabilità edile: Primus, STR, TeamSystem Construction, Namirial. L'integrazione sincronizza voci di computo, SAL, contabilità lavori e varianti in tempo reale." },
       { question: "Quanti cantieri posso gestire contemporaneamente?", answer: "Non c'è limite. Il sistema scala con la tua azienda: dai 2-3 cantieri di una piccola impresa ai 50+ cantieri di un general contractor. Ogni cantiere ha la sua dashboard, i suoi alert e i suoi KPI indipendenti." },
@@ -819,6 +903,14 @@ export const blogPosts: BlogPost[] = [
   // ─── ARTICOLO 9: PREVENTIVI ONLINE EDILIZIA ────────────────────────
   {
     slug: "preventivi-online-edilizia",
+    summary: "Il preventivo online automatico con AI raccoglie i dati via agente vocale, li incrocia con il tuo listino e invia un documento professionale su WhatsApp entro 12 minuti, portando il tempo di creazione da 3 ore a 12 minuti e il tasso di chiusura dal 18% al 38% (+52%). Poiché il 67% dei clienti accetta il preventivo ricevuto per primo, la velocità conta più del prezzo.",
+    keyTakeaways: [
+      "Il tasso medio di chiusura dei preventivi edili in Italia è del 18%: 82 preventivi su 100 finiscono nel cestino, bruciando circa 246 ore di lavoro l'anno.",
+      "Il preventivo AI riduce il tempo di creazione da 3 ore a 12 minuti e alza il tasso di chiusura dal 18% al 38%, un incremento del 52%.",
+      "Il 41% dei preventivi viene rifiutato per tempi di risposta troppo lunghi e solo il 13% per prezzo fuori mercato: non serve costare meno, serve essere più veloci.",
+      "InfissiBergamo è passata da 8 a 22 preventivi a settimana e da un tasso di chiusura del 22% al 47% dopo l'adozione del sistema AI.",
+      "Il 48% dei preventivi si chiude dopo il secondo o terzo contatto, ma l'80% delle imprese non fa mai follow-up: la sequenza automatica AI recupera 3 lead su 10."
+    ],
     title: "Preventivi Online Edilizia: Come Creare Preventivi Automatici che Chiudono il 52% in Più",
     description: "Stanco di passare ore sui preventivi per poi sentirti dire 'ci penso'? Scopri come il sistema di preventivi online automatici con AI aumenta il tasso di chiusura del 52% e riduce i tempi di creazione da 3 ore a 12 minuti. Guida completa.",
     date: "2025-07-20",
@@ -902,6 +994,8 @@ export const blogPosts: BlogPost[] = [
       }
     ],
     faqs: [
+      { question: "Quanto costa un sistema di preventivi online automatici per l'edilizia?", answer: "Il sistema costa tra 149 e 249 euro al mese, con 30 giorni di prova gratuita per testarlo sui tuoi preventivi reali. Considerando che le 300 ore l'anno spese in preventivi valgono circa 30.000 euro di costo lavoro e che il ROI medio dichiarato è tra 60x e 120x, l'investimento si ripaga già con i primi lavori chiusi in più." },
+      { question: "Come funziona il preventivo automatico quando un cliente mi chiama?", answer: "Quando il cliente chiama, l'agente vocale AI risponde, chiede tipo di intervento, misure approssimative e CAP, poi incrocia i dati con il tuo listino personalizzato. Entro 12 minuti il cliente riceve su WhatsApp un preventivo preliminare con range di prezzo, dettaglio lavorazioni, tempistiche, bonus applicabili e portfolio di lavori simili, seguito da un follow-up automatico se non risponde entro 48 ore." },
       { question: "I preventivi online funzionano anche per lavori complessi?", answer: "Sì. Il sistema genera preventivi preliminari anche per ristrutturazioni complete, ampliamenti e lavori strutturali. Per lavori sopra €50.000, il preventivo online serve come stima iniziale che qualifica il lead; il preventivo definitivo viene perfezionato dopo il sopralluogo tecnico." },
       { question: "Il cliente può personalizzare il preventivo online?", answer: "Sì. Il configuratore permette al cliente di selezionare finiture, materiali, opzioni aggiuntive e vedere in tempo reale come cambia il prezzo. Questo aumenta l'engagement del 340% rispetto a un preventivo statico e riduce le richieste di modifica successive del 60%." },
       { question: "Come si integra il preventivo online con il mio sito web?", answer: "Con un semplice widget da incorporare nel tuo sito (copia-incolla di un codice). Non serve modificare il sito. Il widget si adatta automaticamente al design, funziona su mobile e desktop, e invia i dati direttamente al tuo CRM o email." },
@@ -912,6 +1006,14 @@ export const blogPosts: BlogPost[] = [
   // ─── ARTICOLO 10: CRM EDILIZIA AI ──────────────────────────────────
   {
     slug: "crm-edilizia-intelligenza-artificiale",
+    summary: "Un CRM per l'edilizia potenziato dall'AI cattura automaticamente ogni contatto (chiamate, WhatsApp, email, form) e gestisce follow-up e pipeline senza intervento manuale, così nessun cliente cade nel vuoto. Un'impresa edile media perde il 35% dei potenziali clienti per mancato follow-up: recuperarli vale in media +43% di fatturato, con l'impresa RistrutturaRoma passata da un tasso di chiusura del 15% al 34% in 6 mesi.",
+    keyTakeaways: [
+      "Un'impresa edile media perde il 35% dei potenziali clienti solo perché non fa follow-up: con un fatturato di €800.000 sono €280.000 persi ogni anno.",
+      "Solo il 12% delle imprese edili usa un CRM, mentre chi adotta un CRM AI registra in media +43% di fatturato e -68% di tempo speso nella gestione clienti.",
+      "Il CRM AI cattura il 100% dei contatti in automatico e automatizza il 100% dei follow-up, eliminando il foglio Excel che non avvisa, non scala e non è accessibile dal cantiere.",
+      "Caso RistrutturaRoma: tasso di chiusura da 15% a 34% (+127%), +€340.000 in 6 mesi e referral +120% grazie alla richiesta recensione automatica dopo ogni lavoro.",
+      "Costa €99-€199/mese: basta recuperare un solo cliente ogni 3 mesi per un ROI del 1.000%, e le imprese con CRM AI hanno un tasso di sopravvivenza a 5 anni dell'89% contro il 54% di settore."
+    ],
     title: "CRM per l'Edilizia con AI: Come Gestire 300 Clienti Senza Perderne Nemmeno Uno",
     description: "Il tuo CRM è un foglio Excel con 47 colonne che nessuno aggiorna? Scopri come un CRM edile potenziato dall'AI gestisce automaticamente contatti, follow-up e pipeline di vendita. Da zero clienti persi a +43% di fatturato. Guida con casi reali.",
     date: "2025-08-01",
@@ -985,6 +1087,8 @@ export const blogPosts: BlogPost[] = [
       }
     ],
     faqs: [
+      { question: "Quanto costa un CRM con AI per un'impresa edile?", answer: "Un CRM edile con intelligenza artificiale costa tra €99 e €199 al mese. Considerando che un singolo cliente recuperato dal follow-up automatico vale €5.000-€50.000, basta recuperarne uno ogni 3 mesi per ottenere un ROI del 1.000%. Per i primi 30 iscritti è inclusa la migrazione assistita gratuita dell'archivio clienti (valore €300)." },
+      { question: "Serve un CRM se lavoro solo con il passaparola?", answer: "Sì, soprattutto se lavori con il passaparola. È il canale più prezioso ma anche il più fragile: se non richiami un referral entro 48 ore perdi il contatto e la fiducia di chi ti ha raccomandato. Il CRM AI traccia ogni segnalazione e invia un ringraziamento automatico a fine lavoro, generando fino a +120% di referral." },
       { question: "Un CRM per edilizia è diverso da un CRM generico?", answer: "Sì, profondamente. Un CRM edile gestisce cantieri, non solo contatti. Traccia sopralluoghi, preventivi, SAL, garanzie post-lavoro. Ha campi specifici per metrature, materiali, permessi edilizi. Un CRM generico ti obbliga a personalizzazioni infinite che non funzionano mai bene." },
       { question: "Posso importare i contatti dal mio foglio Excel?", answer: "Sì, l'importazione è guidata e automatica. Carichi il file Excel o CSV, il sistema mappa le colonne ai campi CRM, rileva duplicati e normalizza numeri di telefono. Per i primi 30 iscritti, offriamo migrazione assistita gratuita con un nostro operatore." },
       { question: "Il CRM funziona anche da smartphone in cantiere?", answer: "Sì, l'app mobile è progettata per l'uso in cantiere: interfaccia semplificata, funzionamento offline, foto con geotag automatico, note vocali. Puoi aggiornare lo stato di un lead, aggiungere note e consultare lo storico clienti direttamente dal telefono." },
@@ -995,6 +1099,14 @@ export const blogPosts: BlogPost[] = [
   // ─── ARTICOLO 11: MARKETING DIGITALE IMPRESE EDILI ─────────────────
   {
     slug: "marketing-digitale-imprese-edili",
+    summary: "Il marketing digitale per imprese edili si regge su tre pilastri: Google Ads per chi cerca ora (ROI 8x-15x), social per costruire fiducia (lead a €8-€25) e agente vocale AI per convertire i lead, che porta il tasso di conversione dal 12% al 34%. Un budget di €600-€2.350/mese genera 15-50 lead qualificati mensili, riempiendo i vuoti da €210.000 l'anno che colpiscono il 62% delle imprese dipendenti dal passaparola.",
+    keyTakeaways: [
+      "Il 74% delle imprese edili italiane dipende dal passaparola per oltre l'80% del fatturato e il 62% subisce vuoti di 2-4 mesi l'anno, pari a circa €210.000 di mancato fatturato.",
+      "Google Ads intercetta chi ha già intenzione d'acquisto con un ROI di 8x-15x, mentre il costo per lead su Facebook per l'edilizia è di soli €8-€25 con campagne ben fatte.",
+      "L'agente vocale AI risponde in 0,8 secondi anche fuori orario e porta il tasso di conversione dei lead dal 12% al 34%, il pezzo che manca al 90% delle imprese.",
+      "Budget realistico: €600-€950/mese per una micro-impresa e €1.350-€2.350/mese per una piccola impresa, investendo il 3-5% del fatturato target in marketing.",
+      "Caso SolarPuglia (fotovoltaico): da 0 a 47 lead al mese con ROI 89x, 14 installazioni mensili e 2 tecnici assunti per gestire il carico di lavoro."
+    ],
     title: "Marketing Digitale per Imprese Edili: Come Generare 40+ Lead al Mese Senza Porta a Porta",
     description: "Il passaparola non basta più? Scopri la strategia di marketing digitale che genera 40+ lead qualificati al mese per imprese edili. Google, social, AI: guida pratica con budget, risultati reali e ROI misurato per serramentisti, ristrutturazioni e fotovoltaico.",
     date: "2025-08-10",
@@ -1073,6 +1185,8 @@ export const blogPosts: BlogPost[] = [
       }
     ],
     faqs: [
+      { question: "Quanti lead al mese posso generare con il marketing digitale nell'edilizia?", answer: "Con un budget di €600-€950 al mese una micro-impresa genera 15-25 lead qualificati, mentre una piccola impresa con €1.350-€2.350 al mese arriva a 30-50 lead. Il sistema completo Google Ads + social + agente vocale AI produce in media 40+ lead mensili, come nel caso SolarPuglia passata da 0 a 47 lead al mese." },
+      { question: "Come funziona il marketing digitale se non ci capisco niente di pubblicità?", answer: "Non devi diventare esperto di marketing: fornisci il materiale che hai già (foto prima/dopo, testimonianze, listino), fai 2 ore di setup guidato in cui campagne, landing page e agente vocale vengono configurati per te, e poi ti concentri su sopralluoghi e chiusure. Il sistema automatizza l'80% del processo e il primo mese è gratis: se non generi almeno 15 lead qualificati non paghi nulla." },
       { question: "Quanto devo investire in marketing digitale per un'impresa edile?", answer: "Per iniziare, €500-€1.500/mese in Google Ads sono sufficienti per generare 20-40 lead qualificati. Con l'agente vocale AI che risponde a tutte le chiamate, il tasso di conversione raddoppia rispetto alla gestione manuale. Il costo per lead acquisito scende a €15-€35." },
       { question: "Google Ads o social media: cosa funziona meglio per l'edilizia?", answer: "Google Ads per lead caldi (chi cerca attivamente 'ristrutturazione casa'), social media per brand awareness e remarketing. La combinazione ideale è 70% Google Ads + 30% social. L'agente vocale AI gestisce le chiamate da entrambi i canali senza costi aggiuntivi." },
       { question: "Come misuro il ROI del marketing digitale?", answer: "La dashboard traccia ogni euro: costo per click, costo per lead, costo per sopralluogo, costo per contratto chiuso. Sai esattamente quanto ti costa acquisire un cliente e quanto rende ogni canale. Il ROI medio dei nostri clienti edili è 5-8x sull'investimento marketing." },
@@ -1083,6 +1197,14 @@ export const blogPosts: BlogPost[] = [
   // ─── ARTICOLO 12: SOPRALLUOGHI VIRTUALI AI ─────────────────────────
   {
     slug: "sopralluoghi-virtuali-ai",
+    summary: "Il sopralluogo virtuale con AI pre-qualifica i lavori da remoto: il cliente invia foto e video via WhatsApp e in meno di 2 minuti l'AI stima dimensioni, stato, complessità e costi, così decidi in 7 minuti se muoverti. Un imprenditore edile fa 12 sopralluoghi a settimana ma solo il 33% diventa lavoro, sprecando 16 ore e circa €38.000 l'anno: filtrando i perditempo si evita il 40-50% delle visite fisiche.",
+    keyTakeaways: [
+      "Un imprenditore edile fa in media 12 sopralluoghi a settimana ma solo il 33% diventa lavoro, con 16 ore settimanali perse in visite inutili pari a circa €38.000 l'anno.",
+      "L'analisi fotografica AI produce in meno di 2 minuti dimensioni con precisione 85-90% e stime costi preliminari accurate all'80-85%, dando il 70% delle informazioni prima di partire.",
+      "La pre-qualifica da remoto permette di evitare il 40-50% dei sopralluoghi fisici, concentrando il tempo solo sui lead con budget adeguato e lavoro fattibile.",
+      "Caso EtnaBuild (Catania): sopralluoghi fisici -47%, tasso di chiusura raddoppiato dal 37% al 76%, ore in auto -60% e fatturato mensile da €95.000 a €138.000 (+45%).",
+      "L'82% dei clienti accetta volentieri di inviare foto perché evita di prendere ferie per aspettare l'impresa, e l'agente vocale AI guida anche gli anziani con successo nel 94% dei casi."
+    ],
     title: "Sopralluoghi Virtuali con AI: Come Fare 3x Sopralluoghi Senza Muoverti dall'Ufficio",
     description: "Passi 4 ore al giorno in macchina per sopralluoghi che si rivelano una perdita di tempo? Scopri come i sopralluoghi virtuali con AI ti permettono di pre-qualificare i lavori da remoto, triplicare gli appuntamenti utili e risparmiare 15 ore a settimana.",
     date: "2025-08-15",
@@ -1166,6 +1288,8 @@ export const blogPosts: BlogPost[] = [
       }
     ],
     faqs: [
+      { question: "Quanto tempo si risparmia con i sopralluoghi virtuali AI?", answer: "Si passa da 2+ ore per sopralluogo a soli 7 minuti del tuo tempo per pre-qualificare un lead. Evitando il 40-50% delle visite fisiche recuperi in media 12 ore a settimana. Nel caso EtnaBuild le ore in auto al mese sono scese da 120 a 48 (-60%), con €480 al mese di carburante risparmiato." },
+      { question: "Come convinco il cliente a mandare le foto per il sopralluogo virtuale?", answer: "Basta spiegare il beneficio: un preventivo preliminare in poche ore senza prendere un giorno di ferie per aspettare l'impresa. L'82% dei clienti accetta volentieri, perché mandare 5 foto dal telefono è più comodo di una visita. Per chi non è pratico, l'agente vocale AI lo guida passo passo e funziona nel 94% dei casi, anche con clienti anziani." },
       { question: "Come funziona un sopralluogo virtuale con AI?", answer: "Il cliente invia foto e video dell'ambiente tramite WhatsApp o l'app dedicata. L'AI analizza le immagini, rileva dimensioni, stato delle superfici, materiali presenti e criticità. In 7 minuti hai un report completo con misure, diagnosi e stima costi, senza muoverti dall'ufficio." },
       { question: "Il sopralluogo virtuale è accurato quanto quello fisico?", answer: "Per la fase di qualificazione, l'accuratezza è del 90-95%. L'AI rileva dimensioni con margine di errore del 3-5%, identifica materiali e criticità strutturali visibili. Per il preventivo definitivo, il sopralluogo fisico resta necessario, ma lo fai solo sui lead già qualificati." },
       { question: "Quanti sopralluoghi fisici posso evitare?", answer: "In media il 60-70% dei sopralluoghi. L'analisi AI ti permette di capire subito se il lavoro è nel tuo range, se il cliente ha budget adeguato e se ci sono criticità bloccanti. Vai fisicamente solo dove vale davvero la pena. Risparmio medio: 12 ore a settimana." },

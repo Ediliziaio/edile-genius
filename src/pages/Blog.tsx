@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Search, X } from "lucide-react";
 import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
@@ -10,16 +10,11 @@ const Blog = () => {
   const [activeCategory, setActiveCategory] = useState<string>("Tutti");
   const [searchQuery, setSearchQuery] = useState("");
 
-  usePageSEO({
+  const seoTags = usePageSEO({
     title: "Blog — AI e Innovazione nell'Edilizia | Edilizia.io",
     description: "Articoli, guide e casi studio sull'intelligenza artificiale applicata al settore edile italiano. Scopri come l'AI trasforma serramenti, fotovoltaico e ristrutturazioni.",
     canonical: "/blog",
-  });
-
-  // CollectionPage JSON-LD
-  useEffect(() => {
-    const jsonLd = {
-      "@context": "https://schema.org",
+    jsonLd: {
       "@type": "CollectionPage",
       name: "Blog — AI e Innovazione nell'Edilizia",
       description: "Articoli, guide e casi studio sull'intelligenza artificiale applicata al settore edile italiano.",
@@ -34,17 +29,8 @@ const Blog = () => {
           name: p.title,
         })),
       },
-    };
-    let script = document.querySelector('script[data-jsonld="collection"]') as HTMLScriptElement | null;
-    if (!script) {
-      script = document.createElement("script");
-      script.type = "application/ld+json";
-      script.setAttribute("data-jsonld", "collection");
-      document.head.appendChild(script);
-    }
-    script.textContent = JSON.stringify(jsonLd);
-    return () => { script?.remove(); };
-  }, []);
+    },
+  });
 
   const filtered = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -67,6 +53,7 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {seoTags}
       <Navbar />
 
       {/* Hero */}
@@ -75,7 +62,7 @@ const Blog = () => {
           <span className="inline-block font-mono text-xs uppercase tracking-wider bg-primary/10 text-primary px-3 py-1 rounded-full font-bold">
             Blog
           </span>
-          <h1 className="text-3xl sm:text-3xl sm:text-4xl md:text-5xl font-display font-extrabold text-foreground leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold text-foreground leading-tight">
             AI e Innovazione<br className="hidden md:block" /> nell'Edilizia
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">

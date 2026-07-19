@@ -10,12 +10,16 @@ interface ImpersonationContextType {
 
 const ImpersonationContext = createContext<ImpersonationContextType | undefined>(undefined);
 
+// Durante il prerender SSG (Node) `sessionStorage` non esiste.
+const getStored = (key: string): string | null =>
+  typeof sessionStorage !== "undefined" ? sessionStorage.getItem(key) : null;
+
 export function ImpersonationProvider({ children }: { children: ReactNode }) {
   const [impersonatingCompanyId, setCompanyId] = useState<string | null>(
-    () => sessionStorage.getItem("impersonating_company_id")
+    () => getStored("impersonating_company_id")
   );
   const [impersonatingCompanyName, setCompanyName] = useState<string | null>(
-    () => sessionStorage.getItem("impersonating_company_name")
+    () => getStored("impersonating_company_name")
   );
 
   const startImpersonation = (companyId: string, companyName: string) => {

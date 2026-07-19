@@ -37,7 +37,7 @@ const CategoryCard = ({ cat, index }: { cat: PerChiECategory; index: number }) =
 };
 
 const PerChiE = () => {
-  usePageSEO({
+  const seoTags = usePageSEO({
     title: "Per Chi È — Soluzioni AI per Ogni Azienda Edile | Edilizia.io",
     description: "Soluzioni AI su misura per artigiani, PMI, grandi imprese, serramentisti, fotovoltaico, ristrutturazioni e tutti i settori dell'edilizia italiana.",
     canonical: "/per-chi-e",
@@ -45,6 +45,7 @@ const PerChiE = () => {
 
   return (
     <main className="min-h-screen bg-background">
+      {seoTags}
       <Navbar />
 
       {/* Hero */}
@@ -52,7 +53,7 @@ const PerChiE = () => {
         <div className="max-w-5xl mx-auto px-6 text-center">
           <AnimatedBadge>PER CHI È</AnimatedBadge>
           <motion.h1
-            className="font-display text-3xl sm:text-3xl sm:text-4xl md:text-6xl font-extrabold text-foreground leading-tight mt-6 mb-6"
+            className="font-display text-3xl sm:text-4xl md:text-6xl font-extrabold text-foreground leading-tight mt-6 mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}

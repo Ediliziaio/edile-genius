@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
-const faqs = [
+export const faqs = [
   { q: "Posso attivare una sola soluzione o devo prenderle tutte?", a: "Puoi iniziare con una sola soluzione — la più urgente per la tua azienda. Molti clienti iniziano con l'Agente Vocale per la qualifica lead, e poi aggiungono soluzioni nel tempo. Non c'è obbligo di pacchetti. Cresci al tuo ritmo." },
   { q: "Le soluzioni si integrano con il mio CRM attuale?", a: "Sì. Ci integriamo con i principali CRM utilizzati nel settore edile italiano: HubSpot, Salesforce, Monday, Pipedrive, e i software gestionali più diffusi. Se usi un sistema proprietario, valutiamo insieme le possibilità di integrazione via API." },
   { q: "Quanto tempo ci vuole prima di vedere i primi risultati?", a: "Per gli Agenti Vocali, i primi risultati arrivano dalla prima settimana di operatività — risposte automatiche, appuntamenti fissati, lead qualificati. Per le soluzioni di analisi dati o BI, i risultati più significativi si consolidano nel primo mese, quando il sistema ha elaborato un volume sufficiente di dati." },
@@ -10,7 +10,7 @@ const faqs = [
   { q: "Cosa succede se un cliente pone una domanda che l'agente non sa gestire?", a: "L'agente è configurato per riconoscere le situazioni fuori dal suo perimetro di competenza. In questi casi effettua un trasferimento intelligente all'operatore umano giusto, comunicando al cliente in modo naturale il passaggio. Nessuna risposta errata — solo escalation gestita." },
   { q: "Come viene gestita la privacy dei dati dei miei clienti?", a: "Tutti i dati sono trattati nel rispetto del GDPR. Le conversazioni vengono registrate e archiviate su server europei. Forniamo il DPA (Data Processing Agreement) necessario. Nessun dato viene utilizzato per addestrare modelli di terze parti." },
   { q: "Posso personalizzare il tono di voce e il linguaggio dell'agente?", a: "Assolutamente. Durante la fase di configurazione definiamo insieme il tono (formale, informale, tecnico), le frasi di apertura e chiusura, le risposte alle obiezioni tipiche del tuo settore, e il nome che l'agente usa per presentarsi. L'agente parla come un tuo dipendente — non come un robot generico." },
-  { q: "Cosa include la garanzia 30 giorni?", a: "Se dopo 30 giorni operativi la soluzione non ha prodotto almeno i risultati minimi concordati nella call di analisi iniziale, ti rimborsamo integralmente il primo mese di servizio. Nessuna domanda. Nessuna clausola. Questo è il nostro impegno." },
+  { q: "Cosa include la garanzia 30 giorni?", a: "Se dopo 30 giorni operativi la soluzione non ha prodotto almeno i risultati minimi concordati nella call di analisi iniziale, ti rimborsiamo integralmente il primo mese di servizio. Nessuna domanda. Nessuna clausola. Questo è il nostro impegno." },
 ];
 
 const SolutionsFAQ = () => {

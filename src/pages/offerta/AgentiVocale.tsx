@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { usePageSEO } from "@/hooks/usePageSEO";
+import { MetaPixel } from "@/lib/metaPixel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -69,12 +71,14 @@ const solutionFeatures = [
 ];
 
 export default function OffertaAgenteVocale() {
-  usePageSEO({ title: "Offerta Agente Vocale AI — Edilizia.io", description: "Attiva il tuo Agente Vocale AI per non perdere mai più una chiamata. Offerta riservata." });
+  const seoTags = usePageSEO({ title: "Offerta Agente Vocale AI — Edilizia.io", description: "Attiva il tuo Agente Vocale AI per non perdere mai più una chiamata. Offerta riservata.", canonical: "/offerta/agente-vocale", noindex: true });
   useNoIndex();
   const countdown = useCountdown("offerta_av_first_visit");
+  useEffect(() => { MetaPixel.viewContent({ content_name: "Offerta Agente Vocale AI", content_category: "offerta" }); }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {seoTags}
       <OfferHeader ctaText="Attiva il Tuo Agente Vocale" onCtaClick={scrollToCta} navLinks={navLinks} />
 
       {/* ===== HERO ===== */}
@@ -298,7 +302,7 @@ export default function OffertaAgenteVocale() {
         headline="Ogni giorno senza Agente Vocale è un giorno di clienti persi."
         subtitle="Attivalo oggi. In 48 ore il tuo telefono non perderà più una chiamata."
         ctaText="Attiva il Tuo Agente Vocale Ora"
-        ctaOnClick={() => window.open("https://wa.me/393000000000?text=Ciao%2C%20vorrei%20attivare%20l%27Agente%20Vocale%20AI", "_blank")}
+        ctaOnClick={() => { MetaPixel.contact({ content_name: "WhatsApp — Agente Vocale AI" }); MetaPixel.lead({ content_name: "Attiva Agente Vocale AI" }); window.open("https://wa.me/393000000000?text=Ciao%2C%20vorrei%20attivare%20l%27Agente%20Vocale%20AI", "_blank"); }}
         countdown={countdown}
       />
 

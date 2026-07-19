@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { usePageSEO } from "@/hooks/usePageSEO";
+import { MetaPixel } from "@/lib/metaPixel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -19,7 +21,7 @@ import {
   useCountdown, useNoIndex, staggerContainer, staggerItem, StarRating,
 } from "@/components/offerta/shared";
 
-const WA_LINK = "https://wa.me/3901onal?text=Ciao%2C%20sono%20interessato%20al%20pacchetto%20completo%20Edil%20Genius.%20Vorrei%20maggiori%20informazioni.";
+const WA_LINK = "https://wa.me/393000000000?text=Ciao%2C%20sono%20interessato%20al%20pacchetto%20completo%20di%20Edilizia.io.%20Vorrei%20maggiori%20informazioni.";
 
 const scrollToPricing = () => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
 
@@ -104,12 +106,14 @@ const faqs = [
 ];
 
 export default function PacchettoCompleto() {
-  usePageSEO({ title: "Pacchetto Completo Edil Genius — Offerta Riservata | Edilizia.io", description: "Agente Vocale + Render AI + Preventivatore + Rapportini + WhatsApp AI + CRM. Tutto in un'unica piattaforma, un unico prezzo. Risparmia fino al 40%." });
+  const seoTags = usePageSEO({ title: "Pacchetto Completo Edilizia.io — Offerta Riservata | Edilizia.io", description: "Agente Vocale + Render AI + Preventivatore + Rapportini + WhatsApp AI + CRM. Tutto in un'unica piattaforma, un unico prezzo. Risparmia fino al 40%.", canonical: "/offerta/pacchetto-completo", noindex: true });
   useNoIndex();
   const countdown = useCountdown("offerta_pacchetto_first_visit");
+  useEffect(() => { MetaPixel.viewContent({ content_name: "Offerta Pacchetto Completo", content_category: "offerta" }); }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {seoTags}
       <OfferHeader ctaText="Scopri i Pacchetti" onCtaClick={scrollToPricing} navLinks={navLinks} />
 
       {/* ══════ HERO ══════ */}
@@ -204,7 +208,7 @@ export default function PacchettoCompleto() {
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2 font-display">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center"><CheckCircle2 className="h-4 w-4 text-primary" /></div>
-                Con il Pacchetto Crescita di Edil Genius:
+                Con il Pacchetto Crescita di Edilizia.io:
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -304,14 +308,14 @@ export default function PacchettoCompleto() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {plans.map((plan) => (
-              <PricingCard key={plan.name} {...plan} setupFree={!countdown.expired} onCta={() => window.open(WA_LINK, "_blank")} />
+              <PricingCard key={plan.name} {...plan} setupFree={!countdown.expired} onCta={() => { MetaPixel.contact({ content_name: `WhatsApp — Pacchetto (${plan.name})` }); MetaPixel.lead({ content_name: `Attiva Pacchetto — ${plan.name}` }); window.open(WA_LINK, "_blank"); }} />
             ))}
           </div>
 
           <div className="text-center bg-card border border-border rounded-lg p-4 shadow-sm">
             <p className="text-sm text-muted-foreground">
               🏢 Hai più di 15 persone o esigenze specifiche?{" "}
-              <a href={WA_LINK} target="_blank" rel="noopener noreferrer" className="text-primary font-semibold underline">
+              <a href={WA_LINK} target="_blank" rel="noopener noreferrer" onClick={() => { MetaPixel.contact({ content_name: "WhatsApp — Pacchetto (link)" }); MetaPixel.lead({ content_name: "Attiva Pacchetto Completo" }); }} className="text-primary font-semibold underline">
                 Contattaci per il Piano Enterprise da €1.997/mese
               </a>
             </p>
@@ -398,6 +402,7 @@ export default function PacchettoCompleto() {
         subtitle="Attiva il pacchetto oggi. Tra 7 giorni avrai un'impresa che funziona anche quando tu non ci sei."
         ctaText="Attiva il Tuo Pacchetto Completo"
         ctaHref={WA_LINK}
+        ctaOnClick={() => { MetaPixel.contact({ content_name: "WhatsApp — Pacchetto (banner)" }); MetaPixel.lead({ content_name: "Attiva Pacchetto Completo" }); }}
         countdown={countdown}
         footerLink={{ label: "Preferisci partire con un singolo modulo? → Torna alla pagina Pricing", to: "/tariffe" }}
       />

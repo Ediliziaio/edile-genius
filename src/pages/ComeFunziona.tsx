@@ -120,7 +120,7 @@ const heroStats = [
 ];
 
 const ComeFunziona = () => {
-  usePageSEO({
+  const seoTags = usePageSEO({
     title: "Come Funziona — Agenti AI Operativi in 7 Giorni | Edilizia.io",
     description: "Scopri il processo in 3 step per attivare il tuo Agente Vocale AI: setup in 48 ore, prime chiamate gestite, ottimizzazione continua. Zero configurazione da parte tua.",
     canonical: "/come-funziona",
@@ -138,6 +138,7 @@ const ComeFunziona = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {seoTags}
       <Navbar />
       <main>
         {/* ── HERO ── */}
@@ -366,8 +367,8 @@ const ComeFunziona = () => {
               Prenota La Tua Demo Gratuita →
             </a>
             <p className="text-neutral-500 text-sm italic pt-4 max-w-md mx-auto">
-              P.S. — Il 73% delle aziende edili che prenota la demo decide di partire
-              entro 48 ore. Non perché vendiamo bene, ma perché i numeri parlano da soli.
+              P.S. — La maggior parte delle aziende edili che prenota la demo decide di partire
+              in pochi giorni. Non perché vendiamo bene, ma perché i numeri parlano da soli.
             </p>
           </div>
         </section>

@@ -335,7 +335,7 @@ export function OfferCTABanner({ headline, subtitle, ctaText, ctaHref, ctaOnClic
 
         {ctaHref ? (
           <Button size="lg" variant="secondary" className="mt-8 text-base px-8 py-6 shadow-lg hover:-translate-y-0.5 transition-all" asChild>
-            <a href={ctaHref} target="_blank" rel="noopener noreferrer">{ctaText} <ArrowRight className="ml-1" /></a>
+            <a href={ctaHref} target="_blank" rel="noopener noreferrer" onClick={ctaOnClick}>{ctaText} <ArrowRight className="ml-1" /></a>
           </Button>
         ) : (
           <Button size="lg" variant="secondary" className="mt-8 text-base px-8 py-6 shadow-lg hover:-translate-y-0.5 transition-all" onClick={ctaOnClick}>

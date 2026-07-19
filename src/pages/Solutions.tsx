@@ -11,7 +11,7 @@ import SolutionCard from "@/components/solutions/SolutionCard";
 import SolutionModal from "@/components/solutions/SolutionModal";
 import AIComparison from "@/components/solutions/AIComparison";
 import ImplementationSteps from "@/components/solutions/ImplementationSteps";
-import SolutionsFAQ from "@/components/solutions/SolutionsFAQ";
+import SolutionsFAQ, { faqs as solutionsFaqs } from "@/components/solutions/SolutionsFAQ";
 import SolutionsCTA from "@/components/solutions/SolutionsCTA";
 import Guarantee from "@/components/sections/Guarantee";
 import { solutions, type Solution } from "@/data/solutions";
@@ -20,10 +20,18 @@ const Solutions = () => {
   const [filterActive, setFilterActive] = useState("tutte");
   const [modalOpen, setModalOpen] = useState<Solution | null>(null);
 
-  usePageSEO({
+  const seoTags = usePageSEO({
     title: "20 Soluzioni AI per l'Edilizia | Edilizia.io",
     description: "Scopri 20 agenti AI specializzati per infissi, fotovoltaico, ristrutturazioni e imprese edili. Automazione vendite, assistenza clienti e gestione cantieri.",
     canonical: "/soluzioni",
+    jsonLd: {
+      "@type": "FAQPage",
+      mainEntity: solutionsFaqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
   });
 
   useEffect(() => {
@@ -41,6 +49,7 @@ const Solutions = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {seoTags}
       <CustomCursor />
       <Navbar />
       <ScrollProgress />

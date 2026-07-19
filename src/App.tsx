@@ -3,11 +3,15 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import type { RouteRecord } from "vite-react-ssg";
+import { blogPosts } from "./data/blogPosts";
+import { perChiECategories } from "./data/perChiE";
 import { AuthProvider } from "@/context/AuthContext";
 import { ImpersonationProvider } from "@/context/ImpersonationContext";
 import ScrollToTop from "./components/ScrollToTop";
 import SubdomainRouter from "./components/SubdomainRouter";
+import MetaPixelPageView from "./components/MetaPixelPageView";
 import { Loader2 } from "lucide-react";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
@@ -41,6 +45,7 @@ const OffertaRenderAI = lazy(() => import("./pages/offerta/RenderAI"));
 const OffertaPreventivatoreAI = lazy(() => import("./pages/offerta/PreventivatoreAI"));
 const OffertaPacchettoCompleto = lazy(() => import("./pages/offerta/PacchettoCompleto"));
 const OffertaUnica = lazy(() => import("./pages/OffertaUnica"));
+const LegalPage = lazy(() => import("./pages/LegalPage"));
 
 // Lazy-loaded SuperAdmin pages
 const SuperAdminDashboard = lazy(() => import("./pages/superadmin/Dashboard"));
@@ -150,152 +155,185 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
-  <ErrorBoundary>
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <ScrollToTop />
-        <SubdomainRouter />
-        <AuthProvider>
-          <ImpersonationProvider>
-          <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/soluzioni" element={<SafeRoute><Solutions /></SafeRoute>} />
-            <Route path="/per-chi-e" element={<SafeRoute><PerChiE /></SafeRoute>} />
-            <Route path="/per-chi-e/:slug" element={<SafeRoute><PerChiEDetail /></SafeRoute>} />
-            <Route path="/chi-siamo" element={<SafeRoute><ChiSiamo /></SafeRoute>} />
-            <Route path="/come-funziona" element={<SafeRoute><ComeFunziona /></SafeRoute>} />
-            <Route path="/garanzia" element={<SafeRoute><Garanzia /></SafeRoute>} />
-            <Route path="/tariffe" element={<SafeRoute><Tariffe /></SafeRoute>} />
-            <Route path="/blog" element={<SafeRoute><Blog /></SafeRoute>} />
-            <Route path="/blog/:slug" element={<SafeRoute><BlogPost /></SafeRoute>} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<SafeRoute><ForgotPassword /></SafeRoute>} />
-            <Route path="/reset-password" element={<SafeRoute><ResetPassword /></SafeRoute>} />
-            <Route path="/s/:token" element={<SafeRoute><PublicShareViewer /></SafeRoute>} />
-            <Route path="/offerta/agente-vocale" element={<SafeRoute><OffertaAgenteVocale /></SafeRoute>} />
-            <Route path="/offerta/render-ai" element={<SafeRoute><OffertaRenderAI /></SafeRoute>} />
-            <Route path="/offerta/preventivatore-ai" element={<SafeRoute><OffertaPreventivatoreAI /></SafeRoute>} />
-            <Route path="/offerta/pacchetto-completo" element={<SafeRoute><OffertaPacchettoCompleto /></SafeRoute>} />
-            <Route path="/offerta-unica" element={<SafeRoute><OffertaUnica /></SafeRoute>} />
-            <Route path="/accetta-invito" element={<SafeRoute><AccettaInvito /></SafeRoute>} />
+/**
+ * Layout radice: provider globali + router utilities + <Outlet/>.
+ * Con vite-react-ssg il router è fornito dall'entry (main.tsx), quindi qui
+ * NON c'è più <BrowserRouter> — al suo posto <Outlet/> per le rotte figlie.
+ */
+function RootLayout() {
+  return (
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <ScrollToTop />
+          <SubdomainRouter />
+          <MetaPixelPageView />
+          <AuthProvider>
+            <ImpersonationProvider>
+              <Suspense fallback={<PageLoader />}>
+                <Outlet />
+              </Suspense>
+            </ImpersonationProvider>
+          </AuthProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
+  );
+}
 
-            {/* SuperAdmin routes */}
-            <Route element={<AuthGuard requiredRole="superadmin" />}>
-              <Route element={<Shell />}>
-                <Route path="/superadmin" element={<SafeRoute><SuperAdminDashboard /></SafeRoute>} />
-                <Route path="/superadmin/companies" element={<SafeRoute><Companies /></SafeRoute>} />
-                <Route path="/superadmin/companies/new" element={<SafeRoute><CreateCompany /></SafeRoute>} />
-                <Route path="/superadmin/companies/:id" element={<SafeRoute><CompanyDetail /></SafeRoute>} />
-                <Route path="/superadmin/whatsapp" element={<SafeRoute><WhatsAppAdminPage /></SafeRoute>} />
-                <Route path="/superadmin/templates" element={<SafeRoute><SATemplatesPage /></SafeRoute>} />
-                <Route path="/superadmin/team" element={<SafeRoute><TeamPage /></SafeRoute>} />
-                <Route path="/superadmin/settings" element={<SafeRoute><SASettingsPage /></SafeRoute>} />
-                <Route path="/superadmin/analytics" element={<SafeRoute><GlobalAnalyticsPage /></SafeRoute>} />
-                <Route path="/superadmin/api-keys" element={<SafeRoute><ApiKeysPage /></SafeRoute>} />
-                <Route path="/superadmin/logs" element={<SafeRoute><SystemLogsPage /></SafeRoute>} />
-                <Route path="/superadmin/platform-settings" element={<SafeRoute><PlatformSettingsPage /></SafeRoute>} />
-                <Route path="/superadmin/render-config" element={<SafeRoute><RenderConfig /></SafeRoute>} />
-                <Route path="/superadmin/monitoring" element={<SafeRoute><MonitoringPage /></SafeRoute>} />
-              </Route>
-            </Route>
+export const routes: RouteRecord[] = [
+  {
+    path: "/",
+    element: <RootLayout />,
+    children: [
+      // ── Pagine pubbliche (prerenderizzate) ──
+      { index: true, element: <Index /> },
+      { path: "soluzioni", element: <SafeRoute><Solutions /></SafeRoute> },
+      { path: "per-chi-e", element: <SafeRoute><PerChiE /></SafeRoute> },
+      {
+        path: "per-chi-e/:slug",
+        element: <SafeRoute><PerChiEDetail /></SafeRoute>,
+        getStaticPaths: () => perChiECategories.map((c) => `/per-chi-e/${c.slug}`),
+      },
+      { path: "chi-siamo", element: <SafeRoute><ChiSiamo /></SafeRoute> },
+      { path: "come-funziona", element: <SafeRoute><ComeFunziona /></SafeRoute> },
+      { path: "garanzia", element: <SafeRoute><Garanzia /></SafeRoute> },
+      { path: "tariffe", element: <SafeRoute><Tariffe /></SafeRoute> },
+      { path: "blog", element: <SafeRoute><Blog /></SafeRoute> },
+      {
+        path: "blog/:slug",
+        element: <SafeRoute><BlogPost /></SafeRoute>,
+        getStaticPaths: () => blogPosts.map((p) => `/blog/${p.slug}`),
+      },
+      { path: "privacy-policy", element: <SafeRoute><LegalPage doc="privacy" /></SafeRoute> },
+      { path: "cookie-policy", element: <SafeRoute><LegalPage doc="cookie" /></SafeRoute> },
+      { path: "termini-di-servizio", element: <SafeRoute><LegalPage doc="termini" /></SafeRoute> },
 
-            {/* Company routes */}
-            <Route element={<AuthGuard requiredRole="company" />}>
-              <Route element={<Shell />}>
-                <Route path="/app" element={<SafeRoute><AppDashboard /></SafeRoute>} />
-                <Route path="/app/onboarding" element={<SafeRoute><OnboardingPage /></SafeRoute>} />
-                {/* ── Agenti AI ── */}
-                <Route path="/app/agents" element={<SafeRoute><FeatureGate featureId="agente_vendita"><AgentsPage /></FeatureGate></SafeRoute>} />
-                <Route path="/app/agents/new" element={<SafeRoute><FeatureGate featureId="agente_vendita"><CreateAgent /></FeatureGate></SafeRoute>} />
-                <Route path="/app/agents/new/:slug" element={<SafeRoute><FeatureGate featureId="agente_vendita"><AgentTemplateWizard /></FeatureGate></SafeRoute>} />
-                <Route path="/app/agents/:id" element={<SafeRoute><FeatureGate featureId="agente_vendita"><AgentDetail /></FeatureGate></SafeRoute>} />
-                <Route path="/app/conversations" element={<SafeRoute><FeatureGate featureId="agente_vendita"><ConversationsPage /></FeatureGate></SafeRoute>} />
-                <Route path="/app/campaigns" element={<SafeRoute><FeatureGate featureId="agente_vendita"><CampaignsPage /></FeatureGate></SafeRoute>} />
-                <Route path="/app/campaigns/new" element={<SafeRoute><FeatureGate featureId="agente_vendita"><CreateCampaignPage /></FeatureGate></SafeRoute>} />
-                <Route path="/app/campaigns/:id" element={<SafeRoute><FeatureGate featureId="agente_vendita"><CampaignDetailPage /></FeatureGate></SafeRoute>} />
-                <Route path="/app/scheduled-calls" element={<SafeRoute><FeatureGate featureId="agente_vendita"><ScheduledCalls /></FeatureGate></SafeRoute>} />
-                <Route path="/app/call-monitor" element={<SafeRoute><FeatureGate featureId="agente_vendita"><CallMonitor /></FeatureGate></SafeRoute>} />
-                <Route path="/app/phone-numbers" element={<SafeRoute><FeatureGate featureId="agente_vendita"><PhoneNumbersPage /></FeatureGate></SafeRoute>} />
-                <Route path="/app/phone-numbers/buy" element={<SafeRoute><FeatureGate featureId="agente_vendita"><BuyPhoneNumberPage /></FeatureGate></SafeRoute>} />
+      // ── Rotte client-only (auth / offerte / share) — NON prerenderizzate ──
+      { path: "login", element: <Login /> },
+      { path: "signup", element: <Signup /> },
+      { path: "forgot-password", element: <SafeRoute><ForgotPassword /></SafeRoute> },
+      { path: "reset-password", element: <SafeRoute><ResetPassword /></SafeRoute> },
+      { path: "s/:token", element: <SafeRoute><PublicShareViewer /></SafeRoute> },
+      { path: "offerta/agente-vocale", element: <SafeRoute><OffertaAgenteVocale /></SafeRoute> },
+      { path: "offerta/render-ai", element: <SafeRoute><OffertaRenderAI /></SafeRoute> },
+      { path: "offerta/preventivatore-ai", element: <SafeRoute><OffertaPreventivatoreAI /></SafeRoute> },
+      { path: "offerta/pacchetto-completo", element: <SafeRoute><OffertaPacchettoCompleto /></SafeRoute> },
+      { path: "offerta-unica", element: <SafeRoute><OffertaUnica /></SafeRoute> },
+      { path: "accetta-invito", element: <SafeRoute><AccettaInvito /></SafeRoute> },
 
-                {/* ── CRM ── */}
-                <Route path="/app/contacts" element={<SafeRoute><FeatureGate featureId="crm_avanzato"><ContactsPage /></FeatureGate></SafeRoute>} />
-                <Route path="/app/contacts/import" element={<SafeRoute><FeatureGate featureId="crm_avanzato"><ImportContactsPage /></FeatureGate></SafeRoute>} />
-                <Route path="/app/contacts/:id" element={<SafeRoute><FeatureGate featureId="crm_avanzato"><ContactDetailPage /></FeatureGate></SafeRoute>} />
-                <Route path="/app/lists" element={<SafeRoute><FeatureGate featureId="crm_avanzato"><ContactListsPage /></FeatureGate></SafeRoute>} />
-                <Route path="/app/lists/:id" element={<SafeRoute><FeatureGate featureId="crm_avanzato"><ContactListDetailPage /></FeatureGate></SafeRoute>} />
+      // ── SuperAdmin ──
+      {
+        element: <AuthGuard requiredRole="superadmin" />,
+        children: [
+          {
+            element: <Shell />,
+            children: [
+              { path: "superadmin", element: <SafeRoute><SuperAdminDashboard /></SafeRoute> },
+              { path: "superadmin/companies", element: <SafeRoute><Companies /></SafeRoute> },
+              { path: "superadmin/companies/new", element: <SafeRoute><CreateCompany /></SafeRoute> },
+              { path: "superadmin/companies/:id", element: <SafeRoute><CompanyDetail /></SafeRoute> },
+              { path: "superadmin/whatsapp", element: <SafeRoute><WhatsAppAdminPage /></SafeRoute> },
+              { path: "superadmin/templates", element: <SafeRoute><SATemplatesPage /></SafeRoute> },
+              { path: "superadmin/team", element: <SafeRoute><TeamPage /></SafeRoute> },
+              { path: "superadmin/settings", element: <SafeRoute><SASettingsPage /></SafeRoute> },
+              { path: "superadmin/analytics", element: <SafeRoute><GlobalAnalyticsPage /></SafeRoute> },
+              { path: "superadmin/api-keys", element: <SafeRoute><ApiKeysPage /></SafeRoute> },
+              { path: "superadmin/logs", element: <SafeRoute><SystemLogsPage /></SafeRoute> },
+              { path: "superadmin/platform-settings", element: <SafeRoute><PlatformSettingsPage /></SafeRoute> },
+              { path: "superadmin/render-config", element: <SafeRoute><RenderConfig /></SafeRoute> },
+              { path: "superadmin/monitoring", element: <SafeRoute><MonitoringPage /></SafeRoute> },
+            ],
+          },
+        ],
+      },
 
-                {/* ── Preventivi ── */}
-                <Route path="/app/preventivi" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventiviList /></FeatureGate></SafeRoute>} />
-                <Route path="/app/preventivi/nuovo" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><NuovoPreventivo /></FeatureGate></SafeRoute>} />
-                <Route path="/app/preventivi/:id" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoDetail /></FeatureGate></SafeRoute>} />
-                <Route path="/app/preventivo-hub" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoHub /></FeatureGate></SafeRoute>} />
-                <Route path="/app/agente-preventivo-setup" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoAgentSetup /></FeatureGate></SafeRoute>} />
-                <Route path="/app/preventivo-kb" element={<SafeRoute><FeatureGate featureId="knowledge_base"><KnowledgeBasePreventivo /></FeatureGate></SafeRoute>} />
-                <Route path="/app/preventivi/listino" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><ListinoVociManager /></FeatureGate></SafeRoute>} />
-                <Route path="/app/preventivi/templates" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoTemplateList /></FeatureGate></SafeRoute>} />
-                <Route path="/app/preventivi/templates/nuovo" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoTemplateBuilder /></FeatureGate></SafeRoute>} />
-                <Route path="/app/preventivi/templates/:id" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoTemplateBuilder /></FeatureGate></SafeRoute>} />
-                <Route path="/app/impostazioni/template-preventivo" element={<SafeRoute><FeatureGate featureId="generatore_preventivi"><TemplatePreventivo /></FeatureGate></SafeRoute>} />
-                <Route path="/app/knowledge-base" element={<SafeRoute><FeatureGate featureId="knowledge_base"><KnowledgeBasePage /></FeatureGate></SafeRoute>} />
+      // ── Company (app) ──
+      {
+        element: <AuthGuard requiredRole="company" />,
+        children: [
+          {
+            element: <Shell />,
+            children: [
+              { path: "app", element: <SafeRoute><AppDashboard /></SafeRoute> },
+              { path: "app/onboarding", element: <SafeRoute><OnboardingPage /></SafeRoute> },
+              // ── Agenti AI ──
+              { path: "app/agents", element: <SafeRoute><FeatureGate featureId="agente_vendita"><AgentsPage /></FeatureGate></SafeRoute> },
+              { path: "app/agents/new", element: <SafeRoute><FeatureGate featureId="agente_vendita"><CreateAgent /></FeatureGate></SafeRoute> },
+              { path: "app/agents/new/:slug", element: <SafeRoute><FeatureGate featureId="agente_vendita"><AgentTemplateWizard /></FeatureGate></SafeRoute> },
+              { path: "app/agents/:id", element: <SafeRoute><FeatureGate featureId="agente_vendita"><AgentDetail /></FeatureGate></SafeRoute> },
+              { path: "app/conversations", element: <SafeRoute><FeatureGate featureId="agente_vendita"><ConversationsPage /></FeatureGate></SafeRoute> },
+              { path: "app/campaigns", element: <SafeRoute><FeatureGate featureId="agente_vendita"><CampaignsPage /></FeatureGate></SafeRoute> },
+              { path: "app/campaigns/new", element: <SafeRoute><FeatureGate featureId="agente_vendita"><CreateCampaignPage /></FeatureGate></SafeRoute> },
+              { path: "app/campaigns/:id", element: <SafeRoute><FeatureGate featureId="agente_vendita"><CampaignDetailPage /></FeatureGate></SafeRoute> },
+              { path: "app/scheduled-calls", element: <SafeRoute><FeatureGate featureId="agente_vendita"><ScheduledCalls /></FeatureGate></SafeRoute> },
+              { path: "app/call-monitor", element: <SafeRoute><FeatureGate featureId="agente_vendita"><CallMonitor /></FeatureGate></SafeRoute> },
+              { path: "app/phone-numbers", element: <SafeRoute><FeatureGate featureId="agente_vendita"><PhoneNumbersPage /></FeatureGate></SafeRoute> },
+              { path: "app/phone-numbers/buy", element: <SafeRoute><FeatureGate featureId="agente_vendita"><BuyPhoneNumberPage /></FeatureGate></SafeRoute> },
+              // ── CRM ──
+              { path: "app/contacts", element: <SafeRoute><FeatureGate featureId="crm_avanzato"><ContactsPage /></FeatureGate></SafeRoute> },
+              { path: "app/contacts/import", element: <SafeRoute><FeatureGate featureId="crm_avanzato"><ImportContactsPage /></FeatureGate></SafeRoute> },
+              { path: "app/contacts/:id", element: <SafeRoute><FeatureGate featureId="crm_avanzato"><ContactDetailPage /></FeatureGate></SafeRoute> },
+              { path: "app/lists", element: <SafeRoute><FeatureGate featureId="crm_avanzato"><ContactListsPage /></FeatureGate></SafeRoute> },
+              { path: "app/lists/:id", element: <SafeRoute><FeatureGate featureId="crm_avanzato"><ContactListDetailPage /></FeatureGate></SafeRoute> },
+              // ── Preventivi ──
+              { path: "app/preventivi", element: <SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventiviList /></FeatureGate></SafeRoute> },
+              { path: "app/preventivi/nuovo", element: <SafeRoute><FeatureGate featureId="generatore_preventivi"><NuovoPreventivo /></FeatureGate></SafeRoute> },
+              { path: "app/preventivi/:id", element: <SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoDetail /></FeatureGate></SafeRoute> },
+              { path: "app/preventivo-hub", element: <SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoHub /></FeatureGate></SafeRoute> },
+              { path: "app/agente-preventivo-setup", element: <SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoAgentSetup /></FeatureGate></SafeRoute> },
+              { path: "app/preventivo-kb", element: <SafeRoute><FeatureGate featureId="knowledge_base"><KnowledgeBasePreventivo /></FeatureGate></SafeRoute> },
+              { path: "app/preventivi/listino", element: <SafeRoute><FeatureGate featureId="generatore_preventivi"><ListinoVociManager /></FeatureGate></SafeRoute> },
+              { path: "app/preventivi/templates", element: <SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoTemplateList /></FeatureGate></SafeRoute> },
+              { path: "app/preventivi/templates/nuovo", element: <SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoTemplateBuilder /></FeatureGate></SafeRoute> },
+              { path: "app/preventivi/templates/:id", element: <SafeRoute><FeatureGate featureId="generatore_preventivi"><PreventivoTemplateBuilder /></FeatureGate></SafeRoute> },
+              { path: "app/impostazioni/template-preventivo", element: <SafeRoute><FeatureGate featureId="generatore_preventivi"><TemplatePreventivo /></FeatureGate></SafeRoute> },
+              { path: "app/knowledge-base", element: <SafeRoute><FeatureGate featureId="knowledge_base"><KnowledgeBasePage /></FeatureGate></SafeRoute> },
+              // ── Render ──
+              { path: "app/render", element: <SafeRoute><FeatureGate featureId="render_infissi"><RenderHub /></FeatureGate></SafeRoute> },
+              { path: "app/render/new", element: <SafeRoute><FeatureGate featureId="render_infissi"><RenderNew /></FeatureGate></SafeRoute> },
+              { path: "app/render/gallery", element: <SafeRoute><FeatureGate featureId="render_infissi"><RenderGallery /></FeatureGate></SafeRoute> },
+              { path: "app/render/gallery/:id", element: <SafeRoute><FeatureGate featureId="render_infissi"><RenderGalleryDetail /></FeatureGate></SafeRoute> },
+              { path: "app/render-bagno", element: <SafeRoute><FeatureGate featureId="render_bagno"><RenderBagnoHub /></FeatureGate></SafeRoute> },
+              { path: "app/render-bagno/new", element: <SafeRoute><FeatureGate featureId="render_bagno"><RenderBagnoNew /></FeatureGate></SafeRoute> },
+              { path: "app/render-bagno/gallery/:id", element: <SafeRoute><FeatureGate featureId="render_bagno"><RenderBagnoGalleryDetail /></FeatureGate></SafeRoute> },
+              { path: "app/render-facciata", element: <SafeRoute><FeatureGate featureId="render_facciata"><RenderFacciataHub /></FeatureGate></SafeRoute> },
+              { path: "app/render-facciata/new", element: <SafeRoute><FeatureGate featureId="render_facciata"><RenderFacciataNew /></FeatureGate></SafeRoute> },
+              { path: "app/render-persiane", element: <SafeRoute><FeatureGate featureId="render_persiane"><RenderPersianeHub /></FeatureGate></SafeRoute> },
+              { path: "app/render-persiane/new", element: <SafeRoute><FeatureGate featureId="render_persiane"><RenderPersianeNew /></FeatureGate></SafeRoute> },
+              { path: "app/render-pavimento", element: <SafeRoute><FeatureGate featureId="render_pavimento"><RenderPavimentoHub /></FeatureGate></SafeRoute> },
+              { path: "app/render-pavimento/new", element: <SafeRoute><FeatureGate featureId="render_pavimento"><RenderPavimentoNew /></FeatureGate></SafeRoute> },
+              { path: "app/render-stanza", element: <SafeRoute><FeatureGate featureId="render_stanza"><RenderStanzaHub /></FeatureGate></SafeRoute> },
+              { path: "app/render-stanza/new", element: <SafeRoute><FeatureGate featureId="render_stanza"><RenderStanzaNew /></FeatureGate></SafeRoute> },
+              { path: "app/render-tetto", element: <SafeRoute><FeatureGate featureId="render_tetto"><RenderTettoHub /></FeatureGate></SafeRoute> },
+              { path: "app/render-tetto/new", element: <SafeRoute><FeatureGate featureId="render_tetto"><RenderTettoNew /></FeatureGate></SafeRoute> },
+              // ── Automazioni ──
+              { path: "app/automations", element: <SafeRoute><FeatureGate featureId="automazioni_ai"><Automations /></FeatureGate></SafeRoute> },
+              // ── Libere (no feature gate) ──
+              { path: "app/analytics", element: <SafeRoute><AnalyticsPage /></SafeRoute> },
+              { path: "app/credits", element: <SafeRoute><CreditsPage /></SafeRoute> },
+              { path: "app/settings", element: <SafeRoute><SettingsPage /></SafeRoute> },
+              { path: "app/integrations", element: <SafeRoute><Integrations /></SafeRoute> },
+              { path: "app/templates", element: <SafeRoute><TemplatesPage /></SafeRoute> },
+              { path: "app/templates/:slug", element: <SafeRoute><TemplateDetailPage /></SafeRoute> },
+              { path: "app/templates/:slug/setup", element: <SafeRoute><TemplateSetupPage /></SafeRoute> },
+              { path: "app/whatsapp", element: <SafeRoute><WhatsAppPage /></SafeRoute> },
+              { path: "app/cantieri", element: <SafeRoute><CantierePage /></SafeRoute> },
+              { path: "app/cantieri/configurazione", element: <SafeRoute><CantiereConfig /></SafeRoute> },
+              { path: "app/cantieri/:id", element: <SafeRoute><CantiereDetail /></SafeRoute> },
+              { path: "app/documenti", element: <SafeRoute><DocumentiScadenze /></SafeRoute> },
+              { path: "app/presenze", element: <SafeRoute><FoglioPresenze /></SafeRoute> },
+              // Area Vendite — Campagne Voce Interne
+              { path: "app/vendite/campagne", element: <SafeRoute><InternalCampaignsPage /></SafeRoute> },
+              { path: "app/vendite/registro", element: <SafeRoute><InternalCallLogsPage /></SafeRoute> },
+            ],
+          },
+        ],
+      },
 
-                {/* ── Render ── */}
-                <Route path="/app/render" element={<SafeRoute><FeatureGate featureId="render_infissi"><RenderHub /></FeatureGate></SafeRoute>} />
-                <Route path="/app/render/new" element={<SafeRoute><FeatureGate featureId="render_infissi"><RenderNew /></FeatureGate></SafeRoute>} />
-                <Route path="/app/render/gallery" element={<SafeRoute><FeatureGate featureId="render_infissi"><RenderGallery /></FeatureGate></SafeRoute>} />
-                <Route path="/app/render/gallery/:id" element={<SafeRoute><FeatureGate featureId="render_infissi"><RenderGalleryDetail /></FeatureGate></SafeRoute>} />
-                <Route path="/app/render-bagno" element={<SafeRoute><FeatureGate featureId="render_bagno"><RenderBagnoHub /></FeatureGate></SafeRoute>} />
-                <Route path="/app/render-bagno/new" element={<SafeRoute><FeatureGate featureId="render_bagno"><RenderBagnoNew /></FeatureGate></SafeRoute>} />
-                <Route path="/app/render-bagno/gallery/:id" element={<SafeRoute><FeatureGate featureId="render_bagno"><RenderBagnoGalleryDetail /></FeatureGate></SafeRoute>} />
-                <Route path="/app/render-facciata" element={<SafeRoute><FeatureGate featureId="render_facciata"><RenderFacciataHub /></FeatureGate></SafeRoute>} />
-                <Route path="/app/render-facciata/new" element={<SafeRoute><FeatureGate featureId="render_facciata"><RenderFacciataNew /></FeatureGate></SafeRoute>} />
-                <Route path="/app/render-persiane" element={<SafeRoute><FeatureGate featureId="render_persiane"><RenderPersianeHub /></FeatureGate></SafeRoute>} />
-                <Route path="/app/render-persiane/new" element={<SafeRoute><FeatureGate featureId="render_persiane"><RenderPersianeNew /></FeatureGate></SafeRoute>} />
-                <Route path="/app/render-pavimento" element={<SafeRoute><FeatureGate featureId="render_pavimento"><RenderPavimentoHub /></FeatureGate></SafeRoute>} />
-                <Route path="/app/render-pavimento/new" element={<SafeRoute><FeatureGate featureId="render_pavimento"><RenderPavimentoNew /></FeatureGate></SafeRoute>} />
-                <Route path="/app/render-stanza" element={<SafeRoute><FeatureGate featureId="render_stanza"><RenderStanzaHub /></FeatureGate></SafeRoute>} />
-                <Route path="/app/render-stanza/new" element={<SafeRoute><FeatureGate featureId="render_stanza"><RenderStanzaNew /></FeatureGate></SafeRoute>} />
-                <Route path="/app/render-tetto" element={<SafeRoute><FeatureGate featureId="render_tetto"><RenderTettoHub /></FeatureGate></SafeRoute>} />
-                <Route path="/app/render-tetto/new" element={<SafeRoute><FeatureGate featureId="render_tetto"><RenderTettoNew /></FeatureGate></SafeRoute>} />
-
-                {/* ── Automazioni ── */}
-                <Route path="/app/automations" element={<SafeRoute><FeatureGate featureId="automazioni_ai"><Automations /></FeatureGate></SafeRoute>} />
-
-                {/* ── Libre (no feature gate needed) ── */}
-                <Route path="/app/analytics" element={<SafeRoute><AnalyticsPage /></SafeRoute>} />
-                <Route path="/app/credits" element={<SafeRoute><CreditsPage /></SafeRoute>} />
-                <Route path="/app/settings" element={<SafeRoute><SettingsPage /></SafeRoute>} />
-                <Route path="/app/integrations" element={<SafeRoute><Integrations /></SafeRoute>} />
-                <Route path="/app/templates" element={<SafeRoute><TemplatesPage /></SafeRoute>} />
-                <Route path="/app/templates/:slug" element={<SafeRoute><TemplateDetailPage /></SafeRoute>} />
-                <Route path="/app/templates/:slug/setup" element={<SafeRoute><TemplateSetupPage /></SafeRoute>} />
-                <Route path="/app/whatsapp" element={<SafeRoute><WhatsAppPage /></SafeRoute>} />
-                <Route path="/app/cantieri" element={<SafeRoute><CantierePage /></SafeRoute>} />
-                <Route path="/app/cantieri/configurazione" element={<SafeRoute><CantiereConfig /></SafeRoute>} />
-                <Route path="/app/cantieri/:id" element={<SafeRoute><CantiereDetail /></SafeRoute>} />
-                <Route path="/app/documenti" element={<SafeRoute><DocumentiScadenze /></SafeRoute>} />
-                <Route path="/app/presenze" element={<SafeRoute><FoglioPresenze /></SafeRoute>} />
-                {/* Area Vendite — Campagne Voce Interne */}
-                <Route path="/app/vendite/campagne" element={<SafeRoute><InternalCampaignsPage /></SafeRoute>} />
-                <Route path="/app/vendite/registro" element={<SafeRoute><InternalCallLogsPage /></SafeRoute>} />
-              </Route>
-            </Route>
-
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          </Suspense>
-          </ImpersonationProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-  </ErrorBoundary>
-);
-
-export default App;
+      { path: "*", element: <NotFound /> },
+    ],
+  },
+];

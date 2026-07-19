@@ -39,7 +39,7 @@ const Footer = () => {
               La prima azienda AI specializzata esclusivamente per il settore edile italiano.
             </p>
             <p className="font-mono text-[11px] text-neutral-600">
-              © 2025 Edilizia.io — P.IVA [da inserire]
+              © {new Date().getFullYear()} Edilizia.io — P.IVA [da inserire]
             </p>
           </div>
 
@@ -75,10 +75,14 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-neutral-800 pt-6 flex flex-wrap gap-4 justify-center">
-          {["Privacy Policy", "Cookie Policy", "Termini di Servizio"].map((t) => (
-            <a key={t} href="#" className="font-mono text-[11px] text-neutral-600 hover:text-neutral-400 transition-colors">
-              {t}
-            </a>
+          {[
+            { label: "Privacy Policy", href: "/privacy-policy" },
+            { label: "Cookie Policy", href: "/cookie-policy" },
+            { label: "Termini di Servizio", href: "/termini-di-servizio" },
+          ].map((t) => (
+            <Link key={t.label} to={t.href} className="font-mono text-[11px] text-neutral-600 hover:text-neutral-400 transition-colors">
+              {t.label}
+            </Link>
           ))}
         </div>
       </div>

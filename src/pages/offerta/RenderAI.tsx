@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { usePageSEO } from "@/hooks/usePageSEO";
+import { MetaPixel } from "@/lib/metaPixel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -50,12 +52,14 @@ const faqs = [
 ];
 
 export default function OffertaRenderAI() {
-  usePageSEO({ title: "Offerta Render AI — Edilizia.io", description: "Render fotorealistici in 10 secondi per chiudere più vendite. Offerta riservata." });
+  const seoTags = usePageSEO({ title: "Offerta Render AI — Edilizia.io", description: "Render fotorealistici in 10 secondi per chiudere più vendite. Offerta riservata.", canonical: "/offerta/render-ai", noindex: true });
   useNoIndex();
   const countdown = useCountdown("offerta_render_first_visit");
+  useEffect(() => { MetaPixel.viewContent({ content_name: "Offerta Render AI", content_category: "offerta" }); }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {seoTags}
       <OfferHeader ctaText="Attiva Render AI" onCtaClick={scrollToCta} navLinks={navLinks} />
 
       {/* ===== HERO ===== */}
@@ -299,7 +303,7 @@ export default function OffertaRenderAI() {
         headline="Ogni preventivo senza render è una vendita più difficile."
         subtitle="Attiva i Render AI oggi. Domani chiudi con le immagini."
         ctaText="Attiva Render AI Ora"
-        ctaOnClick={() => window.open("https://wa.me/393000000000?text=Ciao%2C%20vorrei%20attivare%20i%20Render%20AI%20di%20Edilizia.io", "_blank")}
+        ctaOnClick={() => { MetaPixel.contact({ content_name: "WhatsApp — Render AI" }); MetaPixel.lead({ content_name: "Attiva Render AI" }); window.open("https://wa.me/393000000000?text=Ciao%2C%20vorrei%20attivare%20i%20Render%20AI%20di%20Edilizia.io", "_blank"); }}
         countdown={countdown}
       />
 

@@ -32,11 +32,17 @@ const RenderParagraph = ({ html }: { html: string }) => {
     .replace(/\*\*(.*?)\*\*/g, "<strong class='text-foreground font-semibold'>$1</strong>")
     .replace(/\n/g, "<br/>");
 
-  // Sanitize to prevent XSS
-  const cleanHtml = DOMPurify.sanitize(rawHtml, {
-    ALLOWED_TAGS: ["strong", "em", "br", "a"],
-    ALLOWED_ATTR: ["href", "class", "target", "rel"],
-  });
+  // Sanitize to prevent XSS. DOMPurify richiede il DOM del browser: durante il
+  // prerender SSG (Node) non è disponibile, quindi usiamo il raw — il contenuto
+  // blog è statico e fidato (src/data/blogPosts.ts, non input utente) e sul
+  // client viene comunque sanificato all'idratazione.
+  const cleanHtml =
+    typeof window !== "undefined"
+      ? DOMPurify.sanitize(rawHtml, {
+          ALLOWED_TAGS: ["strong", "em", "br", "a"],
+          ALLOWED_ATTR: ["href", "class", "target", "rel"],
+        })
+      : rawHtml;
 
   return (
     <p

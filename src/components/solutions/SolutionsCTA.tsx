@@ -1,6 +1,7 @@
 import { useState, FormEvent, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Check, Loader2 } from "lucide-react";
+import { MetaPixel } from "@/lib/metaPixel";
 
 const SolutionsCTA = () => {
   const ref = useRef(null);
@@ -13,6 +14,7 @@ const SolutionsCTA = () => {
     setStatus("loading");
     await new Promise((r) => setTimeout(r, 1500));
     setStatus("success");
+    MetaPixel.lead({ content_name: "Form Sessione Gratuita — Soluzioni", content_category: form.settore || "edilizia" });
   };
 
   const inputClass = "w-full bg-neutral-700 border border-neutral-600 rounded-[10px] px-4 py-3.5 text-white font-display text-[15px] placeholder:text-neutral-500 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all";

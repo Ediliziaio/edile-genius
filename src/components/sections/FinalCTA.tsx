@@ -2,6 +2,7 @@ import { useState, FormEvent } from "react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { Check, Loader2 } from "lucide-react";
+import { MetaPixel } from "@/lib/metaPixel";
 
 const FinalCTA = () => {
   const ref = useRef(null);
@@ -16,6 +17,7 @@ const FinalCTA = () => {
       // Webhook placeholder
       await new Promise((r) => setTimeout(r, 1500));
       setStatus("success");
+      MetaPixel.lead({ content_name: "Form Prenota Demo — Home", content_category: form.settore || "edilizia" });
     } catch {
       setStatus("error");
     }

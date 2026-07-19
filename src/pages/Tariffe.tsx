@@ -72,10 +72,40 @@ const Section = ({ children, className = "", id }: { children: React.ReactNode; 
 
 /* ═══════════════ PAGE ═══════════════ */
 const Tariffe = () => {
-  usePageSEO({
+  const seoTags = usePageSEO({
     title: "Quanto Puoi Risparmiare — Edilizia.io | AI per Imprese Edili",
     description: "Scopri quanto puoi risparmiare e guadagnare con l'AI di Edilizia.io: più appuntamenti, meno costi, margini maggiori. Prenota una demo gratuita di 15 minuti.",
     canonical: "/tariffe",
+    jsonLd: [
+      {
+        "@type": "Product",
+        name: "Agente AI per l'Edilizia — Edilizia.io",
+        description:
+          "Agente Vocale AI, Render AI e Preventivatore AI per imprese edili italiane. Nessun vincolo, disdici quando vuoi.",
+        brand: { "@type": "Brand", name: "Edilizia.io" },
+        offers: {
+          "@type": "Offer",
+          priceCurrency: "EUR",
+          price: "147",
+          priceSpecification: {
+            "@type": "UnitPriceSpecification",
+            price: "147",
+            priceCurrency: "EUR",
+            unitText: "MONTH",
+          },
+          availability: "https://schema.org/InStock",
+          url: "https://edilizia.io/tariffe",
+        },
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: faqs.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      },
+    ],
   });
 
   /* ROI calculator */
@@ -93,6 +123,7 @@ const Tariffe = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {seoTags}
       <Navbar />
 
       {/* ── HERO ── */}

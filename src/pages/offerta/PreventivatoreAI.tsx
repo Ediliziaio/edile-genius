@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { usePageSEO } from "@/hooks/usePageSEO";
+import { MetaPixel } from "@/lib/metaPixel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -68,12 +70,14 @@ const comparisonRows = [
 ];
 
 export default function OffertaPreventivatoreAI() {
-  usePageSEO({ title: "Offerta Preventivatore AI — Edilizia.io", description: "Preventivi professionali in 30 secondi con calcolo IVA, detrazioni e PDF automatico. Offerta riservata." });
+  const seoTags = usePageSEO({ title: "Offerta Preventivatore AI — Edilizia.io", description: "Preventivi professionali in 30 secondi con calcolo IVA, detrazioni e PDF automatico. Offerta riservata.", canonical: "/offerta/preventivatore-ai", noindex: true });
   useNoIndex();
   const countdown = useCountdown("offerta_prev_first_visit");
+  useEffect(() => { MetaPixel.viewContent({ content_name: "Offerta Preventivatore AI", content_category: "offerta" }); }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {seoTags}
       <OfferHeader ctaText="Attiva il Preventivatore AI" onCtaClick={scrollToCta} navLinks={navLinks} />
 
       {/* ===== HERO ===== */}
@@ -266,7 +270,7 @@ export default function OffertaPreventivatoreAI() {
                 key={plan.name}
                 {...plan}
                 setupFree={!countdown.expired}
-                onCta={() => window.open(`https://wa.me/3900000000?text=${encodeURIComponent(`Ciao, vorrei attivare il piano ${plan.name} del Preventivatore AI di Edilizia.io`)}`, "_blank")}
+                onCta={() => { MetaPixel.contact({ content_name: `WhatsApp — Preventivatore AI (${plan.name})` }); MetaPixel.lead({ content_name: `Attiva Preventivatore AI — ${plan.name}` }); window.open(`https://wa.me/3900000000?text=${encodeURIComponent(`Ciao, vorrei attivare il piano ${plan.name} del Preventivatore AI di Edilizia.io`)}`, "_blank"); }}
               />
             ))}
           </div>
@@ -306,7 +310,7 @@ export default function OffertaPreventivatoreAI() {
         headline="Ogni preventivo fatto a mano è tempo rubato alla vendita."
         subtitle="Attiva il Preventivatore AI oggi. Da domani i tuoi preventivi si fanno da soli."
         ctaText="Attiva il Preventivatore AI Ora"
-        ctaOnClick={() => window.open(`https://wa.me/3900000000?text=${encodeURIComponent("Ciao, vorrei attivare il Preventivatore AI di Edilizia.io")}`, "_blank")}
+        ctaOnClick={() => { MetaPixel.contact({ content_name: "WhatsApp — Preventivatore AI" }); MetaPixel.lead({ content_name: "Attiva Preventivatore AI" }); window.open(`https://wa.me/3900000000?text=${encodeURIComponent("Ciao, vorrei attivare il Preventivatore AI di Edilizia.io")}`, "_blank"); }}
         countdown={countdown}
       />
 

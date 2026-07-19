@@ -86,10 +86,18 @@ const testimonials = [
 /* ───────────── COMPONENT ───────────── */
 
 const Garanzia = () => {
-  usePageSEO({
+  const seoTags = usePageSEO({
     title: "Garanzia 30 Giorni Soddisfatti o Rimborsati | Edilizia.io",
     description: "Zero rischi con la nostra garanzia 30 giorni. Se il tuo Agente AI non genera risultati misurabili, ti rimborsiamo al 100%. Nessuna domanda.",
     canonical: "/garanzia",
+    jsonLd: {
+      "@type": "FAQPage",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
   });
 
   const heroRef = useRef(null);
@@ -109,6 +117,7 @@ const Garanzia = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {seoTags}
       <Navbar />
       <main>
         {/* ═══════════ 1. HERO — Pattern Interrupt ═══════════ */}

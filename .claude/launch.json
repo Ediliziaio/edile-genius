@@ -1,11 +1,6 @@
 {
   "version": "0.0.1",
   "configurations": [
-    {
-      "name": "dev",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "port": 8080
-    }
+    { "name": "edile-genius", "runtimeExecutable": "npx", "runtimeArgs": ["vite", "--port", "8085"], "port": 8085 }
   ]
 }

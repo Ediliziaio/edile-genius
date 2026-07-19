@@ -1,5 +1,4 @@
 import { useParams, Link, Navigate } from "react-router-dom";
-import { useEffect } from "react";
 import { Calendar, Clock, Tag } from "lucide-react";
 import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
@@ -23,7 +22,65 @@ const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
   const post = blogPosts.find((p) => p.slug === slug);
 
-  usePageSEO({
+  // Article + Breadcrumb (+ FAQ) JSON-LD, renderizzato nell'HTML statico via SEOHead.
+  const jsonLd = post
+    ? ((): Record<string, unknown>[] => {
+        const wordCount = post.sections.reduce(
+          (acc, s) => acc + s.content.split(/\s+/).length + (s.callout?.split(/\s+/).length || 0),
+          0,
+        );
+        const graph: Record<string, unknown>[] = [
+          {
+            "@type": "Article",
+            headline: post.title,
+            description: post.description,
+            abstract: post.summary || post.description,
+            image: post.heroImage,
+            datePublished: post.date,
+            dateModified: post.dateModified || post.date,
+            wordCount,
+            articleSection: post.category,
+            keywords: post.tags.join(", "),
+            inLanguage: "it-IT",
+            author: {
+              "@type": "Person",
+              name: "Florin Andriciuc",
+              jobTitle: "Founder & CEO",
+              worksFor: { "@type": "Organization", name: "AEDIX" },
+              url: "https://edilizia.io/chi-siamo",
+            },
+            publisher: {
+              "@type": "Organization",
+              name: "Edilizia.io",
+              url: "https://edilizia.io",
+              logo: { "@type": "ImageObject", url: "https://edilizia.io/favicon.png" },
+            },
+            mainEntityOfPage: `https://edilizia.io/blog/${post.slug}`,
+          },
+          {
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Home", item: "https://edilizia.io" },
+              { "@type": "ListItem", position: 2, name: "Blog", item: "https://edilizia.io/blog" },
+              { "@type": "ListItem", position: 3, name: post.title, item: `https://edilizia.io/blog/${post.slug}` },
+            ],
+          },
+        ];
+        if (post.faqs && post.faqs.length > 0) {
+          graph.push({
+            "@type": "FAQPage",
+            mainEntity: post.faqs.map((f) => ({
+              "@type": "Question",
+              name: f.question,
+              acceptedAnswer: { "@type": "Answer", text: f.answer },
+            })),
+          });
+        }
+        return graph;
+      })()
+    : undefined;
+
+  const seoTags = usePageSEO({
     title: post ? `${post.title} | Edilizia.io` : "Articolo non trovato | Edilizia.io",
     description: post?.description ?? "",
     canonical: post ? `/blog/${post.slug}` : "/blog",
@@ -37,81 +94,8 @@ const BlogPost = () => {
           section: post.category,
         }
       : undefined,
+    jsonLd,
   });
-
-  // Inject Article + Breadcrumb JSON-LD
-  useEffect(() => {
-    if (!post) return;
-
-    const wordCount = post.sections.reduce(
-      (acc, s) => acc + s.content.split(/\s+/).length + (s.callout?.split(/\s+/).length || 0),
-      0
-    );
-
-    const articleJsonLd = {
-      "@context": "https://schema.org",
-      "@type": "Article",
-      headline: post.title,
-      description: post.description,
-      image: post.heroImage,
-      datePublished: post.date,
-      dateModified: post.dateModified || post.date,
-      wordCount,
-      articleSection: post.category,
-      author: { "@type": "Organization", name: "Edilizia.io" },
-      publisher: {
-        "@type": "Organization",
-        name: "Edilizia.io",
-        url: "https://edilizia.io",
-      },
-      mainEntityOfPage: `https://edilizia.io/blog/${post.slug}`,
-    };
-
-    const breadcrumbJsonLd = {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Home", item: "https://edilizia.io" },
-        { "@type": "ListItem", position: 2, name: "Blog", item: "https://edilizia.io/blog" },
-        { "@type": "ListItem", position: 3, name: post.title, item: `https://edilizia.io/blog/${post.slug}` },
-      ],
-    };
-
-    const inject = (id: string, data: object) => {
-      let script = document.querySelector(`script[data-jsonld="${id}"]`) as HTMLScriptElement | null;
-      if (!script) {
-        script = document.createElement("script");
-        script.type = "application/ld+json";
-        script.setAttribute("data-jsonld", id);
-        document.head.appendChild(script);
-      }
-      script.textContent = JSON.stringify(data);
-      return script;
-    };
-
-    const s1 = inject("article", articleJsonLd);
-    const s2 = inject("breadcrumb", breadcrumbJsonLd);
-
-    let s3: HTMLScriptElement | null = null;
-    if (post.faqs && post.faqs.length > 0) {
-      const faqJsonLd = {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        mainEntity: post.faqs.map((f) => ({
-          "@type": "Question",
-          name: f.question,
-          acceptedAnswer: { "@type": "Answer", text: f.answer },
-        })),
-      };
-      s3 = inject("faqpage", faqJsonLd);
-    }
-
-    return () => {
-      s1?.remove();
-      s2?.remove();
-      s3?.remove();
-    };
-  }, [post]);
 
   if (!post) return <Navigate to="/blog" replace />;
 
@@ -120,6 +104,7 @@ const BlogPost = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {seoTags}
       <Navbar />
       <ScrollProgress />
 
@@ -163,6 +148,9 @@ const BlogPost = () => {
             <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold uppercase tracking-wider text-[10px]">
               {post.category}
             </span>
+            <span className="flex items-center gap-1">
+              Di <span className="font-semibold text-foreground">Florin Andriciuc</span>, Founder AEDIX
+            </span>
           </div>
           <h1 className="text-3xl md:text-4xl font-display font-extrabold text-foreground leading-tight">
             {post.title}
@@ -188,6 +176,29 @@ const BlogPost = () => {
           alt={post.heroImageAlt}
           className="w-full rounded-2xl mb-10 aspect-video object-cover"
         />
+
+        {/* In sintesi — answer block estraibile dagli AI (AEO) */}
+        {post.summary && (
+          <div className="mb-8 rounded-2xl border-l-4 border-primary bg-primary/5 p-6">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-primary mb-2">In sintesi</h2>
+            <p className="text-[17px] leading-relaxed text-foreground">{post.summary}</p>
+          </div>
+        )}
+
+        {/* Punti chiave — featured-snippet / AEO */}
+        {post.keyTakeaways && post.keyTakeaways.length > 0 && (
+          <div className="mb-10 rounded-2xl border border-border bg-muted/40 p-6">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-foreground mb-3">Punti chiave</h2>
+            <ul className="space-y-2">
+              {post.keyTakeaways.map((k, i) => (
+                <li key={i} className="flex gap-3 text-[15px] leading-relaxed text-muted-foreground">
+                  <span className="mt-1 shrink-0 h-1.5 w-1.5 rounded-full bg-primary" />
+                  <span>{k}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Table of Contents */}
         {post.sections.length > 2 && (

@@ -7,6 +7,10 @@
   <url><loc>https://edilizia.io/come-funziona</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edilizia.io/garanzia</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://edilizia.io/tariffe</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <!-- Legali -->
+  <url><loc>https://edilizia.io/privacy-policy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://edilizia.io/cookie-policy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://edilizia.io/termini-di-servizio</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <!-- Per Chi È - Dimensione -->
   <url><loc>https://edilizia.io/per-chi-e/artigiani-micro-imprese</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edilizia.io/per-chi-e/piccole-imprese</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
