@@ -7,6 +7,7 @@
   <url><loc>https://edilizia.io/come-funziona</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edilizia.io/garanzia</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://edilizia.io/tariffe</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://edilizia.io/edilizia-in-cloud</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <!-- Legali -->
   <url><loc>https://edilizia.io/privacy-policy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://edilizia.io/cookie-policy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
@@ -29,6 +30,7 @@
   <url><loc>https://edilizia.io/per-chi-e/progettisti-studi-tecnici</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <!-- Blog -->
   <url><loc>https://edilizia.io/blog</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://edilizia.io/blog/gestionale-edilizia-cloud-ediliziaincloud</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edilizia.io/blog/agenti-vocali-ai-edilizia</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edilizia.io/blog/intelligenza-artificiale-serramenti</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edilizia.io/blog/automazione-preventivi-edilizia</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>

@@ -1,12 +1,13 @@
 import { useState, FormEvent } from "react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Check, Loader2 } from "lucide-react";
-import { MetaPixel } from "@/lib/metaPixel";
 
 const FinalCTA = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const navigate = useNavigate();
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [form, setForm] = useState({ nome: "", email: "", telefono: "", settore: "" });
 
@@ -16,8 +17,8 @@ const FinalCTA = () => {
     try {
       // Webhook placeholder
       await new Promise((r) => setTimeout(r, 1500));
-      setStatus("success");
-      MetaPixel.lead({ content_name: "Form Prenota Demo — Home", content_category: form.settore || "edilizia" });
+      // L'evento Lead scatta sulla pagina /grazie (più affidabile del submit).
+      navigate(`/grazie?from=home-demo&settore=${encodeURIComponent(form.settore || "")}`);
     } catch {
       setStatus("error");
     }

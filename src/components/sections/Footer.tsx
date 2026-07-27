@@ -23,6 +23,7 @@ const footerCols: { title: string; links: FooterLink[] }[] = [
       { label: "Soluzioni", href: "/soluzioni" },
       { label: "Blog", href: "/blog" },
       { label: "Per Chi È", href: "/per-chi-e" },
+      { label: "EdiliziaInCloud", href: "/edilizia-in-cloud" },
     ],
   },
 ];

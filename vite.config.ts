@@ -60,6 +60,8 @@ export default defineConfig(({ isSsrBuild }) => ({
         "/garanzia",
         "/tariffe",
         "/blog",
+        "/edilizia-in-cloud",
+        "/grazie",
         "/privacy-policy",
         "/cookie-policy",
         "/termini-di-servizio",

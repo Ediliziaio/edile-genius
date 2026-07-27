@@ -46,6 +46,8 @@ const OffertaPreventivatoreAI = lazy(() => import("./pages/offerta/Preventivator
 const OffertaPacchettoCompleto = lazy(() => import("./pages/offerta/PacchettoCompleto"));
 const OffertaUnica = lazy(() => import("./pages/OffertaUnica"));
 const LegalPage = lazy(() => import("./pages/LegalPage"));
+const EdiliziaInCloud = lazy(() => import("./pages/EdiliziaInCloud"));
+const Grazie = lazy(() => import("./pages/Grazie"));
 
 // Lazy-loaded SuperAdmin pages
 const SuperAdminDashboard = lazy(() => import("./pages/superadmin/Dashboard"));
@@ -210,6 +212,8 @@ export const routes: RouteRecord[] = [
       { path: "privacy-policy", element: <SafeRoute><LegalPage doc="privacy" /></SafeRoute> },
       { path: "cookie-policy", element: <SafeRoute><LegalPage doc="cookie" /></SafeRoute> },
       { path: "termini-di-servizio", element: <SafeRoute><LegalPage doc="termini" /></SafeRoute> },
+      { path: "edilizia-in-cloud", element: <SafeRoute><EdiliziaInCloud /></SafeRoute> },
+      { path: "grazie", element: <SafeRoute><Grazie /></SafeRoute> },
 
       // ── Rotte client-only (auth / offerte / share) — NON prerenderizzate ──
       { path: "login", element: <Login /> },

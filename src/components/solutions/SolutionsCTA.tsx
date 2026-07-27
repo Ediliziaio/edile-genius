@@ -1,11 +1,12 @@
 import { useState, FormEvent, useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { Check, Loader2 } from "lucide-react";
-import { MetaPixel } from "@/lib/metaPixel";
 
 const SolutionsCTA = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const navigate = useNavigate();
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
   const [form, setForm] = useState({ nome: "", email: "", telefono: "", settore: "" });
 
@@ -13,8 +14,8 @@ const SolutionsCTA = () => {
     e.preventDefault();
     setStatus("loading");
     await new Promise((r) => setTimeout(r, 1500));
-    setStatus("success");
-    MetaPixel.lead({ content_name: "Form Sessione Gratuita — Soluzioni", content_category: form.settore || "edilizia" });
+    // L'evento Lead scatta sulla pagina /grazie (più affidabile del submit).
+    navigate(`/grazie?from=soluzioni&settore=${encodeURIComponent(form.settore || "")}`);
   };
 
   const inputClass = "w-full bg-neutral-700 border border-neutral-600 rounded-[10px] px-4 py-3.5 text-white font-display text-[15px] placeholder:text-neutral-500 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all";

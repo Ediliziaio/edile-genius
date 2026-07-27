@@ -51,6 +51,104 @@ export interface BlogPost {
 }
 
 export const blogPosts: BlogPost[] = [
+  // ─── GESTIONALE EDILIZIA CLOUD — EDILIZIAINCLOUD ─────────────────────
+  {
+    slug: "gestionale-edilizia-cloud-ediliziaincloud",
+    title: "Gestionale per Imprese Edili: Perché il Cloud con AI Sta Sostituendo Excel (e Come Funziona EdiliziaInCloud)",
+    description: "Guida al gestionale edilizia cloud: cosa deve fare, perché Excel e i software generici non bastano più e come EdiliziaInCloud gestisce cantieri, fatture, margini e personale in un'unica piattaforma.",
+    date: "2026-06-10",
+    dateModified: "2026-07-01",
+    readTime: "16 min",
+    category: "Operativo",
+    tags: [
+      "gestionale edilizia cloud",
+      "gestionale imprese edili",
+      "software edilizia",
+      "EdiliziaInCloud",
+      "gestione cantieri software",
+      "controllo margini edilizia",
+      "digitalizzazione impresa edile",
+      "alternativa Excel cantieri"
+    ],
+    heroImage: heroGestioneCantiere,
+    heroImageAlt: "Gestionale edilizia cloud EdiliziaInCloud: dashboard cantieri, margini e fatturazione su computer e smartphone",
+    summary: "Un gestionale edilizia cloud riunisce in un'unica piattaforma cantieri, fatturazione elettronica, preventivi, margini, personale e CRM, accessibile anche da smartphone in cantiere. EdiliziaInCloud è il gestionale con AI costruito esclusivamente per le imprese edili italiane: sostituisce il mosaico di Excel, software generici e WhatsApp con un sistema unico, così il titolare vede in tempo reale quanto guadagna su ogni commessa.",
+    keyTakeaways: [
+      "Un gestionale edilizia cloud centralizza cantieri, fatture, preventivi, margini, personale e CRM in un'unica piattaforma accessibile da ufficio e da cantiere.",
+      "Excel e i gestionali generici non parlano la lingua dell'edilizia (SAL, ritenuta di garanzia, subappalto, DURC) e lasciano scoprire i margini solo a lavoro finito.",
+      "EdiliziaInCloud è 100% cloud: nessuna installazione né server, con app mobile e dati sincronizzati in tempo reale tra ufficio e squadre.",
+      "Il controllo dei margini in tempo reale è il vero motivo per digitalizzare: sapere quanto guadagni su ogni cantiere mentre è ancora aperto, non a consuntivo.",
+      "edilizia.io ed EdiliziaInCloud sono complementari: gli agenti AI acquisiscono e qualificano i clienti, il gestionale li porta dal preventivo alla consegna."
+    ],
+    sections: [
+      {
+        heading: "Perché Excel e i gestionali generici non bastano più a un'impresa edile",
+        content: "La maggior parte delle imprese edili italiane gestisce l'azienda con strumenti scollegati: Excel per i preventivi, un software separato per le fatture, WhatsApp per il cantiere, il commercialista per la contabilità e la testa del titolare per tutto il resto.\n\nFinché i cantieri sono uno o due, funziona. Quando diventano cinque, dieci, quindici in parallelo, il sistema collassa: i dati non tornano, i materiali si comprano \"a sentimento\", i preventivi restano fermi e il margine reale si scopre solo a lavoro finito — spesso più basso del previsto.\n\nIl problema non è il titolare, è lo strumento. Excel non avvisa una scadenza, non è aggiornato in tempo reale, non è accessibile dal cantiere e non conosce la ritenuta di garanzia, il SAL o il subappalto. I gestionali generici, nati per altri settori, chiedono di adattare l'edilizia al software invece del contrario.",
+        stats: [
+          { label: "Imprese edili che usano ancora Excel come strumento principale", value: "la maggioranza" },
+          { label: "Cantieri gestiti in parallelo prima che il metodo manuale collassi", value: "5+" },
+          { label: "Quando scopri il margine reale con Excel", value: "a fine lavoro" }
+        ],
+        callout: "Il vero costo di Excel non è il software gratis: è il margine che si erode senza che tu lo veda, cantiere dopo cantiere."
+      },
+      {
+        heading: "Cos'è un gestionale edilizia cloud (e cosa lo rende diverso)",
+        content: "Un gestionale edilizia cloud è una piattaforma web che riunisce in un unico posto tutti i processi di un'impresa di costruzioni: gestione dei cantieri, fatturazione elettronica, preventivi, controllo dei margini, finanza, gestione del personale e rapporto con i clienti.\n\nLa parola chiave è \"cloud\": non si installa nulla, non serve un server, si accede da browser in ufficio e da app mobile in cantiere, con i dati sincronizzati in tempo reale per tutti. La squadra carica foto e rapportini dal telefono, l'ufficio vede lo stato lavori aggiornato, il titolare controlla i margini da casa.\n\n<a href=\"https://www.ediliziaincloud.com/\" target=\"_blank\" rel=\"noopener noreferrer\"><strong>EdiliziaInCloud</strong></a> è un gestionale di questo tipo, ma con una differenza sostanziale: è costruito esclusivamente per l'edilizia italiana. Non è un software generico riadattato — parla la lingua del cantiere, del computo metrico, della cassa edile, del DURC e della fattura elettronica verso SDI.",
+        callout: "Cloud non vuol dire solo \"online\": vuol dire stessi dati, in tempo reale, per ufficio e cantiere — senza installazioni né passaggi manuali."
+      },
+      {
+        heading: "I moduli che servono davvero a un'impresa edile",
+        content: "Un buon gestionale edilizia non è un blocco monolitico: è modulare, così attivi ciò che ti serve e aggiungi il resto quando l'azienda cresce. Ecco le aree che fanno davvero la differenza in EdiliziaInCloud:\n\n**Cantieri e commesse** — pianificazione, stato lavori, SAL, foto, giornale dei lavori e app mobile: vedi ogni cantiere in tempo reale. (<a href=\"https://www.ediliziaincloud.com/funzionalita/gestione-cantieri/\" target=\"_blank\" rel=\"noopener noreferrer\">gestione cantieri</a>)\n\n**Fatturazione elettronica e fisco** — fatture attive e passive verso SDI, DDT digitali, cassetto SDI, registro IVA e ritenute di garanzia. (<a href=\"https://www.ediliziaincloud.com/funzionalita/fatturazione-elettronica/\" target=\"_blank\" rel=\"noopener noreferrer\">fatturazione elettronica</a>)\n\n**Preventivi e render AI** — preventivi professionali in minuti e render fotorealistici per chiudere più contratti. (<a href=\"https://www.ediliziaincloud.com/funzionalita/preventivi-edilizia/\" target=\"_blank\" rel=\"noopener noreferrer\">preventivi edilizia</a>)\n\n**Finanza e margini** — cruscotto aziendale, prima nota, tesoreria e scadenzario per sapere sempre quanto hai in cassa e quanto guadagni.\n\n**Personale** — presenze, timbrature GPS, cedolini, ferie e permessi di operai e tecnici.\n\n**CRM, marketing e AI** — pipeline vendite, automazioni e agenti AI che qualificano i lead e fissano appuntamenti.",
+        stats: [
+          { label: "Moduli attivabili on demand", value: "modulare" },
+          { label: "Accesso", value: "web + app cantiere" },
+          { label: "Adempimenti SDI", value: "attivi e passivi" }
+        ]
+      },
+      {
+        heading: "Il controllo dei margini: il vero motivo per digitalizzare",
+        content: "Se c'è un solo motivo per portare un'impresa edile nel cloud, è questo: sapere quanto guadagni davvero su ogni cantiere mentre il cantiere è ancora aperto, non tre mesi dopo la consegna.\n\nCon i fogli sparsi, il margine è un numero che si calcola a consuntivo, quando ormai non puoi più intervenire. Con un gestionale come EdiliziaInCloud, ogni costo — materiali, manodopera, subappalti, ordini d'acquisto — viene agganciato alla commessa in tempo reale. Il cruscotto ti dice subito se un cantiere sta erodendo il margine previsto, così puoi correggere prima che il danno sia fatto.\n\nÈ la differenza tra guidare guardando lo specchietto retrovisore e guidare guardando la strada. Il preventivo dice quanto \"dovresti\" guadagnare; il gestionale ti dice quanto stai guadagnando adesso.",
+        callout: "Il preventivo è una promessa. Il margine in tempo reale è la verità: è lì che un gestionale edilizia si ripaga da solo."
+      },
+      {
+        heading: "Fatturazione elettronica e adempimenti senza stress",
+        content: "La burocrazia è una delle voci che divora più tempo in un'impresa edile: fatture elettroniche, DDT, ritenute di garanzia, IVA, DURC, congruità della manodopera. Ogni scadenza mancata è un rischio concreto.\n\nEdiliziaInCloud gestisce l'intero ciclo della fatturazione elettronica verso il Sistema di Interscambio — fatture attive e passive — con DDT digitali, cassetto SDI e registro IVA integrati. Le scadenze non le devi più ricordare a mente: il sistema le monitora e ti avvisa in anticipo.\n\nIl risultato è un'impresa che resta in regola senza trasformare il titolare in un impiegato amministrativo. Meno tempo su documenti e scadenze, più tempo su cantieri e clienti.",
+        stats: [
+          { label: "Ciclo fatturazione", value: "attiva + passiva SDI" },
+          { label: "Documenti gestiti", value: "fatture, DDT, IVA" },
+          { label: "Scadenze", value: "monitorate in automatico" }
+        ]
+      },
+      {
+        heading: "Dal cantiere allo smartphone: l'app mobile che tiene tutto allineato",
+        content: "Il cantiere non è in ufficio, e un gestionale che vive solo sul computer dell'amministrazione serve a metà. La forza di un gestionale edilizia cloud è l'app mobile: il capocantiere carica foto, rapportini e stato lavori dal telefono, gli operai timbrano con il GPS, l'ufficio vede tutto aggiornato senza una telefonata.\n\nCon EdiliziaInCloud le informazioni si muovono nella direzione giusta senza passaggi manuali: quello che succede in cantiere è immediatamente visibile a chi gestisce commesse, fatture e margini. Niente più fine giornata passata a ricostruire cos'è successo dai messaggi WhatsApp sparsi.\n\nÈ pensata per chi lavora con le mani, non per informatici: se il tuo capocantiere sa mandare una foto su WhatsApp, sa usare l'app.",
+        callout: "Un gestionale che non arriva in cantiere è un archivio. Uno che ci arriva è un sistema operativo per l'azienda."
+      },
+      {
+        heading: "edilizia.io + EdiliziaInCloud: prima acquisisci, poi gestisci",
+        content: "Un'impresa edile ha due problemi distinti: trovare clienti e gestire i lavori. edilizia.io ed EdiliziaInCloud, entrambi del gruppo AEDIX, risolvono le due metà.\n\nedilizia.io porta e qualifica i clienti: agenti vocali AI che rispondono a ogni chiamata 24 ore su 24, render fotorealistici e preventivatore automatico per non perdere una richiesta e chiudere più contratti. È la parte che riempie il funnel.\n\nEdiliziaInCloud prende il testimone da lì: una volta acquisito il cliente, gestisce il preventivo definitivo, il cantiere, i materiali, la fatturazione e i margini fino alla consegna. Il lead intercettato dall'AI non si perde in un foglio Excel: diventa una commessa sotto controllo.\n\nInsieme coprono l'intero ciclo — dal primo squillo alla fattura finale — senza buchi e senza dati che spariscono nel passaggio da un sistema all'altro.",
+        callout: "Gli agenti AI di edilizia.io riempiono il cantiere di lavoro. EdiliziaInCloud fa in modo che quel lavoro sia anche profittevole."
+      },
+      {
+        heading: "Come scegliere il gestionale giusto e migrare senza fermare l'attività",
+        content: "Scegliere un gestionale edilizia significa valutare tre cose: che sia fatto per l'edilizia (non un software generico), che sia in cloud e mobile (arriva in cantiere), e che copra il ciclo completo (dal preventivo al margine, non solo le fatture).\n\nEdiliziaInCloud nasce come alternativa concreta a Excel e ai gestionali tradizionali. Puoi confrontarlo direttamente con gli strumenti che usi oggi — Excel, PriMus, TeamSystem, Edilnet — e vedere cosa cambia in termini di tempo e controllo.\n\nIl timore più comune è la migrazione: \"perdo i miei dati?\", \"devo fermare l'azienda?\". La risposta è no: EdiliziaInCloud prevede un percorso di migrazione assistita che porta anagrafiche e dati nel nuovo sistema senza bloccare l'attività. Il modo migliore per capire se fa per te è provare la <a href=\"https://www.ediliziaincloud.com/demo/\" target=\"_blank\" rel=\"noopener noreferrer\">demo gratuita</a> sul tuo caso reale.",
+        stats: [
+          { label: "Criteri di scelta", value: "verticale + cloud + ciclo completo" },
+          { label: "Migrazione", value: "assistita, senza fermi" },
+          { label: "Prova", value: "demo gratuita" }
+        ]
+      }
+    ],
+    faqs: [
+      { question: "Quanto costa un gestionale edilizia cloud come EdiliziaInCloud?", answer: "Il costo di un gestionale edilizia cloud dipende dai moduli attivati e dalla dimensione dell'impresa. EdiliziaInCloud è modulare, quindi si parte dalle funzioni che servono davvero (ad esempio cantieri e fatturazione) e si aggiungono le altre quando l'azienda cresce. Per i piani aggiornati e una stima sul tuo caso conviene consultare la pagina prezzi e richiedere una demo gratuita." },
+      { question: "EdiliziaInCloud sostituisce il commercialista?", answer: "No, lo affianca. EdiliziaInCloud gestisce fatturazione elettronica, DDT, registro IVA, prima nota e scadenzario, così i dati arrivano al commercialista già ordinati e in tempo reale. Il commercialista continua a occuparsi di dichiarazioni e consulenza fiscale, ma con molto meno lavoro manuale di raccolta documenti." },
+      { question: "Serve essere pratici di computer per usare un gestionale edilizia?", answer: "No. EdiliziaInCloud è pensato per chi lavora in cantiere, non per informatici: l'app mobile funziona come le app che già usi ogni giorno e il capocantiere carica foto, rapportini e timbrature con pochi tap. L'obiettivo è semplificare il lavoro, non aggiungerne." },
+      { question: "Posso migrare a EdiliziaInCloud da Excel o da PriMus/TeamSystem?", answer: "Sì. EdiliziaInCloud è nato come alternativa a Excel e ai gestionali tradizionali come PriMus, TeamSystem ed Edilnet, con un percorso di migrazione assistita che porta dati e anagrafiche nel nuovo sistema senza fermare l'attività dell'impresa." },
+      { question: "Che differenza c'è tra edilizia.io ed EdiliziaInCloud?", answer: "edilizia.io ed EdiliziaInCloud sono due strumenti complementari del gruppo AEDIX: edilizia.io acquisisce e qualifica i clienti con agenti vocali AI, render e preventivatore, mentre EdiliziaInCloud gestisce l'azienda dal preventivo alla consegna (cantieri, fatture, margini, personale). Insieme coprono l'intero ciclo dell'impresa edile." },
+      { question: "EdiliziaInCloud è adatto anche a piccole imprese e artigiani edili?", answer: "Sì. Grazie alla struttura modulare, EdiliziaInCloud si adatta a piccole, medie e grandi imprese, oltre che a impiantisti, serramentisti, ristrutturatori e installatori fotovoltaico. Una ditta piccola può iniziare con pochi moduli essenziali e ampliare nel tempo." }
+    ]
+  },
+
   // ─── ARTICOLO 1: AGENTI VOCALI AI EDILIZIA ───────────────────────────
   {
     slug: "agenti-vocali-ai-edilizia",
