@@ -9,6 +9,7 @@ import ScrollProgress from "@/components/custom/ScrollProgress";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { blogPosts } from "@/data/blogPosts";
 import { usePageSEO } from "@/hooks/usePageSEO";
+import { BLOG_SEO } from "@/data/blogSeo";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -81,8 +82,8 @@ const BlogPost = () => {
     : undefined;
 
   const seoTags = usePageSEO({
-    title: post ? `${post.title} | Edilizia.io` : "Articolo non trovato | Edilizia.io",
-    description: post?.description ?? "",
+    title: post ? (BLOG_SEO[post.slug]?.title ?? `${post.title} | Edilizia.io`) : "Articolo non trovato | Edilizia.io",
+    description: post ? (BLOG_SEO[post.slug]?.description ?? post.description) : "",
     canonical: post ? `/blog/${post.slug}` : "/blog",
     ogImage: post?.heroImage,
     ogType: "article",

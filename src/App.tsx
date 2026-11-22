@@ -15,6 +15,7 @@ import SubdomainRouter from "./components/SubdomainRouter";
 import MetaPixelPageView from "./components/MetaPixelPageView";
 import { Loader2 } from "lucide-react";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import RouteError from "./components/RouteError";
 
 // Eagerly loaded (landing + auth)
 import Index from "./pages/Index";
@@ -186,6 +187,7 @@ export const routes: RouteRecord[] = [
   {
     path: "/",
     element: <RootLayout />,
+    errorElement: <RouteError />,
     children: [
       // ── Pagine pubbliche (prerenderizzate) ──
       { index: true, element: <Index /> },

@@ -24,7 +24,7 @@ const Solutions = () => {
 
   const seoTags = usePageSEO({
     title: "Soluzioni AI per Imprese Edili e Progettisti | Edilizia.io",
-    description: "Agenti e strumenti AI per infissi, fotovoltaico, ristrutturazioni, imprese edili e studi tecnici: automazione, preventivazione, render AI, documenti e gestione cantieri.",
+    description: "45 soluzioni AI per infissi, fotovoltaico, ristrutturazioni, imprese edili, gare d'appalto e studi tecnici: automazione, preventivi, render e cantiere.",
     canonical: "/soluzioni",
     jsonLd: {
       "@type": "FAQPage",

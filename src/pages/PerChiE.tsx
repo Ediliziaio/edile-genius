@@ -38,7 +38,7 @@ const CategoryCard = ({ cat, index }: { cat: PerChiECategory; index: number }) =
 
 const PerChiE = () => {
   const seoTags = usePageSEO({
-    title: "Per Chi È — Soluzioni AI per Imprese Edili e Studi Tecnici | Edilizia.io",
+    title: "Per Chi È: AI per Imprese Edili e Studi Tecnici | Edilizia.io",
     description: "Soluzioni AI per artigiani, PMI, general contractor, serramentisti, fotovoltaico, ristrutturazioni, impiantisti e per architetti, ingegneri e geometri.",
     canonical: "/per-chi-e",
   });

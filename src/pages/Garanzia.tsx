@@ -88,7 +88,7 @@ const testimonials = [
 const Garanzia = () => {
   const seoTags = usePageSEO({
     title: "Garanzia sui Risultati 30 Giorni | Edilizia.io",
-    description: "Se entro 30 giorni dall'avvio il sistema AI non raggiunge i risultati concordati nel progetto, ti rimborsiamo quanto pagato per quel sistema. Per imprese edili e studi tecnici.",
+    description: "Se entro 30 giorni il sistema AI non raggiunge i risultati concordati, ti rimborsiamo quanto pagato per quel sistema. Per imprese edili e studi tecnici.",
     canonical: "/garanzia",
     jsonLd: {
       "@type": "FAQPage",

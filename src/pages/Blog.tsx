@@ -12,7 +12,7 @@ const Blog = () => {
 
   const seoTags = usePageSEO({
     title: "Blog — AI e Innovazione nell'Edilizia | Edilizia.io",
-    description: "Articoli, guide e casi studio sull'intelligenza artificiale applicata al settore edile italiano. Scopri come l'AI trasforma serramenti, fotovoltaico e ristrutturazioni.",
+    description: "Guide e casi studio sull'intelligenza artificiale per l'edilizia: preventivi, cantiere, gare, marketing, serramenti, fotovoltaico e ristrutturazioni.",
     canonical: "/blog",
     jsonLd: {
       "@type": "CollectionPage",

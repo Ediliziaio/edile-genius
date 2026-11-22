@@ -82,7 +82,7 @@ export const SERVIZI_DETTAGLIO: ServizioDettaglio[] = [
   },
   {
     slug: "preventivazione-ai",
-    seoTitle: "Preventivazione AI per l'Edilizia — Preventivi, Computi e Offerte | Edilizia.io",
+    seoTitle: "Preventivazione AI per l'Edilizia: Preventivi e Computi",
     seoDescription:
       "Preventivi da nota vocale, foto o testo sul tuo listino, computo metrico e stima preliminare, confronto offerte fornitori e richiamo dei preventivi scaduti.",
     eyebrow: "Preventivazione AI",
@@ -133,9 +133,9 @@ export const SERVIZI_DETTAGLIO: ServizioDettaglio[] = [
   },
   {
     slug: "render-ai",
-    seoTitle: "Render AI Fotorealistici per l'Edilizia — Infissi, Bagni, Facciate | Edilizia.io",
+    seoTitle: "Render AI per l'Edilizia: Infissi, Bagni, Facciate",
     seoDescription:
-      "Render AI da una foto dello stato di fatto: infissi, bagno, facciata, persiane, pavimento, stanza e tetto. Per imprese che vogliono chiudere più trattative e progettisti che presentano le varianti.",
+      "Render AI fotorealistici dalla foto dello stato di fatto: infissi, bagni, facciate, pavimenti, tetti. Il cliente vede il lavoro finito prima di firmare.",
     eyebrow: "Render AI",
     heroTitolo: "Il cliente vede il lavoro finito",
     heroEvidenza: "prima ancora di firmare.",
@@ -183,9 +183,9 @@ export const SERVIZI_DETTAGLIO: ServizioDettaglio[] = [
   },
   {
     slug: "ai-per-progettisti",
-    seoTitle: "AI per Architetti, Ingegneri e Geometri — Strumenti per Studi Tecnici | Edilizia.io",
+    seoTitle: "AI per Architetti, Ingegneri e Geometri | Edilizia.io",
     seoDescription:
-      "Strumenti AI per studi tecnici: filtro delle richieste, sintesi di capitolati e bandi, bozze di computi e relazioni, render per il committente, aggiornamenti in direzione lavori. Il progetto e la firma restano tuoi.",
+      "Strumenti AI per studi tecnici: filtro delle richieste, capitolati, computi, relazioni, render e direzione lavori. Il progetto e la firma restano tuoi.",
     eyebrow: "AI per progettisti",
     heroTitolo: "Più tempo per il progetto,",
     heroEvidenza: "meno tempo su telefono e carte.",
@@ -282,9 +282,9 @@ export const SERVIZI_DETTAGLIO: ServizioDettaglio[] = [
   },
   {
     slug: "gare-e-appalti-ai",
-    seoTitle: "AI per le Gare d'Appalto in Edilizia — Bandi, Requisiti, Offerta Tecnica | Edilizia.io",
+    seoTitle: "AI per Gare d'Appalto in Edilizia | Edilizia.io",
     seoDescription:
-      "Monitoraggio dei bandi, analisi di requisiti e convenienza, sintesi di disciplinare e capitolato, checklist documentale, bozze di offerta tecnica e analisi prezzi per imprese edili e studi tecnici.",
+      "Monitoraggio bandi, analisi dei requisiti, checklist di gara e bozze di offerta tecnica con l'AI. Per imprese edili, general contractor e studi tecnici.",
     eyebrow: "Gare e appalti",
     heroTitolo: "Più gare valutate, meno esclusioni,",
     heroEvidenza: "con lo stesso ufficio gare.",
@@ -332,9 +332,9 @@ export const SERVIZI_DETTAGLIO: ServizioDettaglio[] = [
   },
   {
     slug: "sicurezza-e-conformita-ai",
-    seoTitle: "AI per la Sicurezza in Cantiere e la Conformità Documentale | Edilizia.io",
+    seoTitle: "AI per Sicurezza e Conformità in Cantiere",
     seoDescription:
-      "Bozze di POS e documenti di sicurezza, scadenzario di DURC, formazione e visite mediche, verifica documentale dei subappaltatori e controlli da foto in cantiere nel rispetto di privacy e Statuto dei lavoratori.",
+      "Bozze di POS, scadenze di DURC, formazione e visite mediche, documenti dei subappaltatori: la sicurezza di cantiere tenuta in ordine con l'AI.",
     eyebrow: "Sicurezza e conformità",
     heroTitolo: "Documenti in regola e scadenze sotto controllo,",
     heroEvidenza: "senza rincorrere nessuno.",
@@ -379,9 +379,9 @@ export const SERVIZI_DETTAGLIO: ServizioDettaglio[] = [
   },
   {
     slug: "cantiere-e-acquisti-ai",
-    seoTitle: "AI per Cantiere, Acquisti e Magazzino nelle Imprese Edili | Edilizia.io",
+    seoTitle: "AI per Cantiere, Acquisti e Magazzino | Edilizia.io",
     seoDescription:
-      "Previsione dei ritardi sul cronoprogramma, avanzamento lavori da foto e rapportini, ordini materiali in base all'avanzamento, lettura di DDT e fatture fornitori e controllo sugli ordini.",
+      "Previsione dei ritardi, avanzamento dalle foto, ordini al momento giusto, DDT e fatture controllati sugli ordini: cantiere e acquisti collegati dall'AI.",
     eyebrow: "Cantiere e acquisti",
     heroTitolo: "Cantieri che non si fermano",
     heroEvidenza: "per un materiale mancante.",
@@ -426,9 +426,9 @@ export const SERVIZI_DETTAGLIO: ServizioDettaglio[] = [
   },
   {
     slug: "marketing-e-vendite-ai",
-    seoTitle: "Marketing AI per Imprese Edili e Studi Tecnici — Contenuti, Recensioni, Follow-up | Edilizia.io",
+    seoTitle: "Marketing AI per Imprese Edili e Studi Tecnici",
     seoDescription:
-      "Testi di annunci, post e pagine per il mercato locale, gestione delle recensioni Google, follow-up automatici dopo sopralluogo e preventivo e analisi dei canali che portano clienti veri.",
+      "Contenuti per il tuo territorio, recensioni Google, follow-up dopo sopralluogo e preventivo: più richieste dal web e nessun contatto perso.",
     eyebrow: "Marketing AI",
     heroTitolo: "Più richieste dal web,",
     heroEvidenza: "nessun contatto lasciato indietro.",
@@ -468,7 +468,7 @@ export const SERVIZI_DETTAGLIO: ServizioDettaglio[] = [
     slug: "progettazione-sistemi-ai",
     seoTitle: "Sistemi AI su Misura per Imprese Edili e Studi Tecnici | Edilizia.io",
     seoDescription:
-      "Progettiamo e sviluppiamo sistemi di intelligenza artificiale su misura: mappatura dei processi, progetto, sviluppo di agenti e automazioni, collegamento a gestionale, email, Excel e WhatsApp.",
+      "Sistemi di intelligenza artificiale su misura per imprese edili e studi tecnici: analisi dei processi, progetto, sviluppo e integrazione con i tuoi strumenti.",
     eyebrow: "Sistemi su misura",
     heroTitolo: "Quando serve qualcosa di tuo,",
     heroEvidenza: "lo costruiamo attorno a te.",

@@ -177,9 +177,9 @@ const faqs = [
 
 export default function EdiliziaInCloud() {
   const seoTags = usePageSEO({
-    title: "EdiliziaInCloud: il Gestionale Cloud con AI per Imprese Edili | Edilizia.io",
+    title: "EdiliziaInCloud: Gestionale Cloud con AI per Imprese Edili",
     description:
-      "Cos'è EdiliziaInCloud, il gestionale cloud con AI per imprese edili: cantieri, fatturazione elettronica, preventivi, margini, personale e CRM in un'unica piattaforma. Guida completa e link utili.",
+      "EdiliziaInCloud è il gestionale cloud con AI per imprese edili: cantieri, fatturazione elettronica, preventivi, margini, personale e CRM in un unico posto.",
     canonical: "/edilizia-in-cloud",
     jsonLd: [
       {

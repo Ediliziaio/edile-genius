@@ -28,7 +28,7 @@ const Footer = lazy(() => import("@/components/sections/Footer"));
 const Index = () => {
   const seoTags = usePageSEO({
     title: "Edilizia.io — Intelligenza Artificiale per Imprese Edili e Progettisti",
-    description: "Sistemi di intelligenza artificiale per imprese edili, architetti, ingegneri e geometri: automazione, agenti vocali, preventivazione, render AI, documenti tecnici e consulenza. Primo sistema attivo in 7 giorni.",
+    description: "Sistemi AI per imprese edili, architetti, ingegneri e geometri: automazione, preventivi, render, gare d'appalto, cantiere e consulenza. Attivi in circa 7 giorni.",
     canonical: "/",
   });
 

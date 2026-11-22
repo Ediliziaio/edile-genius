@@ -123,8 +123,8 @@ const heroStats = [
 
 const ComeFunziona = () => {
   const seoTags = usePageSEO({
-    title: "Come Funziona — Il Tuo Sistema AI Attivo in Circa 7 Giorni | Edilizia.io",
-    description: "Il processo in 3 step per attivare il tuo sistema AI, per imprese edili e studi tecnici: analisi e progetto, sviluppo e test, avvio in circa 7 giorni. Zero configurazione da parte tua.",
+    title: "Come Funziona: Sistema AI Attivo in 7 Giorni | Edilizia.io",
+    description: "Come attiviamo il tuo sistema AI in 3 passi: analisi e progetto, sviluppo e test, avvio in circa 7 giorni. Per imprese edili e studi tecnici.",
     canonical: "/come-funziona",
   });
 

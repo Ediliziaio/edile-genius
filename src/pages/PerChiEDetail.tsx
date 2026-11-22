@@ -10,13 +10,21 @@ import AnimatedBadge from "@/components/custom/AnimatedBadge";
 import SectorServicesGrid from "@/components/perchie/SectorServicesGrid";
 import { perChiECategories } from "@/data/perChiE";
 
+/** Descrizione per Google: al massimo ~155 caratteri, tagliata su una parola intera. */
+const seoDescription = (text?: string) => {
+  if (!text) return "";
+  if (text.length <= 158) return text;
+  const cut = text.slice(0, 155);
+  return cut.slice(0, cut.lastIndexOf(" ")).replace(/[,;:]$/, "") + "…";
+};
+
 const PerChiEDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const cat = perChiECategories.find(c => c.slug === slug);
 
   const seoTags = usePageSEO({
     title: cat ? `${cat.name} — AI per l'Edilizia | Edilizia.io` : "Per Chi È | Edilizia.io",
-    description: cat?.heroSubtitle || "Soluzioni AI specializzate per il settore edile italiano.",
+    description: seoDescription(cat?.heroSubtitle) || "Soluzioni AI specializzate per il settore edile italiano.",
     canonical: `/per-chi-e/${slug}`,
   });
 

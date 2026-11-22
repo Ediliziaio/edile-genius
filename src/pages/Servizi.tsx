@@ -37,9 +37,9 @@ const Reveal = ({ children, className, delay = 0 }: { children: React.ReactNode;
 
 const Servizi = () => {
   const seoTags = usePageSEO({
-    title: "Servizi AI per Imprese Edili e Progettisti — Gare, Preventivi, Render, Cantiere | Edilizia.io",
+    title: "Servizi AI per Imprese Edili e Progettisti | Edilizia.io",
     description:
-      "Automazione AI, preventivazione, render, gare d'appalto, sicurezza e conformità, cantiere e acquisti, marketing, AI per progettisti, controllo margini, sistemi su misura, consulenza e formazione per imprese edili e studi tecnici.",
+      "12 servizi AI per imprese edili e studi tecnici: automazione, preventivi, render, gare d'appalto, sicurezza, cantiere, marketing, consulenza e formazione.",
     canonical: "/servizi",
     jsonLd: [
       {

@@ -4,6 +4,8 @@ import { motion, useMotionValue, useSpring } from "framer-motion";
 const CustomCursor = () => {
   const [isHovering, setIsHovering] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
+  // Sopra gli strumenti interattivi (editor dei flussi, nucleo animato) il cursore finto confonde: lo nascondiamo.
+  const [isHidden, setIsHidden] = useState(false);
   const cursorX = useMotionValue(0);
   const cursorY = useMotionValue(0);
   const ringX = useSpring(cursorX, { stiffness: 180, damping: 18 });
@@ -22,6 +24,7 @@ const CustomCursor = () => {
 
     const over = (e: MouseEvent) => {
       const t = e.target as HTMLElement;
+      setIsHidden(!!t.closest(".wb-root, .n3-visual, iframe"));
       if (t.closest("a, button, [role='button'], input, textarea, select")) {
         setIsHovering(true);
       }
@@ -45,7 +48,7 @@ const CustomCursor = () => {
       <motion.div
         className="fixed top-0 left-0 w-2.5 h-2.5 rounded-full bg-primary pointer-events-none z-[9999]"
         style={{ x: cursorX, y: cursorY, translateX: "-50%", translateY: "-50%" }}
-        animate={{ scale: isHovering ? 0 : 1 }}
+        animate={{ scale: isHovering || isHidden ? 0 : 1 }}
       />
       <motion.div
         className="fixed top-0 left-0 w-9 h-9 rounded-full border-[1.5px] pointer-events-none z-[9999]"
@@ -56,7 +59,7 @@ const CustomCursor = () => {
           translateY: "-50%",
           borderColor: isHovering ? "white" : "hsl(var(--primary) / 0.4)",
         }}
-        animate={{ scale: isHovering ? 1.5 : 1, opacity: isHovering ? 1 : 0.6 }}
+        animate={{ scale: isHovering ? 1.5 : 1, opacity: isHidden ? 0 : isHovering ? 1 : 0.6 }}
       />
     </>
   );

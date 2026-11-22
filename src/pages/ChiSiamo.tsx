@@ -50,8 +50,8 @@ const values = [
 
 const ChiSiamo = () => {
   const seoTags = usePageSEO({
-    title: "Chi Siamo — Intelligenza Artificiale per Imprese Edili e Progettisti | Edilizia.io",
-    description: "Nati in cantiere, non in ufficio. Edilizia.io sviluppa sistemi di intelligenza artificiale per imprese edili, architetti, ingegneri e geometri. Il progetto e la firma restano ai tecnici.",
+    title: "Chi Siamo — AI per l'Edilizia nata in Cantiere | Edilizia.io",
+    description: "Nati in cantiere, non in ufficio: Edilizia.io sviluppa sistemi di intelligenza artificiale per imprese edili, architetti, ingegneri e geometri.",
     canonical: "/chi-siamo",
   });
 
