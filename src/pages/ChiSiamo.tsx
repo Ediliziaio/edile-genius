@@ -53,6 +53,22 @@ const ChiSiamo = () => {
     title: "Chi Siamo — AI per l'Edilizia nata in Cantiere | Edilizia.io",
     description: "Nati in cantiere, non in ufficio: Edilizia.io sviluppa sistemi di intelligenza artificiale per imprese edili, architetti, ingegneri e geometri.",
     canonical: "/chi-siamo",
+    jsonLd: [
+      {
+        "@type": "AboutPage",
+        url: "https://edilizia.io/chi-siamo",
+        name: "Chi siamo — Edilizia.io",
+        about: { "@id": "https://edilizia.io/#organization" },
+        inLanguage: "it-IT",
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://edilizia.io/" },
+          { "@type": "ListItem", position: 2, name: "Chi siamo", item: "https://edilizia.io/chi-siamo" },
+        ],
+      },
+    ],
   });
 
   const heroRef = useRef(null);

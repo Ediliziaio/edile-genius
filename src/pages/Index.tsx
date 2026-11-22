@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { usePageSEO } from "@/hooks/usePageSEO";
+import { FAQ_HOME } from "@/data/faqHome";
 import AnnouncementBar from "@/components/sections/AnnouncementBar";
 import Navbar from "@/components/sections/Navbar";
 import ScrollProgress from "@/components/custom/ScrollProgress";
@@ -22,6 +23,7 @@ const Results = lazy(() => import("@/components/sections/Results"));
 const WhyUs = lazy(() => import("@/components/sections/WhyUs"));
 const WhyDifferent = lazy(() => import("@/components/sections/WhyDifferent"));
 const Guarantee = lazy(() => import("@/components/sections/Guarantee"));
+const HomeFAQ = lazy(() => import("@/components/sections/HomeFAQ"));
 const FinalCTA = lazy(() => import("@/components/sections/FinalCTA"));
 const Footer = lazy(() => import("@/components/sections/Footer"));
 
@@ -30,6 +32,22 @@ const Index = () => {
     title: "Edilizia.io — Intelligenza Artificiale per Imprese Edili e Progettisti",
     description: "Sistemi AI per imprese edili, architetti, ingegneri e geometri: automazione, preventivi, render, gare d'appalto, cantiere e consulenza. Attivi in circa 7 giorni.",
     canonical: "/",
+    jsonLd: [
+      {
+        "@type": "WebPage",
+        "@id": "https://edilizia.io/#webpage",
+        url: "https://edilizia.io/",
+        name: "Edilizia.io — Intelligenza Artificiale per Imprese Edili e Progettisti",
+        inLanguage: "it-IT",
+        isPartOf: { "@id": "https://edilizia.io/#website" },
+        about: { "@id": "https://edilizia.io/#organization" },
+        speakable: { "@type": "SpeakableSpecification", cssSelector: ["h1", "#domande-frequenti"] },
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: FAQ_HOME.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+      },
+    ],
   });
 
   return (
@@ -56,6 +74,7 @@ const Index = () => {
           <WhyUs />
           <WhyDifferent />
           <Guarantee />
+          <HomeFAQ />
           <FinalCTA />
         </Suspense>
       </main>

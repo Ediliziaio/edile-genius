@@ -4,9 +4,10 @@ import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
 import BlogArticle from "@/components/blog/BlogArticle";
 import BlogCTA from "@/components/blog/BlogCTA";
+import RelatedServices from "@/components/custom/RelatedServices";
 import SocialShareButtons from "@/components/blog/SocialShareButtons";
 import ScrollProgress from "@/components/custom/ScrollProgress";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import FaqList from "@/components/custom/FaqList";
 import { blogPosts } from "@/data/blogPosts";
 import { usePageSEO } from "@/hooks/usePageSEO";
 import { BLOG_SEO } from "@/data/blogSeo";
@@ -227,18 +228,7 @@ const BlogPost = () => {
         {post.faqs && post.faqs.length > 0 && (
           <section className="mt-16 mb-10">
             <h2 className="text-xl md:text-2xl font-bold text-foreground mb-6">Domande Frequenti</h2>
-            <Accordion type="single" collapsible className="space-y-3">
-              {post.faqs.map((faq, i) => (
-                <AccordionItem key={i} value={`faq-${i}`} className="border border-border rounded-xl px-5 data-[state=open]:border-primary/30 data-[state=open]:bg-primary/5 transition-colors">
-                  <AccordionTrigger className="text-left font-semibold text-foreground hover:no-underline py-4">
-                    {faq.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground leading-relaxed">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+            <FaqList items={post.faqs.map((f) => ({ q: f.question, a: f.answer }))} group="faq-articolo" />
           </section>
         )}
 
@@ -248,6 +238,7 @@ const BlogPost = () => {
         </div>
 
         {/* CTA */}
+        <RelatedServices pageKey={post.slug} title="Approfondisci i servizi collegati" className="py-10" />
         <BlogCTA />
 
         {/* Related */}

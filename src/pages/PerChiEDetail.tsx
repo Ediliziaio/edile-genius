@@ -8,6 +8,7 @@ import Footer from "@/components/sections/Footer";
 import Guarantee from "@/components/sections/Guarantee";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
 import SectorServicesGrid from "@/components/perchie/SectorServicesGrid";
+import RelatedServices from "@/components/custom/RelatedServices";
 import { perChiECategories } from "@/data/perChiE";
 
 /** Descrizione per Google: al massimo ~155 caratteri, tagliata su una parola intera. */
@@ -26,6 +27,33 @@ const PerChiEDetail = () => {
     title: cat ? `${cat.name} — AI per l'Edilizia | Edilizia.io` : "Per Chi È | Edilizia.io",
     description: seoDescription(cat?.heroSubtitle) || "Soluzioni AI specializzate per il settore edile italiano.",
     canonical: `/per-chi-e/${slug}`,
+    jsonLd: cat
+      ? [
+          {
+            "@type": "Service",
+            name: `Intelligenza artificiale per ${cat.name}`,
+            serviceType: "Sistemi di intelligenza artificiale per l'edilizia",
+            description: seoDescription(cat.heroSubtitle),
+            audience: { "@type": "BusinessAudience", name: cat.name },
+            areaServed: "IT",
+            provider: { "@type": "Organization", name: "Edilizia.io", url: "https://edilizia.io" },
+            url: `https://edilizia.io/per-chi-e/${cat.slug}`,
+            hasOfferCatalog: {
+              "@type": "OfferCatalog",
+              name: `Soluzioni AI per ${cat.name}`,
+              itemListElement: cat.services.map((sv) => ({ "@type": "Offer", itemOffered: { "@type": "Service", name: sv.title, description: sv.description } })),
+            },
+          },
+          {
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Home", item: "https://edilizia.io/" },
+              { "@type": "ListItem", position: 2, name: "Per chi è", item: "https://edilizia.io/per-chi-e" },
+              { "@type": "ListItem", position: 3, name: cat.name, item: `https://edilizia.io/per-chi-e/${cat.slug}` },
+            ],
+          },
+        ]
+      : undefined,
   });
 
   const problemsRef = useRef(null);
@@ -138,6 +166,8 @@ const PerChiEDetail = () => {
 
       {/* SERVIZI AI */}
       <SectorServicesGrid sectorName={cat.name} services={cat.services} />
+
+      <RelatedServices pageKey={cat.slug} title={`I servizi più utili per ${cat.name}`} />
 
 
       {/* ROI */}

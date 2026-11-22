@@ -6,7 +6,7 @@ import { usePageSEO } from "@/hooks/usePageSEO";
 import Navbar from "@/components/sections/Navbar";
 import WorkflowSection from "@/components/sections/WorkflowSection";
 import { SERVIZI, METODO, FAQ_SERVIZI } from "@/data/servizi";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import FaqList from "@/components/custom/FaqList";
 
 const InkOrbitFeatures = lazy(() => import("@/components/ui/ink-orbit-features"));
 const EicBand = lazy(() => import("@/components/sections/EicBand"));
@@ -238,14 +238,7 @@ const Servizi = () => {
               <span className="font-mono text-xs uppercase tracking-wider text-primary font-semibold">Domande frequenti</span>
               <h2 className="font-display text-[28px] md:text-[40px] font-extrabold leading-tight text-neutral-900">Prima di iniziare</h2>
             </Reveal>
-            <Accordion type="single" collapsible className="space-y-3">
-              {FAQ_SERVIZI.map((f, i) => (
-                <AccordionItem key={f.q} value={`faq-${i}`} className="rounded-xl border border-neutral-200 bg-background px-5">
-                  <AccordionTrigger className="text-left font-semibold text-neutral-900 hover:no-underline">{f.q}</AccordionTrigger>
-                  <AccordionContent className="text-neutral-500 leading-relaxed">{f.a}</AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+            <FaqList items={FAQ_SERVIZI} group="faq-servizi" />
           </div>
         </section>
 

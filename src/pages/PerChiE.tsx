@@ -41,6 +41,30 @@ const PerChiE = () => {
     title: "Per Chi È: AI per Imprese Edili e Studi Tecnici | Edilizia.io",
     description: "Soluzioni AI per artigiani, PMI, general contractor, serramentisti, fotovoltaico, ristrutturazioni, impiantisti e per architetti, ingegneri e geometri.",
     canonical: "/per-chi-e",
+    jsonLd: [
+      {
+        "@type": "CollectionPage",
+        url: "https://edilizia.io/per-chi-e",
+        name: "Per chi è — Soluzioni AI per imprese edili e studi tecnici",
+        inLanguage: "it-IT",
+        mainEntity: {
+          "@type": "ItemList",
+          itemListElement: [...dimensioneCategories, ...settoreCategories].map((c, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            name: c.name,
+            url: `https://edilizia.io/per-chi-e/${c.slug}`,
+          })),
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://edilizia.io/" },
+          { "@type": "ListItem", position: 2, name: "Per chi è", item: "https://edilizia.io/per-chi-e" },
+        ],
+      },
+    ],
   });
 
   return (

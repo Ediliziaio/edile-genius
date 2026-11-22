@@ -1,55 +1,73 @@
 # Edilizia.io
 
-> Edilizia.io è la prima azienda italiana di intelligenza artificiale specializzata esclusivamente per il settore edile. Progetta, sviluppa e integra sistemi di intelligenza artificiale su misura per imprese edili, serramentisti, installatori, progettisti e studi tecnici, e offre consulenza strategica sull'AI: automazione, preventivazione, render, gare d'appalto, sicurezza e conformità, cantiere e acquisti, marketing, controllo margini. Non fa progettazione edilizia: fornisce gli strumenti AI ai tecnici. Tra le soluzioni pronte: Agenti Vocali AI che rispondono e qualificano i lead 24/7, un Preventivatore AI che genera preventivi in pochi secondi e un sistema di Render AI che mostra al cliente il risultato dei lavori prima di iniziare.
+> Edilizia.io (gruppo AEDIX) sviluppa sistemi di intelligenza artificiale su misura per imprese edili, serramentisti, installatori, general contractor e per architetti, ingegneri e geometri: automazione, preventivi, render, gare d'appalto, sicurezza e conformità, cantiere e acquisti, marketing, controllo margini, consulenza e formazione. Non fa progettazione edilizia: il progetto e la firma restano dei tecnici.
 
-Edilizia.io nasce dall'esperienza diretta in cantiere (azienda di serramenti I-Profili S.r.l. e Marketing Edile): ogni strumento è stato testato su un'impresa edile reale prima di essere offerto ai clienti. Il posizionamento è "imprenditore edile per imprenditori edili", con un linguaggio concreto e orientato al ritorno economico (meno lead persi, meno costi operativi, più contratti chiusi).
+Informazioni chiave:
+- Nessun listino pubblico: i costi si definiscono su misura dopo una consulenza gratuita.
+- Primo sistema attivo in circa 7 giorni dall'approvazione del progetto (un agente vocale anche in 48 ore).
+- Garanzia sui risultati: se entro 30 giorni il sistema non raggiunge i risultati concordati, rimborso di quanto pagato per quel sistema.
+- Il gestionale del gruppo è EdiliziaInCloud; i sistemi si collegano anche a Excel, email, WhatsApp e ad altri gestionali.
+- Testo completo di servizi, soluzioni e FAQ: https://edilizia.io/llms-full.txt
 
 ## Servizi
 
-- [Servizi](https://edilizia.io/servizi): progettazione e sviluppo di sistemi AI su misura, consulenza strategica sull'AI, AI per progettisti e studi tecnici (capitolati, computi, relazioni, render), agenti vocali, preventivi e documenti automatici, formazione e affiancamento del team.
+- [Automazione AI dei processi](https://edilizia.io/servizi/automazione-ai): Agenti AI che si occupano del lavoro ripetitivo: telefono, WhatsApp, rapportini, assistenze e pratiche.
+- [Preventivazione AI](https://edilizia.io/servizi/preventivazione-ai): Preventivi, computi e stime preparati dall'AI con i tuoi listini, il tuo formato e i tuoi margini.
+- [Render AI fotorealistici](https://edilizia.io/servizi/render-ai): Da una foto dello stato di fatto, il cliente vede il lavoro finito: infissi, bagno, facciata, pavimenti, persiane, stanze e tetti.
+- [AI per architetti, ingegneri e geometri](https://edilizia.io/servizi/ai-per-progettisti): Non progettiamo al posto tuo: ti diamo l'AI che toglie le ore di carte, telefonate e documenti, così hai più tempo per il progetto.
+- [Controllo margini, amministrazione e analisi](https://edilizia.io/servizi/controllo-e-analisi): L'AI incrocia costi, avanzamento, fatture e vendite e ti dice in tempo dove stai guadagnando, dove no e cosa sta per scadere.
+- [Gare d'appalto con l'AI](https://edilizia.io/servizi/gare-e-appalti-ai): Dal monitoraggio dei bandi alla documentazione di gara: l'AI legge, verifica e prepara, il tuo ufficio gare decide e firma.
+- [Sicurezza e conformità di cantiere](https://edilizia.io/servizi/sicurezza-e-conformita-ai): Documenti di sicurezza, scadenze di imprese e lavoratori e controlli in cantiere tenuti in ordine dall'AI.
+- [Cantiere, acquisti e magazzino](https://edilizia.io/servizi/cantiere-e-acquisti-ai): Cronoprogramma, avanzamento, ordini e materiali: l'AI collega cantiere e ufficio acquisti e segnala i problemi prima che costino.
+- [Marketing e acquisizione clienti](https://edilizia.io/servizi/marketing-e-vendite-ai): Contenuti, campagne, recensioni e follow-up commerciali preparati con l'AI per portare più richieste qualificate.
+- [Sistemi AI su misura](https://edilizia.io/servizi/progettazione-sistemi-ai): Quando serve qualcosa di specifico, progettiamo e sviluppiamo il sistema AI attorno ai tuoi processi e ai tuoi dati.
+- [Consulenza strategica sull'AI](https://edilizia.io/servizi/consulenza-ai): Ti aiutiamo a capire dove l'AI rende davvero, quanto costa e in che ordine introdurla.
+- [Formazione e affiancamento](https://edilizia.io/servizi/formazione-e-affiancamento): Insegniamo al tuo team a usare l'AI ogni giorno e restiamo al tuo fianco dopo l'avvio.
 
-## Pagine dei servizi
+## Pagine principali
 
-- [Automazione AI](https://edilizia.io/servizi/automazione-ai)
-- [Preventivazione AI](https://edilizia.io/servizi/preventivazione-ai)
-- [Render AI](https://edilizia.io/servizi/render-ai)
-- [AI per architetti, ingegneri e geometri](https://edilizia.io/servizi/ai-per-progettisti)
-- [Controllo margini e analisi](https://edilizia.io/servizi/controllo-e-analisi)
-- [Gare d'appalto con l'AI](https://edilizia.io/servizi/gare-e-appalti-ai)
-- [Sicurezza e conformità di cantiere](https://edilizia.io/servizi/sicurezza-e-conformita-ai)
-- [Cantiere, acquisti e magazzino](https://edilizia.io/servizi/cantiere-e-acquisti-ai)
-- [Marketing e acquisizione clienti](https://edilizia.io/servizi/marketing-e-vendite-ai)
-- [Sistemi AI su misura](https://edilizia.io/servizi/progettazione-sistemi-ai)
-- [Consulenza AI](https://edilizia.io/servizi/consulenza-ai)
-- [Formazione e affiancamento](https://edilizia.io/servizi/formazione-e-affiancamento)
+- [Home](https://edilizia.io/): panoramica, casi d'uso e domande frequenti.
+- [Servizi](https://edilizia.io/servizi): i 12 servizi, il metodo in 4 passi e le FAQ.
+- [Soluzioni](https://edilizia.io/soluzioni): 45 soluzioni AI per mestiere, gare d'appalto, progettisti e render.
+- [Come funziona](https://edilizia.io/come-funziona): analisi e progetto, sviluppo e test, avvio in circa 7 giorni.
+- [Garanzia](https://edilizia.io/garanzia): garanzia sui risultati a 30 giorni.
+- [Chi siamo](https://edilizia.io/chi-siamo): un'azienda nata in cantiere, nel gruppo AEDIX.
+- [EdiliziaInCloud](https://edilizia.io/edilizia-in-cloud): il gestionale cloud con AI per imprese edili del gruppo.
 
-## Soluzioni
+## Per chi è
 
-- [Agente Vocale AI](https://edilizia.io/servizi/automazione-ai): risponde H24 a ogni chiamata, qualifica il lead (materiale, dimensioni, budget, bonus fiscali) e prenota il sopralluogo. Zero chiamate perse.
-- [Render AI](https://edilizia.io/servizi/render-ai): trasforma una foto in un render fotorealistico del lavoro finito (bagno, facciata, pavimento, persiane, stanza, tetto) per aiutare il cliente a decidere.
-- [Preventivatore AI](https://edilizia.io/servizi/preventivazione-ai): genera preventivi professionali in PDF a partire da voce, foto o testo, sul listino dell'azienda.
-
-## Pagine chiave
-
-- [Soluzioni](https://edilizia.io/soluzioni): 45 soluzioni AI per infissi, fotovoltaico, ristrutturazioni, imprese edili, gare d'appalto, render e studi tecnici.
-- [Per Chi È](https://edilizia.io/per-chi-e): soluzioni per dimensione d'impresa e per mestiere (serramentisti, fotovoltaico, ristrutturazioni, impianti, coperture, ecc.).
-- [Come Funziona](https://edilizia.io/come-funziona): analisi e progetto, sviluppo e test, primo sistema attivo in circa 7 giorni.
-- [Garanzia](https://edilizia.io/garanzia): se entro 30 giorni dall'avvio il sistema non raggiunge i risultati concordati nel progetto, Edilizia.io rimborsa quanto pagato per quel sistema.
-- [Chi Siamo](https://edilizia.io/chi-siamo): la storia dell'azienda, nata in cantiere.
+- [Artigiani e Micro Imprese](https://edilizia.io/per-chi-e/artigiani-micro-imprese)
+- [Piccole Imprese](https://edilizia.io/per-chi-e/piccole-imprese)
+- [Medie Imprese](https://edilizia.io/per-chi-e/medie-imprese)
+- [Grandi Aziende e General Contractor](https://edilizia.io/per-chi-e/grandi-aziende-general-contractor)
+- [Serramentisti e Infissi](https://edilizia.io/per-chi-e/serramentisti-infissi)
+- [Installatori Fotovoltaico](https://edilizia.io/per-chi-e/installatori-fotovoltaico)
+- [Imprese di Ristrutturazione](https://edilizia.io/per-chi-e/imprese-ristrutturazione)
+- [Imprese Edili Generali](https://edilizia.io/per-chi-e/imprese-edili-generali)
+- [Posatori e Pavimentisti](https://edilizia.io/per-chi-e/posatori-pavimentisti)
+- [Lattonieri e Coperture](https://edilizia.io/per-chi-e/lattonieri-coperture)
+- [Impianti Idraulici e Termici](https://edilizia.io/per-chi-e/impianti-idraulici-termici)
+- [Impianti Elettrici](https://edilizia.io/per-chi-e/impianti-elettrici)
+- [Cartongessisti e Finiture](https://edilizia.io/per-chi-e/cartongessisti-finiture)
+- [Progettisti e Studi Tecnici](https://edilizia.io/per-chi-e/progettisti-studi-tecnici)
 
 ## Blog
 
-- [Blog](https://edilizia.io/blog): guide pratiche, casi studio e strategie sull'AI applicata all'edilizia (agenti vocali, automazione preventivi, gestione bonus, cantiere digitale, fotovoltaico).
-
-## Prezzi
-
-Edilizia.io non pubblica un listino: ogni progetto viene definito su misura dopo una consulenza gratuita.
-
-## Piattaforma gestionale
-
-- [EdiliziaInCloud](https://edilizia.io/edilizia-in-cloud): il gestionale cloud con AI per imprese edili (cantieri, fatturazione elettronica, preventivi, margini, personale, CRM). I sistemi AI di Edilizia.io si integrano con EdiliziaInCloud.
+- [Gestionale per Imprese Edili in Cloud con AI | Edilizia.io](https://edilizia.io/blog/gestionale-edilizia-cloud-ediliziaincloud)
+- [Agenti Vocali AI per l'Edilizia: Zero Chiamate Perse](https://edilizia.io/blog/agenti-vocali-ai-edilizia)
+- [Intelligenza Artificiale per Serramentisti | Edilizia.io](https://edilizia.io/blog/intelligenza-artificiale-serramenti)
+- [Automazione Preventivi in Edilizia con l'AI | Edilizia.io](https://edilizia.io/blog/automazione-preventivi-edilizia)
+- [AI per Installatori Fotovoltaico: Più Vendite | Edilizia.io](https://edilizia.io/blog/ai-fotovoltaico-vendite)
+- [Ridurre i Costi Operativi dell'Impresa Edile con l'AI](https://edilizia.io/blog/ridurre-costi-operativi-impresa-edile)
+- [Call Center AI per Imprese di Ristrutturazione](https://edilizia.io/blog/call-center-ai-ristrutturazioni)
+- [Bonus Edilizi e AI: Pratiche e Scadenze | Edilizia.io](https://edilizia.io/blog/bonus-edilizi-ai-gestione)
+- [Gestione Cantiere Digitale con l'AI | Edilizia.io](https://edilizia.io/blog/gestione-cantiere-digitale)
+- [Preventivi Online per l'Edilizia: Guida all'AI | Edilizia.io](https://edilizia.io/blog/preventivi-online-edilizia)
+- [CRM per l'Edilizia con Intelligenza Artificiale](https://edilizia.io/blog/crm-edilizia-intelligenza-artificiale)
+- [Marketing Digitale per Imprese Edili | Edilizia.io](https://edilizia.io/blog/marketing-digitale-imprese-edili)
+- [Sopralluoghi Virtuali con AI per l'Edilizia | Edilizia.io](https://edilizia.io/blog/sopralluoghi-virtuali-ai)
 
 ## Contatti
 
 - Email: info@edilizia.io
-- Prenotazione consulenza gratuita: https://edilizia.io/#cta-finale
+- Consulenza gratuita: https://edilizia.io/#cta-finale

@@ -8,7 +8,7 @@ import { SERVIZI } from "@/data/servizi";
 import { getServizioDettaglio } from "@/data/serviziDettaglio";
 import { solutions, settoreConfig } from "@/data/solutions";
 import ServiceFlowVisual from "@/components/ui/service-flow-visual";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import FaqList from "@/components/custom/FaqList";
 
 const EicBand = lazy(() => import("@/components/sections/EicBand"));
 const FinalCTA = lazy(() => import("@/components/sections/FinalCTA"));
@@ -69,7 +69,7 @@ const ServizioDetail = () => {
           {
             "@context": "https://schema.org",
             "@type": "FAQPage",
-            mainEntity: d.faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+            mainEntity: [...d.faq, { q: "Quanto costa?", a: "Non abbiamo un listino: ogni progetto è diverso. Dopo la consulenza gratuita ti presentiamo il progetto con costi, tempi e risparmio atteso." }].map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
           },
         ]
       : undefined,
@@ -266,16 +266,13 @@ const ServizioDetail = () => {
               <span className="font-mono text-xs uppercase tracking-wider text-primary font-semibold">Domande frequenti</span>
               <h2 className="font-display text-[28px] md:text-[40px] font-extrabold leading-tight text-neutral-900">{d.eyebrow}: le domande più comuni</h2>
             </Reveal>
-            <Accordion type="single" collapsible className="space-y-3">
-              {[...d.faq, { q: "Quanto costa?", a: "Non abbiamo un listino: ogni progetto è diverso. Dopo la consulenza gratuita ti presentiamo il progetto con costi, tempi e risparmio atteso." }].map(
-                (f, i) => (
-                  <AccordionItem key={f.q} value={`faq-${i}`} className="rounded-xl border border-neutral-200 bg-background px-5">
-                    <AccordionTrigger className="text-left font-semibold text-neutral-900 hover:no-underline">{f.q}</AccordionTrigger>
-                    <AccordionContent className="text-neutral-500 leading-relaxed">{f.a}</AccordionContent>
-                  </AccordionItem>
-                ),
-              )}
-            </Accordion>
+            <FaqList
+              items={[
+                ...d.faq,
+                { q: "Quanto costa?", a: "Non abbiamo un listino: ogni progetto è diverso. Dopo la consulenza gratuita ti presentiamo il progetto con costi, tempi e risparmio atteso." },
+              ]}
+              group={`faq-${slug}`}
+            />
           </div>
         </section>
 

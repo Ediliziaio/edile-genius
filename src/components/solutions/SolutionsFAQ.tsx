@@ -1,6 +1,6 @@
-import { useState, useRef } from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { useRef } from "react";
+import { motion, useInView } from "framer-motion";
+import FaqList from "@/components/custom/FaqList";
 
 export const faqs = [
   { q: "Posso attivare una sola soluzione o devo prenderle tutte?", a: "Puoi iniziare con una sola soluzione — la più urgente per la tua azienda. Molti clienti partono da ciò che pesa di più, spesso telefono o preventivi, e aggiungono il resto nel tempo. Non c'è obbligo di pacchetti. Cresci al tuo ritmo." },
@@ -14,7 +14,6 @@ export const faqs = [
 ];
 
 const SolutionsFAQ = () => {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-50px" });
 
@@ -31,42 +30,9 @@ const SolutionsFAQ = () => {
           </h2>
         </div>
 
-        <div className="space-y-3">
-          {faqs.map((faq, i) => {
-            const isOpen = openIndex === i;
-            return (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: i * 0.07, duration: 0.5, ease: [0.25, 1, 0.35, 1] }}
-                className={`bg-white border rounded-xl overflow-hidden transition-colors ${isOpen ? 'border-l-primary border-l-[3px] border-neutral-200' : 'border-neutral-200'}`}
-              >
-                <button
-                  className="w-full flex items-center justify-between px-6 py-5 text-left"
-                  onClick={() => setOpenIndex(isOpen ? null : i)}
-                >
-                  <span className="font-display font-semibold text-neutral-900 pr-4">{faq.q}</span>
-                  <motion.span animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.25, ease: "easeInOut" }}>
-                    <ChevronDown size={20} className="text-neutral-400 shrink-0" />
-                  </motion.span>
-                </button>
-                <AnimatePresence>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                    >
-                      <div className="px-6 pb-5 text-neutral-600 leading-relaxed">{faq.a}</div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            );
-          })}
-        </div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5 }}>
+          <FaqList items={faqs} group="faq-soluzioni" itemClassName="bg-white" />
+        </motion.div>
       </div>
     </section>
   );

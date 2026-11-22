@@ -8,12 +8,7 @@ import Guarantee from "@/components/sections/Guarantee";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
 import WorkflowSection from "@/components/sections/WorkflowSection";
 const InkOrbitFeatures = lazy(() => import("@/components/ui/ink-orbit-features"));
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import FaqList from "@/components/custom/FaqList";
 
 /* ── animation variants ── */
 const fadeUp = {
@@ -126,6 +121,26 @@ const ComeFunziona = () => {
     title: "Come Funziona: Sistema AI Attivo in 7 Giorni | Edilizia.io",
     description: "Come attiviamo il tuo sistema AI in 3 passi: analisi e progetto, sviluppo e test, avvio in circa 7 giorni. Per imprese edili e studi tecnici.",
     canonical: "/come-funziona",
+    jsonLd: [
+      {
+        "@type": "HowTo",
+        name: "Come attivare un sistema di intelligenza artificiale in un'impresa edile o in uno studio tecnico",
+        description: "Il percorso di Edilizia.io: analisi e progetto, sviluppo e test, avvio e affiancamento. Primo sistema attivo in circa 7 giorni.",
+        totalTime: "P7D",
+        step: steps.map((s, i) => ({ "@type": "HowToStep", position: i + 1, name: s.title, text: s.text })),
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://edilizia.io/" },
+          { "@type": "ListItem", position: 2, name: "Come funziona", item: "https://edilizia.io/come-funziona" },
+        ],
+      },
+    ],
   });
 
   const problemRef = useRef(null);
@@ -335,22 +350,7 @@ const ComeFunziona = () => {
               </motion.div>
 
               <motion.div variants={fadeUp}>
-                <Accordion type="single" collapsible className="space-y-3">
-                  {faqs.map((faq, i) => (
-                    <AccordionItem
-                      key={i}
-                      value={`faq-${i}`}
-                      className="bg-background border border-border rounded-xl px-6 overflow-hidden"
-                    >
-                      <AccordionTrigger className="font-display font-bold text-neutral-900 text-left hover:no-underline py-5">
-                        {faq.q}
-                      </AccordionTrigger>
-                      <AccordionContent className="text-neutral-500 leading-relaxed pb-5">
-                        {faq.a}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
+                <FaqList items={faqs} group="faq-come-funziona" />
               </motion.div>
             </motion.div>
           </div>

@@ -1,0 +1,740 @@
+# Edilizia.io — testo completo per motori di ricerca e assistenti AI
+
+> Edilizia.io (gruppo AEDIX) sviluppa sistemi di intelligenza artificiale su misura per imprese edili, serramentisti, installatori, general contractor e per architetti, ingegneri e geometri. Non fa progettazione edilizia: fornisce gli strumenti AI ai tecnici, il progetto e la firma restano del professionista. Non pubblica un listino: i costi si definiscono su misura dopo una consulenza gratuita. Primo sistema attivo in circa 7 giorni. Garanzia: se entro 30 giorni il sistema non raggiunge i risultati concordati, rimborsa quanto pagato per quel sistema. Il gestionale del gruppo è EdiliziaInCloud.
+
+Contatti: info@edilizia.io — consulenza gratuita: https://edilizia.io/#cta-finale
+
+## Domande frequenti
+### Cos'è Edilizia.io?
+Edilizia.io è un'azienda italiana del gruppo AEDIX che sviluppa sistemi di intelligenza artificiale su misura per imprese edili, serramentisti, installatori, general contractor e per architetti, ingegneri e geometri. Si occupa di automazione, preventivi, render, gare d'appalto, sicurezza, cantiere e consulenza.
+
+### Edilizia.io fa progettazione edilizia?
+No. Edilizia.io non progetta edifici e non firma pratiche: sviluppa gli strumenti di intelligenza artificiale che aiutano architetti, ingegneri, geometri e uffici tecnici a lavorare più in fretta. Il progetto, le scelte tecniche e la firma restano sempre del professionista.
+
+### Cosa può fare l'intelligenza artificiale per un'impresa edile?
+L'AI può rispondere alle chiamate e qualificare i clienti 24 ore su 24, preparare preventivi e computi dai listini dell'impresa, creare render del lavoro finito, trovare e analizzare bandi di gara, tenere sotto controllo sicurezza e scadenze, prevedere ritardi di cantiere, leggere DDT e fatture e calcolare i margini per commessa.
+
+### Quanto costa un sistema AI di Edilizia.io?
+Edilizia.io non ha un listino: ogni sistema viene progettato sui processi dell'azienda. Dopo una consulenza gratuita viene presentato un progetto con costi, tempi e risparmio atteso, e si decide se partire.
+
+### Quanto tempo serve per attivare l'AI in azienda?
+Dopo la consulenza e l'approvazione del progetto, il primo sistema AI è attivo di solito in circa 7 giorni. Un agente vocale per le chiamate può essere operativo anche in 48 ore.
+
+### Si può usare l'AI per le gare d'appalto?
+Sì. La giurisprudenza ha chiarito che usare l'AI non rende di per sé un'offerta inaffidabile, e alcuni bandi tipo ANAC chiedono di dichiarare se l'offerta tecnica è stata preparata con l'AI. Edilizia.io usa l'AI per monitorare i bandi, sintetizzare i documenti di gara e preparare bozze, sempre verificate e firmate dall'impresa.
+
+### Devo cambiare gestionale per usare l'AI?
+No. I sistemi di Edilizia.io si collegano agli strumenti già in uso: gestionale, Excel, email, cartelle condivise e WhatsApp. Chi cerca anche un gestionale può usare EdiliziaInCloud, il gestionale cloud del gruppo AEDIX, a cui i sistemi si collegano direttamente.
+
+### Cosa succede se il sistema AI non funziona?
+Edilizia.io offre una garanzia sui risultati: se entro 30 giorni dall'avvio il sistema non raggiunge i risultati concordati nel progetto, viene rimborsato quanto pagato per quel sistema.
+
+## Servizi
+### Automazione AI dei processi
+URL: https://edilizia.io/servizi/automazione-ai
+Agenti AI che si occupano del lavoro ripetitivo: telefono, WhatsApp, rapportini, assistenze e pratiche.
+Per chi: Imprese edili, serramentisti, installatori e studi tecnici che perdono tempo dietro a richieste e passaggi ripetitivi.
+Cosa fa:
+- Agente vocale 24/7: Risponde con voce naturale in italiano, qualifica la richiesta (lavoro, misure, budget, tempi) e fissa il sopralluogo in agenda.
+- Passaggio a una persona quando serve: Se la richiesta esce dal suo ambito, trasferisce la chiamata a te o al commerciale, oppure fissa un richiamo.
+- WhatsApp AI: Risponde ai clienti, raccoglie foto e documenti, manda aggiornamenti di cantiere e promemoria.
+- Rapportini dal cantiere: Ore, materiali e foto inviati dal capocantiere via WhatsApp diventano un rapportino ordinato per commessa.
+- Assistenze e garanzie: Le richieste post-vendita vengono classificate per urgenza, assegnate al tecnico giusto e seguite fino alla chiusura.
+- Pratiche sotto controllo: Raccolta documenti e scadenze per ENEA, GSE, CILA e SCIA. La firma resta sempre del professionista.
+Risultato: Nessuna chiamata persa, meno passaggi a mano e un team che lavora sulle cose che contano.
+Domande frequenti:
+- I clienti capiscono che parlano con un'AI? L'agente parla in italiano naturale, con pause e tono conversazionale, e gestisce interruzioni e cambi di argomento. Se il cliente lo chiede, l'agente dice di essere un assistente digitale: la trasparenza viene prima di tutto.
+- E se il cliente fa una domanda che l'AI non sa gestire? L'agente è configurato per passare la chiamata a te o al tuo commerciale quando la richiesta esce dal suo ambito. In alternativa prende nota e fissa un richiamo: il cliente non si perde.
+- Posso ascoltare le chiamate? Sì. Ogni chiamata viene registrata e trascritta, con il riepilogo della richiesta e il livello di qualifica del contatto.
+- Si collega ai miei strumenti? Sì: calendario, email, WhatsApp, CRM, Excel ed EdiliziaInCloud, il gestionale del nostro gruppo. Non devi cambiare il modo in cui lavori.
+
+### Preventivazione AI
+URL: https://edilizia.io/servizi/preventivazione-ai
+Preventivi, computi e stime preparati dall'AI con i tuoi listini, il tuo formato e i tuoi margini.
+Per chi: Uffici commerciali e tecnici che passano ore su preventivi, computi e confronto delle offerte.
+Cosa fa:
+- Preventivo da voce, foto o testo: Detti le misure in cantiere o mandi una foto: l'AI imposta il preventivo con le voci del tuo listino.
+- I tuoi listini, sempre aggiornati: Listini in Excel o CSV importati con prezzi, varianti e accessori. Funziona per serramenti, porte, persiane, fotovoltaico, impianti e ristrutturazioni.
+- IVA e detrazioni guidate: Poche domande su intervento, edificio e cliente, e il preventivo applica l'aliquota corretta.
+- Computo e stima preliminare: Da planimetrie e misure, una bozza di computo metrico con range di costo, da usare come base tecnica.
+- Confronto offerte fornitori: Le offerte vengono lette e messe a confronto su prezzo, tempi e condizioni, con un riepilogo per decidere.
+- Richiamo dei preventivi aperti: Chi non ha risposto viene ricontattato al momento giusto, per telefono o WhatsApp.
+Risultato: Preventivi professionali in minuti invece che in ore, con i margini sempre sotto controllo.
+Domande frequenti:
+- Posso caricare i listini dei miei fornitori? Sì, in Excel o CSV. Il sistema importa prezzi, varianti e accessori e li tiene aggiornati.
+- Funziona solo per i serramenti? No. Funziona per qualsiasi prodotto o lavorazione edile: serramenti, porte, persiane, tende, fotovoltaico, climatizzazione, ristrutturazioni. Basta configurare il catalogo.
+- I miei commerciali riusciranno a usarlo? Se sanno usare WhatsApp, sanno usare il preventivatore. È pensato per chi lavora in cantiere, non per informatici.
+- Posso allegare un render al preventivo? Sì: con il servizio Render AI, il render del lavoro finito si allega al PDF del preventivo.
+
+### Render AI fotorealistici
+URL: https://edilizia.io/servizi/render-ai
+Da una foto dello stato di fatto, il cliente vede il lavoro finito: infissi, bagno, facciata, pavimenti, persiane, stanze e tetti.
+Per chi: Imprese che vogliono chiudere più trattative e progettisti che devono presentare le varianti al committente.
+Cosa fa:
+- Infissi e persiane: Riconosce finestre, porte e oscuranti e li sostituisce mantenendo prospettiva, luce e ombre.
+- Bagno e stanze: Restyling leggero, rifacimento completo o sostituzione di singoli elementi, sulla foto reale.
+- Facciate e cappotto: Intonaci, colori, rivestimenti e cappotto visti sull'edificio del cliente.
+- Pavimenti: Gres, parquet, marmo o resina con pattern di posa, fughe e luce della stanza.
+- Tetti e coperture: Coppi, tegole, lamiera, ardesia, gronde, lucernari e pannelli solari integrati.
+- Prima/dopo da condividere: Confronto con cursore, esportazione in PDF e invio via WhatsApp o email.
+Risultato: Il cliente decide prima, perché vede il risultato e non deve immaginarlo.
+Domande frequenti:
+- I render sono abbastanza realistici da mostrare al cliente? Sì, per la fase di vendita e di scelta sono più che sufficienti. Non sostituiscono un render 3D fatto a mano per un progetto esecutivo, ma li hai in pochi secondi invece che in giorni.
+- Posso usarlo durante l'appuntamento? È pensato proprio per questo: scatti la foto, scegli il prodotto e mostri il render sul tablet o sul telefono, davanti al cliente.
+- Funziona anche per interni e facciate? Sì. Ci sono moduli per infissi, bagno, facciata, persiane, pavimento, stanza e tetto, ciascuno con opzioni dedicate.
+- Lo possono usare anche gli architetti? Sì: è utile per presentare le varianti al committente nelle prime fasi. Il progetto resta del professionista, il render aiuta a decidere prima.
+
+### AI per architetti, ingegneri e geometri
+URL: https://edilizia.io/servizi/ai-per-progettisti
+Non progettiamo al posto tuo: ti diamo l'AI che toglie le ore di carte, telefonate e documenti, così hai più tempo per il progetto.
+Per chi: Studi di architettura e ingegneria, geometri, direttori lavori e uffici tecnici d'impresa.
+Cosa fa:
+- Filtro delle richieste: Un agente vocale risponde a nome dello studio, capisce intervento, tempi e budget e ti passa solo gli incarichi concreti.
+- Sintesi di capitolati e bandi: Requisiti, voci, quantità e scadenze estratti dai PDF, con i punti critici da verificare.
+- Bozze di computi: Una prima impostazione del computo metrico da tavole, rilievi e prezzari, da completare e verificare.
+- Bozze di relazioni e documentazione: Relazioni tecniche e descrizioni nel formato del tuo studio, partendo da appunti, foto e note vocali.
+- Render per il committente: Varianti fotorealistiche dalla foto dello stato di fatto, per far decidere prima.
+- Supporto alla direzione lavori: Foto e note dal cantiere ordinate per commessa, bozze di verbali e aggiornamenti periodici al committente.
+- Supporto BIM: Estrazione di quantità dai modelli, controlli di coerenza e organizzazione della documentazione richiesta dai capitolati informativi.
+- Gare e concorsi: Sintesi di bandi di progettazione e concorsi, con requisiti, scadenze e documenti da preparare.
+Risultato: Ore recuperate ogni settimana. Il progetto e la firma restano sempre tuoi.
+Domande frequenti:
+- Fate progettazione edilizia? No. Edilizia.io sviluppa sistemi di intelligenza artificiale. Il progetto, le scelte tecniche e la firma restano sempre del professionista: l'AI prepara bozze e sintesi che tu verifichi.
+- Le bozze sono affidabili? Sono un punto di partenza, non un documento finito. Servono a togliere la pagina bianca e il lavoro di battitura; il controllo e la responsabilità restano tuoi.
+- Posso usare i modelli del mio studio? Sì. Configuriamo gli strumenti sui tuoi formati, intestazioni e modo di scrivere, così le bozze escono già nel tuo stile.
+- I documenti dei miei clienti restano riservati? Sì. I documenti servono solo a far funzionare gli strumenti del tuo studio e non vengono condivisi con altri.
+
+### Controllo margini, amministrazione e analisi
+URL: https://edilizia.io/servizi/controllo-e-analisi
+L'AI incrocia costi, avanzamento, fatture e vendite e ti dice in tempo dove stai guadagnando, dove no e cosa sta per scadere.
+Per chi: Titolari e direzione che vogliono numeri chiari ogni settimana, non a fine anno.
+Cosa fa:
+- Margine per commessa: Costi di materiali, manodopera e subappalti confrontati con il preventivo, commessa per commessa.
+- Avvisi fuori budget: Quando una commessa supera la soglia che decidi tu, ricevi un avviso con il motivo.
+- Report commerciali: Lead, preventivi, chiusure e tempi di risposta, per canale e per commerciale.
+- Riepilogo settimanale: Ogni settimana un riassunto chiaro per il titolare: cosa va bene, cosa no, cosa fare.
+- Fatture e scadenze: Fatture fornitori lette in automatico, scadenzario di incassi e pagamenti e solleciti ai clienti in ritardo.
+- Previsione di cassa: Entrate e uscite previste nelle prossime settimane, per non avere sorprese.
+Risultato: Decisioni prese sui numeri, prima che il problema diventi una perdita.
+Domande frequenti:
+- Devo inserire i dati a mano? No: il sistema legge i dati dalle fonti che usi già, come gestionale, fogli di calcolo, CRM e rapportini.
+- Funziona con EdiliziaInCloud? Sì. EdiliziaInCloud, il gestionale del nostro gruppo, contiene già cantieri, costi e fatture: l'analisi AI lavora direttamente su quei dati.
+- Chi vede i report? Decidi tu: titolare, direzione, responsabili di cantiere o commerciali, ognuno con i numeri che gli servono.
+
+### Gare d'appalto con l'AI
+URL: https://edilizia.io/servizi/gare-e-appalti-ai
+Dal monitoraggio dei bandi alla documentazione di gara: l'AI legge, verifica e prepara, il tuo ufficio gare decide e firma.
+Per chi: Imprese che partecipano a gare pubbliche e private, general contractor e studi tecnici che seguono le offerte.
+Cosa fa:
+- Monitoraggio bandi: Ricerca quotidiana delle gare per categorie, importi e zone che ti interessano, con avviso solo per quelle pertinenti.
+- Analisi partecipo / non partecipo: Requisiti, categorie, scadenze, criteri di valutazione e rischi messi a confronto con le capacità della tua impresa.
+- Sintesi e checklist: Disciplinare e capitolato riassunti, con l'elenco di documenti, dichiarazioni, garanzie e scadenze da rispettare.
+- Bozze di offerta tecnica: Impostazione delle relazioni e delle migliorie sui criteri di valutazione, partendo dalle vostre referenze e procedure.
+- Analisi prezzi e computo: Supporto all'offerta economica con computi, analisi prezzi e confronto con lo storico delle vostre commesse.
+- Chiarimenti e scadenze: Raccolta dei chiarimenti pubblicati e promemoria su sopralluoghi, quesiti e termini di presentazione.
+Risultato: Più gare valutate con lo stesso ufficio, meno esclusioni per un documento dimenticato.
+Domande frequenti:
+- Si può usare l'AI per preparare un'offerta di gara? Sì: la giurisprudenza ha chiarito che l'uso dell'AI non rende di per sé l'offerta inaffidabile. Alcuni bandi tipo ANAC chiedono però di dichiarare se l'offerta tecnica è stata preparata con l'AI: lo gestiamo in modo trasparente, e il contenuto resta sempre verificato e firmato da voi.
+- L'AI decide al posto nostro se partecipare? No. Prepara un'analisi chiara di requisiti, rischi e convenienza; la decisione resta del titolare e dell'ufficio gare.
+- Funziona anche per le gare con il BIM? Sì. Con l'obbligo BIM per le stazioni appaltanti, l'AI aiuta a leggere capitolati informativi e requisiti di gestione digitale e a organizzare la documentazione richiesta.
+- Serve un ufficio gare strutturato? No. Anche un'impresa piccola, con una sola persona che segue le gare, può valutarne molte di più con lo stesso tempo.
+
+### Sicurezza e conformità di cantiere
+URL: https://edilizia.io/servizi/sicurezza-e-conformita-ai
+Documenti di sicurezza, scadenze di imprese e lavoratori e controlli in cantiere tenuti in ordine dall'AI.
+Per chi: Imprese edili, general contractor, coordinatori della sicurezza e RSPP.
+Cosa fa:
+- Bozze di POS: Impostazione del Piano Operativo di Sicurezza con i dati del cantiere e delle lavorazioni, da verificare e firmare.
+- Scadenzario intelligente: DURC, formazione, visite mediche, attestati e mezzi: avvisi prima della scadenza a chi deve agire.
+- Verifica subappaltatori: Raccolta dei documenti via email o WhatsApp, controllo di completezza e date, solleciti automatici.
+- Checklist di cantiere da foto: Foto dei sopralluoghi organizzate per cantiere, con segnalazione dei punti da verificare.
+- Visione artificiale sui DPI: Dove l'azienda lo sceglie, controllo dell'uso dei dispositivi di protezione nel rispetto dell'art. 4 dello Statuto dei lavoratori e del GDPR.
+- Archivio per ispezioni: Tutti i documenti di cantiere ordinati e pronti da mostrare in caso di controllo.
+Risultato: Documenti sempre aggiornati e nessuna scadenza scoperta all'ultimo momento.
+Domande frequenti:
+- L'AI può firmare un POS o un PSC? No. L'AI prepara bozze e raccoglie i dati; la valutazione dei rischi e la firma restano del datore di lavoro, del coordinatore o del tecnico incaricato.
+- Il controllo con le telecamere è legale? Si può fare solo rispettando l'art. 4 dello Statuto dei lavoratori, il GDPR e l'AI Act, con accordo sindacale o autorizzazione quando richiesti. Lo progettiamo insieme a voi e ai vostri consulenti, e non è obbligatorio: molte aziende partono dallo scadenzario.
+- Funziona con i documenti che abbiamo già? Sì. Partiamo dal vostro archivio attuale, anche se è fatto di cartelle e PDF sparsi.
+
+### Cantiere, acquisti e magazzino
+URL: https://edilizia.io/servizi/cantiere-e-acquisti-ai
+Cronoprogramma, avanzamento, ordini e materiali: l'AI collega cantiere e ufficio acquisti e segnala i problemi prima che costino.
+Per chi: Imprese con più cantieri aperti, capicantiere, uffici acquisti e magazzini.
+Cosa fa:
+- Previsione dei ritardi: Dallo storico delle commesse e dall'avanzamento reale, segnala le attività che rischiano di slittare.
+- Avanzamento da foto e rapportini: Foto e rapportini del capocantiere diventano lo stato di avanzamento della commessa.
+- Ordini al momento giusto: Suggerisce cosa ordinare e quando, in base al cronoprogramma e ai tempi di consegna dei fornitori.
+- Lettura di DDT e fatture: Bolle e fatture lette da foto o PDF, confrontate con gli ordini, con segnalazione delle differenze.
+- Magazzino aggiornato: Entrate e uscite registrate dai documenti, materiale assegnato alla commessa giusta.
+- Meteo e squadre: Avvisi meteo sui cantieri all'aperto e supporto alla pianificazione delle squadre.
+Risultato: Cantieri che non si fermano per un materiale mancante e acquisti sempre allineati alle commesse.
+Domande frequenti:
+- Serve installare qualcosa in cantiere? No. Basta il telefono del capocantiere: foto e rapportini arrivano via WhatsApp o app.
+- Si collega al nostro gestionale? Sì: a EdiliziaInCloud, il gestionale del nostro gruppo, o al gestionale che usate già.
+- Le previsioni dei ritardi sono affidabili? Sono segnalazioni, non certezze: diventano più precise con lo storico delle vostre commesse e servono a intervenire in tempo.
+
+### Marketing e acquisizione clienti
+URL: https://edilizia.io/servizi/marketing-e-vendite-ai
+Contenuti, campagne, recensioni e follow-up commerciali preparati con l'AI per portare più richieste qualificate.
+Per chi: Imprese e studi tecnici che vogliono più contatti dal web e un commerciale che non perde nessuno.
+Cosa fa:
+- Contenuti per il tuo territorio: Testi per annunci, post e pagine con i lavori, le zone e il linguaggio dei tuoi clienti.
+- Recensioni Google: Richiesta di recensioni ai clienti soddisfatti e bozze di risposta a tutte le recensioni.
+- Follow-up automatici: Messaggi e richiami dopo sopralluogo e preventivo, al momento giusto e sul canale giusto.
+- Analisi dei canali: Quali campagne e quali canali portano contratti, non solo contatti.
+Risultato: Più richieste dal web e nessun contatto lasciato senza risposta.
+Domande frequenti:
+- Pubblicate contenuti senza il mio consenso? No. L'AI prepara testi e risposte, tu li approvi prima della pubblicazione.
+- Gestite anche le campagne pubblicitarie? Prepariamo testi, segmenti e misurazione dei risultati e collaboriamo con chi gestisce le tue campagne, o le impostiamo insieme a te.
+
+### Sistemi AI su misura
+URL: https://edilizia.io/servizi/progettazione-sistemi-ai
+Quando serve qualcosa di specifico, progettiamo e sviluppiamo il sistema AI attorno ai tuoi processi e ai tuoi dati.
+Per chi: Aziende e studi che vogliono un sistema loro, collegato agli strumenti che usano già.
+Cosa fa:
+- Mappatura dei processi: Ufficio, studio, cantiere: chi fa cosa, con quali dati e dove si perde tempo.
+- Progetto del sistema: Un documento chiaro con cosa fa il sistema, con quali dati, tempi e risultati attesi.
+- Agenti e automazioni dedicate: Sviluppiamo gli agenti AI e i flussi specifici del tuo modo di lavorare.
+- Integrazioni: Collegamento a EdiliziaInCloud o al tuo gestionale, email, Excel, cartelle condivise e WhatsApp.
+Risultato: Un sistema AI cucito sulla tua realtà, che lavora con i tuoi listini, documenti e modelli.
+Domande frequenti:
+- Quanto tempo serve? Dipende dal progetto. Per i sistemi più semplici bastano pochi giorni; per quelli più articolati ti diamo un calendario preciso nel progetto.
+- Il sistema resta mio? Il sistema è configurato sui tuoi dati e processi, e i dati restano della tua azienda. Le condizioni di utilizzo sono definite nel progetto.
+- Serve un gestionale specifico? No. Ci colleghiamo a quello che usi già. Se cerchi anche un gestionale, il nostro gruppo ha EdiliziaInCloud.
+
+### Consulenza strategica sull'AI
+URL: https://edilizia.io/servizi/consulenza-ai
+Ti aiutiamo a capire dove l'AI rende davvero, quanto costa e in che ordine introdurla.
+Per chi: Titolari d'impresa e di studio che vogliono decidere con numeri alla mano, prima di investire.
+Cosa fa:
+- Analisi dei processi: Come lavorate oggi, dove si perde tempo e quanto costa.
+- Attività da automatizzare: Una lista ordinata di cosa conviene affidare all'AI e cosa no.
+- Piano di introduzione: Priorità, tempi e responsabilità, un passo alla volta.
+- Stima del ritorno: Per ogni intervento, il risparmio di tempo e di costi atteso.
+Risultato: Una roadmap chiara: cosa fare subito, cosa dopo e cosa non conviene fare.
+Domande frequenti:
+- La consulenza mi obbliga ad acquistare qualcosa? No. La prima analisi è gratuita e serve a capire se e dove l'AI conviene. Se non conviene, te lo diciamo.
+- Serve preparare qualcosa? Basta conoscere come lavora la tua azienda. Se hai numeri su chiamate, preventivi o commesse, portali: rendono l'analisi più precisa.
+
+### Formazione e affiancamento
+URL: https://edilizia.io/servizi/formazione-e-affiancamento
+Insegniamo al tuo team a usare l'AI ogni giorno e restiamo al tuo fianco dopo l'avvio.
+Per chi: Imprese e studi che vogliono rendere autonomo il personale con gli strumenti AI.
+Cosa fa:
+- Formazione per ruolo: Sessioni pratiche per ufficio, tecnici, commerciali e progettisti, ciascuno sui suoi compiti.
+- Guide sui vostri casi: Procedure scritte con esempi presi dal vostro lavoro, da tenere a portata di mano.
+- Assistenza continua: Un riferimento a cui chiedere quando serve, e miglioramenti mensili degli strumenti.
+- Verifica dei risultati: Controlli periodici su come gli strumenti vengono usati e cosa stanno portando.
+Risultato: Un team che usa l'AI con sicurezza e un sistema che migliora mese dopo mese.
+Domande frequenti:
+- Serve essere esperti di tecnologia? No. La formazione parte da zero ed è costruita sui compiti di ogni giorno.
+- La formazione è in presenza? Si può fare in presenza o a distanza, a seconda delle esigenze del team.
+
+## Metodo di lavoro
+01. Analisi: Una prima consulenza gratuita per capire come lavori oggi, dove perdi tempo e dove l'AI può fare la differenza.
+02. Progetto: Ti presentiamo il progetto del sistema: cosa fa, con quali dati, quanto costa e quanto ti fa risparmiare.
+03. Sviluppo e avvio: Costruiamo il sistema, lo colleghiamo ai tuoi strumenti e lo mettiamo in funzione, di solito in pochi giorni.
+04. Affiancamento: Formiamo il team, misuriamo i risultati e miglioriamo il sistema nel tempo.
+
+## Domande frequenti sui servizi
+### Quanto costa?
+Non abbiamo un listino: ogni progetto è diverso. Dopo la consulenza gratuita ti presentiamo il progetto con costi, tempi e risparmio atteso, e decidi tu se partire.
+
+### Devo cambiare il gestionale o i programmi che uso?
+No. Progettiamo il sistema AI sopra gli strumenti che usi già: gestionale, Excel, cartelle condivise, email e WhatsApp. Se cerchi anche un gestionale, il nostro gruppo ha EdiliziaInCloud, a cui i sistemi si collegano direttamente.
+
+### Lavorate anche con architetti, ingegneri e geometri?
+Sì. Non facciamo progettazione al posto vostro: forniamo a studi di architettura, ingegneria e geometri gli strumenti AI per capitolati, computi, relazioni, render, filtro delle richieste e direzione lavori. Il progetto e la firma restano del professionista.
+
+### Quanto tempo serve per partire?
+Dopo la consulenza iniziale e l'approvazione del progetto, il primo sistema è operativo di solito in circa 7 giorni.
+
+### La consulenza iniziale è a pagamento?
+La prima analisi è gratuita: serve a capire se e dove l'AI conviene davvero alla tua azienda.
+
+### I miei dati restano riservati?
+Sì. I dati della tua azienda vengono usati solo per far funzionare il tuo sistema e non vengono condivisi con altre aziende.
+
+## Soluzioni (45)
+Catalogo: https://edilizia.io/soluzioni
+### Agente Vocale AI — Qualifica Lead & Sopralluogo [Infissi]
+Risponde H24 a ogni chiamata in entrata. Qualifica il lead con domande precise (materiale, numero vani, zona, bonus fiscale), valuta idoneità e prenota il sopralluogo del tecnico commerciale. Il venditore arriva preparato, non a vuoto.
+- Risposta immediata — zero lead persi per mancata risposta
+- Qualifica tecnica su materiale, dimensioni e budget
+- Agenda sopralluoghi gestita automaticamente
+Ideale per: Aziende di serramenti con 3+ commerciali, Showroom con alto volume di chiamate, Rivenditori multi-brand infissi
+
+### Configuratore AI Preventivi Infissi [Infissi]
+Il cliente inserisce misure e preferenze via chat o WhatsApp guidata. L'AI calcola il preventivo in tempo reale sul tuo listino, genera PDF professionale e lo invia automaticamente. Il commerciale interviene solo per chiudere.
+- Preventivo generato in 8 minuti — da 90 minuti manuali
+- PDF brandizzato inviato automaticamente al cliente
+- Integrazione diretta con il tuo listino prezzi aggiornato
+Ideale per: Serramentisti con alto volume preventivi, Aziende che vendono su misura, Rivenditori con listini multi-fornitore
+
+### Agente AI Pratiche ENEA & Ecobonus [Infissi]
+Raccoglie i documenti del cliente via chat (foto, fattura, dati catastali), verifica la completezza, pre-compila la pratica ENEA e la carica sul portale. Gestisce le richieste di integrazione e archivia tutto in modo strutturato.
+- Da 3-4 ore/pratica a meno di 20 minuti
+- Verifica automatica completezza documenti prima dell'invio
+- Monitoraggio stato pratica con notifiche automatiche al cliente
+Ideale per: Serramentisti che gestiscono Ecobonus, Studi tecnici partner, Aziende con alto volume pratiche
+
+### Riattivazione AI Preventivi Scaduti [Infissi]
+Analizza il CRM, identifica i preventivi dormienti per fascia temporale (30/90/180 giorni) e attiva sequenze di contatto personalizzate. Ogni messaggio è calibrato sul tipo di prodotto e sull'ultimo punto di contatto con il cliente.
+- 100% del database preventivi ricontattato in automatico
+- Sequenze differenziate per anzianità del preventivo
+- Recupero medio 18-22% dei preventivi non chiusi
+Ideale per: Aziende con CRM con storico > 1 anno, Serramentisti con tasso chiusura < 30%, Showroom con alto volume preventivi
+
+### Agente Vocale AI — Qualifica Lead Fotovoltaico [Fotovoltaico]
+Qualifica ogni lead con domande tecniche precise: consumo annuo kWh, superficie tetto, orientamento, ombreggiature, interesse per accumulo. Filtra i profili non idonei e prenota sopralluogo solo per i lead qualificati. Riduce sopralluoghi a vuoto del 65%.
+- Pre-qualifica tecnica completa prima del sopralluogo
+- Riduzione sopralluoghi inutili del 60-65%
+- Scheda tecnica completa consegnata al commerciale
+Ideale per: Installatori fotovoltaico con team commerciale, EPC contractor, Rivenditori pannelli solari
+
+### Simulatore AI Risparmio Energetico Personalizzato [Fotovoltaico]
+Il cliente carica la bolletta elettrica. L'AI analizza i consumi, calcola il dimensionamento ottimale, simula il risparmio annuo, il payback period e il ROI su 25 anni. Genera un report PDF personalizzato prima ancora del sopralluogo.
+- Report personalizzato generato in 3 minuti dalla bolletta
+- Calcola payback period e rendimento 25 anni
+- Tasso chiusura post-report: +3X rispetto a senza simulazione
+Ideale per: Installatori con alto volume lead, Aziende che vendono residenziale, EPC con team commerciale strutturato
+
+### Agente AI Monitoraggio & Assistenza Post-Installazione [Fotovoltaico]
+Monitora i dati di produzione dagli inverter in tempo reale (SolarEdge, Fronius, SMA, Huawei). Rileva anomalie automaticamente, apre ticket assistenza, classifica l'urgenza, assegna al tecnico e aggiorna il cliente senza intervento umano.
+- Integrazione API con i principali brand di inverter
+- Alert automatico al cliente + apertura ticket entro 5 minuti
+- Notifiche di stato intervento senza chiamate al centralino
+Ideale per: Installatori con parco impianti > 100, Aziende con servizio O&M, EPC con contratti di manutenzione
+
+### Agente AI Pratiche GSE & Incentivi Fotovoltaico [Fotovoltaico]
+Gestisce tutte le pratiche incentivanti: Scambio sul Posto, Ritiro Dedicato, Comunità Energetiche Rinnovabili, Piano Transizione 5.0. Raccoglie documenti, verifica correttezza formale, compila e monitora lo stato con l'ente erogatore.
+- Copertura di tutti i principali incentivi fotovoltaico 2025
+- Verifica preventiva errori formali — zero pratiche respinte
+- Aggiornamento automatico normative per zona geografica
+Ideale per: Installatori che gestiscono pratiche GSE, Studi tecnici partner, EPC con alto volume installazioni
+
+### AI Upselling Accumulo & Ricarica EV [Fotovoltaico]
+Analizza il parco clienti attivi, identifica chi ha un impianto con più di 18 mesi o alta immissione in rete (candidati ideali per accumulo), e avvia campagne di contatto personalizzate con simulazione di beneficio aggiuntivo.
+- Segmentazione automatica clienti pronti per upgrade
+- Proposta personalizzata con calcolo risparmio aggiuntivo
+- Gestione automatica follow-up fino alla risposta
+Ideale per: Installatori con parco > 200 impianti, Aziende che vendono accumulo, Rivenditori wallbox EV
+
+### Agente Vocale AI — Prima Qualifica & Filtro Lead [Ristrutturazioni]
+Conduce una prima intervista strutturata: tipologia intervento, superficie, budget, proprietà, necessità permessi, urgenza, zona. Filtra i lead non qualificati (budget fuori target, tipologia non gestita) e prenota sopralluogo solo per i profili idonei.
+- Filtra automaticamente i lead fuori dal tuo target
+- Il tecnico arriva al sopralluogo già informato su tutto
+- Zero sopralluoghi gratuiti non produttivi
+Ideale per: Imprese di ristrutturazione medio-grandi, General contractor residenziale, Studi di progettazione con cantieri
+
+### Assistente AI Computo Metrico & Stima Preliminare [Ristrutturazioni]
+Il cliente carica planimetrie o inserisce misure via interfaccia guidata. L'AI elabora il computo metrico preliminare per le voci principali, applica i prezzari regionali DEI aggiornati e genera una stima con range min-max in 5 minuti.
+- Computo preliminare da planimetria in 5 minuti
+- Aggiornato sui prezzari regionali DEI 2025
+- Il tecnico usa la bozza come base — dimezza i tempi
+Ideale per: Imprese edili con alto volume preventivi, Studi tecnici, General contractor
+
+### Agente AI Aggiornamenti Cantiere & Comunicazione Cliente [Ristrutturazioni]
+Gli operai mandano audio + foto via WhatsApp a fine turno. L'AI elabora, struttura e invia al cliente un aggiornamento giornaliero professionale. Il cliente è sempre informato — senza che nessuno in cantiere perda tempo al telefono.
+- Report giornaliero cliente generato in automatico
+- Zero interruzioni al capocantiere durante i lavori
+- Storico documentato di tutto l'avanzamento lavori
+Ideale per: Imprese con 5+ cantieri attivi, General contractor, Imprese che lavorano con privati esigenti
+
+### Agente AI Pratiche Edilizie — CILA, SCIA, DIA [Ristrutturazioni]
+Raccoglie tutti i documenti necessari, classifica il tipo di pratica richiesta in base alla normativa regionale, pre-compila i moduli, genera checklist per il tecnico responsabile e monitora scadenze amministrative con alert automatici.
+- Classificazione automatica tipo pratica per normativa regionale
+- Checklist completezza documenti prima della presentazione
+- Monitoraggio scadenze con alert preventivi
+Ideale per: Imprese edili strutturate, Studi tecnici associati, General contractor
+
+### AI Cross-Sell & Riattivazione Clienti Ristrutturazioni [Ristrutturazioni]
+Analizza lo storico clienti per tipo di intervento e anzianità. Attiva sequenze personalizzate su clienti pronti per un nuovo lavoro (bagno → cucina → cappotto). Proposta calibrata sul loro storico, non un messaggio generico.
+- Segmentazione clienti per tipo intervento + anzianità
+- Proposta personalizzata basata sullo storico reale
+- Sequenze automatiche fino alla risposta o disiscrizione
+Ideale per: Imprese con storico clienti > 2 anni, General contractor residenziale, Aziende multi-servizio
+
+### Agente AI Reportistica Operai via WhatsApp [Edilizia]
+L'operaio manda un audio di 30 secondi a fine turno: cosa ha fatto, materiali usati, problemi emersi. L'AI trascrive, struttura per cantiere, aggiorna il Gantt e notifica il responsabile delle criticità. Report giornaliero automatico — zero Excel.
+- Report strutturato da audio WhatsApp in 60 secondi
+- Aggiornamento automatico Gantt per ogni cantiere
+- Alert immediato su criticità segnalate dagli operai
+Ideale per: Imprese con 3+ cantieri attivi, General contractor, Imprese edili strutturate
+
+### AI Analisi & Comparazione Offerte Fornitori [Edilizia]
+Carica le offerte dei fornitori (PDF, Excel, email). L'AI le analizza, normalizza le voci, identifica clausole anomale, calcola il costo totale reale inclusi trasporti e oneri, e genera una tabella comparativa con raccomandazione d'acquisto.
+- Normalizzazione automatica offerte su stesse unità di misura
+- Segnalazione clausole anomale e condizioni fuori standard
+- Risparmio medio acquisti: 8-12% con stesso livello qualitativo
+Ideale per: Imprese con 10+ fornitori attivi, Uffici acquisti, General contractor
+
+### Agente AI Gestione Assistenze & Garanzie Post-Vendita [Edilizia]
+Riceve le richieste di assistenza (telefono, WhatsApp, form), le classifica per tipo e urgenza, le assegna al tecnico corretto con tutta la storia del cliente e dell'intervento originale. SLA automatici con escalation al responsabile.
+- Classificazione automatica per tipo urgenza e competenza
+- Scheda cliente completa consegnata al tecnico prima del sopralluogo
+- SLA con escalation automatica se non preso in carico in 4h
+Ideale per: Imprese con servizio assistenza, Aziende con garanzie contrattuali, General contractor
+
+### AI Analisi Margini per Commessa in Tempo Reale [Edilizia]
+Aggrega dati di costo in tempo reale (ore da timesheet, acquisti fornitori, subappalti) e li confronta con il budget di commessa. Report settimanale: margine preventivato vs. effettivo, scostamenti per categoria, proiezione finale.
+- Confronto budget vs. costi reali aggiornato ogni settimana
+- Alert quando il margine scende sotto soglia critica
+- Proiezione margine finale quando il cantiere è ancora aperto
+Ideale per: Imprese con 5+ commesse attive, General contractor, Imprese con subappalti frequenti
+
+### Agente Vocale AI Call Center Multi-Prodotto [Edilizia]
+Gestisce il primo livello di tutte le chiamate in entrata: identifica cliente o lead, capisce il motivo (commerciale, assistenza, emergenza, amministrazione) e instrada alla persona giusta con tutte le info già raccolte. Non un IVR — una conversazione.
+- Smistamento intelligente per tipo richiesta e prodotto
+- Nessun cliente rimbalzato tra reparti senza informazioni
+- Scalabile a qualsiasi volume senza assumere operatori
+Ideale per: Aziende con centralino ad alto volume, Multi-divisione, Imprese con 10+ dipendenti
+
+### AI Business Intelligence Commerciale [Edilizia]
+Aggrega tutti i dati commerciali disponibili (lead per fonte, tasso chiusura per commerciale, margine per tipologia lavoro, stagionalità, zone) e genera report settimanali con insights azionabili. Smetti di navigare a vista — decidi con i dati.
+- Report settimanale automatico con KPI commerciali chiave
+- Insights azionabili — non solo dati, ma raccomandazioni
+- Confronto performance per commerciale, zona, tipologia
+Ideale per: Aziende con 3+ commerciali, Imprese multi-prodotto, General contractor con divisioni
+
+### Agente Vocale AI per Studi Tecnici — Filtro Incarichi [Progettisti]
+L'agente risponde alle chiamate dello studio mentre progetti: capisce tipo di intervento, immobile, tempi e budget, e ti passa solo le richieste con un incarico reale. Le altre ricevono comunque una risposta chiara.
+- Risposta a ogni chiamata, anche quando sei in cantiere
+- Qualifica tipo di intervento, budget e tempistiche
+- Appuntamenti in agenda solo con chi ha un incarico vero
+Ideale per: Studi di architettura, Studi di ingegneria, Geometri e tecnici
+
+### Lettura AI di Capitolati, Bandi e Documenti di Gara [Progettisti]
+Carica capitolati, bandi o documenti di gara in PDF: l'AI estrae requisiti, voci, quantità, scadenze e punti critici, e ti restituisce una sintesi ordinata da cui partire.
+- Sintesi di capitolati e bandi in pochi minuti
+- Requisiti, scadenze e voci estratti in automatico
+- Segnala incongruenze e punti da chiarire
+Ideale per: Studi tecnici che partecipano a gare, Uffici tecnici d'impresa, General contractor
+
+### Bozze AI di Relazioni Tecniche e Documentazione [Progettisti]
+Dai tuoi appunti, dai rilievi e dai modelli dello studio l'AI prepara la bozza di relazioni tecniche, descrizioni degli interventi e documentazione di progetto. Tu correggi e firmi.
+- Bozze con il formato e lo stile del tuo studio
+- Parte da appunti, rilievi, foto e note vocali
+- Il professionista rivede e firma: sempre
+Ideale per: Architetti e ingegneri, Geometri, Uffici tecnici d'impresa
+
+### Render AI per Presentare il Progetto al Committente [Progettisti]
+Da una foto dello stato di fatto, l'AI mostra al committente come sarà l'intervento: facciate, interni, bagni, coperture, infissi. Più varianti in pochi minuti, senza modellazione 3D.
+- Varianti di materiali e colori in pochi minuti
+- Prima/dopo sulla foto reale dell'immobile
+- Ideale per la fase di proposta e approvazione
+Ideale per: Architetti e interior designer, Studi tecnici, Imprese di ristrutturazione
+
+### AI per Direzione Lavori — Verbali, Avanzamento e Committente [Progettisti]
+Durante la direzione lavori l'AI raccoglie foto e note dal cantiere, prepara bozze di verbali e stati di avanzamento e tiene aggiornato il committente, senza telefonate continue.
+- Foto e note dal cantiere organizzate per commessa
+- Bozze di verbali e stati di avanzamento
+- Aggiornamenti periodici al committente
+Ideale per: Direttori lavori, Studi tecnici, Project manager d'impresa
+
+### Monitoraggio Bandi AI & Analisi Partecipo / Non Partecipo [Gare & Appalti]
+Ogni giorno l'AI cerca le gare adatte alle tue categorie, classifiche e zone, e per ciascuna prepara una scheda con requisiti, importi, scadenze e criteri: decidi in pochi minuti se vale la pena partecipare.
+- Ricerca quotidiana su categorie, importi e zone
+- Scheda di sintesi per ogni bando pertinente
+- Confronto dei requisiti con le capacità dell'impresa
+Ideale per: Imprese che partecipano a gare pubbliche, General contractor, Impiantisti
+
+### Sintesi AI di Disciplinare e Capitolato con Checklist Documenti [Gare & Appalti]
+L'AI legge disciplinare, capitolato, allegati e chiarimenti e restituisce una sintesi ordinata con la checklist di documenti, dichiarazioni, garanzie e scadenze, per non essere esclusi per un dettaglio.
+- Sintesi di centinaia di pagine in una scheda
+- Checklist di documenti, garanzie e dichiarazioni
+- Promemoria su sopralluoghi, quesiti e scadenze
+Ideale per: Uffici gare, Imprese edili, Studi tecnici
+
+### Bozze AI di Offerta Tecnica sui Criteri di Valutazione [Gare & Appalti]
+Partendo dai criteri di valutazione, dalle vostre referenze e dalle relazioni già scritte, l'AI imposta la struttura e le bozze dell'offerta tecnica. Il gruppo di gara completa, verifica e firma.
+- Struttura dell'offerta sui criteri del bando
+- Riuso di referenze e relazioni già scritte
+- Uso dell'AI dichiarato quando il bando lo richiede
+Ideale per: Imprese che partecipano a gare con OEPV, General contractor, Studi tecnici
+
+### Analisi Prezzi e Supporto all'Offerta Economica [Gare & Appalti]
+Computo, analisi prezzi e confronto con lo storico delle vostre commesse e con i prezzari di riferimento, per un'offerta economica sostenibile e un ribasso ragionato.
+- Computo e analisi prezzi dalle voci di gara
+- Confronto con lo storico delle commesse
+- Segnalazione delle voci a rischio margine
+Ideale per: Imprese edili, General contractor, Uffici gare
+
+### Scadenzario AI Sicurezza e Documenti Subappaltatori [Edilizia]
+DURC, formazione, visite mediche, attestati e documenti dei subappaltatori: l'AI li raccoglie, controlla date e completezza e avvisa chi deve agire prima che qualcosa scada.
+- Avvisi prima di ogni scadenza
+- Raccolta documenti via email e WhatsApp
+- Archivio pronto per le ispezioni
+Ideale per: Imprese edili, General contractor, Coordinatori per la sicurezza
+
+### Bozze AI di POS e Documenti di Sicurezza [Edilizia]
+Con i dati del cantiere, delle lavorazioni e delle squadre, l'AI imposta la bozza del Piano Operativo di Sicurezza e dei documenti collegati, da verificare e firmare da parte dei responsabili.
+- Bozza di POS con i dati del cantiere
+- Lavorazioni, mezzi e squadre già compilati
+- Valutazione e firma restano dei responsabili
+Ideale per: Imprese edili, Impiantisti, RSPP e consulenti
+
+### Visione Artificiale per DPI e Rischi in Cantiere [Edilizia]
+Dove l'azienda lo sceglie, l'AI analizza foto o immagini del cantiere per segnalare l'assenza di dispositivi di protezione e situazioni a rischio, nel rispetto dell'art. 4 dello Statuto dei lavoratori, del GDPR e dell'AI Act.
+- Segnalazione di DPI mancanti e situazioni a rischio
+- Progettato con i vostri consulenti privacy e sicurezza
+- Facoltativo: si può partire dai controlli da foto
+Ideale per: General contractor, Grandi cantieri, Imprese con più squadre
+
+### Previsione AI dei Ritardi sul Cronoprogramma [Edilizia]
+L'AI confronta l'avanzamento reale con il cronoprogramma e con lo storico delle vostre commesse, e segnala in anticipo le attività che rischiano di slittare.
+- Confronto tra programmato e reale
+- Segnalazione delle attività a rischio
+- Più precisa con lo storico delle commesse
+Ideale per: Imprese con più cantieri, General contractor, Project manager
+
+### Avanzamento Lavori da Foto e Rapportini [Edilizia]
+Le foto e i rapportini inviati dal capocantiere diventano lo stato di avanzamento della commessa, con percentuali per lavorazione e materiale pronto per SAL e aggiornamenti al cliente.
+- Foto e note dal cantiere via WhatsApp
+- Avanzamento per lavorazione
+- Base per SAL e aggiornamenti al committente
+Ideale per: Imprese edili, Imprese di ristrutturazione, Direttori lavori
+
+### Lettura AI di DDT e Fatture Fornitori con Controllo Ordini [Edilizia]
+Bolle e fatture vengono lette da foto o PDF, confrontate con gli ordini e assegnate alla commessa giusta. Le differenze di quantità o prezzo vengono segnalate prima del pagamento.
+- DDT e fatture lette da foto o PDF
+- Confronto automatico con gli ordini
+- Segnalazione di differenze e doppi addebiti
+Ideale per: Uffici acquisti, Amministrazione, Magazzini
+
+### Ordini Materiali in Base ad Avanzamento e Consegne [Edilizia]
+L'AI incrocia cronoprogramma, avanzamento e tempi di consegna dei fornitori e suggerisce cosa ordinare e quando, per non fermare le squadre e non riempire il magazzino.
+- Suggerimenti d'ordine al momento giusto
+- Tempi di consegna dei fornitori considerati
+- Meno fermi in cantiere, meno scorte inutili
+Ideale per: Imprese edili, General contractor, Uffici acquisti
+
+### Marketing AI: Contenuti, Recensioni e Follow-up [Edilizia]
+Testi per annunci e social pensati per il tuo territorio, richiesta e risposta alle recensioni Google, follow-up automatici dopo sopralluogo e preventivo.
+- Contenuti locali per annunci, post e pagine
+- Recensioni Google richieste e gestite
+- Follow-up dopo sopralluogo e preventivo
+Ideale per: Artigiani, Serramentisti, Imprese di ristrutturazione
+
+### Supporto AI al BIM: Quantità, Controlli e Documentazione [Progettisti]
+Dai modelli BIM l'AI estrae quantità per computi e preventivi, aiuta nei controlli di coerenza e organizza la documentazione richiesta dai capitolati informativi delle gare.
+- Quantità estratte dai modelli per i computi
+- Controlli di coerenza tra modello e documenti
+- Documentazione per i capitolati informativi
+Ideale per: Studi di ingegneria e architettura, Uffici tecnici d'impresa, General contractor
+
+### Render AI Infissi — Sostituzione Serramenti Fotorealistica [Render AI]
+Carica una foto della facciata attuale. L'AI analizza finestre esistenti (materiale, dimensioni, contesto architettonico), applica i nuovi serramenti scelti e genera un render fotorealistico in pochi secondi. Il cliente vede il risultato prima di firmare.
+- Render fotorealistico da foto reale in 30 secondi
+- Scelta profilo, colore RAL, maniglia e vetro
+- Confronto prima/dopo con slider interattivo
+Ideale per: Serramentisti e showroom infissi, Rivenditori multi-brand serramenti, Commerciali che fanno sopralluoghi
+
+### Render AI Bagno — Ristrutturazione Bagno con AI [Render AI]
+Carica una foto del bagno attuale. L'AI analizza layout, sanitari e rivestimenti, poi genera varianti fotorealistiche: restyling leggero, demolizione e rifacimento completo, o sostituzione singoli elementi. Il cliente sceglie vedendo il risultato finale.
+- 3 livelli di intervento: restyling, parziale, totale
+- Scelta stile, colori e materiali da catalogo
+- Render fotorealistico in 30 secondi
+Ideale per: Imprese di ristrutturazione bagni, Showroom sanitari e ceramiche, Interior designer
+
+### Render AI Facciata — Cappotto, Intonaco e Rivestimenti [Render AI]
+Carica una foto della facciata. L'AI genera render fotorealistici con cappotto termico, nuovo intonaco, rivestimenti in pietra o ceramica, e colorazioni personalizzate. Ideale per presentare proposte di riqualificazione energetica e estetica.
+- Cappotto termico, intonaco e rivestimenti visualizzati
+- Selezione colore, materiale e elementi architettonici
+- Perfetto per pratiche Superbonus e bonus facciate
+Ideale per: Imprese di isolamento termico, Aziende cappotto e facciate, Amministratori di condominio
+
+### Render AI Persiane — Oscuranti e Persiane su Misura [Render AI]
+Carica una foto della facciata e visualizza persiane, scuri o tapparelle prima dell'installazione. L'AI rispetta proporzioni, stile architettonico e colori esistenti. Scelta di materiale, lamella, colore e tipologia di apertura.
+- Persiane, scuri e tapparelle visualizzati in contesto
+- Scelta materiale, lamella e colore personalizzato
+- Render coerente con architettura esistente
+Ideale per: Produttori e rivenditori persiane, Serramentisti con linea oscuranti, Showroom infissi
+
+### Render AI Pavimento — Posa e Finiture Fotorealistiche [Render AI]
+Carica una foto dell'ambiente attuale. L'AI sostituisce il pavimento con il materiale scelto (gres, parquet, marmo, resina), rispettando pattern di posa, fughe e illuminazione. Il cliente vede il risultato nella propria stanza, non in un catalogo generico.
+- Gres, parquet, marmo, resina — tutti i materiali
+- Pattern di posa, fughe e finiture configurabili
+- Render nella stanza reale del cliente
+Ideale per: Showroom ceramiche e pavimenti, Posatori e rivenditori, Interior designer
+
+### Render AI Stanza — Ristrutturazione Completa con 10 Interventi [Render AI]
+Carica una foto della stanza. L'AI supporta fino a 10 interventi combinabili: pavimento, pareti, soffitto, illuminazione, infissi, porte, mobilio, complementi, impianti e finiture. Genera render fotorealistico della trasformazione completa.
+- Fino a 10 interventi combinabili in un solo render
+- Stili pronti: moderno, classico, industrial, scandinavo
+- Render completo in meno di 1 minuto
+Ideale per: Imprese di ristrutturazione, Interior designer e architetti, General contractor residenziale
+
+### Render AI Tetto — Rifacimento Manto, Gronde e Lucernari [Render AI]
+Carica una foto del tetto o della copertura. L'AI analizza materiale attuale, pendenza e contesto, poi genera render con il nuovo manto (coppi, tegole, lamiera, ardesia), gronde, lucernari e pannelli solari integrati.
+- Coppi, tegole, lamiera, ardesia — tutti i manti
+- Aggiunta lucernari, gronde e pannelli solari
+- Render coerente con contesto architettonico
+Ideale per: Imprese di coperture e lattoneria, Installatori fotovoltaico con servizio tetto, General contractor
+
+## Per chi è
+### Artigiani e Micro Imprese
+URL: https://edilizia.io/per-chi-e/artigiani-micro-imprese
+Chi ti chiama alle 8 di mattina mentre sei sul ponteggio? Nessuno. E quel cliente va dal competitor che risponde.
+- Agente Vocale AI: Risponde a ogni chiamata in <2 secondi, qualifica il cliente, fissa appuntamenti. Funziona mentre sei sul ponteggio.
+- WhatsApp AI: Gestisce le conversazioni WhatsApp, invia foto lavori, risponde a richieste preventivo automaticamente.
+- Gestione Cantieri: Coordina fornitori e clienti con aggiornamenti automatici sullo stato dei lavori e scadenze.
+- Gestione Documenti: Organizza DDT, fatture, certificazioni di conformità. Tutto digitale, zero carta persa.
+- Preventivi Automatici: Raccoglie dati dal cliente (misure, materiali, tempistiche) e genera preventivi professionali in automatico.
+- Campagne Outbound: Chiama la tua lista clienti passati, propone manutenzioni e nuovi lavori. Tu arrivi e chiudi.
+- Preventivo da Nota Vocale: Detti misure e lavorazioni in cantiere: il preventivo si prepara sul tuo listino e parte al cliente su WhatsApp.
+
+### Piccole Imprese
+URL: https://edilizia.io/per-chi-e/piccole-imprese
+Telefono, WhatsApp, lead, preventivi: troppo per una persona sola. L'AI prende il lavoro ripetitivo e il tuo ufficio si concentra sui clienti.
+- Agente Vocale AI: Risponde a ogni chiamata, anche 50+ al giorno, qualifica i lead e fissa appuntamenti. H24, e il tuo ufficio si dedica ai clienti.
+- WhatsApp AI: Risponde ai clienti su WhatsApp, invia preventivi, gestisce follow-up e conferme appuntamento.
+- Gestione Cantieri: Aggiornamenti automatici ai clienti sullo stato lavori, coordinamento squadre, scadenze materiali.
+- Gestione Documenti: Archiviazione automatica DDT, fatture, contratti. Ricerca istantanea, zero documenti persi.
+- Preventivi Automatici: Genera preventivi professionali dalla telefonata. Il cliente riceve il preventivo entro 10 minuti.
+- Campagne Outbound: L'AI chiama la tua lista contatti, presenta servizi, fissa appuntamenti. Il commerciale chiude.
+- Margini per Commessa: Costi, ore e fatture incrociati ogni settimana: sai dove guadagni e dove perdi prima che sia tardi.
+
+### Medie Imprese
+URL: https://edilizia.io/per-chi-e/medie-imprese
+I tuoi commerciali passano le giornate a richiamare contatti che non compreranno. L'AI qualifica prima, e loro chiudono di più.
+- Agente Vocale AI: Pre-qualifica ogni lead con criteri oggettivi. Il commerciale riceve solo opportunità concrete, pronte alla chiusura.
+- WhatsApp AI: Follow-up automatico post-chiamata, invio preventivi, conferme sopralluogo. Tutto tracciato e misurabile.
+- Gestione Cantieri: Dashboard cantieri in tempo reale, notifiche automatiche a squadre e clienti, zero ritardi per mancata comunicazione.
+- Gestione Documenti: Generazione automatica contratti, DDT, certificazioni. Firma digitale integrata, archivio consultabile.
+- Preventivi Automatici: L'AI raccoglie specifiche tecniche dalla chiamata e genera preventivi professionali in minuti, non giorni.
+- Campagne Outbound: Scaling commerciale senza assunzioni: l'AI chiama 200 lead/giorno, qualifica e fissa appuntamenti.
+- Gare d'Appalto AI: Bandi filtrati per categorie e zone, requisiti verificati, checklist di gara e bozze di offerta tecnica.
+- Sicurezza e Scadenze: DURC, formazione, visite mediche e documenti dei subappaltatori sotto controllo, con solleciti automatici.
+
+### Grandi Aziende e General Contractor
+URL: https://edilizia.io/per-chi-e/grandi-aziende-general-contractor
+I tuoi competitor più agili stanno già automatizzando. Ogni mese che aspetti è market share perso.
+- Agente Vocale AI: Primo filtro commerciale enterprise: gestisce il contatto iniziale, qualifica, raccoglie dati tecnici e smista.
+- WhatsApp AI: Comunicazione multicanale con clienti e fornitori. Aggiornamenti automatici, conferme, raccolta documenti.
+- Gestione Cantieri: Coordinamento multi-cantiere: notifiche a subappaltatori, scadenze, varianti, aggiornamenti real-time al cliente.
+- Gestione Documenti: Integrazione ERP/CRM, generazione contratti, DDT, certificazioni. Workflow approvativo automatizzato.
+- Preventivi Automatici: Preventivi complessi multi-lotto generati dall'AI. Da due settimane a pochi giorni. Integrazione listini fornitori.
+- Campagne Outbound: L'AI contatta migliaia di prospect, qualifica per bando/progetto, genera pipeline commerciale automatica.
+- Gare d'Appalto AI: Monitoraggio bandi, analisi partecipo/non partecipo, sintesi di disciplinare e capitolato, bozze di offerta tecnica e analisi prezzi.
+- Sicurezza e Conformità: Bozze di POS, scadenzario e verifica documentale dei subappaltatori su tutti i cantieri.
+- Cantiere e Acquisti: Previsione dei ritardi, avanzamento da foto, ordini in base al cronoprogramma, DDT e fatture controllati sugli ordini.
+
+### Serramentisti e Infissi
+URL: https://edilizia.io/per-chi-e/serramentisti-infissi
+Il cliente chiama 5 serramentisti. Chi risponde per primo, vince. E tu stai ancora rispondendo per ultimo.
+- Agente Vocale AI: Risponde in 2 secondi, raccoglie tipo infisso (PVC, alluminio, legno), misure finestre, piano, budget. Qualifica e fissa sopralluogo.
+- WhatsApp AI: Invia catalogo materiali, raccoglie foto finestre attuali, conferma appuntamenti, follow-up post-preventivo.
+- Gestione Cantieri: Traccia ordini fornitori, tempi di produzione infissi, coordina posa e muratore. Aggiornamenti automatici al cliente.
+- Gestione Documenti: Certificazioni energetiche, pratiche ENEA per detrazioni, DDT, garanzie. Tutto archiviato e tracciabile.
+- Preventivi Automatici: Dalla telefonata al preventivo in 10 minuti: tipo infisso, misure, accessori, posa, muratura. Pronto da firmare.
+- Campagne Outbound: Chiama clienti con infissi vecchi 15+ anni, propone sostituzione con incentivi. Lavoro anche nei mesi morti.
+- Render AI Infissi: Il cliente vede i nuovi infissi e le persiane sulla sua facciata prima di firmare.
+
+### Installatori Fotovoltaico
+URL: https://edilizia.io/per-chi-e/installatori-fotovoltaico
+La domanda esplode, ma senza un sistema per gestire i contatti, stai lasciando milioni sul tavolo.
+- Agente Vocale AI: Risponde a tutte le richieste, raccoglie consumi bolletta, orientamento tetto, superficie disponibile. Qualifica e fissa sopralluogo.
+- WhatsApp AI: Spiega bonus fiscali, invia simulazione risparmio, raccoglie bollette via foto, follow-up anti-rinvio.
+- Gestione Cantieri: Pianifica installazioni, coordina elettricista e muratore, notifica cliente su avanzamento e allaccio GSE.
+- Gestione Documenti: Pratiche GSE, comunicazione ENEA, certificazione impianto, garanzie pannelli e inverter. Tutto automatizzato.
+- Preventivi Automatici: Da bolletta e tetto a preventivo completo: kWp, pannelli, inverter, batteria, costo, risparmio annuo, rientro.
+- Campagne Outbound: Chiama proprietari di case in zone target, spiega vantaggi fotovoltaico con incentivi attuali. Pipeline infinita.
+- Render AI Tetto e Pannelli: Il cliente vede l'impianto sul suo tetto, con pannelli integrati nella copertura reale.
+- Sicurezza e Scadenze: Lavori in quota, formazione, DURC e documenti delle squadre sempre in regola.
+
+### Imprese di Ristrutturazione
+URL: https://edilizia.io/per-chi-e/imprese-ristrutturazione
+Spendi ore a fare sopralluoghi e preventivi per clienti che non firmeranno mai. L'AI cambia le regole.
+- Agente Vocale AI: Pre-qualifica ogni richiesta: tipo intervento, budget, tempistiche, decisore. Passa al commerciale solo chi è pronto.
+- WhatsApp AI: Follow-up post-preventivo automatico, risponde a obiezioni, invia referenze e foto lavori simili completati.
+- Gestione Cantieri: Coordina muratore, idraulico, elettricista, piastrellista. Aggiornamenti automatici al cliente con foto avanzamento.
+- Gestione Documenti: CILA/SCIA, pratiche comunali, computi metrici, certificazioni fine lavori. Zero burocrazia manuale.
+- Preventivi Automatici: Da sopralluogo a preventivo dettagliato in ore: demolizioni, impianti, finiture, tempistiche, costi per voce.
+- Campagne Outbound: Contatta proprietari di immobili datati nella tua zona, propone ristrutturazione con incentivi. Lead costanti.
+- Render AI Interni e Facciate: Bagni, stanze, pavimenti e facciate mostrati sulla foto reale per far decidere prima il cliente.
+- Cantiere e Acquisti: Materiali ordinati in base all'avanzamento, bolle e fatture controllate sugli ordini.
+
+### Imprese Edili Generali
+URL: https://edilizia.io/per-chi-e/imprese-edili-generali
+Telefonate, preventivi, rapportini, documenti: ore ogni giorno prima ancora di posare un mattone. L'AI ne automatizza la maggior parte.
+- Agente Vocale AI: Front-office completo: gestisce chiamate clienti, fornitori, subappaltatori. Smista per urgenza e tipo richiesta.
+- WhatsApp AI: Canale dedicato per aggiornamenti cantiere, coordinamento squadre, invio foto e documenti in tempo reale.
+- Gestione Cantieri: Dashboard multi-cantiere: scadenze, materiali, avanzamento, sicurezza. Notifiche automatiche a tutte le parti.
+- Gestione Documenti: DDT, POS, PSC, certificazioni SOA, DURC. Tutto digitalizzato, scadenze monitorate, alert automatici.
+- Preventivi Automatici: Computi metrici automatici, listini integrati, preventivi multi-lotto. Da settimane a ore.
+- Campagne Outbound: Contatta amministratori condominio, costruttori, studi tecnici. Presenta i tuoi servizi, genera pipeline.
+- Gare d'Appalto AI: Bandi adatti alla tua impresa, requisiti verificati, checklist documentale e bozze di offerta tecnica.
+- Sicurezza e Conformità: Bozze di POS, scadenzario sicurezza e documenti dei subappaltatori sotto controllo.
+- Cantiere e Acquisti: Ritardi previsti in anticipo, avanzamento da foto, ordini e magazzino allineati ai cantieri.
+
+### Posatori e Pavimentisti
+URL: https://edilizia.io/per-chi-e/posatori-pavimentisti
+Non puoi rispondere con le mani nella colla. Ma quel cliente non richiamerà. Va dal prossimo su Google.
+- Agente Vocale AI: Risponde mentre posi: raccoglie tipo pavimento (gres, parquet, marmo), metratura, piano, tempistiche.
+- WhatsApp AI: Invia catalogo materiali, raccoglie foto ambiente, conferma appuntamenti. Chiede recensioni post-lavoro.
+- Gestione Cantieri: Pianifica lavori settimanali, coordina consegna materiali, notifica cliente su inizio e fine lavori.
+- Gestione Documenti: DDT materiali, fatture, garanzie pavimenti. Archiviazione digitale, ricerca istantanea per cliente.
+- Preventivi Automatici: Da metratura e tipo pavimento a preventivo completo: materiale, massetto, posa, battiscopa, costo totale.
+- Campagne Outbound: Contatta imprese di ristrutturazione, architetti, negozi ceramiche. Propone collaborazione continuativa.
+- Render AI Pavimenti: Gres, parquet, marmo o resina visti nella stanza del cliente, con pattern di posa e fughe.
+
+### Lattonieri e Coperture
+URL: https://edilizia.io/per-chi-e/lattonieri-coperture
+I danni da maltempo generano picchi di richieste. Se non rispondi in 10 minuti, il cliente chiama un altro.
+- Agente Vocale AI: Gestisce 100+ chiamate simultanee post-maltempo. Registra ogni richiesta, classifica per urgenza, prenota intervento.
+- WhatsApp AI: Raccoglie foto danni via WhatsApp, stima gravità, invia tempistiche intervento. Triage automatico.
+- Gestione Cantieri: Pianifica interventi urgenti e programmati su mappa, coordina squadre, ottimizza percorsi giornalieri.
+- Gestione Documenti: Perizie danni, documentazione assicurativa, certificazioni impermeabilizzazione. Tutto digitalizzato.
+- Preventivi Automatici: Da foto danno e descrizione a preventivo rapido: tipo copertura, metratura stimata, materiali, costo.
+- Campagne Outbound: Contatta proprietari zona per ispezioni preventive tetti, manutenzione grondaie. Lavoro costante tutto l'anno.
+- Render AI Coperture: Nuovo manto, gronde e lucernari mostrati sulla foto del tetto del cliente.
+- Sicurezza Lavori in Quota: Formazione, attestati e documenti delle squadre sempre aggiornati, con avvisi prima delle scadenze.
+
+### Impianti Idraulici e Termici
+URL: https://edilizia.io/per-chi-e/impianti-idraulici-termici
+Tubo rotto alle 3 di notte. Il cliente chiama. Se non rispondi, chiama il prossimo su Google. Per sempre.
+- Agente Vocale AI: Pronto intervento H24: valuta urgenza, classifica tipo problema, prenota intervento. Risponde anche alle 3 di notte.
+- WhatsApp AI: Recall manutenzione caldaie, invio promemoria tagliandi, raccolta foto problemi per pre-diagnosi.
+- Gestione Cantieri: Pianifica interventi giornalieri, ottimizza percorsi, coordina consegna materiali e ricambi.
+- Gestione Documenti: Libretti impianto, certificazioni F-Gas, rapporti di intervento, garanzie. Scadenze monitorate automaticamente.
+- Preventivi Automatici: Da tipo intervento (caldaia, bagno, riscaldamento) a preventivo: materiali, manodopera, tempistiche, costo.
+- Campagne Outbound: Chiama clienti con caldaie in scadenza revisione, propone contratti manutenzione annuali. Ricavi ricorrenti.
+- Scadenze e Certificazioni: Patentini, formazione, DURC e documenti di conformità sotto controllo, con avvisi automatici.
+
+### Impianti Elettrici
+URL: https://edilizia.io/per-chi-e/impianti-elettrici
+Mentre tiri cavi in un appartamento, stai perdendo il lavoro nel condominio dall'altra parte della città.
+- Agente Vocale AI: Receptionist tecnico: capisce tipo intervento, raccoglie kW, numero punti luce, tipo impianto. Qualifica e prenota.
+- WhatsApp AI: Raccoglie planimetrie e foto quadri elettrici, invia preventivi, reminder scadenze conformità.
+- Gestione Cantieri: Pianifica interventi multi-cantiere, coordina forniture cavi e materiali, traccia avanzamento.
+- Gestione Documenti: DiCo, DiRi, certificazioni conformità, schemi impianto. Generazione automatica, archivio digitale.
+- Preventivi Automatici: Da planimetria e specifiche a preventivo: punti luce, prese, quadro, canalizzazioni, costo dettagliato.
+- Campagne Outbound: Contatta amministratori condominio per verifiche impianti, aziende per manutenzione programmata.
+- Scadenze e Certificazioni: Abilitazioni, formazione, DURC e documenti per le dichiarazioni di conformità sempre in ordine.
+
+### Cartongessisti e Finiture
+URL: https://edilizia.io/per-chi-e/cartongessisti-finiture
+Fai controsoffitti da paura ma nessuno ti trova online. L'AI porta clienti mentre tu lavori.
+- Agente Vocale AI: Gestisce richieste: tipo lavoro (controsoffitto, pareti, isolamento), metratura, altezze, finiture. Qualifica budget.
+- WhatsApp AI: Invia portfolio lavori, raccoglie foto ambienti, preventivi rapidi. Educa il cliente sul valore artigianale.
+- Gestione Cantieri: Pianifica lavori settimanali, coordina consegna lastre e profili, notifica cliente su inizio/fine lavori.
+- Gestione Documenti: Schede tecniche materiali, certificazioni acustiche/termiche, DDT, fatture. Tutto digitalizzato.
+- Preventivi Automatici: Da metratura e tipo lavoro a preventivo: struttura, lastre, stuccatura, pittura, dettaglio per voce.
+- Campagne Outbound: Contatta imprese di ristrutturazione, architetti, interior designer. Propone collaborazione continuativa.
+- Render AI Stanze: Controsoffitti, pareti e finiture mostrati sulla foto reale dell'ambiente.
+- Marketing AI Locale: Contenuti per Google e social, recensioni gestite, follow-up dopo ogni preventivo.
+
+### Progettisti e Studi Tecnici
+URL: https://edilizia.io/per-chi-e/progettisti-studi-tecnici
+Non progettiamo al posto tuo: ti diamo l'AI che filtra le richieste, legge capitolati, imposta computi e relazioni, crea i render per il committente e tiene aggiornato il cantiere. Il progetto e la firma restano tuoi.
+- Agente Vocale AI: Filtro intelligente: capisce tipo progetto, dimensione, budget. Ti passa solo chi ha un incarico vero da affidare.
+- WhatsApp AI: Aggiornamenti cantiere con foto ai committenti, raccolta documenti da imprese, comunicazioni DL.
+- Gestione Cantieri: Coordinamento imprese esecutrici, verbali avanzamento, gestione varianti e SAL. Report automatici.
+- Pratiche e Documenti: Raccolta documenti e bozze per CILA, SCIA, permessi e pratiche catastali, con scadenze sotto controllo. Firma e responsabilità restano del professionista.
+- Preventivi di Onorario: Da brief del committente a proposta economica: fasi, tempistiche, onorari, spese tecniche. Professionale in minuti.
+- Render AI per il Committente: Dalla foto dello stato di fatto, varianti fotorealistiche di facciate, interni, bagni e coperture per far decidere il committente.
+- Campagne Outbound: Contatta costruttori, imprese, proprietari immobili per proporre servizi di progettazione e DL.
+- Capitolati e Relazioni AI: Lettura automatica di capitolati, tavole e PDF, bozze di relazioni tecniche e supporto ai computi metrici. Sempre rivisti e firmati da te.
+- Supporto AI al BIM: Quantità estratte dai modelli, controlli di coerenza e documentazione per i capitolati informativi.
+- Gare e Concorsi: Sintesi di bandi di progettazione e concorsi con requisiti, scadenze e documenti da preparare.
