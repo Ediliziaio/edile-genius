@@ -4,13 +4,6 @@ export interface ServiceItem {
   description: string;
 }
 
-export interface CalculatorDefaults {
-  defaultStipendio: number;
-  defaultLeadMensili: number;
-  defaultOreRipetitive: number;
-  valoreCommessaMedia: number;
-}
-
 export interface PerChiECategory {
   slug: string;
   name: string;
@@ -22,7 +15,6 @@ export interface PerChiECategory {
   problems: { title: string; description: string }[];
   solutions: { title: string; description: string }[];
   services: ServiceItem[];
-  calculator: CalculatorDefaults;
   roi: { metric: string; value: string }[];
   caseStudy: {
     company: string;
@@ -65,11 +57,10 @@ export const perChiECategories: PerChiECategory[] = [
       { icon: "Calculator", title: "Preventivi Automatici", description: "Raccoglie dati dal cliente (misure, materiali, tempistiche) e genera preventivi professionali in automatico." },
       { icon: "Megaphone", title: "Campagne Outbound", description: "Chiama la tua lista clienti passati, propone manutenzioni e nuovi lavori. Tu arrivi e chiudi." },
     ],
-    calculator: { defaultStipendio: 1600, defaultLeadMensili: 20, defaultOreRipetitive: 3, valoreCommessaMedia: 2500 },
     roi: [
       { metric: "Lead recuperati", value: "+340%" },
       { metric: "Ore risparmiate/mese", value: "60+" },
-      { metric: "Costo vs segretaria", value: "-85%" },
+      { metric: "Tempo al telefono", value: "-85%" },
     ],
     caseStudy: {
       company: "Rossi Impianti",
@@ -84,17 +75,17 @@ export const perChiECategories: PerChiECategory[] = [
     name: "Piccole Imprese",
     icon: "Building",
     group: "dimensione",
-    heroTitle: "Hai 6-25 Dipendenti? La Tua Segretaria Non Basta Più.",
-    heroSubtitle: "Stai pagando una persona per fare il lavoro che un'AI fa meglio, più veloce e a un decimo del costo.",
+    heroTitle: "Hai 6-25 Dipendenti? Il Tuo Ufficio Non Riesce a Stare Dietro a Tutto.",
+    heroSubtitle: "Telefono, WhatsApp, lead, preventivi: troppo per una persona sola. L'AI prende il lavoro ripetitivo e il tuo ufficio si concentra sui clienti.",
     stats: [
-      { value: "€36K", label: "Costo annuo segretaria" },
+      { value: "50+", label: "Chiamate al giorno da gestire" },
       { value: "42%", label: "Chiamate fuori orario perse" },
-      { value: "€8K", label: "Risparmiati al mese con AI" },
+      { value: "24/7", label: "Risposta con l'agente AI" },
     ],
     problems: [
-      { title: "La segretaria è un collo di bottiglia", description: "Una persona non può gestire 50 chiamate al giorno, rispondere su WhatsApp e seguire i lead. Fisicamente impossibile." },
+      { title: "L'ufficio è un collo di bottiglia", description: "Una persona non può gestire 50 chiamate al giorno, rispondere su WhatsApp e seguire i lead. Fisicamente impossibile." },
       { title: "Lead che cadono nel vuoto", description: "Il foglio Excel dei contatti è pieno di nomi mai richiamati. Ogni riga è un cantiere perso." },
-      { title: "Costi fissi che salgono", description: "TFR, ferie, malattia, contributi. La segretaria costa €36K/anno e non risponde di notte." },
+      { title: "Il telefono non si ferma mai", description: "Sera, weekend, ferie: le richieste arrivano sempre, l'ufficio no. Ogni chiamata senza risposta è un cliente che va altrove." },
     ],
     solutions: [
       { title: "Front-Office AI con Vocale + WhatsApp", description: "Gestisce chiamate e messaggi WhatsApp contemporaneamente. Qualifica lead, fissa sopralluoghi, tutto H24." },
@@ -102,16 +93,15 @@ export const perChiECategories: PerChiECategory[] = [
       { title: "Gestione Cantieri + Campagne Outbound", description: "Coordina i cantieri con aggiornamenti automatici e lancia campagne per acquisire nuovi clienti." },
     ],
     services: [
-      { icon: "Phone", title: "Agente Vocale AI", description: "Sostituisce la segretaria: gestisce 50+ chiamate/giorno, qualifica lead, fissa appuntamenti. H24, costo 1/10." },
+      { icon: "Phone", title: "Agente Vocale AI", description: "Risponde a ogni chiamata, anche 50+ al giorno, qualifica i lead e fissa appuntamenti. H24, e il tuo ufficio si dedica ai clienti." },
       { icon: "MessageSquare", title: "WhatsApp AI", description: "Risponde ai clienti su WhatsApp, invia preventivi, gestisce follow-up e conferme appuntamento." },
       { icon: "HardHat", title: "Gestione Cantieri", description: "Aggiornamenti automatici ai clienti sullo stato lavori, coordinamento squadre, scadenze materiali." },
       { icon: "FileText", title: "Gestione Documenti", description: "Archiviazione automatica DDT, fatture, contratti. Ricerca istantanea, zero documenti persi." },
       { icon: "Calculator", title: "Preventivi Automatici", description: "Genera preventivi professionali dalla telefonata. Il cliente riceve il preventivo entro 10 minuti." },
       { icon: "Megaphone", title: "Campagne Outbound", description: "L'AI chiama la tua lista contatti, presenta servizi, fissa appuntamenti. Il commerciale chiude." },
     ],
-    calculator: { defaultStipendio: 1800, defaultLeadMensili: 40, defaultOreRipetitive: 5, valoreCommessaMedia: 5000 },
     roi: [
-      { metric: "Risparmio annuo", value: "€30K+" },
+      { metric: "Ore d'ufficio recuperate/mese", value: "60+" },
       { metric: "Lead qualificati/mese", value: "3x" },
       { metric: "Tempo risposta", value: "<3 sec" },
     ],
@@ -121,19 +111,19 @@ export const perChiECategories: PerChiECategory[] = [
       quote: "Abbiamo eliminato la segretaria e messo l'AI. In 60 giorni abbiamo gestito il triplo dei lead spendendo un terzo.",
       result: "€30K risparmiati, +200% lead gestiti",
     },
-    ctaLine: "Stai pagando €3.000/mese per una persona che l'AI sostituisce a €297/mese.",
+    ctaLine: "Il tuo ufficio passa ore al telefono: l'AI se ne occupa 24/7, e il team torna a lavorare sui clienti.",
   },
   {
     slug: "medie-imprese",
     name: "Medie Imprese",
     icon: "Building2",
     group: "dimensione",
-    heroTitle: "26-100 Dipendenti? Il Tuo Reparto Commerciale Sta Bruciando Budget.",
-    heroSubtitle: "3 commerciali a €45K l'uno. Quanti contratti chiudono davvero? L'AI ne chiude di più, a una frazione del costo.",
+    heroTitle: "26-100 Dipendenti? Il Tuo Reparto Commerciale Lavora su Troppi Lead Freddi.",
+    heroSubtitle: "I tuoi commerciali passano le giornate a richiamare contatti che non compreranno. L'AI qualifica prima, e loro chiudono di più.",
     stats: [
-      { value: "€135K", label: "Costo annuo 3 commerciali" },
       { value: "23%", label: "Tasso conversione medio" },
-      { value: "€50K+", label: "Risparmiabili con AI" },
+      { value: "100%", label: "Lead richiamati e qualificati" },
+      { value: "24/7", label: "Pre-qualifica attiva" },
     ],
     problems: [
       { title: "Commerciali costosi e inefficienti", description: "Sopralluoghi a vuoto, lead non qualificati, tempo perso in telefonate inutili. Il ROI non torna." },
@@ -153,7 +143,6 @@ export const perChiECategories: PerChiECategory[] = [
       { icon: "Calculator", title: "Preventivi Automatici", description: "L'AI raccoglie specifiche tecniche dalla chiamata e genera preventivi professionali in minuti, non giorni." },
       { icon: "Megaphone", title: "Campagne Outbound", description: "Scaling commerciale senza assunzioni: l'AI chiama 200 lead/giorno, qualifica e fissa appuntamenti." },
     ],
-    calculator: { defaultStipendio: 2200, defaultLeadMensili: 80, defaultOreRipetitive: 6, valoreCommessaMedia: 15000 },
     roi: [
       { metric: "Costo per lead", value: "-65%" },
       { metric: "Conversione", value: "+180%" },
@@ -194,10 +183,9 @@ export const perChiECategories: PerChiECategory[] = [
       { icon: "MessageSquare", title: "WhatsApp AI", description: "Comunicazione multicanale con clienti e fornitori. Aggiornamenti automatici, conferme, raccolta documenti." },
       { icon: "HardHat", title: "Gestione Cantieri", description: "Coordinamento multi-cantiere: notifiche a subappaltatori, scadenze, varianti, aggiornamenti real-time al cliente." },
       { icon: "FileText", title: "Gestione Documenti", description: "Integrazione ERP/CRM, generazione contratti, DDT, certificazioni. Workflow approvativo automatizzato." },
-      { icon: "Calculator", title: "Preventivi Automatici", description: "Preventivi complessi multi-lotto generati dall'AI. Da 14 giorni a 3. Integrazione listini fornitori." },
+      { icon: "Calculator", title: "Preventivi Automatici", description: "Preventivi complessi multi-lotto generati dall'AI. Da due settimane a pochi giorni. Integrazione listini fornitori." },
       { icon: "Megaphone", title: "Campagne Outbound", description: "L'AI contatta migliaia di prospect, qualifica per bando/progetto, genera pipeline commerciale automatica." },
     ],
-    calculator: { defaultStipendio: 2800, defaultLeadMensili: 200, defaultOreRipetitive: 8, valoreCommessaMedia: 50000 },
     roi: [
       { metric: "Efficienza commerciale", value: "+300%" },
       { metric: "Time-to-quote", value: "-70%" },
@@ -209,7 +197,7 @@ export const perChiECategories: PerChiECategory[] = [
       quote: "Abbiamo integrato l'AI su 3 divisioni. Il time-to-quote è passato da 14 giorni a 3. I competitor non capiscono come facciamo.",
       result: "-78% tempi di preventivazione, +60% win rate",
     },
-    ctaLine: "Le aziende che adottano l'AI oggi domineranno il mercato domani. Le altre spariranno.",
+    ctaLine: "Chi porta l'AI nei propri processi prima, lavora con margini più alti. Parti dall'analisi.",
   },
 
   // === SETTORE ===
@@ -243,7 +231,6 @@ export const perChiECategories: PerChiECategory[] = [
       { icon: "Calculator", title: "Preventivi Automatici", description: "Dalla telefonata al preventivo in 10 minuti: tipo infisso, misure, accessori, posa, muratura. Pronto da firmare." },
       { icon: "Megaphone", title: "Campagne Outbound", description: "Chiama clienti con infissi vecchi 15+ anni, propone sostituzione con incentivi. Lavoro anche nei mesi morti." },
     ],
-    calculator: { defaultStipendio: 1800, defaultLeadMensili: 30, defaultOreRipetitive: 4, valoreCommessaMedia: 4200 },
     roi: [
       { metric: "Sopralluoghi qualificati", value: "+200%" },
       { metric: "Tempo preventivazione", value: "-50%" },
@@ -287,7 +274,6 @@ export const perChiECategories: PerChiECategory[] = [
       { icon: "Calculator", title: "Preventivi Automatici", description: "Da bolletta e tetto a preventivo completo: kWp, pannelli, inverter, batteria, costo, risparmio annuo, rientro." },
       { icon: "Megaphone", title: "Campagne Outbound", description: "Chiama proprietari di case in zone target, spiega vantaggi fotovoltaico con incentivi attuali. Pipeline infinita." },
     ],
-    calculator: { defaultStipendio: 2000, defaultLeadMensili: 50, defaultOreRipetitive: 5, valoreCommessaMedia: 15000 },
     roi: [
       { metric: "Lead gestiti", value: "5x" },
       { metric: "Tempo al sopralluogo", value: "-60%" },
@@ -331,7 +317,6 @@ export const perChiECategories: PerChiECategory[] = [
       { icon: "Calculator", title: "Preventivi Automatici", description: "Da sopralluogo a preventivo dettagliato in ore: demolizioni, impianti, finiture, tempistiche, costi per voce." },
       { icon: "Megaphone", title: "Campagne Outbound", description: "Contatta proprietari di immobili datati nella tua zona, propone ristrutturazione con incentivi. Lead costanti." },
     ],
-    calculator: { defaultStipendio: 2000, defaultLeadMensili: 25, defaultOreRipetitive: 5, valoreCommessaMedia: 25000 },
     roi: [
       { metric: "Preventivi accettati", value: "+120%" },
       { metric: "Tempo commerciale", value: "-70%" },
@@ -350,20 +335,20 @@ export const perChiECategories: PerChiECategory[] = [
     name: "Imprese Edili Generali",
     icon: "HardHat",
     group: "settore",
-    heroTitle: "Impresa Edile? I Tuoi Costi Fissi Ti Stanno Soffocando.",
-    heroSubtitle: "Segretaria, commerciali, ufficio. Ogni mese bruci €15K prima ancora di posare un mattone. L'AI taglia il 60%.",
+    heroTitle: "Impresa Edile? L'Ufficio Si Mangia il Margine dei Cantieri.",
+    heroSubtitle: "Telefonate, preventivi, rapportini, documenti: ore ogni giorno prima ancora di posare un mattone. L'AI ne automatizza la maggior parte.",
     stats: [
-      { value: "€180K", label: "Costi fissi annui medi" },
-      { value: "60%", label: "Riducibili con automazione AI" },
-      { value: "€108K", label: "Risparmiabili ogni anno" },
+      { value: "60%", label: "Attività d'ufficio automatizzabili" },
+      { value: "24/7", label: "Sistemi AI sempre attivi" },
+      { value: "1", label: "Regia unica su lead, cantieri e margini" },
     ],
     problems: [
-      { title: "Costi fissi fuori controllo", description: "Segretaria, commerciale, amministrazione. €15K/mese prima di vedere un euro di fatturato." },
+      { title: "Ufficio sommerso dal lavoro ripetitivo", description: "Telefono, preventivi, rapportini, amministrazione. Ore ogni giorno prima di vedere un euro di fatturato." },
       { title: "Gare e appalti: troppo tempo, pochi risultati", description: "Prepari documentazione per 10 gare, ne vinci 1. Il tempo investito non ha ROI." },
       { title: "Coordinamento subappaltatori caotico", description: "Telefonate, WhatsApp, email. Nessuno sa chi deve fare cosa e quando. Ritardi e costi extra." },
     ],
     solutions: [
-      { title: "Agente Vocale + WhatsApp come Front-Office", description: "Gestisce chiamate, qualifica lead, fissa sopralluoghi, risponde su WhatsApp. Zero personale aggiuntivo, H24." },
+      { title: "Agente Vocale + WhatsApp come Front-Office", description: "Gestisce chiamate, qualifica lead, fissa sopralluoghi, risponde su WhatsApp. Senza appesantire l'ufficio, H24." },
       { title: "Preventivi Automatici + Screening Gare", description: "L'AI genera preventivi da specifiche tecniche e analizza bandi di gara per segnalarti solo quelli vincibili." },
       { title: "Gestione Cantieri + Documenti Completa", description: "Coordina subappaltatori con notifiche AI, gestisce DDT, certificazioni, sicurezza cantiere. Zero caos." },
     ],
@@ -375,9 +360,8 @@ export const perChiECategories: PerChiECategory[] = [
       { icon: "Calculator", title: "Preventivi Automatici", description: "Computi metrici automatici, listini integrati, preventivi multi-lotto. Da settimane a ore." },
       { icon: "Megaphone", title: "Campagne Outbound", description: "Contatta amministratori condominio, costruttori, studi tecnici. Presenta i tuoi servizi, genera pipeline." },
     ],
-    calculator: { defaultStipendio: 2200, defaultLeadMensili: 40, defaultOreRipetitive: 6, valoreCommessaMedia: 30000 },
     roi: [
-      { metric: "Costi fissi", value: "-60%" },
+      { metric: "Tempo amministrativo", value: "-60%" },
       { metric: "Win rate gare", value: "+90%" },
       { metric: "Ritardi cantiere", value: "-45%" },
     ],
@@ -387,7 +371,7 @@ export const perChiECategories: PerChiECategory[] = [
       quote: "Abbiamo tagliato €8K/mese di costi fissi e gestiamo il triplo dei cantieri. L'AI coordina tutto.",
       result: "-60% costi, +200% cantieri gestiti",
     },
-    ctaLine: "Ogni euro speso in costi fissi inutili è un euro tolto al tuo utile. Taglia adesso.",
+    ctaLine: "Ogni ora che l'ufficio passa su carte e telefonate è margine tolto ai cantieri. Riprenditelo.",
   },
   {
     slug: "posatori-pavimentisti",
@@ -419,7 +403,6 @@ export const perChiECategories: PerChiECategory[] = [
       { icon: "Calculator", title: "Preventivi Automatici", description: "Da metratura e tipo pavimento a preventivo completo: materiale, massetto, posa, battiscopa, costo totale." },
       { icon: "Megaphone", title: "Campagne Outbound", description: "Contatta imprese di ristrutturazione, architetti, negozi ceramiche. Propone collaborazione continuativa." },
     ],
-    calculator: { defaultStipendio: 1600, defaultLeadMensili: 20, defaultOreRipetitive: 3, valoreCommessaMedia: 3500 },
     roi: [
       { metric: "Chiamate gestite", value: "100%" },
       { metric: "Valore medio lavoro", value: "+35%" },
@@ -463,7 +446,6 @@ export const perChiECategories: PerChiECategory[] = [
       { icon: "Calculator", title: "Preventivi Automatici", description: "Da foto danno e descrizione a preventivo rapido: tipo copertura, metratura stimata, materiali, costo." },
       { icon: "Megaphone", title: "Campagne Outbound", description: "Contatta proprietari zona per ispezioni preventive tetti, manutenzione grondaie. Lavoro costante tutto l'anno." },
     ],
-    calculator: { defaultStipendio: 1800, defaultLeadMensili: 25, defaultOreRipetitive: 4, valoreCommessaMedia: 6000 },
     roi: [
       { metric: "Lead gestiti nei picchi", value: "+500%" },
       { metric: "Tempo organizzazione", value: "-60%" },
@@ -507,7 +489,6 @@ export const perChiECategories: PerChiECategory[] = [
       { icon: "Calculator", title: "Preventivi Automatici", description: "Da tipo intervento (caldaia, bagno, riscaldamento) a preventivo: materiali, manodopera, tempistiche, costo." },
       { icon: "Megaphone", title: "Campagne Outbound", description: "Chiama clienti con caldaie in scadenza revisione, propone contratti manutenzione annuali. Ricavi ricorrenti." },
     ],
-    calculator: { defaultStipendio: 1700, defaultLeadMensili: 30, defaultOreRipetitive: 3, valoreCommessaMedia: 1800 },
     roi: [
       { metric: "Interventi notturni gestiti", value: "+100%" },
       { metric: "Rinnovi manutenzione", value: "+250%" },
@@ -551,7 +532,6 @@ export const perChiECategories: PerChiECategory[] = [
       { icon: "Calculator", title: "Preventivi Automatici", description: "Da planimetria e specifiche a preventivo: punti luce, prese, quadro, canalizzazioni, costo dettagliato." },
       { icon: "Megaphone", title: "Campagne Outbound", description: "Contatta amministratori condominio per verifiche impianti, aziende per manutenzione programmata." },
     ],
-    calculator: { defaultStipendio: 1700, defaultLeadMensili: 25, defaultOreRipetitive: 3, valoreCommessaMedia: 2500 },
     roi: [
       { metric: "Chiamate gestite", value: "100%" },
       { metric: "Tempo pre-sopralluogo", value: "-40%" },
@@ -595,7 +575,6 @@ export const perChiECategories: PerChiECategory[] = [
       { icon: "Calculator", title: "Preventivi Automatici", description: "Da metratura e tipo lavoro a preventivo: struttura, lastre, stuccatura, pittura, dettaglio per voce." },
       { icon: "Megaphone", title: "Campagne Outbound", description: "Contatta imprese di ristrutturazione, architetti, interior designer. Propone collaborazione continuativa." },
     ],
-    calculator: { defaultStipendio: 1500, defaultLeadMensili: 15, defaultOreRipetitive: 2, valoreCommessaMedia: 2000 },
     roi: [
       { metric: "Lead da online", value: "+300%" },
       { metric: "Mesi vuoti/anno", value: "-80%" },
@@ -614,8 +593,8 @@ export const perChiECategories: PerChiECategory[] = [
     name: "Progettisti e Studi Tecnici",
     icon: "Compass",
     group: "settore",
-    heroTitle: "Architetto? Geometra? Passi Più Tempo Al Telefono Che Al Tecnigrafo.",
-    heroSubtitle: "Ogni ora spesa a rispondere a richieste generiche è un'ora tolta ai progetti che pagano. L'AI filtra per te.",
+    heroTitle: "Architetto, Ingegnere, Geometra? Passi Più Tempo su Telefono e Carte che sul Progetto.",
+    heroSubtitle: "Non progettiamo al posto tuo: ti diamo l'AI che filtra le richieste, legge capitolati, imposta computi e relazioni, crea i render per il committente e tiene aggiornato il cantiere. Il progetto e la firma restano tuoi.",
     stats: [
       { value: "€8K", label: "Valore medio progetto" },
       { value: "4h/gg", label: "Spese in comunicazione" },
@@ -625,21 +604,24 @@ export const perChiECategories: PerChiECategory[] = [
       { title: "Telefonate che interrompono il lavoro", description: "Stai progettando, il telefono suona. Perdi concentrazione. Ci metti 20 minuti a riprendere il filo." },
       { title: "Richieste generiche e perditempo", description: "'Quanto costa ristrutturare?' Domande vaghe che richiedono 30 minuti di conversazione per capire che non c'è budget." },
       { title: "Gestione cantiere a distanza", description: "Devi coordinare imprese, aggiornare il cliente, gestire varianti. Tutto via telefono e email. Caos." },
+      { title: "Ore perse su carte e documenti", description: "Capitolati da leggere, computi da impostare, relazioni da scrivere da zero. Lavoro necessario che ruba giornate alla progettazione." },
+      { title: "Il committente non riesce a immaginare il progetto", description: "Tavole e descrizioni non bastano: il cliente rimanda le decisioni e le varianti si moltiplicano." },
     ],
     solutions: [
       { title: "Agente Vocale come Filtro Intelligente", description: "L'AI risponde, capisce tipo progetto, verifica budget e tempistiche. Ti passa solo i clienti con progetti reali." },
       { title: "WhatsApp AI + Gestione Cantieri", description: "Aggiornamenti cantiere automatici via WhatsApp con foto e avanzamento. Zero telefonate di aggiornamento." },
-      { title: "Preventivi + Documenti + Outbound", description: "Genera proposte progettuali da brief, gestisce pratiche edilizie, contatta imprese per collaborazioni." },
+      { title: "Documenti Tecnici + Render + Preventivi", description: "Sintesi di capitolati, bozze di computi e relazioni, render AI per il committente e preventivi di onorario. Tu rivedi e firmi." },
     ],
     services: [
       { icon: "Phone", title: "Agente Vocale AI", description: "Filtro intelligente: capisce tipo progetto, dimensione, budget. Ti passa solo chi ha un incarico vero da affidare." },
       { icon: "MessageSquare", title: "WhatsApp AI", description: "Aggiornamenti cantiere con foto ai committenti, raccolta documenti da imprese, comunicazioni DL." },
       { icon: "HardHat", title: "Gestione Cantieri", description: "Coordinamento imprese esecutrici, verbali avanzamento, gestione varianti e SAL. Report automatici." },
-      { icon: "FileText", title: "Gestione Documenti", description: "CILA, SCIA, permessi, pratiche catastali, computi metrici. Workflow approvativo con firma digitale." },
-      { icon: "Calculator", title: "Preventivi Automatici", description: "Da brief progettuale a proposta economica: fasi, tempistiche, onorari, spese tecniche. Professionale in minuti." },
+      { icon: "FileText", title: "Pratiche e Documenti", description: "Raccolta documenti e bozze per CILA, SCIA, permessi e pratiche catastali, con scadenze sotto controllo. Firma e responsabilità restano del professionista." },
+      { icon: "Calculator", title: "Preventivi di Onorario", description: "Da brief del committente a proposta economica: fasi, tempistiche, onorari, spese tecniche. Professionale in minuti." },
+      { icon: "Image", title: "Render AI per il Committente", description: "Dalla foto dello stato di fatto, varianti fotorealistiche di facciate, interni, bagni e coperture per far decidere il committente." },
       { icon: "Megaphone", title: "Campagne Outbound", description: "Contatta costruttori, imprese, proprietari immobili per proporre servizi di progettazione e DL." },
+      { icon: "FileSearch", title: "Capitolati e Relazioni AI", description: "Lettura automatica di capitolati, tavole e PDF, bozze di relazioni tecniche e supporto ai computi metrici. Sempre rivisti e firmati da te." },
     ],
-    calculator: { defaultStipendio: 2000, defaultLeadMensili: 15, defaultOreRipetitive: 4, valoreCommessaMedia: 8000 },
     roi: [
       { metric: "Ore produttive/giorno", value: "+3h" },
       { metric: "Clienti qualificati", value: "+200%" },
@@ -651,9 +633,71 @@ export const perChiECategories: PerChiECategory[] = [
       quote: "L'AI filtra le chiamate e mi passa solo chi ha un progetto vero con budget vero. Ho recuperato 3 ore al giorno di lavoro produttivo.",
       result: "+3h/giorno produttive, +80% progetti gestiti",
     },
-    ctaLine: "Il tuo tempo vale €100/ora. Quante ore stai regalando ai perditempo?",
+    ctaLine: "Il tuo tempo vale €100/ora. Quante ore stai regalando a telefonate, perditempo e documenti da scrivere da zero?",
   },
 ];
+
+
+/** Servizi in più per ogni scheda: l'offerta oggi va oltre l'agente vocale (gare, render, sicurezza, cantiere, BIM). */
+const EXTRA_SERVICES: Record<string, ServiceItem[]> = {
+  "artigiani-micro-imprese": [
+    { icon: "Calculator", title: "Preventivo da Nota Vocale", description: "Detti misure e lavorazioni in cantiere: il preventivo si prepara sul tuo listino e parte al cliente su WhatsApp." },
+  ],
+  "piccole-imprese": [
+    { icon: "BarChart3", title: "Margini per Commessa", description: "Costi, ore e fatture incrociati ogni settimana: sai dove guadagni e dove perdi prima che sia tardi." },
+  ],
+  "medie-imprese": [
+    { icon: "Gavel", title: "Gare d'Appalto AI", description: "Bandi filtrati per categorie e zone, requisiti verificati, checklist di gara e bozze di offerta tecnica." },
+    { icon: "ShieldCheck", title: "Sicurezza e Scadenze", description: "DURC, formazione, visite mediche e documenti dei subappaltatori sotto controllo, con solleciti automatici." },
+  ],
+  "grandi-aziende-general-contractor": [
+    { icon: "Gavel", title: "Gare d'Appalto AI", description: "Monitoraggio bandi, analisi partecipo/non partecipo, sintesi di disciplinare e capitolato, bozze di offerta tecnica e analisi prezzi." },
+    { icon: "ShieldCheck", title: "Sicurezza e Conformità", description: "Bozze di POS, scadenzario e verifica documentale dei subappaltatori su tutti i cantieri." },
+    { icon: "Package", title: "Cantiere e Acquisti", description: "Previsione dei ritardi, avanzamento da foto, ordini in base al cronoprogramma, DDT e fatture controllati sugli ordini." },
+  ],
+  "serramentisti-infissi": [
+    { icon: "Image", title: "Render AI Infissi", description: "Il cliente vede i nuovi infissi e le persiane sulla sua facciata prima di firmare." },
+  ],
+  "installatori-fotovoltaico": [
+    { icon: "Image", title: "Render AI Tetto e Pannelli", description: "Il cliente vede l'impianto sul suo tetto, con pannelli integrati nella copertura reale." },
+    { icon: "ShieldCheck", title: "Sicurezza e Scadenze", description: "Lavori in quota, formazione, DURC e documenti delle squadre sempre in regola." },
+  ],
+  "imprese-ristrutturazione": [
+    { icon: "Image", title: "Render AI Interni e Facciate", description: "Bagni, stanze, pavimenti e facciate mostrati sulla foto reale per far decidere prima il cliente." },
+    { icon: "Package", title: "Cantiere e Acquisti", description: "Materiali ordinati in base all'avanzamento, bolle e fatture controllate sugli ordini." },
+  ],
+  "imprese-edili-generali": [
+    { icon: "Gavel", title: "Gare d'Appalto AI", description: "Bandi adatti alla tua impresa, requisiti verificati, checklist documentale e bozze di offerta tecnica." },
+    { icon: "ShieldCheck", title: "Sicurezza e Conformità", description: "Bozze di POS, scadenzario sicurezza e documenti dei subappaltatori sotto controllo." },
+    { icon: "Package", title: "Cantiere e Acquisti", description: "Ritardi previsti in anticipo, avanzamento da foto, ordini e magazzino allineati ai cantieri." },
+  ],
+  "posatori-pavimentisti": [
+    { icon: "Image", title: "Render AI Pavimenti", description: "Gres, parquet, marmo o resina visti nella stanza del cliente, con pattern di posa e fughe." },
+  ],
+  "lattonieri-coperture": [
+    { icon: "Image", title: "Render AI Coperture", description: "Nuovo manto, gronde e lucernari mostrati sulla foto del tetto del cliente." },
+    { icon: "ShieldCheck", title: "Sicurezza Lavori in Quota", description: "Formazione, attestati e documenti delle squadre sempre aggiornati, con avvisi prima delle scadenze." },
+  ],
+  "impianti-idraulici-termici": [
+    { icon: "ShieldCheck", title: "Scadenze e Certificazioni", description: "Patentini, formazione, DURC e documenti di conformità sotto controllo, con avvisi automatici." },
+  ],
+  "impianti-elettrici": [
+    { icon: "ShieldCheck", title: "Scadenze e Certificazioni", description: "Abilitazioni, formazione, DURC e documenti per le dichiarazioni di conformità sempre in ordine." },
+  ],
+  "cartongessisti-finiture": [
+    { icon: "Image", title: "Render AI Stanze", description: "Controsoffitti, pareti e finiture mostrati sulla foto reale dell'ambiente." },
+    { icon: "Megaphone", title: "Marketing AI Locale", description: "Contenuti per Google e social, recensioni gestite, follow-up dopo ogni preventivo." },
+  ],
+  "progettisti-studi-tecnici": [
+    { icon: "Box", title: "Supporto AI al BIM", description: "Quantità estratte dai modelli, controlli di coerenza e documentazione per i capitolati informativi." },
+    { icon: "Gavel", title: "Gare e Concorsi", description: "Sintesi di bandi di progettazione e concorsi con requisiti, scadenze e documenti da preparare." },
+  ],
+};
+
+perChiECategories.forEach((c) => {
+  const extra = EXTRA_SERVICES[c.slug];
+  if (extra) c.services.push(...extra);
+});
 
 export const dimensioneCategories = perChiECategories.filter(c => c.group === "dimensione");
 export const settoreCategories = perChiECategories.filter(c => c.group === "settore");

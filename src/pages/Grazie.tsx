@@ -8,18 +8,19 @@ import { MetaPixel } from "@/lib/metaPixel";
 
 /** Mappa l'origine del form al nome evento per Meta. */
 const SOURCES: Record<string, string> = {
-  "home-demo": "Grazie — Prenota Demo (Home)",
+  "home-demo": "Grazie — Consulenza gratuita (Home)",
   soluzioni: "Grazie — Sessione Gratuita (Soluzioni)",
 };
 
 const nextSteps = [
-  { icon: Clock, title: "Entro 4 ore lavorative", text: "Un nostro specialista ti ricontatta per fissare la demo nel momento più comodo per te." },
-  { icon: Phone, title: "Analisi del tuo caso", text: "In 15 minuti vediamo insieme quanti lead stai perdendo e quanto puoi risparmiare con l'AI." },
-  { icon: CheckCircle2, title: "Nessun impegno", text: "La demo è gratuita e senza vincoli. Decidi tu se e quando partire." },
+  { icon: Clock, title: "Entro 4 ore lavorative", text: "Un nostro specialista ti ricontatta per fissare la consulenza gratuita nel momento più comodo per te." },
+  { icon: Phone, title: "Analisi del tuo caso", text: "In 30 minuti analizziamo i tuoi processi e dove l'AI ti fa risparmiare tempo e denaro." },
+  { icon: CheckCircle2, title: "Nessun impegno", text: "La consulenza è gratuita e senza vincoli. Decidi tu se e quando partire." },
 ];
 
 const usefulLinks = [
-  { label: "Le 20 soluzioni AI", href: "/soluzioni" },
+  { label: "I servizi AI", href: "/servizi" },
+  { label: "Tutte le soluzioni AI", href: "/soluzioni" },
   { label: "Come funziona", href: "/come-funziona" },
   { label: "Il gestionale EdiliziaInCloud", href: "/edilizia-in-cloud" },
   { label: "Blog e guide", href: "/blog" },
@@ -31,7 +32,7 @@ export default function Grazie() {
 
   const seoTags = usePageSEO({
     title: "Grazie — Richiesta ricevuta | Edilizia.io",
-    description: "Grazie! Abbiamo ricevuto la tua richiesta. Ti ricontattiamo entro 4 ore lavorative per la tua demo gratuita.",
+    description: "Grazie! Abbiamo ricevuto la tua richiesta. Ti ricontattiamo entro 4 ore lavorative per la tua consulenza gratuita.",
     canonical: "/grazie",
     noindex: true,
   });
@@ -59,7 +60,7 @@ export default function Grazie() {
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
           Ti ricontattiamo <strong className="text-foreground">entro 4 ore lavorative</strong> per
-          fissare la tua demo gratuita di 15 minuti.
+          fissare la tua consulenza gratuita.
         </p>
 
         {/* Prossimi passi */}

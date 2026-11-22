@@ -5,28 +5,28 @@ import AnimatedBadge from "@/components/custom/AnimatedBadge";
 
 const pains = [
   {
-    title: "La segretaria che perde il 40% delle chiamate inbound",
-    text: "È in pausa, è al telefono, è impegnata con un cliente. Nel frattempo il lead chiama il concorrente. Ogni chiamata persa è un preventivo regalato. La stai pagando €2.200/mese per perdere clienti.",
+    title: "Il 40% delle chiamate in entrata resta senza risposta",
+    text: "L'ufficio è in pausa, al telefono o impegnato con un cliente. Nel frattempo il lead chiama il concorrente. Ogni chiamata persa è un preventivo regalato, e non è colpa di nessuno: il telefono non si ferma mai.",
     stat: "78% dei clienti edili sceglie chi risponde per primo",
   },
   {
-    title: "Il commerciale che richiama i lead dopo 3 giorni (se li richiama)",
-    text: "Soldi spesi in campagne Google e Meta che dormono nel CRM. Il tuo commerciale costa €3.000/mese e richiama — forse — il 30% dei lead. Il resto? Fatturato fantasma che si accumula ogni mese.",
+    title: "I lead vengono richiamati dopo giorni (quando va bene)",
+    text: "Soldi spesi in campagne Google e Meta che dormono nel CRM. Il commerciale è in cantiere o in trattativa e riesce a richiamare solo una parte dei contatti. Il resto è fatturato che si perde ogni mese.",
     stat: "68% dei lead edili non viene ricontattato entro 24h",
   },
   {
-    title: "L'impiegata che passa 3,5 ore/giorno a fare report",
-    text: "Fogli Excel, reportistica operai, analisi preventivi. €2.400/mese per attività ripetitive che un Agente AI fa in 5 minuti. Ogni ora che lei ci passa è un'ora che tu paghi senza ritorno.",
+    title: "Ore ogni giorno a ricopiare dati e fare report",
+    text: "Fogli Excel, rapportini, computi, confronto preventivi. Attività ripetitive che l'AI prepara in pochi minuti, lasciando al tuo ufficio il lavoro che conta davvero: clienti, fornitori e cantieri.",
     stat: "Media: 3,5 ore/giorno perse in attività amministrative ripetitive",
   },
   {
-    title: "Il call center che costa €3.500/mese e lavora solo 8 ore",
-    text: "Copre solo il 33% della giornata. Il 30% dei lead arriva fuori orario — la sera, il weekend, ad agosto. Li stai perdendo tutti. Un Agente AI costa una frazione e lavora H24, 365 giorni.",
-    stat: "30% dei lead edili arriva fuori orario lavorativo",
+    title: "Progettisti e tecnici sommersi da carte e capitolati",
+    text: "Leggere capitolati, impostare computi, scrivere relazioni e rispondere alle varianti porta via giornate intere. Tempo tolto alla progettazione e al controllo del cantiere.",
+    stat: "Il lavoro documentale pesa più del progetto stesso",
   },
   {
-    title: "I tuoi concorrenti stanno già licenziando — e assumendo AI",
-    text: "Non tra 2 anni. Adesso. Ogni settimana senza sostituzione AI è un vantaggio competitivo regalato a chi ha avuto il coraggio di muoversi prima. Il mercato edile cambia. Chi non cambia con lui, sparisce.",
+    title: "I tuoi concorrenti stanno già introducendo l'AI",
+    text: "Non tra 2 anni. Adesso. Ogni mese senza un sistema AI è un vantaggio regalato a chi si è mosso prima. Il mercato edile cambia: chi organizza meglio dati e processi lavora con margini più alti.",
     stat: "+180% crescita adozione AI nel settore costruzioni 2023-2025",
   },
 ];
@@ -40,14 +40,14 @@ const PainSection = () => {
         <div className="text-center mb-12 space-y-4">
           <AnimatedBadge variant="arancio">IL PROBLEMA</AnimatedBadge>
           <h2 className="font-display text-[32px] md:text-5xl font-extrabold text-neutral-900 leading-tight">
-            Ogni Dipendente Improduttivo<br />
-            Ti Costa <span className="text-primary">€45.000/anno.</span><br />
+            Il Lavoro Ripetitivo<br />
+            Ti Costa <span className="text-primary">Più di Quanto Pensi.</span><br />
             E Tu Lo Sai.
           </h2>
           <p className="text-lg text-neutral-500 max-w-xl mx-auto leading-relaxed">
             Hai un ottimo prodotto. Hai una squadra. Investi in pubblicità.
-            Ma stai pagando persone che fanno il lavoro che un Agente AI
-            farebbe meglio, più veloce, e a una frazione del costo.
+            Ma il tuo team passa ore su telefonate, documenti e report che un
+            sistema AI gestirebbe più velocemente, a una frazione del costo.
           </p>
         </div>
 

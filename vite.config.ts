@@ -53,12 +53,12 @@ export default defineConfig(({ isSsrBuild }) => ({
       // (/per-chi-e/<slug>, /blog/<slug>) scoperte via getStaticPaths.
       const flat = [
         "/",
+        "/servizi",
         "/soluzioni",
         "/per-chi-e",
         "/chi-siamo",
         "/come-funziona",
         "/garanzia",
-        "/tariffe",
         "/blog",
         "/edilizia-in-cloud",
         "/grazie",
@@ -67,7 +67,7 @@ export default defineConfig(({ isSsrBuild }) => ({
         "/termini-di-servizio",
       ];
       const dynamic = paths.filter(
-        (p) => p.startsWith("/per-chi-e/") || p.startsWith("/blog/"),
+        (p) => p.startsWith("/per-chi-e/") || p.startsWith("/blog/") || p.startsWith("/servizi/"),
       );
       return Array.from(new Set([...flat, ...dynamic]));
     },

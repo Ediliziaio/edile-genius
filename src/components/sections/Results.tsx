@@ -8,7 +8,7 @@ const metrics = [
   { value: 65, prefix: "-", suffix: "%", label: "Tempo Non-Vendita" },
   { value: 25, prefix: "+", suffix: "%", label: "Lead Freddi Riattivati" },
   { value: 3, suffix: "X", label: "Appuntamenti per Commerciale" },
-  { value: 60, prefix: "-", suffix: "%", label: "Costi del Personale Operativo" },
+  { value: 60, prefix: "-", suffix: "%", label: "Tempo su Attività Ripetitive" },
 ];
 
 const Results = () => {
@@ -21,7 +21,7 @@ const Results = () => {
         <div className="text-center mb-12 space-y-4">
           <AnimatedBadge variant="verde">RISULTATI REALI</AnimatedBadge>
           <h2 className="font-display text-[32px] md:text-5xl font-extrabold text-neutral-900 leading-tight">
-            50+ Dipendenti Già Sostituiti.<br />
+            Risultati Misurati.<br />
             <span className="text-primary">Ecco i Numeri.</span>
           </h2>
         </div>
@@ -67,7 +67,7 @@ const Results = () => {
               {Array.from({ length: 5 }).map((_, i) => <span key={i}>⭐</span>)}
             </div>
             <p className="font-mono text-[10px] text-neutral-600 mt-4">
-              *Risultati indicativi. Variano in base a volume lead e organico aziendale.
+              *Risultati indicativi. Variano in base al volume di lead e ai processi aziendali.
             </p>
           </motion.div>
         </div>

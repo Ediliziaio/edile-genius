@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import { solutions } from "@/data/solutions";
 
 const container = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.12 } } };
 const item = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 1, 0.35, 1] as const } } };
@@ -40,7 +41,7 @@ const AIComparison = () => {
               ))}
             </ul>
             <div className="bg-neutral-700/50 rounded-xl px-4 py-2.5 font-mono text-xs text-neutral-400 text-center">
-              7 delle 20 soluzioni usano questa tecnologia
+              {solutions.filter((s) => s.tipoAI === "vocale").length} delle {solutions.length} soluzioni usano questa tecnologia
             </div>
           </motion.div>
 
@@ -49,7 +50,7 @@ const AIComparison = () => {
             <div className="bg-primary rounded-2xl p-5 text-center max-w-[160px]">
               <p className="font-mono text-[10px] uppercase tracking-wider text-primary-foreground/70 mb-2">Potenza Massima</p>
               <p className="font-display text-sm font-bold text-primary-foreground leading-snug">
-                3 soluzioni combinano entrambe le tecnologie per un'automazione completa end-to-end.
+                {solutions.filter((s) => s.tipoAI === "misto").length} soluzioni combinano entrambe le tecnologie per un'automazione completa end-to-end.
               </p>
             </div>
           </motion.div>
@@ -64,14 +65,14 @@ const AIComparison = () => {
               genera documenti, analizza informazioni e automatizza processi
               ripetitivi. Lavora in background, spesso invisibile al cliente.
             </p>
-            <p className="text-neutral-400 leading-relaxed mb-6 font-semibold text-white">È il motore silenzioso che fa funzionare la tua azienda senza personale.</p>
+            <p className="text-neutral-400 leading-relaxed mb-6 font-semibold text-white">È il motore silenzioso che toglie al tuo team il lavoro ripetitivo.</p>
             <ul className="space-y-2 mb-6">
               {["Reportistica automatica", "Analisi offerte", "Pratiche ENEA/GSE", "Computo metrico", "Margini commessa", "Business intelligence"].map((c) => (
                 <li key={c} className="flex gap-2 items-center text-sm text-[#3B82F6]"><span>✓</span><span className="text-neutral-300">{c}</span></li>
               ))}
             </ul>
             <div className="bg-neutral-700/50 rounded-xl px-4 py-2.5 font-mono text-xs text-neutral-400 text-center">
-              10 delle 20 soluzioni usano questa tecnologia
+              {solutions.filter((s) => s.tipoAI === "operativo").length} delle {solutions.length} soluzioni usano questa tecnologia
             </div>
           </motion.div>
         </div>

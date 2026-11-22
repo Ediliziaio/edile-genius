@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { usePageSEO } from "@/hooks/usePageSEO";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/sections/Navbar";
@@ -14,6 +14,8 @@ import ImplementationSteps from "@/components/solutions/ImplementationSteps";
 import SolutionsFAQ, { faqs as solutionsFaqs } from "@/components/solutions/SolutionsFAQ";
 import SolutionsCTA from "@/components/solutions/SolutionsCTA";
 import Guarantee from "@/components/sections/Guarantee";
+const EicBand = lazy(() => import("@/components/sections/EicBand"));
+const DuePercorsi = lazy(() => import("@/components/sections/DuePercorsi"));
 import { solutions, type Solution } from "@/data/solutions";
 
 const Solutions = () => {
@@ -21,8 +23,8 @@ const Solutions = () => {
   const [modalOpen, setModalOpen] = useState<Solution | null>(null);
 
   const seoTags = usePageSEO({
-    title: "20 Soluzioni AI per l'Edilizia | Edilizia.io",
-    description: "Scopri 20 agenti AI specializzati per infissi, fotovoltaico, ristrutturazioni e imprese edili. Automazione vendite, assistenza clienti e gestione cantieri.",
+    title: "Soluzioni AI per Imprese Edili e Progettisti | Edilizia.io",
+    description: "Agenti e strumenti AI per infissi, fotovoltaico, ristrutturazioni, imprese edili e studi tecnici: automazione, preventivazione, render AI, documenti e gestione cantieri.",
     canonical: "/soluzioni",
     jsonLd: {
       "@type": "FAQPage",
@@ -78,9 +80,15 @@ const Solutions = () => {
             </div>
           </section>
         </div>
+        <Suspense fallback={null}>
+          <DuePercorsi />
+        </Suspense>
         <AIComparison />
         <ImplementationSteps />
         <SolutionsFAQ />
+        <Suspense fallback={null}>
+          <EicBand />
+        </Suspense>
         <SolutionsCTA />
       </main>
       <Guarantee />

@@ -7,12 +7,18 @@ const footerCols: { title: string; links: FooterLink[] }[] = [
   {
     title: "Servizi",
     links: [
-      { label: "Agenti Vocali", href: "/soluzioni" },
-      { label: "Agenti AI Operativi", href: "/soluzioni" },
-      { label: "Analisi Offerte", href: "/soluzioni" },
-      { label: "Reportistica Operai", href: "/soluzioni" },
-      { label: "Gestione Assistenze", href: "/soluzioni" },
-      { label: "Call Center AI", href: "/soluzioni" },
+      { label: "Automazione AI", href: "/servizi/automazione-ai" },
+      { label: "Preventivazione AI", href: "/servizi/preventivazione-ai" },
+      { label: "Render AI", href: "/servizi/render-ai" },
+      { label: "Gare e appalti", href: "/servizi/gare-e-appalti-ai" },
+      { label: "Sicurezza e conformità", href: "/servizi/sicurezza-e-conformita-ai" },
+      { label: "AI per progettisti", href: "/servizi/ai-per-progettisti" },
+      { label: "Cantiere e acquisti", href: "/servizi/cantiere-e-acquisti-ai" },
+      { label: "Marketing AI", href: "/servizi/marketing-e-vendite-ai" },
+      { label: "Controllo margini", href: "/servizi/controllo-e-analisi" },
+      { label: "Sistemi su misura", href: "/servizi/progettazione-sistemi-ai" },
+      { label: "Consulenza AI", href: "/servizi/consulenza-ai" },
+      { label: "Formazione", href: "/servizi/formazione-e-affiancamento" },
     ],
   },
   {
@@ -37,7 +43,7 @@ const Footer = () => {
           <div className="space-y-4">
             <img src={logoWhite} alt="Edilizia.io" className="h-20 w-auto" />
             <p className="text-sm text-neutral-500 leading-relaxed">
-              La prima azienda AI specializzata esclusivamente per il settore edile italiano.
+              Sistemi di intelligenza artificiale per imprese edili, architetti, ingegneri e geometri.
             </p>
             <p className="font-mono text-[11px] text-neutral-600">
               © {new Date().getFullYear()} Edilizia.io — P.IVA [da inserire]
@@ -66,11 +72,7 @@ const Footer = () => {
             <p className="font-mono text-xs uppercase tracking-wider text-neutral-500 mb-4">Contatti</p>
             <ul className="space-y-2">
               <li><a href="mailto:info@edilizia.io" className="text-sm text-neutral-400 hover:text-primary transition-colors">info@edilizia.io</a></li>
-              <li><a href="#cta-finale" className="text-sm text-primary font-semibold hover:text-primary-dark transition-colors">Prenota Demo Gratuita →</a></li>
-              <li className="flex gap-3 pt-2">
-                <a href="#" className="text-sm text-neutral-400 hover:text-primary transition-colors">LinkedIn</a>
-                <a href="#" className="text-sm text-neutral-400 hover:text-primary transition-colors">Instagram</a>
-              </li>
+              <li><Link to="/#cta-finale" className="text-sm text-primary font-semibold hover:text-primary-dark transition-colors">Prenota la consulenza gratuita →</Link></li>
             </ul>
           </div>
         </div>

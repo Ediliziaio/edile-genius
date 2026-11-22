@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#22c55e" />
     <meta name="language" content="it" />
     <meta name="author" content="Edilizia.io" />
-    <meta name="keywords" content="agenti vocali AI edilizia, intelligenza artificiale serramenti, AI per imprese edili, preventivi automatici, agente AI fotovoltaico, automazione edilizia Italia, software gestione cantieri, CRM edilizia, AI ristrutturazioni" />
+    <meta name="keywords" content="intelligenza artificiale edilizia, AI per imprese edili, AI per architetti ingegneri geometri, preventivazione AI, render AI, gare d'appalto AI, sicurezza cantiere AI, automazione edilizia, consulenza AI edilizia" />
     <link rel="icon" href="/favicon.png" type="image/png">
     <!-- title / description / canonical / robots / OG / Twitter sono gestiti per-pagina da SEOHead (src/hooks/usePageSEO.tsx) -->
 
@@ -25,7 +25,7 @@
         "name": "Edilizia.io",
         "url": "https://edilizia.io",
         "logo": "https://edilizia.io/favicon.png",
-        "description": "La prima azienda AI specializzata per il settore edile italiano. Agenti Vocali AI 24/7, automazione preventivi, gestione cantieri e CRM per serramentisti, fotovoltaico e imprese di ristrutturazione.",
+        "description": "Edilizia.io sviluppa sistemi di intelligenza artificiale per imprese edili, architetti, ingegneri e geometri: automazione, preventivazione, render, gare d'appalto, sicurezza, cantiere, marketing e controllo margini, con consulenza e formazione.",
         "areaServed": { "@type": "Country", "name": "Italy" },
         "knowsLanguage": "it",
         "sameAs": []
@@ -41,18 +41,31 @@
       },
       {
         "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Edilizia.io — Piattaforma AI per l'Edilizia",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "url": "https://app.edilizia.io",
-        "description": "Piattaforma SaaS con Agenti Vocali AI, CRM, preventivatore automatico, gestione cantieri e render AI per imprese del settore edile italiano.",
-        "offers": {
-          "@type": "Offer",
-          "priceCurrency": "EUR",
-          "availability": "https://schema.org/InStock"
-        },
-        "publisher": { "@id": "https://edilizia.io/#organization" }
+        "@type": "ProfessionalService",
+        "@id": "https://edilizia.io/#service",
+        "name": "Edilizia.io",
+        "url": "https://edilizia.io/servizi",
+        "description": "Servizi di intelligenza artificiale per imprese edili, architetti, ingegneri e geometri: automazione, preventivazione, render AI, documenti tecnici, sistemi su misura e consulenza. Costi definiti su misura dopo una consulenza gratuita.",
+        "areaServed": { "@type": "Country", "name": "Italy" },
+        "provider": { "@id": "https://edilizia.io/#organization" },
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Servizi AI per l'edilizia",
+          "itemListElement": [
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Automazione AI dei processi" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Preventivazione AI" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Render AI fotorealistici" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "AI per architetti, ingegneri e geometri" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Controllo margini e analisi" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Gare d'appalto con l'AI" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Sicurezza e conformità di cantiere" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Cantiere, acquisti e magazzino" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Marketing e acquisizione clienti" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Sistemi AI su misura" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Consulenza strategica sull'AI" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Formazione e affiancamento" } }
+          ]
+        }
       }
     ]
     </script>

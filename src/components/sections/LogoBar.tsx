@@ -23,7 +23,7 @@ const logos = [
 ];
 
 const stats = [
-  { icon: "🏗️", text: "50+ dipendenti sostituiti" },
+  { icon: "🏗️", text: "50+ ruoli ripetitivi automatizzati" },
   { icon: "💰", text: "€2.3M risparmiati dai clienti" },
   { icon: "⚡", text: "Setup medio: 7 giorni" },
 ];
@@ -32,7 +32,7 @@ const LogoBar = () => {
   return (
     <section className="bg-neutral-50 py-14">
       <p className="text-center font-display text-[13px] font-medium text-neutral-500 uppercase tracking-[0.08em] mb-10">
-        Aziende edili che hanno già sostituito dipendenti con Agenti AI
+        Aziende edili che lavorano già con i nostri sistemi AI
       </p>
 
       {/* Marquee logos */}

@@ -4,29 +4,30 @@ import AnnouncementBar from "@/components/sections/AnnouncementBar";
 import Navbar from "@/components/sections/Navbar";
 import ScrollProgress from "@/components/custom/ScrollProgress";
 import CustomCursor from "@/components/custom/CustomCursor";
-import Hero from "@/components/sections/Hero";
+import SyntraHero from "@/components/ui/syntra-hero";
 import StickyMobileCTA from "@/components/sections/StickyMobileCTA";
 
 // Lazy-load below-the-fold sections
 const LogoBar = lazy(() => import("@/components/sections/LogoBar"));
+const DuePercorsi = lazy(() => import("@/components/sections/DuePercorsi"));
+const EicBand = lazy(() => import("@/components/sections/EicBand"));
+const ServiziSection = lazy(() => import("@/components/sections/ServiziSection"));
+const InkOrbitFeatures = lazy(() => import("@/components/ui/ink-orbit-features"));
 const PainSection = lazy(() => import("@/components/sections/PainSection"));
 const SolutionSection = lazy(() => import("@/components/sections/SolutionSection"));
 const UseCasesGrid = lazy(() => import("@/components/sections/UseCasesGrid"));
-const ROISection = lazy(() => import("@/components/sections/ROISection"));
-const CostCalculator = lazy(() => import("@/components/sections/CostCalculator"));
 const HowItWorks = lazy(() => import("@/components/sections/HowItWorks"));
 const Results = lazy(() => import("@/components/sections/Results"));
 const WhyUs = lazy(() => import("@/components/sections/WhyUs"));
 const WhyDifferent = lazy(() => import("@/components/sections/WhyDifferent"));
-const Pricing = lazy(() => import("@/components/sections/Pricing"));
 const Guarantee = lazy(() => import("@/components/sections/Guarantee"));
 const FinalCTA = lazy(() => import("@/components/sections/FinalCTA"));
 const Footer = lazy(() => import("@/components/sections/Footer"));
 
 const Index = () => {
   const seoTags = usePageSEO({
-    title: "Edilizia.io — Agenti Vocali AI per il Settore Edile | Italia",
-    description: "La prima azienda AI specializzata per serramenti, infissi, fotovoltaico e ristrutturazioni. Agenti Vocali AI 24/7, riduzione costi operativi -60%, setup in 7 giorni.",
+    title: "Edilizia.io — Intelligenza Artificiale per Imprese Edili e Progettisti",
+    description: "Sistemi di intelligenza artificiale per imprese edili, architetti, ingegneri e geometri: automazione, agenti vocali, preventivazione, render AI, documenti tecnici e consulenza. Primo sistema attivo in 7 giorni.",
     canonical: "/",
   });
 
@@ -38,19 +39,20 @@ const Index = () => {
       <Navbar />
       <ScrollProgress />
       <main>
-        <Hero />
+        <SyntraHero />
         <Suspense fallback={null}>
           <LogoBar />
+          <DuePercorsi />
+          <ServiziSection />
+          <InkOrbitFeatures />
+          <EicBand />
           <PainSection />
           <SolutionSection />
           <UseCasesGrid />
-          <ROISection />
-          <CostCalculator />
           <HowItWorks />
           <Results />
           <WhyUs />
           <WhyDifferent />
-          <Pricing />
           <Guarantee />
           <FinalCTA />
         </Suspense>

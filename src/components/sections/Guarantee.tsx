@@ -31,15 +31,15 @@ const Guarantee = () => {
           </h2>
 
           <p className="text-lg text-neutral-700 leading-relaxed mb-4">
-            Se il tuo Agente AI non supera il dipendente che ha sostituito
-            entro 30 giorni — in termini di risultati, velocità e costi —
-            ti rimborsiamo il primo mese. Integralmente. Senza domande.
+            Se entro 30 giorni dall'avvio il sistema AI non raggiunge
+            i risultati concordati nel progetto, ti rimborsiamo quanto pagato
+            per quel sistema. Integralmente. Senza domande.
             Senza clausole.
           </p>
           <p className="text-lg leading-relaxed">
             <span className="font-bold text-neutral-900">
               Guadagniamo bene solo quando tu risparmi.
-              Questo è il nostro patto con ogni azienda edile che sceglie di licenziare i costi.
+              Questo è il nostro patto con ogni azienda edile che sceglie di lavorare con noi.
             </span>
           </p>
         </motion.div>

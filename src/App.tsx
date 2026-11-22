@@ -7,6 +7,7 @@ import { Outlet } from "react-router-dom";
 import type { RouteRecord } from "vite-react-ssg";
 import { blogPosts } from "./data/blogPosts";
 import { perChiECategories } from "./data/perChiE";
+import { SERVIZI } from "./data/servizi";
 import { AuthProvider } from "@/context/AuthContext";
 import { ImpersonationProvider } from "@/context/ImpersonationContext";
 import ScrollToTop from "./components/ScrollToTop";
@@ -32,19 +33,15 @@ const AccettaInvito = lazy(() => import("./pages/AccettaInvito"));
 
 // Lazy-loaded marketing pages
 const Solutions = lazy(() => import("./pages/Solutions"));
+const Servizi = lazy(() => import("./pages/Servizi"));
+const ServizioDetail = lazy(() => import("./pages/ServizioDetail"));
 const ChiSiamo = lazy(() => import("./pages/ChiSiamo"));
 const ComeFunziona = lazy(() => import("./pages/ComeFunziona"));
 const Garanzia = lazy(() => import("./pages/Garanzia"));
-const Tariffe = lazy(() => import("./pages/Tariffe"));
 const PerChiE = lazy(() => import("./pages/PerChiE"));
 const PerChiEDetail = lazy(() => import("./pages/PerChiEDetail"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
-const OffertaAgenteVocale = lazy(() => import("./pages/offerta/AgentiVocale"));
-const OffertaRenderAI = lazy(() => import("./pages/offerta/RenderAI"));
-const OffertaPreventivatoreAI = lazy(() => import("./pages/offerta/PreventivatoreAI"));
-const OffertaPacchettoCompleto = lazy(() => import("./pages/offerta/PacchettoCompleto"));
-const OffertaUnica = lazy(() => import("./pages/OffertaUnica"));
 const LegalPage = lazy(() => import("./pages/LegalPage"));
 const EdiliziaInCloud = lazy(() => import("./pages/EdiliziaInCloud"));
 const Grazie = lazy(() => import("./pages/Grazie"));
@@ -192,6 +189,12 @@ export const routes: RouteRecord[] = [
     children: [
       // ── Pagine pubbliche (prerenderizzate) ──
       { index: true, element: <Index /> },
+      { path: "servizi", element: <SafeRoute><Servizi /></SafeRoute> },
+      {
+        path: "servizi/:slug",
+        element: <SafeRoute><ServizioDetail /></SafeRoute>,
+        getStaticPaths: () => SERVIZI.map((s) => `/servizi/${s.slug}`),
+      },
       { path: "soluzioni", element: <SafeRoute><Solutions /></SafeRoute> },
       { path: "per-chi-e", element: <SafeRoute><PerChiE /></SafeRoute> },
       {
@@ -202,7 +205,6 @@ export const routes: RouteRecord[] = [
       { path: "chi-siamo", element: <SafeRoute><ChiSiamo /></SafeRoute> },
       { path: "come-funziona", element: <SafeRoute><ComeFunziona /></SafeRoute> },
       { path: "garanzia", element: <SafeRoute><Garanzia /></SafeRoute> },
-      { path: "tariffe", element: <SafeRoute><Tariffe /></SafeRoute> },
       { path: "blog", element: <SafeRoute><Blog /></SafeRoute> },
       {
         path: "blog/:slug",
@@ -221,11 +223,6 @@ export const routes: RouteRecord[] = [
       { path: "forgot-password", element: <SafeRoute><ForgotPassword /></SafeRoute> },
       { path: "reset-password", element: <SafeRoute><ResetPassword /></SafeRoute> },
       { path: "s/:token", element: <SafeRoute><PublicShareViewer /></SafeRoute> },
-      { path: "offerta/agente-vocale", element: <SafeRoute><OffertaAgenteVocale /></SafeRoute> },
-      { path: "offerta/render-ai", element: <SafeRoute><OffertaRenderAI /></SafeRoute> },
-      { path: "offerta/preventivatore-ai", element: <SafeRoute><OffertaPreventivatoreAI /></SafeRoute> },
-      { path: "offerta/pacchetto-completo", element: <SafeRoute><OffertaPacchettoCompleto /></SafeRoute> },
-      { path: "offerta-unica", element: <SafeRoute><OffertaUnica /></SafeRoute> },
       { path: "accetta-invito", element: <SafeRoute><AccettaInvito /></SafeRoute> },
 
       // ── SuperAdmin ──

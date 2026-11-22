@@ -38,8 +38,8 @@ const CategoryCard = ({ cat, index }: { cat: PerChiECategory; index: number }) =
 
 const PerChiE = () => {
   const seoTags = usePageSEO({
-    title: "Per Chi È — Soluzioni AI per Ogni Azienda Edile | Edilizia.io",
-    description: "Soluzioni AI su misura per artigiani, PMI, grandi imprese, serramentisti, fotovoltaico, ristrutturazioni e tutti i settori dell'edilizia italiana.",
+    title: "Per Chi È — Soluzioni AI per Imprese Edili e Studi Tecnici | Edilizia.io",
+    description: "Soluzioni AI per artigiani, PMI, general contractor, serramentisti, fotovoltaico, ristrutturazioni, impiantisti e per architetti, ingegneri e geometri.",
     canonical: "/per-chi-e",
   });
 
@@ -67,8 +67,8 @@ const PerChiE = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15, duration: 0.5 }}
           >
-            Ogni tipo di azienda edile ha problemi specifici. Noi abbiamo soluzioni specifiche. 
-            Trova la tua categoria e scopri come l'AI trasforma il tuo business.
+            Ogni impresa edile e ogni studio tecnico ha problemi specifici. Noi abbiamo soluzioni specifiche.
+            Trova la tua categoria e scopri come l'AI trasforma il tuo lavoro.
           </motion.p>
         </div>
       </section>

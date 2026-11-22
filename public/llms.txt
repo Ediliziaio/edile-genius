@@ -1,30 +1,55 @@
 # Edilizia.io
 
-> Edilizia.io è la prima azienda italiana di intelligenza artificiale specializzata esclusivamente per il settore edile: serramentisti, installatori fotovoltaico, imprese di ristrutturazione e costruzione. Offre Agenti Vocali AI che rispondono e qualificano i lead 24/7, un Preventivatore AI che genera preventivi in pochi secondi e un sistema di Render AI che mostra al cliente il risultato dei lavori prima di iniziare.
+> Edilizia.io è la prima azienda italiana di intelligenza artificiale specializzata esclusivamente per il settore edile. Progetta, sviluppa e integra sistemi di intelligenza artificiale su misura per imprese edili, serramentisti, installatori, progettisti e studi tecnici, e offre consulenza strategica sull'AI: automazione, preventivazione, render, gare d'appalto, sicurezza e conformità, cantiere e acquisti, marketing, controllo margini. Non fa progettazione edilizia: fornisce gli strumenti AI ai tecnici. Tra le soluzioni pronte: Agenti Vocali AI che rispondono e qualificano i lead 24/7, un Preventivatore AI che genera preventivi in pochi secondi e un sistema di Render AI che mostra al cliente il risultato dei lavori prima di iniziare.
 
 Edilizia.io nasce dall'esperienza diretta in cantiere (azienda di serramenti I-Profili S.r.l. e Marketing Edile): ogni strumento è stato testato su un'impresa edile reale prima di essere offerto ai clienti. Il posizionamento è "imprenditore edile per imprenditori edili", con un linguaggio concreto e orientato al ritorno economico (meno lead persi, meno costi operativi, più contratti chiusi).
 
-## Prodotti
+## Servizi
 
-- [Agente Vocale AI](https://edilizia.io/offerta/agente-vocale): risponde H24 a ogni chiamata, qualifica il lead (materiale, dimensioni, budget, bonus fiscali) e prenota il sopralluogo. Zero chiamate perse.
-- [Render AI](https://edilizia.io/offerta/render-ai): trasforma una foto in un render fotorealistico del lavoro finito (bagno, facciata, pavimento, persiane, stanza, tetto) per aiutare il cliente a decidere.
-- [Preventivatore AI](https://edilizia.io/offerta/preventivatore-ai): genera preventivi professionali in PDF a partire da voce, foto o testo, sul listino dell'azienda.
-- [Pacchetto Completo](https://edilizia.io/offerta/pacchetto-completo): tutti gli strumenti AI in un'unica piattaforma a un unico prezzo.
+- [Servizi](https://edilizia.io/servizi): progettazione e sviluppo di sistemi AI su misura, consulenza strategica sull'AI, AI per progettisti e studi tecnici (capitolati, computi, relazioni, render), agenti vocali, preventivi e documenti automatici, formazione e affiancamento del team.
+
+## Pagine dei servizi
+
+- [Automazione AI](https://edilizia.io/servizi/automazione-ai)
+- [Preventivazione AI](https://edilizia.io/servizi/preventivazione-ai)
+- [Render AI](https://edilizia.io/servizi/render-ai)
+- [AI per architetti, ingegneri e geometri](https://edilizia.io/servizi/ai-per-progettisti)
+- [Controllo margini e analisi](https://edilizia.io/servizi/controllo-e-analisi)
+- [Gare d'appalto con l'AI](https://edilizia.io/servizi/gare-e-appalti-ai)
+- [Sicurezza e conformità di cantiere](https://edilizia.io/servizi/sicurezza-e-conformita-ai)
+- [Cantiere, acquisti e magazzino](https://edilizia.io/servizi/cantiere-e-acquisti-ai)
+- [Marketing e acquisizione clienti](https://edilizia.io/servizi/marketing-e-vendite-ai)
+- [Sistemi AI su misura](https://edilizia.io/servizi/progettazione-sistemi-ai)
+- [Consulenza AI](https://edilizia.io/servizi/consulenza-ai)
+- [Formazione e affiancamento](https://edilizia.io/servizi/formazione-e-affiancamento)
+
+## Soluzioni
+
+- [Agente Vocale AI](https://edilizia.io/servizi/automazione-ai): risponde H24 a ogni chiamata, qualifica il lead (materiale, dimensioni, budget, bonus fiscali) e prenota il sopralluogo. Zero chiamate perse.
+- [Render AI](https://edilizia.io/servizi/render-ai): trasforma una foto in un render fotorealistico del lavoro finito (bagno, facciata, pavimento, persiane, stanza, tetto) per aiutare il cliente a decidere.
+- [Preventivatore AI](https://edilizia.io/servizi/preventivazione-ai): genera preventivi professionali in PDF a partire da voce, foto o testo, sul listino dell'azienda.
 
 ## Pagine chiave
 
-- [Soluzioni](https://edilizia.io/soluzioni): 20 soluzioni AI verticali per infissi, fotovoltaico, ristrutturazioni ed edilizia generale.
+- [Soluzioni](https://edilizia.io/soluzioni): 45 soluzioni AI per infissi, fotovoltaico, ristrutturazioni, imprese edili, gare d'appalto, render e studi tecnici.
 - [Per Chi È](https://edilizia.io/per-chi-e): soluzioni per dimensione d'impresa e per mestiere (serramentisti, fotovoltaico, ristrutturazioni, impianti, coperture, ecc.).
-- [Come Funziona](https://edilizia.io/come-funziona): processo di attivazione in pochi step.
-- [Tariffe](https://edilizia.io/tariffe): calcolatore di risparmio e condizioni (nessun vincolo, disdici quando vuoi).
-- [Garanzia](https://edilizia.io/garanzia): garanzia soddisfatti o rimborsati a 30 giorni.
+- [Come Funziona](https://edilizia.io/come-funziona): analisi e progetto, sviluppo e test, primo sistema attivo in circa 7 giorni.
+- [Garanzia](https://edilizia.io/garanzia): se entro 30 giorni dall'avvio il sistema non raggiunge i risultati concordati nel progetto, Edilizia.io rimborsa quanto pagato per quel sistema.
 - [Chi Siamo](https://edilizia.io/chi-siamo): la storia dell'azienda, nata in cantiere.
 
 ## Blog
 
 - [Blog](https://edilizia.io/blog): guide pratiche, casi studio e strategie sull'AI applicata all'edilizia (agenti vocali, automazione preventivi, gestione bonus, cantiere digitale, fotovoltaico).
 
+## Prezzi
+
+Edilizia.io non pubblica un listino: ogni progetto viene definito su misura dopo una consulenza gratuita.
+
+## Piattaforma gestionale
+
+- [EdiliziaInCloud](https://edilizia.io/edilizia-in-cloud): il gestionale cloud con AI per imprese edili (cantieri, fatturazione elettronica, preventivi, margini, personale, CRM). I sistemi AI di Edilizia.io si integrano con EdiliziaInCloud.
+
 ## Contatti
 
 - Email: info@edilizia.io
-- Prenotazione demo gratuita: https://edilizia.io/come-funziona
+- Prenotazione consulenza gratuita: https://edilizia.io/#cta-finale

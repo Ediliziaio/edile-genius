@@ -3,10 +3,10 @@ import { useRef } from "react";
 
 const leftItems = [
   { emoji: "🏗️", title: "Costruito dall'interno del settore", text: "Nato da chi ha gestito cantieri, posatori e fornitori. Ogni funzione risolve un problema reale vissuto in prima persona." },
-  { emoji: "🤖", title: "AI verticale per le costruzioni", text: "Agenti vocali addestrati sul linguaggio del settore: SAL, preventivi a misura, pratiche ENEA. Non AI generica." },
+  { emoji: "🤖", title: "AI verticale per le costruzioni", text: "Sistemi addestrati sul linguaggio del settore: SAL, preventivi a misura, capitolati, pratiche ENEA. Non AI generica." },
   { emoji: "📞", title: "Risponde ai tuoi lead mentre dormi", text: "L'agente vocale qualifica i nuovi contatti 24/7, fissa appuntamenti e aggiorna il CRM in automatico." },
   { emoji: "📊", title: "Controllo margini in tempo reale", text: "Sai quanto guadagni su ogni commessa ogni settimana. Non a fine anno quando è troppo tardi." },
-  { emoji: "⚡", title: "Operativo in 48 ore, non in mesi", text: "Onboarding guidato, dati importati, team formato. Sei operativo in due giorni." },
+  { emoji: "⚡", title: "Operativo in giorni, non in mesi", text: "Progetto chiaro, dati importati, team formato. Il primo sistema è attivo di solito in circa 7 giorni." },
 ];
 
 const rightItems = [

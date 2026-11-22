@@ -1,3 +1,4 @@
+import { solutions } from "@/data/solutions";
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
@@ -11,8 +12,8 @@ const item = {
 };
 
 const stats = [
-  { value: "20", label: "SOLUZIONI AI DISPONIBILI" },
-  { value: "4", label: "SETTORI COPERTI" },
+  { value: String(solutions.length), label: "SOLUZIONI AI DISPONIBILI" },
+  { value: "7", label: "AREE: MESTIERI, GARE, PROGETTISTI, RENDER" },
   { value: "-60%", label: "RIDUZIONE COSTI OPERATIVI MEDIA" },
   { value: "7 gg", label: "SETUP MEDIO PER SOLUZIONE" },
 ];
@@ -30,23 +31,23 @@ const SolutionsHero = () => (
       <motion.div variants={item} className="inline-flex items-center gap-2 bg-[rgba(62,207,110,0.12)] border border-[rgba(62,207,110,0.25)] rounded-full px-4 py-1.5 mb-8">
         <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
         <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-primary font-medium">
-          ⚡ 20 Soluzioni AI Certificate per l'Edilizia Italiana
+          ⚡ {solutions.length} Soluzioni AI per Imprese Edili e Progettisti
         </span>
       </motion.div>
 
       <motion.h1 variants={item} className="font-display text-[32px] sm:text-[44px] md:text-[72px] font-extrabold text-white leading-[1.05] mb-6">
-        Ogni Problema<br />della Tua Azienda<br />Edile — Risolto.<br />
+        Ogni Problema<br />di Impresa e Studio<br />Tecnico — Risolto.<br />
         <span className="text-primary">Con l'AI.</span>
       </motion.h1>
 
       <motion.div variants={item} className="max-w-[640px] mx-auto mb-10">
         <p className="text-neutral-400 text-lg leading-[1.7]">
           Abbiamo analizzato ogni processo critico del settore edile italiano —
-          infissi, fotovoltaico, ristrutturazioni, cantieri — e costruito
-          20 soluzioni AI specifiche per eliminare sprechi, ridurre costi
-          e far crescere le vendite.
+          infissi, fotovoltaico, ristrutturazioni, cantieri, gare d'appalto, sicurezza, studi tecnici — e costruito
+          {solutions.length} soluzioni AI specifiche per eliminare sprechi, ridurre costi,
+          far crescere le vendite e dare più tempo a chi progetta.
         </p>
-        <p className="text-white font-semibold mt-4">Non template generici. Soluzioni verticali costruite per voi.</p>
+        <p className="text-white font-semibold mt-4">Non template generici. Soluzioni verticali per imprese, architetti, ingegneri e geometri.</p>
       </motion.div>
 
       <motion.div variants={item} className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-3 mb-12">

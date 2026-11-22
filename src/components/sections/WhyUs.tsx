@@ -5,23 +5,23 @@ import AnimatedBadge from "@/components/custom/AnimatedBadge";
 const cards = [
   {
     icon: "🏗️",
-    title: "Specializzati nel Sostituire Figure Edili",
-    text: "Non siamo un'azienda AI generalista. Esistiamo esclusivamente per serramenti, infissi, fotovoltaico, ristrutturazioni e impianti. Sappiamo esattamente quali figure puoi sostituire, come farlo e quanto risparmierai. Questa specializzazione vale +30% di efficacia rispetto a soluzioni generiche.",
+    title: "Specializzati Solo nell'Edilizia",
+    text: "Non siamo un'azienda AI generalista. Lavoriamo esclusivamente con imprese edili, serramentisti, installatori, progettisti e studi tecnici. Conosciamo i tuoi processi, i tuoi documenti e il tuo linguaggio: per questo i nostri sistemi funzionano dal primo giorno.",
   },
   {
     icon: "🎙️",
-    title: "Voci Italiane Indistinguibili da un Umano",
-    text: "Nessun accento straniero, nessun robot. Le nostre voci sono costruite su modelli linguistici italiani, con gestione del dialetto, delle interruzioni, delle esitazioni naturali. I tuoi clienti non si accorgono di parlare con un AI. Il dipendente sostituito non mancherà a nessuno.",
+    title: "Sistemi Costruiti sui Tuoi Dati",
+    text: "Lavoriamo sui tuoi listini, documenti, capitolati e sul tuo gestionale, anche EdiliziaInCloud. Gli agenti vocali parlano un italiano naturale, i documenti seguono i tuoi modelli: niente risposte generiche.",
   },
   {
     icon: "⚡",
-    title: "Operativi in 7 Giorni — Il Dipendente Se Ne Va, l'AI Arriva",
-    text: "Nessun mese di integrazione. Nessun consulente a tempo indeterminato. Dal momento in cui decidi chi sostituire alla prima chiamata gestita dall'Agente AI: meno di due settimane. Zero downtime operativo.",
+    title: "Operativi in 7 Giorni",
+    text: "Nessun mese di integrazione. Nessun consulente a tempo indeterminato. Dall'approvazione del progetto al primo sistema in funzione passano di solito circa 7 giorni, senza fermare il lavoro.",
   },
   {
     icon: "📈",
-    title: "Ottimizzazione Settimanale — Meglio di Qualsiasi Formazione",
-    text: "Non consegniamo un prodotto e ci dimentichiamo di te. Ogni settimana analizziamo le conversazioni, identifichiamo i punti di miglioramento e ottimizziamo script e risposte. L'Agente AI diventa più bravo ogni giorno — nessun dipendente umano migliora così velocemente.",
+    title: "Miglioramento Settimanale",
+    text: "Non consegniamo un prodotto e ci dimentichiamo di te. Ogni settimana analizziamo risultati, conversazioni e documenti prodotti, e miglioriamo il sistema. Il sistema AI migliora settimana dopo settimana, insieme al tuo team.",
   },
 ];
 
@@ -40,9 +40,8 @@ const WhyUs = forwardRef<HTMLElement>(function WhyUs(_, _ref) {
         <div className="text-center mb-12 space-y-4">
           <AnimatedBadge variant="verde">IL NOSTRO VANTAGGIO</AnimatedBadge>
           <h2 className="font-display text-[32px] md:text-5xl font-extrabold text-neutral-900 leading-tight">
-            L'Azienda che{" "}
-            <span className="text-primary">Licenzia<br />i Tuoi Costi.</span>{" "}
-            Non per Tutti.
+            Perché Scegliere{" "}
+            <span className="text-primary">Edilizia.io.</span>
           </h2>
         </div>
 

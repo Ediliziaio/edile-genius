@@ -12,27 +12,27 @@ import { Shield, Clock, TrendingUp, CheckCircle2, XCircle, ArrowRight, Phone, Ba
 const timeline = [
   {
     day: "Giorno 1–3",
-    icon: "⚙️",
-    title: "Setup e Lancio",
-    desc: "Configuriamo il tuo Agente AI, lo addestriamo sul tuo settore specifico, lo colleghiamo al tuo numero. In 48 ore è operativo. Tu non tocchi nulla.",
+    icon: "🔍",
+    title: "Analisi e Progetto",
+    desc: "Studiamo i tuoi processi e ti presentiamo il progetto del sistema: cosa fa, con quali dati e quali risultati concordiamo. Tu non tocchi nulla di tecnico.",
   },
   {
-    day: "Giorno 4–7",
-    icon: "📞",
-    title: "Prime Chiamate Gestite",
-    desc: "Il tuo Agente inizia a rispondere, qualificare lead e fissare appuntamenti. Tu ricevi notifiche in tempo reale. Vedi i primi risultati concreti.",
+    day: "Giorno 3–7",
+    icon: "⚙️",
+    title: "Sviluppo e Avvio",
+    desc: "Il sistema entra nei tuoi processi: telefono, preventivi, documenti, cantiere. In circa 7 giorni è attivo (un agente vocale anche in 48 ore).",
   },
   {
     day: "Giorno 8–14",
     icon: "📈",
-    title: "Ottimizzazione e Scaling",
-    desc: "Analizziamo le prime conversazioni, raffiniamo lo script, miglioriamo il tasso di conversione. Il tuo Agente diventa più bravo ogni giorno.",
+    title: "Messa a Punto",
+    desc: "Analizziamo i primi risultati, conversazioni e documenti prodotti, e miglioriamo il sistema con il tuo team.",
   },
   {
     day: "Giorno 15–30",
     icon: "🏆",
-    title: "ROI Misurabile",
-    desc: "Dashboard attiva con KPI in tempo reale. Sai esattamente quanti appuntamenti ha fissato, quanto tempo ha risparmiato, quanto vale ogni chiamata gestita.",
+    title: "Risultati Misurati",
+    desc: "Dati alla mano: richieste gestite, preventivi preparati, ore recuperate. Confrontiamo i risultati con quelli concordati nel progetto.",
   },
 ];
 
@@ -43,11 +43,11 @@ const faqs = [
   },
   {
     q: "\"E se il mio settore è diverso?\"",
-    a: "Lavoriamo esclusivamente con il settore edile: serramenti, infissi, fotovoltaico, ristrutturazioni, impianti. Non siamo un'azienda generica che fa tutto per tutti. Ogni script, ogni flusso, ogni obiezione gestita è calibrata su come parla, pensa e decide il tuo cliente tipo.",
+    a: "Lavoriamo esclusivamente con il settore edile: serramenti, infissi, fotovoltaico, ristrutturazioni, impianti, general contractor e studi tecnici di architetti, ingegneri e geometri. Non siamo un'azienda generica che fa tutto per tutti. Ogni flusso, ogni documento, ogni risposta è calibrata su come lavora il tuo settore.",
   },
   {
     q: "\"Non ho tempo per implementare qualcosa di nuovo.\"",
-    a: "Perfetto, perché non devi fare nulla. Facciamo tutto noi: setup, training, collegamento numeri, test. Il tuo unico impegno? Una call di 30 minuti per capire il tuo business. Dopo, ci pensiamo noi. In 48 ore sei operativo.",
+    a: "Perfetto, perché non devi fare nulla. Facciamo tutto noi: setup, training, collegamento numeri, test. Il tuo unico impegno? Una call di 30 minuti per capire il tuo business. Dopo, ci pensiamo noi. In circa 7 giorni il primo sistema è attivo.",
   },
   {
     q: "\"Ho già provato software che non funzionavano.\"",
@@ -55,17 +55,17 @@ const faqs = [
   },
   {
     q: "\"Cosa succede se non funziona davvero?\"",
-    a: "Ti rimborsiamo il primo mese. Integralmente. Senza email di giustificazione, senza clausole nascoste, senza \"crediti\" al posto dei soldi veri. Bonifico sul tuo conto. Fine. Se non generiamo almeno 10 appuntamenti qualificati in 30 giorni, non meriti di pagare.",
+    a: "Se entro 30 giorni dall'avvio il sistema non raggiunge i risultati concordati nel progetto, ti rimborsiamo quanto pagato per quel sistema. Integralmente. Senza clausole nascoste, senza \"crediti\" al posto dei soldi veri. Bonifico sul tuo conto. Fine.",
   },
   {
-    q: "\"E se funziona ma poi i costi aumentano?\"",
-    a: "Il prezzo che vedi è il prezzo che paghi. Nessun aumento nascosto, nessun costo variabile a sorpresa. E puoi disdire quando vuoi, con un mese di preavviso. Zero vincoli. Se restiamo, è perché ti conviene — non perché sei obbligato.",
+    q: "\"E se poi i costi aumentano?\"",
+    a: "I costi li definiamo insieme dopo la consulenza gratuita, nero su bianco nel progetto. Nessun costo nascosto, nessuna sorpresa a metà strada. Se continuiamo a lavorare insieme è perché ti conviene, non perché sei obbligato.",
   },
 ];
 
 const stats = [
-  { value: "97%", label: "Tasso di rinnovo", icon: BadgePercent },
-  { value: "50+", label: "Dipendenti sostituiti", icon: Users },
+  { value: "~7 gg", label: "Primo sistema attivo", icon: BadgePercent },
+  { value: "50+", label: "Ruoli ripetitivi automatizzati", icon: Users },
   { value: "<2%", label: "Richieste rimborso", icon: Shield },
   { value: "€2.3M", label: "Risparmiati dai clienti", icon: TrendingUp },
 ];
@@ -87,8 +87,8 @@ const testimonials = [
 
 const Garanzia = () => {
   const seoTags = usePageSEO({
-    title: "Garanzia 30 Giorni Soddisfatti o Rimborsati | Edilizia.io",
-    description: "Zero rischi con la nostra garanzia 30 giorni. Se il tuo Agente AI non genera risultati misurabili, ti rimborsiamo al 100%. Nessuna domanda.",
+    title: "Garanzia sui Risultati 30 Giorni | Edilizia.io",
+    description: "Se entro 30 giorni dall'avvio il sistema AI non raggiunge i risultati concordati nel progetto, ti rimborsiamo quanto pagato per quel sistema. Per imprese edili e studi tecnici.",
     canonical: "/garanzia",
     jsonLd: {
       "@type": "FAQPage",
@@ -149,17 +149,17 @@ const Garanzia = () => {
 
               <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                 Perché ti offriamo una garanzia che nessun competitor oserebbe dare?
-                Perché sappiamo cosa succede quando un imprenditore edile smette di
-                pagare stipendi inutili e lascia che un Agente AI faccia il lavoro —{" "}
-                <span className="font-semibold text-foreground">meglio, più veloce, 24/7, a una frazione del costo.</span>
+                Perché sappiamo cosa succede quando un'impresa edile toglie al suo team il lavoro
+                ripetitivo e lo affida a un sistema AI costruito sui suoi processi:{" "}
+                <span className="font-semibold text-foreground">più veloce, sempre disponibile, misurabile.</span>
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                 <Link
-                  to="/soluzioni"
+                  to="/#cta-finale"
                   className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-xl text-base font-bold hover:bg-primary-dark hover:scale-[1.02] shadow-button-green transition-all"
                 >
-                  Prenota Analisi Gratuita <ArrowRight size={18} />
+                  Prenota la Consulenza Gratuita <ArrowRight size={18} />
                 </Link>
                 <span className="text-sm text-muted-foreground">⏱ 30 min · Nessun impegno</span>
               </div>
@@ -185,7 +185,7 @@ const Garanzia = () => {
               <p>
                 Negli ultimi 18 mesi, abbiamo implementato Agenti AI in oltre{" "}
                 <span className="font-bold text-foreground">50 aziende edili</span> in tutta Italia.
-                Serramentisti, impiantisti, fotovoltaico, ristrutturazioni, general contractor.
+                Serramentisti, impiantisti, fotovoltaico, ristrutturazioni, general contractor, e oggi anche architetti, ingegneri e geometri.
               </p>
               <p>
                 Su oltre 50 implementazioni, le richieste di rimborso sono state{" "}
@@ -301,12 +301,12 @@ const Garanzia = () => {
                     {
                       icon: Shield,
                       title: "Rimborso Integrale",
-                      text: "Se il tuo Agente AI non genera almeno 10 appuntamenti qualificati nei primi 30 giorni, ti rimborsiamo il primo mese. Integralmente. Senza domande.",
+                      text: "Se entro 30 giorni dall'avvio il sistema AI non raggiunge i risultati concordati nel progetto, ti rimborsiamo quanto pagato per quel sistema. Integralmente. Senza domande.",
                     },
                     {
                       icon: Clock,
-                      title: "Zero Vincoli Contrattuali",
-                      text: "Nessun contratto annuale. Nessuna penale di uscita. Disdici quando vuoi, con un mese di preavviso. Se restiamo, è perché ti conviene.",
+                      title: "Costi Chiari nel Progetto",
+                      text: "Costi, tempi e risultati attesi scritti nel progetto prima di partire. Nessun costo nascosto. Se continuiamo insieme, è perché ti conviene.",
                     },
                     {
                       icon: BarChart3,
@@ -434,8 +434,8 @@ const Garanzia = () => {
                   <h3 className="font-display font-bold text-white text-lg">Se non prenoti</h3>
                 </div>
                 {[
-                  "Stesso organico, stessi costi",
-                  "Segretaria che perde lead al telefono",
+                  "Stessi processi, stessi costi",
+                  "Ufficio sommerso da telefonate e documenti",
                   "Lead del weekend persi per sempre",
                   "Nessuna idea di quanti soldi stai bruciando",
                   "I tuoi competitor iniziano a usare l'AI",
@@ -456,7 +456,7 @@ const Garanzia = () => {
                 {[
                   "Agente AI operativo 24/7, zero assenze",
                   "Ogni lead qualificato e in agenda",
-                  "Risparmi €2.000–5.000/mese di stipendio",
+                  "Recuperi ore ogni giorno su telefono e documenti",
                   "Dashboard con ROI in tempo reale",
                   "30 giorni di garanzia — zero rischio",
                 ].map((item) => (
@@ -471,10 +471,10 @@ const Garanzia = () => {
             {/* CTA Button */}
             <div className="text-center space-y-6">
               <Link
-                to="/soluzioni"
+                to="/#cta-finale"
                 className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-10 py-5 rounded-xl text-lg font-bold hover:bg-primary-dark hover:scale-[1.02] shadow-button-green transition-all"
               >
-                PRENOTA LA TUA ANALISI GRATUITA <ArrowRight size={20} />
+                PRENOTA LA CONSULENZA GRATUITA <ArrowRight size={20} />
               </Link>
 
               <p className="text-[hsl(var(--neutral-500))] text-sm">
@@ -486,8 +486,8 @@ const Garanzia = () => {
             <div className="mt-14 space-y-5 text-[15px] text-[hsl(var(--neutral-500))] italic max-w-2xl mx-auto">
               <p>
                 <span className="font-bold text-primary not-italic">P.S.</span> — Nel peggiore dei casi, esci dalla call con una mappa chiara
-                del tuo organico e delle figure che potresti sostituire subito con l'AI. Una consulenza che normalmente
-                costa €500, la ricevi gratis. Nel migliore dei casi, inizi a risparmiare migliaia di euro al mese dal giorno dopo.
+                dei tuoi processi e di dove l'AI può aiutarti subito. Una consulenza completa,
+                gratis. Nel migliore dei casi, hai già il progetto del sistema che ti farà risparmiare ogni mese.
               </p>
               <p>
                 <span className="font-bold text-primary not-italic">P.P.S.</span> — Accettiamo solo 12 aziende al mese. Non per creare

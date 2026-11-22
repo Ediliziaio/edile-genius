@@ -6,23 +6,23 @@ const steps = [
   {
     num: "01",
     icon: "🔍",
-    title: "Analisi & Configurazione",
-    days: "GIORNI 1–7",
-    text: "Studiamo il tuo processo di vendita, il tuo mercato, i tuoi prodotti. Configuriamo ogni agente sulla tua lingua commerciale, le tue obiezioni comuni, il tuo territory. Non un template — un sistema costruito sulla tua azienda.",
+    title: "Analisi & Progetto",
+    days: "GIORNI 1–3",
+    text: "Studiamo i tuoi processi di ufficio e cantiere, i tuoi documenti, i tuoi listini e il tuo modo di vendere. Ti presentiamo il progetto del sistema: cosa fa, con quali dati e quanto ti fa risparmiare. Non un template, un sistema costruito sulla tua azienda.",
   },
   {
     num: "02",
     icon: "⚡",
-    title: "Training & Test",
-    days: "GIORNI 7–12",
-    text: "Training su centinaia di scenari reali del settore edile italiano. Test su dialetti, obiezioni tecniche, situazioni complesse. L'agente va live solo dopo aver superato i nostri standard di qualità.",
+    title: "Sviluppo & Test",
+    days: "GIORNI 3–7",
+    text: "Sviluppiamo agenti e automazioni, li colleghiamo ai tuoi strumenti e li mettiamo alla prova su casi reali del settore edile: telefonate, preventivi, documenti tecnici. Il sistema parte solo dopo aver superato i nostri standard di qualità.",
   },
   {
     num: "03",
     icon: "🚀",
-    title: "Go Live & Ottimizzazione",
-    days: "DAL GIORNO 14 IN POI",
-    text: "L'agente è attivo. Da questo momento lavora per te ogni ora di ogni giorno. Ogni settimana analizziamo le conversazioni, ottimizziamo gli script, miglioriamo le conversion.",
+    title: "Avvio & Affiancamento",
+    days: "DAL GIORNO 7 IN POI",
+    text: "Il sistema è attivo e lavora per te ogni giorno. Formiamo il tuo team, misuriamo i risultati e ogni settimana miglioriamo risposte, automazioni e documenti.",
   },
 ];
 
@@ -41,7 +41,7 @@ const HowItWorks = () => {
         <div className="text-center mb-16 space-y-4">
           <AnimatedBadge variant="verde">IL PROCESSO</AnimatedBadge>
           <h2 className="font-display text-[32px] md:text-5xl font-extrabold text-neutral-900 leading-tight">
-            Operativo in<br />7-14 Giorni.<br />
+            Operativo in<br />Circa 7 Giorni.<br />
             <span className="text-primary">Senza Mal di Testa.</span>
           </h2>
         </div>

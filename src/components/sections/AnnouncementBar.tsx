@@ -1,5 +1,5 @@
 const AnnouncementBar = () => {
-  const text = "🔥 La 1ª Azienda di Licenziamento AI per l'Edilizia  •  Sostituisci dipendenti improduttivi con Agenti AI  •  Fino a -60% sui costi del personale  •  Setup rapido  •  Garanzia rimborso 30 giorni  •  ";
+  const text = "Sistemi di intelligenza artificiale per l'edilizia  •  Automazione, preventivi e render AI  •  Strumenti AI per architetti, ingegneri e geometri  •  Consulenza AI  •  Primo sistema attivo in 7 giorni  •  Garanzia 30 giorni  •  ";
 
   return (
     <div className="bg-primary h-11 flex items-center overflow-hidden relative">
@@ -14,7 +14,7 @@ const AnnouncementBar = () => {
         href="#cta-finale"
         className="hidden sm:flex flex-shrink-0 px-4 text-white text-xs font-medium underline hover:opacity-75 transition-opacity font-mono"
       >
-        Scopri Chi Puoi Sostituire →
+        Prenota la consulenza →
       </a>
     </div>
   );

@@ -30,7 +30,7 @@ const SolutionsCTA = () => {
             Quale Soluzione<br />Fa al Caso Tuo?<br /><span className="text-primary">Scoprilo in 30 Minuti.</span>
           </h2>
           <p className="text-neutral-400 text-lg max-w-xl mx-auto leading-relaxed">
-            Prenota una sessione strategica gratuita con uno specialista AI del settore edile.
+            Prenota la consulenza gratuita con uno specialista AI per l'edilizia.
             Analizziamo insieme la tua azienda e ti mostriamo — con numeri concreti — cosa cambierebbe nei prossimi 90 giorni.
           </p>
         </div>

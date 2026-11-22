@@ -155,7 +155,7 @@ const faqs = [
   },
   {
     q: "Che differenza c'è tra edilizia.io ed EdiliziaInCloud?",
-    a: "Sono due strumenti complementari dello stesso gruppo AEDIX: edilizia.io porta i clienti (agenti vocali AI, render, preventivatore per acquisire e qualificare lead 24/7), mentre EdiliziaInCloud gestisce l'azienda (cantieri, fatture, margini, personale). Insieme coprono l'intero ciclo: dal primo contatto alla consegna del lavoro.",
+    a: "Sono due strumenti complementari dello stesso gruppo AEDIX: edilizia.io sviluppa sistemi AI su misura per imprese edili e studi tecnici (automazione, preventivi, render, gare d'appalto, documenti, cantiere), mentre EdiliziaInCloud è il gestionale che manda avanti l'azienda (cantieri, fatture, margini, personale). Insieme coprono l'intero ciclo: dal primo contatto alla consegna del lavoro.",
   },
   {
     q: "EdiliziaInCloud gestisce la fatturazione elettronica verso SDI?",
@@ -399,9 +399,9 @@ export default function EdiliziaInCloud() {
             <p>
               <strong className="text-foreground">edilizia.io</strong> e{" "}
               <strong className="text-foreground">EdiliziaInCloud</strong> fanno parte dello stesso
-              gruppo, AEDIX, e risolvono due metà dello stesso problema. edilizia.io porta e
-              qualifica i clienti: agenti vocali AI che rispondono 24/7, render fotorealistici e
-              preventivatore automatico per non perdere una richiesta e chiudere più contratti.
+              gruppo, AEDIX, e risolvono due metà dello stesso problema. edilizia.io sviluppa i
+              sistemi AI su misura: agenti vocali, preventivi, render, gare d'appalto, documenti
+              tecnici e cantiere, per imprese edili e studi tecnici.
             </p>
             <p>
               EdiliziaInCloud prende il testimone da lì in poi: una volta acquisito il cliente,

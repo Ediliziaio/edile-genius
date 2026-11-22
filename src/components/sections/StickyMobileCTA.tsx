@@ -24,7 +24,7 @@ const StickyMobileCTA = () => {
             href="#cta-finale"
             className="block w-full bg-primary text-primary-foreground text-center py-3.5 rounded-xl font-bold text-sm shadow-button-green hover:bg-primary-dark transition-all"
           >
-            Prenota Demo Gratuita →
+            Prenota la Consulenza Gratuita →
           </a>
         </motion.div>
       )}

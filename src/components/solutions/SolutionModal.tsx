@@ -150,7 +150,7 @@ const SolutionModal = memo(({ solution, onClose }: SolutionModalProps) => {
                 onClick={onClose}
                 className="block w-full bg-primary text-primary-foreground text-center py-4 rounded-xl font-display font-bold text-base hover:opacity-90 transition-opacity"
               >
-                Prenota Demo per questa Soluzione →
+                Prenota una Consulenza su questa Soluzione →
               </a>
             </motion.div>
           </motion.div>

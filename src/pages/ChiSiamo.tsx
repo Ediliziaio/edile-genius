@@ -30,7 +30,7 @@ const differentiators = [
   {
     icon: HardHat,
     title: "Solo Edilizia",
-    text: "Non facciamo AI per ristoranti, e-commerce o startup tech. Parliamo la lingua del SAL, del preventivo a misura, del cantiere. Solo quella.",
+    text: "Non facciamo AI per ristoranti, e-commerce o startup tech. Lavoriamo con imprese edili e con chi progetta: architetti, ingegneri, geometri. Parliamo la lingua del SAL, del capitolato, del preventivo a misura, del cantiere.",
   },
 ];
 
@@ -39,19 +39,19 @@ const milestones = [
   { icon: TrendingUp, phase: "Fase 2", title: "Prima automazione interna", desc: "Ordini digitali, controllo margini, previsionale di cassa. Applicato prima su di noi, poi offerto ad altri.", highlight: false },
   { icon: Target, phase: "Fase 3", title: "Marketing Edile", desc: "Azienda marketing per il settore edile. Centinaia di imprenditori come clienti. Stessi problemi, ogni volta.", highlight: false },
   { icon: FlaskConical, phase: "Fase 4", title: "Agenti AI vocali", desc: "Prima integrazione di agenti vocali AI nel settore serramenti in Italia. Il nostro commerciale ha smesso di rispondere a chiamate inutili.", highlight: false },
-  { icon: Rocket, phase: "Oggi", title: "Edilizia.io", desc: "Il sistema completo — testato, perfezionato, disponibile per ogni imprenditore del settore costruzioni.", highlight: true },
+  { icon: Rocket, phase: "Oggi", title: "Edilizia.io", desc: "Progettiamo, sviluppiamo e integriamo sistemi AI per imprese edili, progettisti e studi tecnici, con la consulenza per introdurli nel modo giusto.", highlight: true },
 ];
 
 const values = [
   { icon: Eye, title: "Trasparenza Radicale", text: "Niente costi nascosti, niente vincoli contrattuali. Vedi esattamente quanto spendi e quanto risparmi." },
-  { icon: Target, title: "Risultati Misurabili", text: "Se il tuo agente AI non batte il dipendente che ha sostituito entro 30 giorni, ti rimborsiamo." },
+  { icon: Target, title: "Risultati Misurabili", text: "Se entro 30 giorni il sistema AI non raggiunge i risultati concordati nel progetto, ti rimborsiamo quanto pagato per quel sistema." },
   { icon: HardHat, title: "Ossessione Per L'Edilizia", text: "Non inseguiamo trend. Risolviamo i problemi reali di chi gestisce cantieri, preventivi e commerciali." },
 ];
 
 const ChiSiamo = () => {
   const seoTags = usePageSEO({
-    title: "Chi Siamo — La Prima Azienda AI per l'Edilizia | Edilizia.io",
-    description: "Nati in cantiere, non in ufficio. Scopri il team dietro Edilizia.io: la prima azienda AI specializzata per serramenti, fotovoltaico e ristrutturazioni in Italia.",
+    title: "Chi Siamo — Intelligenza Artificiale per Imprese Edili e Progettisti | Edilizia.io",
+    description: "Nati in cantiere, non in ufficio. Edilizia.io sviluppa sistemi di intelligenza artificiale per imprese edili, architetti, ingegneri e geometri. Il progetto e la firma restano ai tecnici.",
     canonical: "/chi-siamo",
   });
 
@@ -184,6 +184,7 @@ const ChiSiamo = () => {
             </motion.p>
             <motion.p variants={fadeUp}>
               Agenti vocali che rispondono ai lead di notte, qualificano i contatti, fissano appuntamenti. Il nostro commerciale ha smesso di rispondere a telefonate inutili e ha iniziato a chiudere contratti.
+              Poi preventivi, render, documenti tecnici, gare e controllo margini: ogni processo che rubava ore all'ufficio.
             </motion.p>
 
             <motion.p variants={fadeUp}>
@@ -259,15 +260,15 @@ const ChiSiamo = () => {
             <CounterStat value={500} suffix="+" label="Aziende edili seguite" />
           </motion.div>
           <motion.div variants={fadeUp} className="text-center">
-            <div className="text-5xl md:text-6xl font-extrabold text-primary font-display">24/7</div>
+            <div className="text-5xl md:text-6xl font-extrabold text-primary font-display">12</div>
             <div className="font-mono text-xs text-[hsl(var(--neutral-500))] uppercase tracking-wider mt-2">
-              Copertura lead con AI
+              Servizi AI per imprese e studi tecnici
             </div>
           </motion.div>
           <motion.div variants={fadeUp} className="text-center">
-            <div className="text-5xl md:text-6xl font-extrabold text-primary font-display">48h</div>
+            <div className="text-5xl md:text-6xl font-extrabold text-primary font-display">~7 gg</div>
             <div className="font-mono text-xs text-[hsl(var(--neutral-500))] uppercase tracking-wider mt-2">
-              Per essere operativi
+              Per il primo sistema attivo
             </div>
           </motion.div>
         </motion.div>

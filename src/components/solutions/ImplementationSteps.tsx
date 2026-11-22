@@ -2,10 +2,10 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
 const steps = [
-  { num: "01", title: "CALL DI ANALISI — GIORNO 1", text: "Analizziamo insieme il tuo processo attuale, i tuoi prodotti, il tuo mercato locale e il tuo CRM. Definiamo gli obiettivi misurabili: quanti lead, quale tasso di conversione, quali KPI monitorare. Niente template — parte tutto dalla tua realtà." },
-  { num: "02", title: "CONFIGURAZIONE & TRAINING — GIORNI 1-7", text: "Configuriamo l'agente sul tuo linguaggio commerciale, i tuoi prodotti, le tue obiezioni tipiche. Per gli Agenti Vocali: training sulla voce, sul dialetto locale, sulle interruzioni naturali. Test su decine di scenari prima di andare live." },
-  { num: "03", title: "TEST & VALIDAZIONE — GIORNI 7-12", text: "L'agente viene testato in ambiente controllato. Simuliamo chiamate reali, scenari difficili, clienti esigenti. Solo quando supera i nostri standard qualitativi — e i tuoi — andiamo live. Non c'è fretta: meglio farlo bene una volta sola." },
-  { num: "04", title: "GO LIVE & OTTIMIZZAZIONE CONTINUA — DAL GIORNO 14", text: "L'agente è operativo. Da questo momento ogni settimana analizziamo le conversazioni, ottimizziamo gli script, miglioriamo i tassi di conversione. Non è un prodotto che si compra e si dimentica — è un sistema che migliora ogni giorno." },
+  { num: "01", title: "CONSULENZA DI ANALISI — GIORNO 1", text: "Analizziamo insieme i tuoi processi, i tuoi prodotti, i tuoi documenti e gli strumenti che usi. Definiamo obiettivi misurabili e i risultati da raggiungere. Niente template: parte tutto dalla tua realtà." },
+  { num: "02", title: "PROGETTO & CONFIGURAZIONE — GIORNI 1-5", text: "Configuriamo il sistema sui tuoi prodotti, listini, documenti e processi. Per gli agenti vocali anche voce, dialetto e obiezioni tipiche. Colleghiamo gli strumenti che usi già, anche EdiliziaInCloud." },
+  { num: "03", title: "TEST & VALIDAZIONE — GIORNI 5-7", text: "Il sistema viene provato su casi reali della tua azienda: telefonate, preventivi, documenti, cantiere. Parte solo quando supera i nostri standard e i tuoi. Meglio farlo bene una volta sola." },
+  { num: "04", title: "AVVIO & MIGLIORAMENTO CONTINUO — DAL GIORNO 7", text: "Il sistema è attivo. Ogni settimana analizziamo risultati, conversazioni e documenti prodotti e lo miglioriamo. Non è un prodotto che si compra e si dimentica: è un sistema che cresce con te." },
 ];
 
 const ImplementationSteps = () => {
@@ -21,7 +21,7 @@ const ImplementationSteps = () => {
             <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-primary font-medium">Come Si Implementa</span>
           </div>
           <h2 className="font-display text-[36px] md:text-[48px] font-extrabold text-neutral-900 leading-[1.1]">
-            Da Zero a Operativo<br />in <span className="text-primary">7-14 Giorni.</span><br />Per Ogni Soluzione.
+            Da Zero a Operativo<br />in <span className="text-primary">Circa 7 Giorni.</span><br />Per Ogni Soluzione.
           </h2>
         </div>
 

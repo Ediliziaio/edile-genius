@@ -6,9 +6,9 @@ import { Menu, X, ChevronDown, Wrench, Building, Building2, Factory, DoorOpen, S
 import { Link, useLocation } from "react-router-dom";
 
 const navLinks = [
+  { label: "Servizi", href: "/servizi" },
   { label: "Soluzioni", href: "/soluzioni" },
   { label: "Come Funziona", href: "/come-funziona" },
-  { label: "Tariffe", href: "/tariffe" },
   { label: "Blog", href: "/blog" },
   { label: "Chi Siamo", href: "/chi-siamo" },
 ];
@@ -187,10 +187,10 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
             Accedi
           </Link>
           <Link
-            to="/soluzioni"
+            to="/#cta-finale"
             className="bg-primary text-primary-foreground px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-primary-dark hover:scale-[1.02] shadow-button-green transition-all"
           >
-            Prenota Demo
+            Prenota la consulenza
           </Link>
         </div>
 
@@ -272,11 +272,11 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
             Accedi
           </Link>
           <Link
-            to="/soluzioni"
+            to="/#cta-finale"
             onClick={() => setOpen(false)}
             className="block bg-primary text-primary-foreground text-center px-5 py-3 rounded-xl font-bold"
           >
-            Prenota Demo
+            Prenota la consulenza gratuita
           </Link>
         </motion.div>
       )}

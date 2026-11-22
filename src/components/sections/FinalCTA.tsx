@@ -33,24 +33,24 @@ const FinalCTA = () => {
           </div>
 
           <h2 className="font-display text-[28px] sm:text-[28px] sm:text-[36px] md:text-[72px] font-extrabold text-white leading-[1.05]">
-            Scopri Chi Puoi<br />
-            <span className="text-primary">Licenziare.</span><br />
-            Prenota l'Analisi.
+            Progettiamo<br />
+            <span className="text-primary">il tuo sistema AI.</span><br />
+            Parti dall'analisi.
           </h2>
 
           <p className="text-neutral-500 text-lg max-w-xl mx-auto leading-relaxed">
-            30 minuti con uno specialista. Analizziamo il tuo organico,
-            identifichiamo le figure sostituibili e ti mostriamo —
-            con numeri concreti — quanto risparmieresti dal primo mese.
+            30 minuti con uno specialista, gratis. Analizziamo come lavori,
+            individuiamo dove l'intelligenza artificiale ti fa risparmiare
+            tempo e denaro e ti mostriamo il progetto, con numeri concreti.
           </p>
         </div>
 
         {/* Form Card — embed EdiliziaInCloud (i lead arrivano direttamente a EiC) */}
         <div className="bg-neutral-800 rounded-3xl p-4 md:p-6 border border-neutral-700">
           <p className="font-mono text-xs text-primary uppercase tracking-wider font-medium mb-4 text-center">
-            Analisi Gratuita — Scopri Chi Puoi Sostituire
+            Consulenza gratuita — Progetta il tuo sistema AI
           </p>
-          <EicForm source="Home — Prenota Demo" />
+          <EicForm source="Home — Consulenza gratuita" />
           <p className="font-mono text-[11px] text-neutral-500 text-center mt-4">
             🔒 Dati protetti · 📅 Risposta entro 4 ore · ✓ Nessun venditore aggressivo
           </p>
@@ -59,9 +59,9 @@ const FinalCTA = () => {
         {/* P.S. */}
         <div className="mt-10 space-y-4 text-[15px] italic text-neutral-500">
           <p>
-            <span className="font-bold text-primary not-italic">P.S.</span> — Nel peggiore dei casi esci con una mappa chiara del tuo
-            organico e delle figure che potresti sostituire subito. Nel migliore dei casi,
-            inizi a risparmiare migliaia di euro al mese dal giorno dopo.
+            <span className="font-bold text-primary not-italic">P.S.</span> — Nel peggiore dei casi esci con una mappa chiara dei tuoi
+            processi e di dove l'AI può aiutarti subito. Nel migliore dei casi,
+            hai già il progetto del sistema che ti farà risparmiare ogni mese.
           </p>
           <p>
             <span className="font-bold text-primary not-italic">P.P.S.</span> — Lavoriamo solo con titolari e soci che prendono decisioni.

@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { lazy, Suspense, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { usePageSEO } from "@/hooks/usePageSEO";
 import { XCircle, Check, ArrowRight, Clock, Brain, Headphones } from "lucide-react";
@@ -6,6 +6,8 @@ import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
 import Guarantee from "@/components/sections/Guarantee";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
+import WorkflowSection from "@/components/sections/WorkflowSection";
+const InkOrbitFeatures = lazy(() => import("@/components/ui/ink-orbit-features"));
 import {
   Accordion,
   AccordionContent,
@@ -44,54 +46,54 @@ const steps = [
   {
     num: "01",
     icon: "🔍",
-    title: "Analisi & Configurazione",
-    days: "GIORNI 1–7",
-    text: "Studiamo il tuo processo di vendita, il tuo mercato, i tuoi prodotti. Configuriamo ogni agente sulla tua lingua commerciale, le tue obiezioni comuni, il tuo territorio. Non un template — un sistema costruito sulla tua azienda.",
+    title: "Analisi & Progetto",
+    days: "GIORNI 1–3",
+    text: "Studiamo i tuoi processi di ufficio, cantiere e vendita, i documenti e gli strumenti che usi. Ti presentiamo il progetto del sistema: cosa fa, con quali dati, quanto ti fa risparmiare. Non un template, un sistema costruito sulla tua azienda.",
     details: [
-      "Analisi approfondita del tuo ciclo di vendita attuale",
-      "Mappatura prodotti, listini e margini per commessa",
-      "Configurazione CRM con i tuoi campi personalizzati",
-      "Setup agente vocale con il linguaggio del tuo settore",
+      "Analisi dei processi di ufficio, cantiere, vendita e gare",
+      "Mappatura di prodotti, listini, documenti e margini per commessa",
+      "Scelta dei primi processi da automatizzare",
+      "Progetto con costi, tempi e risultati attesi",
     ],
-    result: "Agente configurato sul tuo business, pronto per il training",
+    result: "Progetto approvato, pronto per lo sviluppo",
   },
   {
     num: "02",
     icon: "⚡",
-    title: "Training & Test",
-    days: "GIORNI 7–12",
-    text: "Training su centinaia di scenari reali del settore edile italiano. Test su dialetti, obiezioni tecniche, situazioni complesse. L'agente va live solo dopo aver superato i nostri standard di qualità.",
+    title: "Sviluppo & Test",
+    days: "GIORNI 3–7",
+    text: "Sviluppiamo agenti e automazioni, li colleghiamo ai tuoi strumenti e li proviamo su casi reali: telefonate, preventivi, capitolati, documenti di cantiere. Il sistema parte solo dopo aver superato i nostri standard di qualità.",
     details: [
-      "Simulazione di chiamate reali con scenari difficili",
-      "Test su dialetti regionali e obiezioni tecniche",
-      "Validazione con il tuo team prima del go-live",
-      "Ottimizzazione degli script di conversazione",
+      "Prove su casi reali della tua azienda",
+      "Collegamento a gestionale, email, WhatsApp ed EdiliziaInCloud",
+      "Validazione con il tuo team prima dell'avvio",
+      "Messa a punto di risposte, documenti e flussi",
     ],
-    result: "Agente validato dal tuo team, pronto per andare live",
+    result: "Sistema validato dal tuo team, pronto per partire",
   },
   {
     num: "03",
     icon: "🚀",
-    title: "Go Live & Ottimizzazione",
-    days: "DAL GIORNO 14 IN POI",
-    text: "L'agente è attivo. Da questo momento lavora per te ogni ora di ogni giorno. Ogni settimana analizziamo le conversazioni, ottimizziamo gli script, miglioriamo le conversioni.",
+    title: "Avvio & Affiancamento",
+    days: "DAL GIORNO 7 IN POI",
+    text: "Il sistema è attivo e lavora per te ogni giorno. Formiamo il tuo team, misuriamo i risultati e ogni settimana lo miglioriamo.",
     details: [
       "Monitoraggio continuo delle performance",
       "Report settimanali con KPI e suggerimenti",
-      "Ottimizzazione automatica degli script",
+      "Miglioramento continuo su dati reali",
       "Supporto dedicato per ogni necessità",
     ],
-    result: "Sistema che migliora da solo, ogni settimana",
+    result: "Sistema che migliora ogni settimana, insieme al tuo team",
   },
 ];
 
 const valueStack = [
-  { label: "Audit completo processo vendita", value: "€2.000" },
-  { label: "Configurazione agente AI personalizzato", value: "€3.500" },
-  { label: "Training su scenari reali del tuo settore", value: "€1.500" },
-  { label: "Integrazione CRM e canali esistenti", value: "€2.000" },
-  { label: "Ottimizzazione continua primo mese", value: "€1.000" },
-  { label: "Supporto dedicato e report settimanali", value: "€500" },
+  "Analisi completa dei processi di ufficio, cantiere e vendita",
+  "Progetto del sistema AI con priorità, tempi e risultati attesi",
+  "Configurazione e training sui casi reali del tuo settore",
+  "Collegamento a CRM, calendario, email, WhatsApp ed EdiliziaInCloud",
+  "Ottimizzazione continua nel primo mese",
+  "Supporto dedicato e report settimanali",
 ];
 
 const faqs = [
@@ -105,24 +107,24 @@ const faqs = [
   },
   {
     q: "E se non mi piace il risultato?",
-    a: "Hai la nostra Garanzia Rimborso 30 Giorni. Se l'agente non supera il dipendente che ha sostituito in termini di risultati, ti rimborsiamo integralmente. Senza domande.",
+    a: "Hai la nostra Garanzia Rimborso 30 Giorni. Se entro 30 giorni dall'avvio il sistema non raggiunge i risultati concordati nel progetto, ti rimborsiamo quanto pagato per quel sistema, integralmente. Senza domande.",
   },
   {
     q: "Funziona per il mio settore specifico?",
-    a: "Lavoriamo esclusivamente con aziende del settore edile italiano. Niente generalisti. Il nostro agente conosce ponteggi, pluviali, preventivi, obiezioni tecniche e dialetti regionali.",
+    a: "Lavoriamo esclusivamente con il settore edile italiano: imprese, serramentisti, installatori e anche architetti, ingegneri e geometri. Niente generalisti. I nostri sistemi conoscono ponteggi, pluviali, capitolati, computi, SAL, obiezioni tecniche e dialetti regionali.",
   },
 ];
 
 const heroStats = [
-  { icon: Clock, value: "14 giorni", label: "setup completo" },
+  { icon: Clock, value: "~7 giorni", label: "primo sistema attivo" },
   { icon: Brain, value: "0", label: "competenze tecniche" },
   { icon: Headphones, value: "100%", label: "gestito da noi" },
 ];
 
 const ComeFunziona = () => {
   const seoTags = usePageSEO({
-    title: "Come Funziona — Agenti AI Operativi in 7 Giorni | Edilizia.io",
-    description: "Scopri il processo in 3 step per attivare il tuo Agente Vocale AI: setup in 48 ore, prime chiamate gestite, ottimizzazione continua. Zero configurazione da parte tua.",
+    title: "Come Funziona — Il Tuo Sistema AI Attivo in Circa 7 Giorni | Edilizia.io",
+    description: "Il processo in 3 step per attivare il tuo sistema AI, per imprese edili e studi tecnici: analisi e progetto, sviluppo e test, avvio in circa 7 giorni. Zero configurazione da parte tua.",
     canonical: "/come-funziona",
   });
 
@@ -144,7 +146,7 @@ const ComeFunziona = () => {
         {/* ── HERO ── */}
         <section className="bg-primary-bg py-20 md:py-28">
           <div className="max-w-4xl mx-auto px-6 text-center space-y-8">
-            <AnimatedBadge variant="verde">OPERATIVO IN 14 GIORNI</AnimatedBadge>
+            <AnimatedBadge variant="verde">OPERATIVO IN CIRCA 7 GIORNI</AnimatedBadge>
             <h1 className="font-display text-[32px] md:text-[52px] font-extrabold text-neutral-900 leading-[1.1]">
               Mentre Tu Leggi Questa Pagina,<br />
               Un Tuo Competitor Sta Già Usando l'AI.<br />
@@ -152,7 +154,7 @@ const ComeFunziona = () => {
             </h1>
             <p className="text-lg md:text-xl text-neutral-500 max-w-2xl mx-auto leading-relaxed">
               Nessuna configurazione complicata. Nessun consulente che non conosce il tuo settore.
-              Dal primo contatto al go-live in 14 giorni — e noi facciamo tutto.
+              Dall'approvazione del progetto al primo sistema attivo in circa 7 giorni, e noi facciamo tutto.
             </p>
 
             {/* 3 mini-stats */}
@@ -209,7 +211,7 @@ const ComeFunziona = () => {
             <div className="text-center mb-14 space-y-4">
               <AnimatedBadge variant="verde">IL PROCESSO</AnimatedBadge>
               <h2 className="font-display text-[28px] md:text-[42px] font-extrabold text-neutral-900 leading-tight">
-                3 Step. 14 Giorni.<br />
+                3 Step. Circa 7 Giorni.<br />
                 <span className="text-primary">Zero Mal di Testa.</span>
               </h2>
             </div>
@@ -266,6 +268,14 @@ const ComeFunziona = () => {
           </div>
         </section>
 
+        {/* ── COME LAVORA L'AI (animazione) ── */}
+        <Suspense fallback={null}>
+          <InkOrbitFeatures />
+        </Suspense>
+
+        {/* ── EDITOR INTERATTIVO DEL FLUSSO ── */}
+        <WorkflowSection ctaHref="/#cta-finale" />
+
         {/* ── VALUE STACK ── */}
         <section className="bg-background py-16 md:py-24">
           <div className="max-w-3xl mx-auto px-6">
@@ -280,27 +290,24 @@ const ComeFunziona = () => {
                 <AnimatedBadge variant="verde">COSA RICEVI</AnimatedBadge>
                 <h2 className="font-display text-[28px] md:text-[42px] font-extrabold text-neutral-900 leading-tight">
                   Ecco Cosa Ti Consegniamo.<br />
-                  <span className="text-primary">Prima Di Chiederti Un Euro.</span>
+                  <span className="text-primary">Tutto Compreso.</span>
                 </h2>
               </motion.div>
 
               <motion.div variants={fadeUp} className="bg-neutral-50 border border-border rounded-2xl overflow-hidden">
-                {valueStack.map((item, i) => (
+                {valueStack.map((label, i) => (
                   <div
-                    key={i}
-                    className={`flex flex-col sm:flex-row sm:items-center justify-between px-5 sm:px-7 py-4 sm:py-5 ${i < valueStack.length - 1 ? "border-b border-border" : ""}`}
+                    key={label}
+                    className={`flex items-center gap-3 px-5 sm:px-7 py-4 sm:py-5 ${i < valueStack.length - 1 ? "border-b border-border" : ""}`}
                   >
-                    <div className="flex items-center gap-3">
-                      <Check className="w-5 h-5 text-primary flex-shrink-0" />
-                      <span className="text-neutral-700 font-medium">{item.label}</span>
-                    </div>
-                    <span className="font-display font-bold text-neutral-400 line-through text-sm">{item.value}</span>
+                    <Check className="w-5 h-5 text-primary flex-shrink-0" />
+                    <span className="text-neutral-700 font-medium">{label}</span>
                   </div>
                 ))}
                 <div className="bg-primary-light px-5 sm:px-7 py-5 sm:py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <p className="font-display font-extrabold text-neutral-900 text-base sm:text-lg">Valore totale: <span className="line-through text-neutral-400">€10.500</span></p>
-                    <p className="text-sm text-neutral-500 mt-1">Incluso nel tuo piano personalizzato</p>
+                    <p className="font-display font-extrabold text-neutral-900 text-base sm:text-lg">Tutto compreso nel progetto</p>
+                    <p className="text-sm text-neutral-500 mt-1">Costi definiti su misura durante la consulenza gratuita</p>
                   </div>
                   <span className="font-display font-extrabold text-primary text-xl sm:text-2xl">INCLUSO</span>
                 </div>
@@ -354,20 +361,20 @@ const ComeFunziona = () => {
           <div className="max-w-2xl mx-auto px-6 text-center space-y-8">
             <h2 className="font-display text-[28px] md:text-[42px] font-extrabold text-white leading-tight">
               Ogni Giorno Che Aspetti,<br />
-              <span className="text-primary">Paghi Uno Stipendio In Più.</span>
+              <span className="text-primary">Il Tuo Ufficio Perde Ore.</span>
             </h2>
             <p className="text-neutral-400 text-lg leading-relaxed max-w-xl mx-auto">
               Prenota una call di analisi gratuita. In 30 minuti ti mostriamo esattamente
-              quanto puoi risparmiare — con i numeri della tua azienda.
+              dove l'AI ti fa risparmiare tempo e denaro, con i numeri della tua azienda.
             </p>
             <a
-              href="/soluzioni"
+              href="/#cta-finale"
               className="inline-block bg-primary text-primary-foreground px-10 py-4 rounded-xl text-base font-bold hover:bg-primary-dark hover:scale-[1.02] shadow-button-green transition-all"
             >
-              Prenota La Tua Demo Gratuita →
+              Prenota La Tua Consulenza Gratuita →
             </a>
             <p className="text-neutral-500 text-sm italic pt-4 max-w-md mx-auto">
-              P.S. — La maggior parte delle aziende edili che prenota la demo decide di partire
+              P.S. — La maggior parte delle aziende edili che prenota la consulenza decide di partire
               in pochi giorni. Non perché vendiamo bene, ma perché i numeri parlano da soli.
             </p>
           </div>

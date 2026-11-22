@@ -130,7 +130,7 @@ export const LEGAL_DOCS: Record<string, LegalDoc> = {
       {
         h: "1. Oggetto",
         body: [
-          "Edilizia.io offre soluzioni di intelligenza artificiale per il settore edile, tra cui agenti vocali, strumenti di render e preventivazione. Le caratteristiche specifiche e i corrispettivi dei servizi sono definiti nelle offerte e nei contratti sottoscritti dal cliente.",
+          "Edilizia.io offre sistemi di intelligenza artificiale per imprese edili e studi tecnici (automazione, preventivazione, render, documenti, gare, cantiere, marketing, controllo margini), consulenza e formazione. Le caratteristiche specifiche e i corrispettivi dei servizi sono definiti nel progetto e nel contratto sottoscritti dal cliente.",
         ],
       },
       {

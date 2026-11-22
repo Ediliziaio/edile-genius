@@ -8,7 +8,6 @@ import Footer from "@/components/sections/Footer";
 import Guarantee from "@/components/sections/Guarantee";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
 import SectorServicesGrid from "@/components/perchie/SectorServicesGrid";
-import SectorCalculator from "@/components/perchie/SectorCalculator";
 import { perChiECategories } from "@/data/perChiE";
 
 const PerChiEDetail = () => {
@@ -132,8 +131,6 @@ const PerChiEDetail = () => {
       {/* SERVIZI AI */}
       <SectorServicesGrid sectorName={cat.name} services={cat.services} />
 
-      {/* CALCOLATORE RISPARMIO */}
-      <SectorCalculator sectorName={cat.name} defaults={cat.calculator} />
 
       {/* ROI */}
       <section ref={roiRef} className="py-16 md:py-20">
@@ -206,10 +203,10 @@ const PerChiEDetail = () => {
             Ogni giorno che aspetti, un tuo competitor chiude un contratto in più.
           </p>
           <Link
-            to="/soluzioni"
+            to="/#cta-finale"
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-xl text-lg font-bold hover:bg-primary-dark hover:scale-[1.02] shadow-button-green transition-all"
           >
-            Prenota La Tua Demo Gratuita <ArrowRight size={20} />
+            Prenota La Tua Consulenza Gratuita <ArrowRight size={20} />
           </Link>
         </div>
       </section>

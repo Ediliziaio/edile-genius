@@ -6,6 +6,8 @@ const filters: { key: string; label: string; emoji?: string }[] = [
   { key: 'fotovoltaico', label: 'Fotovoltaico', emoji: '☀️' },
   { key: 'ristrutturazioni', label: 'Ristrutturazioni', emoji: '🏠' },
   { key: 'edilizia', label: 'Edilizia', emoji: '🏢' },
+  { key: 'gare', label: 'Gare & Appalti', emoji: '⚖️' },
+  { key: 'progettisti', label: 'Progettisti', emoji: '📐' },
   { key: 'render', label: 'Render AI', emoji: '🎨' },
 ];
 

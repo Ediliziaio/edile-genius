@@ -8,9 +8,13 @@ const useCases = [
   { icon: "📊", title: "Analisi e Comparazione Offerte", text: "L'Agente AI analizza le offerte dei fornitori, le compara per prezzo, condizioni e qualità, e ti presenta un report decisionale in secondi. Fine dei fogli Excel manuali.", tag: "Agente AI" },
   { icon: "👷", title: "Reportistica Operai & Cantieri", text: "Raccoglie automaticamente dati di avanzamento lavori, ore operai, materiali utilizzati e stato cantieri. Report giornalieri e settimanali generati in autonomia.", tag: "Agente AI" },
   { icon: "🔧", title: "Gestione Assistenze Post-Vendita", text: "Riceve le richieste di assistenza, le classifica per urgenza e tipologia, smista agli operatori tecnici giusti e tiene aggiornato il cliente in tempo reale.", tag: "Agente AI + Vocale" },
-  { icon: "🎧", title: "Call Center & Customer Care AI", text: "Gestisce l'intero volume di chiamate e messaggi in entrata: domande tecniche, aggiornamenti preventivi, stato cantieri. Escalation intelligente solo quando necessario.", tag: "Agente Vocale + AI" },
+  { icon: "⚖️", title: "Gare d'Appalto", text: "Bandi filtrati per la tua impresa, requisiti verificati, sintesi del disciplinare e bozza dell'offerta tecnica. La decisione e la firma restano tue.", tag: "Gare AI" },
   { icon: "🖼️", title: "Render AI Fotorealistici", text: "7 moduli specializzati per infissi, facciate, bagni, pavimenti, persiane, stanze e tetti. Carica una foto, configura materiali e colori, ottieni render professionali prima/dopo per convincere il cliente prima ancora di iniziare i lavori.", tag: "Render AI" },
   { icon: "📄", title: "Preventivazione Automatica AI", text: "Dall'analisi delle foto al computo metrico estimativo: l'AI stima superfici, genera descrizioni tecniche, crea offerte complete con prezzi e condizioni. Preventivi professionali in 10 minuti invece che ore di lavoro manuale.", tag: "Preventivi AI" },
+  { icon: "🦺", title: "Sicurezza e Scadenze", text: "DURC, formazione, visite mediche e documenti dei subappaltatori sotto controllo, con bozze di POS da verificare e firmare. Nessuna scadenza scoperta all'ultimo.", tag: "Sicurezza AI" },
+  { icon: "📦", title: "Acquisti e Magazzino", text: "DDT e fatture lette da foto, confrontate con gli ordini; materiali ordinati in base all'avanzamento del cantiere. Squadre mai ferme, magazzino in ordine.", tag: "Cantiere AI" },
+  { icon: "📈", title: "Margini per Commessa", text: "Costi, avanzamento e fatture incrociati ogni settimana: sai dove guadagni e dove perdi prima che sia troppo tardi.", tag: "Controllo AI" },
+  { icon: "📐", title: "Capitolati, Computi e Relazioni", text: "Per progettisti e uffici tecnici: l'AI legge capitolati, tavole e PDF, imposta i computi metrici e prepara le bozze di relazioni tecniche. Il professionista controlla e firma, senza ripartire da zero.", tag: "AI per Progettisti" },
 ];
 
 const item = {
@@ -30,7 +34,7 @@ const UseCasesGrid = () => {
           <h2 className="font-display text-[32px] md:text-5xl font-extrabold text-neutral-900 leading-tight">
             Cosa Fanno<br />
             <span className="text-primary">Concretamente</span><br />
-            i Tuoi Agenti AI
+            i Nostri Sistemi AI
           </h2>
         </div>
 
