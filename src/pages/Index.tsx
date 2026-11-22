@@ -10,6 +10,7 @@ import StickyMobileCTA from "@/components/sections/StickyMobileCTA";
 // Lazy-load below-the-fold sections
 const LogoBar = lazy(() => import("@/components/sections/LogoBar"));
 const DuePercorsi = lazy(() => import("@/components/sections/DuePercorsi"));
+const WorkflowSection = lazy(() => import("@/components/sections/WorkflowSection"));
 const EicBand = lazy(() => import("@/components/sections/EicBand"));
 const ServiziSection = lazy(() => import("@/components/sections/ServiziSection"));
 const InkOrbitFeatures = lazy(() => import("@/components/ui/ink-orbit-features"));
@@ -49,6 +50,7 @@ const Index = () => {
           <PainSection />
           <SolutionSection />
           <UseCasesGrid />
+          <WorkflowSection />
           <HowItWorks />
           <Results />
           <WhyUs />
