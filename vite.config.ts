@@ -47,7 +47,7 @@ export default defineConfig(({ isSsrBuild }) => ({
     },
   },
   ssgOptions: {
-    script: "async",
+    script: "defer",
     includedRoutes(paths: string[]) {
       // Pagine flat pubbliche (sempre incluse esplicitamente) + rotte dinamiche
       // (/per-chi-e/<slug>, /blog/<slug>) scoperte via getStaticPaths.
