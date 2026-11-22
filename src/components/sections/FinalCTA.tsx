@@ -1,31 +1,10 @@
-import { useState, FormEvent } from "react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { Check, Loader2 } from "lucide-react";
+import EicForm from "@/components/EicForm";
 
 const FinalCTA = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
-  const navigate = useNavigate();
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [form, setForm] = useState({ nome: "", email: "", telefono: "", settore: "" });
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setStatus("loading");
-    try {
-      // Webhook placeholder
-      await new Promise((r) => setTimeout(r, 1500));
-      // L'evento Lead scatta sulla pagina /grazie (più affidabile del submit).
-      navigate(`/grazie?from=home-demo&settore=${encodeURIComponent(form.settore || "")}`);
-    } catch {
-      setStatus("error");
-    }
-  };
-
-  const inputClass =
-    "w-full bg-neutral-700 border border-neutral-600 rounded-[10px] px-4 py-3.5 text-white font-display text-[15px] placeholder:text-neutral-500 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all";
 
   return (
     <section id="cta-finale" className="relative bg-neutral-900 py-16 md:py-24 overflow-hidden">
@@ -66,86 +45,15 @@ const FinalCTA = () => {
           </p>
         </div>
 
-        {/* Form Card */}
-        <div className="bg-neutral-800 rounded-3xl p-6 md:p-12 border border-neutral-700">
-          {status === "success" ? (
-            <motion.div
-              className="text-center space-y-4 py-8"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-            >
-              <div className="w-16 h-16 rounded-full bg-primary mx-auto flex items-center justify-center">
-                <Check size={32} className="text-primary-foreground" />
-              </div>
-              <p className="text-white font-display font-bold text-xl">Prenotazione confermata!</p>
-              <p className="text-neutral-500 text-sm">Ti contatteremo entro 4 ore.</p>
-            </motion.div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <p className="font-mono text-xs text-primary uppercase tracking-wider font-medium mb-4">
-                Analisi Gratuita — Scopri Chi Puoi Sostituire
-              </p>
-
-              <input
-                type="text"
-                placeholder="Nome e Cognome"
-                required
-                className={inputClass}
-                value={form.nome}
-                onChange={(e) => setForm({ ...form, nome: e.target.value })}
-              />
-              <input
-                type="email"
-                placeholder="Email aziendale"
-                required
-                className={inputClass}
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-              />
-              <input
-                type="tel"
-                placeholder="Numero di telefono"
-                required
-                className={inputClass}
-                value={form.telefono}
-                onChange={(e) => setForm({ ...form, telefono: e.target.value })}
-              />
-              <select
-                className={inputClass}
-                value={form.settore}
-                onChange={(e) => setForm({ ...form, settore: e.target.value })}
-                required
-              >
-                <option value="" disabled>Settore</option>
-                <option>Serramenti</option>
-                <option>Infissi</option>
-                <option>Fotovoltaico</option>
-                <option>Ristrutturazioni</option>
-                <option>Impianti Termici</option>
-                <option>General Contractor</option>
-                <option>Altro</option>
-              </select>
-
-              <button
-                type="submit"
-                disabled={status === "loading"}
-                className="w-full bg-primary text-primary-foreground py-4 rounded-xl font-bold text-base hover:bg-primary-dark hover:-translate-y-0.5 shadow-button-green transition-all disabled:opacity-70 flex items-center justify-center gap-2"
-              >
-                {status === "loading" ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" />
-                    Invio in corso...
-                  </>
-                ) : (
-                  "PRENOTA LA TUA ANALISI GRATUITA →"
-                )}
-              </button>
-
-              <p className="font-mono text-[11px] text-neutral-500 text-center">
-                🔒 Dati protetti · 📅 Risposta entro 4 ore · ✓ Nessun venditore aggressivo
-              </p>
-            </form>
-          )}
+        {/* Form Card — embed EdiliziaInCloud (i lead arrivano direttamente a EiC) */}
+        <div className="bg-neutral-800 rounded-3xl p-4 md:p-6 border border-neutral-700">
+          <p className="font-mono text-xs text-primary uppercase tracking-wider font-medium mb-4 text-center">
+            Analisi Gratuita — Scopri Chi Puoi Sostituire
+          </p>
+          <EicForm source="Home — Prenota Demo" />
+          <p className="font-mono text-[11px] text-neutral-500 text-center mt-4">
+            🔒 Dati protetti · 📅 Risposta entro 4 ore · ✓ Nessun venditore aggressivo
+          </p>
         </div>
 
         {/* P.S. */}
