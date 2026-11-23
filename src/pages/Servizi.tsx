@@ -6,6 +6,8 @@ import { usePageSEO } from "@/hooks/usePageSEO";
 import Navbar from "@/components/sections/Navbar";
 import WorkflowSection from "@/components/sections/WorkflowSection";
 import { SERVIZI, METODO, FAQ_SERVIZI } from "@/data/servizi";
+import EditorialVisual from "@/components/custom/EditorialVisual";
+import { SERVICE_VISUALS, SITE_VISUALS, visualSEO } from "@/data/siteVisuals";
 import FaqList from "@/components/custom/FaqList";
 
 const InkOrbitFeatures = lazy(() => import("@/components/ui/ink-orbit-features"));
@@ -41,6 +43,7 @@ const Servizi = () => {
     description:
       "12 servizi AI per imprese edili e studi tecnici: automazione, preventivi, render, gare d'appalto, sicurezza, cantiere, marketing, consulenza e formazione.",
     canonical: "/servizi",
+    ...visualSEO(SITE_VISUALS.consulting),
     jsonLd: [
       {
         "@context": "https://schema.org",
@@ -145,6 +148,7 @@ const Servizi = () => {
                   className="scroll-mt-28 grid gap-8 rounded-3xl border border-neutral-200 bg-background p-6 md:p-10 lg:grid-cols-[1.1fr_1fr]"
                 >
                   <div className="space-y-4">
+                    <EditorialVisual visual={SERVICE_VISUALS[s.slug]} />
                     <div className="flex items-center gap-3">
                       <span className="grid size-12 place-items-center rounded-xl bg-primary text-primary-foreground">
                         <s.icon size={24} strokeWidth={1.8} />

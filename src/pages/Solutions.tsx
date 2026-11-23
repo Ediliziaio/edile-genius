@@ -1,3 +1,5 @@
+import EditorialVisual from "@/components/custom/EditorialVisual";
+import { SITE_VISUALS, visualSEO } from "@/data/siteVisuals";
 import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { usePageSEO } from "@/hooks/usePageSEO";
 import { motion, AnimatePresence } from "framer-motion";
@@ -26,6 +28,7 @@ const Solutions = () => {
     title: "Soluzioni AI per Imprese Edili e Progettisti | Edilizia.io",
     description: "45 soluzioni AI per infissi, fotovoltaico, ristrutturazioni, imprese edili, gare d'appalto e studi tecnici: automazione, preventivi, render e cantiere.",
     canonical: "/soluzioni",
+    ...visualSEO(SITE_VISUALS.documents),
     jsonLd: {
       "@type": "FAQPage",
       mainEntity: solutionsFaqs.map((f) => ({
@@ -57,6 +60,7 @@ const Solutions = () => {
       <ScrollProgress />
       <main>
         <SolutionsHero />
+        <div className="mx-auto max-w-5xl px-6 pb-10"><EditorialVisual visual={SITE_VISUALS.documents} priority sizes="(min-width: 1024px) 960px, calc(100vw - 48px)" /></div>
         <div id="solutions-grid">
           <FilterBar activeFilter={filterActive} onFilterChange={setFilterActive} totalShown={filtered.length} total={solutions.length} />
           <section className="bg-neutral-50 py-12 md:py-16">

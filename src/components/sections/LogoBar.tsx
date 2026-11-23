@@ -1,75 +1,31 @@
-import logoMarchetti from "@/assets/logos/costruzioni-marchetti.png";
-import logoSolartech from "@/assets/logos/solartech-italia.png";
-import logoFinestre from "@/assets/logos/finestre-italia.png";
-import logoTermoidraulica from "@/assets/logos/termoidraulica-verdi.png";
-import logoEdilgroup from "@/assets/logos/edilgroup-roma.png";
-import logoEnersun from "@/assets/logos/enersun-impianti.png";
-import logoSerramenti from "@/assets/logos/serramenti-bianchi.png";
-import logoCmb from "@/assets/logos/cmb-edilizia.png";
-import logoRossi from "@/assets/logos/rossi-costruzioni.png";
-import logoImpiantipro from "@/assets/logos/impiantipro.png";
+import { Link } from "react-router-dom";
+import { ArrowUpRight } from "lucide-react";
+import EditorialVisual from "@/components/custom/EditorialVisual";
+import { SITE_VISUALS } from "@/data/siteVisuals";
 
-const logos = [
-  { name: "Costruzioni Marchetti", src: logoMarchetti },
-  { name: "SolarTech Italia", src: logoSolartech },
-  { name: "Finestre Italia", src: logoFinestre },
-  { name: "Termoidraulica Verdi", src: logoTermoidraulica },
-  { name: "Edilgroup Roma", src: logoEdilgroup },
-  { name: "EnerSun Impianti", src: logoEnersun },
-  { name: "Serramenti Bianchi", src: logoSerramenti },
-  { name: "CMB Edilizia", src: logoCmb },
-  { name: "Rossi Costruzioni", src: logoRossi },
-  { name: "ImpiantiPro", src: logoImpiantipro },
+const paths = [
+  { title: "Gestire chiamate e richieste", description: "Raccogli le informazioni e passa al team le richieste da seguire.", href: "/servizi/automazione-ai", visual: SITE_VISUALS.voice },
+  { title: "Preparare preventivi e computi", description: "Parti dai tuoi listini e controlla la bozza prima di inviarla.", href: "/servizi/preventivazione-ai", visual: SITE_VISUALS.estimates },
+  { title: "Mostrare una proposta visiva", description: "Usa foto e materiali per spiegare al cliente l'idea di ristrutturazione.", href: "/servizi/render-ai", visual: SITE_VISUALS.render },
 ];
 
-const stats = [
-  { icon: "🏗️", text: "50+ ruoli ripetitivi automatizzati" },
-  { icon: "💰", text: "€2.3M risparmiati dai clienti" },
-  { icon: "⚡", text: "Setup medio: 7 giorni" },
-];
-
-const LogoBar = () => {
+export default function LogoBar() {
   return (
-    <section className="bg-neutral-50 py-14">
-      <p className="text-center font-display text-[13px] font-medium text-neutral-500 uppercase tracking-[0.08em] mb-10">
-        Aziende edili che lavorano già con i nostri sistemi AI
-      </p>
-
-      {/* Marquee logos */}
-      <div className="relative overflow-hidden mb-10">
-        <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-neutral-50 to-transparent z-10" />
-        <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-neutral-50 to-transparent z-10" />
-        <div className="flex animate-marquee gap-10 whitespace-nowrap">
-          {[...logos, ...logos].map((logo, i) => (
-            <div
-              key={i}
-              className="flex-shrink-0 flex items-center justify-center bg-background border border-neutral-200/80 rounded-2xl px-6 py-4 shadow-sm hover:shadow-md transition-shadow duration-300"
-              style={{ minWidth: 180, height: 90 }}
-            >
-              <img
-                src={logo.src}
-                alt={logo.name}
-                className="h-16 w-auto object-contain"
-                loading="lazy"
-              />
+    <section className="border-y border-neutral-200 bg-neutral-50 py-12 md:py-16" aria-labelledby="primi-passi-ai">
+      <div className="mx-auto max-w-6xl px-6">
+        <p className="mb-3 font-mono text-xs font-semibold uppercase tracking-wider text-primary-dark">Da dove iniziare</p>
+        <h2 id="primi-passi-ai" className="max-w-2xl font-display text-2xl font-extrabold text-neutral-900 md:text-3xl">Scegli il lavoro che vuoi semplificare.</h2>
+        <div className="mt-8 grid gap-6 md:grid-cols-3">
+          {paths.map((path) => <Link key={path.href} to={path.href} className="group min-w-0 rounded-2xl border border-neutral-200 bg-background p-3 transition-colors hover:border-primary-dark">
+            <EditorialVisual visual={path.visual} compact sizes="(min-width: 768px) 350px, calc(100vw - 76px)" />
+            <div className="p-3">
+              <h3 className="flex items-start justify-between gap-3 font-display text-lg font-bold leading-snug text-neutral-900">{path.title}<ArrowUpRight size={20} className="shrink-0 text-primary-dark" /></h3>
+              <p className="mt-2 text-sm leading-relaxed text-neutral-500">{path.description}</p>
             </div>
-          ))}
+          </Link>)}
         </div>
-      </div>
-
-      {/* Stats */}
-      <div className="flex flex-wrap justify-center gap-4">
-        {stats.map((s) => (
-          <div
-            key={s.text}
-            className="bg-background border border-neutral-200 rounded-full px-5 py-2.5 text-sm font-semibold text-neutral-700 font-display"
-          >
-            {s.icon} {s.text}
-          </div>
-        ))}
+        <p className="mt-3 text-xs text-neutral-500">Immagini illustrative generate con AI.</p>
       </div>
     </section>
   );
-};
-
-export default LogoBar;
+}

@@ -41,12 +41,12 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8 md:gap-10 mb-10">
           {/* Logo col */}
           <div className="space-y-4">
-            <img src={logoWhite} alt="Edilizia.io" className="h-20 w-auto" />
-            <p className="text-sm text-neutral-500 leading-relaxed">
+            <img src={logoWhite} alt="Edilizia.io" width={833} height={241} loading="lazy" className="h-20 w-auto max-w-full object-contain" />
+            <p className="text-sm text-neutral-300 leading-relaxed">
               Sistemi di intelligenza artificiale per imprese edili, architetti, ingegneri e geometri.
             </p>
-            <p className="font-mono text-[11px] text-neutral-600">
-              © {new Date().getFullYear()} Edilizia.io — P.IVA [da inserire]
+            <p className="font-mono text-xs text-neutral-400">
+              © {new Date().getFullYear()} Edilizia.io
             </p>
           </div>
 
@@ -72,6 +72,7 @@ const Footer = () => {
             <p className="font-mono text-xs uppercase tracking-wider text-neutral-500 mb-4">Contatti</p>
             <ul className="space-y-2">
               <li><a href="mailto:info@edilizia.io" className="text-sm text-neutral-400 hover:text-primary transition-colors">info@edilizia.io</a></li>
+              <li><a href="https://www.facebook.com/profile.php?id=61596669548715" target="_blank" rel="noopener noreferrer" className="text-sm text-neutral-300 hover:text-primary transition-colors">Edilizia.io su Facebook</a></li>
               <li><Link to="/#cta-finale" className="text-sm text-primary font-semibold hover:text-primary-dark transition-colors">Prenota la consulenza gratuita →</Link></li>
             </ul>
           </div>
@@ -83,7 +84,7 @@ const Footer = () => {
             { label: "Cookie Policy", href: "/cookie-policy" },
             { label: "Termini di Servizio", href: "/termini-di-servizio" },
           ].map((t) => (
-            <Link key={t.label} to={t.href} className="font-mono text-[11px] text-neutral-600 hover:text-neutral-400 transition-colors">
+            <Link key={t.label} to={t.href} className="font-mono text-xs text-neutral-400 hover:text-white transition-colors">
               {t.label}
             </Link>
           ))}

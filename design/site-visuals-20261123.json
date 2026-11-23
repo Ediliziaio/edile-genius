@@ -1,0 +1,102 @@
+{
+  "mode": "built-in image_gen",
+  "style": "Italian architecture editorial, limestone, oak, graphite, emerald accents",
+  "assets": [
+    {
+      "id": "agenti-vocali-edilizia",
+      "prompt": "Use case: photorealistic-natural. Asset type: premium editorial illustration for Edilizia.io, an Italian AI service for construction businesses and technical practices. Create a finished landscape 16:10 composition, high resolution. Art direction: sophisticated Italian architecture magazine, natural materials, pale warm limestone and oak, graphite tools, small restrained emerald green accents. Believable geometry and crisp natural light, generous space, one clear focal point. Image will appear in service pages and be cropped to 4:3 or 16:10: keep important objects inside central 70 percent. This is a conceptual AI illustration, not a real documented customer, team, project or software screenshot. No text, no letters, no numbers, no logos, no watermarks, no humanoid robots, no giant AI brain, no handshake or neon cyberpunk. Subject: close editorial still life of a professional wireless office headset on a graphite stand, an open blank construction appointment notebook with a simple architectural drawing, and a smartphone resting flat on an Italian contractor's clean office desk. A single fine translucent emerald audio waveform suspended just above the phone subtly expresses an AI telephone assistant. The phone screen is dark, no invented app interface. Window daylight, calm competent mood, physically plausible hardware, no people.",
+      "productionBase": "/visuals/20261123/agenti-vocali-edilizia",
+      "dimensions": {
+        "width": 1440,
+        "height": 900
+      },
+      "responsiveWidths": [
+        480,
+        800,
+        1440
+      ]
+    },
+    {
+      "id": "documenti-tecnici-ai",
+      "prompt": "Use case: photorealistic-natural. Asset type: premium editorial illustration for Edilizia.io, an Italian AI service for construction businesses and technical practices. Create a finished landscape 16:10 composition, high resolution. Art direction: sophisticated Italian architecture magazine, natural materials, pale warm limestone and oak, graphite tools, small restrained emerald green accents. Believable geometry and crisp natural light, generous space, one clear focal point. Image will appear in service pages and be cropped to 4:3 or 16:10: keep important objects inside central 70 percent. This is a conceptual AI illustration, not a real documented customer, team, project or software screenshot. No text, no letters, no numbers, no logos, no watermarks, no humanoid robots, no giant AI brain, no handshake or neon cyberpunk. Subject: an overhead angled view of neatly ordered construction tender documents and architectural drawings, a graphite binder, emerald index tabs and a metal ruler on pale stone. One sheet contains an abstract plan with simple lines only; no readable writing or stamps. A narrow transparent emerald overlay connects three aligned checklist marks on a single sheet, suggesting document classification and review. Paper must look real, restrained AI accent, thoughtful beautifully organized composition, no people.",
+      "productionBase": "/visuals/20261123/documenti-tecnici-ai",
+      "dimensions": {
+        "width": 1440,
+        "height": 900
+      },
+      "responsiveWidths": [
+        480,
+        800,
+        1440
+      ]
+    },
+    {
+      "id": "cantiere-digitale-ai",
+      "prompt": "Use case: photorealistic-natural. Asset type: premium editorial illustration for Edilizia.io, an Italian AI service for construction businesses and technical practices. Create a finished landscape 16:10 composition, high resolution. Art direction: sophisticated Italian architecture magazine, natural materials, pale warm limestone and oak, graphite tools, small restrained emerald green accents. Believable geometry and crisp natural light, generous space, one clear focal point. Image will appear in service pages and be cropped to 4:3 or 16:10: keep important objects inside central 70 percent. This is a conceptual AI illustration, not a real documented customer, team, project or software screenshot. No text, no letters, no numbers, no logos, no watermarks, no humanoid robots, no giant AI brain, no handshake or neon cyberpunk. Subject: a rugged tablet and folded architectural plans on a clean temporary construction workbench overlooking the interior of a modest Italian building renovation. Protected openings, masonry and organized materials visible in background. A white hardhat and dark green work gloves rest safely on the bench. Tablet turned partly away and dark reflective screen, no fabricated dashboard. A discreet emerald line follows the edge of the drawing as an abstract digital signal. No people, no unsafe activity, no floating tools.",
+      "productionBase": "/visuals/20261123/cantiere-digitale-ai",
+      "dimensions": {
+        "width": 1440,
+        "height": 900
+      },
+      "responsiveWidths": [
+        480,
+        800,
+        1440
+      ]
+    },
+    {
+      "id": "consulenza-ai-edilizia",
+      "prompt": "Use case: photorealistic-natural. Asset type: premium editorial illustration for Edilizia.io, an Italian AI service for construction businesses and technical practices. Create a finished landscape 16:10 composition, high resolution. Art direction: sophisticated Italian architecture magazine, natural materials, pale warm limestone and oak, graphite tools, small restrained emerald green accents. Believable geometry and crisp natural light, generous space, one clear focal point. Image will appear in service pages and be cropped to 4:3 or 16:10: keep important objects inside central 70 percent. This is a conceptual AI illustration, not a real documented customer, team, project or software screenshot. No text, no letters, no numbers, no logos, no watermarks, no humanoid robots, no giant AI brain, no handshake or neon cyberpunk. Subject: close overhead three-quarter composition of the hands and forearms of three professionals collaborating around an architectural plan and six blank process cards on a warm oak meeting table in a technical practice. A laptop is turned away, notebooks and pencils, one emerald green card connects two neutral cards. Do not show faces, do not imply a specific real company team. Authentic natural hand anatomy, no extra fingers, quiet practical workshop rather than generic corporate stock, no written words.",
+      "productionBase": "/visuals/20261123/consulenza-ai-edilizia",
+      "dimensions": {
+        "width": 1440,
+        "height": 900
+      },
+      "responsiveWidths": [
+        480,
+        800,
+        1440
+      ]
+    },
+    {
+      "id": "serramenti-showroom-ai",
+      "prompt": "Use case: photorealistic-natural. Asset type: premium editorial illustration for Edilizia.io, an Italian AI service for construction businesses and technical practices. Create a finished landscape 16:10 composition, high resolution. Art direction: sophisticated Italian architecture magazine, natural materials, pale warm limestone and oak, graphite tools, small restrained emerald green accents. Believable geometry and crisp natural light, generous space, one clear focal point. Image will appear in service pages and be cropped to 4:3 or 16:10: keep important objects inside central 70 percent. This is a conceptual AI illustration, not a real documented customer, team, project or software screenshot. No text, no letters, no numbers, no logos, no watermarks, no humanoid robots, no giant AI brain, no handshake or neon cyberpunk. Subject: a refined contemporary Italian window showroom with three CLOSED full-size window samples displayed upright on solid well-defined exhibit frames, one anthracite aluminum window, one warm wood-aluminum window and one slim white frame. All windows are physically correct, handles attached to the opening sash at realistic height, hinges aligned, no intersecting frames. Material swatches on a pale oak consultation bench, a small graphite tablet lying face down. Warm diffuse daylight, tactile frame details, no people, no town landscape, no open sash, no text.",
+      "productionBase": "/visuals/20261123/serramenti-showroom-ai",
+      "dimensions": {
+        "width": 1440,
+        "height": 900
+      },
+      "responsiveWidths": [
+        480,
+        800,
+        1440
+      ]
+    },
+    {
+      "id": "fotovoltaico-ai",
+      "prompt": "Use case: photorealistic-natural. Asset type: premium editorial illustration for Edilizia.io, an Italian AI service for construction businesses and technical practices. Create a finished landscape 16:10 composition, high resolution. Art direction: sophisticated Italian architecture magazine, natural materials, pale warm limestone and oak, graphite tools, small restrained emerald green accents. Believable geometry and crisp natural light, generous space, one clear focal point. Image will appear in service pages and be cropped to 4:3 or 16:10: keep important objects inside central 70 percent. This is a conceptual AI illustration, not a real documented customer, team, project or software screenshot. No text, no letters, no numbers, no logos, no watermarks, no humanoid robots, no giant AI brain, no handshake or neon cyberpunk. Subject: elegant photoreal editorial view from above of a modest Italian pitched tile roof with a compact professionally installed photovoltaic array, straight aligned blue-black panels, consistent realistic rails and clean tile geometry. Foreground on a nearby safe terrace: a folded technical plan, emerald pen and graphite tablet facing down, unobtrusive. Distant hills softly out of focus, morning daylight, no people, no fictitious performance numbers, no cables hanging unsafely, credible residential architecture.",
+      "productionBase": "/visuals/20261123/fotovoltaico-ai",
+      "dimensions": {
+        "width": 1440,
+        "height": 900
+      },
+      "responsiveWidths": [
+        480,
+        800,
+        1440
+      ]
+    }
+  ],
+  "reusedAssets": [
+    {
+      "id": "computo-metrico-ai",
+      "source": "public/blog/covers/computo-metrico-ai-v2.jpg",
+      "promptManifest": "design/graphics-20261123.json"
+    },
+    {
+      "id": "render-ristrutturazioni-ai",
+      "source": "public/blog/covers/render-ai-ristrutturazioni-v2.jpg",
+      "promptManifest": "design/graphics-20261123.json"
+    }
+  ]
+}

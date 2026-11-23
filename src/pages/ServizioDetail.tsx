@@ -9,6 +9,9 @@ import { getServizioDettaglio } from "@/data/serviziDettaglio";
 import { solutions, settoreConfig } from "@/data/solutions";
 import ServiceFlowVisual from "@/components/ui/service-flow-visual";
 import FaqList from "@/components/custom/FaqList";
+import EditorialVisual from "@/components/custom/EditorialVisual";
+import RelatedGuides from "@/components/custom/RelatedGuides";
+import { SERVICE_VISUALS, visualSEO } from "@/data/siteVisuals";
 
 const EicBand = lazy(() => import("@/components/sections/EicBand"));
 const FinalCTA = lazy(() => import("@/components/sections/FinalCTA"));
@@ -40,11 +43,13 @@ const ServizioDetail = () => {
   const { slug = "" } = useParams<{ slug: string }>();
   const base = SERVIZI.find((s) => s.slug === slug);
   const d = getServizioDettaglio(slug);
+  const visual = SERVICE_VISUALS[slug];
 
   const seoTags = usePageSEO({
     title: d?.seoTitle ?? "Servizi | Edilizia.io",
     description: d?.seoDescription ?? "Servizi di intelligenza artificiale per imprese edili e progettisti.",
     canonical: `/servizi/${slug}`,
+    ...(visual ? visualSEO(visual) : {}),
     jsonLd: d
       ? [
           {
@@ -139,7 +144,7 @@ const ServizioDetail = () => {
                 ))}
               </motion.ul>
             </motion.div>
-            <ServiceFlowVisual slug={slug} className="mx-auto w-full max-w-[560px]" />
+            {visual && <EditorialVisual visual={visual} priority className="mx-auto w-full max-w-[560px]" />}
             </div>
           </div>
         </section>
@@ -166,6 +171,13 @@ const ServizioDetail = () => {
         <section id="cosa-fa" className="scroll-mt-24 bg-background py-16 md:py-24">
           <div className="max-w-6xl mx-auto px-6">
             <SectionHead eyebrow="Cosa fa" title={<>Cosa fa per te, <span className="text-primary">concretamente.</span></>} />
+            <div className="mb-10 grid items-center gap-6 rounded-2xl border border-neutral-200 bg-neutral-50 p-5 md:p-8 lg:grid-cols-2">
+              <div>
+                <h3 className="font-display text-xl font-bold text-neutral-900">Dai tuoi dati al lavoro pronto da controllare.</h3>
+                <p className="mt-3 leading-relaxed text-neutral-500">Definiamo i materiali di partenza, i passaggi affidati all'AI e ciò che il team deve verificare prima di confermare il risultato.</p>
+              </div>
+              <ServiceFlowVisual slug={slug} className="mx-auto w-full max-w-[520px]" />
+            </div>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {d.capacita.map((c, i) => (
                 <Reveal key={c.titolo} delay={(i % 3) * 0.08}>
@@ -299,6 +311,7 @@ const ServizioDetail = () => {
         </section>
 
         <Suspense fallback={null}>
+          <RelatedGuides pageKey={slug} />
           <FinalCTA />
         </Suspense>
       </main>

@@ -80,6 +80,7 @@ const Blog = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cerca articoli…"
+            aria-label="Cerca articoli nel blog"
             className="w-full h-11 pl-10 pr-10 rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background text-sm"
           />
           {searchQuery && (
@@ -101,6 +102,7 @@ const Blog = () => {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
+              aria-pressed={activeCategory === cat}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
                 activeCategory === cat
                   ? "bg-primary text-primary-foreground"

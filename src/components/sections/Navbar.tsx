@@ -54,6 +54,14 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
   ]);
   const location = useLocation();
 
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { setOpen(false); setMegaOpen(false); setMobileSectorOpen(false); }
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, []);
+
   // Close mega-menu on click outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -82,7 +90,7 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
     >
       <div className="max-w-6xl mx-auto px-6 h-[76px] flex items-center justify-between">
         <Link to="/">
-          <img src={isDark ? logoWhite : logoGreen} alt="Edilizia.io" className="h-14 w-auto" />
+          <img src={isDark ? logoWhite : logoGreen} alt="Edilizia.io" width={833} height={241} className="h-14 w-auto" />
         </Link>
 
         {/* Desktop Links */}
@@ -91,6 +99,8 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
           <div ref={megaRef} className="relative">
             <button
               onClick={() => setMegaOpen(!megaOpen)}
+              aria-expanded={megaOpen}
+              aria-controls="sector-menu-desktop"
               className={`relative text-sm font-medium transition-colors flex items-center gap-1 ${
                 location.pathname.startsWith("/per-chi-e") ? "text-primary" : isDark ? "text-neutral-300 hover:text-white" : "text-neutral-500 hover:text-neutral-900"
               }`}
@@ -102,6 +112,7 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
             <AnimatePresence>
               {megaOpen && (
                 <motion.div
+                  id="sector-menu-desktop"
                   className="absolute top-full left-1/2 -translate-x-1/2 mt-3 bg-background rounded-2xl border border-border shadow-xl p-6 w-[640px] z-50"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -195,7 +206,7 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
         </div>
 
         {/* Mobile Toggle */}
-        <button onClick={() => setOpen(!open)} className={`md:hidden ${isDark ? "text-white" : "text-neutral-900"}`} aria-label="Menu">
+        <button onClick={() => setOpen(!open)} className={`md:hidden ${isDark ? "text-white" : "text-neutral-900"}`} aria-label="Menu" aria-expanded={open} aria-controls="mobile-navigation">
           {open ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
@@ -203,7 +214,8 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
       {/* Mobile Menu */}
       {open && (
         <motion.div
-          className="md:hidden bg-background border-t border-border px-6 py-6 space-y-4"
+          id="mobile-navigation"
+          className="md:hidden max-h-[calc(100dvh-76px)] overflow-y-auto bg-background border-t border-border px-6 py-6 space-y-4"
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
         >
@@ -211,6 +223,7 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
           <div>
             <button
               onClick={() => setMobileSectorOpen(!mobileSectorOpen)}
+              aria-expanded={mobileSectorOpen}
               className={`flex items-center justify-between w-full text-base font-medium ${
                 location.pathname.startsWith("/per-chi-e") ? "text-primary" : "text-neutral-700"
               }`}

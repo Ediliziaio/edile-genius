@@ -1,3 +1,5 @@
+import EditorialVisual from "@/components/custom/EditorialVisual";
+import { SITE_VISUALS, visualSEO } from "@/data/siteVisuals";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { usePageSEO } from "@/hooks/usePageSEO";
@@ -53,6 +55,7 @@ const ChiSiamo = () => {
     title: "Chi Siamo — AI per l'Edilizia nata in Cantiere | Edilizia.io",
     description: "Nati in cantiere, non in ufficio: Edilizia.io sviluppa sistemi di intelligenza artificiale per imprese edili, architetti, ingegneri e geometri.",
     canonical: "/chi-siamo",
+    ...visualSEO(SITE_VISUALS.consulting),
     jsonLd: [
       {
         "@type": "AboutPage",
@@ -116,6 +119,7 @@ const ChiSiamo = () => {
             Ogni strumento che ti proponiamo ha funzionato <span className="text-white font-semibold">prima sulla nostra azienda</span>.
           </motion.p>
         </motion.div>
+        <div className="mx-auto mt-10 max-w-5xl px-6"><EditorialVisual visual={SITE_VISUALS.consulting} priority className="[&_figcaption]:text-neutral-300" sizes="(min-width: 1024px) 960px, calc(100vw - 48px)" /></div>
       </section>
 
       {/* ─── Perché Siamo Diversi ─── */}

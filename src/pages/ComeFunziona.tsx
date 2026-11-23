@@ -1,3 +1,5 @@
+import EditorialVisual from "@/components/custom/EditorialVisual";
+import { SITE_VISUALS, visualSEO } from "@/data/siteVisuals";
 import { lazy, Suspense, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { usePageSEO } from "@/hooks/usePageSEO";
@@ -121,6 +123,7 @@ const ComeFunziona = () => {
     title: "Come Funziona: Sistema AI Attivo in 7 Giorni | Edilizia.io",
     description: "Come attiviamo il tuo sistema AI in 3 passi: analisi e progetto, sviluppo e test, avvio in circa 7 giorni. Per imprese edili e studi tecnici.",
     canonical: "/come-funziona",
+    ...visualSEO(SITE_VISUALS.consulting),
     jsonLd: [
       {
         "@type": "HowTo",
@@ -163,9 +166,8 @@ const ComeFunziona = () => {
           <div className="max-w-4xl mx-auto px-6 text-center space-y-8">
             <AnimatedBadge variant="verde">OPERATIVO IN CIRCA 7 GIORNI</AnimatedBadge>
             <h1 className="font-display text-[32px] md:text-[52px] font-extrabold text-neutral-900 leading-[1.1]">
-              Mentre Tu Leggi Questa Pagina,<br />
-              Un Tuo Competitor Sta Già Usando l'AI.<br />
-              <span className="text-primary">Tu Quanto Vuoi Aspettare?</span>
+              Come portiamo l'AI<br />
+              <span className="text-primary-dark">nella tua impresa edile.</span>
             </h1>
             <p className="text-lg md:text-xl text-neutral-500 max-w-2xl mx-auto leading-relaxed">
               Nessuna configurazione complicata. Nessun consulente che non conosce il tuo settore.
@@ -185,6 +187,7 @@ const ComeFunziona = () => {
               ))}
             </div>
           </div>
+        <div className="mx-auto mt-10 max-w-5xl px-6"><EditorialVisual visual={SITE_VISUALS.consulting} priority className="" sizes="(min-width: 1024px) 960px, calc(100vw - 48px)" /></div>
         </section>
 
         {/* ── IL PROBLEMA ── */}

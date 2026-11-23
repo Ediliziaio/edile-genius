@@ -1,3 +1,5 @@
+import EditorialVisual from "@/components/custom/EditorialVisual";
+import { SITE_VISUALS, visualSEO } from "@/data/siteVisuals";
 import { usePageSEO } from "@/hooks/usePageSEO";
 import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
@@ -181,6 +183,7 @@ export default function EdiliziaInCloud() {
     description:
       "EdiliziaInCloud è il gestionale cloud con AI per imprese edili: cantieri, fatturazione elettronica, preventivi, margini, personale e CRM in un unico posto.",
     canonical: "/edilizia-in-cloud",
+    ...visualSEO(SITE_VISUALS.site),
     jsonLd: [
       {
         "@type": "SoftwareApplication",
@@ -256,6 +259,7 @@ export default function EdiliziaInCloud() {
             </a>
           </div>
         </div>
+        <div className="mx-auto mt-10 max-w-5xl px-6"><EditorialVisual visual={SITE_VISUALS.site} priority className="" sizes="(min-width: 1024px) 960px, calc(100vw - 48px)" /></div>
       </section>
 
       <main className="max-w-4xl mx-auto px-6 pb-24">

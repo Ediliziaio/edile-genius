@@ -1,79 +1,26 @@
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
-import AnimatedBadge from "@/components/custom/AnimatedBadge";
-import CounterStat from "@/components/custom/CounterStat";
+import { ArrowRight, Clock3, ClipboardCheck, MessagesSquare } from "lucide-react";
+import { Link } from "react-router-dom";
 
-const metrics = [
-  { value: 90, prefix: "+", suffix: "%", label: "Tasso di Risposta ai Lead" },
-  { value: 65, prefix: "-", suffix: "%", label: "Tempo Non-Vendita" },
-  { value: 25, prefix: "+", suffix: "%", label: "Lead Freddi Riattivati" },
-  { value: 3, suffix: "X", label: "Appuntamenti per Commerciale" },
-  { value: 60, prefix: "-", suffix: "%", label: "Tempo su Attività Ripetitive" },
+const measures = [
+  { icon: Clock3, title: "Tempo per attività", text: "Quanto impieghi per preparare un preventivo, ordinare i documenti o completare un rapportino? Misuriamo la stessa attività prima e dopo." },
+  { icon: MessagesSquare, title: "Richieste seguite", text: "Controlliamo quante richieste arrivano, quali vengono gestite e quando serve il passaggio a una persona." },
+  { icon: ClipboardCheck, title: "Qualità del risultato", text: "Verifichiamo errori, dati mancanti e correzioni necessarie. Un'attività più veloce deve restare controllabile dal tuo team." },
 ];
 
-const Results = () => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-50px" });
-
-  return (
-    <section id="risultati" className="bg-background py-16 md:py-24">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-12 space-y-4">
-          <AnimatedBadge variant="verde">RISULTATI REALI</AnimatedBadge>
-          <h2 className="font-display text-[32px] md:text-5xl font-extrabold text-neutral-900 leading-tight">
-            Risultati Misurati.<br />
-            <span className="text-primary">Ecco i Numeri.</span>
-          </h2>
-        </div>
-
-        <div ref={ref} className="grid lg:grid-cols-2 gap-8">
-          {/* Metrics */}
-          <div className="space-y-4">
-            {metrics.map((m) => (
-              <div key={m.label} className="bg-neutral-50 rounded-2xl p-5 border-l-[3px] border-l-primary flex items-center gap-4">
-                <CounterStat
-                  value={m.value}
-                  prefix={m.prefix}
-                  suffix={m.suffix}
-                  label={m.label}
-                  className="text-left"
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* Testimonial */}
-          <motion.div
-            className="bg-neutral-900 rounded-3xl p-8 md:p-10 relative"
-            initial={{ opacity: 0, y: 30 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <span className="absolute top-4 left-6 font-display text-[120px] font-extrabold text-primary/15 leading-none select-none">"</span>
-            <blockquote className="relative z-10 text-white text-lg italic leading-relaxed mb-6 pt-12">
-              "Ho sostituito la segretaria e il primo commerciale inbound.
-              In 30 giorni l'Agente AI ha fissato più appuntamenti di
-              entrambi messi insieme. Con il risparmio sugli stipendi ho
-              coperto il costo del servizio per tutto l'anno e reinvestito
-              il resto in cantiere."
-            </blockquote>
-            <div className="space-y-1">
-              <p className="text-white font-display font-bold text-sm">— Marco T.</p>
-              <p className="font-mono text-[11px] text-neutral-500">
-                Titolare azienda serramenti · Lombardia · 22 dipendenti
-              </p>
-            </div>
-            <div className="flex gap-1 mt-4 text-accent-gold">
-              {Array.from({ length: 5 }).map((_, i) => <span key={i}>⭐</span>)}
-            </div>
-            <p className="font-mono text-[10px] text-neutral-600 mt-4">
-              *Risultati indicativi. Variano in base al volume di lead e ai processi aziendali.
-            </p>
-          </motion.div>
-        </div>
+export default function Results() {
+  return <section id="risultati" className="bg-background py-16 md:py-24">
+    <div className="mx-auto max-w-6xl px-6">
+      <p className="mb-3 font-mono text-xs font-semibold uppercase tracking-wider text-primary-dark">Come misuriamo il lavoro</p>
+      <h2 className="max-w-3xl font-display text-3xl font-extrabold leading-tight text-neutral-900 md:text-4xl">Prima e dopo, con i dati della tua impresa.</h2>
+      <p className="mt-4 max-w-2xl text-lg leading-relaxed text-neutral-500">Prima dell'avvio scegliamo un'attività e definiamo cosa deve migliorare. Poi confrontiamo tempi e risultati su casi dello stesso tipo.</p>
+      <div className="mt-9 grid gap-6 md:grid-cols-3">
+        {measures.map((measure) => <article key={measure.title} className="rounded-2xl border border-neutral-200 p-6">
+          <measure.icon size={25} className="mb-4 text-primary-dark" />
+          <h3 className="font-display text-lg font-bold text-neutral-900">{measure.title}</h3>
+          <p className="mt-3 text-sm leading-relaxed text-neutral-500">{measure.text}</p>
+        </article>)}
       </div>
-    </section>
-  );
-};
-
-export default Results;
+      <Link to="/come-funziona" className="mt-7 inline-flex items-center gap-2 font-semibold text-primary-dark">Scopri il metodo di lavoro <ArrowRight size={17} /></Link>
+    </div>
+  </section>;
+}

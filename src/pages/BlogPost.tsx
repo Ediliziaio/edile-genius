@@ -87,6 +87,7 @@ const BlogPost = () => {
     description: post ? (BLOG_SEO[post.slug]?.description ?? post.description) : "",
     canonical: post ? `/blog/${post.slug}` : "/blog",
     ogImage: post?.heroImage,
+    ogImageAlt: post?.heroImageAlt,
     ogType: "article",
     articleMeta: post
       ? {

@@ -13,6 +13,9 @@ export interface SEOConfig {
   description: string;
   canonical?: string;
   ogImage?: string;
+  ogImageAlt?: string;
+  ogImageWidth?: number;
+  ogImageHeight?: number;
   ogType?: string;
   articleMeta?: ArticleMeta;
   /** Pagine che non devono essere indicizzate (es. landing offerta). */
@@ -65,6 +68,9 @@ export function SEOHead({
   description,
   canonical,
   ogImage,
+  ogImageAlt,
+  ogImageWidth,
+  ogImageHeight,
   ogType,
   articleMeta,
   noindex = false,
@@ -72,6 +78,9 @@ export function SEOHead({
 }: SEOConfig) {
   const url = canonical ? `${BASE_URL}${canonical}` : BASE_URL;
   const image = ogImage || DEFAULT_OG_IMAGE;
+  const imageAlt = ogImageAlt || OG_IMAGE_ALT;
+  const imageWidth = ogImageWidth ?? (ogImage ? undefined : 1200);
+  const imageHeight = ogImageHeight ?? (ogImage ? undefined : 630);
   const jsonLdString = jsonLd
     ? JSON.stringify(
         Array.isArray(jsonLd)
@@ -92,10 +101,16 @@ export function SEOHead({
     setMetaAttr('meta[property="og:description"]', metaByProp("og:description"), description);
     setMetaAttr('meta[property="og:url"]', metaByProp("og:url"), url);
     setMetaAttr('meta[property="og:image"]', metaByProp("og:image"), image);
+    setMetaAttr('meta[property="og:image:alt"]', metaByProp("og:image:alt"), imageAlt);
+    for (const [key, value] of [["width", imageWidth], ["height", imageHeight]] as const) {
+      if (value) setMetaAttr(`meta[property="og:image:${key}"]`, metaByProp(`og:image:${key}`), String(value));
+      else document.head.querySelector(`meta[property="og:image:${key}"]`)?.remove();
+    }
     setMetaAttr('meta[property="og:type"]', metaByProp("og:type"), ogType || "website");
     setMetaAttr('meta[name="twitter:title"]', metaByName("twitter:title"), title);
     setMetaAttr('meta[name="twitter:description"]', metaByName("twitter:description"), description);
     setMetaAttr('meta[name="twitter:image"]', metaByName("twitter:image"), image);
+    setMetaAttr('meta[name="twitter:image:alt"]', metaByName("twitter:image:alt"), imageAlt);
     setMetaAttr('meta[name="twitter:card"]', metaByName("twitter:card"), "summary_large_image");
     setMetaAttr('meta[property="og:site_name"]', metaByProp("og:site_name"), "Edilizia.io");
     setMetaAttr('meta[property="og:locale"]', metaByProp("og:locale"), "it_IT");
@@ -106,7 +121,7 @@ export function SEOHead({
       document.head.appendChild(link);
     }
     link.setAttribute("href", url);
-  }, [title, description, url, image, ogType, noindex]);
+  }, [title, description, url, image, imageAlt, imageWidth, imageHeight, ogType, noindex]);
 
   return (
     <Head>
@@ -130,15 +145,16 @@ export function SEOHead({
       <meta property="og:site_name" content="Edilizia.io" />
       <meta property="og:locale" content="it_IT" />
       <meta property="og:image" content={image} />
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="630" />
-      <meta property="og:image:alt" content={OG_IMAGE_ALT} />
+      {imageWidth && <meta property="og:image:width" content={String(imageWidth)} />}
+      {imageHeight && <meta property="og:image:height" content={String(imageHeight)} />}
+      <meta property="og:image:alt" content={imageAlt} />
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={image} />
+      <meta name="twitter:image:alt" content={imageAlt} />
 
       {/* Article */}
       {articleMeta && (

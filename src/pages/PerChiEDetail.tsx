@@ -2,7 +2,7 @@ import { useParams, Navigate, Link } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { usePageSEO } from "@/hooks/usePageSEO";
-import { icons, XCircle, CheckCircle2, ArrowRight, Quote } from "lucide-react";
+import { XCircle, CheckCircle2, ArrowRight } from "lucide-react";
 import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
 import Guarantee from "@/components/sections/Guarantee";
@@ -10,6 +10,9 @@ import AnimatedBadge from "@/components/custom/AnimatedBadge";
 import SectorServicesGrid from "@/components/perchie/SectorServicesGrid";
 import RelatedServices from "@/components/custom/RelatedServices";
 import { perChiECategories } from "@/data/perChiE";
+import EditorialVisual from "@/components/custom/EditorialVisual";
+import RelatedGuides from "@/components/custom/RelatedGuides";
+import { SECTOR_VISUALS, visualSEO } from "@/data/siteVisuals";
 
 /** Descrizione per Google: al massimo ~155 caratteri, tagliata su una parola intera. */
 const seoDescription = (text?: string) => {
@@ -22,11 +25,13 @@ const seoDescription = (text?: string) => {
 const PerChiEDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const cat = perChiECategories.find(c => c.slug === slug);
+  const visual = slug ? SECTOR_VISUALS[slug] : undefined;
 
   const seoTags = usePageSEO({
     title: cat ? `${cat.name} — AI per l'Edilizia | Edilizia.io` : "Per Chi È | Edilizia.io",
     description: seoDescription(cat?.heroSubtitle) || "Soluzioni AI specializzate per il settore edile italiano.",
     canonical: `/per-chi-e/${slug}`,
+    ...(visual ? visualSEO(visual) : {}),
     jsonLd: cat
       ? [
           {
@@ -58,16 +63,10 @@ const PerChiEDetail = () => {
 
   const problemsRef = useRef(null);
   const solutionsRef = useRef(null);
-  const roiRef = useRef(null);
-  const caseRef = useRef(null);
   const problemsInView = useInView(problemsRef, { once: true });
   const solutionsInView = useInView(solutionsRef, { once: true });
-  const roiInView = useInView(roiRef, { once: true });
-  const caseInView = useInView(caseRef, { once: true });
 
   if (!cat) return <Navigate to="/per-chi-e" replace />;
-
-  const IconComponent = icons[cat.icon as keyof typeof icons];
 
   return (
     <main className="min-h-screen bg-background">
@@ -75,11 +74,12 @@ const PerChiEDetail = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="py-20 md:py-28 bg-primary-bg">
-        <div className="max-w-4xl mx-auto px-6 text-center">
+      <section className="py-14 md:py-20 bg-primary-bg">
+        <div className="max-w-6xl mx-auto grid items-center gap-10 px-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <div>
           <AnimatedBadge>{cat.name.toUpperCase()}</AnimatedBadge>
           <motion.h1
-            className="font-display text-3xl md:text-5xl lg:text-[56px] font-extrabold text-foreground leading-tight mt-6 mb-6"
+            className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground leading-tight mt-6 mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -87,7 +87,7 @@ const PerChiEDetail = () => {
             {cat.heroTitle}
           </motion.h1>
           <motion.p
-            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
+            className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-8"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15, duration: 0.5 }}
@@ -95,18 +95,21 @@ const PerChiEDetail = () => {
             {cat.heroSubtitle}
           </motion.p>
           <motion.div
-            className="grid grid-cols-3 gap-4 max-w-xl mx-auto"
+            className="space-y-3"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
           >
-            {cat.stats.map((s, i) => (
-              <div key={i} className="bg-background rounded-xl border border-border p-4">
-                <div className="font-display text-2xl md:text-3xl font-extrabold text-primary">{s.value}</div>
-                <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mt-1">{s.label}</div>
+            {cat.solutions.map((s, i) => (
+              <div key={i} className="flex items-start gap-3 text-sm font-medium text-neutral-700">
+                <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-primary-dark" />
+                <span>{s.title}</span>
               </div>
             ))}
           </motion.div>
+          <Link to="/#cta-finale" className="mt-7 inline-flex items-center gap-2 rounded-xl bg-primary-dark px-5 py-3 font-semibold text-white">Parliamo del tuo lavoro <ArrowRight size={17} /></Link>
+          </div>
+          {visual && <EditorialVisual visual={visual} priority />}
         </div>
       </section>
 
@@ -143,7 +146,7 @@ const PerChiEDetail = () => {
           <div className="text-center mb-12">
             <span className="font-mono text-xs uppercase tracking-wider text-primary font-bold">La Nostra Soluzione</span>
             <h2 className="font-display text-3xl md:text-4xl font-extrabold text-foreground mt-2">
-              Ecco Come l'AI Risolve Tutto.
+              Le attività che possiamo semplificare con l'AI.
             </h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
@@ -170,64 +173,7 @@ const PerChiEDetail = () => {
       <RelatedServices pageKey={cat.slug} title={`I servizi più utili per ${cat.name}`} />
 
 
-      {/* ROI */}
-      <section ref={roiRef} className="py-16 md:py-20">
-        <div className="max-w-3xl mx-auto px-6">
-          <motion.div
-            className="bg-[hsl(var(--neutral-900))] rounded-3xl p-10 md:p-14 text-center"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={roiInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: 0.5 }}
-          >
-            <span className="font-mono text-xs uppercase tracking-wider text-primary font-bold">I Numeri Parlano</span>
-            <h2 className="font-display text-3xl md:text-4xl font-extrabold text-white mt-3 mb-10">
-              Risultati Concreti Per {cat.name}
-            </h2>
-            <div className="grid grid-cols-3 gap-6">
-              {cat.roi.map((r, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={roiInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ delay: 0.2 + i * 0.1, duration: 0.4 }}
-                >
-                  <div className="font-display text-3xl md:text-4xl font-extrabold text-primary">{r.value}</div>
-                  <div className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--neutral-300))] mt-2">{r.metric}</div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* CASO STUDIO */}
-      <section ref={caseRef} className="py-16 md:py-20 bg-muted/30">
-        <div className="max-w-3xl mx-auto px-6">
-          <motion.div
-            className="bg-background rounded-3xl border border-border p-10 md:p-14"
-            initial={{ opacity: 0, y: 20 }}
-            animate={caseInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5 }}
-          >
-            <Quote className="text-primary mb-4" size={36} />
-            <blockquote className="font-display text-xl md:text-2xl font-bold text-foreground leading-snug mb-6">
-              "{cat.caseStudy.quote}"
-            </blockquote>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                {IconComponent && <IconComponent size={18} className="text-primary" />}
-              </div>
-              <div>
-                <div className="font-bold text-foreground text-sm">{cat.caseStudy.company}</div>
-                <div className="text-xs text-muted-foreground">{cat.caseStudy.location}</div>
-              </div>
-            </div>
-            <div className="mt-6 inline-block bg-primary-light text-primary-dark font-mono text-sm font-bold px-4 py-2 rounded-full">
-              {cat.caseStudy.result}
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      <RelatedGuides pageKey={cat.slug} />
 
       <Guarantee />
 
@@ -238,7 +184,7 @@ const PerChiEDetail = () => {
             {cat.ctaLine}
           </h2>
           <p className="text-[hsl(var(--neutral-300))] text-lg mb-8">
-            Ogni giorno che aspetti, un tuo competitor chiude un contratto in più.
+            Partiamo da una tua attività ripetitiva e definiamo insieme dati, controlli e risultato atteso.
           </p>
           <Link
             to="/#cta-finale"

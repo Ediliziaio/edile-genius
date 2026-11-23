@@ -8,6 +8,8 @@ import Guarantee from "@/components/sections/Guarantee";
 import AnimatedBadge from "@/components/custom/AnimatedBadge";
 import { dimensioneCategories, settoreCategories } from "@/data/perChiE";
 import type { PerChiECategory } from "@/data/perChiE";
+import EditorialVisual from "@/components/custom/EditorialVisual";
+import { SECTOR_VISUALS, SITE_VISUALS, visualSEO } from "@/data/siteVisuals";
 
 const CategoryCard = ({ cat, index }: { cat: PerChiECategory; index: number }) => {
   const IconComponent = icons[cat.icon as keyof typeof icons];
@@ -23,6 +25,7 @@ const CategoryCard = ({ cat, index }: { cat: PerChiECategory; index: number }) =
         to={`/per-chi-e/${cat.slug}`}
         className="group block bg-background rounded-2xl border border-border p-6 hover:border-primary hover:shadow-card transition-all duration-300"
       >
+        <EditorialVisual visual={SECTOR_VISUALS[cat.slug]} compact className="mb-5" sizes="(min-width: 1024px) 320px, (min-width: 640px) 45vw, calc(100vw - 96px)" />
         <div className="w-12 h-12 rounded-xl bg-primary-light flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
           {IconComponent && <IconComponent size={24} className="text-primary group-hover:text-primary-foreground transition-colors" />}
         </div>
@@ -41,6 +44,7 @@ const PerChiE = () => {
     title: "Per Chi È: AI per Imprese Edili e Studi Tecnici | Edilizia.io",
     description: "Soluzioni AI per artigiani, PMI, general contractor, serramentisti, fotovoltaico, ristrutturazioni, impiantisti e per architetti, ingegneri e geometri.",
     canonical: "/per-chi-e",
+    ...visualSEO(SITE_VISUALS.site),
     jsonLd: [
       {
         "@type": "CollectionPage",
