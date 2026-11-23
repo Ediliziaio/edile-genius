@@ -575,7 +575,7 @@ Ideale per: Imprese di coperture e lattoneria, Installatori fotovoltaico con ser
 ## Per chi è
 ### Artigiani e Micro Imprese
 URL: https://edilizia.io/per-chi-e/artigiani-micro-imprese
-Chi ti chiama alle 8 di mattina mentre sei sul ponteggio? Nessuno. E quel cliente va dal competitor che risponde.
+Raccogli le richieste mentre lavori, prepara bozze di preventivo con i tuoi listini e organizza le note dal cantiere. Tu controlli il risultato prima di confermarlo.
 - Agente Vocale AI: Risponde a ogni chiamata in <2 secondi, qualifica il cliente, fissa appuntamenti. Funziona mentre sei sul ponteggio.
 - WhatsApp AI: Gestisce le conversazioni WhatsApp, invia foto lavori, risponde a richieste preventivo automaticamente.
 - Gestione Cantieri: Coordina fornitori e clienti con aggiornamenti automatici sullo stato dei lavori e scadenze.
@@ -586,7 +586,7 @@ Chi ti chiama alle 8 di mattina mentre sei sul ponteggio? Nessuno. E quel client
 
 ### Piccole Imprese
 URL: https://edilizia.io/per-chi-e/piccole-imprese
-Telefono, WhatsApp, lead, preventivi: troppo per una persona sola. L'AI prende il lavoro ripetitivo e il tuo ufficio si concentra sui clienti.
+Collega telefonate, messaggi, preventivi e appuntamenti. Partiamo dalle attività ripetitive del tuo ufficio per dare al team informazioni complete e facili da seguire.
 - Agente Vocale AI: Risponde a ogni chiamata, anche 50+ al giorno, qualifica i lead e fissa appuntamenti. H24, e il tuo ufficio si dedica ai clienti.
 - WhatsApp AI: Risponde ai clienti su WhatsApp, invia preventivi, gestisce follow-up e conferme appuntamento.
 - Gestione Cantieri: Aggiornamenti automatici ai clienti sullo stato lavori, coordinamento squadre, scadenze materiali.
@@ -597,7 +597,7 @@ Telefono, WhatsApp, lead, preventivi: troppo per una persona sola. L'AI prende i
 
 ### Medie Imprese
 URL: https://edilizia.io/per-chi-e/medie-imprese
-I tuoi commerciali passano le giornate a richiamare contatti che non compreranno. L'AI qualifica prima, e loro chiudono di più.
+Organizza i contatti commerciali, raccogli gli aggiornamenti delle commesse e confronta i dati dei reparti. Definiamo regole, responsabilità e controlli prima dell'avvio.
 - Agente Vocale AI: Pre-qualifica ogni lead con criteri oggettivi. Il commerciale riceve solo opportunità concrete, pronte alla chiusura.
 - WhatsApp AI: Follow-up automatico post-chiamata, invio preventivi, conferme sopralluogo. Tutto tracciato e misurabile.
 - Gestione Cantieri: Dashboard cantieri in tempo reale, notifiche automatiche a squadre e clienti, zero ritardi per mancata comunicazione.
@@ -609,7 +609,7 @@ I tuoi commerciali passano le giornate a richiamare contatti che non compreranno
 
 ### Grandi Aziende e General Contractor
 URL: https://edilizia.io/per-chi-e/grandi-aziende-general-contractor
-I tuoi competitor più agili stanno già automatizzando. Ogni mese che aspetti è market share perso.
+Classifica bandi e capitolati, raccogli aggiornamenti dai cantieri e organizza i dati delle commesse. L'ufficio gare e i responsabili tecnici verificano documenti e decisioni.
 - Agente Vocale AI: Primo filtro commerciale enterprise: gestisce il contatto iniziale, qualifica, raccoglie dati tecnici e smista.
 - WhatsApp AI: Comunicazione multicanale con clienti e fornitori. Aggiornamenti automatici, conferme, raccolta documenti.
 - Gestione Cantieri: Coordinamento multi-cantiere: notifiche a subappaltatori, scadenze, varianti, aggiornamenti real-time al cliente.
@@ -622,7 +622,7 @@ I tuoi competitor più agili stanno già automatizzando. Ogni mese che aspetti �
 
 ### Serramentisti e Infissi
 URL: https://edilizia.io/per-chi-e/serramentisti-infissi
-Il cliente chiama 5 serramentisti. Chi risponde per primo, vince. E tu stai ancora rispondendo per ultimo.
+Raccogli misure, materiali e tempi richiesti, organizza i sopralluoghi e prepara proposte sul tuo listino. Usa i render per spiegare al cliente le alternative di finitura.
 - Agente Vocale AI: Risponde in 2 secondi, raccoglie tipo infisso (PVC, alluminio, legno), misure finestre, piano, budget. Qualifica e fissa sopralluogo.
 - WhatsApp AI: Invia catalogo materiali, raccoglie foto finestre attuali, conferma appuntamenti, follow-up post-preventivo.
 - Gestione Cantieri: Traccia ordini fornitori, tempi di produzione infissi, coordina posa e muratore. Aggiornamenti automatici al cliente.
@@ -633,7 +633,7 @@ Il cliente chiama 5 serramentisti. Chi risponde per primo, vince. E tu stai anco
 
 ### Installatori Fotovoltaico
 URL: https://edilizia.io/per-chi-e/installatori-fotovoltaico
-La domanda esplode, ma senza un sistema per gestire i contatti, stai lasciando milioni sul tavolo.
+Organizza le richieste, raccogli le informazioni utili al sopralluogo e segui le proposte commerciali. Il progetto dell'impianto e le verifiche tecniche restano ai professionisti.
 - Agente Vocale AI: Risponde a tutte le richieste, raccoglie consumi bolletta, orientamento tetto, superficie disponibile. Qualifica e fissa sopralluogo.
 - WhatsApp AI: Spiega bonus fiscali, invia simulazione risparmio, raccoglie bollette via foto, follow-up anti-rinvio.
 - Gestione Cantieri: Pianifica installazioni, coordina elettricista e muratore, notifica cliente su avanzamento e allaccio GSE.
@@ -645,7 +645,7 @@ La domanda esplode, ma senza un sistema per gestire i contatti, stai lasciando m
 
 ### Imprese di Ristrutturazione
 URL: https://edilizia.io/per-chi-e/imprese-ristrutturazione
-Spendi ore a fare sopralluoghi e preventivi per clienti che non firmeranno mai. L'AI cambia le regole.
+Metti in ordine foto, richieste, computi e aggiornamenti dei lavori. L'AI aiuta a preparare bozze e proposte visive; il tuo team verifica misure, costi e fattibilità.
 - Agente Vocale AI: Pre-qualifica ogni richiesta: tipo intervento, budget, tempistiche, decisore. Passa al commerciale solo chi è pronto.
 - WhatsApp AI: Follow-up post-preventivo automatico, risponde a obiezioni, invia referenze e foto lavori simili completati.
 - Gestione Cantieri: Coordina muratore, idraulico, elettricista, piastrellista. Aggiornamenti automatici al cliente con foto avanzamento.
@@ -657,7 +657,7 @@ Spendi ore a fare sopralluoghi e preventivi per clienti che non firmeranno mai. 
 
 ### Imprese Edili Generali
 URL: https://edilizia.io/per-chi-e/imprese-edili-generali
-Telefonate, preventivi, rapportini, documenti: ore ogni giorno prima ancora di posare un mattone. L'AI ne automatizza la maggior parte.
+Raccogli telefonate, preventivi, rapportini e documenti nello stesso flusso di lavoro. Parti da una commessa e misura tempo, dati mancanti e passaggi da migliorare.
 - Agente Vocale AI: Front-office completo: gestisce chiamate clienti, fornitori, subappaltatori. Smista per urgenza e tipo richiesta.
 - WhatsApp AI: Canale dedicato per aggiornamenti cantiere, coordinamento squadre, invio foto e documenti in tempo reale.
 - Gestione Cantieri: Dashboard multi-cantiere: scadenze, materiali, avanzamento, sicurezza. Notifiche automatiche a tutte le parti.
@@ -670,7 +670,7 @@ Telefonate, preventivi, rapportini, documenti: ore ogni giorno prima ancora di p
 
 ### Posatori e Pavimentisti
 URL: https://edilizia.io/per-chi-e/posatori-pavimentisti
-Non puoi rispondere con le mani nella colla. Ma quel cliente non richiamerà. Va dal prossimo su Google.
+Gestisci le richieste mentre sei al lavoro, raccogli foto e superfici e prepara la bozza del preventivo. Presenta materiali e finiture con proposte visive da verificare.
 - Agente Vocale AI: Risponde mentre posi: raccoglie tipo pavimento (gres, parquet, marmo), metratura, piano, tempistiche.
 - WhatsApp AI: Invia catalogo materiali, raccoglie foto ambiente, conferma appuntamenti. Chiede recensioni post-lavoro.
 - Gestione Cantieri: Pianifica lavori settimanali, coordina consegna materiali, notifica cliente su inizio e fine lavori.
@@ -681,7 +681,7 @@ Non puoi rispondere con le mani nella colla. Ma quel cliente non richiamerà. Va
 
 ### Lattonieri e Coperture
 URL: https://edilizia.io/per-chi-e/lattonieri-coperture
-I danni da maltempo generano picchi di richieste. Se non rispondi in 10 minuti, il cliente chiama un altro.
+Raccogli le richieste di intervento, organizza i sopralluoghi e conserva foto e note per commessa. Il tecnico decide priorità, sicurezza e soluzione da proporre.
 - Agente Vocale AI: Gestisce 100+ chiamate simultanee post-maltempo. Registra ogni richiesta, classifica per urgenza, prenota intervento.
 - WhatsApp AI: Raccoglie foto danni via WhatsApp, stima gravità, invia tempistiche intervento. Triage automatico.
 - Gestione Cantieri: Pianifica interventi urgenti e programmati su mappa, coordina squadre, ottimizza percorsi giornalieri.
@@ -693,7 +693,7 @@ I danni da maltempo generano picchi di richieste. Se non rispondi in 10 minuti, 
 
 ### Impianti Idraulici e Termici
 URL: https://edilizia.io/per-chi-e/impianti-idraulici-termici
-Tubo rotto alle 3 di notte. Il cliente chiama. Se non rispondi, chiama il prossimo su Google. Per sempre.
+Raccogli il tipo di intervento, i dati del cliente e le disponibilità. Organizza appuntamenti, assistenze e bozze di preventivo, con passaggio a una persona quando serve.
 - Agente Vocale AI: Pronto intervento H24: valuta urgenza, classifica tipo problema, prenota intervento. Risponde anche alle 3 di notte.
 - WhatsApp AI: Recall manutenzione caldaie, invio promemoria tagliandi, raccolta foto problemi per pre-diagnosi.
 - Gestione Cantieri: Pianifica interventi giornalieri, ottimizza percorsi, coordina consegna materiali e ricambi.
@@ -704,7 +704,7 @@ Tubo rotto alle 3 di notte. Il cliente chiama. Se non rispondi, chiama il prossi
 
 ### Impianti Elettrici
 URL: https://edilizia.io/per-chi-e/impianti-elettrici
-Mentre tiri cavi in un appartamento, stai perdendo il lavoro nel condominio dall'altra parte della città.
+Metti in ordine richieste, sopralluoghi e documentazione delle commesse. L'AI prepara le informazioni e le bozze; il tuo team verifica le scelte e conferma gli interventi.
 - Agente Vocale AI: Receptionist tecnico: capisce tipo intervento, raccoglie kW, numero punti luce, tipo impianto. Qualifica e prenota.
 - WhatsApp AI: Raccoglie planimetrie e foto quadri elettrici, invia preventivi, reminder scadenze conformità.
 - Gestione Cantieri: Pianifica interventi multi-cantiere, coordina forniture cavi e materiali, traccia avanzamento.
@@ -715,7 +715,7 @@ Mentre tiri cavi in un appartamento, stai perdendo il lavoro nel condominio dall
 
 ### Cartongessisti e Finiture
 URL: https://edilizia.io/per-chi-e/cartongessisti-finiture
-Fai controsoffitti da paura ma nessuno ti trova online. L'AI porta clienti mentre tu lavori.
+Raccogli foto, superfici e richieste del cliente, prepara una bozza sui tuoi prezzi e presenta le alternative. Mantieni collegati appuntamenti e aggiornamenti dei lavori.
 - Agente Vocale AI: Gestisce richieste: tipo lavoro (controsoffitto, pareti, isolamento), metratura, altezze, finiture. Qualifica budget.
 - WhatsApp AI: Invia portfolio lavori, raccoglie foto ambienti, preventivi rapidi. Educa il cliente sul valore artigianale.
 - Gestione Cantieri: Pianifica lavori settimanali, coordina consegna lastre e profili, notifica cliente su inizio/fine lavori.
@@ -727,7 +727,7 @@ Fai controsoffitti da paura ma nessuno ti trova online. L'AI porta clienti mentr
 
 ### Progettisti e Studi Tecnici
 URL: https://edilizia.io/per-chi-e/progettisti-studi-tecnici
-Non progettiamo al posto tuo: ti diamo l'AI che filtra le richieste, legge capitolati, imposta computi e relazioni, crea i render per il committente e tiene aggiornato il cantiere. Il progetto e la firma restano tuoi.
+Filtra le richieste, consulta capitolati e prepara bozze di computi, relazioni e render. Il professionista controlla dati, requisiti e fattibilità: il progetto e la firma restano suoi.
 - Agente Vocale AI: Filtro intelligente: capisce tipo progetto, dimensione, budget. Ti passa solo chi ha un incarico vero da affidare.
 - WhatsApp AI: Aggiornamenti cantiere con foto ai committenti, raccolta documenti da imprese, comunicazioni DL.
 - Gestione Cantieri: Coordinamento imprese esecutrici, verbali avanzamento, gestione varianti e SAL. Report automatici.

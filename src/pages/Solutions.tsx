@@ -53,7 +53,7 @@ const Solutions = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen overflow-x-clip bg-background">
       {seoTags}
       <CustomCursor />
       <Navbar />

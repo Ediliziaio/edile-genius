@@ -14,7 +14,7 @@ const item = {
 const stats = [
   { value: String(solutions.length), label: "SOLUZIONI AI DISPONIBILI" },
   { value: "7", label: "AREE: MESTIERI, GARE, PROGETTISTI, RENDER" },
-  { value: "-60%", label: "RIDUZIONE COSTI OPERATIVI MEDIA" },
+  { value: "Su misura", label: "PROCESSI E STRUMENTI DELLA TUA IMPRESA" },
   { value: "7 gg", label: "SETUP MEDIO PER SOLUZIONE" },
 ];
 
@@ -36,8 +36,8 @@ const SolutionsHero = () => (
       </motion.div>
 
       <motion.h1 variants={item} className="font-display text-[32px] sm:text-[44px] md:text-[72px] font-extrabold text-white leading-[1.05] mb-6">
-        Ogni Problema<br />di Impresa e Studio<br />Tecnico — Risolto.<br />
-        <span className="text-primary">Con l'AI.</span>
+        Soluzioni AI per<br />
+        <span className="text-primary">imprese edili e studi tecnici.</span>
       </motion.h1>
 
       <motion.div variants={item} className="max-w-[640px] mx-auto mb-10">

@@ -199,7 +199,7 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
           </Link>
           <Link
             to="/#cta-finale"
-            className="bg-primary text-primary-foreground px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-primary-dark hover:scale-[1.02] shadow-button-green transition-all"
+            className="bg-primary-dark text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-primary-dark hover:scale-[1.02] shadow-button-green transition-all"
           >
             Prenota la consulenza
           </Link>
@@ -287,7 +287,7 @@ const Navbar = ({ variant = "light" }: NavbarProps) => {
           <Link
             to="/#cta-finale"
             onClick={() => setOpen(false)}
-            className="block bg-primary text-primary-foreground text-center px-5 py-3 rounded-xl font-bold"
+            className="block bg-primary-dark text-white text-center px-5 py-3 rounded-xl font-bold"
           >
             Prenota la consulenza gratuita
           </Link>

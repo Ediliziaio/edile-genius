@@ -117,7 +117,7 @@ const ServizioDetail = () => {
                 <span className="font-mono text-xs uppercase tracking-wider text-primary font-semibold">{d.eyebrow}</span>
               </motion.div>
               <motion.h1 variants={fadeUp} className="font-display text-[32px] md:text-[48px] font-extrabold leading-[1.05] text-neutral-900">
-                {d.heroTitolo} <span className="text-primary">{d.heroEvidenza}</span>
+                {d.heroTitolo} <span className="text-primary-dark">{d.heroEvidenza}</span>
               </motion.h1>
               <motion.p variants={fadeUp} className="text-lg md:text-xl text-neutral-500 leading-relaxed">
                 {d.heroSottotitolo}
@@ -125,7 +125,7 @@ const ServizioDetail = () => {
               <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3 pt-2">
                 <a
                   href="#cta-finale"
-                  className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-7 py-4 rounded-xl font-bold hover:bg-primary-dark hover:-translate-y-0.5 shadow-button-green transition-all"
+                  className="inline-flex items-center justify-center gap-2 bg-primary-dark text-white px-7 py-4 rounded-xl font-bold hover:bg-primary-dark hover:-translate-y-0.5 shadow-button-green transition-all"
                 >
                   Prenota la consulenza gratuita <ArrowRight size={18} />
                 </a>
