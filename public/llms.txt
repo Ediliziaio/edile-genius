@@ -53,6 +53,12 @@ Informazioni chiave:
 
 ## Blog
 
+- [Computo metrico con AI: prezzari e controlli](https://edilizia.io/blog/computo-metrico-ai-prezzari-controlli)
+- [Render AI per ristrutturazioni](https://edilizia.io/blog/render-ai-ristrutturazione-foto-progetto)
+
+- [Confrontare offerte di fornitori edili con l’AI](https://edilizia.io/blog/confrontare-offerte-fornitori-ai-edilizia)
+- [Rapportini di cantiere con voce e AI](https://edilizia.io/blog/rapportini-cantiere-voce-ai)
+
 - [Gestionale per Imprese Edili in Cloud con AI | Edilizia.io](https://edilizia.io/blog/gestionale-edilizia-cloud-ediliziaincloud)
 - [Agenti Vocali AI per l'Edilizia: Zero Chiamate Perse](https://edilizia.io/blog/agenti-vocali-ai-edilizia)
 - [Intelligenza Artificiale per Serramentisti | Edilizia.io](https://edilizia.io/blog/intelligenza-artificiale-serramenti)

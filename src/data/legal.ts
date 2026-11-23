@@ -17,7 +17,8 @@ export interface LegalDoc {
   sections: LegalSection[];
 }
 
-const TITOLARE = "[RAGIONE SOCIALE], P.IVA [P.IVA], con sede in [INDIRIZZO]";
+// Dati societari lasciati vuoti su richiesta del titolare del sito.
+const TITOLARE = "";
 const EMAIL = "info@edilizia.io";
 
 export const LEGAL_DOCS: Record<string, LegalDoc> = {
@@ -27,7 +28,7 @@ export const LEGAL_DOCS: Record<string, LegalDoc> = {
     metaTitle: "Privacy Policy | Edilizia.io",
     description:
       "Informativa sul trattamento dei dati personali di Edilizia.io ai sensi del Regolamento UE 2016/679 (GDPR).",
-    updated: "Luglio 2026",
+    updated: "23 novembre 2026",
     intro: [
       "La presente informativa descrive le modalità di trattamento dei dati personali degli utenti che consultano il sito edilizia.io e utilizzano i relativi servizi, ai sensi del Regolamento UE 2016/679 (GDPR) e del D.Lgs. 196/2003 come modificato dal D.Lgs. 101/2018.",
     ],
@@ -35,7 +36,7 @@ export const LEGAL_DOCS: Record<string, LegalDoc> = {
       {
         h: "1. Titolare del trattamento",
         body: [
-          `Il Titolare del trattamento è ${TITOLARE}.`,
+          TITOLARE ? `Il Titolare del trattamento è ${TITOLARE}.` : "",
           `Per qualsiasi richiesta relativa ai dati personali è possibile scrivere a ${EMAIL}.`,
         ],
       },
@@ -81,7 +82,7 @@ export const LEGAL_DOCS: Record<string, LegalDoc> = {
     metaTitle: "Cookie Policy | Edilizia.io",
     description:
       "Informativa sull'uso dei cookie e delle tecnologie di tracciamento sul sito edilizia.io.",
-    updated: "Luglio 2026",
+    updated: "23 novembre 2026",
     intro: [
       "Questa Cookie Policy spiega cosa sono i cookie, quali tipologie utilizza il sito edilizia.io e come è possibile gestirli, in conformità alle Linee guida del Garante Privacy e alla direttiva ePrivacy.",
     ],
@@ -96,21 +97,21 @@ export const LEGAL_DOCS: Record<string, LegalDoc> = {
         h: "2. Tipologie di cookie utilizzati",
         body: [
           "Cookie tecnici e necessari: indispensabili per il corretto funzionamento del sito. Non richiedono consenso.",
-          "Cookie analitici: utilizzati, in forma anonimizzata o previo consenso, per raccogliere informazioni statistiche sull'uso del sito.",
-          "Cookie di terze parti / marketing: eventualmente installati da servizi esterni per finalità di profilazione o remarketing. Vengono attivati solo previo consenso dell'utente.",
+          "Cookie analitici: Google Analytics 4 viene caricato tramite un unico contenitore Google Tag Manager soltanto dopo il consenso alle statistiche. Misuriamo le visite alle pagine pubbliche, escludendo login, area applicativa, amministrazione e link di condivisione. I tag ricevono URL privi di query e frammenti; non inviamo nomi, email, telefoni o contenuti dei moduli.",
+          "Cookie di marketing: il Pixel Meta già presente viene attivato solo dopo un consenso separato al marketing. La scelta del marketing non abilita la personalizzazione pubblicitaria in Google Analytics.",
         ],
       },
       {
         h: "3. Gestione dei cookie",
         body: [
-          "L'utente può gestire le preferenze tramite l'apposito banner presente sul sito e in qualsiasi momento modificando le impostazioni del proprio browser, che consentono di bloccare o eliminare i cookie.",
+          "Puoi accettare, rifiutare o personalizzare le categorie dal banner. Il pulsante Preferenze cookie consente di cambiare scelta in qualsiasi momento. La revoca disattiva i tag, elimina i cookie analitici riconosciuti e ricarica la pagina. Il salvataggio locale della scelta serve a rispettare le preferenze, anche quando rifiuti il tracking. La scelta viene riproposta dopo 182 giorni.",
           "La disabilitazione dei cookie tecnici può compromettere la fruizione di alcune funzionalità del sito.",
         ],
       },
       {
         h: "4. Titolare e contatti",
         body: [
-          `Titolare del trattamento: ${TITOLARE}. Per informazioni: ${EMAIL}.`,
+          TITOLARE ? `Titolare del trattamento: ${TITOLARE}. Per informazioni: ${EMAIL}.` : `Per informazioni: ${EMAIL}.`,
         ],
       },
     ],

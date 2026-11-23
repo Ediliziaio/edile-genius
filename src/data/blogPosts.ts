@@ -1,3 +1,4 @@
+import { newSeoPosts } from "./newSeoPosts";
 import heroAgentiVocali from "@/assets/blog/hero-agenti-vocali.jpg";
 import heroSerramenti from "@/assets/blog/hero-serramenti.jpg";
 import heroPreventivi from "@/assets/blog/hero-preventivi.jpg";
@@ -51,6 +52,7 @@ export interface BlogPost {
 }
 
 export const blogPosts: BlogPost[] = [
+  ...newSeoPosts,
   // ─── GESTIONALE EDILIZIA CLOUD — EDILIZIAINCLOUD ─────────────────────
   {
     slug: "gestionale-edilizia-cloud-ediliziaincloud",
