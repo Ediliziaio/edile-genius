@@ -40,6 +40,13 @@
       "width": 1600,
       "height": 592,
       "bytes": 117732
+    },
+    {
+      "id": "facebook-profile-edilizia-io",
+      "productionPath": "public/social/facebook-profile-edilizia-io-20261123.png",
+      "mode": "built-in image_gen edit",
+      "reference": "src/assets/logo-green.png",
+      "prompt": "Use only the existing green hexagonal icon of the official Edilizia.io logo. Preserve the white house outline and connected nodes. Remove wordmark and tagline, center with padding for a circular crop, and preserve a genuinely transparent background. No added text or invented symbol."
     }
   ]
 }
