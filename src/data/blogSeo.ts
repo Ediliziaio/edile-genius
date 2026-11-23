@@ -11,19 +11,19 @@ export const BLOG_SEO: Record<string, { title: string; description: string }> = 
       "Cosa deve fare un gestionale edile, perché Excel non basta più e come EdiliziaInCloud gestisce cantieri, fatture, margini e personale in un unico posto.",
   },
   "agenti-vocali-ai-edilizia": {
-    title: "Agenti Vocali AI per l'Edilizia: Zero Chiamate Perse",
+    title: "Agenti vocali AI per imprese edili: guida e controlli",
     description:
-      "Come gli agenti vocali AI rispondono 24/7, qualificano i lead e fissano i sopralluoghi per le imprese edili. Guida pratica con casi reali e numeri.",
+      "Agenti vocali per imprese edili: raccolta richieste, calendario, passaggio al team, dati personali e verifica della prova. Metodo pratico.",
   },
   "intelligenza-artificiale-serramenti": {
     title: "Intelligenza Artificiale per Serramentisti | Edilizia.io",
     description:
-      "AI per serramentisti e aziende di infissi: risposta automatica ai clienti, preventivi più veloci e render dei nuovi infissi. Guida con casi reali.",
+      "AI per serramentisti: richieste, misure, cataloghi, preventivi, render e passaggio alla posa. Metodo per collegare showroom, ufficio e tecnici.",
   },
   "automazione-preventivi-edilizia": {
     title: "Automazione Preventivi in Edilizia con l'AI | Edilizia.io",
     description:
-      "Come automatizzare i preventivi edili con l'AI: dalla nota vocale al PDF sul tuo listino. Meno ore in ufficio, più preventivi chiusi. Dati e metodo.",
+      "Automazione dei preventivi edili con listini verificati, controlli e varianti. Metodo operativo, esempi e calcolatore dei tempi di lavoro.",
   },
   "ai-fotovoltaico-vendite": {
     title: "AI per Installatori Fotovoltaico: Più Vendite | Edilizia.io",

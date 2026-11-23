@@ -77,7 +77,7 @@ export function SEOHead({
   jsonLd,
 }: SEOConfig) {
   const url = canonical ? `${BASE_URL}${canonical}` : BASE_URL;
-  const image = ogImage || DEFAULT_OG_IMAGE;
+  const image = new URL(ogImage || DEFAULT_OG_IMAGE, BASE_URL).href;
   const imageAlt = ogImageAlt || OG_IMAGE_ALT;
   const imageWidth = ogImageWidth ?? (ogImage ? undefined : 1200);
   const imageHeight = ogImageHeight ?? (ogImage ? undefined : 630);

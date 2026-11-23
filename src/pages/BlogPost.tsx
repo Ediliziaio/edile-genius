@@ -4,13 +4,16 @@ import Navbar from "@/components/sections/Navbar";
 import Footer from "@/components/sections/Footer";
 import BlogArticle from "@/components/blog/BlogArticle";
 import BlogCTA from "@/components/blog/BlogCTA";
-import RelatedServices from "@/components/custom/RelatedServices";
+import BlogCover from "@/components/blog/BlogCover";
+import QuoteTimeCalculator from "@/components/blog/QuoteTimeCalculator";
+import RelatedServices, { RELATED } from "@/components/custom/RelatedServices";
 import SocialShareButtons from "@/components/blog/SocialShareButtons";
 import ScrollProgress from "@/components/custom/ScrollProgress";
 import FaqList from "@/components/custom/FaqList";
 import { blogPosts } from "@/data/blogPosts";
 import { usePageSEO } from "@/hooks/usePageSEO";
 import { BLOG_SEO } from "@/data/blogSeo";
+import { articleWordCount, relatedBlogPosts } from "@/lib/blogContent";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -27,17 +30,14 @@ const BlogPost = () => {
   // Article + Breadcrumb (+ FAQ) JSON-LD, renderizzato nell'HTML statico via SEOHead.
   const jsonLd = post
     ? ((): Record<string, unknown>[] => {
-        const wordCount = post.sections.reduce(
-          (acc, s) => acc + s.content.split(/\s+/).length + (s.callout?.split(/\s+/).length || 0),
-          0,
-        );
+        const wordCount = articleWordCount(post.sections);
         const graph: Record<string, unknown>[] = [
           {
             "@type": "Article",
             headline: post.title,
             description: post.description,
             abstract: post.summary || post.description,
-            image: post.heroImage,
+            image: post.heroVisual ? { "@type": "ImageObject", url: new URL(post.heroImage, "https://edilizia.io").href, width: 1440, height: 900 } : new URL(post.heroImage, "https://edilizia.io").href,
             datePublished: post.date,
             dateModified: post.dateModified || post.date,
             wordCount,
@@ -88,6 +88,8 @@ const BlogPost = () => {
     canonical: post ? `/blog/${post.slug}` : "/blog",
     ogImage: post?.heroImage,
     ogImageAlt: post?.heroImageAlt,
+    ogImageWidth: post?.heroVisual ? 1440 : undefined,
+    ogImageHeight: post?.heroVisual ? 900 : undefined,
     ogType: "article",
     articleMeta: post
       ? {
@@ -103,7 +105,7 @@ const BlogPost = () => {
   if (!post) return <Navigate to="/blog" replace />;
 
   const shareUrl = `https://edilizia.io/blog/${post.slug}`;
-  const related = blogPosts.filter((p) => p.slug !== post.slug).slice(0, 3);
+  const related = relatedBlogPosts(post, blogPosts, RELATED);
 
   return (
     <div className="min-h-screen bg-background">
@@ -138,12 +140,13 @@ const BlogPost = () => {
           <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar size={12} />
-              {new Date(post.date).toLocaleDateString("it-IT", {
+              <time dateTime={post.date}>{new Date(post.date).toLocaleDateString("it-IT", {
                 day: "numeric",
                 month: "long",
                 year: "numeric",
-              })}
+              })}</time>
             </span>
+            {post.dateModified && post.dateModified !== post.date && <span>Aggiornato il <time dateTime={post.dateModified}>{new Date(post.dateModified).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" })}</time></span>}
             <span className="flex items-center gap-1">
               <Clock size={12} />
               {post.readTime} di lettura
@@ -174,11 +177,9 @@ const BlogPost = () => {
         </div>
 
         {/* Hero Image */}
-        <img
-          src={post.heroImage}
-          alt={post.heroImageAlt}
-          className="w-full rounded-2xl mb-10 aspect-video object-cover"
-        />
+        <BlogCover post={post} priority className="w-full rounded-2xl aspect-video object-cover" />
+        {post.heroVisual && <p className="mt-2 text-xs text-muted-foreground">Illustrazione generata con AI.</p>}
+        <div className="mb-10" />
 
         {/* In sintesi — answer block estraibile dagli AI (AEO) */}
         {post.summary && (
@@ -224,6 +225,7 @@ const BlogPost = () => {
 
         {/* Content */}
         <BlogArticle sections={post.sections} />
+        {post.slug === "automazione-preventivi-edilizia" && <QuoteTimeCalculator />}
 
         {/* FAQ Section */}
         {post.faqs && post.faqs.length > 0 && (
@@ -240,7 +242,7 @@ const BlogPost = () => {
 
         {/* CTA */}
         <RelatedServices pageKey={post.slug} title="Approfondisci i servizi collegati" className="py-10" />
-        <BlogCTA />
+        <BlogCTA serviceSlug={RELATED[post.slug]?.[0]} />
 
         {/* Related */}
         {related.length > 0 && (
@@ -253,12 +255,7 @@ const BlogPost = () => {
                   to={`/blog/${r.slug}`}
                   className="group block rounded-xl border border-border overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all"
                 >
-                  <img
-                    src={r.heroImage}
-                    alt={r.heroImageAlt}
-                    loading="lazy"
-                    className="w-full aspect-video object-cover"
-                  />
+                  <BlogCover post={r} className="w-full aspect-video object-cover" sizes="(min-width: 768px) 260px, calc(100vw - 48px)" />
                   <div className="p-4">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
                       {r.category}

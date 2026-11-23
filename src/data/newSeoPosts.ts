@@ -1,15 +1,9 @@
-import type { BlogPost, BlogSection } from "./blogPosts";
+import type { BlogPost } from "./blogPosts";
+import { markdownSections as sections } from "@/lib/blogContent";
 import offers from "../content/blog/confrontare-offerte-fornitori-ai-edilizia.md?raw";
 import reports from "../content/blog/rapportini-cantiere-voce-ai.md?raw";
 import quantities from "../content/blog/computo-metrico-ai-prezzari-controlli.md?raw";
 import renders from "../content/blog/render-ai-ristrutturazione-foto-progetto.md?raw";
-
-function sections(markdown: string): BlogSection[] {
-  return markdown.trim().split(/^## /m).filter(Boolean).map((part) => {
-    const newline = part.indexOf("\n");
-    return { heading: part.slice(0, newline).trim(), content: part.slice(newline + 1).trim() };
-  });
-}
 
 export const newSeoPosts: BlogPost[] = [
   {

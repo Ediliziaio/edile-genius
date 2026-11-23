@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Calendar, Clock } from "lucide-react";
 import type { BlogPost } from "@/data/blogPosts";
 import type { ReactNode } from "react";
+import BlogCover from "./BlogCover";
 
 interface BlogCardProps {
   post: BlogPost;
@@ -32,12 +33,7 @@ const BlogCard = ({ post, searchQuery = "" }: BlogCardProps) => (
     className="group block bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
   >
     <div className="aspect-video overflow-hidden bg-muted">
-      <img
-        src={post.heroImage}
-        alt={post.heroImageAlt}
-        loading="lazy"
-        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-      />
+      <BlogCover post={post} className="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-500" sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, calc(100vw - 48px)" />
     </div>
     <div className="p-6 space-y-3">
       <span className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${categoryColors[post.category] ?? "bg-muted text-muted-foreground"}`}>
@@ -48,7 +44,7 @@ const BlogCard = ({ post, searchQuery = "" }: BlogCardProps) => (
       </h3>
       <p className="text-sm text-muted-foreground line-clamp-2">{highlightText(post.description, searchQuery)}</p>
       <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
-        <span className="flex items-center gap-1"><Calendar size={12} />{new Date(post.date).toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" })}</span>
+        <span className="flex items-center gap-1"><Calendar size={12} />{post.dateModified && post.dateModified !== post.date ? "Aggiornato " : ""}<time dateTime={post.dateModified || post.date}>{new Date(post.dateModified || post.date).toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" })}</time></span>
         <span className="flex items-center gap-1"><Clock size={12} />{post.readTime}</span>
       </div>
     </div>

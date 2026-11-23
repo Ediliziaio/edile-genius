@@ -21,6 +21,10 @@ export const RELATED: Record<string, string[]> = {
   "cartongessisti-finiture": ["render-ai", "marketing-e-vendite-ai", "preventivazione-ai"],
   "progettisti-studi-tecnici": ["ai-per-progettisti", "gare-e-appalti-ai", "render-ai"],
   // Blog
+  "computo-metrico-ai-prezzari-controlli": ["preventivazione-ai", "ai-per-progettisti", "controllo-e-analisi"],
+  "render-ai-ristrutturazione-foto-progetto": ["render-ai", "ai-per-progettisti", "preventivazione-ai"],
+  "confrontare-offerte-fornitori-ai-edilizia": ["cantiere-e-acquisti-ai", "preventivazione-ai", "controllo-e-analisi"],
+  "rapportini-cantiere-voce-ai": ["automazione-ai", "cantiere-e-acquisti-ai", "controllo-e-analisi"],
   "gestionale-edilizia-cloud-ediliziaincloud": ["controllo-e-analisi", "cantiere-e-acquisti-ai", "progettazione-sistemi-ai"],
   "agenti-vocali-ai-edilizia": ["automazione-ai", "marketing-e-vendite-ai", "consulenza-ai"],
   "intelligenza-artificiale-serramenti": ["render-ai", "preventivazione-ai", "automazione-ai"],
