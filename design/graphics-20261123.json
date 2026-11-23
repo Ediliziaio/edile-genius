@@ -1,0 +1,45 @@
+{
+  "mode": "built-in image_gen",
+  "assets": [
+    {
+      "id": "computo-metrico-ai-v2",
+      "prompt": "Use case: stylized-concept. Asset type: premium editorial cover for Edilizia.io, an Italian AI service for construction companies. Create a finished wide 16:9 image, 1920x1080 or larger equivalent. Art direction: sophisticated architecture magazine meets applied AI, photoreal materials with restrained editorial 3D compositing, warm neutral stone and pale oak, graphite and clear emerald-green accents matching the existing brand. Strong single visual story, generous breathing room, crisp light, believable geometry, beautifully balanced composition readable as a small blog thumbnail. No words, no letters, no logos, no watermarks, no giant robot heads, no stock-photo handshake, no neon cyberpunk. This is an illustrative scene, never a documented client project. Subject: an architect's worktable with an exceptionally crafted architectural scale model of a modest Italian renovation, a partial room with exactly aligned walls and window openings, accurate-looking measuring rule and neatly arranged drawing sheets. A single restrained transparent emerald glass plane with precise dimensional guide lines rises from the blueprint to the physical model, expressing quantity takeoff from verified geometry. No visible number strings. View from an elegant three-quarter elevated angle; model is the strong focal point; tactile paper, plaster and oak. Keep the central architecture clear and logical.",
+      "productionPath": "public/blog/covers/computo-metrico-ai-v2.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 276324
+    },
+    {
+      "id": "render-ai-ristrutturazioni-v2",
+      "prompt": "Use case: stylized-concept. Asset type: premium editorial cover for Edilizia.io, an Italian AI service for construction companies. Create a finished wide 16:9 image, 1920x1080 or larger equivalent. Art direction: sophisticated architecture magazine meets applied AI, photoreal materials with restrained editorial 3D compositing, warm neutral stone and pale oak, graphite and clear emerald-green accents matching the existing brand. Strong single visual story, generous breathing room, crisp light, believable geometry, beautifully balanced composition readable as a small blog thumbnail. No words, no letters, no logos, no watermarks, no giant robot heads, no stock-photo handshake, no neon cyberpunk. This is an illustrative scene, never a documented client project. Subject: one spacious but realistic Italian apartment interior with a coherent window, wall and floor geometry. The same continuous room transitions elegantly from a restrained white architectural wireframe / clay study in one area into a beautifully finished warm apartment with stone floor, oak detailing, linen and natural daylight in the rest. One thin emerald drafting line delineates the transition. This is one physically continuous perspective, not multiple panels and not random before-after views. Controlled architectural photography, serene and visually striking, no people, no text, no furniture deformities, no impossible openings.",
+      "productionPath": "public/blog/covers/render-ai-ristrutturazioni-v2.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 224382
+    },
+    {
+      "id": "confronto-offerte-ai-v2",
+      "prompt": "Use case: stylized-concept. Asset type: premium editorial cover for Edilizia.io, an Italian AI service for construction companies. Create a finished wide 16:9 image, 1920x1080 or larger equivalent. Art direction: sophisticated architecture magazine meets applied AI, photoreal materials with restrained editorial 3D compositing, warm neutral stone and pale oak, graphite and clear emerald-green accents matching the existing brand. Strong single visual story, generous breathing room, crisp light, believable geometry, beautifully balanced composition readable as a small blog thumbnail. No words, no letters, no logos, no watermarks, no giant robot heads, no stock-photo handshake, no neon cyberpunk. This is an illustrative scene, never a documented client project. Subject: an elegant real construction procurement desk. Three distinct supplier proposal folders arranged in an ordered shallow fan beside real material samples: neutral stone tile, oak trim and a compact metal window-profile section. A carefully designed translucent emerald comparison plane, containing only a few clean abstract rows and source-connection lines, organizes the three proposals into one clear decision. No numerals, no readable writing, no UI clutter. Precise tactile materials, sophisticated overhead three-quarter composition, soft window light, no people. Clear metaphor of comparing equivalent offers, not investment or financial speculation.",
+      "productionPath": "public/blog/covers/confronto-offerte-ai-v2.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 215230
+    },
+    {
+      "id": "rapportini-voce-ai-v2",
+      "prompt": "Use case: stylized-concept. Asset type: premium editorial cover for Edilizia.io, an Italian AI service for construction companies. Create a finished wide 16:9 image, 1920x1080 or larger equivalent. Art direction: sophisticated architecture magazine meets applied AI, photoreal materials with restrained editorial 3D compositing, warm neutral stone and pale oak, graphite and clear emerald-green accents matching the existing brand. Strong single visual story, generous breathing room, crisp light, believable geometry, beautifully balanced composition readable as a small blog thumbnail. No words, no letters, no logos, no watermarks, no giant robot heads, no stock-photo handshake, no neon cyberpunk. This is an illustrative scene, never a documented client project. Subject: a construction foreman in proper hard hat and plain work jacket, shown waist-up in three-quarter side view, standing safely in a quiet finished concrete corridor of a renovation site and dictating a work update into a smartphone held naturally in one hand. Realistic human anatomy, exactly five fingers where visible, no brand on clothing. A restrained sculptural emerald soundwave floats just beside the phone and resolves into three minimal translucent report cards, with simple non-textual line icons. Keep the human, phone and architecture as the central story; editorial natural daylight, believable site textures, calm competent mood, no active machinery or unsafe poses.",
+      "productionPath": "public/blog/covers/rapportini-voce-ai-v2.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 183648
+    },
+    {
+      "id": "facebook-cover-edilizia-io",
+      "prompt": "Use case: stylized-concept. Asset type: premium editorial cover for Edilizia.io, an Italian AI service for construction companies. Create a finished wide 16:9 image, 1920x1080 or larger equivalent. Art direction: sophisticated architecture magazine meets applied AI, photoreal materials with restrained editorial 3D compositing, warm neutral stone and pale oak, graphite and clear emerald-green accents matching the existing brand. Strong single visual story, generous breathing room, crisp light, believable geometry, beautifully balanced composition readable as a small blog thumbnail. No words, no letters, no logos, no watermarks, no giant robot heads, no stock-photo handshake, no neon cyberpunk. This is an illustrative scene, never a documented client project. Asset type override: Facebook business-page cover, very wide 2.7:1 composition. Subject: a beautifully constructed low-rise Italian architectural model, precise building drawing sheets and subtle clear emerald digital layers connecting architecture to an organized office workflow. Keep important subjects inside the middle two thirds of the frame for responsive cropping. The leftmost quarter and upper middle should remain dark graphite negative space for a brand logo to be added later. Uncluttered, ambitious, tangible and premium, warm light on architecture against deep charcoal. Absolutely no generated text or logos.",
+      "productionPath": "public/social/facebook-cover-edilizia-io-20261123.jpg",
+      "width": 1600,
+      "height": 592,
+      "bytes": 117732
+    }
+  ]
+}
